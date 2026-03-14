@@ -1,9 +1,0 @@
-generator client {
-  provider        = "prisma-client-js"
-  engineType      = "library"
-  previewFeatures = ["prismaSchemaFolder"]
-}
-
-datasource db {
-  provider = "mysql"
-}
