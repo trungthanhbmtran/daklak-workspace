@@ -1,0 +1,167 @@
+namespace: infra-system
+
+mysql:
+  image:
+    repository: mysql
+    tag: "8.0"
+  mysql:
+    rootPassword: mypassword
+    database: daklak_db
+  persistence:
+    enabled: false # Disable persistence for now to avoid storage pool issues
+
+redis:
+  image:
+    repository: redis
+    tag: "7"
+  persistence:
+    enabled: false
+
+minio:
+  image:
+    repository: minio/minio
+    tag: "latest"
+  minio:
+    rootUser: admin
+    rootPassword: password123
+  persistence:
+    enabled: false
+
+rabbitmq:
+  image:
+    repository: rabbitmq
+    tag: "3-management"
+  rabbitmq:
+    user: admin
+    password: admin123
+
+user-service:
+  image:
+    repository: daklak-user-service
+    tag: latest
+  database:
+    host: mysql
+    user: root           
+    port: 3306              
+    rootPassword: mypassword
+    name: admin_systems
+  service:
+    port: 50051            
+    targetPort: 50051
+  env:
+    JWT_SECRET: "55d0057c326d49b23894b55990ad2928c4daa2fe6a17fe4350a6a8c32195f8ef"
+  resources:               
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+hrm-service:
+  image:
+    repository: daklak-hrm-service
+    tag: latest
+  database:
+    host: mysql
+    rootPassword: mypassword
+    name: admin_hrm
+  service:
+    port: 50052
+    targetPort: 50052
+api-gateway:
+  image:
+    repository: daklak-api-gateway
+    tag: latest
+  env:
+    USER_SERVICE_ADDR: "user-service:50051"
+    HRM_SERVICE_ADDR: "hrm-service:50052"
+    POST_SERVICE_URL: "posts-service:50055"
+    NOTIFICATION_SERVICE_URL: "notification-service:50075"
+    JWT_SECRET: "55d0057c326d49b23894b55990ad2928c4daa2fe6a17fe4350a6a8c32195f8ef"
+  database:
+    host: mysql
+    rootPassword: mypassword
+    name: daklak_db
+  service:
+    port: 80
+    targetPort: 8080
+notification-service:
+  image:
+    repository: daklak-notification-service
+    tag: latest
+  env:
+    RABBITMQ_URL: "amqp://admin:admin123@rabbitmq:5672"
+    NOTIFICATION_QUEUE: "notifications"
+  service:
+    port: 50075
+    targetPort: 3000
+translate-service:
+  image:
+    repository: daklak-translate-service
+    tag: latest
+  env:
+    DATABASE_URL: "mysql+pymysql://root:mypassword@mysql:3306/daklak_translation"
+  service:
+    port: 50051
+    targetPort: 50051
+admin-khcn:
+  image:
+    repository: daklak-admin-khcn
+    tag: latest
+  service:
+    port: 3000
+    targetPort: 3000
+  env:
+    HOSTNAME: "0.0.0.0"
+    API_URL: "/api/v1/admin"
+ 
+media-service:
+  image:
+    repository: daklak-media-service
+    tag: latest
+  database:
+    host: mysql
+    user: root
+    rootPassword: mypassword
+    name: admin_media
+  minio:
+    endpoint: minio
+    port: 9000
+    accessKey: admin
+    secretKey: password123
+    bucket: media-center
+    externalEndpoint: "http://minio:9000"
+  service:
+    port: 50051
+    targetPort: 50051
+
+posts-service:
+  image:
+    repository: daklak-posts-service
+    tag: latest
+  database:
+    host: mysql
+    rootPassword: mypassword
+    name: admin_posts
+  rabbitmq:
+    url: "amqp://admin:admin123@rabbitmq:5672"
+  service:
+    port: 50055
+    targetPort: 50055
+
+e-portal:
+  image:
+    repository: e-portal
+    tag: latest
+  env:
+    API_URL: "http://api-gateway/api/v1"
+    NEXT_PUBLIC_API_URL: "/api/v1/public"
+  service:
+    port: 3000
+    targetPort: 3000
+
+istio:
+  enabled: true
+  domain: "admin.daklak.local"
+  gatewayName: "daklak-gateway"

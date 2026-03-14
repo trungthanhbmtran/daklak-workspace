@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package auth;
+
+service AuthencationService {
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc RefreshToken (RefreshTokenRequest) returns (RefreshTokenResponse);
+  rpc ValidateToken (ValidateTokenRequest) returns (ValidateTokenResponse);
+  rpc Logout (LogoutRequest) returns (LogoutResponse);
+  
+  // Hàm quan trọng cho RBAC check
+  rpc CheckPermission (CheckPermissionRequest) returns (CheckPermissionResponse);
+}
+
+// --- Messages ---
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message RegisterRequest {
+  string username = 1;
+  string password = 2;
+  string identitycard = 3;
+  repeated int32 roles = 4;
+}
+
+message RegisterResponse {
+  int32 id = 1;
+  string username = 2;
+  string message = 3;
+}
+
+message RefreshTokenRequest {
+  string refreshToken = 1;
+}
+
+message RefreshTokenResponse {
+  string accessToken = 1;
+  string refreshToken = 2;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool is_valid = 1;
+  int32 userId = 2;
+  string roles = 3; // JSON String
+}
+
+message LogoutRequest {
+  string refreshToken = 1;
+}
+
+message LogoutResponse {
+  bool success = 1;
+}
+
+message CheckPermissionRequest {
+  int32 user_id = 1;
+  string resource = 2;
+  string action = 3;
+}
+
+message CheckPermissionResponse {
+  bool allowed = 1;
+  string conditions = 2; // JSON String: "{ scope: 'own' }"
+}

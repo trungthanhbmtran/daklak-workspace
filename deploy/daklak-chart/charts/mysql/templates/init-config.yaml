@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-init-config
+data:
+  init-db.sql: |
+    CREATE DATABASE IF NOT EXISTS admin_systems;
+    CREATE DATABASE IF NOT EXISTS admin_posts;
+    CREATE DATABASE IF NOT EXISTS admin_hrm;
+    CREATE DATABASE IF NOT EXISTS admin_media;
+    CREATE DATABASE IF NOT EXISTS daklak_translation;
+    CREATE DATABASE IF NOT EXISTS daklak_db;

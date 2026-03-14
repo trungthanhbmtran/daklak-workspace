@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package employee;
+
+import "common/common.proto"; // Import Meta pagination
+
+// ---------------- MODELS ----------------
+
+// Object phụ để hiển thị thông tin rút gọn của Phòng ban/Chức vụ
+message DepartmentPreview {
+  int32 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message JobTitlePreview {
+  int32 id = 1;
+  string name = 2;
+  string code = 3;
+}
+
+message Employee {
+  int32 id = 1;
+  string firstname = 2;
+  string lastname = 3;
+  string employeeCode = 4;   // Mã nhân viên (Unique)
+  string email = 5;
+  string phone = 6;
+  string gender = 7;
+  string birthday = 8;       // Format: YYYY-MM-DD
+  string identityCard = 9;   // CCCD/CMND
+  string status = 10;        // active, probation, retired...
+  string address = 11;
+  string avatar = 12;
+  
+  // Quan hệ (Relation)
+  int32 departmentId = 13;
+  int32 jobTitleId = 14;
+  string startDate = 15;     // Ngày vào làm/biên chế
+
+  // Dữ liệu Include (Để hiển thị tên phòng/chức vụ thay vì chỉ hiện ID)
+  DepartmentPreview department = 16;
+  JobTitlePreview jobTitle = 17;
+  
+  string createdAt = 18;
+  string updatedAt = 19;
+}
+
+// ---------------- REQUESTS ----------------
+
+message CreateEmployeeRequest {
+  string firstname = 1;
+  string lastname = 2;
+  string employeeCode = 3;
+  string email = 4;
+  string phone = 5;
+  string gender = 6;
+  string birthday = 7;
+  string identityCard = 8;
+  int32 departmentId = 9;
+  int32 jobTitleId = 10;
+  string startDate = 11;
+  string status = 12;
+  string address = 13;
+}
+
+message UpdateEmployeeRequest {
+  int32 id = 1;
+  // Các trường update (Optional)
+  string firstname = 2;
+  string lastname = 3;
+  string email = 4;
+  string phone = 5;
+  string gender = 6;
+  string birthday = 7;
+  string identityCard = 8;
+  int32 departmentId = 9;
+  int32 jobTitleId = 10;
+  string status = 11;
+  string address = 12;
+  string avatar = 13;
+}
+
+message DeleteEmployeeRequest {
+  int32 id = 1;
+}
+
+message GetEmployeeRequest {
+  int32 id = 1;
+}
+
+// Filter nâng cao cho nhân sự
+message ListEmployeesRequest {
+  int32 page = 1;
+  int32 pageSize = 2;
+  string keyword = 3;        // Tìm theo tên, mã, email
+  
+  // Các bộ lọc
+  int32 departmentId = 4;
+  int32 jobTitleId = 5;
+  string status = 6;
+  
+  // QUAN TRỌNG: Lọc theo cây tổ chức
+  // true: Lấy nhân viên của phòng này VÀ các phòng con
+  // false: Chỉ lấy nhân viên của phòng này
+  bool includeChildren = 7;  
+}
+
+// ---------------- RESPONSES ----------------
+
+message EmployeeResponse {
+  bool success = 1;
+  string message = 2;
+  Employee data = 3;
+}
+
+message ListEmployeesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated Employee data = 3;
+  common.Meta meta = 4;
+}
+
+message BaseResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// ---------------- SERVICE ----------------
+
+service EmployeeHandlers {
+  rpc CreateEmployee(CreateEmployeeRequest) returns (EmployeeResponse);
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (EmployeeResponse);
+  rpc DeleteEmployee(DeleteEmployeeRequest) returns (BaseResponse);
+  rpc GetEmployee(GetEmployeeRequest) returns (EmployeeResponse);
+  rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse);
+}

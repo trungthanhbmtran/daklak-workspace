@@ -1,0 +1,51 @@
+model Credential {
+  id           String   @id @default(uuid())
+  userId       Int      @unique @map("user_id")
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("auth_credentials")
+}
+
+// Tài khoản liên kết SSO
+model Account {
+  id                String  @id @default(uuid())
+  userId            Int     @map("user_id")
+  type              String  // "oauth", "oidc"
+  provider          String  // "vneid", "keycloak", "google"
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("auth_accounts")
+}
+
+model RefreshToken {
+  id              String   @id @default(uuid())
+  token           String   @unique @db.VarChar(512)
+  userId          Int      @map("user_id")
+  
+  deviceInfo      String?  @map("device_info") 
+  ipAddress       String?  @map("ip_address")
+  
+  isRevoked       Boolean  @default(false) @map("is_revoked")
+  expiresAt       DateTime @map("expires_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  replacedByToken String?  @map("replaced_by_token")
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("auth_refresh_tokens")
+}

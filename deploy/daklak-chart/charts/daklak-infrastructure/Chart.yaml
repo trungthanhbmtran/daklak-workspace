@@ -1,0 +1,20 @@
+apiVersion: v2
+name: daklak-infrastructure
+version: 0.1.0
+
+dependencies:
+  - name: mysql
+    version: 0.1.0
+    repository: "file://../mysql"
+
+  - name: redis
+    version: 0.1.0
+    repository: "file://../redis"
+
+  - name: rabbitmq
+    version: 0.1.0
+    repository: "file://../rabbitmq"
+
+  - name: minio
+    version: 0.1.0
+    repository: "file://../minio"

@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package translation;
+
+service TranslationService {
+  rpc TranslateSync (TranslateRequest) returns (TranslateResponse);
+  rpc HealthCheck (HealthRequest) returns (HealthResponse);
+}
+
+message TranslateRequest {
+  string text = 1;
+  string target_lang = 2;
+}
+
+message TranslateResponse {
+  string translated_text = 1;
+}
+
+message HealthRequest {}
+
+message HealthResponse {
+  bool status = 1;
+}

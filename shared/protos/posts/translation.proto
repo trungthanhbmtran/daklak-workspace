@@ -1,0 +1,116 @@
+syntax = "proto3";
+
+package translation;
+
+service TranslationService {
+  rpc GetTranslationsByPost (GetTranslationsByPostRequest) returns (GetTranslationsByPostResponse);
+  rpc GetTranslationDetail (GetTranslationDetailRequest) returns (GetTranslationDetailResponse);
+  rpc UpdateTranslation (UpdateTranslationRequest) returns (UpdateTranslationResponse);
+  rpc TriggerTranslation (TriggerTranslationRequest) returns (TriggerTranslationResponse);
+  rpc DeleteTranslation (DeleteTranslationRequest) returns (DeleteTranslationResponse);
+}
+
+
+// 1. GetTranslationsByPost
+message GetTranslationsByPostRequest {
+  string postId = 1;
+}
+
+message TranslationSummary {
+  string id = 1;
+  string language = 2;
+  string title = 3;
+  string status = 4; // draft, pending_review, published
+  string updatedAt = 5;
+  string createdAt = 6;
+}
+
+message GetTranslationsByPostResponse {
+  bool success = 1;
+  repeated TranslationSummary data = 2; // Danh sách bản dịch
+}
+
+// 2. GetTranslationDetail
+message GetTranslationDetailRequest {
+  string id = 1; // ID của bảng PostTranslate
+}
+
+message OriginalPostInfo {
+  string title = 1;
+  string description = 2;
+  string contentJson = 3; // JSON stringified
+  string language = 4;
+}
+
+message TranslationDetail {
+  string id = 1;
+  string postId = 2;
+  string language = 3;
+  string title = 4;
+  string description = 5;
+  string contentJson = 6; // JSON stringified (Lexical state)
+  string content = 7;
+  string status = 8;
+  OriginalPostInfo originalPost = 9; // Kèm thông tin bài gốc để so sánh
+}
+
+message TranslationItem {
+  string id = 1;
+  string language = 2;
+  string title = 3;
+  string description = 4;
+  string contentJson = 5; // JSON string (Lexical)
+  string content = 6;     // HTML content
+  string status = 7;      // pending_review, published...
+  string updatedAt = 8;
+  string createdAt = 9;
+}
+
+message PostWithTranslations {
+  string id = 1;          // ID bài viết gốc (postId)
+  string title = 2;       // Tiêu đề gốc
+  string description = 3; // Mô tả gốc
+  string contentJson = 4; // Nội dung gốc (để hiển thị cột trái)
+  string language = 5;    // Ngôn ngữ gốc (vd: vi)
+  repeated TranslationItem translations = 6; // Mảng chứa tất cả các bản dịch
+}
+
+message GetTranslationDetailResponse {
+  bool success = 1;
+  PostWithTranslations data = 2;
+}
+
+// 3. UpdateTranslation
+message UpdateTranslationRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string contentJson = 4; // JSON stringified
+  string content = 5;
+  string status = 6;
+}
+
+message UpdateTranslationResponse {
+  bool success = 1;
+  TranslationDetail data = 2; // Trả về data mới nhất sau khi update
+}
+
+// 4. TriggerTranslation
+message TriggerTranslationRequest {
+  string postId = 1;
+  string targetLang = 2; // en, zh, ja...
+}
+
+message TriggerTranslationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+// 5. DeleteTranslation
+message DeleteTranslationRequest {
+  string id = 1;
+}
+
+message DeleteTranslationResponse {
+  bool success = 1;
+}

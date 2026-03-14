@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package tag;
+
+service TagService {
+  rpc CreateTag(CreateTagRequest) returns (TagResponse);
+  rpc ListTags(ListTagsRequest) returns (ListTagsResponse);
+}
+
+message Tag {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+}
+
+message CreateTagRequest {
+  string name = 1;
+}
+
+message TagResponse {
+  Tag data = 1;
+}
+
+message ListTagsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+}
+
+message ListTagsResponse {
+  repeated Tag data = 1;
+}

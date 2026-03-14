@@ -1,0 +1,31 @@
+model Menu {
+  id                   Int         @id @default(autoincrement())
+  code                 String      @unique 
+  name                 String      
+  route                String?     
+  icon                 String?     
+  order                Int         @default(0)
+  description          String?     @map("description")
+  iconColor            String?     @map("icon_color")
+  service              String?     @map("service_code")
+  application          String      @default("ADMIN_PORTAL")
+  target               String      @default("SELF")
+  parentId             Int?        @map("parent_id")
+  parent               Menu?       @relation("MenuHierarchy", fields: [parentId], references: [id])
+  children             Menu[]      @relation("MenuHierarchy")
+  requiredPermissions  MenuRequiredPermission[]
+  isActive             Boolean     @default(true) @map("is_active")
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+  @@index([application, parentId, order]) 
+  @@map("sys_menus")
+}
+
+model MenuRequiredPermission {
+  menuId       Int @map("menu_id")
+  permissionId Int @map("permission_id")
+  menu       Menu @relation(fields: [menuId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([menuId, permissionId])
+  @@map("menu_required_permissions")
+}

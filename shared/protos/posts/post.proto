@@ -1,0 +1,204 @@
+syntax = "proto3";
+
+package post;
+
+import "common/common.proto";
+import "tag.proto";
+import "category.proto";
+
+service PostService {
+  rpc CreatePost(CreatePostRequest) returns (PostResponse) {}
+  rpc GetPost(GetPostRequest) returns (Post) {}
+  rpc ListPosts(ListPostsRequest) returns (ListPostsResponse) {}
+  rpc UpdatePost(UpdatePostRequest) returns (PostResponse) {}
+  rpc DeletePost(DeletePostRequest) returns (common.DeleteResponse) {}
+  rpc AddTagsToPost(AddTagsToPostRequest) returns (common.DeleteResponse) {}
+  rpc RemoveTagFromPost(RemoveTagFromPostRequest) returns (common.DeleteResponse) {}
+  rpc GetTagsByPost(GetTagsByPostRequest) returns (GetTagsByPostResponse) {}
+  rpc SetCategoryForPost(SetCategoryForPostRequest) returns (common.DeleteResponse) {}
+  rpc GetPostBySlug(GetPostBySlugRequest) returns (Post) {}
+  rpc GetPostsByCategorySlug(GetPostsByCategorySlugRequest) returns (ListPostsResponse) {}
+  rpc ReviewPost (ReviewPostRequest) returns (ReviewPostResponse);
+}
+
+// ====================== Post Object ======================
+
+message Post {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string content = 4;
+  string slug = 5;
+  string thumbnail = 6;
+  string authorId = 7;
+  string status = 8;
+  bool isFeatured = 9;
+  bool isNotification = 10;
+  int32 viewCount = 11;
+  string publishedAt = 12;
+  string createdAt = 13;
+  string updatedAt = 14;
+  repeated Variable variables = 15;
+  repeated tag.Tag tags = 16;
+  string categoryId = 17;
+  category.Category category = 18;
+  string contentJson = 19;
+  string moderationNote  = 20;
+}
+
+message ReviewPostRequest {
+  string id = 1;
+  string status = 2;
+  optional string note = 3;         
+  optional string reviewerId = 4;   
+  optional string title = 5;
+  optional string description = 6;
+  optional string contentJson = 7; 
+}
+
+message ReviewPostResponse {
+  bool success = 1;
+  Post data = 2; 
+}
+
+// Response wrapper
+message PostResponse {
+  Post data = 1;
+}
+
+// ====================== Create ======================
+
+message CreatePostRequest {
+  string title = 1;
+  string description = 2;
+  string content = 3;
+  string contentJson = 4;
+  string authorId = 5;
+  string categoryId = 6;
+  repeated string tagIds = 7;
+  bool isFeatured = 8;
+  bool isNotification = 9;
+  string thumbnail = 10;
+  string status = 11;
+}
+
+// ====================== Get ======================
+
+message GetPostRequest {
+  string id = 1;
+}
+
+message GetPostBySlugRequest {
+  string slug = 1;
+}
+
+// ====================== List ======================
+
+message ListPostsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string authorId = 3;
+  string search = 4;
+  string categoryId = 5;
+  string category = 6;
+}
+
+message DataListPost {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string slug = 4;
+  string thumbnail = 5;
+  string authorId = 6;
+  string status = 7;
+  bool isFeatured = 8;
+  bool isNotification = 10;
+  string createdAt = 11;
+  string updatedAt = 12;
+  repeated tag.Tag tags = 13;
+  string categoryId = 14;
+  category.Category category = 15;
+}
+
+message ListPostsResponse {
+  repeated DataListPost data = 1;
+  common.Meta meta = 2;
+}
+
+// New: Get posts by category SLUG
+message GetPostsByCategorySlugRequest {
+  string slug = 1;
+  int32 page = 2;
+  int32 limit = 3;
+}
+
+// ====================== Update ======================
+
+message UpdatePostRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string content = 4;
+  string status = 5;
+  bool isFeatured = 6;
+  string thumbnail = 7;
+  string categoryId = 8;
+  repeated string tagIds = 9;
+  bool isNotification = 10;
+}
+
+// ====================== Delete ======================
+
+message DeletePostRequest {
+  string id = 1;
+}
+
+// ====================== Tags ======================
+
+message AddTagsToPostRequest {
+  string postId = 1;
+  repeated string tagIds = 2;
+}
+
+message RemoveTagFromPostRequest {
+  string postId = 1;
+  string tagId = 2;
+}
+
+message GetTagsByPostRequest {
+  string postId = 1;
+}
+
+message GetTagsByPostResponse {
+  repeated tag.Tag tags = 1;
+}
+
+// ====================== Category ======================
+
+message SetCategoryForPostRequest {
+  string postId = 1;
+  string categoryId = 2;
+}
+
+// ====================== Variables ======================
+
+message Variable {
+  string id = 1;
+  string name = 2;
+  string value = 3;
+  DataType type = 4;
+  bool required = 5;
+  bool isMultiValue = 6;
+  string options = 7;
+}
+
+enum DataType {
+  text = 0;
+  number = 1;
+  date = 2;
+  email = 3;
+  phone = 4;
+  information = 5;
+  address = 6;
+  select = 7;
+}

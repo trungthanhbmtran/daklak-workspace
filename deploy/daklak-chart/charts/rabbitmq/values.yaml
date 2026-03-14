@@ -1,0 +1,11 @@
+image:
+  repository: rabbitmq
+  tag: "3-management"
+
+rabbitmq:
+  user: admin
+  password: admin123
+
+service:
+  amqpPort: 5672
+  managementPort: 15672

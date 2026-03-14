@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package category;
+
+service CategoryService {
+  rpc GetByGroup (GetByGroupRequest) returns (GetByGroupResponse);
+  rpc Create (CreateCategoryRequest) returns (CategoryResponse);
+  rpc Update (UpdateCategoryRequest) returns (CategoryResponse);
+  rpc Delete (DeleteCategoryRequest) returns (DeleteCategoryResponse);
+}
+
+message GetByGroupRequest {
+  string group = 1;
+}
+
+message CategoryItem {
+  int32 id = 1;
+  string group = 2;
+  string code = 3;
+  string name = 4;
+  string description = 5;
+  int32 order = 6;
+  bool is_system = 7;
+  bool is_active = 8;
+}
+
+message GetByGroupResponse {
+  repeated CategoryItem data = 1;
+}
+
+message CreateCategoryRequest {
+  string group = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  int32 order = 5;
+}
+
+message UpdateCategoryRequest {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  int32 order = 5;
+  bool is_active = 6;
+}
+
+message DeleteCategoryRequest {
+  int32 id = 1;
+}
+
+message CategoryResponse {
+  int32 id = 1;
+  string group = 2;
+  string code = 3;
+  string name = 4;
+  int32 order = 5;
+  bool is_active = 6;
+}
+
+message DeleteCategoryResponse {
+  bool success = 1;
+  string message = 2;
+}

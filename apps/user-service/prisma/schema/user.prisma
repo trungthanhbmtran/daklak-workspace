@@ -1,0 +1,51 @@
+model User {
+  id            Int       @id @default(autoincrement())
+  email         String    @unique
+  username      String?   @unique 
+  fullName      String?   @map("full_name")
+  phoneNumber   String?   @map("phone_number")
+  avatarUrl     String?   @map("avatar_url")
+  cccd          String?   @map("cccd")
+  employeeCode  String?   @map("employee_code")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  // Relations
+  credential    Credential?
+  accounts      Account[]
+  refreshTokens RefreshToken[]
+  jobPositions  JobPosition[]
+  roles         Role[]
+  groups        UserGroup[]
+
+  @@map("users")
+}
+
+model JobPosition {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  unitId      Int      @map("unit_id")
+  jobTitleId  Int      @map("job_title_id")
+  
+  isPrimary     Boolean  @default(false) @map("is_primary")   
+  isUnitLeader  Boolean  @default(false) @map("is_unit_leader")  
+  isDeputyLeader Boolean @default(false) @map("is_deputy_leader") 
+  startDate   DateTime @default(now()) @map("start_date")
+  endDate     DateTime? @map("end_date")
+
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  unit        OrganizationUnit @relation(fields: [unitId], references: [id])
+  jobTitle    JobTitle         @relation(fields: [jobTitleId], references: [id])
+
+  @@map("job_positions")
+}
+
+model UserGroup {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+  roles Role[]
+
+  @@map("user_groups")
+}

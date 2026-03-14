@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package notification;
+
+option js_package = "stc.notification";
+
+// NotificationService – gửi thông báo qua các kênh (email, push, SMS) theo cấu hình adapter.
+service NotificationService {
+  // Gửi một thông báo qua kênh được chỉ định (channel = adapter id trong config).
+  rpc Send(SendRequest) returns (SendResponse);
+  // Health / ping.
+  rpc Ping(PingRequest) returns (PingResponse);
+}
+
+message SendRequest {
+  string channel = 1;   // id kênh (trùng với adapter id trong config, vd: email, push, sms).
+  string recipient = 2; // địa chỉ đích (email, device token, số điện thoại tùy kênh).
+  string subject = 3;    // tiêu đề (email) hoặc title (push).
+  string body = 4;       // nội dung.
+  map<string, string> metadata = 5; // bổ sung (vd: from, replyTo cho email).
+}
+
+message SendResponse {
+  bool success = 1;
+  string message_id = 2;  // id từ adapter nếu có.
+  string error = 3;       // lỗi nếu success = false.
+}
+
+message PingRequest {}
+message PingResponse {
+  string status = 1;
+}

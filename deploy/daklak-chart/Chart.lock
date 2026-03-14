@@ -1,0 +1,45 @@
+dependencies:
+- name: user-service
+  repository: file://charts/user-service
+  version: 0.1.0
+- name: admin-khcn
+  repository: file://charts/admin-khcn
+  version: 0.1.0
+- name: api-gateway
+  repository: file://charts/api-gateway
+  version: 0.1.0
+- name: hrm-service
+  repository: file://charts/hrm-service
+  version: 0.1.0
+- name: notification-service
+  repository: file://charts/notification-service
+  version: 0.1.0
+- name: translate-service
+  repository: file://charts/translate-service
+  version: 0.1.0
+- name: media-service
+  repository: file://charts/media-service
+  version: 0.1.0
+- name: posts-service
+  repository: file://charts/posts-service
+  version: 0.1.0
+- name: e-portal
+  repository: file://charts/e-portal
+  version: 0.1.0
+- name: daklak-infrastructure
+  repository: file://charts/daklak-infrastructure
+  version: 0.1.0
+- name: mysql
+  repository: file://charts/mysql
+  version: 0.1.0
+- name: redis
+  repository: file://charts/redis
+  version: 0.1.0
+- name: rabbitmq
+  repository: file://charts/rabbitmq
+  version: 0.1.0
+- name: minio
+  repository: file://charts/minio
+  version: 0.1.0
+digest: sha256:88f72ab838480cb2a1dd72caf074854ae0bd0a4c469da8d06d4cf836a6ef61bf
+generated: "2026-03-14T08:44:51.4021955+07:00"

@@ -1,0 +1,23 @@
+replicaCount: 1
+
+image:
+  repository: e-portal
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 3000
+
+env:
+  NODE_ENV: production
+  NEXT_PUBLIC_API_URL: "/api/v1/public"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi

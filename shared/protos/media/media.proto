@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package media;
+
+service MediaService {
+  // Gateway gọi xuống để lấy link cho Client upload trực tiếp lên MinIO
+  rpc RequestUpload (UploadRequest) returns (UploadResponse);
+  
+  // Client gọi sau khi upload xong để Media Service kiểm tra và xác nhận
+  rpc ConfirmUpload (ConfirmRequest) returns (MediaInfo);
+  
+  // Các service khác gọi để lấy link download/view tài liệu
+  rpc GetMedia (MediaIdRequest) returns (MediaInfo);
+
+  rpc InitMultipartUpload (InitMultipartRequest) returns (InitMultipartResponse);
+  rpc GetMultipartPreSignedUrls (GetMultipartUrlsRequest) returns (GetMultipartUrlsResponse);
+  rpc CompleteMultipartUpload (CompleteMultipartRequest) returns (MediaInfo);
+}
+
+message UploadRequest {
+  string originalName = 1;
+  string mimeType = 2;
+  int64 size = 3;
+  string ownerId = 4;
+}
+
+message UploadResponse {
+  string uploadUrl = 1;
+  string fileId = 2;
+  string fileName = 3;
+}
+
+message ConfirmRequest {
+  string fileId = 1;
+}
+
+message MediaIdRequest {
+  string fileId = 1;
+}
+
+message MediaInfo {
+  string id = 1;
+  string fileName = 2;
+  string downloadUrl = 3;
+  string status = 4;
+  string mimeType = 5;
+}
+
+message InitMultipartRequest {
+  string originalName = 1;
+  string mimeType = 2;
+  int64 size = 3;
+  string ownerId = 4;
+}
+
+message InitMultipartResponse {
+  string uploadId = 1;     // Mã phiên upload MinIO cấp
+  string fileKey = 2;      // Tên file vật lý (vd: 177228-video.mp4)
+  string fileId = 3;       // ID bản ghi trong Database
+}
+
+message GetMultipartUrlsRequest {
+  string fileKey = 1;
+  string uploadId = 2;
+  int32 partsCount = 3;    // Tổng số cục chunk (VD: 10)
+}
+
+message GetMultipartUrlsResponse {
+  repeated string presignedUrls = 1; // Trả về mảng 10 cái link
+}
+
+message PartInfo {
+  int32 partNumber = 1;
+  string eTag = 2;         // Tem xác nhận của từng cục
+}
+
+message CompleteMultipartRequest {
+  string fileId = 1;
+  string fileKey = 2;
+  string uploadId = 3;
+  repeated PartInfo parts = 4; // Mảng các tem xác nhận
+}

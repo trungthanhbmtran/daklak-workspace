@@ -1,0 +1,36 @@
+enum LinkType {
+  standard
+  static
+  external
+}
+
+model Category {
+  id              String    @id @default(uuid()) @db.Char(36)
+  name            String    @unique @db.VarChar(255)
+  slug            String    @unique @db.VarChar(255)
+  description     String?   @db.Text
+  thumbnail       String?   @db.VarChar(255)
+  linkType        LinkType  @default(standard) @map("link_type")
+  customUrl       String?   @map("custom_url") @db.VarChar(255)
+  target          String    @default("_self") @db.VarChar(20)
+  parentId        String?   @map("parent_id") @db.Char(36)
+  lft             Int       @default(0)
+  rgt             Int       @default(0)
+  depth           Int       @default(0)
+  orderIndex      Int       @default(0) @map("order_index")
+  status          Boolean   @default(true)
+  metaTitle       String?   @map("meta_title") @db.VarChar(255)
+  metaDescription String?   @map("meta_description") @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  parent          Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children        Category[] @relation("CategoryToCategory")
+  posts           Post[]
+
+  @@index([lft])
+  @@index([lft, rgt])
+  @@index([parentId])
+  @@index([status, slug])
+  @@map("categories")
+}

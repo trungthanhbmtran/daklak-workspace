@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package category;
+
+import "common/common.proto";
+
+// ===================== CATEGORY SERVICE =====================
+service CategoryService {
+  rpc CreateCategory(CreateCategoryRequest) returns (CategoryResponse) {}
+  rpc GetCategory(GetCategoryRequest) returns (Category) {}
+  rpc ListCategories(common.ListRequest) returns (CategoryTreeResponse) {}
+  rpc UpdateCategory(UpdateCategoryRequest) returns (CategoryResponse) {}
+  rpc DeleteCategory(DeleteCategoryRequest) returns (common.DeleteResponse) {}
+  rpc GetCategorySubTree(GetCategoryRequest) returns (CategoryTreeResponse) {}
+}
+
+// ===================== CATEGORY MODELS =====================
+message Category {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string parentId = 4;
+  int32 lft = 5;
+  int32 rgt = 6;
+  int32 depth = 7;
+  repeated Category children = 8;
+  int32 postsCount = 9;
+  bool status = 10;
+  string thumbnail = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+  string linkType = 14;
+  string customUrl = 15;
+  string target = 16;
+  int32 orderIndex = 17;
+}
+
+// Response chuẩn cho create / update
+message CategoryResponse {
+  Category data = 1;
+}
+
+// ===================== REQUESTS =====================
+message CreateCategoryRequest {
+  string name = 1;
+  string slug = 2;
+  string parentId = 3;
+  string thumbnail = 4;
+  string customUrl = 5;
+  string linkType = 6;   // "default" | "custom"
+  string target = 7;     // "_self" | "_blank"
+  int32 orderIndex = 8;
+}
+
+message UpdateCategoryRequest {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string parentId = 4;
+  string thumbnail = 5;
+  string customUrl = 6;
+  string linkType = 7;
+  string target = 8;
+  int32 orderIndex = 9;
+  bool status = 10;
+}
+
+message GetCategoryRequest {
+  string id = 1;
+}
+
+message DeleteCategoryRequest {
+  string id = 1;
+}
+
+// ===================== LIST CATEGORY =====================
+message ListCategoriesResponse {
+  repeated Category data = 1;
+  common.Meta meta = 2;
+}
+
+// ===================== CATEGORY SELECT (OPTION LIST) =====================
+message CategoryOption {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string parentId = 4;
+  int32 depth = 5;
+}
+
+// Nếu sau này cần tự fetch options:
+message GetCategoriesForSelectRequest {
+  string search = 1;
+  int32 limit = 2;
+  bool includeTree = 3;
+}
+
+message GetCategoriesForSelectResponse {
+  repeated CategoryOption options = 1;
+}
+
+// ===================== TREE RESPONSE =====================
+message CategoryTreeNode {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string parentId = 4;
+  int32 lft = 5;
+  int32 rgt = 6;
+  int32 depth = 7;
+  string thumbnail=8;
+  string linkType =9;
+  string customUrl =10;
+  string target = 11;
+  string orderIndex = 12;
+  repeated CategoryTreeNode children = 13;
+}
+
+message CategoryTreeResponse {
+  repeated CategoryTreeNode data = 1;
+}

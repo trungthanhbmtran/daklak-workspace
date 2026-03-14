@@ -1,0 +1,24 @@
+model Category {
+  id          Int      @id @default(autoincrement())
+  group       String   @map("group_code") 
+  code        String   
+  name        String   
+  description String?
+  order       Int      @default(0) 
+  
+  isSystem    Boolean  @default(false) @map("is_system") 
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organizationUnits       OrganizationUnit[] @relation("OrgType")   
+  unitDomains             UnitDomain[]      
+  jobTitlesDomain         JobTitle[]         @relation("JobTitleDomain") 
+  jobTitlesGeographicArea JobTitle[]         @relation("JobTitleGeographicArea") 
+  jobTitleUnitTypes       JobTitleUnitType[] @relation("JobTitleUnitType")        
+  staffingSlotsGeographicArea StaffingSlot[]  @relation("StaffingSlotGeographicArea") 
+  staffingSlotDomains         StaffingSlotDomain[]  
+
+  @@unique([group, code]) 
+  @@index([group])        
+  @@map("sys_categories")
+}

@@ -1,0 +1,77 @@
+{
+  "Navigation": {
+    "home": "HOME",
+    "email": "EMAIL",
+    "notification": "NOTIFICATIONS",
+    "contact": "CONTACT",
+    "map": "SITE MAP"
+  },
+   "AboutPage": {
+    "title": "INTRODUCTION OF DAK LAK PROVINCE DEPARTMENT OF FINANCE",
+    "article1": {
+      "title": "Article 1. Position and Functions",
+      "content1": "<b>1.</b> Advising and assisting the Provincial People's Committee...",
+      "content2": "<b>2.</b> The Department of Finance has legal status..."
+    },
+    "article2": {
+      "title": "Article 2. Duties and Powers",
+      "section1": {
+        "title": "1. Submit to the Provincial People's Committee:",
+        "list": {
+          "a": "a) Draft resolutions of the Provincial People's Council...",
+          "b": "b) Draft 5-year and annual socio-economic development plans...",
+          "c": "c) ...",
+          "d": "d) ...",
+          "e": "e) ...",
+          "f": "f) ...",
+          "g": "g) ...",
+          "h": "h) ...",
+          "i": "i) ...",
+          "k": "k) ..."
+        }
+      },
+      "section2": {
+        "title": "2. Submit to the Chairman of the Provincial People's Committee:",
+        "list": {
+          "a": "a) Draft decisions...",
+          "b": "b) Draft directives..."
+        }
+      },
+      "section3": {
+        "title": "3. Organizing the implementation of legal documents",
+        "content": "Organizing the implementation of legal normative documents..."
+      },
+      "section4": {
+        "title": "4. Registration and Licensing",
+        "content": "Organizing implementation and being responsible for registration..."
+      },
+      "section5": {
+        "title": "5. Regarding State Budget Management:",
+        "list": {
+           "a": "a) Constructing, synthesizing...",
+           "b": "b) ...",
+           "c": "c) ...",
+           "d": "d) ...",
+           "e": "e) ...",
+           "f": "f) ...",
+           "g": "g) ...",
+           "h": "h) ...",
+           "i": "i) ...",
+           "k": "k) ...",
+           "l": "l) ...",
+           "m": "m) ..."
+        }
+      },
+      "section6": { "title": "6. Regarding Development Investment Management" },
+      "section7": { "title": "7. Financial Management regarding Land" },
+      "section8": { "title": "8. Public Asset Management" },
+      "section9": { "title": "9. Management of extra-budgetary State financial funds" },
+      "section10": { "title": "10. Management of State capital in enterprises" }
+    }
+  },
+  "Branding": {
+    "province": "Dak Lak Provincial People's Committee",
+    "portal": "Electronic Information Portal",
+    "department": "Department of Finance"
+  }
+}

@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package menu;
+
+service MenuService {
+  rpc GetMyMenus (GetMyMenusRequest) returns (GetMyMenusResponse);
+  rpc GetAll (GetAllRequest) returns (GetAllResponse);
+  rpc GetOne (GetOneRequest) returns (GetOneResponse);
+  rpc Create (CreateMenuRequest) returns (CreateMenuResponse);
+  rpc Update (UpdateMenuRequest) returns (UpdateMenuResponse);
+  rpc Delete (DeleteMenuRequest) returns (DeleteMenuResponse);
+}
+
+message GetMyMenusRequest {
+  int32 user_id = 1;
+  string app = 2;  // ADMIN_PORTAL, CITIZEN_PORTAL...
+}
+
+message MenuNode {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string route = 4;
+  string icon = 5;
+  int32 order = 6;
+  string service = 7;
+  string application = 8;
+  string target = 9;
+  int32 parent_id = 10;
+  bool is_active = 11;
+  repeated MenuNode children = 12;
+}
+
+message GetMyMenusResponse {
+  repeated MenuNode items = 1;
+}
+
+message GetAllRequest {
+  string app = 1;  // ADMIN_PORTAL | CITIZEN_PORTAL, default ADMIN_PORTAL
+}
+message GetAllResponse {
+  repeated MenuItemFlat items = 1;
+}
+
+message GetOneRequest {
+  int32 id = 1;
+}
+message GetOneResponse {
+  MenuItemFlat menu = 1;
+}
+
+message MenuItemFlat {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string route = 4;
+  string icon = 5;
+  int32 order = 6;
+  string service = 7;
+  string application = 8;
+  string target = 9;
+  int32 parent_id = 10;
+  repeated int32 required_permission_ids = 11;
+  bool is_active = 12;
+}
+
+message CreateMenuRequest {
+  string code = 1;
+  string name = 2;
+  string route = 3;
+  string icon = 4;
+  int32 order = 5;
+  string service = 6;
+  string application = 7;
+  string target = 8;
+  int32 parent_id = 9;
+  repeated int32 required_permission_ids = 10;
+  bool is_active = 11;
+}
+
+message UpdateMenuRequest {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string route = 4;
+  string icon = 5;
+  int32 order = 6;
+  string service = 7;
+  string application = 8;
+  string target = 9;
+  int32 parent_id = 10;
+  repeated int32 required_permission_ids = 11;
+  bool is_active = 12;
+}
+
+message CreateMenuResponse {
+  MenuItemFlat menu = 1;
+}
+
+message UpdateMenuResponse {
+  MenuItemFlat menu = 1;
+}
+
+message DeleteMenuRequest {
+  int32 id = 1;
+}
+
+message DeleteMenuResponse {
+  bool success = 1;
+  string message = 2;
+}

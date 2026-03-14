@@ -1,0 +1,32 @@
+export const GROUP_LABELS: Record<string, string> = {
+    STATUS: "Trạng thái hệ thống",
+    ACTION_LOG: "Loại thao tác hệ thống",
+    UNIT_TYPE: "Loại hình cơ quan/đơn vị",
+    DOMAIN: "Lĩnh vực phụ trách / quản lý",
+    PROVINCE: "Tỉnh/Thành phố trực thuộc TW",
+    GEO_AREA : "Khu vực địa lý phụ trách",
+    DISTRICT: "Quận/Huyện/Thị xã/TP thuộc tỉnh",
+    WARD: "Phường/Xã/Thị trấn",
+    DEPARTMENT: "Phòng ban/Bộ phận chuyên môn",
+    DOCUMENT_TYPE: "Loại hình văn bản",
+    URGENCY_LEVEL: "Mức độ khẩn",
+    SECURITY_LEVEL: "Mức độ mật",
+    DOCUMENT_DOMAIN: "Lĩnh vực văn bản",
+    STORAGE_PERIOD: "Thời hạn bảo quản hồ sơ",
+    GENDER: "Giới tính",
+    ETHNICITY: "Dân tộc",
+    RELIGION: "Tôn giáo",
+    IDENTITY_TYPE: "Loại giấy tờ tùy thân",
+    POSITION: "Chức vụ lãnh đạo, quản lý",
+    CIVIL_SERVANT_RANK: "Ngạch công chức/viên chức",
+    ACADEMIC_RANK: "Học hàm, Học vị",
+    POLITICAL_THEORY: "Trình độ lý luận chính trị",
+    STATE_MANAGEMENT: "Trình độ quản lý nhà nước",
+    IT_SKILL: "Trình độ tin học",
+    LANGUAGE_SKILL: "Trình độ ngoại ngữ",
+    CONTENT_TYPE : "Loại nội dung",
+    MICROSERVICE : "Microservice",
+    SERVICE : "Dịch vụ"
+  };
+  
+  export const GROUP_KEYS = Object.keys(GROUP_LABELS);

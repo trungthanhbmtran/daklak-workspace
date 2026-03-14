@@ -1,0 +1,29 @@
+model Role {
+  id          Int          @id @default(autoincrement())
+  code        String       @unique 
+  name        String?      
+  description String?
+  users       User[]
+  groups      UserGroup[]
+  permissions Permission[]
+  @@map("roles")
+}
+
+model Permission {
+  id         Int      @id @default(autoincrement())
+  action     String   
+  resourceId Int      @map("resource_id")
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  roles      Role[]
+  menuRequirements MenuRequiredPermission[]
+  @@unique([action, resourceId])
+  @@map("permissions")
+}
+
+model Resource {
+  id          Int          @id @default(autoincrement())
+  code        String       @unique 
+  name        String
+  permissions Permission[]
+  @@map("resources")
+}

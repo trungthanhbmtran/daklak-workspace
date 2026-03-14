@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package common;
+
+import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/any.proto";
+
+/* ================= META ================= */
+
+message PaginationMeta {
+  int32 total = 1;
+  int32 page = 2;
+  int32 pageSize = 3;
+  int32 totalPages = 4;
+  bool hasNext = 5;
+  bool hasPrev = 6;
+}
+
+message SortMeta {
+  string sortBy = 1;
+  string sortOrder = 2; // asc | desc
+}
+
+message Meta {
+  PaginationMeta pagination = 1;
+  SortMeta sort = 2;
+  google.protobuf.Struct filters = 3;
+  google.protobuf.Struct extra = 10; 
+}
+
+/* ================= REQUEST ================= */
+
+message ListRequest {
+  int32 page = 1;
+  int32 pageSize = 2;
+  string search = 3;
+  google.protobuf.Struct filters = 4;
+  string mode = 5; // flat | tree | forPost
+  string sortBy = 6;
+  string sortOrder = 7;
+}
+
+
+message TreeNode {
+  int32 id = 1;
+  string name = 2;
+  int32 parentId = 3;
+  repeated TreeNode children = 4;
+}
+
+/* ================= RESPONSE ================= */
+
+message StandardResponse {
+  bool success = 1;
+  string message = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  bytes data = 4;
+  Meta meta = 5;
+}
+
+/* ================= COMMON ================= */
+
+message DeleteResponse {
+  bool success = 1;
+}

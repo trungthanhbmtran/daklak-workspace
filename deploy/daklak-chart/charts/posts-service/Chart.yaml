@@ -1,0 +1,6 @@
+apiVersion: v2
+name: posts-service
+description: A Helm chart for Posts Service
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

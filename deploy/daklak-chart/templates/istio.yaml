@@ -1,0 +1,69 @@
+{{- if .Values.istio.enabled -}}
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ .Values.istio.gatewayName | default "daklak-gateway" }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: istio-ingress
+  servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+        - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: daklak-virtualservice
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - {{ .Values.istio.gatewayName | default "daklak-gateway" }}
+  http:
+    # API Gateway routes
+    - match:
+        - uri:
+            prefix: /api/
+      route:
+        - destination:
+            host: api-gateway
+            port:
+              number: 80
+    # Media/Public images routes (Targeting Minio bucket)
+    - match:
+        - uri:
+            prefix: /public
+        - uri:
+            prefix: /media
+      rewrite:
+        uri: /media-center/
+      route:
+        - destination:
+            host: minio
+            port:
+              number: 9000
+    # Admin KHCN (Frontend) routes
+    - match:
+        - uri:
+            prefix: /admin
+      route:
+        - destination:
+            host: admin-khcn
+            port:
+              number: 3000
+    # Electronic Portal (Main) routes
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: e-portal
+            port:
+              number: 3000
+{{- end -}}

@@ -1,0 +1,14 @@
+image:
+  repository: minio/minio
+  tag: "latest"
+
+minio:
+  rootUser: minioadmin
+  rootPassword: minioadmin123
+
+service:
+  apiPort: 9000
+  consolePort: 9001
+
+persistence:
+  size: 5Gi

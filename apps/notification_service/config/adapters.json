@@ -1,0 +1,49 @@
+{
+  "adapters": [
+    {
+      "id": "console",
+      "type": "console",
+      "enabled": true,
+      "config": {}
+    },
+    {
+      "id": "email",
+      "type": "smtp",
+      "enabled": true,
+      "config": {
+        "host": "env:SMTP_HOST",
+        "port": "env:SMTP_PORT",
+        "secure": "env:SMTP_SECURE",
+        "from": "env:SMTP_FROM",
+        "user": "env:SMTP_USER",
+        "passwordRef": "env:SMTP_PASSWORD"
+      }
+    },
+    {
+      "id": "telegram",
+      "type": "telegram",
+      "enabled": true,
+      "config": {
+        "botToken": "env:TELEGRAM_BOT_TOKEN"
+      }
+    },
+    {
+      "id": "zalo",
+      "type": "zalo",
+      "enabled": true,
+      "config": {
+        "accessToken": "env:ZALO_ACCESS_TOKEN",
+        "apiUrl": "env:ZALO_API_URL"
+      }
+    },
+    {
+      "id": "facebook",
+      "type": "facebook",
+      "enabled": true,
+      "config": {
+        "pageAccessToken": "env:FACEBOOK_PAGE_ACCESS_TOKEN",
+        "apiVersion": "env:FACEBOOK_API_VERSION"
+      }
+    }
+  ]
+}

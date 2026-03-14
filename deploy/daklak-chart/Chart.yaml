@@ -1,0 +1,49 @@
+apiVersion: v2
+name: daklak-chart
+version: 0.1.0
+
+dependencies:
+  - name: user-service
+    version: 0.1.0
+    repository: "file://charts/user-service"
+
+  - name: admin-khcn
+    version: 0.1.0
+    repository: "file://charts/admin-khcn"
+  - name: api-gateway
+    version: 0.1.0
+    repository: "file://charts/api-gateway"
+  - name: hrm-service
+    version: 0.1.0
+    repository: "file://charts/hrm-service"
+  - name: notification-service
+    version: 0.1.0
+    repository: "file://charts/notification-service"
+  - name: translate-service
+    version: 0.1.0
+    repository: "file://charts/translate-service"
+  - name: media-service
+    version: 0.1.0
+    repository: "file://charts/media-service"
+  - name: posts-service
+    version: 0.1.0
+    repository: "file://charts/posts-service"
+  - name: e-portal
+    version: 0.1.0
+    repository: "file://charts/e-portal"
+  - name: daklak-infrastructure
+    version: 0.1.0
+    repository: "file://charts/daklak-infrastructure"
+
+  - name: mysql
+    version: 0.1.0
+    repository: "file://charts/mysql"
+  - name: redis
+    version: 0.1.0
+    repository: "file://charts/redis"
+  - name: rabbitmq
+    version: 0.1.0
+    repository: "file://charts/rabbitmq"
+  - name: minio
+    version: 0.1.0
+    repository: "file://charts/minio"

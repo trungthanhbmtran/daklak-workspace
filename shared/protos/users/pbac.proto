@@ -1,0 +1,131 @@
+syntax = "proto3";
+
+package pbac;
+
+// PBAC: Chính sách phân quyền (Policy-Based) – Vai trò + Ma trận quyền
+service PbacService {
+  // --- Vai trò (Roles) ---
+  rpc CreateRole (CreateRoleRequest) returns (RoleResponse);
+  rpc FindAllRoles (Empty) returns (FindAllRolesResponse);
+  rpc FindOneRole (FindOneRoleRequest) returns (RoleDetailResponse);
+  rpc UpdateRole (UpdateRoleRequest) returns (RoleResponse);
+  rpc DeleteRole (DeleteRoleRequest) returns (RoleResponse);
+  // --- Ma trận quyền (Permissions) ---
+  rpc GetPermissionMatrix (Empty) returns (PermissionMatrixResponse);
+  // --- Tài nguyên & Quyền CRUD ---
+  rpc CreateResource (CreateResourceRequest) returns (ResourceResponse);
+  rpc UpdateResource (UpdateResourceRequest) returns (ResourceResponse);
+  rpc DeleteResource (DeleteResourceRequest) returns (ResourceResponse);
+  rpc CreatePermission (CreatePermissionRequest) returns (PermissionItemResponse);
+  rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionResponse);
+}
+
+message CreateResourceRequest {
+  string code = 1;
+  string name = 2;
+}
+
+message UpdateResourceRequest {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+}
+
+message DeleteResourceRequest {
+  int32 id = 1;
+}
+
+message ResourceResponse {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+}
+
+message CreatePermissionRequest {
+  int32 resource_id = 1;
+  string action = 2;
+}
+
+message DeletePermissionRequest {
+  int32 id = 1;
+}
+
+message PermissionItemResponse {
+  int32 id = 1;
+  string action = 2;
+  int32 resource_id = 3;
+}
+
+message DeletePermissionResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message Empty {}
+
+message CreateRoleRequest {
+  string code = 1;
+  string name = 2;
+  string description = 3;
+  repeated int32 permission_ids = 4;
+}
+
+message FindOneRoleRequest {
+  int32 id = 1;
+}
+
+message UpdateRoleRequest {
+  int32 id = 1;
+  string name = 2;
+  string description = 3;
+  repeated int32 permission_ids = 4;
+}
+
+message DeleteRoleRequest {
+  int32 id = 1;
+}
+
+message RoleResponse {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message PermissionItem {
+  int32 id = 1;
+  string action = 2;
+  int32 resource_id = 3;
+}
+
+message RoleDetailResponse {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  repeated PermissionItem permissions = 5;
+}
+
+message RoleWithCount {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+  int32 users_count = 5;
+  int32 permissions_count = 6;
+}
+
+message FindAllRolesResponse {
+  repeated RoleWithCount roles = 1;
+}
+
+message ResourceWithPermissions {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  repeated PermissionItem permissions = 4;
+}
+
+message PermissionMatrixResponse {
+  repeated ResourceWithPermissions resources = 1;
+}

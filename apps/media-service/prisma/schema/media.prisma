@@ -1,0 +1,25 @@
+enum MediaStatus {
+  PENDING    // Đang chờ client upload (hoặc đang up dở các chunk)
+  COMPLETED  // Đã upload xong, ráp chunk thành công
+  FAILED     // Lỗi hoặc User hủy upload giữa chừng
+}
+
+model Media {
+  id            String      @id @default(uuid())
+  fileName      String      @unique
+  originalName  String
+  mimeType      String
+  size          Int
+  status        MediaStatus @default(PENDING)
+  bucket        String
+  ownerId       String      // ID người dùng từ Gateway truyền xuống
+  
+  // --- TRƯỜNG DÀNH CHO MULTIPART UPLOAD ---
+  uploadId      String?     // BẮT BUỘC: Lưu mã phiên upload của MinIO cấp
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([ownerId])
+  @@index([uploadId])       // Đánh index để sau này tìm và xóa các phiên upload rác dễ hơn
+}

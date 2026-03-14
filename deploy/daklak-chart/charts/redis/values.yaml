@@ -1,0 +1,5 @@
+image:
+  repository: redis
+  tag: "7"
+service:
+  port: 6379

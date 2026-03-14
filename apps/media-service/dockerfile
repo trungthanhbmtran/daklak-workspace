@@ -1,0 +1,48 @@
+# Giai đoạn 1: Build mã nguồn
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Cài đặt các công cụ cần thiết cho Prisma (openssl)
+RUN apk add --no-cache openssl
+
+# Copy file cấu hình phụ thuộc từ root monorepo
+COPY apps/media-service/package*.json ./
+RUN npm install
+
+# Copy source của service
+COPY apps/media-service .
+
+# Tạo Prisma Client
+RUN npx prisma generate
+
+# Build dự án NestJS
+RUN npm run build
+
+# Giai đoạn 2: Chạy Production
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+# Cài đặt openssl cho runtime Prisma
+RUN apk add --no-cache openssl
+
+# Chỉ copy node_modules và các file cần thiết từ giai đoạn builder
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/prisma ./prisma
+
+# Copy TOÀN BỘ thư mục protos dùng chung từ monorepo root
+COPY shared/protos ./protos
+
+# Biến môi trường
+ENV NODE_ENV=production
+ENV PROTO_PATH=/app/protos
+ENV GRPC_URL=0.0.0.0:50051
+
+# Mở cổng gRPC
+EXPOSE 50059
+
+# Lệnh khởi chạy service
+CMD ["node", "dist/src/main.js"]

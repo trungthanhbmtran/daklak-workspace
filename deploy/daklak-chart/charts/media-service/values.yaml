@@ -1,0 +1,42 @@
+replicaCount: 1
+
+image:
+  repository: daklak-media-service
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 50051
+  targetPort: 50051
+
+database:
+  name: admin_storage
+  host: mysql
+  port: 3306
+  user: root
+  rootPassword: mypassword
+
+minio:
+  endpoint: minio
+  port: 9000
+  useSsl: "false"
+  accessKey: admin
+  secretKey: password123
+  bucket: media-center
+  region: us-east-1
+  externalEndpoint: "http://minio:9000"
+
+env:
+  NODE_ENV: production
+  MEDIA_SERVICE_GRPC_URL: "0.0.0.0:50051"
+  UPLOAD_URL_EXPIRES: "300"
+  DOWNLOAD_URL_EXPIRES: "3600"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 300m
+    memory: 256Mi

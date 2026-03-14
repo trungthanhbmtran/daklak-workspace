@@ -1,0 +1,38 @@
+{
+  "name": "hrm-service",
+  "version": "0.0.1",
+  "description": "HRM microservice (NestJS + Prisma + gRPC) – Department, Employee, JobTitle, Position",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "nest build",
+    "prisma:generate": "prisma generate --schema=./prisma/schema",
+    "prisma:migrate": "prisma migrate dev --schema=./prisma/schema",
+    "prisma:studio": "prisma studio --schema=./prisma/schema",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:prod": "node dist/main"
+  },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.3",
+    "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/core": "^11.0.1",
+    "@nestjs/microservices": "^11.1.13",
+    "@nestjs/platform-express": "^11.0.1",
+    "@prisma/adapter-mariadb": "^7.4.1",
+    "@prisma/client": "^7.4.0",
+    "dotenv": "^16.4.5",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@types/node": "^22.10.7",
+    "prisma": "^7.4.0",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.7.3"
+  }
+}

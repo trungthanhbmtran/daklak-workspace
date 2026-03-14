@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package banner;
+
+import "common/common.proto";
+
+// ====================== Banner Service ======================
+
+service BannerService {
+  rpc CreateBanner(CreateBannerRequest) returns (BannerResponse) {}
+  rpc GetBanner(GetBannerRequest) returns (Banner) {}
+  rpc ListBanners(ListBannersRequest) returns (ListBannersResponse) {}
+  rpc UpdateBanner(UpdateBannerRequest) returns (BannerResponse) {}
+  rpc DeleteBanner(DeleteBannerRequest) returns (common.DeleteResponse) {}
+}
+
+// ====================== Banner Object ======================
+
+message Banner {
+  string id = 1;
+  string title = 2;
+  string slug = 3;
+  string description = 4;
+  string imageUrl = 5;
+  string linkType = 6;       // internal | external
+  string customUrl = 7;
+  string target = 8;         // _self | _blank
+  string position = 9;       // top | middle | bottom | custom
+  int32 orderIndex = 10;
+  bool status = 11;
+  string metaTitle = 12;
+  string metaDescription = 13;
+  string startAt = 14;
+  string endAt = 15;
+  string createdAt = 16;
+  string updatedAt = 17;
+}
+
+// ====================== Create ======================
+
+message CreateBannerRequest {
+  string name = 1;
+  string description = 2;
+  string imageUrl = 3;
+  string linkType = 4;       // internal | external
+  string customUrl = 5;
+  string target = 6;
+  string position = 7;       // top | middle | bottom | custom
+  int32 orderIndex = 8;
+  bool status = 9;
+  string metaTitle = 10;
+  string metaDescription = 11;
+  string startAt = 12;
+  string endAt = 13;
+  string slug = 14;
+}
+
+// ====================== Get ======================
+
+message GetBannerRequest {
+  string id = 1;
+}
+
+message GetBannerBySlugRequest {
+  string slug = 1;
+}
+
+// ====================== List ======================
+
+message ListBannersRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string position = 4; // filter theo vị trí banner
+  bool status = 5;     // chỉ lấy banner đang active
+}
+
+message ListBannersResponse {
+  repeated Banner data = 1;
+  common.Meta meta = 2;
+}
+
+// ====================== Update ======================
+
+message UpdateBannerRequest {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string imageUrl = 4;
+  string linkType = 5;
+  string customUrl = 6;
+  string target = 7;
+  string position = 8;
+  int32 orderIndex = 9;
+  bool status = 10;
+  string metaTitle = 11;
+  string metaDescription = 12;
+  string startAt = 13;
+  string endAt = 14;
+}
+
+// ====================== Delete ======================
+
+message DeleteBannerRequest {
+  string id = 1;
+}
+
+message BannerResponse {
+  Banner data = 1;
+  string message = 2;
+}

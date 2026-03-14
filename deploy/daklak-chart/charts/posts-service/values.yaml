@@ -1,0 +1,25 @@
+replicaCount: 1
+
+image:
+  repository: daklak-posts-service
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 50055
+  targetPort: 50055
+
+database:
+  host: mysql
+  port: 3306
+  user: root
+  rootPassword: mypassword
+  name: daklak_posts
+
+rabbitmq:
+  url: "amqp://admin:admin123@rabbitmq:5672"
+
+env: {}
+
+resources: {}

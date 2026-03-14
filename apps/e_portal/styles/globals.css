@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@config "../tailwind.config.js";
+
+@theme {
+  --color-content1: #ffffff;
+  --color-content2: #f2f8ff;
+  --color-content3: #e5f1ff;
+  --color-content4: #d8eaff;
+
+  /* Primary colors */
+  --color-primary: #007bff;
+  --color-primary-foreground: #ffffff;
+
+  /* Border / Divider */
+  --color-default-200: #cfe2f5;
+  --color-default-300: #bfd4ec;
+}
+
+/* Dark mode (HeroUI = class-based) */
+.dark {
+  --color-background: #0b1220;
+  --color-foreground: #e7ebf3;
+
+  --color-content1: #111827;
+  --color-content2: #1a2335;
+  --color-content3: #223049;
+  --color-content4: #2a3a57;
+
+  --color-default-200: #2a3a57;
+  --color-default-300: #35486c;
+
+  --color-primary: #4da3ff;
+  --color-primary-foreground: #0b1220;
+}
+

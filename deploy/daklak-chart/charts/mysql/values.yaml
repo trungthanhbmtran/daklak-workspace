@@ -1,0 +1,16 @@
+image:
+  repository: mysql
+  tag: "8.0"
+
+mysql:
+  database: app_db
+  user: app_user
+  password: app_pass
+  rootPassword: root_pass
+
+service:
+  port: 3306
+
+persistence:
+  enabled: true
+  size: 5Gi
