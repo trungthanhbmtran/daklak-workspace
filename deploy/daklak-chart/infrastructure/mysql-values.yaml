@@ -1,0 +1,23 @@
+auth:
+  rootPassword: mypassword
+
+initdbScripts:
+  init.sql: |
+    CREATE DATABASE user_db;
+    CREATE DATABASE posts_db;
+    CREATE DATABASE media_db;
+    CREATE DATABASE notification_db;
+
+    CREATE USER 'app_user'@'%' IDENTIFIED BY 'mypassword';
+
+    GRANT ALL PRIVILEGES ON user_db.* TO 'app_user'@'%';
+    GRANT ALL PRIVILEGES ON posts_db.* TO 'app_user'@'%';
+    GRANT ALL PRIVILEGES ON media_db.* TO 'app_user'@'%';
+    GRANT ALL PRIVILEGES ON notification_db.* TO 'app_user'@'%';
+
+    FLUSH PRIVILEGES;
+
+primary:
+  persistence:
+    enabled: true
+    size: 20Gi

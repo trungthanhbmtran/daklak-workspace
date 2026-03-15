@@ -48,3 +48,12 @@ Dưới đây là thông tin đăng nhập mặc định cho các dịch vụ tr
  kubectl get pods -A
 
 kubectl port-forward service/admin-khcn 3000:3000 -n daklak
+
+helm uninstall mysql -n daklak
+
+helm install mysql bitnami/mysql `
+--namespace daklak `
+--set auth.rootPassword=mypassword `
+--set auth.database=app_db `
+--set auth.username=app_user `
+--set auth.password=mypassword
