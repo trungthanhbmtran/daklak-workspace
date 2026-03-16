@@ -1,23 +1,46 @@
+architecture: standalone
+
 auth:
-  rootPassword: mypassword
+  rootPassword: "mypassword"
+  username: "daklak_user"
+  password: "mypassword"
+  database: "daklak_db"
 
 initdbScripts:
-  init.sql: |
-    CREATE DATABASE user_db;
-    CREATE DATABASE posts_db;
-    CREATE DATABASE media_db;
-    CREATE DATABASE notification_db;
+  init-dbs.sql: |
+    CREATE DATABASE IF NOT EXISTS admin_systems;
+    CREATE DATABASE IF NOT EXISTS admin_posts;
+    CREATE DATABASE IF NOT EXISTS admin_hrm;
+    CREATE DATABASE IF NOT EXISTS admin_media;
+    CREATE DATABASE IF NOT EXISTS daklak_translation;
 
-    CREATE USER 'app_user'@'%' IDENTIFIED BY 'mypassword';
-
-    GRANT ALL PRIVILEGES ON user_db.* TO 'app_user'@'%';
-    GRANT ALL PRIVILEGES ON posts_db.* TO 'app_user'@'%';
-    GRANT ALL PRIVILEGES ON media_db.* TO 'app_user'@'%';
-    GRANT ALL PRIVILEGES ON notification_db.* TO 'app_user'@'%';
-
+    GRANT ALL PRIVILEGES ON admin_systems.* TO 'daklak_user'@'%';
+    GRANT ALL PRIVILEGES ON admin_posts.* TO 'daklak_user'@'%';
+    GRANT ALL PRIVILEGES ON admin_hrm.* TO 'daklak_user'@'%';
+    GRANT ALL PRIVILEGES ON admin_media.* TO 'daklak_user'@'%';
+    GRANT ALL PRIVILEGES ON daklak_translation.* TO 'daklak_user'@'%';
     FLUSH PRIVILEGES;
 
 primary:
-  persistence:
+  podSecurityContext:
     enabled: true
-    size: 20Gi
+    fsGroup: 1001
+
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+
+  persistence:
+    enabled: false
+    size: 10Gi
+    accessModes:
+      - ReadWriteOnce
+    storageClass: hostpath   # FIX LỖI PVC
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 1Gi
