@@ -1,0 +1,54 @@
+image:
+  repository: mysql
+  tag: "8.0"
+  pullPolicy: IfNotPresent
+
+mysql:
+  auth:
+    database: daklak_db
+    user: daklak_user
+    password: daklak_password
+    rootPassword: root_password
+  
+  # Custom MySQL configuration
+  config: |
+    [mysqld]
+    max_connections=200
+    skip-name-resolve
+    innodb_buffer_pool_size=256M
+
+service:
+  type: ClusterIP
+  port: 3306
+
+persistence:
+  enabled: true
+  storageClass: "hostpath" # Change to your storage class
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+  readiness:
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    successThreshold: 1
+    failureThreshold: 3
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
