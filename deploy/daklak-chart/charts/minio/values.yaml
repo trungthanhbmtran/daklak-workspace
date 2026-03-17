@@ -12,3 +12,7 @@ service:
 
 persistence:
   size: 5Gi
+
+defaultBuckets:
+  - name: media-center
+    policy: public

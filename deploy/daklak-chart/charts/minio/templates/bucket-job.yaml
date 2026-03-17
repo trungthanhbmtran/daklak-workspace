@@ -1,0 +1,35 @@
+{{- if .Values.defaultBuckets }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: minio-create-buckets
+spec:
+  template:
+    metadata:
+      labels:
+        app: minio-create-buckets
+    spec:
+      containers:
+      - name: minio-mc
+        image: minio/mc:latest
+        command: ["/bin/sh", "-c"]
+        args:
+        - |
+          # Wait for minio service to be reachable
+          echo "Waiting for MinIO..."
+          until mc alias set myminio http://minio:{{ .Values.service.apiPort }} {{ .Values.minio.rootUser }} {{ .Values.minio.rootPassword }}; do
+            echo "MinIO not ready, retrying..."
+            sleep 2
+          done
+
+          {{- range .Values.defaultBuckets }}
+          echo "Creating bucket: {{ .name }}"
+          mc mb myminio/{{ .name }} || true;
+          {{- if eq .policy "public" }}
+          echo "Setting public policy for: {{ .name }}"
+          mc anonymous set public myminio/{{ .name }};
+          {{- end }}
+          {{- end }}
+      restartPolicy: OnFailure
+  backoffLimit: 4
+{{- end }}

@@ -9,3 +9,26 @@ rabbitmq:
 service:
   amqpPort: 5672
   managementPort: 15672
+
+persistence:
+  enabled: true
+  size: 2Gi
+  storageClass: "hostpath"
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  liveness:
+    initialDelaySeconds: 300
+    timeoutSeconds: 30
+    periodSeconds: 30
+  readiness:
+    initialDelaySeconds: 60
+    timeoutSeconds: 20
+    periodSeconds: 20

@@ -49,6 +49,11 @@ Dưới đây là thông tin đăng nhập mặc định cho các dịch vụ tr
 
 kubectl port-forward service/admin-khcn 3000:3000 -n daklak
 
+kubectl port-forward svc/minio 9001:9001 -n infra-system
+
+kubectl port-forward svc/rabbitmq 15672:15672 -n infra-system
+
+
 
 
 git clone https://github.com/bitnami/charts.git
