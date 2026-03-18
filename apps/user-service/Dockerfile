@@ -16,7 +16,11 @@ COPY shared/protos ./shared/protos
 
 # ✅ Đảm bảo có prisma/schema/*
 # Generate Prisma Client
-RUN npx prisma generate --schema=./prisma/schema/main.prisma
+# ✅ Merge schema
+RUN cat prisma/schema/*.prisma > prisma/schema.prisma
+
+# ✅ Generate từ file đã merge
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Build app
 RUN npm run build
@@ -50,8 +54,7 @@ COPY --from=builder /app/prisma ./prisma
 
 COPY apps/user-service/package*.json ./
 
-CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema/main.prisma"]
-
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema.prisma"]
 
 # ==========================================
 # 4️⃣ Stage: Runner (Production)
