@@ -9,7 +9,7 @@ migration:
   image:
     repository: thanhtran1993/daklak-user-service-migration
     tag: "latest"
-    pullPolicy: Always
+    pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
