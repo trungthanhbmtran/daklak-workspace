@@ -3,7 +3,10 @@ name: Build & Push Docker Image
 on:
   push:
     branches:
-      - main   # hoặc master nếu bạn dùng master
+      - main
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true   # 👈 thêm dòng này
 
 jobs:
   build-and-push:
@@ -26,7 +29,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: apps/user-service/Dockerfile   
+          file: apps/user-service/Dockerfile
           push: true
           tags: |
             thanhtran1993/daklak-user-service:latest
