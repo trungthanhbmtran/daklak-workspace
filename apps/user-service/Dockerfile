@@ -15,7 +15,7 @@ COPY apps/user-service .
 COPY shared/protos ./shared/protos
 
 # Generate Prisma Client
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate --schema=./prisma/schema/main.prisma
 
 # Build app
 RUN npm run build
@@ -43,8 +43,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
 COPY apps/user-service/package*.json ./
 
-CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema.prisma"]
-
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema/main.prisma"]
 # ==========================================
 # 4️⃣ Stage: Runner (Production)
 # ==========================================
