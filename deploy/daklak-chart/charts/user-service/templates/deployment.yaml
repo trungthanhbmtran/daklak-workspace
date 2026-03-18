@@ -17,14 +17,14 @@ spec:
     spec:
       initContainers:
         - name: prisma-migrate
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.migration.image.repository }}:{{ .Values.migration.image.tag }}"
+          imagePullPolicy: {{ .Values.migration.image.pullPolicy }}
           command:
             - npx
             - prisma
             - migrate
             - deploy
-            - --schema=./prisma/schema/main.prisma
+            - --schema=./prisma/schema
           env:
             - name: DATABASE_URL
               value: "mysql://{{ .Values.database.user }}:{{ .Values.database.rootPassword }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"

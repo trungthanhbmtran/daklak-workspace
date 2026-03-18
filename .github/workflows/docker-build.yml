@@ -25,11 +25,23 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & Push Image
+      - name: Build & Push Migration Image
         uses: docker/build-push-action@v5
         with:
           context: .
           file: apps/user-service/Dockerfile
+          target: migration
+          push: true
+          tags: |
+            thanhtran1993/daklak-user-service-migration:latest
+            thanhtran1993/daklak-user-service-migration:${{ github.sha }}
+
+      - name: Build & Push Service Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/user-service/Dockerfile
+          target: runner
           push: true
           tags: |
             thanhtran1993/daklak-user-service:latest

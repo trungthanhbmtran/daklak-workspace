@@ -5,6 +5,12 @@ image:
   tag: "latest"
   pullPolicy: Always
 
+migration:
+  image:
+    repository: thanhtran1993/daklak-user-service-migration
+    tag: "latest"
+    pullPolicy: Always
+
 service:
   type: ClusterIP
   port: 3000
