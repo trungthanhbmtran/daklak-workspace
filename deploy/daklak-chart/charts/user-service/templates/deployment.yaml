@@ -18,7 +18,7 @@ spec:
       initContainers:
         - name: prisma-migrate
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - npx
             - prisma
@@ -31,7 +31,7 @@ spec:
       containers:
         - name: user-service
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: Never
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 3000
           env:
