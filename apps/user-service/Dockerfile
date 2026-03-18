@@ -1,41 +1,52 @@
-# ---------- BUILD STAGE ----------
+# ==========================================
+# 1️⃣ Stage: Builder
+# ==========================================
 FROM node:20-alpine AS builder
-
 WORKDIR /app
 
-# Copy package
-COPY package*.json ./
+# Copy dependencies (from root context)
+COPY apps/user-service/package*.json ./
 RUN npm install
 
-# Copy toàn bộ source
-COPY . .
+# Copy source and shared protos
+COPY apps/user-service .
+COPY shared/protos ./shared/protos
 
 # Generate Prisma Client
-RUN npx prisma generate
+RUN npx prisma generate --schema=./prisma/schema
 
-# Build NestJS
+# Build the app
 RUN npm run build
 
-
-
-# ---------- PRODUCTION STAGE ----------
-FROM node:20-alpine
-
+# ==========================================
+# 2️⃣ Stage: Runner (Production)
+# ==========================================
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Copy package để install production deps
-COPY package*.json ./
-RUN npm install --omit=dev
+ENV NODE_ENV=production
+ENV PROTO_PATH=/app/protos
 
-# ⚠️ Quan trọng: copy prisma folder
-COPY prisma ./prisma
-
-# Generate prisma client cho runtime
-RUN npx prisma generate
-
-# Copy dist từ builder
+# Copy necessary files from builder
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+# Copy protos to internal path
+COPY --from=builder /app/shared/protos ./protos
 
 EXPOSE 3000
 
 CMD ["node", "dist/main.js"]
+
+# ==========================================
+# 3️⃣ Stage: Migration
+# ==========================================
+FROM node:20-alpine AS migration
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/package*.json ./
+
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema"]

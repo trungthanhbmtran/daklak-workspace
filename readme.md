@@ -54,6 +54,15 @@ kubectl port-forward svc/minio 9001:9001 -n infra-system
 kubectl port-forward svc/rabbitmq 15672:15672 -n infra-system
 
 
+docker build --target runner -t daklak-user-service:latest -f apps/user-service/Dockerfile .
+
+
+
+docker tag daklak-user-service:latest thanhtran1993/daklak-user-service:latest
+
+docker login
+
+docker push thanhtran1993/daklak-user-service:latest
 
 
 git clone https://github.com/bitnami/charts.git

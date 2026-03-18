@@ -1,51 +1,42 @@
-// apps/user-service/src/database/prisma.service.ts
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { PrismaClient } from '../generated/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
-import * as mysql from 'mysql2'; // 🔹 Sử dụng import chuẩn (không /promise)
 import { ConfigService } from '@nestjs/config';
+import { PrismaClient } from '@prisma/client';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
-const extendedClient = (config: ConfigService) => {
-  const url = config.get<string>('DATABASE_URL');
-  if (!url) {
-    throw new Error('❌ DATABASE_URL missing in .env');
-  }
-
-  const pool = mysql.createPool(url);
-  const adapter = new PrismaMariaDb(pool as any);
-
-  return new PrismaClient({ adapter }).$extends({
-    query: {
-      async $allOperations({ operation, model, args, query }) {
-        const start = Date.now();
-        const result = await query(args);
-        const duration = Date.now() - start;
-        if (duration > 200) {
-          console.warn(`⚠️ [Slow Query] ${model}.${operation} took ${duration}ms`);
-        }
-        return result;
-      },
-    },
-  });
-};
-
-type ExtendedPrismaClient = ReturnType<typeof extendedClient>;
+function parseDatabaseUrl(url: string): {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  database: string;
+} {
+  const u = new URL(url);
+  return {
+    host: u.hostname,
+    port: u.port ? parseInt(u.port, 10) : 3306,
+    user: decodeURIComponent(u.username),
+    password: decodeURIComponent(u.password),
+    database: u.pathname ? decodeURIComponent(u.pathname.slice(1)) : '',
+  };
+}
 
 @Injectable()
-export class PrismaService extends (PrismaClient as any) implements OnModuleInit, OnModuleDestroy {
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor(config: ConfigService) {
-    super();
-    return extendedClient(config) as any;
+    const url = config.getOrThrow<string>('DATABASE_URL');
+    const parsed = parseDatabaseUrl(url);
+    const adapter = new PrismaMariaDb({
+      ...parsed,
+      allowPublicKeyRetrieval: true,
+    });
+    super({ adapter });
   }
 
   async onModuleInit() {
-    await (this as any).$connect();
+    await this.$connect();
   }
 
   async onModuleDestroy() {
-    await (this as any).$disconnect();
+    await this.$disconnect();
   }
 }
-
-export interface PrismaService extends ExtendedPrismaClient { }
-

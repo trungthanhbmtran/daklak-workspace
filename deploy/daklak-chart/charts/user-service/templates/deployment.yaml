@@ -20,9 +20,11 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: Never
           command:
-            - ls
-            - -R
-            - /app
+            - npx
+            - prisma
+            - migrate
+            - deploy
+            - --schema=./prisma/schema/main.prisma
           env:
             - name: DATABASE_URL
               value: "mysql://{{ .Values.database.user }}:{{ .Values.database.rootPassword }}@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
