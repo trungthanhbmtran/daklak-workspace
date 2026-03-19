@@ -1,38 +1,63 @@
-name: Continuous Deployment
+name: CD - Deploy to Kubernetes
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'deploy/daklak-chart/**'
-      - '.github/workflows/cd.yml'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout source
+      # 1. Checkout source
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # ☸️ Setup kubectl
+      # 2. Setup kubectl
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
 
-      # 🔐 Giải mã KUBECONFIG từ Secret
-      - name: Set kubeconfig
-        run: |
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > kubeconfig
-          echo "KUBECONFIG=$PWD/kubeconfig" >> $GITHUB_ENV
-
-      # ⎈ Setup Helm
+      # 3. Setup Helm
       - name: Setup Helm
         uses: azure/setup-helm@v4
+        with:
+          version: 'latest'
 
-      # 🚀 Deploy bằng Helm (Deploy toàn bộ chart daklak-chart)
-      - name: Deploy to Kubernetes
+      # 4. Setup KUBECONFIG
+      - name: Setup kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > kubeconfig
+          chmod 600 kubeconfig
+
+      # 5. Debug cluster (RẤT QUAN TRỌNG)
+      - name: Test cluster connection
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
+        run: |
+          echo "===== KUBECONFIG ====="
+          ls -la
+          echo "===== CONTEXT ====="
+          kubectl config get-contexts
+          kubectl config current-context
+          echo "===== NODES ====="
+          kubectl get nodes
+
+      # 6. Deploy Helm
+      - name: Deploy with Helm
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: |
           helm upgrade --install daklak ./deploy/daklak-chart \
             --namespace production \
             --create-namespace \
             --values ./deploy/daklak-chart/values.yaml
+
+      # 7. Verify deployment
+      - name: Check pods
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
+        run: |
+          kubectl get pods -n production
