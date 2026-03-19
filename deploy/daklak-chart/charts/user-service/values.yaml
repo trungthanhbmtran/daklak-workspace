@@ -1,9 +1,9 @@
-replicaCount: 1
+replicaCount: 2
 
 image:
   repository: thanhtran1993/daklak-user-service
-  tag: "latest"
-  pullPolicy: Always
+  tag: "latest"        # ⚠️ CI sẽ override bằng commit SHA
+  pullPolicy: IfNotPresent
 
 migration:
   image:
@@ -17,11 +17,16 @@ service:
   targetPort: 3000
 
 database:
-  name: admin_systems
   host: mysql.infra.svc.cluster.local
   port: 3306
-  user: root
-  rootPassword: mypassword
+  name: admin_systems
+
+# ❗ KHÔNG để password ở đây nữa
+secret:
+  create: true
+  name: user-service-secret
+  data:
+    DATABASE_URL: "mysql://root:mypassword@mysql.infra.svc.cluster.local:3306/admin_systems"
 
 env:
   NODE_ENV: production
