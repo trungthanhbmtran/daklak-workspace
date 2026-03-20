@@ -17,13 +17,16 @@ jobs:
   filter:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.filter.outputs.changes }}
+      services: ${{ steps.prepare.outputs.services }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
+            workflow: 
+              - '.github/workflows/cd.yml'
+              - 'shared/**'
             admin_khcn: 'apps/admin_khcn/**'
             api-gateway: 'apps/api-gateway/**'
             e_portal: 'apps/e_portal/**'
@@ -33,6 +36,16 @@ jobs:
             posts_service: 'apps/posts_service/**'
             translate_service: 'apps/translate_service/**'
             user-service: 'apps/user-service/**'
+
+      - id: prepare
+        shell: bash
+        run: |
+          # If workflow or shared changed, build EVERYTHING
+          if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
+            echo 'services=["admin_khcn", "api-gateway", "e_portal", "hrm-service", "media-service", "notification_service", "posts_service", "translate_service", "user-service"]' >> $GITHUB_OUTPUT
+          else
+            echo "services=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+          fi
 
   build-push:
     needs: filter
@@ -90,7 +103,7 @@ jobs:
     if: |
       always() && 
       (needs.build-push.result == 'success' || needs.build-push.result == 'skipped') &&
-      (needs.filter.outputs.services != '[]' || contains(github.event.head_commit.modified, 'deploy/daklak-chart'))
+      (needs.filter.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -113,7 +126,6 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          # Define all services to ensure they get the correct tag if they were updated
           SERVICES=(admin-khcn api-gateway e-portal hrm-service media-service notification-service posts-service translate-service user-service)
           HELM_OPTS=""
           for svc in "${SERVICES[@]}"; do
