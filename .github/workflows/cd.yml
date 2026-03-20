@@ -135,6 +135,11 @@ jobs:
             echo "$SECRET_DATA" | base64 -d -i > kubeconfig || { echo "ERROR: Failed to decode base64. Please ensure KUBECONFIG_BASE64 is valid base64 or raw YAML."; exit 1; }
           fi
           
+          # Patch: Ensure we use the correct public IP even if secret is outdated
+          echo "Patching kubeconfig to use 113.176.130.180..."
+          sed -i 's/kubernetes.docker.internal/113.176.130.180/g' kubeconfig
+          sed -i 's/127.0.0.1/113.176.130.180/g' kubeconfig
+
           chmod 600 kubeconfig
           echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
           
