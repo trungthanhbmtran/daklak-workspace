@@ -28,9 +28,6 @@ dependencies:
   - name: posts-service
     version: 0.1.0
     repository: "file://charts/posts-service"
-  - name: e-portal
-    version: 0.1.0
-    repository: "file://charts/e-portal"
   - name: daklak-infrastructure
     version: 0.1.0
     repository: "file://charts/daklak-infrastructure"

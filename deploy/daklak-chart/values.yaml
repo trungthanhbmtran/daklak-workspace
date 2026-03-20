@@ -150,17 +150,6 @@ posts-service:
     port: 50055
     targetPort: 50055
 
-e-portal:
-  image:
-    repository: e-portal
-    tag: latest
-  env:
-    API_URL: "http://api-gateway/api/v1"
-    NEXT_PUBLIC_API_URL: "/api/v1/public"
-  service:
-    port: 3000
-    targetPort: 3000
-
 istio:
   enabled: true
   domain: "admin.daklak.local"

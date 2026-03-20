@@ -29,7 +29,6 @@ jobs:
               - 'shared/**'
             admin_khcn: 'apps/admin_khcn/**'
             api-gateway: 'apps/api-gateway/**'
-            e_portal: 'apps/e_portal/**'
             hrm-service: 'apps/hrm-service/**'
             media-service: 'apps/media-service/**'
             notification_service: 'apps/notification_service/**'
@@ -42,7 +41,7 @@ jobs:
         run: |
           # If workflow or shared changed, build EVERYTHING
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            echo 'services=["admin_khcn", "api-gateway", "e_portal", "hrm-service", "media-service", "notification_service", "posts_service", "translate_service", "user-service"]' >> $GITHUB_OUTPUT
+            echo 'services=["admin_khcn", "api-gateway", "hrm-service", "media-service", "notification_service", "posts_service", "translate_service", "user-service"]' >> $GITHUB_OUTPUT
           else
             echo "services=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
           fi
@@ -126,7 +125,7 @@ jobs:
 
       - name: Deploy with Helm
         run: |
-          SERVICES=(admin-khcn api-gateway e-portal hrm-service media-service notification-service posts-service translate-service user-service)
+          SERVICES=(admin-khcn api-gateway hrm-service media-service notification-service posts-service translate-service user-service)
           HELM_OPTS=""
           for svc in "${SERVICES[@]}"; do
             HELM_OPTS="$HELM_OPTS --set $svc.image.tag=${{ github.sha }} --set $svc.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$svc"

@@ -27,7 +27,6 @@ jobs:
           filters: |
             admin_khcn: 'apps/admin_khcn/**'
             api-gateway: 'apps/api-gateway/**'
-            e_portal: 'apps/e_portal/**'
             hrm-service: 'apps/hrm-service/**'
             media-service: 'apps/media-service/**'
             notification_service: 'apps/notification_service/**'
