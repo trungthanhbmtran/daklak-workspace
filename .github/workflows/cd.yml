@@ -39,12 +39,12 @@ jobs:
       - id: prepare
         shell: bash
         run: |
-          # If workflow or shared changed, build EVERYTHING
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            echo 'services=["admin_khcn", "api-gateway", "hrm-service", "media-service", "notification_service", "posts_service", "translate_service", "user-service"]' >> $GITHUB_OUTPUT
+            SERVICES='["admin_khcn", "api-gateway", "hrm-service", "media-service", "notification_service", "posts_service", "translate_service", "user-service"]'
           else
-            echo "services=${{ steps.filter.outputs.changes }}" >> $GITHUB_OUTPUT
+            SERVICES="${{ steps.filter.outputs.changes }}"
           fi
+          echo "services=$SERVICES" >> $GITHUB_OUTPUT
 
   build-push:
     needs: filter
@@ -69,7 +69,7 @@ jobs:
           echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
           
           HAS_MIGRATION="false"
-          if [[ "${{ matrix.service }}" =~ ^(user-service|hrm-service|posts_service|media-service)$ ]]; then
+          if [[ "${{ matrix.service }}" == "user-service" ]]; then
             HAS_MIGRATION="true"
           fi
           echo "HAS_MIGRATION=$HAS_MIGRATION" >> $GITHUB_OUTPUT
@@ -129,7 +129,7 @@ jobs:
           HELM_OPTS=""
           for svc in "${SERVICES[@]}"; do
             HELM_OPTS="$HELM_OPTS --set $svc.image.tag=${{ github.sha }} --set $svc.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$svc"
-            if [[ "$svc" =~ ^(user-service|hrm-service|posts-service|media-service|translate-service)$ ]]; then
+            if [[ "$svc" == "user-service" ]]; then
               HELM_OPTS="$HELM_OPTS --set $svc.migration.image.tag=${{ github.sha }} --set $svc.migration.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$svc-migration"
             fi
           done
