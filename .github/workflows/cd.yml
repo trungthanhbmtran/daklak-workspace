@@ -69,7 +69,7 @@ jobs:
           echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
           
           HAS_MIGRATION="false"
-          if [[ "${{ matrix.service }}" =~ ^(user-service|hrm-service|posts_service|media-service|translate_service)$ ]]; then
+          if [[ "${{ matrix.service }}" =~ ^(user-service|hrm-service|posts_service|media-service)$ ]]; then
             HAS_MIGRATION="true"
           fi
           echo "HAS_MIGRATION=$HAS_MIGRATION" >> $GITHUB_OUTPUT

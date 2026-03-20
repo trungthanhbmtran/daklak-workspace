@@ -24,8 +24,25 @@ RUN npx prisma generate
 # Build app ra thư mục dist
 RUN npm run build
 
+
 # ==========================================
-# 3️⃣ Stage: Runner (K8s Production Container)
+# 3️⃣ Stage: Migration
+# ==========================================
+FROM node:20-alpine AS migration
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Copy FULL source (bao gồm prisma schema + migrations)
+COPY apps/hrm-service ./
+RUN npm ci --omit=dev
+
+# Chạy lệnh migration mặc định (có thể override trong Helm)
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema"]
+
+
+# ==========================================
+# 4️⃣ Stage: Runner (K8s Production Container)
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
