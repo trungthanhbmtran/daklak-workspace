@@ -1,0 +1,66 @@
+name: CI - Lint and Test
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'apps/**'
+      - 'shared/**'
+      - '.github/workflows/ci.yml'
+  push:
+    branches: [ main ]
+    paths:
+      - 'apps/**'
+      - 'shared/**'
+      - '.github/workflows/ci.yml'
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            admin_khcn: 'apps/admin_khcn/**'
+            api-gateway: 'apps/api-gateway/**'
+            e_portal: 'apps/e_portal/**'
+            hrm-service: 'apps/hrm-service/**'
+            media-service: 'apps/media-service/**'
+            notification_service: 'apps/notification_service/**'
+            posts_service: 'apps/posts_service/**'
+            translate_service: 'apps/translate_service/**'
+            user-service: 'apps/user-service/**'
+
+  lint-and-test:
+    needs: filter
+    if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.filter.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: apps/${{ matrix.service }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: apps/${{ matrix.service }}
+
+      - name: Lint
+        run: npm run lint
+        working-directory: apps/${{ matrix.service }}
+        continue-on-error: true
+
+      - name: Build check
+        run: npm run build
+        working-directory: apps/${{ matrix.service }}

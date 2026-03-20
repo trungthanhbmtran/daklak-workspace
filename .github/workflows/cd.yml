@@ -2,62 +2,131 @@ name: CD - Deploy to Kubernetes
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+    paths:
+      - 'apps/**'
+      - 'shared/**'
+      - 'deploy/daklak-chart/**'
+      - '.github/workflows/cd.yml'
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  deploy:
+  filter:
     runs-on: ubuntu-latest
-
+    outputs:
+      services: ${{ steps.filter.outputs.changes }}
     steps:
-      # 1. Checkout source
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            admin_khcn: 'apps/admin_khcn/**'
+            api-gateway: 'apps/api-gateway/**'
+            e_portal: 'apps/e_portal/**'
+            hrm-service: 'apps/hrm-service/**'
+            media-service: 'apps/media-service/**'
+            notification_service: 'apps/notification_service/**'
+            posts_service: 'apps/posts_service/**'
+            translate_service: 'apps/translate_service/**'
+            user-service: 'apps/user-service/**'
+
+  build-push:
+    needs: filter
+    if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJSON(needs.filter.outputs.services) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set Image Meta
+        id: meta
+        run: |
+          IMAGE_NAME=$(echo ${{ matrix.service }} | tr '_' '-')
+          echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
+          
+          HAS_MIGRATION="false"
+          if [[ "${{ matrix.service }}" =~ ^(user-service|hrm-service|posts_service|media-service|translate_service)$ ]]; then
+            HAS_MIGRATION="true"
+          fi
+          echo "HAS_MIGRATION=$HAS_MIGRATION" >> $GITHUB_OUTPUT
+
+      - name: Build and Push App
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.service }}/Dockerfile
+          target: runner
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Build and Push Migration
+        if: steps.meta.outputs.HAS_MIGRATION == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: apps/${{ matrix.service }}/Dockerfile
+          target: migration
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:${{ github.sha }}
+
+  deploy:
+    needs: [filter, build-push]
+    if: |
+      always() && 
+      (needs.build-push.result == 'success' || needs.build-push.result == 'skipped') &&
+      (needs.filter.outputs.services != '[]' || contains(github.event.head_commit.modified, 'deploy/daklak-chart'))
+    runs-on: ubuntu-latest
+    steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup kubectl
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
         with:
           version: 'latest'
 
-      # 3. Setup Helm
       - name: Setup Helm
         uses: azure/setup-helm@v4
         with:
           version: 'latest'
 
-      # 4. Setup KUBECONFIG
       - name: Setup kubeconfig
         run: |
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > kubeconfig
-          chmod 600 kubeconfig
+          echo "KUBECONFIG=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
 
-      # 5. Debug cluster (RẤT QUAN TRỌNG)
-      - name: Test cluster connection
-        env:
-          KUBECONFIG: ${{ github.workspace }}/kubeconfig
-        run: |
-          echo "===== KUBECONFIG ====="
-          ls -la
-          echo "===== CONTEXT ====="
-          kubectl config get-contexts
-          kubectl config current-context
-          echo "===== NODES ====="
-          kubectl get nodes
-
-      # 6. Deploy Helm
       - name: Deploy with Helm
-        env:
-          KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: |
+          # Define all services to ensure they get the correct tag if they were updated
+          SERVICES=(admin-khcn api-gateway e-portal hrm-service media-service notification-service posts-service translate-service user-service)
+          HELM_OPTS=""
+          for svc in "${SERVICES[@]}"; do
+            HELM_OPTS="$HELM_OPTS --set $svc.image.tag=${{ github.sha }} --set $svc.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/daklak-$svc"
+            if [[ "$svc" =~ ^(user-service|hrm-service|posts-service|media-service|translate-service)$ ]]; then
+              HELM_OPTS="$HELM_OPTS --set $svc.migration.image.tag=${{ github.sha }} --set $svc.migration.image.repository=${{ secrets.DOCKERHUB_USERNAME }}/daklak-$svc-migration"
+            fi
+          done
+
           helm upgrade --install daklak ./deploy/daklak-chart \
             --namespace production \
             --create-namespace \
-            --values ./deploy/daklak-chart/values.yaml
-
-      # 7. Verify deployment
-      - name: Check pods
-        env:
-          KUBECONFIG: ${{ github.workspace }}/kubeconfig
-        run: |
-          kubectl get pods -n production
+            --values ./deploy/daklak-chart/values.yaml \
+            $HELM_OPTS \
+            --wait \
+            --timeout 10m0s
