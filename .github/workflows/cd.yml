@@ -120,11 +120,28 @@ jobs:
 
       - name: Setup kubeconfig
         run: |
+          # Create kubeconfig from secret
           echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > kubeconfig
-          echo "KUBECONFIG=${{ github.workspace }}/kubeconfig" >> $GITHUB_ENV
+          chmod 600 kubeconfig
+          echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
+          
+          # Debug: show KUBECONFIG path and test connection
+          echo "KUBECONFIG path: $(pwd)/kubeconfig"
+          # Check if file is valid (not empty)
+          if [ -s "kubeconfig" ]; then
+            echo "Kubeconfig file is not empty."
+          else
+            echo "Error: Kubeconfig file is empty! Check your KUBE_CONFIG_DATA secret."
+            exit 1
+          fi
 
       - name: Deploy with Helm
+        env:
+          KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: |
+          # Verify connection before deploy
+          kubectl cluster-info || { echo "Failed to connect to cluster"; exit 1; }
+
           SERVICES=(admin-khcn api-gateway hrm-service media-service notification-service posts-service translate-service user-service)
           HELM_OPTS=""
           for svc in "${SERVICES[@]}"; do
