@@ -14,19 +14,25 @@ permissions:
   packages: write
 
 jobs:
+# ==========================================
+# 1. Detect changed services
+# ==========================================
   filter:
     runs-on: ubuntu-latest
     outputs:
       services: ${{ steps.prepare.outputs.services }}
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
-            workflow: 
+            workflow:
               - '.github/workflows/cd.yml'
               - 'shared/**'
+
             admin_khcn: 'apps/admin_khcn/**'
             api-gateway: 'apps/api-gateway/**'
             hrm-service: 'apps/hrm-service/**'
@@ -37,44 +43,50 @@ jobs:
             user-service: 'apps/user-service/**'
 
       - id: prepare
-        shell: bash
         run: |
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            SERVICES='["admin_khcn", "api-gateway", "hrm-service", "media-service", "notification_service", "posts_service", "translate_service", "user-service"]'
+            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts_service","translate_service","user-service"]'
           else
-            SERVICES="${{ steps.filter.outputs.changes }}"
+            SERVICES='${{ steps.filter.outputs.changes }}'
           fi
+
+          echo "Changed services: $SERVICES"
           echo "services=$SERVICES" >> $GITHUB_OUTPUT
 
+# ==========================================
+# 2. Build & Push Docker images
+# ==========================================
   build-push:
     needs: filter
     if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         service: ${{ fromJSON(needs.filter.outputs.services) }}
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Login to Docker Hub
+      - name: Login Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Set Image Meta
+      - name: Set metadata
         id: meta
         run: |
           IMAGE_NAME=$(echo ${{ matrix.service }} | tr '_' '-')
           echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
-          
-          HAS_MIGRATION="false"
-          if [[ "${{ matrix.service }}" == "user-service" ]]; then
-            HAS_MIGRATION="true"
-          fi
-          echo "HAS_MIGRATION=$HAS_MIGRATION" >> $GITHUB_OUTPUT
 
-      - name: Build and Push App
+          if [[ "${{ matrix.service }}" == "user-service" ]]; then
+            echo "HAS_MIGRATION=true" >> $GITHUB_OUTPUT
+          else
+            echo "HAS_MIGRATION=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build & Push App
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -82,10 +94,12 @@ jobs:
           target: runner
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
+          cache-to: type=inline
 
-      - name: Build and Push Migration
+      - name: Build & Push Migration
         if: steps.meta.outputs.HAS_MIGRATION == 'true'
         uses: docker/build-push-action@v5
         with:
@@ -94,87 +108,83 @@ jobs:
           target: migration
           push: true
           tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:latest
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:latest
 
+# ==========================================
+# 3. Deploy to Kubernetes
+# ==========================================
   deploy:
     needs: [filter, build-push]
     if: |
-      always() && 
-      (needs.build-push.result == 'success' || needs.build-push.result == 'skipped') &&
-      (needs.filter.result == 'success')
+      always() &&
+      (needs.build-push.result == 'success' || needs.build-push.result == 'skipped')
+
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
-        with:
-          version: 'latest'
 
       - name: Setup Helm
         uses: azure/setup-helm@v4
-        with:
-          version: 'latest'
 
       - name: Setup kubeconfig
         run: |
-          # Create kubeconfig from secret (handle both base64 and raw YAML)
-          SECRET_DATA="${{ secrets.KUBECONFIG_BASE64 }}"
-          if [[ -z "$SECRET_DATA" ]]; then
-            echo "ERROR: KUBECONFIG_BASE64 secret is empty!"
-            exit 1
-          fi
-
-          if [[ "$SECRET_DATA" == *"apiVersion"* ]]; then
-            echo "Secret looks like raw YAML. Using as-is."
-            echo "$SECRET_DATA" > kubeconfig
-          else
-            echo "Secret looks like base64. Decoding..."
-            echo "$SECRET_DATA" | base64 -d -i > kubeconfig || { echo "ERROR: Failed to decode base64. Please ensure KUBECONFIG_BASE64 is valid base64 or raw YAML."; exit 1; }
-          fi
-          
-          # Patch: Ensure we use the correct public IP even if secret is outdated
-          echo "Patching kubeconfig to use 113.176.130.180..."
-          sed -i 's/kubernetes.docker.internal/113.176.130.180/g' kubeconfig
-          sed -i 's/127.0.0.1/113.176.130.180/g' kubeconfig
-
+          echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 -d > kubeconfig
           chmod 600 kubeconfig
           echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
-          
-          # Debug: check file content
-          if [ -s "kubeconfig" ]; then
-            echo "Kubeconfig file created successfully ($(stat -c%s kubeconfig) bytes)."
-          else
-            echo "ERROR: Kubeconfig file is empty after processing."
-            exit 1
-          fi
 
-      - name: Deploy with Helm
-        env:
-          KUBECONFIG: ${{ github.workspace }}/kubeconfig
+      - name: Check cluster
         run: |
-          echo "Checking cluster connectivity..."
-          kubectl cluster-info || { echo "ERROR: Cannot reach K8s cluster. Check your KUBECONFIG_BASE64 secret and cluster accessibility."; exit 1; }
-          
-          echo "Checking nodes..."
-          kubectl get nodes || echo "Warning: Could not list nodes, but cluster-info succeeded."
+          kubectl cluster-info
+          kubectl get nodes
 
-          SERVICES=(admin-khcn api-gateway hrm-service media-service notification-service posts-service translate-service user-service)
+      - name: Prepare Helm values
+        id: helm
+        run: |
+          SERVICES='${{ needs.filter.outputs.services }}'
+
           HELM_OPTS=""
-          for svc in "${SERVICES[@]}"; do
-            HELM_OPTS="$HELM_OPTS --set $svc.image.tag=${{ github.sha }} --set $svc.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$svc"
+
+          for svc in $(echo $SERVICES | jq -r '.[]'); do
+            NAME=$(echo $svc | tr '_' '-')
+
+            HELM_OPTS="$HELM_OPTS \
+              --set $NAME.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$NAME \
+              --set $NAME.image.tag=${{ github.sha }}"
+
             if [[ "$svc" == "user-service" ]]; then
-              HELM_OPTS="$HELM_OPTS --set $svc.migration.image.tag=${{ github.sha }} --set $svc.migration.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$svc-migration"
+              HELM_OPTS="$HELM_OPTS \
+                --set $NAME.migration.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$NAME-migration \
+                --set $NAME.migration.image.tag=${{ github.sha }}"
             fi
           done
 
-          echo "Running Helm Upgrade..."
+          echo "opts=$HELM_OPTS" >> $GITHUB_OUTPUT
+
+      - name: Deploy with Helm
+        run: |
           helm upgrade --install daklak ./deploy/daklak-chart \
             --namespace production \
             --create-namespace \
-            --values ./deploy/daklak-chart/values.yaml \
-            $HELM_OPTS \
-            --debug \
-            --timeout 15m0s
+            --values ./deploy/daklak-chart/values-prod.yaml \
+            ${{ steps.helm.outputs.opts }} \
+            --atomic \
+            --wait \
+            --timeout 10m
+
+      - name: Verify rollout
+        run: |
+          SERVICES='${{ needs.filter.outputs.services }}'
+
+          for svc in $(echo $SERVICES | jq -r '.[]'); do
+            NAME=$(echo $svc | tr '_' '-')
+            echo "Checking rollout for $NAME..."
+
+            kubectl rollout status deployment/$NAME \
+              -n production \
+              --timeout=120s
+          done
