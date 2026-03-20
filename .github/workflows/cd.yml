@@ -120,18 +120,29 @@ jobs:
 
       - name: Setup kubeconfig
         run: |
-          # Create kubeconfig from secret
-          echo "${{ secrets.KUBECONFIG_BASE64 }}" | base64 -d > kubeconfig
+          # Create kubeconfig from secret (handle both base64 and raw YAML)
+          SECRET_DATA="${{ secrets.KUBECONFIG_BASE64 }}"
+          if [[ -z "$SECRET_DATA" ]]; then
+            echo "ERROR: KUBECONFIG_BASE64 secret is empty!"
+            exit 1
+          fi
+
+          if [[ "$SECRET_DATA" == *"apiVersion"* ]]; then
+            echo "Secret looks like raw YAML. Using as-is."
+            echo "$SECRET_DATA" > kubeconfig
+          else
+            echo "Secret looks like base64. Decoding..."
+            echo "$SECRET_DATA" | base64 -d -i > kubeconfig || { echo "ERROR: Failed to decode base64. Please ensure KUBECONFIG_BASE64 is valid base64 or raw YAML."; exit 1; }
+          fi
+          
           chmod 600 kubeconfig
           echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
           
-          # Debug: show KUBECONFIG path and test connection
-          echo "KUBECONFIG path: $(pwd)/kubeconfig"
-          # Check if file is valid (not empty)
+          # Debug: check file content
           if [ -s "kubeconfig" ]; then
-            echo "Kubeconfig file is not empty."
+            echo "Kubeconfig file created successfully ($(stat -c%s kubeconfig) bytes)."
           else
-            echo "Error: Kubeconfig file is empty! Check your KUBE_CONFIG_DATA secret."
+            echo "ERROR: Kubeconfig file is empty after processing."
             exit 1
           fi
 
