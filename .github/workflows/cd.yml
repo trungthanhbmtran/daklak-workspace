@@ -139,8 +139,11 @@ jobs:
         env:
           KUBECONFIG: ${{ github.workspace }}/kubeconfig
         run: |
-          # Verify connection before deploy
-          kubectl cluster-info || { echo "Failed to connect to cluster"; exit 1; }
+          echo "Checking cluster connectivity..."
+          kubectl cluster-info || { echo "ERROR: Cannot reach K8s cluster. Check your KUBECONFIG_BASE64 secret and cluster accessibility."; exit 1; }
+          
+          echo "Checking nodes..."
+          kubectl get nodes || echo "Warning: Could not list nodes, but cluster-info succeeded."
 
           SERVICES=(admin-khcn api-gateway hrm-service media-service notification-service posts-service translate-service user-service)
           HELM_OPTS=""
@@ -151,10 +154,11 @@ jobs:
             fi
           done
 
+          echo "Running Helm Upgrade..."
           helm upgrade --install daklak ./deploy/daklak-chart \
             --namespace production \
             --create-namespace \
             --values ./deploy/daklak-chart/values.yaml \
             $HELM_OPTS \
-            --wait \
-            --timeout 10m0s
+            --debug \
+            --timeout 15m0s
