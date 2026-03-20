@@ -66,6 +66,8 @@ docker push thanhtran1993/daklak-user-service:latest
 
 C:\Users\Admin\.kube\config
 
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\Users\Admin\.kube\config'))
+
 
 git clone https://github.com/bitnami/charts.git
 cd charts/bitnami/mysql
