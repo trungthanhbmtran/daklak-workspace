@@ -25,6 +25,20 @@ RUN npx prisma generate
 RUN npm run build
 
 # ==========================================
+# 4️⃣ Stage: Migration
+# ==========================================
+FROM node:20-alpine AS migration
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY apps/hrm-service/package*.json ./
+
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema.prisma"]
+
+# ==========================================
 # 3️⃣ Stage: Runner (K8s Production Container)
 # ==========================================
 FROM node:20-alpine AS runner

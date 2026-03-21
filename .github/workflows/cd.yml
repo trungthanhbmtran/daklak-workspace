@@ -80,7 +80,7 @@ jobs:
           IMAGE_NAME=$(echo ${{ matrix.service }} | tr '_' '-')
           echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
 
-          if [[ "${{ matrix.service }}" == "user-service" ]]; then
+          if [ -d "apps/${{ matrix.service }}/prisma" ]; then
             echo "HAS_MIGRATION=true" >> $GITHUB_OUTPUT
           else
             echo "HAS_MIGRATION=false" >> $GITHUB_OUTPUT
@@ -112,79 +112,43 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:latest
 
 # ==========================================
-# 3. Deploy to Kubernetes
+# 3. Deploy to Remote Server
 # ==========================================
   deploy:
     needs: [filter, build-push]
     if: |
       always() &&
       (needs.build-push.result == 'success' || needs.build-push.result == 'skipped')
-
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
+      - name: Copy docker-compose.prod.yml to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml"
+          target: ${{ secrets.DEPLOY_PATH }}
 
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-
-      - name: Setup kubeconfig
-        run: |
-          printf "%s" "${{ secrets.KUBECONFIG_BASE64 }}" | tr -d '[:space:]' | base64 -d > kubeconfig
-          chmod 600 kubeconfig
-          echo "KUBECONFIG=$(pwd)/kubeconfig" >> $GITHUB_ENV
-
-      - name: Check cluster
-        run: |
-          kubectl cluster-info
-          kubectl get nodes
-
-      - name: Prepare Helm values
-        id: helm
-        run: |
-          SERVICES='${{ needs.filter.outputs.services }}'
-
-          HELM_OPTS=""
-
-          for svc in $(echo $SERVICES | jq -r '.[]'); do
-            NAME=$(echo $svc | tr '_' '-')
-
-            HELM_OPTS="$HELM_OPTS \
-              --set $NAME.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$NAME \
-              --set $NAME.image.tag=${{ github.sha }}"
-
-            if [[ "$svc" == "user-service" ]]; then
-              HELM_OPTS="$HELM_OPTS \
-                --set $NAME.migration.image.repository=${{ secrets.DOCKER_USERNAME }}/daklak-$NAME-migration \
-                --set $NAME.migration.image.tag=${{ github.sha }}"
-            fi
-          done
-
-          echo "opts=$HELM_OPTS" >> $GITHUB_OUTPUT
-
-      - name: Deploy with Helm
-        run: |
-          helm upgrade --install daklak ./deploy/daklak-chart \
-            --namespace production \
-            --create-namespace \
-            --values ./deploy/daklak-chart/values-prod.yaml \
-            ${{ steps.helm.outputs.opts }} \
-            --atomic \
-            --wait \
-            --timeout 10m
-
-      - name: Verify rollout
-        run: |
-          SERVICES='${{ needs.filter.outputs.services }}'
-
-          for svc in $(echo $SERVICES | jq -r '.[]'); do
-            NAME=$(echo $svc | tr '_' '-')
-            echo "Checking rollout for $NAME..."
-
-            kubectl rollout status deployment/$NAME \
-              -n production \
-              --timeout=120s
-          done
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            export DOCKER_USERNAME=$DOCKER_USERNAME
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            docker compose -f docker-compose.prod.yml pull
+            
+            # Chạy migrations cho tất cả các service có profile migrate
+            docker compose -f docker-compose.prod.yml --profile migrate up
+            
+            # Khởi động các service chính
+            docker compose -f docker-compose.prod.yml up -d
+            docker system prune -f

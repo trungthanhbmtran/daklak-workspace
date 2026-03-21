@@ -1,73 +1,56 @@
 # Daklak Workspace Deployment Guide
 
-Hướng dẫn build và deploy ứng dụng Daklak vào Kubernetes (k8s).
+Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
 
-## 1. Build Docker Images
-Chạy script PowerShell từ thư mục gốc để build các microservices:
-```powershell
-./build-images.ps1
-```
-*Lưu ý: Script mặc định bỏ qua `admin-khcn`.*
+## 1. CI/CD Workflow
+Ứng dụng được tự động deploy khi có hành động `push` vào nhánh `main`.
 
-## 2. Deploy với Helm
-Cập nhật dependencies và thực hiện cài đặt/nâng cấp:
+### Luồng hoạt động:
+1. **Build & Push**: GitHub Actions build Docker images cho các dịch vụ thay đổi và push lên Docker Hub.
+2. **Deploy**: GitHub Actions SSH vào server đích, copy file `docker-compose.prod.yml`, và chạy các lệnh docker compose để cập nhật ứng dụng.
 
+## 2. Cấu hình GitHub Secrets
+Để workflow hoạt động, bạn cần cấu hình các Secrets sau trong repository:
+
+| Biến | Mô tả |
+| :--- | :--- |
+| `DOCKER_USERNAME` | Username Docker Hub |
+| `DOCKER_PASSWORD` | Password hoặc Token Docker Hub |
+| `REMOTE_HOST` | IP/Hostname của server đích |
+| `REMOTE_USER` | SSH user (vd: `root`, `ubuntu`) |
+| `SSH_PRIVATE_KEY` | SSH Private Key để truy cập server |
+| `DEPLOY_PATH` | Thư mục deploy trên server (vd: `/home/ubuntu/daklak`) |
+
+## 3. Deploy thủ công (Manual)
+Nếu muốn deploy thủ công trên server:
 ```bash
-# Cập nhật dependencies
-helm dependency update ./deploy/daklak-chart
+# Pull images mới nhất
+docker compose -f docker-compose.prod.yml pull
 
-# Deploy vào namespace 'daklak'
-helm upgrade --install daklak ./deploy/daklak-chart --create-namespace --namespace daklak
+# Khởi động lại các services
+docker compose -f docker-compose.prod.yml up -d
 ```
-
-## 3. Các lệnh quản lý khác
-- **Gỡ bỏ ứng dụng:** `helm uninstall daklak -n daklak`
-- **Xóa PVCs:** `kubectl delete pvc --all -n daklak`
-- **Cài đặt với Local Storage:** `helm install daklak ./deploy/daklak-chart --set global.storageClass=hostpath -n daklak`
 
 ## 4. Thông tin Tài khoản & Kết nối
-Dưới đây là thông tin đăng nhập mặc định cho các dịch vụ trong namespace `daklak`:
+Thông tin đăng nhập mặc định cho các dịch vụ:
 
 ### Infrastructure
-| Dịch vụ | Hostname | Tài khoản | Mật khẩu |
+| Dịch vụ | Cổng | Tài khoản | Mật khẩu |
 | :--- | :--- | :--- | :--- |
-| **MySQL** | `mysql` | `root` | `mypassword` |
-| **RabbitMQ** | `rabbitmq` | `admin` | `admin123` |
-| **MinIO** | `minio` | `admin` | `password123` |
-| **Redis** | `redis` | - | - |
+| **MySQL** | `3306` | `root` | `mypassword` |
+| **RabbitMQ** | `5672`, `15672` | `admin` | `admin123` |
+| **MinIO** | `9000` | `admin` | `password123` |
+| **Redis** | `6379` | - | - |
 
-### Microservices Databases
-| Dịch vụ | Database Name |
-| :--- | :--- |
-| `user-service` | `admin_systems` |
-| `hrm-service` | `admin_hrm` |
-| `translate-service` | `daklak_translation` |
-| `api-gateway` | `daklak_db` |
+### Microservices
+| Dịch vụ | Port (Internal) | Database Name |
+| :--- | :--- | :--- |
+| `api-gateway` | `8080` | `daklak_db` |
+| `user-service` | `3001` | `admin_systems` |
+| `hrm-service` | `3002` | `admin_hrm` |
+| `media-service` | `3003` | - |
+| `posts-service` | `3005` | - |
+| `translate-service` | `3006` | `daklak_translation` |
+| `admin-khcn` | `3007` | - |
 
-*Lưu ý: Tất cả các dịch vụ sử dụng chung JWT_SECRET để xác thực token.*
- kubectl get pods -A
-
-kubectl port-forward service/admin-khcn 3000:3000 -n daklak
-
-kubectl port-forward svc/minio 9001:9001 -n infra-system
-
-kubectl port-forward svc/rabbitmq 15672:15672 -n infra-system
-
-
-docker build --target runner -t daklak-user-service:latest -f apps/user-service/Dockerfile .
-
-
-
-docker tag daklak-user-service:latest thanhtran1993/daklak-user-service:latest
-
-docker login
-
-docker push thanhtran1993/daklak-user-service:latest
-
-C:\Users\Admin\.kube\config
-
-[Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\Users\Admin\.kube\config'))
-
-
-git clone https://github.com/bitnami/charts.git
-cd charts/bitnami/mysql
+*Lưu ý: Đảm bảo file `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*

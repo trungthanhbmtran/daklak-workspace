@@ -19,6 +19,14 @@ RUN npx prisma generate
 # Build dự án NestJS
 RUN npm run build
 
+# Giai đoạn 3: Migration
+FROM node:20-alpine AS migration
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY apps/media-service/package*.json ./
+CMD ["npx", "prisma", "migrate", "deploy"]
+
 # Giai đoạn 2: Chạy Production
 FROM node:20-alpine AS runner
 

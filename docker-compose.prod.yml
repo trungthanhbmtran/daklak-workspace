@@ -1,0 +1,204 @@
+services:
+
+  # --- Infrastructure ---
+
+  mysql:
+    image: mysql:8
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-mypassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-admin_systems}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  minio:
+    image: minio/minio
+    container_name: minio
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password123}
+    ports:
+      - "9000:9000"
+    volumes:
+      - minio_data:/data
+
+  # --- Services ---
+
+  api-gateway:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-api-gateway:latest
+    container_name: api-gateway
+    restart: always
+    depends_on:
+      - redis
+      - rabbitmq
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/daklak_db"
+    env_file:
+      - .env
+
+  user-service:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-user-service:latest
+    container_name: user-service
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+      - minio
+    ports:
+      - "3001:50051"
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_systems"
+    env_file:
+      - .env
+
+  hrm-service:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-hrm-service:latest
+    container_name: hrm-service
+    restart: always
+    depends_on:
+      - mysql
+      - rabbitmq
+    ports:
+      - "3002:50052"
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_hrm"
+    env_file:
+      - .env
+
+  media-service:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-media-service:latest
+    container_name: media-service
+    restart: always
+    depends_on:
+      - minio
+      - rabbitmq
+    ports:
+      - "3003:50059"
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_media"
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-admin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-password123}
+      MINIO_EXTERNAL_ENDPOINT: ${MINIO_EXTERNAL_ENDPOINT:-http://minio:9000}
+    env_file:
+      - .env
+
+  notification-service:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-notification-service:latest
+    container_name: notification-service
+    restart: always
+    depends_on:
+      - rabbitmq
+      - redis
+    env_file:
+      - .env
+
+  posts-service:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-posts-service:latest
+    container_name: posts-service
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+      - rabbitmq
+    ports:
+      - "3005:50055"
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_posts" # Giả định admin_posts hoặc tương đương
+    env_file:
+      - .env
+
+  translate-service:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-translate-service:latest
+    container_name: translate-service
+    restart: always
+    depends_on:
+      - rabbitmq
+    ports:
+      - "3006:50051"
+    environment:
+      DATABASE_URL: "mysql+pymysql://root:mypassword@mysql:3306/daklak_translation"
+    env_file:
+      - .env
+
+  admin-khcn:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-admin-khcn:latest
+    container_name: admin-khcn
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "3007:3000"
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/daklak_db"
+    env_file:
+      - .env
+
+  # --- Migrations ---
+  user-service-migrate:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-user-service-migration:latest
+    profiles: ["migrate"]
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_systems"
+    env_file:
+      - .env
+
+  hrm-service-migrate:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-hrm-service-migration:latest
+    profiles: ["migrate"]
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_hrm"
+    env_file:
+      - .env
+
+  media-service-migrate:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-media-service-migration:latest
+    profiles: ["migrate"]
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_media"
+    env_file:
+      - .env
+
+  posts-service-migrate:
+    image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-posts-service-migration:latest
+    profiles: ["migrate"]
+    depends_on:
+      - mysql
+    environment:
+      DATABASE_URL: "mysql://root:mypassword@mysql:3306/admin_posts"
+    env_file:
+      - .env
+
+volumes:
+  mysql_data:
+  minio_data:

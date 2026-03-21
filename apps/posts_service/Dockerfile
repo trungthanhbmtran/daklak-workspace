@@ -20,6 +20,16 @@ RUN npm run build
 RUN npm prune --omit=dev && npm cache clean --force
 
 # ==========================================
+# 3️⃣ Stage: Migration
+# ==========================================
+FROM node:20-alpine AS migration
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY apps/posts_service/package*.json ./
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema.prisma"]
+
+# ==========================================
 # 2️⃣ Stage: Runner (Production)
 # ==========================================
 FROM node:20-alpine AS runner
