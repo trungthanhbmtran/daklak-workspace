@@ -162,7 +162,7 @@ services:
   # --- Migrations ---
   user-service-migrate:
     image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-user-service-migration:latest
-    profiles: ["migrate"]
+    profiles: [ "migrate" ]
     depends_on:
       - mysql
     environment:
@@ -172,7 +172,7 @@ services:
 
   hrm-service-migrate:
     image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-hrm-service-migration:latest
-    profiles: ["migrate"]
+    profiles: [ "migrate" ]
     depends_on:
       - mysql
     environment:
@@ -182,7 +182,7 @@ services:
 
   media-service-migrate:
     image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-media-service-migration:latest
-    profiles: ["migrate"]
+    profiles: [ "migrate" ]
     depends_on:
       - mysql
     environment:
@@ -192,7 +192,7 @@ services:
 
   posts-service-migrate:
     image: ${DOCKER_USERNAME:-thanhtran1993}/daklak-posts-service-migration:latest
-    profiles: ["migrate"]
+    profiles: [ "migrate" ]
     depends_on:
       - mysql
     environment:
