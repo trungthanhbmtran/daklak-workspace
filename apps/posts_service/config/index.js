@@ -4,7 +4,7 @@ dotenv.config();
 
 const config = {
   env: process.env.NODE_ENV || 'development',
-  
+
   server: {
     port: parseInt(process.env.PORT || '50060', 10),
     host: process.env.HOST || '0.0.0.0',
@@ -32,7 +32,7 @@ const config = {
   },
 
   rabbitmq: {
-    url: process.env.RABBITMQ_URL || 'amqp://host.docker.internal:5672',
+    url: process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672',
     queues: {
       postUpdates: 'post_updates'
     },

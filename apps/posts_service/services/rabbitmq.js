@@ -1,152 +1,161 @@
-// services/rabbitmq.client.js
-const amqp = require('amqplib');
+const amqp = require('amqp-connection-manager');
 const { v4: uuidv4 } = require('uuid');
+const config = require('../config');
 
 // --- CẤU HÌNH KẾT NỐI ---
-// Ưu tiên lấy từ biến môi trường (Docker), nếu không có thì fallback về localhost (Chạy tay)
-// Lưu ý: user/pass mặc định là guest/guest
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://guest:guest@localhost:5672';
+const RABBITMQ_URL = config.rabbitmq.url;
 
 class RabbitMQClient {
   constructor() {
     this.connection = null;
-    this.channel = null;
-    this.replyQueue = null;
+    this.channelWrapper = null;
     this.eventEmitter = new (require('events'))();
+    this.replyQueue = null;
   }
 
   async connect() {
-    // Nếu đã kết nối rồi thì bỏ qua
     if (this.connection) return;
 
     try {
       console.log(`⏳ [RabbitMQ] Connecting to ${RABBITMQ_URL}...`);
       
-      this.connection = await amqp.connect(RABBITMQ_URL);
-      this.channel = await this.connection.createChannel();
+      this.connection = amqp.connect([RABBITMQ_URL]);
       
-      console.log('✅ [RabbitMQ] Connected successfully');
-      
-      // Xử lý khi connection bị đóng đột ngột (để app không bị treo mà không biết)
-      this.connection.on('close', () => {
-        console.error('❌ [RabbitMQ] Connection closed');
-        this.connection = null;
-        this.channel = null;
+      this.connection.on('connect', () => {
+        console.log('✅ [RabbitMQ] Connected successfully');
       });
 
-      this.connection.on('error', (err) => {
-        console.error('❌ [RabbitMQ] Connection error:', err);
-        this.connection = null;
-        this.channel = null;
+      this.connection.on('disconnect', (params) => {
+        console.error('❌ [RabbitMQ] Disconnected:', params.err.message);
       });
 
+      this.channelWrapper = this.connection.createChannel({
+        json: true,
+        setup: (channel) => {
+          // Setup initial state for the channel if needed
+          return Promise.all([
+            // example: channel.assertQueue('my-queue', { durable: true })
+          ]);
+        },
+      });
+
+      await this.channelWrapper.waitForConnect();
     } catch (error) {
       console.error('❌ [RabbitMQ] Failed to connect:', error.message);
-      // Ném lỗi ra ngoài để Server biết (vì nếu không kết nối được RabbitMQ thì Server không nên start)
       throw error;
     }
   }
 
+  /**
+   * Fire and forget - Gửi message tới một queue
+   */
   async emit(queueName, data) {
-    if (!this.channel) await this.connect();
+    if (!this.channelWrapper) await this.connect();
 
-    // 1. Đảm bảo queue tồn tại (quan trọng để tránh mất tin)
-    await this.channel.assertQueue(queueName, { durable: true });
-
-    // 2. Format dữ liệu chuẩn NestJS { pattern, data }
-    const payload = JSON.stringify({
-        pattern: queueName, // Khớp với @MessagePattern bên NestJS
-        data: data
-    });
-
-    console.log(`🚀 [Fire & Forget] Bắn tin tới: "${queueName}"`);
-
-    // 3. Gửi luôn và không cần chờ reply
-    // Dùng try-catch ở đây để nếu lỗi kết nối thì không sập app
     try {
-        this.channel.sendToQueue(queueName, Buffer.from(payload), {
-            persistent: true // Lưu tin nhắn vào ổ cứng phòng khi RabbitMQ sập
-        });
-        return true;
-    } catch (error) {
-        console.error(`❌ Lỗi gửi RabbitMQ:`, error);
-        return false;
-    }
-}
-
-  // --- PHẦN 1: GỬI REQUEST VÀ CHỜ KẾT QUẢ (RPC) ---
-  async sendRequest(queueName, data) {
-    if (!this.channel) await this.connect();
-
-    // Setup hàng đợi reply một lần duy nhất
-    if (!this.replyQueue) {
-      const q = await this.channel.assertQueue('', { exclusive: true });
-      this.replyQueue = q.queue;
-      
-      // Lắng nghe phản hồi
-      this.channel.consume(this.replyQueue, (msg) => {
-        if (msg && msg.properties.correlationId) {
-          const content = JSON.parse(msg.content.toString());
-          this.eventEmitter.emit(msg.properties.correlationId, content);
+      // Đảm bảo data là object để không bị double stringify
+      let parsedData = data;
+      if (typeof data === 'string') {
+        try {
+          const json = JSON.parse(data);
+          // Nếu data string có dạng { pattern, data }, ta chỉ lấy phần data
+          parsedData = json.data !== undefined ? json.data : json;
+        } catch (e) {
+          // Nếu không phải JSON thù cứ để nguyên string
+          parsedData = data;
         }
-      }, { noAck: true });
+      }
+
+      // Format chuẩn NestJS: { pattern, data }
+      const message = {
+        pattern: queueName,
+        data: parsedData
+      };
+
+      console.log(`🚀 [RabbitMQ] Emitting message to: "${queueName}"`);
+      
+      await this.channelWrapper.sendToQueue(queueName, message, {
+        persistent: true
+      });
+      return true;
+    } catch (error) {
+      console.error(`❌ [RabbitMQ] Error emitting message to ${queueName}:`, error);
+      return false;
+    }
+  }
+
+  /**
+   * Request-Response (RPC) - Gửi message và chờ phản hồi
+   */
+  async sendRequest(queueName, data) {
+    if (!this.channelWrapper) await this.connect();
+
+    if (!this.replyQueue) {
+      await this.channelWrapper.addSetup(async (channel) => {
+        const q = await channel.assertQueue('', { exclusive: true });
+        this.replyQueue = q.queue;
+
+        channel.consume(this.replyQueue, (msg) => {
+          if (msg && msg.properties.correlationId) {
+            const content = JSON.parse(msg.content.toString());
+            this.eventEmitter.emit(msg.properties.correlationId, content);
+          }
+        }, { noAck: true });
+      });
     }
 
     const correlationId = uuidv4();
-    // Format chuẩn cho NestJS Microservice: { pattern, data }
-    const payload = JSON.stringify({ pattern: queueName, data: data });
-    console.log(`🚀 [Express] Đang gửi tin đến queue: "${queueName}"`); // <--- THÊM LOG NÀY
+    const message = { pattern: queueName, data: data };
 
     return new Promise((resolve, reject) => {
-      // Timeout 10s
       const timeout = setTimeout(() => {
         this.eventEmitter.removeAllListeners(correlationId);
         reject(new Error(`[RabbitMQ] Request timeout for pattern: ${queueName}`));
       }, 10000);
 
-      // Lắng nghe event trả về
       this.eventEmitter.once(correlationId, (response) => {
         clearTimeout(timeout);
         resolve(response);
       });
 
-      // Gửi tin nhắn
-      const sent = this.channel.sendToQueue(queueName, Buffer.from(payload), {
+      console.log(`🚀 [RabbitMQ] Sending RPC request to: "${queueName}"`);
+      
+      this.channelWrapper.sendToQueue(queueName, message, {
         correlationId: correlationId,
         replyTo: this.replyQueue,
+      }).catch(err => {
+        clearTimeout(timeout);
+        this.eventEmitter.removeAllListeners(correlationId);
+        reject(err);
       });
-      if (!sent) {
-         console.warn("⚠️ [Express] Buffer đầy, tin nhắn có thể chưa được gửi ngay.");
-      }
     });
   }
 
-  // --- PHẦN 2: LẮNG NGHE BACKGROUND (WORKER) ---
+  /**
+   * Consume message từ một queue
+   */
   async consume(queueName, callback) {
-    if (!this.channel) await this.connect();
+    if (!this.channelWrapper) await this.connect();
 
-    // Durable = true: Giữ tin nhắn nếu consumer chưa kịp nhận
-    await this.channel.assertQueue(queueName, { durable: true });
+    console.log(`🎧 [RabbitMQ] Registering consumer for queue: ${queueName}`);
 
-    console.log(`🎧 [RabbitMQ] Waiting for messages in queue: ${queueName}`);
-
-    this.channel.consume(queueName, async (msg) => {
-      if (msg !== null) {
-        try {
-          const content = JSON.parse(msg.content.toString());
-          
-          // Gọi logic bên ngoài
-          await callback(content);
-
-          // Xác nhận đã xử lý xong (ACK)
-          this.channel.ack(msg);
-        } catch (error) {
-          console.error(`❌ [RabbitMQ] Error processing message in ${queueName}:`, error);
-          // Tùy chọn: this.channel.nack(msg) nếu muốn RabbitMQ gửi lại tin này cho worker khác
-          // Ở đây mình ack luôn để tránh kẹt queue nếu lỗi do format data
-          this.channel.ack(msg); 
+    await this.channelWrapper.addSetup(async (channel) => {
+      await channel.assertQueue(queueName, { durable: true });
+      
+      await channel.consume(queueName, async (msg) => {
+        if (msg !== null) {
+          try {
+            const content = JSON.parse(msg.content.toString());
+            // content thường có dạng { pattern, data } từ NestJS
+            await callback(content);
+            channel.ack(msg);
+          } catch (error) {
+            console.error(`❌ [RabbitMQ] Error processing message in ${queueName}:`, error.message);
+            // Mặc định ack để tránh kẹt, hoặc nack nếu muốn retry
+            channel.ack(msg);
+          }
         }
-      }
+      });
     });
   }
 }

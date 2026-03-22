@@ -46,7 +46,7 @@ module.exports = {
       } catch (error) {
         console.error(`❌ [Translation Worker] Error:`, error);
         // Tùy chọn: Gửi thông báo lỗi vào Slack/Telegram hoặc Log system
-        throw error; // Ném lỗi để rabbitClient biết mà xử lý (nack hoặc log)
+        throw error; // Ném lỗi để RabbitMQ channel biết (ack được gọi sau đó trong client)
       }
     });
   }

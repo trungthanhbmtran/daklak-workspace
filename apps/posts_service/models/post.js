@@ -182,17 +182,14 @@ Post.beforeSave(async (post, options) => {
 
   Post.afterCreate(async (post, options) => {
     try {
-      const payload = JSON.stringify({
-        pattern: 'translation_request', // Phải khớp với @MessagePattern
-        data: {
-          postId: post.id,
-          title: post.title,
-          description: post.description,
-          sourceLang: post.language,
-          content: post.contentJson, // HTML content
-          targetLanguages: ['en'] // Ví dụ: Dịch sang Anh và Trung
-        }
-      });
+      const payload = {
+        postId: post.id,
+        title: post.title,
+        description: post.description,
+        sourceLang: post.language,
+        content: post.contentJson, // HTML content
+        targetLanguages: ['en'] // Ví dụ: Dịch sang Anh và Trung
+      };
       // Gửi vào hàng đợi 'translation_request'
       await rabbitClient.emit('translation_request', payload);
       // await rabbitClient.sendRequest('translation_request', payload);
