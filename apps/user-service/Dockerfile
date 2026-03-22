@@ -1,63 +1,40 @@
 # ==========================================
-# 1️⃣ Stage: Builder
+# 1️⃣ Base deps (cache tốt hơn)
 # ==========================================
-FROM node:20-alpine AS builder
+FROM node:20-alpine AS base
 WORKDIR /app
 
-# Copy package trước để cache
 COPY apps/user-service/package*.json ./
-
-# Install full deps
 RUN npm ci
 
-# ❗ Copy FULL source (bao gồm prisma schema)
+# ==========================================
+# 2️⃣ Builder
+# ==========================================
+FROM base AS builder
+
 COPY apps/user-service ./
 COPY shared/protos ./shared/protos
 
-# ✅ Đảm bảo có prisma/schema/*
-# Generate Prisma Client
-# ✅ Merge schema
+# Merge schema (nếu bạn dùng multi file)
 RUN cat prisma/schema/*.prisma > prisma/schema.prisma
 
-# ✅ Generate từ file đã merge
+# Generate Prisma
 RUN npx prisma generate --schema=./prisma/schema.prisma
 
-# Build app
+# Build
 RUN npm run build
 
-
 # ==========================================
-# 2️⃣ Stage: Production Dependencies
+# 3️⃣ Production deps (nhẹ)
 # ==========================================
 FROM node:20-alpine AS deps
 WORKDIR /app
 
 COPY apps/user-service/package*.json ./
-
-# Chỉ install production deps
 RUN npm ci --omit=dev
 
-
 # ==========================================
-# 3️⃣ Stage: Migration
-# ==========================================
-FROM node:20-alpine AS migration
-WORKDIR /app
-
-ENV NODE_ENV=production
-
-# Copy deps
-COPY --from=deps /app/node_modules ./node_modules
-
-# ✅ Copy FULL prisma (bao gồm schema + migrations)
-COPY --from=builder /app/prisma ./prisma
-
-COPY apps/user-service/package*.json ./
-
-CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema.prisma"]
-
-# ==========================================
-# 4️⃣ Stage: Runner (Production)
+# 4️⃣ Runner (FINAL)
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
@@ -65,18 +42,26 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PROTO_PATH=/app/protos
 
-# Copy production deps
+# 👉 chỉ copy prod deps
 COPY --from=deps /app/node_modules ./node_modules
 
-# Copy build artifacts
+# 👉 copy prisma client (QUAN TRỌNG)
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# 👉 app build
 COPY --from=builder /app/dist ./dist
 
-# ✅ Copy prisma để runtime dùng (nếu cần)
+# 👉 schema (optional)
 COPY --from=builder /app/prisma ./prisma
 
-# Copy protos
+# 👉 protos
 COPY --from=builder /app/shared/protos ./protos
 
 EXPOSE 3000
+
+# 👉 security: không chạy root
+RUN addgroup -S app && adduser -S app -G app
+USER app
 
 CMD ["node", "dist/src/main.js"]
