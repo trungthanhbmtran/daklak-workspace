@@ -137,6 +137,7 @@ services:
     container_name: translate-service
     restart: always
     depends_on:
+      - mysql
       - rabbitmq
     ports:
       - "3006:50051"
