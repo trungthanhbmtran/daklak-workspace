@@ -6,7 +6,7 @@ on:
     paths:
       - 'apps/**'
       - 'shared/**'
-      - 'deploy/daklak-chart/**'
+      - 'deploy/**'
       - '.github/workflows/cd.yml'
 
 permissions:
@@ -55,7 +55,7 @@ jobs:
 
 
 # ==========================================
-# 2. Build & Push Docker images
+# 2. Build & Push Docker images (ONLY 1 IMAGE)
 # ==========================================
   build-push:
     needs: filter
@@ -81,12 +81,6 @@ jobs:
           IMAGE_NAME=$(echo ${{ matrix.service }} | tr '_' '-')
           echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
 
-          if [ -d "apps/${{ matrix.service }}/prisma" ]; then
-            echo "HAS_MIGRATION=true" >> $GITHUB_OUTPUT
-          else
-            echo "HAS_MIGRATION=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Build & Push App
         uses: docker/build-push-action@v5
         with:
@@ -97,18 +91,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
-
-      - name: Build & Push Migration
-        if: steps.meta.outputs.HAS_MIGRATION == 'true'
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: apps/${{ matrix.service }}/Dockerfile
-          target: migration
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:${{ github.sha }}
-            ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:latest
 
 
 # ==========================================
@@ -123,9 +105,6 @@ jobs:
     runs-on: [self-hosted, daklak]
 
     steps:
-      - name: Pull latest code (optional)
-        uses: actions/checkout@v4
-
       - name: Login Docker Hub
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
@@ -138,9 +117,10 @@ jobs:
           docker compose pull
 
           echo "🗄 Run migrations..."
-          docker compose run --rm user-service-migration || true
-          docker compose run --rm posts-service-migration || true
-          docker compose run --rm notification-service-migration || true
+          docker compose --profile migrate run --rm user-service-migrate || true
+          docker compose --profile migrate run --rm hrm-service-migrate || true
+          docker compose --profile migrate run --rm media-service-migrate || true
+          docker compose --profile migrate run --rm posts-service-migrate || true
 
           echo "🚀 Start services..."
           docker compose up -d
