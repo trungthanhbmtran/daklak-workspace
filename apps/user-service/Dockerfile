@@ -34,6 +34,18 @@ COPY apps/user-service/package*.json ./
 RUN npm ci --omit=dev
 
 # ==========================================
+# 5️⃣ Migration
+# ==========================================
+FROM node:20-alpine AS migration
+WORKDIR /app
+
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/prisma ./prisma
+COPY apps/user-service/package*.json ./
+
+CMD ["npx", "prisma", "migrate", "deploy", "--schema=./prisma/schema.prisma"]
+
+# ==========================================
 # 4️⃣ Runner (FINAL)
 # ==========================================
 FROM node:20-alpine AS runner

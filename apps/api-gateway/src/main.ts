@@ -36,11 +36,7 @@ async function bootstrap() {
   app.use(cookieParser());
   // CORS
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      process.env.CLIENT_URL // Vẫn giữ biến env cho lúc build lên Production
-    ].filter(Boolean), // Lọc bỏ các giá trị undefined
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
