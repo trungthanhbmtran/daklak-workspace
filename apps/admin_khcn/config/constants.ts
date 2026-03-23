@@ -18,7 +18,7 @@ if (typeof window === "undefined" && !internalUrl) {
 // Tách luồng rõ ràng: Tránh việc Server vô tình gọi ra tên miền public
 export const API_BASE_URL = typeof window === "undefined"
   // LUỒNG SERVER: Bắt buộc dùng Internal DNS của Kubernetes
-  ? (internalUrl || "http://api-gateway.daklak.svc.cluster.local/api/v1/admin")
+  ? (internalUrl || "http://api-gateway:8080/api/v1/admin")
   // LUỒNG CLIENT: Trình duyệt gọi thẳng API qua domain public hoặc relative path
   : (publicUrl || "/api/v1/admin");
 

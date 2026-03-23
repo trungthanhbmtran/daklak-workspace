@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import axios from 'axios'
 
-const API_URL = process.env.API_URL || 'http://api-gateway/api/v1/admin';
+const API_URL = process.env.API_URL || 'http://api-gateway:8080/api/v1/admin';
 
 export async function loginAction(formData: FormData) {
   const username = formData.get('username')

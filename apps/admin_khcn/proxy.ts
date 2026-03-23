@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
     // 2. Nếu chỉ còn Refresh Token (Access Token đã hết hạn) -> Xử lý cấp lại token
     if (!accessToken && refreshToken) {
       try {
-        const API_URL = process.env.API_URL || 'http://api-gateway/api/v1/admin'
+        const API_URL = process.env.API_URL || 'http://api-gateway:8080/api/v1/admin'
         const res = await fetch(`${API_URL}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

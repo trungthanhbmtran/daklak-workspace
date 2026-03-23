@@ -1,4 +1,4 @@
-name: CD - Deploy to Kubernetes
+name: CD - Deploy to VPS (Self-hosted)
 
 on:
   push:
@@ -14,6 +14,7 @@ permissions:
   packages: write
 
 jobs:
+
 # ==========================================
 # 1. Detect changed services
 # ==========================================
@@ -50,8 +51,8 @@ jobs:
             SERVICES='${{ steps.filter.outputs.changes }}'
           fi
 
-          echo "Changed services: $SERVICES"
           echo "services=$SERVICES" >> $GITHUB_OUTPUT
+
 
 # ==========================================
 # 2. Build & Push Docker images
@@ -96,8 +97,6 @@ jobs:
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
-          cache-to: type=inline
 
       - name: Build & Push Migration
         if: steps.meta.outputs.HAS_MIGRATION == 'true'
@@ -111,44 +110,40 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:${{ github.sha }}
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}-migration:latest
 
+
 # ==========================================
-# 3. Deploy to Remote Server
+# 3. Deploy on VPS (Self-hosted runner)
 # ==========================================
   deploy:
     needs: [filter, build-push]
     if: |
       always() &&
       (needs.build-push.result == 'success' || needs.build-push.result == 'skipped')
-    runs-on: ubuntu-latest
+
+    runs-on: [self-hosted, daklak]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Pull latest code (optional)
+        uses: actions/checkout@v4
 
-      - name: Copy docker-compose.prod.yml to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "docker-compose.prod.yml,init-db.sql,.env"
-          target: ${{ secrets.DEPLOY_PATH }}
+      - name: Login Docker Hub
+        run: |
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.REMOTE_HOST }}
-          username: ${{ secrets.REMOTE_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: DOCKER_USERNAME=${{ secrets.DOCKER_USERNAME }}
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }}
-            export DOCKER_USERNAME=$DOCKER_USERNAME
-            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-            docker compose -f docker-compose.prod.yml pull
-            
-            # Chạy migrations cho tất cả các service có profile migrate
-            docker compose -f docker-compose.prod.yml --profile migrate up
-            
-            # Khởi động các service chính
-            docker compose -f docker-compose.prod.yml up -d
-            docker system prune -f
+      - name: Deploy
+        run: |
+          cd ${{ secrets.DEPLOY_PATH }}
+
+          echo "📦 Pull images..."
+          docker compose pull
+
+          echo "🗄 Run migrations..."
+          docker compose run --rm user-service-migration || true
+          docker compose run --rm posts-service-migration || true
+          docker compose run --rm notification-service-migration || true
+
+          echo "🚀 Start services..."
+          docker compose up -d
+
+          echo "🧹 Cleanup..."
+          docker system prune -f
