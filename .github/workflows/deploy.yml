@@ -1,0 +1,148 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      # Define outputs for each service to detect changes
+      api-gateway: ${{ steps.changes.outputs.api-gateway }}
+      user-service: ${{ steps.changes.outputs.user-service }}
+      hrm-service: ${{ steps.changes.outputs.hrm-service }}
+      media-service: ${{ steps.changes.outputs.media-service }}
+      notification-service: ${{ steps.changes.outputs.notification-service }}
+      posts-service: ${{ steps.changes.outputs.posts-service }}
+      translate-service: ${{ steps.changes.outputs.translate-service }}
+      admin-frontend: ${{ steps.changes.outputs.admin-frontend }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            api-gateway: ['apps/api-gateway/**']
+            user-service: ['apps/user-service/**', 'shared/protos/**']
+            hrm-service: ['apps/hrm-service/**', 'shared/protos/**']
+            media-service: ['apps/media-service/**', 'shared/protos/**']
+            notification-service: ['apps/notification_service/**']
+            posts-service: ['apps/posts_service/**', 'shared/protos/**']
+            translate-service: ['apps/translate_service/**', 'shared/protos/**']
+            admin-frontend: ['apps/admin_khcn/**']
+
+  ci:
+    needs: filter
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # Array of services to build if they changed
+        include:
+          - service: api-gateway
+            path: apps/api-gateway
+            image: daklak-api-gateway
+            changed: ${{ needs.filter.outputs.api-gateway }}
+          - service: user-service
+            path: apps/user-service
+            image: daklak-user-service
+            changed: ${{ needs.filter.outputs.user-service }}
+          - service: hrm-service
+            path: apps/hrm-service
+            image: daklak-hrm-service
+            changed: ${{ needs.filter.outputs.hrm-service }}
+          - service: media-service
+            path: apps/media-service
+            image: daklak-media-service
+            changed: ${{ needs.filter.outputs.media-service }}
+          - service: notification-service
+            path: apps/notification_service
+            image: daklak-notification-service
+            changed: ${{ needs.filter.outputs.notification-service }}
+          - service: posts-service
+            path: apps/posts_service
+            image: daklak-posts-service
+            changed: ${{ needs.filter.outputs.posts-service }}
+          - service: translate-service
+            path: apps/translate_service
+            image: daklak-translate-service
+            changed: ${{ needs.filter.outputs.translate-service }}
+          - service: admin-frontend
+            path: apps/admin_khcn
+            image: daklak-admin-khcn
+            changed: ${{ needs.filter.outputs.admin-frontend }}
+    
+    steps:
+      - name: Skip if no changes
+        if: matrix.changed != 'true'
+        run: echo "No changes for ${{ matrix.service }}. Skipping build."
+
+      - uses: actions/checkout@v4
+        if: matrix.changed == 'true'
+
+      - name: Login to Docker Hub
+        if: matrix.changed == 'true'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        if: matrix.changed == 'true'
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        if: matrix.changed == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ${{ matrix.path }}/Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/${{ matrix.image }}:latest
+            ${{ secrets.DOCKER_USERNAME }}/${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  cd:
+    needs: [filter, ci]
+    runs-on: self-hosted # Using self-hosted runner on VPS
+    env:
+      ENV_NAME: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+      COMPOSE_FILE: ${{ github.ref == 'refs/heads/main' && 'docker-compose.prod.yml' || 'docker-compose.staging.yml' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        run: |
+          # Load Environment Variables (Assuming secrets are already in .env.production on VPS or passed here)
+          # Note: In a real setup, we might copy the .env file or use secrets
+          
+          # 1. Pull latest images
+          docker compose -f $COMPOSE_FILE pull
+
+          # 2. Run migrations for CHANGED services ONLY
+          # We use the filter outputs from the first job
+          
+          if [[ "${{ needs.filter.outputs.user-service }}" == "true" ]]; then
+            docker compose -f $COMPOSE_FILE --profile migrate run --rm user-service-migrate || exit 1
+          fi
+
+          if [[ "${{ needs.filter.outputs.hrm-service }}" == "true" ]]; then
+            docker compose -f $COMPOSE_FILE --profile migrate run --rm hrm-service-migrate || exit 1
+          fi
+
+          if [[ "${{ needs.filter.outputs.media-service }}" == "true" ]]; then
+            docker compose -f $COMPOSE_FILE --profile migrate run --rm media-service-migrate || exit 1
+          fi
+
+          if [[ "${{ needs.filter.outputs.posts-service }}" == "true" ]]; then
+            docker compose -f $COMPOSE_FILE --profile migrate run --rm posts-service-migrate || exit 1
+          fi
+
+          # 3. Restart ONLY changed services (or all if infrastructure changed, but here we focus on apps)
+          # 'docker compose up -d' will only recreate containers whose configuration/image has changed
+          docker compose -f $COMPOSE_FILE up -d
+
+          # 4. Cleanup
+          docker system prune -f

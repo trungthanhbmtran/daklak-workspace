@@ -1,44 +1,42 @@
 # ==========================================
-# 1️⃣ Stage: Builder (Dùng Alpine để build cho tiện)
+# 1️⃣ Dependency Stage
+# ==========================================
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY apps/api-gateway/package*.json ./
+RUN npm ci
+
+# ==========================================
+# 2️⃣ Builder Stage
 # ==========================================
 FROM node:20-alpine AS builder
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY apps/api-gateway/ ./
+COPY shared/protos ./shared/protos
 
-# Khai báo và cài dependencies
-COPY apps/api-gateway/package*.json ./
-RUN npm install
-
-# Copy source code và build ra thư mục dist
-COPY apps/api-gateway .
+# Build the app
 RUN npm run build
 
-# 🔥 ÉP CÂN NGAY TRONG BUILDER: Xóa toàn bộ devDependencies
-RUN npm prune --omit=dev && npm cache clean --force
-
 # ==========================================
-# 2️⃣ Stage: Runner (Production)
+# 3️⃣ Production Runner Stage
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
-
-# 🛡️ Cấu hình Non-root
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
-
 ENV NODE_ENV=production
+
+COPY apps/api-gateway/package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/shared/protos ./protos
+
 ENV PROTO_PATH=/app/protos
 
-# Copy node_modules ĐÃ ÉP CÂN từ builder sang
-COPY --from=builder /app/node_modules ./node_modules
-# Copy code đã biên dịch
-COPY --from=builder /app/dist ./dist
-# Copy thư mục protos dùng chung
-COPY shared/protos ./protos
-
-# Phân quyền cho user nestjs
-RUN chown -R nestjs:nodejs /app
-USER nestjs
+# Security
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
 
 EXPOSE 8080
-
-# Chạy file main.js trực tiếp
 CMD ["node", "dist/main.js"]

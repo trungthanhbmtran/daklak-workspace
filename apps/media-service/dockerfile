@@ -1,56 +1,51 @@
-# Giai đoạn 1: Build mã nguồn
-FROM node:20-alpine AS builder
-
+# ==========================================
+# 1️⃣ Dependency Stage
+# ==========================================
+FROM node:20-alpine AS deps
 WORKDIR /app
-
-# Cài đặt các công cụ cần thiết cho Prisma (openssl)
-RUN apk add --no-cache openssl
-
-# Copy file cấu hình phụ thuộc từ root monorepo
 COPY apps/media-service/package*.json ./
-RUN npm install
+RUN npm ci
 
-# Copy source của service
-COPY apps/media-service .
+# ==========================================
+# 2️⃣ Builder Stage
+# ==========================================
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY apps/media-service/ ./
+COPY shared/protos ./shared/protos
 
-# Tạo Prisma Client
-RUN npx prisma generate
+# Generate Prisma Client
+RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
-# Build dự án NestJS
+# Build the app
 RUN npm run build
 
-# Giai đoạn 3: Migration
-FROM node:20-alpine AS migration
-WORKDIR /app
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
-COPY apps/media-service/package*.json ./
-CMD ["npx", "prisma", "migrate", "deploy"]
-
-# Giai đoạn 2: Chạy Production
+# ==========================================
+# 3️⃣ Production Runner Stage
+# ==========================================
 FROM node:20-alpine AS runner
-
 WORKDIR /app
-
-# Cài đặt openssl cho runtime Prisma
+ENV NODE_ENV=production
 RUN apk add --no-cache openssl
 
-# Chỉ copy node_modules và các file cần thiết từ giai đoạn builder
-COPY --from=builder /app/node_modules ./node_modules
+# Install prod deps + Prisma CLI
+COPY apps/media-service/package*.json ./
+RUN npm ci --omit=dev && npm install prisma --save-prod
+
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/shared/protos ./protos
 
-# Copy TOÀN BỘ thư mục protos dùng chung từ monorepo root
-COPY shared/protos ./protos
-
-# Biến môi trường
-ENV NODE_ENV=production
 ENV PROTO_PATH=/app/protos
-ENV GRPC_URL=0.0.0.0:50051
 
-# Mở cổng gRPC
-EXPOSE 50059
+# Security
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
 
-# Lệnh khởi chạy service
+EXPOSE 3003
 CMD ["node", "dist/src/main.js"]

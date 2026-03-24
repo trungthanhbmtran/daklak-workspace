@@ -3,7 +3,11 @@
 # ==========================================
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY apps/posts_service/package*.json ./
+
+# Install dependencies including devDependencies for building
+COPY package*.json ./
+# If there are shared packages or prisma schema outside, they should be copied too
+# For now, assuming standard NestJS structure
 RUN npm ci
 
 # ==========================================
@@ -11,13 +15,13 @@ RUN npm ci
 # ==========================================
 FROM node:20-alpine AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/posts_service/ ./
-COPY shared/protos ./shared/protos
+COPY . .
 
 # Generate Prisma Client
-RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# Note: Ensure the schema path is correct for your service
+RUN npx prisma generate
 
 # Build the app
 RUN npm run build
@@ -27,25 +31,25 @@ RUN npm run build
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
-ENV NODE_ENV=production
-RUN apk add --no-cache openssl
 
-# Install prod deps + Prisma CLI
-COPY apps/posts_service/package*.json ./
+ENV NODE_ENV=production
+
+# Install ONLY production dependencies + Prisma CLI
+COPY package*.json ./
 RUN npm ci --omit=dev && npm install prisma --save-prod
 
+# Copy built assets and prisma schema
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+# Copy generated prisma client (usually in node_modules/.prisma)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/shared/protos ./protos
 
-ENV PROTO_PATH=/app/protos
-
-# Security
+# Security: Run as non-root user
 RUN addgroup -S app && adduser -S app -G app
-RUN chown -R app:app /app
 USER app
 
-EXPOSE 3005
-CMD ["node", "dist/main.js"]
+EXPOSE 3000
+
+# Default command to run the app
+CMD ["node", "dist/src/main.js"]

@@ -1,60 +1,51 @@
 # ==========================================
-# 1️⃣ Stage: Dependencies (Cache layer)
+# 1️⃣ Dependency Stage
 # ==========================================
 FROM node:20-alpine AS deps
 WORKDIR /app
-
 COPY apps/hrm-service/package*.json ./
 RUN npm ci
 
-
 # ==========================================
-# 2️⃣ Stage: Builder (Build TS + Prisma)
+# 2️⃣ Builder Stage
 # ==========================================
 FROM node:20-alpine AS builder
 WORKDIR /app
-
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/hrm-service .
+COPY apps/hrm-service/ ./
+COPY shared/protos ./shared/protos
 
 # Generate Prisma Client
-RUN npx prisma generate
+RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
-# Build NestJS
+# Build the app
 RUN npm run build
 
-
 # ==========================================
-# 3️⃣ Stage: Runner (Production)
+# 3️⃣ Production Runner Stage
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
-
-# Non-root user
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
-
 ENV NODE_ENV=production
-ENV GRPC_URL=0.0.0.0:50052
-ENV PROTO_PATH=/app/protos
+RUN apk add --no-cache openssl
 
-# Install production deps
+# Install prod deps + Prisma CLI
 COPY apps/hrm-service/package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+RUN npm ci --omit=dev && npm install prisma --save-prod
 
-# Copy build output
 COPY --from=builder /app/dist ./dist
-
-# 🔥 QUAN TRỌNG: Prisma runtime cần các thứ này
+COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/shared/protos ./protos
 
-# Copy protos
-COPY shared/protos/hrm ./protos/hrm
-COPY shared/protos/common ./protos/common
+ENV PROTO_PATH=/app/protos
 
-USER 1000
+# Security
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
 
-EXPOSE 50052
-
-CMD ["node", "dist/src/main.js"]
+EXPOSE 3002
+CMD ["node", "dist/main.js"]

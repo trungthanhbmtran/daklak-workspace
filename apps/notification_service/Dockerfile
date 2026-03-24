@@ -1,42 +1,42 @@
 # ==========================================
-# 1️⃣ Stage: Builder (Môi trường chuẩn bị)
+# 1️⃣ Dependency Stage
+# ==========================================
+FROM node:20-alpine AS deps
+WORKDIR /app
+COPY apps/notification_service/package*.json ./
+RUN npm ci
+
+# ==========================================
+# 2️⃣ Builder Stage
 # ==========================================
 FROM node:20-alpine AS builder
 WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY apps/notification_service/ ./
+COPY shared/protos ./shared/protos
 
-# Lấy package.json của đúng service notification
-COPY apps/notification_service/package*.json ./
-
-# Cài đặt thư viện production (dùng install thay vì ci để không kén file lock)
-RUN npm install --omit=dev && npm cache clean --force
-
-# Copy toàn bộ source code của notification-service (server.js, routes, config...)
-COPY apps/notification_service .
+# Notification service is plain Node.js, no build step needed but copying for consistency
+# (If it had a build step, it would go here)
 
 # ==========================================
-# 2️⃣ Stage: Runner (Production)
+# 3️⃣ Production Runner Stage
 # ==========================================
 FROM node:20-alpine AS runner
 WORKDIR /app
-
-# 🛡️ Cấu hình Non-root
-RUN addgroup -g 1001 -S nodejs && adduser -S nestjs -u 1001
-
 ENV NODE_ENV=production
+
+COPY apps/notification_service/package*.json ./
+RUN npm ci --omit=dev
+
+COPY --from=builder /app ./
+COPY --from=builder /app/shared/protos ./protos
+
 ENV PROTO_PATH=/app/protos
 
-# Copy code & dependencies
-COPY --from=builder /app ./
+# Security
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
 
-# Copy TOÀN BỘ thư mục protos dùng chung từ monorepo root
-COPY shared/protos ./protos
-
-# Phân quyền
-RUN chown -R nestjs:nodejs /app
-USER nestjs
-
-# Mở đúng cổng 50075
 EXPOSE 50075
-
-# Chạy file server.js
 CMD ["node", "server.js"]
