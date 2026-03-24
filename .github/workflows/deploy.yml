@@ -110,14 +110,12 @@ jobs:
     env:
       ENV_NAME: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
       COMPOSE_FILE: ${{ github.ref == 'refs/heads/main' && 'docker-compose.prod.yml' || 'docker-compose.staging.yml' }}
+      IMAGE_TAG: ${{ github.sha }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Deploy to VPS
         run: |
-          # Load Environment Variables (Assuming secrets are already in .env.production on VPS or passed here)
-          # Note: In a real setup, we might copy the .env file or use secrets
-          
           # 1. Pull latest images
           docker compose -f $COMPOSE_FILE pull
 

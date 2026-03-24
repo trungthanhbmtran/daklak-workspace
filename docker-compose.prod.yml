@@ -16,19 +16,33 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   redis:
     image: redis:7-alpine
     restart: always
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
-    # Management port can be exposed if needed, but not the main MQ port
     ports:
       - "15672:15672"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   minio:
     image: minio/minio
@@ -38,6 +52,11 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password123}
     volumes:
       - minio_data:/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- App Services ---
 
@@ -51,6 +70,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     # Reachable via Nginx internally on port 8080
 
   user-service:
@@ -65,6 +89,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   hrm-service:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
@@ -76,6 +105,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   media-service:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
@@ -87,6 +121,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   notification-service:
     image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
@@ -96,6 +135,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   posts-service:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
@@ -107,6 +151,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   translate-service:
     image: ${DOCKER_USERNAME}/daklak-translate-service:${IMAGE_TAG:-latest}
@@ -116,6 +165,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
@@ -125,6 +179,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- Migration Jobs ---
 
@@ -137,6 +196,11 @@ services:
         condition: service_healthy
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   hrm-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
@@ -147,6 +211,11 @@ services:
         condition: service_healthy
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   media-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
@@ -157,6 +226,11 @@ services:
         condition: service_healthy
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   posts-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
@@ -167,6 +241,11 @@ services:
         condition: service_healthy
     env_file:
       - .env.production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # --- Nginx ---
 
