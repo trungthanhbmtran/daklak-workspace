@@ -53,6 +53,7 @@ export default function RootLayout({
             duration={3000}
             theme="light" // Hoặc "dark" tùy project
           />
+
         </Providers>
       </body>
     </html>

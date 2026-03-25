@@ -9,5 +9,4 @@ generator client {
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
-  // URL lấy từ biến môi trường giúp Prisma Client tự nạp cấu hình khi chạy
 }

@@ -8,11 +8,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-admin_systems}
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -50,6 +52,9 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password123}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
     logging:
@@ -62,6 +67,10 @@ services:
 
   api-gateway:
     image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/api-gateway/dockerfile
+      target: runner
     restart: always
     depends_on:
       redis:
@@ -70,6 +79,8 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - JWT_SECRET=${JWT_SECRET}
     logging:
       driver: "json-file"
       options:
@@ -79,6 +90,10 @@ services:
 
   user-service:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/user-service/Dockerfile
+      target: runner
     restart: always
     depends_on:
       mysql:
@@ -89,6 +104,9 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
+      - JWT_SECRET=${JWT_SECRET}
     logging:
       driver: "json-file"
       options:
@@ -97,6 +115,10 @@ services:
 
   hrm-service:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/hrm-service/Dockerfile
+      target: runner
     restart: always
     depends_on:
       mysql:
@@ -105,6 +127,8 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
     logging:
       driver: "json-file"
       options:
@@ -113,6 +137,10 @@ services:
 
   media-service:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/media-service/Dockerfile
+      target: runner
     restart: always
     depends_on:
       rabbitmq:
@@ -121,6 +149,11 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
+      - MINIO_EXTERNAL_ENDPOINT=${MINIO_EXTERNAL_ENDPOINT}
     logging:
       driver: "json-file"
       options:
@@ -129,12 +162,18 @@ services:
 
   notification-service:
     image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/notification_service/Dockerfile
+      target: runner
     restart: always
     depends_on:
       rabbitmq:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
     logging:
       driver: "json-file"
       options:
@@ -143,6 +182,10 @@ services:
 
   posts-service:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/posts_service/Dockerfile
+      target: runner
     restart: always
     depends_on:
       mysql:
@@ -151,6 +194,15 @@ services:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=admin_posts
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
+      - REDIS_URL=redis://redis:6379
+      - ACCESS_TOKEN_SECRET=${JWT_SECRET}
     logging:
       driver: "json-file"
       options:
@@ -159,12 +211,19 @@ services:
 
   translate-service:
     image: ${DOCKER_USERNAME}/daklak-translate-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/translate_service/Dockerfile
+      target: runner
     restart: always
     depends_on:
       rabbitmq:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_translation
+      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
     logging:
       driver: "json-file"
       options:
@@ -173,12 +232,17 @@ services:
 
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/admin_khcn/Dockerfile
     restart: always
     depends_on:
       api-gateway:
         condition: service_started
     env_file:
       - .env.production
+    environment:
+      - NEXT_PUBLIC_API_URL=/api
     logging:
       driver: "json-file"
       options:
@@ -189,13 +253,15 @@ services:
 
   user-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
-    profiles: ["migrate"]
+    command: npx prisma migrate deploy
+    profiles: [ "migrate" ]
     depends_on:
       mysql:
         condition: service_healthy
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
     logging:
       driver: "json-file"
       options:
@@ -204,13 +270,15 @@ services:
 
   hrm-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
-    profiles: ["migrate"]
+    command: npx prisma migrate deploy
+    profiles: [ "migrate" ]
     depends_on:
       mysql:
         condition: service_healthy
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
     logging:
       driver: "json-file"
       options:
@@ -219,13 +287,15 @@ services:
 
   media-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
-    profiles: ["migrate"]
+    command: npx prisma migrate deploy
+    profiles: [ "migrate" ]
     depends_on:
       mysql:
         condition: service_healthy
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
     logging:
       driver: "json-file"
       options:
@@ -234,13 +304,19 @@ services:
 
   posts-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
-    profiles: ["migrate"]
+    command: npx prisma migrate deploy
+    profiles: [ "migrate" ]
     depends_on:
       mysql:
         condition: service_healthy
     env_file:
       - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
+      - DB_HOST=mysql
+      - DB_USER=root
+      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - DB_NAME=admin_posts
     logging:
       driver: "json-file"
       options:
