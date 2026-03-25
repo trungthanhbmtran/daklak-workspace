@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('APIGateway');
 
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('v1');
 
   // Swagger
   const config = new DocumentBuilder()
@@ -29,7 +29,7 @@ async function bootstrap() {
     .addTag('Storage', 'Lưu trữ file')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document, {
+  SwaggerModule.setup('docs', app, document, {
     swaggerOptions: { persistAuthorization: true },
   });
 
