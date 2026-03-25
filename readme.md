@@ -27,6 +27,12 @@ Nếu muốn deploy thủ công trên server:
 # Pull images mới nhất
 docker compose -f docker-compose.prod.yml pull
 
+# Chạy migrations (quan trọng)
+docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate
+
 # Khởi động lại các services
 docker compose -f docker-compose.prod.yml up -d
 ```
@@ -45,11 +51,11 @@ Thông tin đăng nhập mặc định cho các dịch vụ:
 ### Microservices
 | Dịch vụ | Port (Internal) | Database Name |
 | :--- | :--- | :--- |
-| `api-gateway` | `8080` | `daklak_db` |
+| `api-gateway` | `8080` | `admin_systems` |
 | `user-service` | `3001` | `admin_systems` |
 | `hrm-service` | `3002` | `admin_hrm` |
-| `media-service` | `3003` | - |
-| `posts-service` | `3005` | - |
+| `media-service` | `3003` | `admin_media` |
+| `posts-service` | `3005` | `admin_posts` |
 | `translate-service` | `3006` | `daklak_translation` |
 | `admin-khcn` | `3007` | - |
 
