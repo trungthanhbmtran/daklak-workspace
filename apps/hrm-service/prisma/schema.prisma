@@ -1,0 +1,32 @@
+﻿// NhÃ¢n viÃªn HRM â€“ departmentId, jobTitleId tham chiáº¿u sang user-service (OrganizationUnit, JobTitle)
+model Employee {
+  id           Int      @id @default(autoincrement())
+  firstname    String   @map("firstname")
+  lastname     String   @map("lastname")
+  employeeCode String   @unique @map("employee_code")
+  email        String?
+  phone        String?
+  gender       String?  @default("male")
+  birthday     DateTime? @db.Date
+  identityCard String?  @map("identity_card")
+  status       String   @default("active")
+  address      String?  @db.LongText
+  avatar       String?
+  departmentId Int      @map("department_id")  // ID Ä‘Æ¡n vá»‹ trong user-service (OrganizationUnit)
+  jobTitleId   Int      @map("job_title_id")   // ID chá»©c danh trong user-service (JobTitle)
+  startDate    DateTime @db.Date @map("start_date")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("employees")
+}
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
