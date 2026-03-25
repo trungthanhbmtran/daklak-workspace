@@ -48,4 +48,4 @@ RUN chown -R app:app /app
 USER app
 
 EXPOSE 3005
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]
