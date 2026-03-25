@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('APIGateway');
 
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
 
   // Swagger
   const config = new DocumentBuilder()
