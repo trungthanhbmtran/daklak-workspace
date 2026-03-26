@@ -36,7 +36,7 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['media'],
+        package: ['media', 'storage'],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50059',
         loader: {

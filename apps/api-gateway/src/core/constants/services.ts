@@ -3,14 +3,14 @@
  * URL: user_service, project_stc/hrm-service, document_service...
  */
 // Dùng 127.0.0.1 thay vì localhost để tránh resolve sang ::1 (IPv6) gây ECONNREFUSED
-const getUserUrl = () => process.env.USER_SERVICE_ADDR || process.env.AUTH_SERVICE_URL || '127.0.0.1:50051';
+const getUserUrl = () => process.env.USER_SERVICE_ADDR || process.env.AUTH_SERVICE_URL || 'user-service:50051';
 /** project_stc/hrm-service (gRPC, mặc định 127.0.0.1:50052) */
-const getHrmUrl = () => process.env.HRM_SERVICE_ADDR || process.env.DEPARTMENT_SERVICE_URL || '127.0.0.1:50052';
-const getDocumentUrl = () => process.env.DOCUMENT_SERVICE_URL || '127.0.0.1:50056';
-const getPostUrl = () => process.env.POST_SERVICE_URL || '127.0.0.1:50055';
-const getStorageUrl = () => process.env.FILE_SERVICE_URL || process.env.STORAGE_SERVICE_URL || '127.0.0.1:50057';
-const getMediaUrl = () => process.env.MEDIA_SERVICE_URL || '127.0.0.1:50059';
-const getTranslateUrl = () => process.env.TRANSLATE_SERVICE_URL || process.env.POST_SERVICE_URL || '127.0.0.1:50055';
+const getHrmUrl = () => process.env.HRM_SERVICE_ADDR || process.env.DEPARTMENT_SERVICE_URL || 'hrm-service:50052';
+const getDocumentUrl = () => process.env.DOCUMENT_SERVICE_URL || 'document-service:50056';
+const getPostUrl = () => process.env.POST_SERVICE_URL || 'posts-service:50055';
+const getStorageUrl = () => process.env.STORAGE_SERVICE_URL || process.env.FILE_SERVICE_URL || 'media-service:50059';
+const getMediaUrl = () => process.env.MEDIA_SERVICE_URL || 'media-service:50059';
+const getTranslateUrl = () => process.env.TRANSLATE_SERVICE_URL || 'translate-service:50053';
 
 export const MICROSERVICES = {
   // Auth (user_service)

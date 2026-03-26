@@ -18,7 +18,7 @@ class TranslationServicer(translation_pb2_grpc.TranslationServiceServicer):
 def run_grpc_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     translation_pb2_grpc.add_TranslationServiceServicer_to_server(TranslationServicer(), server)
-    server.add_insecure_port('[::]:50051')
-    print("🚀 gRPC Server đang chạy tại port 50051...")
+    server.add_insecure_port('[::]:50053')
+    print("🚀 gRPC Server đang chạy tại port 50053...")
     server.start()
     server.wait_for_termination()
