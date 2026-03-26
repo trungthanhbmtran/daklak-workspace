@@ -1,6 +1,7 @@
 // proxy.ts (đặt ở thư mục gốc)
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { API_BASE_URL } from '@/config/constants'
 
 export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname
@@ -27,8 +28,7 @@ export async function proxy(request: NextRequest) {
     // 2. Nếu chỉ còn Refresh Token (Access Token đã hết hạn) -> Xử lý cấp lại token
     if (!accessToken && refreshToken) {
       try {
-        const API_URL = process.env.API_URL || 'http://api-gateway:8080/api/v1/admin'
-        const res = await fetch(`${API_URL}/auth/refresh`, {
+        const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ refreshToken }),

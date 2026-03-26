@@ -3,17 +3,17 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import axios from 'axios'
+import { API_BASE_URL } from '@/config/constants'
 
 // Vì login chưa có token, chúng ta gọi trực tiếp axios thay vì dùng serverApi instance
 // (để tránh interceptor tự động check token hoặc redirect vòng lặp)
-const API_URL = process.env.API_GATEWAY_URL || 'http://api-gateway.default.svc.cluster.local:8080'
 
 export async function loginAction(formData: FormData) {
     const username = formData.get('username')
     const password = formData.get('password')
 
     try {
-        const res = await axios.post(`${API_URL}/api/auth/login`, {
+        const res = await axios.post(`${API_BASE_URL}/auth/login`, {
             username,
             password,
         })

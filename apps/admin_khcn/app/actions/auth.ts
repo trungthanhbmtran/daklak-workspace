@@ -3,15 +3,14 @@
 import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import axios from 'axios'
-
-const API_URL = process.env.API_URL || 'http://api-gateway:8080/api/v1/admin';
+import { API_BASE_URL } from '@/config/constants'
 
 export async function loginAction(formData: FormData) {
   const username = formData.get('username')
   const password = formData.get('password')
 
   try {
-    const res = await axios.post(`${API_URL}/auth/login`, { username, password })
+    const res = await axios.post(`${API_BASE_URL}/auth/login`, { username, password })
     const { accessToken, refreshToken } = res.data
 
     const cookieStore = await cookies()
