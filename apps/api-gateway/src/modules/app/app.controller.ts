@@ -28,11 +28,11 @@ export class AppController {
         status: 'UP',
         message: 'Gateway Service is running',
         endpoints: {
-          health: '/api/v1/health',
-          auth: '/api/v1/admin/auth',
-          hrm: '/api/v1/admin/hrm',
-          users: '/api/v1/admin/users',
-          documents: '/api/v1/admin/documents',
+          health: '/v1/health',
+          auth: '/v1/admin/auth',
+          hrm: '/v1/admin/hrm',
+          users: '/v1/admin/users',
+          documents: '/v1/admin/documents',
         },
       },
     };

@@ -8,15 +8,16 @@
  * Phân tách rõ ràng giữa môi trường Server (K8s) và Client (Browser)
  */
 
-const internalHost = process.env.INTERNAL_API_URL || "http://api-gateway";
-const apiPrefix = "/api/v1/admin";
+const internalHost = process.env.INTERNAL_API_URL || "http://api-gateway:8080";
+const externalPrefix = "/api/v1/admin";
+const internalPrefix = "/v1/admin";
 
 export const API_BASE_URL = typeof window === "undefined"
-  ? `${internalHost}${apiPrefix}`
-  : apiPrefix;
+  ? `${internalHost}${internalPrefix}`
+  : externalPrefix;
 
 export const INTERNAL_GATEWAY_URL = internalHost;
-export const API_PREFIX = apiPrefix;
+export const API_PREFIX = externalPrefix;
 
 export const API_TIMEOUT_MS = 15000;
 
