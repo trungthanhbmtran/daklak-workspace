@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/api/:path*',
-        destination: `${INTERNAL_GATEWAY_URL}/api/:path*`,
+        destination: `${INTERNAL_GATEWAY_URL}/:path*`,
       },
     ];
   },
