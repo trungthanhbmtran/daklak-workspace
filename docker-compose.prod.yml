@@ -86,7 +86,9 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    # Reachable via Nginx internally on port 8080
+    ports:
+      - "8080:8080"
+    # Reachable via Nginx internally on port 8080 or directly from host at 8080
 
   user-service:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
