@@ -5,27 +5,22 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 
 function getProtoPath() {
-  // First, check for an absolute proto path override via env for Docker/k8s; fallback to project root
-  const envProtoPath = process.env.PROTO_PATH
-    ? join(process.env.PROTO_PATH, 'media/media.proto')
-    : null;
-  if (envProtoPath && existsSync(envProtoPath)) {
-    return envProtoPath;
-  }
-  // Next, try dist/protos or src/protos relative to current file
-  const tryPaths = [
+  const root = process.env.PROTO_PATH || join(process.cwd(), '..', '..', 'shared', 'protos');
+  
+  const envPath = process.env.PROTO_PATH ? join(process.env.PROTO_PATH, 'media/media.proto') : null;
+  if (envPath && existsSync(envPath)) return envPath;
+  
+  const tries = [
     join(__dirname, '../../protos/media/media.proto'),
     join(__dirname, '../protos/media/media.proto'),
-    join(__dirname, '../../../protos/media/media.proto'), // fallback if structure differs
+    join(__dirname, '../../../shared/protos/media/media.proto'),
+    join(process.cwd(), 'protos/media/media.proto'),
+    join(process.cwd(), '../protos/media/media.proto'),
   ];
-  for (const path of tryPaths) {
-    if (existsSync(path)) {
-      return path;
-    }
+  for (const p of tries) {
+    if (existsSync(p)) return p;
   }
-  throw new Error(
-    `media.proto not found. Checked paths: ${[envProtoPath, ...tryPaths].filter(Boolean).join(', ')}`
-  );
+  throw new Error(`media.proto not found`);
 }
 
 async function bootstrap() {
@@ -37,13 +32,14 @@ async function bootstrap() {
       transport: Transport.GRPC,
       options: {
         package: ['media'],
-        protoPath,
+        protoPath: getProtoPath(),
         url: process.env.GRPC_URL ?? '0.0.0.0:50059',
         loader: {
           keepCase: false,
           longs: String,
           enums: String,
           defaults: true,
+          includeDirs: [join(process.cwd(), 'protos'), '/app/protos'],
         },
       },
     },

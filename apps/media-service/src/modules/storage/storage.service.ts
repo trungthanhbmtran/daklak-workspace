@@ -22,7 +22,7 @@ export class StorageService implements OnModuleInit {
   constructor(private prisma: PrismaService) {
     const accessKeyId = process.env.MINIO_ACCESS_KEY;
     const secretAccessKey = process.env.MINIO_SECRET_KEY;
-    const endpoint = process.env.MINIO_EXTERNAL_ENDPOINT;
+    const endpoint = process.env.MINIO_INTERNAL_ENDPOINT || 'http://minio:9000';
 
     // Kiểm tra nếu thiếu cấu hình thì báo lỗi ngay lúc khởi động
     if (!accessKeyId || !secretAccessKey || !endpoint) {

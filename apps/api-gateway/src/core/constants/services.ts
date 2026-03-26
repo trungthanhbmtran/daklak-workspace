@@ -8,7 +8,6 @@ const getUserUrl = () => process.env.USER_SERVICE_ADDR || process.env.AUTH_SERVI
 const getHrmUrl = () => process.env.HRM_SERVICE_ADDR || process.env.DEPARTMENT_SERVICE_URL || 'hrm-service:50052';
 const getDocumentUrl = () => process.env.DOCUMENT_SERVICE_URL || 'document-service:50056';
 const getPostUrl = () => process.env.POST_SERVICE_URL || 'posts-service:50055';
-const getStorageUrl = () => process.env.STORAGE_SERVICE_URL || process.env.FILE_SERVICE_URL || 'media-service:50059';
 const getMediaUrl = () => process.env.MEDIA_SERVICE_URL || 'media-service:50059';
 const getTranslateUrl = () => process.env.TRANSLATE_SERVICE_URL || 'translate-service:50053';
 
@@ -108,14 +107,6 @@ export const MICROSERVICES = {
     PROTO: 'posts/banner.proto',
     URL: getPostUrl(),
     SERVICE: 'BannerService',
-  },
-  // Storage (storage_service)
-  STORAGE: {
-    PACKAGE: 'storage',
-    SYMBOL: 'STORAGE_PACKAGE',
-    PROTO: 'storage/storage.proto',
-    URL: getStorageUrl(),
-    SERVICE: 'FileUpload',
   },
   MEDIA: {
     PACKAGE: 'media',
