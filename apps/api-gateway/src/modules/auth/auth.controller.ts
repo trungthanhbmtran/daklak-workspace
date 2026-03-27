@@ -58,9 +58,10 @@ export class AuthController implements OnModuleInit {
       // Set cookies
       const cookieConfig = {
         httpOnly: true,
-        secure: true, // Should be true in production, but user explicitly asked for true
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict' as const,
         maxAge: 15 * 60 * 1000,
+        path: '/',
       };
 
       res.cookie('accessToken', result.accessToken, cookieConfig);
@@ -97,9 +98,10 @@ export class AuthController implements OnModuleInit {
       // Set cookies
       const cookieConfig = {
         httpOnly: true,
-        secure: true,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict' as const,
         maxAge: 15 * 60 * 1000,
+        path: '/',
       };
 
       res.cookie('accessToken', result.accessToken, cookieConfig);
@@ -133,8 +135,8 @@ export class AuthController implements OnModuleInit {
     }
 
     // Clear cookies
-    res.clearCookie('accessToken');
-    res.clearCookie('refreshToken');
+    res.clearCookie('accessToken', { path: '/' });
+    res.clearCookie('refreshToken', { path: '/' });
 
     return { success: true };
   }

@@ -8,6 +8,9 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('APIGateway');
+  
+  // Trust proxy is required for 'secure' cookies when running behind a proxy (like Next.js rewrite)
+  (app.getHttpAdapter().getInstance() as any).set('trust proxy', 1);
 
   app.setGlobalPrefix('v1');
 
