@@ -26,7 +26,7 @@ export class AuthController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
@@ -37,7 +37,7 @@ export class AuthController implements OnModuleInit {
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({ status: 200, description: 'accessToken, refreshToken, userId, email, username, fullName, unitName (camelCase)' })
   async login(
-    @Body() body: { username?: string; email?: string; password?: string; [key: string]: any },
+    @Body() body: { username?: string; email?: string; password?: string;[key: string]: any },
     @Res({ passthrough: true }) res: Response,
   ) {
     const hasPassword = body.password && String(body.password).trim().length > 0;
@@ -58,10 +58,9 @@ export class AuthController implements OnModuleInit {
       // Set cookies
       const cookieConfig = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true, // Should be true in production, but user explicitly asked for true
         sameSite: 'strict' as const,
         maxAge: 15 * 60 * 1000,
-        path: '/',
       };
 
       res.cookie('accessToken', result.accessToken, cookieConfig);
@@ -98,10 +97,9 @@ export class AuthController implements OnModuleInit {
       // Set cookies
       const cookieConfig = {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: true,
         sameSite: 'strict' as const,
         maxAge: 15 * 60 * 1000,
-        path: '/',
       };
 
       res.cookie('accessToken', result.accessToken, cookieConfig);
@@ -135,8 +133,8 @@ export class AuthController implements OnModuleInit {
     }
 
     // Clear cookies
-    res.clearCookie('accessToken', { path: '/' });
-    res.clearCookie('refreshToken', { path: '/' });
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
 
     return { success: true };
   }
