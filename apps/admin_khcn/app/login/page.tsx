@@ -5,7 +5,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import axios from "axios";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -25,9 +27,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-// Cập nhật import đúng tên hàm loginAction
-import { loginAction } from "@/app/actions/auth";
+// Cấu hình API
+import { API_BASE_URL } from "@/config/constants";
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Tên đăng nhập không được để trống." }),
@@ -35,6 +36,7 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -48,23 +50,23 @@ export default function LoginPage() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
-      // Chuyển đổi dữ liệu sang FormData để gửi cho Server Action
-      const formData = new FormData();
-      formData.append("username", values.username);
-      formData.append("password", values.password);
+      try {
+        // Gọi trực tiếp API qua proxy để Gateway set cookies
+        await axios.post(`${API_BASE_URL}/auth/login`, {
+          username: values.username,
+          password: values.password,
+        }, {
+          withCredentials: true // Quan trọng để nhận cookies
+        });
 
-      // Gọi trực tiếp loginAction với formData (KHÔNG cần truyền null nữa)
-      const response = await loginAction(formData);
-
-      // Xử lý lỗi trả về từ Server Action (nếu có)
-      if (response?.error) {
-        toast.error(response.error);
-        return;
+        toast.success("Đăng nhập thành công! Đang chuyển hướng...");
+        
+        // Chuyển hướng sau khi thành công
+        router.push('/hub');
+      } catch (error: any) {
+        const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
+        toast.error(message);
       }
-
-      // Nếu thành công, Server Action đã tự động gọi redirect('/admin/dashboard')
-      // Lệnh toast dưới đây sẽ hiện lên trong chốc lát trước khi trình duyệt chuyển trang
-      toast.success("Đăng nhập thành công! Đang chuyển hướng...");
     });
   }
 

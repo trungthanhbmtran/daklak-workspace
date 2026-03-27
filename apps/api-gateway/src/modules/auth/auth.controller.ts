@@ -5,12 +5,14 @@ import {
   Body,
   Inject,
   Req,
+  Res,
   UseGuards,
   OnModuleInit,
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -34,7 +36,10 @@ export class AuthController implements OnModuleInit {
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
   @ApiResponse({ status: 200, description: 'accessToken, refreshToken, userId, email, username, fullName, unitName (camelCase)' })
-  async login(@Body() body: { username?: string; email?: string; password?: string; [key: string]: any }) {
+  async login(
+    @Body() body: { username?: string; email?: string; password?: string; [key: string]: any },
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const hasPassword = body.password && String(body.password).trim().length > 0;
     const loginKey = body.username?.trim() || body.email?.trim();
     if (!loginKey || !hasPassword) {
@@ -43,13 +48,25 @@ export class AuthController implements OnModuleInit {
       );
     }
     try {
-      const res = await firstValueFrom(
+      const result = await firstValueFrom(
         this.userService.Login({
           usernameOrEmail: loginKey,
           password: body.password,
         }),
-      );
-      return res;
+      ) as any;
+
+      // Set cookies
+      const cookieConfig = {
+        httpOnly: true,
+        secure: true, // Should be true in production, but user explicitly asked for true
+        sameSite: 'strict' as const,
+        maxAge: 15 * 60 * 1000,
+      };
+
+      res.cookie('accessToken', result.accessToken, cookieConfig);
+      res.cookie('refreshToken', result.refreshToken, cookieConfig);
+
+      return result;
     } catch (err: any) {
       const code = err?.code;
       const message = err?.details || err?.message || 'Đăng nhập thất bại';
@@ -61,18 +78,34 @@ export class AuthController implements OnModuleInit {
   @Post('refresh')
   @ApiOperation({ summary: 'Làm mới access_token bằng refresh_token (session)' })
   @ApiResponse({ status: 200, description: 'accessToken, refreshToken (rotation), userId, email, username, fullName, unitName' })
-  async refresh(@Body() body: { refreshToken?: string }, @Req() req: any) {
+  async refresh(
+    @Body() body: { refreshToken?: string },
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const token =
       body.refreshToken?.trim() ||
-      (req.cookies?.refresh_token as string)?.trim();
+      (req.cookies?.refreshToken as string)?.trim();
     if (!token) {
       throw new UnauthorizedException('Thiếu refresh_token');
     }
     try {
-      const res = await firstValueFrom(
+      const result = await firstValueFrom(
         this.userService.Refresh({ refreshToken: token }),
-      );
-      return res;
+      ) as any;
+
+      // Set cookies
+      const cookieConfig = {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict' as const,
+        maxAge: 15 * 60 * 1000,
+      };
+
+      res.cookie('accessToken', result.accessToken, cookieConfig);
+      res.cookie('refreshToken', result.refreshToken, cookieConfig);
+
+      return result;
     } catch (err: any) {
       const message = err?.details || err?.message || 'Refresh token không hợp lệ';
       throw new UnauthorizedException(message);
@@ -81,10 +114,14 @@ export class AuthController implements OnModuleInit {
 
   @Post('logout')
   @ApiOperation({ summary: 'Đăng xuất và thu hồi refresh_token' })
-  async logout(@Req() req: any, @Body() body?: { refreshToken?: string }) {
+  async logout(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+    @Body() body?: { refreshToken?: string },
+  ) {
     const token =
       body?.refreshToken?.trim() ||
-      (req.cookies?.refresh_token as string)?.trim();
+      (req.cookies?.refreshToken as string)?.trim();
     if (token) {
       try {
         await firstValueFrom(
@@ -94,6 +131,11 @@ export class AuthController implements OnModuleInit {
         // Ignore lỗi thu hồi
       }
     }
+
+    // Clear cookies
+    res.clearCookie('accessToken');
+    res.clearCookie('refreshToken');
+
     return { success: true };
   }
 

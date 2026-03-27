@@ -13,23 +13,9 @@ export async function loginAction(formData: FormData) {
     const res = await axios.post(`${API_BASE_URL}/auth/login`, { username, password })
     const { accessToken, refreshToken } = res.data
 
-    const cookieStore = await cookies()
-
-    // Access Token (ví dụ sống 15 phút)
-    cookieStore.set('accessToken', accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 15 * 60,
-      path: '/',
-    })
-
-    // Refresh Token (ví dụ sống 7 ngày)
-    cookieStore.set('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 7 * 24 * 60 * 60,
-      path: '/',
-    })
+    // Cookies are now set by API Gateway directly
+    // const cookieStore = await cookies()
+    // ...
 
   } catch (error) {
     if (axios.isAxiosError(error)) {
