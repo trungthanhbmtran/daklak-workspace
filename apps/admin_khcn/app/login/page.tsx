@@ -60,7 +60,7 @@ export default function LoginPage() {
         });
 
         toast.success("Đăng nhập thành công! Đang chuyển hướng...");
-        
+
         // Chuyển hướng sau khi thành công
         router.push('/hub');
       } catch (error: any) {

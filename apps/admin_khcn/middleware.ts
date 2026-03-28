@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // This function can be marked `async` if using `await` inside
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const token = request.cookies.get("accessToken")?.value;
     const { pathname } = request.nextUrl;
 
@@ -12,7 +12,7 @@ export function proxy(request: NextRequest) {
     // hoặc ta có thể kiểm tra trực tiếp.
     const publicPaths = [
         "/login",
-        "/api/auth", // Cho phép các route login/refresh của gateway
+        "/api/v1/admin/auth", // Cho phép các route login/refresh của gateway
     ];
 
     const isPublic = publicPaths.some((path) =>
