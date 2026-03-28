@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const logger = new Logger('APIGateway');
 
-  app.setGlobalPrefix('v1');
+  app.setGlobalPrefix('api/v1');
 
   // Swagger
   const config = new DocumentBuilder()
@@ -56,8 +56,8 @@ async function bootstrap() {
   const port = process.env.PORT || 8080;
   await app.listen(port, '0.0.0.0');
 
-  logger.log(`🚀 Gateway đang chạy tại: http://localhost:${port}/v1`);
-  logger.log(`📖 Swagger: http://localhost:${port}/docs`);
+  logger.log(`🚀 Gateway đang chạy tại: http://localhost:${port}/api/v1`);
+  logger.log(`📖 Swagger: http://localhost:${port}/api/v1/docs`);
   // logger.log(`📡 Kết nối tới User Service: ${process.env.USER_SERVICE_ADDR || 'user-service:50051'}`);
   // logger.log(`📡 Kết nối tới HRM Service (project_stc/hrm-service): ${process.env.HRM_SERVICE_ADDR || '127.0.0.1:50052'}`);
 }

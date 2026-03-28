@@ -3,9 +3,9 @@
  * Không còn gọi internal Docker/K8s nữa
  */
 
-export const API_BASE_URL = "/api/admin";
+export const API_BASE_URL = "/api/v1/admin";
 
-export const API_PREFIX = "/api";
+export const API_PREFIX = "/api/v1";
 
 export const API_TIMEOUT_MS = 15000;
 
