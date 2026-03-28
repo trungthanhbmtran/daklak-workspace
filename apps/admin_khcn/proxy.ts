@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 
 // This function can be marked `async` if using `await` inside
 export function proxy(request: NextRequest) {
-    const token = request.cookies.get("access_token")?.value;
+    const token = request.cookies.get("accessToken")?.value;
     const { pathname } = request.nextUrl;
 
     // ✅ Các route công khai không cần login
