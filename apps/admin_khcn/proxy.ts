@@ -8,7 +8,7 @@ export function proxy(request: NextRequest) {
     // ✅ Public routes
     const publicPaths = [
         "/login",
-        "/api/auth", // ✔ sửa lại theo chuẩn mới
+        "/api/admin/auth", // ✔ sửa lại theo chuẩn mới (đã thêm admin)
     ];
 
     const isPublic = publicPaths.some((path) =>

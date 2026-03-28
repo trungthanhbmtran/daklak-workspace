@@ -3,7 +3,7 @@
  * Không còn gọi internal Docker/K8s nữa
  */
 
-export const API_BASE_URL = "/api";
+export const API_BASE_URL = "/api/admin";
 
 export const API_PREFIX = "/api";
 
