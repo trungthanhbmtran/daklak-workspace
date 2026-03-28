@@ -24,7 +24,7 @@ export function proxy(request: NextRequest) {
     if (!token && !isPublic) {
         const loginUrl = new URL("/admin/login", request.url);
         // Nếu muốn quay lại trang cũ sau khi login, có thể thêm callbackUrl
-        // loginUrl.searchParams.set("callbackUrl", pathname);
+        loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
     }
 
