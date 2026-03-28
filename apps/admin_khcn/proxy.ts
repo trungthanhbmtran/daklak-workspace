@@ -1,35 +1,28 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// This function can be marked `async` if using `await` inside
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
     const token = request.cookies.get("accessToken")?.value;
     const { pathname } = request.nextUrl;
 
-    // ✅ Các route công khai không cần login
-    // Lưu ý: pathname trong middleware của Next.js (khi có basePath) 
-    // thường đã được xử lý để không bao gồm basePath trong so khớp, 
-    // hoặc ta có thể kiểm tra trực tiếp.
+    // ✅ Public routes
     const publicPaths = [
         "/login",
-        "/api/v1/admin/auth", // Cho phép các route login/refresh của gateway
+        "/api/auth", // ✔ sửa lại theo chuẩn mới
     ];
 
     const isPublic = publicPaths.some((path) =>
         pathname === path || pathname.startsWith(path + "/")
     );
 
-    // ❌ Trường hợp chưa đăng nhập: 
-    // Redirect về trang login nếu đang truy cập các route bảo mật
+    // ❌ Chưa login → redirect login
     if (!token && !isPublic) {
         const loginUrl = new URL("/admin/login", request.url);
-        // Nếu muốn quay lại trang cũ sau khi login, có thể thêm callbackUrl
         loginUrl.searchParams.set("callbackUrl", pathname);
         return NextResponse.redirect(loginUrl);
     }
 
-    // ✅ Trường hợp đã đăng nhập mà cố vào trang login:
-    // Đẩy về hub (trang chính của admin)
+    // ✅ Đã login mà vào login → đẩy về hub
     if (token && pathname === "/login") {
         return NextResponse.redirect(new URL("/admin/hub", request.url));
     }
@@ -41,4 +34,4 @@ export const config = {
     matcher: [
         '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
-}
+};

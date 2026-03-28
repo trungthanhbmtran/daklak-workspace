@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { INTERNAL_GATEWAY_URL } from "./config/constants";
 
 const nextConfig: NextConfig = {
   output: 'standalone',
@@ -25,14 +24,7 @@ const nextConfig: NextConfig = {
       fullUrl: true,
     },
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${INTERNAL_GATEWAY_URL}/:path*`,
-      },
-    ];
-  },
+
 };
 
 export default nextConfig;
