@@ -3,6 +3,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
 import apiClient from "@/lib/axiosInstance";
+import { useRouter } from "next/navigation";
+
 
 /**
  * Hook đăng xuất: xóa toàn bộ cache React Query (menu, quyền, dữ liệu theo user)
@@ -10,6 +12,7 @@ import apiClient from "@/lib/axiosInstance";
  */
 export function useLogout() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleLogout() {
@@ -24,7 +27,7 @@ export function useLogout() {
         console.error("Logout error:", error);
       } finally {
         // 3. Luôn chuyển hướng về trang login kể cả khi API lỗi
-        window.location.href = "/login";
+        router.push("/login");
       }
     });
   }

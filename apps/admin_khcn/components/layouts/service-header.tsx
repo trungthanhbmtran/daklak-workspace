@@ -28,7 +28,7 @@ export function ServiceHeader({ serviceKey }: { serviceKey: string }) {
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-background sticky top-0 z-10 shadow-sm transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-      
+
       {/* TRÁI: Toggle Sidebar & Tiêu đề */}
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
@@ -67,7 +67,7 @@ export function ServiceHeader({ serviceKey }: { serviceKey: string }) {
               <Settings className="mr-2 h-4 w-4" /> Cài đặt
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-border" />
-            
+
             {/* Đăng xuất: xóa cache React Query rồi mới gọi server để tránh user mới thấy quyền user cũ */}
             <DropdownMenuItem
               className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"

@@ -79,20 +79,20 @@ export function AppSidebar({
                 </div>
               </SidebarMenuItem>
             ) : (
-            items.map((item) => {
-              const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-              const Icon = item.icon;
-              return (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton asChild tooltip={item.name} isActive={isActive}>
-                    <Link href={item.href}>
-                      <Icon className="size-4" />
-                      <span>{item.name}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              );
-            })
+              items.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild tooltip={item.name} isActive={isActive}>
+                      <Link href={item.href}>
+                        <Icon className="size-4" />
+                        <span>{item.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })
             )}
           </SidebarMenu>
         </SidebarGroup>
