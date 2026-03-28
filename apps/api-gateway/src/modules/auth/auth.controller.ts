@@ -58,7 +58,7 @@ export class AuthController implements OnModuleInit {
       // Set cookies
       const cookieConfig = {
         httpOnly: true,
-        secure: true, // Should be true in production, but user explicitly asked for true
+        secure: false, // Tắt secure để chạy được trên HTTP (port 80)
         sameSite: 'strict' as const,
         maxAge: 15 * 60 * 1000,
       };
@@ -97,7 +97,7 @@ export class AuthController implements OnModuleInit {
       // Set cookies
       const cookieConfig = {
         httpOnly: true,
-        secure: true,
+        secure: false, // Tắt secure để chạy được trên HTTP (port 80)
         sameSite: 'strict' as const,
         maxAge: 15 * 60 * 1000,
       };
