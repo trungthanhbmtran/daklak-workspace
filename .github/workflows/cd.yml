@@ -121,6 +121,7 @@ jobs:
           docker compose --profile migrate run --rm hrm-service-migrate || true
           docker compose --profile migrate run --rm media-service-migrate || true
           docker compose --profile migrate run --rm posts-service-migrate || true
+          docker compose --profile migrate run --rm workflow-service-migrate || true
 
           echo "🚀 Start services..."
           docker compose up -d
