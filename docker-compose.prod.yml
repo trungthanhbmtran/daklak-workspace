@@ -289,6 +289,7 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
     logging:
       driver: "json-file"
       options:
@@ -306,6 +307,7 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
     logging:
       driver: "json-file"
       options:
@@ -323,6 +325,7 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
     logging:
       driver: "json-file"
       options:
@@ -344,6 +347,7 @@ services:
       - DB_USER=root
       - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - DB_NAME=admin_posts
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
     logging:
       driver: "json-file"
       options:
@@ -361,6 +365,7 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
     logging:
       driver: "json-file"
       options:
