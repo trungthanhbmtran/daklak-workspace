@@ -14,9 +14,6 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main"
   },
-  "prisma": {
-    "seed": "npx ts-node prisma/seed.ts"
-  },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",
     "@nestjs/common": "^11.0.1",
@@ -24,7 +21,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/microservices": "^11.1.13",
     "@nestjs/platform-express": "^11.0.1",
-    "@prisma/adapter-mariadb": "^7.4.1",
+    "@prisma/adapter-mariadb": "^7.5.0",
     "@prisma/client": "^6.19.2",
     "dotenv": "^16.4.5",
     "reflect-metadata": "^0.2.2",
