@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { MediaController } from './media.controller'; // Hoặc StorageController tùy bạn đặt tên
-import { PrismaModule } from '../../database/prisma.module'; // IMPORT VÀO ĐÂY
+import { MediaController } from './media.controller';
+import { PrismaModule } from '../../database/prisma.module';
 
 @Module({
-  imports: [PrismaModule], // KẾT NỐI PRISMA VÀO MODULE NÀY
+  imports: [PrismaModule],
   controllers: [MediaController],
   providers: [StorageService],
   exports: [StorageService],
 })
-export class StorageModule {}
+export class StorageModule { }
