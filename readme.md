@@ -32,6 +32,7 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm user-servic
 docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate
+docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate
 
 # Khởi động lại các services
 docker compose -f docker-compose.prod.yml up -d

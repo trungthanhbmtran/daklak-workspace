@@ -233,6 +233,30 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  workflow-service:
+    image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/workflow-service/Dockerfile
+      target: runner
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
+      - JWT_SECRET=${JWT_SECRET}
+      - GRPC_URL=0.0.0.0:50060
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
     build:
@@ -320,6 +344,23 @@ services:
       - DB_USER=root
       - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - DB_NAME=admin_posts
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  workflow-service-migrate:
+    image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
+    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
+    profiles: [ "migrate" ]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
     logging:
       driver: "json-file"
       options:

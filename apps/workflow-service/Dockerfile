@@ -3,7 +3,7 @@
 # ==========================================
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY apps/user-service/package*.json ./
+COPY apps/workflow-service/package*.json ./
 RUN npm ci
 
 # ==========================================
@@ -12,7 +12,7 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/user-service/ ./
+COPY apps/workflow-service/ ./
 COPY shared/protos ./shared/protos
 
 # Generate Prisma Client (merge schema if needed)
@@ -31,7 +31,7 @@ ENV NODE_ENV=production
 RUN apk add --no-cache openssl
 
 # Install prod deps + Prisma CLI (Requirement: Prisma CLI in production)
-COPY apps/user-service/package*.json ./
+COPY apps/workflow-service/package*.json ./
 RUN npm ci --omit=dev && npm install prisma --save-prod
 
 COPY --from=builder /app/dist ./dist
@@ -47,6 +47,6 @@ RUN addgroup -S app && adduser -S app -G app
 RUN chown -R app:app /app
 USER app
 
-EXPOSE 3001
+EXPOSE 3001 50060
 # Command overrideable: CMD for app, or 'npx prisma migrate deploy' for migration
 CMD ["node", "dist/src/main.js"]
