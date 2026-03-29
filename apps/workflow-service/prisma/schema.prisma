@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Workflow {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  definition  Json     // { nodes: [], edges: [] }
+  active      Boolean  @default(true)
+  version     Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  instances   WorkflowInstance[]
+
+  @@map("workflows")
+}
+
+model WorkflowInstance {
+  id            String   @id @default(uuid())
+  workflowId    String
+  workflow      Workflow @relation(fields: [workflowId], references: [id])
+  status        String   // PENDING, RUNNING, COMPLETED, FAILED, WAITING
+  currentNodeId String?
+  context       Json     // Data/Variables processed during the workflow
+  logs          ExecutionLog[]
+  initiatorId   String?  // User ID who started the workflow
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("workflow_instances")
+}
+
+model ExecutionLog {
+  id          String   @id @default(uuid())
+  instanceId  String
+  instance    WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  nodeId      String
+  nodeType    String
+  nodeLabel   String?
+  action      String   // e.g., "ENTER", "EXECUTE", "EXIT", "ERROR"
+  data        Json?    // Input/Output data for this node
+  error       String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@map("execution_logs")
+}

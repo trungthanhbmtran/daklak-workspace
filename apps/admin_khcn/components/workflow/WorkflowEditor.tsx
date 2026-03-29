@@ -25,6 +25,8 @@ import PropertiesPanel from "./PropertiesPanel";
 import Topbar from "./Topbar";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { cn } from "@/lib/utils";
+import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 const initialNodes: Node[] = [
   {
@@ -40,6 +42,8 @@ const Flow = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [workflowId, setWorkflowId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   
   const { apps: availableServices } = useHubServices();
   const { screenToFlowPosition } = useReactFlow();
@@ -106,19 +110,46 @@ const Flow = () => {
     setSelectedNodeId(null);
   }, [setNodes, setEdges]);
 
-  const onSave = useCallback(() => {
-    const workflow = {
-      nodes,
-      edges,
+  const onSave = useCallback(async () => {
+    setIsSaving(true);
+    const workflowData = {
+      name: "Quy trình mới", // TODO: Thêm input tên quy trình
+      description: "Được tạo từ Workflow Builder",
+      definition: { nodes, edges },
     };
-    console.log("Saving workflow:", JSON.stringify(workflow, null, 2));
-    alert("Workflow saved to console!");
-  }, [nodes, edges]);
 
-  const onPublish = useCallback(() => {
-    console.log("Publishing workflow...");
-    alert("Workflow published successfully!");
-  }, []);
+    try {
+      let response: any;
+      if (workflowId) {
+        response = await apiClient.put(`/admin/workflow/${workflowId}`, workflowData);
+        toast.success("Đã cập nhật quy trình!");
+      } else {
+        response = await apiClient.post("/admin/workflow", workflowData);
+        setWorkflowId(response.id);
+        toast.success("Đã lưu quy trình mới!");
+      }
+    } catch (error) {
+      console.error("Save error:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [nodes, edges, workflowId]);
+
+  const onPublish = useCallback(async () => {
+    if (!workflowId) {
+      toast.error("Vui lòng lưu bản nháp trước khi xuất bản!");
+      return;
+    }
+    
+    try {
+      await apiClient.post(`/admin/workflow/${workflowId}/start`, { 
+        initialContext: { startedAt: new Date().toISOString() } 
+      });
+      toast.success("Đã xuất bản và chạy thử nghiệm quy trình!");
+    } catch (error) {
+      console.error("Publish error:", error);
+    }
+  }, [workflowId]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || null;
 

@@ -10,8 +10,17 @@ const getDocumentUrl = () => process.env.DOCUMENT_SERVICE_URL || 'document-servi
 const getPostUrl = () => process.env.POST_SERVICE_URL || 'posts-service:50055';
 const getMediaUrl = () => process.env.MEDIA_SERVICE_URL || 'media-service:50059';
 const getTranslateUrl = () => process.env.TRANSLATE_SERVICE_URL || 'translate-service:50053';
+const getWorkflowUrl = () => process.env.WORKFLOW_SERVICE_URL || 'workflow-service:50060';
 
 export const MICROSERVICES = {
+  // Workflow (workflow-service)
+  WORKFLOW: {
+    PACKAGE: 'workflow',
+    SYMBOL: 'WORKFLOW_PACKAGE',
+    PROTO: 'workflow/workflow.proto',
+    URL: getWorkflowUrl(),
+    SERVICE: 'WorkflowService',
+  },
   // Auth (user_service)
   AUTH: {
     PACKAGE: 'auth',

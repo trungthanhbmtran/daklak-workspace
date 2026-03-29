@@ -8,6 +8,7 @@ import { PostsModule } from './modules/posts/posts.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AppController } from './modules/app/app.controller';
 import { MediaModule } from './modules/media/media.module';
+import { WorkflowModule } from './modules/workflow/workflow.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,6 +23,7 @@ import { MediaModule } from './modules/media/media.module';
     // DocumentsModule, // Temporarily disabled: missing protos
     PostsModule,
     MediaModule,
+    WorkflowModule,
   ],
   controllers: [AppController],
   providers: [],

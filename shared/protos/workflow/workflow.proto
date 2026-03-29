@@ -1,0 +1,111 @@
+syntax = "proto3";
+
+package workflow;
+
+import "google/protobuf/struct.proto";
+
+service WorkflowService {
+  rpc CreateWorkflow (CreateWorkflowRequest) returns (WorkflowResponse);
+  rpc UpdateWorkflow (UpdateWorkflowRequest) returns (WorkflowResponse);
+  rpc FindOneWorkflow (FindOneWorkflowRequest) returns (WorkflowResponse);
+  rpc ListWorkflows (ListWorkflowsRequest) returns (ListWorkflowsResponse);
+  rpc DeleteWorkflow (DeleteWorkflowRequest) returns (DeleteWorkflowResponse);
+
+  // Execution Engine
+  rpc StartWorkflow (StartWorkflowRequest) returns (WorkflowInstanceResponse);
+  rpc ResumeWorkflow (ResumeWorkflowRequest) returns (WorkflowInstanceResponse);
+  rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
+  rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
+}
+
+message CreateWorkflowRequest {
+  string name = 1;
+  string description = 2;
+  google.protobuf.Struct definition = 3;
+}
+
+message UpdateWorkflowRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  google.protobuf.Struct definition = 4;
+}
+
+message FindOneWorkflowRequest {
+  string id = 1;
+}
+
+message ListWorkflowsRequest {
+  int32 skip = 1;
+  int32 take = 2;
+}
+
+message ListWorkflowsResponse {
+  repeated WorkflowResponse items = 1;
+  int32 total = 2;
+}
+
+message DeleteWorkflowRequest {
+  string id = 1;
+}
+
+message DeleteWorkflowResponse {
+  bool success = 1;
+}
+
+message WorkflowResponse {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  google.protobuf.Struct definition = 4;
+  string created_at = 5;
+  string updated_at = 6;
+}
+
+message StartWorkflowRequest {
+  string workflow_id = 1;
+  google.protobuf.Struct initial_context = 2;
+  string initiator_id = 3;
+}
+
+message ResumeWorkflowRequest {
+  string instance_id = 1;
+  string node_id = 2;
+  google.protobuf.Struct action_data = 3;
+  repeated string user_roles = 4;
+}
+
+message GetInstanceRequest {
+  string id = 1;
+}
+
+message GetLogsRequest {
+  string instance_id = 1;
+}
+
+message WorkflowInstanceResponse {
+  string id = 1;
+  string workflow_id = 2;
+  string status = 3;
+  string current_node_id = 4;
+  google.protobuf.Struct context = 5;
+  string created_at = 6;
+  string updated_at = 7;
+  string workflow_name = 8;
+  repeated ExecutionLog logs = 9;
+}
+
+message GetLogsResponse {
+  repeated ExecutionLog logs = 1;
+}
+
+message ExecutionLog {
+  string id = 1;
+  string node_id = 2;
+  string node_type = 3;
+  string node_label = 4;
+  string action = 5;
+  google.protobuf.Struct data = 6;
+  string error = 7;
+  string created_at = 8;
+}
