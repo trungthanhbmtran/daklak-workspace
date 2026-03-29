@@ -1,8 +1,5 @@
 generator client {
   provider   = "prisma-client-js"
-  // Ép kiểu engine về library để chạy ổn định trên Docker/Node.js 
-  // mà không cần Driver Adapter phức tạp
-  engineType = "library" 
   previewFeatures = ["prismaSchemaFolder"]
 }
 

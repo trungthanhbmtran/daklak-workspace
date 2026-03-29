@@ -1,51 +1,46 @@
 # ==========================================
-# 1️⃣ Dependency Stage
+# 1️⃣ Dependencies
 # ==========================================
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 WORKDIR /app
-COPY apps/posts_service/package*.json ./
+COPY package*.json ./
 RUN npm ci
 
 # ==========================================
-# 2️⃣ Builder Stage
+# 2️⃣ Builder
 # ==========================================
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
+
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/posts_service/ ./
-COPY shared/protos ./shared/protos
+COPY . .
 
-# Generate Prisma Client
+# Prisma
 RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate
 
-# Build the app
+# Build
 RUN npm run build
 
 # ==========================================
-# 3️⃣ Production Runner Stage
+# 3️⃣ Runner
 # ==========================================
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
-ENV NODE_ENV=production
-RUN apk add --no-cache openssl
 
-# Install prod deps + Prisma CLI
-COPY apps/posts_service/package*.json ./
-RUN npm ci --omit=dev && npm install prisma --save-prod
+ENV NODE_ENV=production
+
+COPY package*.json ./
+RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder /app/shared/protos ./protos
 
-ENV PROTO_PATH=/app/protos
-
-# Security
-RUN addgroup -S app && adduser -S app -G app
-RUN chown -R app:app /app
+# security
+RUN useradd -m app
 USER app
 
-EXPOSE 3005
+EXPOSE 30005
 CMD ["node", "dist/src/main.js"]
