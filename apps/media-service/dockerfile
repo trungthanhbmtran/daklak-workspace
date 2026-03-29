@@ -1,28 +1,39 @@
 # ==========================================
-# 1️⃣ Dependencies
+# 1️⃣ Base & Build Tools
 # ==========================================
-FROM node:20-slim AS deps
+FROM node:20-slim AS base
 WORKDIR /app
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# ==========================================
+# 2️⃣ Dependencies
+# ==========================================
+FROM base AS deps
 COPY package*.json ./
 RUN npm ci
 
 # ==========================================
-# 2️⃣ Builder
+# 3️⃣ Build Production Dependencies
 # ==========================================
-FROM node:20-slim AS builder
-WORKDIR /app
+FROM base AS prod-deps
+COPY package*.json ./
+RUN npm ci --omit=dev
 
+# ==========================================
+# 4️⃣ Builder
+# ==========================================
+FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Prisma
-RUN npx prisma generate
-
-# Build
+# Prisma & Build (automated in npm run build)
 RUN npm run build
 
 # ==========================================
-# 3️⃣ Runner
+# 5️⃣ Runner
 # ==========================================
 FROM node:20-slim AS runner
 WORKDIR /app
@@ -30,15 +41,14 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY package*.json ./
-RUN npm ci --omit=dev
-
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
 # security
-RUN useradd -m app
+RUN useradd -m app && chown -R app:app /app
 USER app
 
 EXPOSE 3003

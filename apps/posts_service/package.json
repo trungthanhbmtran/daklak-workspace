@@ -4,8 +4,8 @@
   "description": "post",
   "main": "server.js",
   "scripts": {
-    "build": "nest build",
-    "prisma:generate": "prisma generate --schema=./prisma/schema",
+    "build": "npm run prisma:generate && nest build",
+    "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
@@ -19,7 +19,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:grpc": "node test-grpc-client.js"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",
