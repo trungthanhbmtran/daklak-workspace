@@ -9,10 +9,13 @@
     "prisma:generate": "prisma generate --schema=./prisma/schema",
     "prisma:migrate": "prisma migrate dev --schema=./prisma/schema",
     "prisma:studio": "prisma studio --schema=./prisma/schema",
-    "prisma:seed": "ts-node prisma/seed.ts",
+    "prisma:seed": "npx ts-node prisma/seed.ts",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main"
+  },
+  "prisma": {
+    "seed": "npx ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.3",

@@ -39,8 +39,9 @@ docker compose -f docker-compose.prod.yml up -d
 # Chạy seeders (nếu cần dữ liệu mẫu)
 # Lưu ý: Nên chạy theo thứ tự dưới đây
 docker exec -it daklak-workspace-user-service-1 npx prisma db seed
-docker exec -it daklak-workspace-hrm-service-1 npm run prisma:seed
-docker exec -it daklak-workspace-media-service-1 npm run prisma:seed
+docker exec -it daklak-workspace-hrm-service-1 npx prisma db seed
+docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
+docker exec -it daklak-workspace-media-service-1 npx prisma db seed
 ```
 
 ## 4. Thông tin Tài khoản & Kết nối
@@ -63,6 +64,7 @@ Thông tin đăng nhập mặc định cho các dịch vụ:
 | `media-service` | `3003` | `admin_media` |
 | `posts-service` | `3005` | `admin_posts` |
 | `translate-service` | `3006` | `daklak_translation` |
+| `workflow-service` | `50060` (gRPC), `3001` (REST) | `admin_workflow` |
 | `admin-khcn` | `3007` | - |
 
 *Lưu ý: Đảm bảo file `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*
