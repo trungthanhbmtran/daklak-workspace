@@ -133,7 +133,7 @@ export class OrganizationsController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'success, message' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     try {
-      const res = await firstValueFrom(this.orgService.DeleteUnit({ id })) as { success?: boolean; message?: string };
+      const res = (await firstValueFrom(this.orgService.DeleteUnit({ id }))) as any;
       return { success: res?.success ?? true, message: res?.message ?? 'Đã xóa đơn vị' };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi xóa đơn vị';

@@ -69,7 +69,7 @@ export class MenusController implements OnModuleInit {
   async getAll(@Query('app') app?: string) {
     const res = (await firstValueFrom(
       this.menuService.GetAll({ app: app || 'ADMIN_PORTAL' }),
-    )) as { items?: any[] };
+    )) as any;
     const items = res?.items ?? [];
     return items.map(toFrontendItem);
   }
@@ -133,7 +133,7 @@ export class MenusController implements OnModuleInit {
   async create(@Body() body: any) {
     try {
       const payload = this.toCreatePayload(body);
-      const res = (await firstValueFrom(this.menuService.Create(payload))) as { menu?: any };
+      const res = (await firstValueFrom(this.menuService.Create(payload))) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi tạo menu';
@@ -178,7 +178,7 @@ export class MenusController implements OnModuleInit {
   ) {
     try {
       const payload = this.toUpdatePayload(id, body);
-      const res = (await firstValueFrom(this.menuService.Update(payload))) as { menu?: any };
+      const res = (await firstValueFrom(this.menuService.Update(payload))) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi cập nhật menu';
@@ -190,7 +190,7 @@ export class MenusController implements OnModuleInit {
   @ApiOperation({ summary: 'Xóa menu' })
   @ApiResponse({ status: 200, description: 'Đã xóa' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const res = (await firstValueFrom(this.menuService.Delete({ id }))) as { success?: boolean; message?: string };
+    const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
     return { success: res?.success ?? true, message: res?.message ?? 'Đã xóa menu' };
   }
 }

@@ -93,7 +93,7 @@ export class CategoriesController implements OnModuleInit {
   @ApiOperation({ summary: 'Xóa danh mục (không xóa được danh mục hệ thống)' })
   @ApiResponse({ status: 200, description: 'Đã xóa' })
   async delete(@Param('id', ParseIntPipe) id: number) {
-    const res = (await firstValueFrom(this.categoryService.Delete({ id }))) as { success?: boolean; message?: string };
+    const res = (await firstValueFrom(this.categoryService.Delete({ id }))) as any;
     return { success: res?.success ?? true, message: res?.message ?? 'Đã xóa danh mục' };
   }
 }

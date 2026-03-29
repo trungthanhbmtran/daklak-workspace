@@ -56,7 +56,7 @@ export class DepartmentController implements OnModuleInit {
   @Get()
   @ApiOperation({ summary: 'Danh sách đơn vị (flatten từ cây, user-service)' })
   async list(@Query() query: any) {
-    const res = await firstValueFrom(this.orgService.GetFullTree({})) as { nodes?: any[] };
+    const res = (await firstValueFrom(this.orgService.GetFullTree({}))) as any;
     const all = flattenUnits(res.nodes ?? []);
     let list = all;
     const parentId = query.parentId != null ? parseInt(query.parentId, 10) : undefined;
