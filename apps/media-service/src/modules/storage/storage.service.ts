@@ -1,12 +1,12 @@
 import { Injectable, InternalServerErrorException, NotFoundException, OnModuleInit } from '@nestjs/common';
-import { 
-  S3Client, 
-  PutObjectCommand, 
-  HeadObjectCommand, 
-  HeadBucketCommand, 
-  CreateBucketCommand, 
-  CreateMultipartUploadCommand, 
-  UploadPartCommand, 
+import {
+  S3Client,
+  PutObjectCommand,
+  HeadObjectCommand,
+  HeadBucketCommand,
+  CreateBucketCommand,
+  CreateMultipartUploadCommand,
+  UploadPartCommand,
   CompleteMultipartUploadCommand,
   GetObjectCommand
 } from '@aws-sdk/client-s3';
@@ -47,7 +47,7 @@ export class StorageService implements OnModuleInit {
   // =========================================================================
   // 1. LUỒNG UPLOAD ĐƠN (ẢNH, FILE NHẸ)
   // =========================================================================
-  
+
   async generateUploadUrl(userId: string, data: { name: string, type: string, size: number }) {
     const fileKey = `${userId}/${Date.now()}-${data.name}`;
 
@@ -130,7 +130,7 @@ export class StorageService implements OnModuleInit {
           ownerId: userId,
           bucket: this.bucket,
           status: MediaStatus.PENDING,
-          uploadId: uploadId,          
+          uploadId: uploadId,
         },
       });
 
