@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 
 interface PropertiesPanelProps {
   selectedNode: Node | null;
+  availableServices?: any[];
   onUpdate: (id: string, data: any) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
@@ -20,6 +21,7 @@ interface PropertiesPanelProps {
 
 export const PropertiesPanel = ({ 
   selectedNode, 
+  availableServices = [],
   onUpdate, 
   onDelete, 
   onClose 
@@ -129,13 +131,20 @@ export const PropertiesPanel = ({
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
                   Target Service
                 </label>
-                <input
+                <select
                   name="service"
                   value={data.service || ""}
                   onChange={handleChange}
                   className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                  placeholder="Service name..."
-                />
+                >
+                  <option value="">Select target service...</option>
+                  {availableServices.map((app) => (
+                    <option key={app.id} value={app.title}>
+                      {app.title}
+                    </option>
+                  ))}
+                  <option value="External Service">External API</option>
+                </select>
               </div>
             </div>
           </>

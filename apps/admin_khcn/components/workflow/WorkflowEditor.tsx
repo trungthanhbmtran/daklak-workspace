@@ -23,6 +23,7 @@ import { nodeTypes } from "./nodes";
 import NodePalette from "./NodePalette";
 import PropertiesPanel from "./PropertiesPanel";
 import Topbar from "./Topbar";
+import { useHubServices } from "@/hooks/useServiceMenus";
 import { cn } from "@/lib/utils";
 
 const initialNodes: Node[] = [
@@ -40,6 +41,7 @@ const Flow = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   
+  const { apps: availableServices } = useHubServices();
   const { screenToFlowPosition } = useReactFlow();
 
   const onConnect = useCallback(
@@ -170,6 +172,7 @@ const Flow = () => {
 
         <PropertiesPanel 
           selectedNode={selectedNode}
+          availableServices={availableServices}
           onUpdate={onUpdateNodeData}
           onDelete={onDeleteNode}
           onClose={() => setSelectedNodeId(null)}
