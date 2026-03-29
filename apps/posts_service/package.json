@@ -46,9 +46,6 @@
     "rxjs": "^7.8.1",
     "winston": "^3.17.0"
   },
-  "prisma": {
-    "schema": "prisma/schema"
-  },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
