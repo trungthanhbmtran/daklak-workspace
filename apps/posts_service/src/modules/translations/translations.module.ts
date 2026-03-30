@@ -3,9 +3,12 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { TranslationService } from './translations.service';
 import { TranslationsController } from './translations.controller';
 import { TranslationsWorker } from './translations.worker';
+import { TranslationsRepository } from './repositories/translations.repository';
+import { PostsModule } from '../posts/posts.module';
 
 @Module({
     imports: [
+        PostsModule,
         ClientsModule.register([
             {
                 name: 'RABBITMQ_SERVICE',
@@ -21,7 +24,7 @@ import { TranslationsWorker } from './translations.worker';
         ]),
     ],
     controllers: [TranslationsController, TranslationsWorker],
-    providers: [TranslationService],
+    providers: [TranslationService, TranslationsRepository],
     exports: [TranslationService],
 })
 export class TranslationsModule { }

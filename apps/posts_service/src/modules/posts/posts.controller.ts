@@ -1,13 +1,17 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { PostsService } from './posts.service';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { QueryPostDto } from './dto/query-post.dto';
 
 @Controller()
 export class PostsController {
     constructor(private readonly postsService: PostsService) { }
 
     @GrpcMethod('PostService', 'CreatePost')
-    async createPost(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async createPost(data: CreatePostDto) {
         try {
             const post = await this.postsService.createPost(data);
             return { success: true, data: post };
@@ -22,12 +26,14 @@ export class PostsController {
     }
 
     @GrpcMethod('PostService', 'ListPosts')
-    async listPosts(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async listPosts(data: QueryPostDto) {
         return this.postsService.getList(data);
     }
 
     @GrpcMethod('PostService', 'UpdatePost')
-    async updatePost(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async updatePost(data: UpdatePostDto & { id: string }) {
         try {
             const post = await this.postsService.update(data.id, data);
             return { success: true, data: post };
@@ -77,28 +83,11 @@ export class PostsController {
     }
 
     @GrpcMethod('PostService', 'ReviewPost')
-    async reviewPost(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async reviewPost(data: UpdatePostDto & { id: string }) {
         try {
             const post = await this.postsService.reviewPost(data.id, data);
-
-            // Formatting to match proto requirements
-            return {
-                success: true,
-                data: {
-                    ...post,
-                    publishedAt: post.publishedAt?.toISOString() || '',
-                    createdAt: post.createdAt?.toISOString() || '',
-                    updatedAt: post.updatedAt?.toISOString() || '',
-                    contentJson: typeof post.contentJson === 'object' ? JSON.stringify(post.contentJson) : post.contentJson,
-                    moderationNote: post.moderationNote || '',
-                    category: post.category ? {
-                        id: post.category.id,
-                        name: post.category.name,
-                        slug: post.category.slug
-                    } : null,
-                    tags: post.tags || []
-                }
-            };
+            return { success: true, data: post };
         } catch (error) {
             throw new RpcException(error);
         }

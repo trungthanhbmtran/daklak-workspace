@@ -1,71 +1,55 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { PrismaService } from '@/database/prisma.service';
+import { CategoriesRepository } from './repositories/categories.repository';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from '@prisma/client';
 
 @Injectable()
 export class CategoryService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private readonly categoriesRepository: CategoriesRepository) { }
 
-    async create(data: any) {
-        // Nested set logic should be handled here or via Prisma middleware/hooks
-        // For now, implementing basic creation
-        return this.prisma.category.create({ data });
+    async create(data: CreateCategoryDto): Promise<Category> {
+        // Here you would normally calculate lft/rgt if not automated
+        return this.categoriesRepository.create(data);
     }
 
-    async findById(id: string) {
-        const category = await this.prisma.category.findUnique({
-            where: { id },
-            include: { children: true, parent: true }
-        });
+    async findById(id: string): Promise<Category> {
+        const category = await this.categoriesRepository.findById(id);
         if (!category) throw new RpcException({ code: 5, message: 'Category not found' });
         return category;
     }
 
-    async update(id: string, data: any) {
-        return this.prisma.category.update({
-            where: { id },
-            data
-        });
+    async update(id: string, data: UpdateCategoryDto): Promise<Category> {
+        await this.findById(id); // Check existence
+        return this.categoriesRepository.update(id, data);
     }
 
-    async delete(id: string) {
-        // Should also handle descendants if using nested set
-        return this.prisma.category.delete({ where: { id } });
+    async delete(id: string): Promise<Category> {
+        await this.findById(id); // Check existence
+        return this.categoriesRepository.delete(id);
     }
 
-    async getAllFlat() {
-        return this.prisma.category.findMany({
-            orderBy: { lft: 'asc' }
-        });
+    async getAllFlat(): Promise<Category[]> {
+        return this.categoriesRepository.findAllFlat();
     }
 
-    async getFullTree() {
-        const categories = await this.prisma.category.findMany({
-            orderBy: { lft: 'asc' }
-        });
+    async getFullTree(): Promise<any[]> {
+        const categories = await this.categoriesRepository.findAllFlat();
         return this.buildTree(categories);
     }
 
-    async getSubTree(id: string) {
+    async getSubTree(id: string): Promise<any[]> {
         const root = await this.findById(id);
-        const descendants = await this.prisma.category.findMany({
-            where: {
-                lft: { gte: root.lft },
-                rgt: { lte: root.rgt }
-            },
-            orderBy: { lft: 'asc' }
-        });
-        return this.buildTree(descendants);
+        const descendants = await this.categoriesRepository.findSubTree(root.lft, root.rgt);
+        return this.buildTree(descendants, root.parentId);
     }
 
-    async getAllForPost() {
-        return this.prisma.category.findMany({
-            where: { status: true },
-            orderBy: { lft: 'asc' }
-        });
+    async getAllForPost(): Promise<Category[]> {
+        return this.categoriesRepository.findActive();
     }
 
-    private buildTree(nodes: any[], parentId: string | null = null): any[] {
+    private buildTree(nodes: Category[], parentId: string | null = null): any[] {
         return nodes
             .filter(node => node.parentId === parentId)
             .map(node => ({

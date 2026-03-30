@@ -1,13 +1,16 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { CategoryService } from './categories.service';
+import { CreateCategoryDto } from './dto/create-category.dto';
+import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller()
 export class CategoriesController {
     constructor(private readonly categoryService: CategoryService) { }
 
     @GrpcMethod('CategoryService', 'CreateCategory')
-    async createCategory(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async createCategory(data: CreateCategoryDto) {
         return this.categoryService.create(data);
     }
 
@@ -45,7 +48,8 @@ export class CategoriesController {
     }
 
     @GrpcMethod('CategoryService', 'UpdateCategory')
-    async updateCategory(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async updateCategory(data: UpdateCategoryDto & { id: string }) {
         return this.categoryService.update(data.id, data);
     }
 

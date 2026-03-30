@@ -1,36 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { PrismaService } from '@/database/prisma.service';
+import { PostsRepository } from './repositories/posts.repository';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { QueryPostDto } from './dto/query-post.dto';
+import { PostStatus } from '@prisma/client';
 
 @Injectable()
 export class PostsService {
-    constructor(private prisma: PrismaService) { }
+    constructor(private readonly postsRepository: PostsRepository) { }
 
-    async createPost(data: any) {
-        const { tagIds, ...postData } = data;
-
-        return this.prisma.post.create({
-            data: {
-                ...postData,
-                tags: tagIds ? {
-                    connect: tagIds.map((id: string) => ({ id }))
-                } : undefined,
-            },
-            include: {
-                category: true,
-                tags: true,
-            }
-        });
+    async createPost(data: CreatePostDto) {
+        return this.postsRepository.create(data);
     }
 
     async findById(id: string) {
-        const post = await this.prisma.post.findUnique({
-            where: { id },
-            include: {
-                category: true,
-                tags: true,
-            }
-        });
+        const post = await this.postsRepository.findById(id);
         if (!post) {
             throw new RpcException({ code: 5, message: 'Post not found' });
         }
@@ -38,147 +23,73 @@ export class PostsService {
     }
 
     async findBySlug(slug: string) {
-        const post = await this.prisma.post.findUnique({
-            where: { slug },
-            include: {
-                category: true,
-                tags: true,
-            }
-        });
+        const post = await this.postsRepository.findBySlug(slug);
         if (!post) {
             throw new RpcException({ code: 5, message: 'Post not found' });
         }
         return post;
     }
 
-    async getList(query: { page?: number; limit?: number; search?: string; categorySlug?: string }) {
-        const skip = ((query.page || 1) - 1) * (query.limit || 10);
-        const take = query.limit || 10;
-
-        const where: any = {};
-        if (query.search) {
-            where.OR = [
-                { title: { contains: query.search } },
-            ];
-        }
-        if (query.categorySlug) {
-            where.category = { slug: query.categorySlug.startsWith('/') ? query.categorySlug : `/${query.categorySlug}` };
-        }
-
-        const [items, total] = await Promise.all([
-            this.prisma.post.findMany({
-                where,
-                skip,
-                take,
-                include: {
-                    category: true,
-                    tags: true,
-                },
-                orderBy: { createdAt: 'desc' },
-            }),
-            this.prisma.post.count({ where }),
-        ]);
-
-        return {
-            rows: items,
-            count: total,
-        };
+    async getList(query: QueryPostDto) {
+        return this.postsRepository.findMany(query);
     }
 
-    async update(id: string, data: any) {
-        const { tagIds, ...updateData } = data;
-        return this.prisma.post.update({
-            where: { id },
-            data: {
-                ...updateData,
-                tags: tagIds ? {
-                    set: tagIds.map((id: string) => ({ id }))
-                } : undefined,
-            },
-        });
+    async update(id: string, data: UpdatePostDto) {
+        await this.findById(id); // Check existence
+        return this.postsRepository.update(id, data);
     }
 
     async delete(id: string) {
-        return this.prisma.post.delete({ where: { id } });
+        await this.findById(id); // Check existence
+        return this.postsRepository.delete(id);
     }
 
     async addTagsToPost(postId: string, tagIds: string[]) {
-        return this.prisma.post.update({
-            where: { id: postId },
-            data: {
-                tags: {
-                    connect: tagIds.map(id => ({ id }))
-                }
-            }
-        });
+        await this.findById(postId);
+        return this.postsRepository.addTags(postId, tagIds);
     }
 
     async removeTagFromPost(postId: string, tagId: string) {
-        return this.prisma.post.update({
-            where: { id: postId },
-            data: {
-                tags: {
-                    disconnect: { id: tagId }
-                }
-            }
-        });
+        await this.findById(postId);
+        return this.postsRepository.removeTag(postId, tagId);
     }
 
     async getTagsByPost(postId: string) {
-        const post = await this.prisma.post.findUnique({
-            where: { id: postId },
-            select: { tags: true }
-        });
-        return post?.tags || [];
+        await this.findById(postId);
+        return this.postsRepository.getTags(postId);
     }
 
     async setCategoryForPost(postId: string, categoryId: string) {
-        return this.prisma.post.update({
-            where: { id: postId },
-            data: { categoryId }
-        });
+        await this.findById(postId);
+        return this.postsRepository.setCategory(postId, categoryId);
     }
 
     async getPostsByCategorySlug(slug: string) {
-        return this.prisma.post.findMany({
-            where: {
-                category: { slug }
-            },
-            include: {
-                category: true,
-                tags: true
-            },
-            orderBy: { createdAt: 'desc' }
-        });
+        return this.postsRepository.findByCategorySlug(slug);
     }
 
-    async reviewPost(id: string, data: any) {
-        // Logic similar to reviewPost in post.service.js
-        const { status, note, reviewerId, ...otherData } = data;
+    async reviewPost(id: string, data: UpdatePostDto) {
+        const post = await this.findById(id);
+        const { status, moderationNote: note, reviewerId, ...otherData } = data;
 
-        let moderationNote = note;
-        if (status === 'published') {
-            moderationNote = null;
+        let finalNote = note;
+        if (status === PostStatus.published) {
+            finalNote = '';
         } else if (!note) {
-            if (status === 'rejected') moderationNote = 'Nội dung bị từ chối bởi quản trị viên';
-            else if (status === 'editing') moderationNote = 'Yêu cầu chỉnh sửa lại nội dung';
-            else if (status === 'approved') moderationNote = 'Nội dung đã được thông qua';
-            else if (status === 'pending') moderationNote = 'Đang chờ thẩm định';
+            switch (status) {
+                case PostStatus.rejected: finalNote = 'Nội dung bị từ chối bởi quản trị viên'; break;
+                case PostStatus.editing: finalNote = 'Yêu cầu chỉnh sửa lại nội dung'; break;
+                case PostStatus.approved: finalNote = 'Nội dung đã được thông qua'; break;
+                case PostStatus.pending: finalNote = 'Đang chờ thẩm định'; break;
+            }
         }
 
-        return this.prisma.post.update({
-            where: { id },
-            data: {
-                ...otherData,
-                status,
-                reviewerId,
-                moderationNote,
-                publishedAt: status === 'published' ? new Date() : undefined,
-            },
-            include: {
-                category: true,
-                tags: true,
-            }
-        });
+        return this.postsRepository.update(id, {
+            ...otherData,
+            status,
+            reviewerId,
+            moderationNote: finalNote,
+            publishedAt: status === PostStatus.published ? new Date() : undefined,
+        } as UpdatePostDto);
     }
 }

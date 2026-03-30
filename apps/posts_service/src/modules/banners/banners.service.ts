@@ -1,48 +1,47 @@
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { PrismaService } from '@/database/prisma.service';
+import { BannersRepository } from './repositories/banners.repository';
+import { CreateBannerDto } from './dto/create-banner.dto';
+import { UpdateBannerDto } from './dto/update-banner.dto';
+import { Banner } from '@prisma/client';
 
 @Injectable()
-export class BannerService {
-    constructor(private prisma: PrismaService) { }
+export class BannersService {
+    constructor(private readonly bannersRepository: BannersRepository) { }
 
-    async create(data: any) {
-        return this.prisma.banner.create({ data });
+    async create(data: CreateBannerDto): Promise<Banner> {
+        const createData = {
+            ...data,
+            startAt: data.startAt ? new Date(data.startAt) : undefined,
+            endAt: data.endAt ? new Date(data.endAt) : undefined,
+        };
+        return this.bannersRepository.create(createData as any);
     }
 
-    async findById(id: string) {
-        const banner = await this.prisma.banner.findUnique({ where: { id } });
-        if (!banner) throw new RpcException({ code: 5, message: 'Banner not found' });
+    async findById(id: string): Promise<Banner> {
+        const banner = await this.bannersRepository.findById(id);
+        if (!banner) {
+            throw new RpcException({ code: 5, message: 'Banner not found' });
+        }
         return banner;
     }
 
-    async findAll(query: any) {
-        const skip = ((query.page || 1) - 1) * (query.limit || 10);
-        const take = query.limit || 10;
-
-        const [items, total] = await Promise.all([
-            this.prisma.banner.findMany({
-                skip,
-                take,
-                orderBy: { orderIndex: 'asc' },
-            }),
-            this.prisma.banner.count(),
-        ]);
-
-        return {
-            rows: items,
-            count: total,
+    async update(id: string, data: UpdateBannerDto): Promise<Banner> {
+        await this.findById(id); // Check existence
+        const updateData = {
+            ...data,
+            startAt: data.startAt ? new Date(data.startAt) : undefined,
+            endAt: data.endAt ? new Date(data.endAt) : undefined,
         };
+        return this.bannersRepository.update(id, updateData as any);
     }
 
-    async update(id: string, data: any) {
-        return this.prisma.banner.update({
-            where: { id },
-            data
-        });
+    async delete(id: string): Promise<Banner> {
+        await this.findById(id); // Check existence
+        return this.bannersRepository.delete(id);
     }
 
-    async delete(id: string) {
-        return this.prisma.banner.delete({ where: { id } });
+    async findAll(position?: string): Promise<Banner[]> {
+        return this.bannersRepository.findActiveByPosition(position);
     }
 }

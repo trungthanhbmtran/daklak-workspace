@@ -1,6 +1,7 @@
-import { Controller } from '@nestjs/common';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { TranslationService } from './translations.service';
+import { UpdateTranslationDto } from './dto/update-translation.dto';
 
 @Controller()
 export class TranslationsController {
@@ -15,30 +16,22 @@ export class TranslationsController {
     @GrpcMethod('TranslationService', 'GetTranslationDetail')
     async getTranslationDetail(data: { id: string }) {
         try {
-            const postData = await this.translationService.getTranslationDetail(data.id);
-
-            const formattedTranslations = postData.translations.map(t => ({
-                ...t,
-                contentJson: typeof t.contentJson === 'object' ? JSON.stringify(t.contentJson) : t.contentJson
-            }));
-
-            return {
-                success: true,
-                data: {
-                    ...postData,
-                    contentJson: typeof postData.contentJson === 'object' ? JSON.stringify(postData.contentJson) : postData.contentJson,
-                    translations: formattedTranslations
-                }
-            };
+            const translation = await this.translationService.getTranslationDetail(data.id);
+            return { success: true, data: translation };
         } catch (error) {
             throw new RpcException(error);
         }
     }
 
     @GrpcMethod('TranslationService', 'UpdateTranslation')
-    async updateTranslation(data: any) {
-        const updated = await this.translationService.updateTranslation(data.id, data);
-        return { success: true, data: updated };
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async updateTranslation(data: UpdateTranslationDto & { id: string }) {
+        try {
+            const updated = await this.translationService.updateTranslation(data.id, data);
+            return { success: true, data: updated };
+        } catch (error) {
+            throw new RpcException(error);
+        }
     }
 
     @GrpcMethod('TranslationService', 'TriggerTranslation')

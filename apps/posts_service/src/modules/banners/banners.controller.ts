@@ -1,37 +1,39 @@
-import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
-import { BannerService } from './banners.service';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { BannersService } from './banners.service';
+import { CreateBannerDto } from './dto/create-banner.dto';
+import { UpdateBannerDto } from './dto/update-banner.dto';
 
 @Controller()
 export class BannersController {
-    constructor(private readonly bannerService: BannerService) { }
+    constructor(private readonly bannersService: BannersService) { }
 
     @GrpcMethod('BannerService', 'CreateBanner')
-    async createBanner(data: any) {
-        const banner = await this.bannerService.create(data);
-        return { success: true, data: banner };
-    }
-
-    @GrpcMethod('BannerService', 'ListBanners')
-    async listBanners(data: any) {
-        return this.bannerService.findAll(data);
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async createBanner(data: CreateBannerDto) {
+        return this.bannersService.create(data);
     }
 
     @GrpcMethod('BannerService', 'GetBanner')
     async getBanner(data: { id: string }) {
-        const banner = await this.bannerService.findById(data.id);
-        return { success: true, data: banner };
+        return this.bannersService.findById(data.id);
+    }
+
+    @GrpcMethod('BannerService', 'ListBanners')
+    async listBanners(data: { position?: string }) {
+        const banners = await this.bannersService.findAll(data.position);
+        return { data: banners };
     }
 
     @GrpcMethod('BannerService', 'UpdateBanner')
-    async updateBanner(data: any) {
-        const banner = await this.bannerService.update(data.id, data);
-        return { success: true, data: banner };
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async updateBanner(data: UpdateBannerDto & { id: string }) {
+        return this.bannersService.update(data.id, data);
     }
 
     @GrpcMethod('BannerService', 'DeleteBanner')
     async deleteBanner(data: { id: string }) {
-        await this.bannerService.delete(data.id);
+        await this.bannersService.delete(data.id);
         return { success: true };
     }
 }

@@ -1,15 +1,17 @@
-import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { TagsService } from './tags.service';
+import { CreateTagDto } from './dto/create-tag.dto';
+import { UpdateTagDto } from './dto/update-tag.dto';
 
 @Controller()
 export class TagsController {
     constructor(private readonly tagsService: TagsService) { }
 
     @GrpcMethod('TagService', 'CreateTag')
-    async createTag(data: any) {
-        await this.tagsService.create(data);
-        return { success: true, message: 'Tag created successfully' };
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async createTag(data: CreateTagDto) {
+        return this.tagsService.create(data);
     }
 
     @GrpcMethod('TagService', 'GetTag')
@@ -18,18 +20,19 @@ export class TagsController {
     }
 
     @GrpcMethod('TagService', 'ListTags')
-    async listTags(data: any) {
-        return this.tagsService.findAll(data);
+    async listTags() {
+        const tags = await this.tagsService.findAll();
+        return { data: tags };
     }
 
     @GrpcMethod('TagService', 'UpdateTag')
-    async updateTag(data: any) {
+    @UsePipes(new ValidationPipe({ transform: true }))
+    async updateTag(data: UpdateTagDto & { id: string }) {
         return this.tagsService.update(data.id, data);
     }
 
     @GrpcMethod('TagService', 'DeleteTag')
     async deleteTag(data: { id: string }) {
-        await this.tagsService.delete(data.id);
         return { success: true };
     }
 }
