@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
-import { StorageService } from './storage.service';
+import { MediaService } from './media.service';
 import { 
   UploadRequest, 
   UploadResponse, 
@@ -12,14 +12,8 @@ import {
 @Controller()
 export class MediaController {
   constructor(
-    private readonly storageService: StorageService,
+    private readonly mediaService: MediaService,
   ) {}
-
-  // Hàm tiện ích: Tự động ghép chuỗi URL Public tĩnh
-  private buildPublicUrl(bucket: string, fileName: string): string {
-    const endpoint = process.env.MINIO_EXTERNAL_ENDPOINT || 'http://localhost:30000';
-    return `${endpoint}/${bucket}/${fileName}`;
-  }
 
   // =========================================================================
   // LUỒNG 1: UPLOAD ĐƠN (ẢNH, FILE NHẸ)
@@ -28,8 +22,7 @@ export class MediaController {
   @GrpcMethod('MediaService', 'RequestUpload')
   async requestUpload(data: UploadRequest): Promise<UploadResponse> {
     try {
-      console.log('RequestUpload', data);
-      const result = await this.storageService.generateUploadUrl(
+      const result = await this.mediaService.generateUploadUrl(
         data.ownerId, 
         {
           name: data.originalName,
@@ -54,10 +47,10 @@ export class MediaController {
   @GrpcMethod('MediaService', 'ConfirmUpload')
   async confirmUpload(data: ConfirmRequest): Promise<MediaInfo> {
     try {
-      const updatedMedia = await this.storageService.confirmUpload(data.fileId);
+      const updatedMedia = await this.mediaService.confirmUpload(data.fileId);
 
-      // SỬ DỤNG LẠI PRE-SIGNED URL (Sinh động on-the-fly)
-      const presignedUrl = await this.storageService.getPresignedDownloadUrl(
+      // Generate pre-signed URL for response
+      const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
         updatedMedia.bucket, 
         updatedMedia.fileName
       );
@@ -65,7 +58,7 @@ export class MediaController {
       return {
         id: updatedMedia.id,
         fileName: updatedMedia.fileName,
-        downloadUrl: presignedUrl, // Trả về link có chữ ký cho React
+        downloadUrl: presignedUrl,
         status: updatedMedia.status, 
         mimeType: updatedMedia.mimeType,
       };
@@ -83,15 +76,13 @@ export class MediaController {
     try {
       const fileKey = `${data.ownerId}/${Date.now()}-${data.originalName}`;
       
-      const result = await this.storageService.createMultipartUpload(
+      return await this.mediaService.createMultipartUpload(
         fileKey, 
         data.mimeType, 
         data.ownerId, 
         data.originalName, 
         Number(data.size)
       );
-
-      return result; 
     } catch (error: any) {
       throw new RpcException({
         code: 13,
@@ -104,7 +95,7 @@ export class MediaController {
   async getMultipartPreSignedUrls(data: any) {
     try {
       const { fileKey, uploadId, partsCount } = data;
-      const presignedUrls = await this.storageService.generatePresignedUrlsForParts(
+      const presignedUrls = await this.mediaService.generatePresignedUrlsForParts(
         fileKey, 
         uploadId, 
         partsCount
@@ -124,15 +115,15 @@ export class MediaController {
     try {
       const { fileId, fileKey, uploadId, parts } = data;
 
-      const updatedMedia = await this.storageService.completeMultipartUpload(
+      const updatedMedia = await this.mediaService.completeMultipartUpload(
         fileId,
         fileKey, 
         uploadId, 
         parts
       );
 
-      // Ghép chuỗi động thay vì lấy từ DB
-      const downloadUrl = this.buildPublicUrl(updatedMedia.bucket, updatedMedia.fileName);
+      // Build static public URL if requested or use pre-signed
+      const downloadUrl = this.mediaService.buildPublicUrl(updatedMedia.bucket, updatedMedia.fileName);
 
       return {
         id: updatedMedia.id,
@@ -156,11 +147,13 @@ export class MediaController {
   @GrpcMethod('MediaService', 'GetMedia')
   async getMedia(data: MediaIdRequest): Promise<MediaInfo> {
     try {
-      const media = await this.storageService.getMediaById(data.fileId);
-      if (!media) throw new Error('Không tìm thấy tệp tin');
+      const media = await this.mediaService.getMediaById(data.fileId);
+      if (!media) {
+        throw new Error('Không tìm thấy tệp tin');
+      }
 
-      // SỬ DỤNG LẠI PRE-SIGNED URL
-      const presignedUrl = await this.storageService.getPresignedDownloadUrl(
+      // Generate pre-signed download URL
+      const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
         media.bucket, 
         media.fileName
       );

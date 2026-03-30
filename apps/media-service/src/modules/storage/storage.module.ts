@@ -1,12 +1,17 @@
 import { Module } from '@nestjs/common';
-import { StorageService } from './storage.service';
+import { MediaService } from './media.service';
 import { MediaController } from './media.controller';
-import { PrismaModule } from '../../database/prisma.module';
+import { MediaRepository } from './repositories/media.repository';
+import { S3StorageService } from './services/s3-storage.service';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [], // PrismaModule is global, so it doesn't need to be imported here if configured as such
   controllers: [MediaController],
-  providers: [StorageService],
-  exports: [StorageService],
+  providers: [
+    MediaService,
+    MediaRepository,
+    S3StorageService,
+  ],
+  exports: [MediaService],
 })
 export class StorageModule { }
