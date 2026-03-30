@@ -12,7 +12,7 @@ export class MediaService {
     private readonly storageProvider: S3StorageService,
     private readonly mediaRepository: MediaRepository,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   /**
    * Helper function: Build static public URL

@@ -4,7 +4,7 @@ import { Media, MediaStatus, Prisma } from '@prisma/client';
 
 @Injectable()
 export class MediaRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   /**
    * Create a new media record.
