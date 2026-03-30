@@ -28,8 +28,7 @@ function parseDatabaseUrl(url: string): {
 @Injectable()
 export class PrismaService
   extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+  implements OnModuleInit, OnModuleDestroy {
   constructor(config: ConfigService) {
     const url = config.getOrThrow<string>('DATABASE_URL');
     const parsed = parseDatabaseUrl(url);
