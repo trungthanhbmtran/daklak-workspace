@@ -30,14 +30,15 @@ WORKDIR /app
 ENV NODE_ENV=production
 RUN apk add --no-cache openssl
 
-# Install prod deps + Prisma CLI (Requirement: Prisma CLI in production)
+# Install prod deps
 COPY apps/posts_service/package*.json ./
-RUN npm ci --omit=dev && npm install prisma --save-prod
+RUN npm ci --omit=dev
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/shared/protos ./protos
 
 ENV PROTO_PATH=/app/protos
