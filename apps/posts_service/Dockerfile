@@ -25,7 +25,7 @@ COPY shared/protos ./shared/protos
 # RUN ls -la prisma
 
 # ✅ Prisma 7: generate đúng schema
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate
 
 # Build app
 RUN npm run build
