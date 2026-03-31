@@ -15,9 +15,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/posts_service/ ./
 COPY shared/protos ./shared/protos
 
-# Generate Prisma Client (merge schema if needed)
-RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# Generate Prisma Client
+RUN npx prisma generate --schema=./prisma/schema
 
 # Build the app
 RUN npm run build

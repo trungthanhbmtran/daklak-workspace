@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build": "npm run prisma:generate && nest build",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "prisma generate --schema=./prisma/schema",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
