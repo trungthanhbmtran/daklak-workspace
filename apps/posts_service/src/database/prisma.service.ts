@@ -1,16 +1,13 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
-    constructor(config: ConfigService) {
+export class PrismaService
+    extends PrismaClient
+    implements OnModuleInit, OnModuleDestroy {
+    constructor() {
         super({
-            datasources: {
-                db: {
-                    url: config.getOrThrow<string>('DATABASE_URL'),
-                },
-            },
+            log: ['error', 'warn'], // 👉 có thể thêm 'query' khi debug
         });
     }
 
