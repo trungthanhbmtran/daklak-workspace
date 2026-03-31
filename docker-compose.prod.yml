@@ -334,7 +334,7 @@ services:
 
   posts-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy
+    command: [ "npx", "prisma", "migrate", "deploy" ]
     profiles: [ "migrate" ]
     depends_on:
       mysql:
