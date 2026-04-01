@@ -15,9 +15,6 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
-# Generate Prisma Client
-RUN npx prisma generate --schema=./prisma/schema
-
 # Build the app
 RUN npm run build
 
