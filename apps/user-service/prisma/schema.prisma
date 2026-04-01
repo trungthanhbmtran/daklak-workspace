@@ -1,7 +1,10 @@
+import "dotenv/config";
+
 generator client {
     provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "mysql"
+  url      = env("DATABASE_URL")
 }
