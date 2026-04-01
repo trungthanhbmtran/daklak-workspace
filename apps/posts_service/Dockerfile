@@ -7,28 +7,27 @@ WORKDIR /app
 COPY apps/posts_service/package*.json ./
 RUN npm ci
 
+
 # ==========================================
 # 2️⃣ Builder Stage
 # ==========================================
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Prisma cần openssl cho engine
+# 👉 Nhận biến từ build
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
+
+# Prisma cần openssl
 RUN apk add --no-cache openssl
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/posts_service/ ./
 COPY shared/protos ./shared/protos
 
-# 👉 Đảm bảo prisma folder tồn tại
-# (debug nếu cần)
-# RUN ls -la prisma
-
-# ✅ Prisma 7: generate đúng schema
-RUN npx prisma generate
-
-# Build app
+# 👉 CHỈ build (đã bao gồm prisma generate)
 RUN npm run build
+
 
 # ==========================================
 # 3️⃣ Production Runner Stage
@@ -37,6 +36,10 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# 👉 Runtime cũng cần DATABASE_URL
+ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 
 # Prisma engine cần openssl
 RUN apk add --no-cache openssl
@@ -57,7 +60,7 @@ COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/shared/protos ./protos
 ENV PROTO_PATH=/app/protos
 
-# 👉 Prisma 7 best practice (optional)
+# 👉 Prisma 7 best practice
 ENV PRISMA_CLIENT_ENGINE_TYPE=binary
 
 # Security
