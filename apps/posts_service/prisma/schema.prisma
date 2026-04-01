@@ -5,5 +5,4 @@ binaryTargets = ["native", "linux-musl"]
 
 datasource db {
   provider = "mysql"
-  url      = env("DATABASE_URL")
 }
