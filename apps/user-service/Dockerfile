@@ -14,19 +14,22 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Prisma cần openssl
 RUN apk add --no-cache openssl
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
-# 👉 Prisma env (required for generate)
+# ==========================================
+# ✅ FIX 1: đảm bảo DATABASE_URL luôn tồn tại
+# ==========================================
 ARG DATABASE_URL
-ENV DATABASE_URL=$DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
 
-# 👉 Generate Prisma Client (IMPORTANT)
-RUN npx prisma generate
+# ==========================================
+# ✅ FIX 2: đảm bảo Prisma CLI có trong builder
+# ==========================================
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Build NestJS
 RUN npm run build
@@ -42,16 +45,16 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
-# Install ONLY production deps
 COPY apps/user-service/package*.json ./
 RUN npm ci --omit=dev
 
-# Copy build artifacts
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/shared/protos ./protos
 
-# Prisma runtime engine (IMPORTANT)
+# ==========================================
+# Prisma runtime engine (required)
+# ==========================================
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
