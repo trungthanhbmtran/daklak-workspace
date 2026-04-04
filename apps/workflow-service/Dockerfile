@@ -23,8 +23,11 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/workflow-service/ ./
 COPY shared/protos ./shared/protos
 
+# gộp nhiều schema thành 1 file prisma/schema.prisma
+RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
+
 # Generate Prisma Client
-RUN npx prisma generate --schema=./prisma/schema
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Build the app
 RUN npm run build

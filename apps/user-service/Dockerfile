@@ -23,8 +23,11 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
-# generate prisma (không cần DB)
-RUN npx prisma generate --schema=./prisma/schema
+# gộp nhiều schema thành 1 file prisma/schema.prisma
+RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
+
+# generate prisma client
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # build nest
 RUN npm run build
