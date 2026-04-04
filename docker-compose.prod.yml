@@ -356,7 +356,7 @@ services:
 
   workflow-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
+    command: npx prisma migrate deploy --schema=./prisma/schema
     profiles: [ "migrate" ]
     depends_on:
       mysql:
