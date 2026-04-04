@@ -1,7 +1,7 @@
 # ==========================================
 # 1️⃣ Dependency Stage
 # ==========================================
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 
 COPY apps/user-service/package*.json ./
@@ -11,7 +11,7 @@ RUN npm ci
 # ==========================================
 # 2️⃣ Builder Stage
 # ==========================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache openssl
@@ -20,16 +20,11 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
-# ==========================================
-# ✅ FIX 1: đảm bảo DATABASE_URL luôn tồn tại
-# ==========================================
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
-# ==========================================
-# ✅ FIX 2: đảm bảo Prisma CLI có trong builder
-# ==========================================
-RUN npx prisma generate --schema=./prisma/schema
+# Prisma generate (ONLY generate)
+RUN npx prisma generate --schema=./prisma/schema.prisma
 
 # Build NestJS
 RUN npm run build
@@ -38,7 +33,7 @@ RUN npm run build
 # ==========================================
 # 3️⃣ Production Runner Stage
 # ==========================================
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -52,12 +47,14 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/shared/protos ./protos
 
-# ==========================================
-# Prisma runtime client (required)
-# ==========================================
+# Prisma runtime
 COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
+# 👇 ADD entrypoint
+COPY apps/user-service/entrypoint.sh ./entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 ENV PROTO_PATH=/app/protos
 
@@ -68,4 +65,4 @@ USER app
 
 EXPOSE 3001
 
-CMD ["node", "dist/src/main.js"]
+CMD ["sh", "entrypoint.sh"]
