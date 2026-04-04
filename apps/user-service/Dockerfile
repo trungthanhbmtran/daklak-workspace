@@ -53,9 +53,7 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/shared/protos ./protos
 COPY --from=builder /app/generated ./generated
 
-# prisma runtime engines (needed if not included in client)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
 
 ENV PROTO_PATH=/app/protos
 
