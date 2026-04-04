@@ -59,5 +59,11 @@ Nếu port 50051 đang bị chiếm, tắt process đang dùng hoặc đổi `GR
 
 Import dùng alias `@/*` → `src/*`, ví dụ: `@/common/decorators/roles.decorator`.
 
- npx prisma migrate dev --name init
- npx prisma generate
+## Deployment & Migrations
+
+### Chạy migration trên Production (VPS)
+Dùng docker compose profile `migrate` để update database:
+
+```bash
+docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate
+```
