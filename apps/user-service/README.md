@@ -58,3 +58,6 @@ Nếu port 50051 đang bị chiếm, tắt process đang dùng hoặc đổi `GR
 ## Path alias
 
 Import dùng alias `@/*` → `src/*`, ví dụ: `@/common/decorators/roles.decorator`.
+
+ npx prisma migrate dev --name init
+ npx prisma generate

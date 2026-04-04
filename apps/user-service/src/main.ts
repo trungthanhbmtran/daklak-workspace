@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 
-const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', 'protos');
+const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
 
 const userDir = join(protoRoot, 'users');
 const protoPath = [

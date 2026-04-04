@@ -1,7 +1,7 @@
 # ==========================================
 # 1️⃣ Dependency Stage
 # ==========================================
-FROM node:22-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 
 COPY apps/user-service/package*.json ./
@@ -29,7 +29,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 # ==========================================
 # ✅ FIX 2: đảm bảo Prisma CLI có trong builder
 # ==========================================
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate --schema=./prisma/schema
 
 # Build NestJS
 RUN npm run build
@@ -53,8 +53,9 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/shared/protos ./protos
 
 # ==========================================
-# Prisma runtime engine (required)
+# Prisma runtime client (required)
 # ==========================================
+COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 
