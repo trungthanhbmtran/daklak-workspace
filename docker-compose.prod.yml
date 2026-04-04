@@ -278,23 +278,23 @@ services:
 
   # --- Migration Jobs ---
 
-  # user-service-migrate:
-  #   image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
-  #   command: npx prisma migrate deploy
-  #   profiles: [ "migrate" ]
-  #   depends_on:
-  #     mysql:
-  #       condition: service_healthy
-  #   env_file:
-  #     - .env.production
-  #   environment:
-  #     - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
-  #     - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-  #   logging:
-  #     driver: "json-file"
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "3"
+  user-service-migrate:
+    image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
+    command: npx prisma migrate deploy --schema=./prisma/schema
+    profiles: [ "migrate" ]
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
+      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   hrm-service-migrate:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}

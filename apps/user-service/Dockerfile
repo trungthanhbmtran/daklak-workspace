@@ -1,31 +1,66 @@
-FROM node:22-alpine
-
+# ==========================================
+# 1️⃣ Dependency Stage
+# ==========================================
+FROM node:22-alpine AS deps
 WORKDIR /app
 
 # prisma cần openssl
 RUN apk add --no-cache openssl
 
-# cache deps
 COPY apps/user-service/package*.json ./
 RUN npm ci
 
-# copy source
+
+# ==========================================
+# 2️⃣ Builder Stage
+# ==========================================
+FROM node:22-alpine AS builder
+WORKDIR /app
+
+RUN apk add --no-cache openssl
+
+COPY --from=deps /app/node_modules ./node_modules
 COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
 # generate prisma (không cần DB)
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN npx prisma generate --schema=./prisma/schema
 
 # build nest
 RUN npm run build
 
-# remove dev deps
-RUN npm prune --omit=dev
+
+# ==========================================
+# 3️⃣ Production Runner Stage
+# ==========================================
+FROM node:22-alpine AS runner
+WORKDIR /app
 
 ENV NODE_ENV=production
+
+RUN apk add --no-cache openssl
+
+# optimize production node_modules
+COPY apps/user-service/package*.json ./
+RUN npm ci --omit=dev
+
+# copy built artifacts
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/shared/protos ./protos
+COPY --from=builder /app/generated ./generated
+
+# prisma runtime engines (needed if not included in client)
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
 ENV PROTO_PATH=/app/protos
+
+# Security
+RUN addgroup -S app && adduser -S app -G app
+RUN chown -R app:app /app
+USER app
 
 EXPOSE 3001
 
-# chạy trực tiếp app
-CMD ["node", "dist/main.js"]
+CMD ["node", "dist/src/main.js"]

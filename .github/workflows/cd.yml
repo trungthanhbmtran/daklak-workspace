@@ -87,7 +87,7 @@ jobs:
         with:
           context: .
           file: apps/${{ matrix.service }}/Dockerfile
-          # target: runner
+          target: runner
           push: true
           tags: |
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:${{ github.sha }}
