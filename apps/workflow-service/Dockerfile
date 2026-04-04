@@ -27,7 +27,7 @@ COPY shared/protos ./shared/protos
 RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
 
 # Generate Prisma Client
-RUN npx prisma generate --schema=./prisma/schema.prisma
+RUN DATABASE_URL=mysql://localhost:3306/unused npx prisma generate --schema=./prisma/schema.prisma
 
 # Build the app
 RUN npm run build
