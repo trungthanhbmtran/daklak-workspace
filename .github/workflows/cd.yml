@@ -1,17 +1,11 @@
-name: CD - Deploy to VPS (Self-hosted)
+name: CD - Deploy to VPS
 
 on:
   push:
-    branches: [ main ]
-    paths:
-      - 'apps/**'
-      - 'shared/**'
-      - 'deploy/**'
-      - '.github/workflows/cd.yml'
+    branches: [main]
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
 
@@ -21,7 +15,7 @@ jobs:
   filter:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.prepare.outputs.services }}
+      services: ${{ steps.set.outputs.services }}
 
     steps:
       - uses: actions/checkout@v4
@@ -30,37 +24,40 @@ jobs:
         id: filter
         with:
           filters: |
-            workflow:
+            all:
               - '.github/workflows/cd.yml'
               - 'shared/**'
 
-            admin_khcn: 'apps/admin_khcn/**'
-            api-gateway: 'apps/api-gateway/**'
-            hrm-service: 'apps/hrm-service/**'
-            media-service: 'apps/media-service/**'
-            notification_service: 'apps/notification_service/**'
-            posts_service: 'apps/posts_service/**'
-            translate_service: 'apps/translate_service/**'
-            user-service: 'apps/user-service/**'
-            workflow-service: 'apps/workflow-service/**'
+            admin_khcn: apps/admin_khcn/**
+            api-gateway: apps/api-gateway/**
+            hrm-service: apps/hrm-service/**
+            media-service: apps/media-service/**
+            notification_service: apps/notification_service/**
+            posts_service: apps/posts_service/**
+            translate_service: apps/translate_service/**
+            user-service: apps/user-service/**
+            workflow-service: apps/workflow-service/**
 
-      - id: prepare
+      - id: set
         run: |
-          if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
+          if [ "${{ steps.filter.outputs.all }}" == "true" ]; then
             SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts_service","translate_service","user-service","workflow-service"]'
           else
-            SERVICES='${{ steps.filter.outputs.changes }}'
+            SERVICES=$(echo '${{ toJSON(steps.filter.outputs) }}' | jq -r '
+              to_entries
+              | map(select(.value == "true"))
+              | map(.key)
+            ')
           fi
 
           echo "services=$SERVICES" >> $GITHUB_OUTPUT
 
-
 # ==========================================
-# 2. Build & Push Docker images (ONLY 1 IMAGE)
+# 2. Build & Push Docker images
 # ==========================================
   build-push:
     needs: filter
-    if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
+    if: ${{ needs.filter.outputs.services != '[]' }}
     runs-on: ubuntu-latest
 
     strategy:
@@ -76,13 +73,13 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Set metadata
+      - name: Set image name
         id: meta
         run: |
           IMAGE_NAME=$(echo ${{ matrix.service }} | tr '_' '-')
           echo "IMAGE_NAME=daklak-$IMAGE_NAME" >> $GITHUB_OUTPUT
 
-      - name: Build & Push App
+      - name: Build & Push
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -93,39 +90,42 @@ jobs:
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:${{ github.sha }}
             ${{ secrets.DOCKER_USERNAME }}/${{ steps.meta.outputs.IMAGE_NAME }}:latest
 
-
 # ==========================================
-# 3. Deploy on VPS (Self-hosted runner)
+# 3. Deploy (Smart deploy)
 # ==========================================
   deploy:
     needs: [filter, build-push]
-    if: |
-      always() &&
-      (needs.build-push.result == 'success' || needs.build-push.result == 'skipped')
-
     runs-on: [self-hosted, daklak]
 
     steps:
       - name: Login Docker Hub
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Deploy
+      - name: Deploy changed services only
         run: |
           cd ${{ secrets.DEPLOY_PATH }}
 
-          echo "📦 Pull images..."
-          docker compose pull
+          SERVICES='${{ needs.filter.outputs.services }}'
 
-          echo "🗄 Run migrations..."
-          docker compose --profile migrate run --rm user-service-migrate || true
-          docker compose --profile migrate run --rm hrm-service-migrate || true
-          docker compose --profile migrate run --rm media-service-migrate || true
-          docker compose --profile migrate run --rm posts-service-migrate || true
-          docker compose --profile migrate run --rm workflow-service-migrate || true
+          echo "📦 Pull changed services..."
+          for service in $(echo $SERVICES | jq -r '.[]'); do
+            NAME=$(echo $service | tr '_' '-')
+            docker pull ${{ secrets.DOCKER_USERNAME }}/daklak-$NAME:${{ github.sha }} || true
+          done
 
-          echo "🚀 Start services..."
-          docker compose up -d
+          echo "🗄 Run migrations (only backend services)..."
+          for service in $(echo $SERVICES | jq -r '.[]'); do
+            case $service in
+              user-service|hrm-service|media-service|posts_service|workflow-service)
+                docker compose --profile migrate run --rm ${service}-migrate || true
+                ;;
+            esac
+          done
+
+          echo "🚀 Restart changed services..."
+          for service in $(echo $SERVICES | jq -r '.[]'); do
+            docker compose up -d $service
+          done
 
           echo "🧹 Cleanup..."
-          docker system prune -f
+          docker image prune -f

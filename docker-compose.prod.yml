@@ -1,10 +1,14 @@
+version: "3.9"
+
 services:
 
-  # --- Infrastructure ---
+  # =============================
+  # Infrastructure
+  # =============================
 
   mysql:
     image: mysql:8
-    restart: always
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-admin_systems}
@@ -16,39 +20,33 @@ services:
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
-      timeout: 5s
       retries: 5
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   redis:
     image: redis:7-alpine
-    restart: always
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 5
 
   rabbitmq:
     image: rabbitmq:3-management-alpine
+    restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
     ports:
       - "15672:15672"
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      retries: 5
 
   minio:
     image: minio/minio
-    command: server /data
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-admin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-password123}
@@ -57,333 +55,116 @@ services:
       - "9001:9001"
     volumes:
       - minio_data:/data
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
-  # --- App Services ---
+  # =============================
+  # App Services
+  # =============================
 
   api-gateway:
     image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/api-gateway/dockerfile
-      target: runner
-    restart: always
+    restart: unless-stopped
     depends_on:
       redis:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
-        condition: service_started
+        condition: service_healthy
     env_file:
       - .env.production
-    environment:
-      - JWT_SECRET=${JWT_SECRET}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
     ports:
       - "8080:8080"
-    # Reachable via Nginx internally on port 8080 or directly from host at 8080
 
   user-service:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/user-service/Dockerfile
-      target: runner
-    restart: always
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_started
-      rabbitmq:
-        condition: service_started
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
-      - JWT_SECRET=${JWT_SECRET}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
 
   hrm-service:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/hrm-service/Dockerfile
-      target: runner
-    restart: always
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
-      rabbitmq:
-        condition: service_started
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
 
   media-service:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/media-service/Dockerfile
-      target: runner
-    restart: always
+    restart: unless-stopped
     depends_on:
-      rabbitmq:
-        condition: service_started
       minio:
         condition: service_started
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
-      - MINIO_EXTERNAL_ENDPOINT=${MINIO_EXTERNAL_ENDPOINT}
-      - MINIO_INTERNAL_ENDPOINT=${MINIO_INTERNAL_ENDPOINT}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  notification-service:
-    image: ${DOCKER_USERNAME}/daklak-notification-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/notification_service/Dockerfile
-      target: runner
-    restart: always
-    depends_on:
-      rabbitmq:
-        condition: service_started
-    env_file:
-      - .env.production
-    environment:
-      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
 
   posts-service:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/posts_service/Dockerfile
-      target: runner
-    restart: always
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
-      rabbitmq:
-        condition: service_started
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
-      - DB_HOST=mysql
-      - DB_USER=root
-      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - DB_NAME=admin_posts
-      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
-      - REDIS_URL=redis://redis:6379
-      - ACCESS_TOKEN_SECRET=${JWT_SECRET}
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  translate-service:
-    image: ${DOCKER_USERNAME}/daklak-translate-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/translate_service/Dockerfile
-      target: runner
-    restart: always
-    depends_on:
-      rabbitmq:
-        condition: service_started
-    env_file:
-      - .env.production
-    environment:
-      - DATABASE_URL=mysql+pymysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_translation
-      - RABBITMQ_URL=amqp://${RABBITMQ_USER}:${RABBITMQ_PASS}@rabbitmq:5672
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
 
   workflow-service:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/workflow-service/Dockerfile
-      target: runner
-    restart: always
+    restart: unless-stopped
     depends_on:
       mysql:
         condition: service_healthy
-      rabbitmq:
-        condition: service_started
     env_file:
       - .env.production
     environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
-      - JWT_SECRET=${JWT_SECRET}
-      - GRPC_URL=0.0.0.0:50060
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
 
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
-    build:
-      context: .
-      dockerfile: apps/admin_khcn/Dockerfile
-    restart: always
+    restart: unless-stopped
     depends_on:
-      api-gateway:
-        condition: service_started
+      - api-gateway
     env_file:
       - .env.production
-    environment:
-      - NEXT_PUBLIC_API_URL=/api
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
-  # --- Migration Jobs ---
+  # =============================
+  # Migration Jobs
+  # =============================
 
-  user-service-migrate:
+  migrate-all:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
     profiles: [ "migrate" ]
     depends_on:
       mysql:
         condition: service_healthy
     env_file:
       - .env.production
-    environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    command: >
+      sh -c " npx prisma migrate deploy && echo 'User DB migrated' "
 
-  hrm-service-migrate:
-    image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy
-    profiles: [ "migrate" ]
-    depends_on:
-      mysql:
-        condition: service_healthy
-    env_file:
-      - .env.production
-    environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  media-service-migrate:
-    image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy
-    profiles: [ "migrate" ]
-    depends_on:
-      mysql:
-        condition: service_healthy
-    env_file:
-      - .env.production
-    environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  posts-service-migrate:
-    image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy
-    profiles: [ "migrate" ]
-    depends_on:
-      mysql:
-        condition: service_healthy
-    env_file:
-      - .env.production
-    environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
-      - DB_HOST=mysql
-      - DB_USER=root
-      - DB_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - DB_NAME=admin_posts
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  workflow-service-migrate:
-    image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
-    command: npx prisma migrate deploy --schema=./prisma/schema.prisma
-    profiles: [ "migrate" ]
-    depends_on:
-      mysql:
-        condition: service_healthy
-    env_file:
-      - .env.production
-    environment:
-      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
-      - PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-
-  # --- Nginx ---
+  # =============================
+  # Nginx
+  # =============================
 
   nginx:
     image: nginx:stable-alpine
-    restart: always
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx:/etc/nginx:ro
     depends_on:
       - api-gateway
       - admin-frontend

@@ -1,10 +1,9 @@
 # ==========================================
-# 1️⃣ Dependency Stage
+# 1. Dependencies
 # ==========================================
 FROM node:22-alpine AS deps
 WORKDIR /app
 
-# prisma cần openssl
 RUN apk add --no-cache openssl
 
 COPY apps/user-service/package*.json ./
@@ -12,7 +11,7 @@ RUN npm ci
 
 
 # ==========================================
-# 2️⃣ Builder Stage
+# 2. Builder
 # ==========================================
 FROM node:22-alpine AS builder
 WORKDIR /app
@@ -23,18 +22,19 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
-# gộp nhiều schema thành 1 file prisma/schema.prisma
-RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
+# merge schema (safe hơn)
+RUN if [ -d "prisma/schema" ]; then \
+    ls prisma/schema/*.prisma | sort | xargs cat > prisma/schema.prisma; \
+    fi
 
-# generate prisma client
-RUN DATABASE_URL=mysql://localhost:3306/unused npx prisma generate --schema=./prisma/schema.prisma
+ENV DATABASE_URL="mysql://root:password@localhost:3306/db"
 
-# build nest
+RUN npx prisma generate --schema=./prisma/schema.prisma
 RUN npm run build
 
 
 # ==========================================
-# 3️⃣ Production Runner Stage
+# 3. Runner
 # ==========================================
 FROM node:22-alpine AS runner
 WORKDIR /app
@@ -43,24 +43,23 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
-# optimize production node_modules
 COPY apps/user-service/package*.json ./
 RUN npm ci --omit=dev
 
-# copy built artifacts
+# copy prisma engines (QUAN TRỌNG)
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/shared/protos ./protos
-COPY --from=builder /app/generated ./generated
-COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 ENV PROTO_PATH=/app/protos
 
-# Security
 RUN addgroup -S app && adduser -S app -G app
 RUN chown -R app:app /app
 USER app
 
 EXPOSE 3001
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
