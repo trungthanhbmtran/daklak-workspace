@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import * as dotenv from 'dotenv';
 
@@ -59,35 +59,35 @@ async function main() {
             id: 'cond_days',
             type: 'condition',
             position: { x: 300, y: 150 },
-            data: { 
-              label: 'Số ngày > 3?', 
-              expression: 'days > 3' 
+            data: {
+              label: 'Số ngày > 3?',
+              expression: 'days > 3'
             },
           },
           {
             id: 'task_manager',
             type: 'user_task',
             position: { x: 550, y: 50 },
-            data: { 
-              label: 'Lãnh đạo đơn vị phê duyệt', 
-              role: 'MANAGER' 
+            data: {
+              label: 'Lãnh đạo đơn vị phê duyệt',
+              role: 'MANAGER'
             },
           },
           {
             id: 'task_supervisor',
             type: 'user_task',
             position: { x: 550, y: 250 },
-            data: { 
-              label: 'Cán bộ quản lý trực tiếp phê duyệt', 
-              role: 'SUPERVISOR' 
+            data: {
+              label: 'Cán bộ quản lý trực tiếp phê duyệt',
+              role: 'SUPERVISOR'
             },
           },
           {
             id: 'service_notify',
             type: 'service_task',
             position: { x: 800, y: 150 },
-            data: { 
-              label: 'Gửi thông báo kết quả', 
+            data: {
+              label: 'Gửi thông báo kết quả',
               service: 'notification-service',
               action: 'SEND_EMAIL'
             },
