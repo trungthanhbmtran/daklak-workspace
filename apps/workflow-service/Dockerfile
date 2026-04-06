@@ -1,10 +1,9 @@
 # ==========================================
 # 1️⃣ Dependency Stage
 # ==========================================
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS deps
 WORKDIR /app
 
-# prisma cần openssl
 RUN apk add --no-cache openssl
 
 COPY apps/workflow-service/package*.json ./
@@ -14,7 +13,7 @@ RUN npm ci
 # ==========================================
 # 2️⃣ Builder Stage
 # ==========================================
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache openssl
@@ -23,43 +22,46 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY apps/workflow-service/ ./
 COPY shared/protos ./shared/protos
 
-# gộp nhiều schema thành 1 file prisma/schema.prisma
+# Merge schemas if needed (standard practice)
 RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
 
-# Generate Prisma Client
-RUN DATABASE_URL=mysql://localhost:3306/unused npx prisma generate --schema=./prisma/schema.prisma
+# 🔥 Prisma 7.6 → dùng config
+ENV DATABASE_URL="mysql://localhost:3306/dummy"
 
-# Build the app
+RUN npx prisma generate --config=./prisma.config.ts
+
 RUN npm run build
 
 
 # ==========================================
-# 3️⃣ Production Runner Stage
+# 3️⃣ Runner Stage
 # ==========================================
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
 RUN apk add --no-cache openssl
 
-# optimize production node_modules
 COPY apps/workflow-service/package*.json ./
 RUN npm ci --omit=dev
 
-# copy built artifacts
+# copy build output
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/shared/protos ./protos
+
+# 🔥 BẮT BUỘC với Prisma 7
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 ENV PROTO_PATH=/app/protos
 
-# Security: Run as non-root user
+# security
 RUN addgroup -S app && adduser -S app -G app
 RUN chown -R app:app /app
 USER app
 
-EXPOSE 3001 50060
+EXPOSE 3004
 
 CMD ["node", "dist/src/main.js"]

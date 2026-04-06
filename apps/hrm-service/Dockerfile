@@ -1,85 +1,67 @@
 # ==========================================
-# 1️⃣ Dependencies Stage
+# 1️⃣ Dependency Stage
 # ==========================================
-FROM node:20-alpine AS deps
-
+FROM node:22-alpine AS deps
 WORKDIR /app
 
-# chỉ copy package để tận dụng cache
-COPY apps/hrm-service/package*.json ./
+RUN apk add --no-cache openssl
 
-# install full deps (bao gồm dev để build)
+COPY apps/hrm-service/package*.json ./
 RUN npm ci
+
 
 # ==========================================
 # 2️⃣ Builder Stage
 # ==========================================
-FROM node:20-alpine AS builder
-
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# reuse node_modules từ deps
-COPY --from=deps /app/node_modules ./node_modules
+RUN apk add --no-cache openssl
 
-# copy source code
+COPY --from=deps /app/node_modules ./node_modules
 COPY apps/hrm-service/ ./
 COPY shared/protos ./shared/protos
 
-# =========================
-# Prisma generate
-# =========================
-# gộp nhiều schema nếu có
+# Merge schemas if needed (standard practice)
 RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
 
-# generate prisma client
-RUN npx prisma generate --schema=./prisma/schema.prisma
+# 🔥 Prisma 7.6 → dùng config
+ENV DATABASE_URL="mysql://localhost:3306/dummy"
 
-# =========================
-# Build NestJS
-# =========================
+RUN npx prisma generate --config=./prisma.config.ts
+
 RUN npm run build
 
-# ==========================================
-# 3️⃣ Production Runner Stage
-# ==========================================
-FROM node:20-alpine AS runner
 
+# ==========================================
+# 3️⃣ Runner Stage
+# ==========================================
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# cần cho prisma engine
 RUN apk add --no-cache openssl
 
-# chỉ cài production dependencies
 COPY apps/hrm-service/package*.json ./
 RUN npm ci --omit=dev
 
-# =========================
-# Copy build output
-# =========================
+# copy build output
 COPY --from=builder /app/dist ./dist
-
-# prisma schema (để migrate / runtime)
 COPY --from=builder /app/prisma ./prisma
-
-# 🔥 cực kỳ quan trọng cho prisma
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-
-# proto files (grpc)
+COPY --from=builder /app/generated ./generated
 COPY --from=builder /app/shared/protos ./protos
+
+# 🔥 BẮT BUỘC với Prisma 7
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
+
 ENV PROTO_PATH=/app/protos
 
-# =========================
-# Security (non-root)
-# =========================
+# security
 RUN addgroup -S app && adduser -S app -G app
 RUN chown -R app:app /app
 USER app
 
-# =========================
-# Run app
-# =========================
 EXPOSE 3002
 
 CMD ["node", "dist/src/main.js"]

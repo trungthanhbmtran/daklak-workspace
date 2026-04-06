@@ -11,7 +11,7 @@
  * Please import the `PrismaClient` class from the `client.ts` file instead.
  */
 
-import * as runtime from "@prisma/client/runtime/client"
+import * as runtime from "@generated/prisma/client/runtime/client"
 import type * as Prisma from "./prismaNamespace"
 
 
@@ -45,10 +45,10 @@ async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Modul
 }
 
 config.compilerWasm = {
-  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.mysql.js"),
+  getRuntime: async () => await import("@generated/prisma/client/runtime/query_compiler_fast_bg.mysql.js"),
 
   getQueryCompilerWasmModule: async () => {
-    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.mysql.wasm-base64.js")
+    const { wasm } = await import("@generated/prisma/client/runtime/query_compiler_fast_bg.mysql.wasm-base64.js")
     return await decodeBase64AsWasm(wasm)
   },
 

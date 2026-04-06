@@ -12,7 +12,10 @@
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": { "@/*": ["src/*"] },
+    "paths": {
+      "@/*": ["src/*"],
+      "@generated/*": ["generated/*"]
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": true,
