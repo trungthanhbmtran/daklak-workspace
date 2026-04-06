@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsBoolean, IsEnum, IsArray, IsUUID } from 'class-validator';
-import { PostStatus } from '@prisma/client';
+import { PostStatus } from '@generated/prisma/client';
 
 export class CreatePostDto {
     @IsString()

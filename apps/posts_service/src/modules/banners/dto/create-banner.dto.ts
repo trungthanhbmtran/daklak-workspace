@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, IsUrl, IsDateString } from 'class-validator';
-import { BannerPosition, BannerLinkType } from '@prisma/client';
+import { BannerPosition, BannerLinkType } from '@generated/prisma/client';
 
 export class CreateBannerDto {
     @IsString()

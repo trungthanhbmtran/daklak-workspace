@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsEnum } from 'class-validator';
-import { TagStatus } from '@prisma/client';
+import { TagStatus } from '@generated/prisma/client';
 
 export class CreateTagDto {
     @IsString()

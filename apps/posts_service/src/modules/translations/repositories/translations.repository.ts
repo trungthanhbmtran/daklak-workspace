@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../database/repositories/base.repository';
-import { PostTranslate, Prisma } from '@prisma/client';
+import { PostTranslate, Prisma } from '@generated/prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import { CreateTranslationDto } from '../dto/create-translation.dto';
 import { UpdateTranslationDto } from '../dto/update-translation.dto';

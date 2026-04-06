@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@generated/prisma/client';
 
 export abstract class BaseRepository<T, CreateDto, UpdateDto, QueryDto> {
     constructor(

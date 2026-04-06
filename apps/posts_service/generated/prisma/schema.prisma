@@ -1,0 +1,207 @@
+enum BannerPosition {
+  top
+  middle
+  bottom
+  custom
+}
+
+enum BannerLinkType {
+  internal
+  external
+}
+
+model Banner {
+  id              String         @id @default(uuid()) @db.Char(36)
+  name            String         @db.VarChar(255)
+  slug            String         @unique @db.VarChar(255)
+  description     String?        @db.Text
+  imageUrl        String         @map("image_url") @db.VarChar(255)
+  linkType        BannerLinkType @default(internal) @map("link_type")
+  customUrl       String?        @map("custom_url") @db.VarChar(255)
+  target          String         @default("_self") @db.VarChar(20)
+  position        BannerPosition @default(top)
+  orderIndex      Int            @default(0) @map("order_index")
+  status          Boolean        @default(true)
+  metaTitle       String?        @map("meta_title") @db.VarChar(255)
+  metaDescription String?        @map("meta_description") @db.Text
+  startAt         DateTime?      @map("start_at")
+  endAt           DateTime?      @map("end_at")
+  createdAt       DateTime       @default(now()) @map("created_at")
+  updatedAt       DateTime       @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([orderIndex])
+  @@index([position])
+  @@map("banners")
+}
+
+enum LinkType {
+  standard
+  static
+  external
+}
+
+model Category {
+  id              String   @id @default(uuid()) @db.Char(36)
+  name            String   @unique @db.VarChar(255)
+  slug            String   @unique @db.VarChar(255)
+  description     String?  @db.Text
+  thumbnail       String?  @db.VarChar(255)
+  linkType        LinkType @default(standard) @map("link_type")
+  customUrl       String?  @map("custom_url") @db.VarChar(255)
+  target          String   @default("_self") @db.VarChar(20)
+  parentId        String?  @map("parent_id") @db.Char(36)
+  lft             Int      @default(0)
+  rgt             Int      @default(0)
+  depth           Int      @default(0)
+  orderIndex      Int      @default(0) @map("order_index")
+  status          Boolean  @default(true)
+  metaTitle       String?  @map("meta_title") @db.VarChar(255)
+  metaDescription String?  @map("meta_description") @db.Text
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  parent   Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryToCategory")
+  posts    Post[]
+
+  @@index([lft])
+  @@index([lft, rgt])
+  @@index([parentId])
+  @@index([status, slug])
+  @@map("categories")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../../generated/prisma"
+  previewFeatures = ["prismaSchemaFolder"]
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum PostStatus {
+  draft
+  pending
+  editing
+  approved
+  published
+  rejected
+  archived
+}
+
+model Post {
+  id             String     @id @default(uuid()) @db.Char(36)
+  title          String     @db.VarChar(255)
+  content        String?    @db.LongText
+  contentJson    Json?      @map("content_json")
+  description    String?    @db.Text
+  slug           String     @unique @db.VarChar(255)
+  authorId       String     @map("author_id") @db.Char(36)
+  categoryId     String?    @map("category_id") @db.Char(36)
+  reviewerId     String?    @map("reviewer_id") @db.Char(36)
+  moderationNote String?    @map("moderation_note") @db.Text
+  language       String     @default("vi") @db.VarChar(10)
+  status         PostStatus @default(draft)
+  thumbnail      String?    @db.VarChar(255)
+  isFeatured     Boolean    @default(false) @map("is_featured")
+  isNotification Boolean    @default(false) @map("is_notification")
+  viewCount      Int        @default(0) @map("view_count")
+  publishedAt    DateTime?  @map("published_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  category     Category?       @relation(fields: [categoryId], references: [id])
+  tags         Tag[]           @relation("PostTags")
+  translations PostTranslate[]
+  variables    Variable[]
+
+  @@index([categoryId, status])
+  @@index([authorId])
+  @@index([status, publishedAt])
+  @@index([isFeatured, status])
+  @@index([isNotification, status])
+  @@index([title])
+  @@index([language])
+  @@map("posts")
+}
+
+enum TagStatus {
+  active
+  inactive
+}
+
+model Tag {
+  id          String    @id @default(uuid()) @db.Char(36)
+  name        String    @unique @db.VarChar(50)
+  slug        String    @db.VarChar(255)
+  description String?   @db.Text
+  status      TagStatus @default(active)
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  posts Post[] @relation("PostTags")
+
+  @@map("tags")
+}
+
+enum TranslationStatus {
+  draft
+  pending_review
+  published
+  rejected
+}
+
+model PostTranslate {
+  id          String            @id @default(uuid()) @db.Char(36)
+  postId      String            @map("post_id") @db.Char(36)
+  language    String            @db.VarChar(10)
+  title       String            @db.VarChar(255)
+  description String?           @db.Text
+  contentJson Json?             @map("content_json")
+  content     String?           @db.LongText
+  status      TranslationStatus @default(draft)
+  metaData    Json?             @map("meta_data")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, language])
+  @@map("post_translates")
+}
+
+enum VariableDataType {
+  text
+  number
+  date
+  email
+  phone
+  information
+  select
+  checkbox
+  radio
+  address
+}
+
+model Variable {
+  id           String           @id @default(uuid()) @db.Char(36)
+  name         String           @db.VarChar(255)
+  options      String           @default("") @db.VarChar(255)
+  dataType     VariableDataType @default(text) @map("data_type")
+  isMultiValue Boolean          @default(false) @map("is_multi_value")
+  required     Boolean          @default(false)
+  description  String?          @db.VarChar(255)
+  defaultValue String?          @map("default_value") @db.VarChar(255)
+  validation   Json?            @default("{}")
+  postId       String           @map("post_id") @db.Char(36)
+  createdAt    DateTime         @default(now()) @map("created_at")
+  updatedAt    DateTime         @updatedAt @map("updated_at")
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@map("variables")
+}

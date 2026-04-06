@@ -3,7 +3,7 @@ import { RpcException, ClientProxy } from '@nestjs/microservices';
 import { TranslationsRepository } from './repositories/translations.repository';
 import { CreateTranslationDto } from './dto/create-translation.dto';
 import { UpdateTranslationDto } from './dto/update-translation.dto';
-import { PostTranslate } from '@prisma/client';
+import { PostTranslate } from '@generated/prisma/client';
 import { PostsRepository } from '../posts/repositories/posts.repository';
 
 @Injectable()

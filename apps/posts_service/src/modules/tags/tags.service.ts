@@ -3,7 +3,7 @@ import { RpcException } from '@nestjs/microservices';
 import { TagsRepository } from './repositories/tags.repository';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
-import { Tag } from '@prisma/client';
+import { Tag } from '@generated/prisma/client';
 
 @Injectable()
 export class TagsService {

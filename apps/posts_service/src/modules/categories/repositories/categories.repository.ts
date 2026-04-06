@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../database/repositories/base.repository';
-import { Category, Prisma } from '@prisma/client';
+import { Category, Prisma } from '@generated/prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../database/repositories/base.repository';
-import { Banner, Prisma } from '@prisma/client';
+import { Banner, Prisma } from '@generated/prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import { CreateBannerDto } from '../dto/create-banner.dto';
 import { UpdateBannerDto } from '../dto/update-banner.dto';

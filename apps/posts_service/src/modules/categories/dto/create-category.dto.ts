@@ -1,5 +1,5 @@
 import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, IsUUID } from 'class-validator';
-import { LinkType } from '@prisma/client';
+import { LinkType } from '@generated/prisma/client';
 
 export class CreateCategoryDto {
     @IsString()

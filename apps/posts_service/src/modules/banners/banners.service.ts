@@ -3,7 +3,7 @@ import { RpcException } from '@nestjs/microservices';
 import { BannersRepository } from './repositories/banners.repository';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
-import { Banner } from '@prisma/client';
+import { Banner } from '@generated/prisma/client';
 
 @Injectable()
 export class BannersService {
