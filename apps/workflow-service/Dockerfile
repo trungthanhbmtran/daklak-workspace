@@ -6,7 +6,7 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY apps/workflow-service/package*.json ./
+COPY apps/user-service/package*.json ./
 RUN npm ci
 
 
@@ -19,10 +19,10 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/workflow-service/ ./
+COPY apps/user-service/ ./
 COPY shared/protos ./shared/protos
 
-# Merge schemas if needed (standard practice)
+# Nếu dùng multi schema → merge
 RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
 
 # 🔥 Prisma 7.6 → dùng config
@@ -43,7 +43,7 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
-COPY apps/workflow-service/package*.json ./
+COPY apps/user-service/package*.json ./
 RUN npm ci --omit=dev
 
 # copy build output
@@ -62,6 +62,6 @@ RUN addgroup -S app && adduser -S app -G app
 RUN chown -R app:app /app
 USER app
 
-EXPOSE 3004
+EXPOSE 3001
 
 CMD ["node", "dist/src/main.js"]
