@@ -2,17 +2,17 @@ import { IsString, IsOptional, IsEnum } from 'class-validator';
 import { TagStatus } from '@generated/prisma/client';
 
 export class CreateTagDto {
-    @IsString()
-    name: string;
+  @IsString()
+  name: string;
 
-    @IsString()
-    slug: string;
+  @IsString()
+  slug: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsEnum(TagStatus)
-    @IsOptional()
-    status?: TagStatus;
+  @IsEnum(TagStatus)
+  @IsOptional()
+  status?: TagStatus;
 }

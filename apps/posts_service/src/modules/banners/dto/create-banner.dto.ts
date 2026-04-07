@@ -1,57 +1,65 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsInt, IsUrl, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsEnum,
+  IsInt,
+  IsUrl,
+  IsDateString,
+} from 'class-validator';
 import { BannerPosition, BannerLinkType } from '@generated/prisma/client';
 
 export class CreateBannerDto {
-    @IsString()
-    name: string;
+  @IsString()
+  name: string;
 
-    @IsString()
-    slug: string;
+  @IsString()
+  slug: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsString()
-    imageUrl: string;
+  @IsString()
+  imageUrl: string;
 
-    @IsEnum(BannerLinkType)
-    @IsOptional()
-    linkType?: BannerLinkType;
+  @IsEnum(BannerLinkType)
+  @IsOptional()
+  linkType?: BannerLinkType;
 
-    @IsString()
-    @IsOptional()
-    customUrl?: string;
+  @IsString()
+  @IsOptional()
+  customUrl?: string;
 
-    @IsString()
-    @IsOptional()
-    target?: string;
+  @IsString()
+  @IsOptional()
+  target?: string;
 
-    @IsEnum(BannerPosition)
-    @IsOptional()
-    position?: BannerPosition;
+  @IsEnum(BannerPosition)
+  @IsOptional()
+  position?: BannerPosition;
 
-    @IsInt()
-    @IsOptional()
-    orderIndex?: number;
+  @IsInt()
+  @IsOptional()
+  orderIndex?: number;
 
-    @IsBoolean()
-    @IsOptional()
-    status?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  status?: boolean;
 
-    @IsString()
-    @IsOptional()
-    metaTitle?: string;
+  @IsString()
+  @IsOptional()
+  metaTitle?: string;
 
-    @IsString()
-    @IsOptional()
-    metaDescription?: string;
+  @IsString()
+  @IsOptional()
+  metaDescription?: string;
 
-    @IsDateString()
-    @IsOptional()
-    startAt?: string;
+  @IsDateString()
+  @IsOptional()
+  startAt?: string;
 
-    @IsDateString()
-    @IsOptional()
-    endAt?: string;
+  @IsDateString()
+  @IsOptional()
+  endAt?: string;
 }

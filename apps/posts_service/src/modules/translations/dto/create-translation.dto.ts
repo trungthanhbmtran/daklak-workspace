@@ -2,30 +2,30 @@ import { IsString, IsOptional, IsEnum, IsUUID, IsJSON } from 'class-validator';
 import { TranslationStatus } from '@generated/prisma/client';
 
 export class CreateTranslationDto {
-    @IsUUID()
-    postId: string;
+  @IsUUID()
+  postId: string;
 
-    @IsString()
-    language: string;
+  @IsString()
+  language: string;
 
-    @IsString()
-    title: string;
+  @IsString()
+  title: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsOptional()
-    contentJson?: any;
+  @IsOptional()
+  contentJson?: any;
 
-    @IsString()
-    @IsOptional()
-    content?: string;
+  @IsString()
+  @IsOptional()
+  content?: string;
 
-    @IsEnum(TranslationStatus)
-    @IsOptional()
-    status?: TranslationStatus;
+  @IsEnum(TranslationStatus)
+  @IsOptional()
+  status?: TranslationStatus;
 
-    @IsOptional()
-    metaData?: any;
+  @IsOptional()
+  metaData?: any;
 }

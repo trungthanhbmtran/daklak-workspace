@@ -8,14 +8,14 @@ import { BannersModule } from './modules/banners/banners.module';
 import { TranslationsModule } from './modules/translations/translations.module';
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        PrismaModule,
-        PostsModule,
-        CategoriesModule,
-        TagsModule,
-        BannersModule,
-        TranslationsModule,
-    ],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    PostsModule,
+    CategoriesModule,
+    TagsModule,
+    BannersModule,
+    TranslationsModule,
+  ],
 })
-export class AppModule { }
+export class AppModule {}

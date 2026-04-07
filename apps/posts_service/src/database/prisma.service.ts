@@ -4,7 +4,10 @@ import { PrismaClient } from '@generated/prisma/client';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor(config: ConfigService) {
     const url = config.getOrThrow<string>('DATABASE_URL');
     const adapter = new PrismaMariaDb(url);
