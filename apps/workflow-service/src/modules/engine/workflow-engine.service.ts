@@ -1,6 +1,6 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Injectable, Logger, OnModuleInit, Inject } from "@nestjs/common";
 import { PrismaService } from "@/database/prisma.service";
-import { HttpService } from "@nestjs/axios";
+import { ClientGrpc } from "@nestjs/microservices";
 import { Parser } from "expr-eval";
 import { firstValueFrom } from "rxjs";
 
@@ -13,14 +13,23 @@ export enum WorkflowStatus {
 }
 
 @Injectable()
-export class WorkflowEngineService {
+export class WorkflowEngineService implements OnModuleInit {
   private readonly logger = new Logger(WorkflowEngineService.name);
   private readonly parser = new Parser();
 
+  private userService: any;
+  private employeeHandlers: any;
+
   constructor(
     private readonly prisma: PrismaService,
-    private readonly http: HttpService
+    @Inject('USERS_SERVICE') private readonly usersClient: ClientGrpc,
+    @Inject('HRM_SERVICE') private readonly hrmClient: ClientGrpc,
   ) {}
+
+  onModuleInit() {
+    this.userService = this.usersClient.getService<any>('UserService');
+    this.employeeHandlers = this.hrmClient.getService<any>('EmployeeHandlers');
+  }
 
   /**
    * Start a new workflow instance
@@ -225,17 +234,40 @@ export class WorkflowEngineService {
   private async callService(config: any, context: any): Promise<any> {
     const { action, service } = config;
     this.logger.log(`Calling service: ${service} with action: ${action}`);
-    
-    // In a real system, we'd lookup service URL from a registry
-    // Mocking an HTTP call
+
     try {
-        // Example: POST http://service-name/api/workflow-action
-        // const response = await firstValueFrom(this.http.post(`http://${service}/api/action`, { action, context }));
-        // return response.data;
-        
-        return { success: true, timestamp: new Date().toISOString() };
+      let response;
+      switch (service?.toLowerCase()) {
+        case 'user':
+        case 'users':
+        case 'user-service':
+          if (this.userService && typeof this.userService[action] === 'function') {
+            response = await firstValueFrom(this.userService[action](context));
+          } else {
+            throw new Error(`Action ${action} not found on UserService`);
+          }
+          break;
+
+        case 'hrm':
+        case 'hrm-service':
+        case 'employee':
+          if (this.employeeHandlers && typeof this.employeeHandlers[action] === 'function') {
+            response = await firstValueFrom(this.employeeHandlers[action](context));
+          } else {
+            throw new Error(`Action ${action} not found on EmployeeHandlers`);
+          }
+          break;
+
+        default:
+          // Fallback to mock for unknown services or explicitly handled as common
+          this.logger.warn(`Service ${service} is not registered or supported via gRPC. Using mock.`);
+          return { success: true, timestamp: new Date().toISOString(), mock: true };
+      }
+
+      return response;
     } catch (e) {
-        throw new Error(`Service call failed: ${e.message}`);
+      this.logger.error(`Service call to ${service}.${action} failed: ${e.message}`);
+      throw new Error(`Service call failed: ${e.message}`);
     }
   }
 
