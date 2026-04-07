@@ -6,7 +6,7 @@ WORKDIR /app
 
 RUN apk add --no-cache openssl
 
-COPY apps/user-service/package*.json ./
+COPY apps/workflow-service/package*.json ./
 RUN npm ci
 
 
@@ -19,7 +19,7 @@ WORKDIR /app
 RUN apk add --no-cache openssl
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/user-service/ ./
+COPY apps/workflow-service/ ./
 COPY shared/protos ./shared/protos
 
 # Nếu dùng multi schema → merge
@@ -43,7 +43,7 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
-COPY apps/user-service/package*.json ./
+COPY apps/workflow-service/package*.json ./
 RUN npm ci --omit=dev
 
 # copy build output
@@ -62,6 +62,6 @@ RUN addgroup -S app && adduser -S app -G app
 RUN chown -R app:app /app
 USER app
 
-EXPOSE 3001
+EXPOSE 3004
 
 CMD ["node", "dist/src/main.js"]
