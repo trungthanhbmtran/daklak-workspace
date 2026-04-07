@@ -35,6 +35,7 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-admin123}
     ports:
+      - "5672:5672"
       - "15672:15672"
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
