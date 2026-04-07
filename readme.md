@@ -1,5 +1,5 @@
 # Daklak Workspace Deployment Guide
-
+npx prisma generate
 Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
 
 ## 1. CI/CD Workflow
