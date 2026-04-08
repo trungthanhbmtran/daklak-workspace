@@ -268,13 +268,13 @@ async function main() {
     { code: 'ADMIN_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'megaphone-outline', order: 7, res: 'NOTIFICATION' },
   ];
 
-  for (const m of adminMenus) {
+  for (const { res, ...m } of adminMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: { parentId: serviceNodes['USER_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
       create: { ...m, parentId: serviceNodes['USER_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'USER_SERVICE' },
     });
-    await linkMenuPBAC(node.id, m.res, 'READ');
+    await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // 2. Document Module
@@ -287,13 +287,13 @@ async function main() {
     { code: 'DOC_MENU_CONSULTATION', name: 'Xin ý kiến', route: 'consultations', icon: 'people-outline', order: 6, res: 'DOC_CONSULTATION' },
   ];
 
-  for (const m of docMenus) {
+  for (const { res, ...m } of docMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: { parentId: serviceNodes['DOCUMENT_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
       create: { ...m, parentId: serviceNodes['DOCUMENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'DOCUMENT_SERVICE' },
     });
-    await linkMenuPBAC(node.id, m.res, 'READ');
+    await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // 3. HRM Module
@@ -301,13 +301,13 @@ async function main() {
     { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
   ];
 
-  for (const m of hrmMenus) {
+  for (const { res, ...m } of hrmMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: { parentId: serviceNodes['HRM_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
       create: { ...m, parentId: serviceNodes['HRM_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'HRM_SERVICE' },
     });
-    await linkMenuPBAC(node.id, m.res, 'READ');
+    await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // 4. Content Module
@@ -315,13 +315,13 @@ async function main() {
     { code: 'CONTENT_MENU_POSTS', name: 'Bài viết & Tin tức', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
   ];
 
-  for (const m of postMenus) {
+  for (const { res, ...m } of postMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: { parentId: serviceNodes['CONTENT_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
       create: { ...m, parentId: serviceNodes['CONTENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'CONTENT_SERVICE' },
     });
-    await linkMenuPBAC(node.id, m.res, 'READ');
+    await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // ==========================================================
