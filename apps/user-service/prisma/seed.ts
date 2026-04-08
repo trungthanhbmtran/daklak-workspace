@@ -18,7 +18,7 @@ const prisma = new PrismaClient({
 const DEFAULT_PASSWORD = 'Admin@123';
 
 async function main() {
-  console.log('🌱 START COMPREHENSIVE SEED');
+  console.log('🌱 START COMPREHENSIVE E-GOV SEED');
 
   const passwordHash = await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
@@ -26,6 +26,7 @@ async function main() {
   // 1. RESOURCES
   // ==========================================================
   const resourcesData = [
+    // System & Admin
     { code: 'SYSTEM', name: 'Hệ thống' },
     { code: 'USER', name: 'Quản lý Người dùng' },
     { code: 'ROLE', name: 'Quản lý Vai trò' },
@@ -33,10 +34,23 @@ async function main() {
     { code: 'MENU', name: 'Quản lý Menu' },
     { code: 'ORGANIZATION', name: 'Cây tổ chức' },
     { code: 'CATEGORY', name: 'Danh mục hệ thống' },
-    { code: 'HRM_EMPLOYEE', name: 'Nhân sự - Nhân viên' },
-    { code: 'HRM_DEPT', name: 'Nhân sự - Phòng ban' },
-    { code: 'DOCUMENT', name: 'Quản lý Văn bản' },
+    { code: 'NOTIFICATION', name: 'Thông báo hệ thống' },
+
+    // Document Management
+    { code: 'DOC_INCOMING', name: 'Văn bản đến' },
+    { code: 'DOC_OUTGOING', name: 'Văn bản đi' },
+    { code: 'DOC_PROCESSING', name: 'Xử lý văn bản' },
+    { code: 'DOC_PUBLISH', name: 'Phát hành văn bản' },
+    { code: 'DOC_TRANSPARENCY', name: 'Công khai văn bản' },
+    { code: 'DOC_CONSULTATION', name: 'Xin ý kiến văn bản' },
+
+    // HRM
+    { code: 'HRM_EMPLOYEE', name: 'Quản lý Nhân sự' },
+
+    // CMS
     { code: 'POST', name: 'Quản lý Bài viết' },
+
+    // Workflow
     { code: 'WORKFLOW', name: 'Quy trình nghiệp vụ' },
   ];
 
@@ -53,12 +67,12 @@ async function main() {
   // ==========================================================
   // 2. PERMISSIONS (CRUD for all)
   // ==========================================================
-  const actions = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE', 'MANAGE'];
+  const actions = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE', 'PUBLISH', 'MANAGE'];
   const allPermissions: { id: number }[] = [];
 
   for (const res of Object.values(resources)) {
     for (const action of actions) {
-      // Logic: SYSTEM only has VIEW/MANAGE, others have standard CRUD
+      // Logic constraint: SYSTEM only has VIEW/MANAGE
       if (res.code === 'SYSTEM' && !['VIEW', 'MANAGE'].includes(action)) continue;
 
       const perm = await prisma.permission.upsert({
@@ -70,20 +84,81 @@ async function main() {
     }
   }
 
-  // Helper to get permission ID
-  const getPermId = async (action: string, resCode: string) => {
-    const resId = resources[resCode].id;
-    const p = await prisma.permission.findUnique({
-      where: { action_resourceId: { action, resourceId: resId } }
+  // ==========================================================
+  // 3. COMMON CATEGORIES (E-GOV STANDARD)
+  // ==========================================================
+  const categoriesData = [
+    // DOC_TYPE
+    { group: 'DOC_TYPE', code: 'QUYET_DINH', name: 'Quyết định', order: 1 },
+    { group: 'DOC_TYPE', code: 'NGHI_QUYET', name: 'Nghị quyết', order: 2 },
+    { group: 'DOC_TYPE', code: 'CONG_VAN', name: 'Công văn', order: 3 },
+    { group: 'DOC_TYPE', code: 'TO_TRINH', name: 'Tờ trình', order: 4 },
+    { group: 'DOC_TYPE', code: 'BAO_CAO', name: 'Báo cáo', order: 5 },
+    { group: 'DOC_TYPE', code: 'CHI_THI', name: 'Chỉ thị', order: 6 },
+    { group: 'DOC_TYPE', code: 'THONG_TU', name: 'Thông tư', order: 7 },
+
+    // DOC_SECURITY
+    { group: 'DOC_SECURITY', code: 'THUONG', name: 'Thường', order: 1 },
+    { group: 'DOC_SECURITY', code: 'MAT', name: 'Mật', order: 2 },
+    { group: 'DOC_SECURITY', code: 'TOI_MAT', name: 'Tối mật', order: 3 },
+    { group: 'DOC_SECURITY', code: 'TUYET_MAT', name: 'Tuyệt mật', order: 4 },
+
+    // DOC_URGENCY
+    { group: 'DOC_URGENCY', code: 'THUONG', name: 'Thường', order: 1 },
+    { group: 'DOC_URGENCY', code: 'KHAN', name: 'Khẩn', order: 2 },
+    { group: 'DOC_URGENCY', code: 'HOA_TOC', name: 'Hỏa tốc', order: 3 },
+
+    // UNIT_TYPE
+    { group: 'UNIT_TYPE', code: 'CQNN', name: 'Cơ quan nhà nước', order: 1 },
+    { group: 'UNIT_TYPE', code: 'DVSN', name: 'Đơn vị sự nghiệp', order: 2 },
+    { group: 'UNIT_TYPE', code: 'DN', name: 'Doanh nghiệp', order: 3 },
+
+    // UNIT_DOMAIN
+    { group: 'UNIT_DOMAIN', code: 'KHCN', name: 'Khoa học công nghệ', order: 1 },
+    { group: 'UNIT_DOMAIN', code: 'GIAO_DUC', name: 'Giáo dục', order: 2 },
+    { group: 'UNIT_DOMAIN', code: 'Y_TE', name: 'Y tế', order: 3 },
+    { group: 'UNIT_DOMAIN', code: 'KINH_TE', name: 'Kinh tế', order: 4 },
+    { group: 'UNIT_DOMAIN', code: 'VAN_HOA', name: 'Văn hóa', order: 5 },
+
+    // JOB_TITLE
+    { group: 'JOB_TITLE', code: 'GIAM_DOC', name: 'Giám đốc', order: 1 },
+    { group: 'JOB_TITLE', code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc', order: 2 },
+    { group: 'JOB_TITLE', code: 'TRUONG_PHONG', name: 'Trưởng phòng', order: 3 },
+    { group: 'JOB_TITLE', code: 'PHO_TRUONG_PHONG', name: 'Phó Trưởng phòng', order: 4 },
+    { group: 'JOB_TITLE', code: 'CHUYEN_VIEN', name: 'Chuyên viên', order: 5 },
+    { group: 'JOB_TITLE', code: 'CAN_BO', name: 'Cán bộ', order: 6 },
+    { group: 'JOB_TITLE', code: 'NHAN_VIEN', name: 'Nhân viên', order: 7 },
+
+    // ETHNICITY
+    { group: 'ETHNICITY', code: 'KINH', name: 'Kinh', order: 1 },
+    { group: 'ETHNICITY', code: 'TAY', name: 'Tày', order: 2 },
+    { group: 'ETHNICITY', code: 'THAI', name: 'Thái', order: 3 },
+    { group: 'ETHNICITY', code: 'EDE', name: 'Ê-đê', order: 4 },
+    { group: 'ETHNICITY', code: 'M_NONG', name: 'M\'Nông', order: 5 },
+
+    // RELIGION
+    { group: 'RELIGION', code: 'KHONG', name: 'Không', order: 1 },
+    { group: 'RELIGION', code: 'PHAT_GIAO', name: 'Phật giáo', order: 2 },
+    { group: 'RELIGION', code: 'CONG_GIAO', name: 'Công giáo', order: 3 },
+    { group: 'RELIGION', code: 'TIN_LANH', name: 'Tin lành', order: 4 },
+
+    // GENDER
+    { group: 'GENDER', code: 'NAM', name: 'Nam', order: 1 },
+    { group: 'GENDER', code: 'NU', name: 'Nữ', order: 2 },
+    { group: 'GENDER', code: 'KHAC', name: 'Khác', order: 3 },
+  ];
+
+  for (const cat of categoriesData) {
+    await prisma.category.upsert({
+      where: { group_code: { group: cat.group, code: cat.code } },
+      update: { name: cat.name, order: cat.order },
+      create: { ...cat, isSystem: true },
     });
-    return p ? { id: p.id } : null;
-  };
+  }
 
   // ==========================================================
-  // 3. ROLES
+  // 4. ROLES
   // ==========================================================
-
-  // ROLE: SUPER_ADMIN (All permissions)
   const superAdminRole = await prisma.role.upsert({
     where: { code: 'SUPER_ADMIN' },
     update: {
@@ -97,26 +172,16 @@ async function main() {
     },
   });
 
-  // ROLE: ADMIN (Standard System Admin)
-  const systemPerms = allPermissions.filter((_, index) => index % 2 === 0); // Placeholder for subset
   const adminRole = await prisma.role.upsert({
     where: { code: 'ADMIN' },
-    update: {
-      name: 'Quản trị viên',
-      permissions: { set: systemPerms },
-    },
-    create: {
-      code: 'ADMIN',
-      name: 'Quản trị viên',
-      permissions: { connect: systemPerms },
-    },
+    update: { name: 'Quản trị viên hệ thống' },
+    create: { code: 'ADMIN', name: 'Quản trị viên hệ thống' },
   });
 
   // ==========================================================
-  // 4. MENUS (ADMIN_PORTAL)
+  // 5. MENUS (ADMIN_PORTAL) - PBAC Implementation
   // ==========================================================
 
-  // Root Menu (Invisible container usually)
   const rootMenu = await prisma.menu.upsert({
     where: { code: 'SYS_ROOT' },
     update: { application: 'ADMIN_PORTAL' },
@@ -128,75 +193,40 @@ async function main() {
     },
   });
 
-  // -- SERVICE ROOTS (CARDS ON HUB) --
+  // Helper to link menu to resource permission
+  const linkMenuPBAC = async (menuId: number, resCode: string, action: string = 'READ') => {
+    const resId = resources[resCode]?.id;
+    if (!resId) return;
+    const perm = await prisma.permission.findUnique({
+      where: { action_resourceId: { action, resourceId: resId } }
+    });
+    if (perm) {
+      await prisma.menuRequiredPermission.upsert({
+        where: { menuId_permissionId: { menuId, permissionId: perm.id } },
+        update: {},
+        create: { menuId, permissionId: perm.id }
+      });
+    }
+  };
 
+  // --- SERVICE ROOTS ---
   const services = [
-    {
-      code: 'USER_SERVICE_ROOT',
-      name: 'Quản trị Hệ thống',
-      icon: 'shield-checkmark-outline',
-      service: 'USER_SERVICE',
-      desc: 'Quản lý tài khoản, vai trò, quyền hạn và cây tổ chức.',
-      color: '#3b82f6',
-      order: 1
-    },
-    {
-      code: 'HRM_SERVICE_ROOT',
-      name: 'Quản lý Nhân sự',
-      icon: 'people-outline',
-      service: 'HRM_SERVICE',
-      desc: 'Quản lý thông tin cán bộ, hồ sơ nhân viên và phòng ban.',
-      color: '#10b981',
-      order: 2
-    },
-    {
-      code: 'DOCUMENT_SERVICE_ROOT',
-      name: 'Quản lý Văn bản',
-      icon: 'document-text-outline',
-      service: 'DOCUMENT_SERVICE',
-      desc: 'Quản lý công văn, tờ trình và luồng luân chuyển văn bản.',
-      color: '#f59e0b',
-      order: 3
-    },
-    {
-      code: 'CONTENT_SERVICE_ROOT',
-      name: 'Quản lý Nội dung',
-      icon: 'newspaper-outline',
-      service: 'CONTENT_SERVICE',
-      desc: 'Quản lý bài viết, tin tức và cổng thông tin điện tử.',
-      color: '#ec4899',
-      order: 4
-    },
-    {
-      code: 'WORKFLOW_SERVICE_ROOT',
-      name: 'Quy trình Nghiệp vụ',
-      icon: 'layers-outline',
-      service: 'WORKFLOW_SERVICE',
-      desc: 'Thiết kế và theo dõi các quy trình phê duyệt tự động.',
-      color: '#8b5cf6',
-      order: 5
-    },
+    { code: 'USER_SERVICE_ROOT', name: 'Quản trị Hệ thống', icon: 'shield-checkmark-outline', service: 'USER_SERVICE', color: '#3b82f6', order: 1, res: 'USER' },
+    { code: 'HRM_SERVICE_ROOT', name: 'Quản lý Nhân sự', icon: 'people-outline', service: 'HRM_SERVICE', color: '#10b981', order: 2, res: 'HRM_EMPLOYEE' },
+    { code: 'DOCUMENT_SERVICE_ROOT', name: 'Quản lý Văn bản', icon: 'document-text-outline', service: 'DOCUMENT_SERVICE', color: '#f59e0b', order: 3, res: 'DOC_INCOMING' },
+    { code: 'CONTENT_SERVICE_ROOT', name: 'Quản lý Nội dung', icon: 'newspaper-outline', service: 'CONTENT_SERVICE', color: '#ec4899', order: 4, res: 'POST' },
+    { code: 'WORKFLOW_SERVICE_ROOT', name: 'Quy trình Nghiệp vụ', icon: 'layers-outline', service: 'WORKFLOW_SERVICE', color: '#8b5cf6', order: 5, res: 'WORKFLOW' },
   ];
 
   const serviceNodes: Record<string, any> = {};
-
   for (const sys of services) {
     const node = await prisma.menu.upsert({
       where: { code: sys.code },
-      update: {
-        parentId: rootMenu.id,
-        name: sys.name,
-        icon: sys.icon,
-        description: sys.desc,
-        iconColor: sys.color,
-        order: sys.order,
-        service: sys.service,
-      },
+      update: { parentId: rootMenu.id, name: sys.name, icon: sys.icon, iconColor: sys.color, order: sys.order, service: sys.service },
       create: {
         code: sys.code,
         name: sys.name,
         icon: sys.icon,
-        description: sys.desc,
         iconColor: sys.color,
         order: sys.order,
         service: sys.service,
@@ -205,64 +235,81 @@ async function main() {
       },
     });
     serviceNodes[sys.service] = node;
+    await linkMenuPBAC(node.id, sys.res, 'READ');
   }
 
-  // -- SUB MENUS (SIDEBARS) --
+  // --- SUB MENUS (PBAC LINKED) ---
 
-  // Admin Sidebar
+  // 1. Admin Module
   const adminMenus = [
-    { code: 'ADMIN_ORG', name: 'Đơn vị & Phòng ban', route: 'org', icon: 'apartment', order: 1 },
-    { code: 'ADMIN_USERS', name: 'Người dùng', route: 'users', icon: 'person-outline', order: 2 },
-    { code: 'ADMIN_ROLES', name: 'Vai trò & Quyền', route: 'roles', icon: 'lock-closed-outline', order: 3 },
-    { code: 'ADMIN_RESOURCES', name: 'Tài nguyên', route: 'resources', icon: 'shield-checkmark-outline', order: 4 },
-    { code: 'ADMIN_MENUS', name: 'Cấu hình Menu', route: 'menus', icon: 'list-outline', order: 5 },
-    { code: 'ADMIN_CATEGORIES', name: 'Danh mục', route: 'categories', icon: 'cog-outline', order: 6 },
+    { code: 'ADMIN_USERS', name: 'Người dùng', route: 'users', icon: 'person-outline', order: 1, res: 'USER' },
+    { code: 'ADMIN_ROLES', name: 'Vai trò & Quyền', route: 'roles', icon: 'lock-closed-outline', order: 2, res: 'ROLE' },
+    { code: 'ADMIN_RESOURCES', name: 'Tài nguyên', route: 'resources', icon: 'shield-checkmark-outline', order: 3, res: 'RESOURCE' },
+    { code: 'ADMIN_MENUS', name: 'Cấu hình Menu', route: 'menus', icon: 'list-outline', order: 4, res: 'MENU' },
+    { code: 'ADMIN_ORG', name: 'Đơn vị & Phòng ban', route: 'organization', icon: 'apartment', order: 5, res: 'ORGANIZATION' },
+    { code: 'ADMIN_CATEGORIES', name: 'Danh mục hệ thống', route: 'categories', icon: 'cog-outline', order: 6, res: 'CATEGORY' },
+    { code: 'ADMIN_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'megaphone-outline', order: 7, res: 'NOTIFICATION' },
   ];
 
   for (const m of adminMenus) {
-    await prisma.menu.upsert({
+    const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: { parentId: serviceNodes['USER_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
-      create: {
-        code: m.code,
-        name: m.name,
-        route: m.route,
-        icon: m.icon,
-        order: m.order,
-        parentId: serviceNodes['USER_SERVICE'].id,
-        application: 'ADMIN_PORTAL',
-        service: 'USER_SERVICE',
-      },
+      create: { ...m, parentId: serviceNodes['USER_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'USER_SERVICE' },
     });
+    await linkMenuPBAC(node.id, m.res, 'READ');
   }
 
-  // HRM Sidebar
+  // 2. Document Module
+  const docMenus = [
+    { code: 'DOC_MENU_INCOMING', name: 'Văn bản đến', route: 'incoming', icon: 'document-attach-outline', order: 1, res: 'DOC_INCOMING' },
+    { code: 'DOC_MENU_OUTGOING', name: 'Văn bản đi', route: 'outgoing', icon: 'document-attach-outline', order: 2, res: 'DOC_OUTGOING' },
+    { code: 'DOC_MENU_PROCESSING', name: 'Xử lý văn bản', route: 'processing', icon: 'document-text-outline', order: 3, res: 'DOC_PROCESSING' },
+    { code: 'DOC_MENU_PUBLISH', name: 'Phát hành', route: 'publish', icon: 'globe-outline', order: 4, res: 'DOC_PUBLISH' },
+    { code: 'DOC_MENU_TRANSPARENCY', name: 'Công khai', route: 'transparency', icon: 'folder-outline', order: 5, res: 'DOC_TRANSPARENCY' },
+    { code: 'DOC_MENU_CONSULTATION', name: 'Xin ý kiến', route: 'consultations', icon: 'people-outline', order: 6, res: 'DOC_CONSULTATION' },
+  ];
+
+  for (const m of docMenus) {
+    const node = await prisma.menu.upsert({
+      where: { code: m.code },
+      update: { parentId: serviceNodes['DOCUMENT_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
+      create: { ...m, parentId: serviceNodes['DOCUMENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'DOCUMENT_SERVICE' },
+    });
+    await linkMenuPBAC(node.id, m.res, 'READ');
+  }
+
+  // 3. HRM Module
   const hrmMenus = [
-    { code: 'HRM_DASHBOARD', name: 'Thống kê nhân sự', route: '', icon: 'grid-outline', order: 1 },
-    { code: 'HRM_EMPLOYEE_LIST', name: 'Danh sách nhân viên', route: 'employees', icon: 'people-outline', order: 2 },
+    { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
   ];
 
   for (const m of hrmMenus) {
-    await prisma.menu.upsert({
+    const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: { parentId: serviceNodes['HRM_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
-      create: {
-        code: m.code,
-        name: m.name,
-        route: m.route,
-        icon: m.icon,
-        order: m.order,
-        parentId: serviceNodes['HRM_SERVICE'].id,
-        application: 'ADMIN_PORTAL',
-        service: 'HRM_SERVICE',
-      },
+      create: { ...m, parentId: serviceNodes['HRM_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'HRM_SERVICE' },
     });
+    await linkMenuPBAC(node.id, m.res, 'READ');
+  }
+
+  // 4. Content Module
+  const postMenus = [
+    { code: 'CONTENT_MENU_POSTS', name: 'Bài viết & Tin tức', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
+  ];
+
+  for (const m of postMenus) {
+    const node = await prisma.menu.upsert({
+      where: { code: m.code },
+      update: { parentId: serviceNodes['CONTENT_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
+      create: { ...m, parentId: serviceNodes['CONTENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'CONTENT_SERVICE' },
+    });
+    await linkMenuPBAC(node.id, m.res, 'READ');
   }
 
   // ==========================================================
-  // 5. USERS
+  // 6. USERS
   // ==========================================================
-
   const superAdmin = await prisma.user.upsert({
     where: { email: 'superadmin@sys.com' },
     update: { roles: { set: [{ id: superAdminRole.id }] } },
@@ -280,7 +327,7 @@ async function main() {
     create: { userId: superAdmin.id, passwordHash },
   });
 
-  console.log('🎉 COMPREHENSIVE SEED COMPLETED');
+  console.log('🎉 COMPREHENSIVE E-GOV SEED COMPLETED');
   console.log(`👉 SuperAdmin: superadmin@sys.com / ${DEFAULT_PASSWORD}`);
 }
 
