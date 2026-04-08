@@ -96,6 +96,14 @@ async function main() {
     { group: 'DOC_TYPE', code: 'BAO_CAO', name: 'Báo cáo', order: 5 },
     { group: 'DOC_TYPE', code: 'CHI_THI', name: 'Chỉ thị', order: 6 },
     { group: 'DOC_TYPE', code: 'THONG_TU', name: 'Thông tư', order: 7 },
+    { group: 'DOC_TYPE', code: 'KE_HOACH', name: 'Kế hoạch', order: 8 },
+    { group: 'DOC_TYPE', code: 'QUY_DINH', name: 'Quy định', order: 9 },
+    { group: 'DOC_TYPE', code: 'QUY_CHE', name: 'Quy chế', order: 10 },
+    { group: 'DOC_TYPE', code: 'HUONG_DAN', name: 'Hướng dẫn', order: 11 },
+    { group: 'DOC_TYPE', code: 'BIEN_BAN', name: 'Biên bản', order: 12 },
+    { group: 'DOC_TYPE', code: 'GIAY_MOI', name: 'Giấy mời', order: 13 },
+    { group: 'DOC_TYPE', code: 'CONG_DIEN', name: 'Công điện', order: 14 },
+    { group: 'DOC_TYPE', code: 'THONG_BAO', name: 'Thông báo', order: 15 },
 
     // DOC_SECURITY
     { group: 'DOC_SECURITY', code: 'THUONG', name: 'Thường', order: 1 },
@@ -135,12 +143,19 @@ async function main() {
     { group: 'ETHNICITY', code: 'THAI', name: 'Thái', order: 3 },
     { group: 'ETHNICITY', code: 'EDE', name: 'Ê-đê', order: 4 },
     { group: 'ETHNICITY', code: 'M_NONG', name: 'M\'Nông', order: 5 },
+    { group: 'ETHNICITY', code: 'MUONG', name: 'Mường', order: 6 },
+    { group: 'ETHNICITY', code: 'KHO_ME', name: 'Khơ-me', order: 7 },
+    { group: 'ETHNICITY', code: 'MONG', name: 'Mông', order: 8 },
+    { group: 'ETHNICITY', code: 'NUNG', name: 'Nùng', order: 9 },
+    { group: 'ETHNICITY', code: 'HOA', name: 'Hoa', order: 10 },
 
     // RELIGION
     { group: 'RELIGION', code: 'KHONG', name: 'Không', order: 1 },
     { group: 'RELIGION', code: 'PHAT_GIAO', name: 'Phật giáo', order: 2 },
     { group: 'RELIGION', code: 'CONG_GIAO', name: 'Công giáo', order: 3 },
     { group: 'RELIGION', code: 'TIN_LANH', name: 'Tin lành', order: 4 },
+    { group: 'RELIGION', code: 'CAO_DAI', name: 'Cao đài', order: 5 },
+    { group: 'RELIGION', code: 'HOA_HAO', name: 'Hòa hảo', order: 6 },
 
     // GENDER
     { group: 'GENDER', code: 'NAM', name: 'Nam', order: 1 },
@@ -148,6 +163,7 @@ async function main() {
     { group: 'GENDER', code: 'KHAC', name: 'Khác', order: 3 },
   ];
 
+  console.log(`📦 Seeding ${categoriesData.length} categories...`);
   for (const cat of categoriesData) {
     await prisma.category.upsert({
       where: { group_code: { group: cat.group, code: cat.code } },
@@ -155,6 +171,7 @@ async function main() {
       create: { ...cat, isSystem: true },
     });
   }
+  console.log('✅ Categories seeded');
 
   // ==========================================================
   // 4. ROLES
@@ -246,7 +263,7 @@ async function main() {
     { code: 'ADMIN_ROLES', name: 'Vai trò & Quyền', route: 'roles', icon: 'lock-closed-outline', order: 2, res: 'ROLE' },
     { code: 'ADMIN_RESOURCES', name: 'Tài nguyên', route: 'resources', icon: 'shield-checkmark-outline', order: 3, res: 'RESOURCE' },
     { code: 'ADMIN_MENUS', name: 'Cấu hình Menu', route: 'menus', icon: 'list-outline', order: 4, res: 'MENU' },
-    { code: 'ADMIN_ORG', name: 'Đơn vị & Phòng ban', route: 'organization', icon: 'apartment', order: 5, res: 'ORGANIZATION' },
+    { code: 'ADMIN_ORGANIZATION', name: 'Đơn vị & Phòng ban', route: 'organization', icon: 'apartment', order: 5, res: 'ORGANIZATION' },
     { code: 'ADMIN_CATEGORIES', name: 'Danh mục hệ thống', route: 'categories', icon: 'cog-outline', order: 6, res: 'CATEGORY' },
     { code: 'ADMIN_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'megaphone-outline', order: 7, res: 'NOTIFICATION' },
   ];
