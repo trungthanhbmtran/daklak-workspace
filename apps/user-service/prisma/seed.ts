@@ -161,6 +161,63 @@ async function main() {
     { group: 'GENDER', code: 'NAM', name: 'Nam', order: 1 },
     { group: 'GENDER', code: 'NU', name: 'Nữ', order: 2 },
     { group: 'GENDER', code: 'KHAC', name: 'Khác', order: 3 },
+
+    // DOC_FIELD
+    { group: 'DOC_FIELD', code: 'HANH_CHINH', name: 'Hành chính', order: 1 },
+    { group: 'DOC_FIELD', code: 'KHOA_HOC', name: 'Khoa học công nghệ', order: 2 },
+    { group: 'DOC_FIELD', code: 'TAI_CHINH', name: 'Tài chính', order: 3 },
+    { group: 'DOC_FIELD', code: 'TO_CHUC', name: 'Tổ chức cán bộ', order: 4 },
+    { group: 'DOC_FIELD', code: 'KE_HOACH', name: 'Kế hoạch đầu tư', order: 5 },
+    { group: 'DOC_FIELD', code: 'XAY_DUNG', name: 'Xây dựng', order: 6 },
+    { group: 'DOC_FIELD', code: 'GIAO_THONG', name: 'Giao thông', order: 7 },
+    { group: 'DOC_FIELD', code: 'GIAO_DUC', name: 'Giáo dục', order: 8 },
+    { group: 'DOC_FIELD', code: 'Y_TE', name: 'Y tế', order: 9 },
+
+    // DOC_STATUS
+    { group: 'DOC_STATUS', code: 'DU_THAO', name: 'Dự thảo', order: 1 },
+    { group: 'DOC_STATUS', code: 'CHO_DUYET', name: 'Chờ duyệt', order: 2 },
+    { group: 'DOC_STATUS', code: 'DA_DUYET', name: 'Đã duyệt', order: 3 },
+    { group: 'DOC_STATUS', code: 'DA_BAN_HANH', name: 'Đã ban hành', order: 4 },
+    { group: 'DOC_STATUS', code: 'DA_THU_HOI', name: 'Đã thu hồi', order: 5 },
+
+    // ACADEMIC_LEVEL
+    { group: 'ACADEMIC_LEVEL', code: 'DAI_HOC', name: 'Đại học', order: 1 },
+    { group: 'ACADEMIC_LEVEL', code: 'CAO_DANG', name: 'Cao đẳng', order: 2 },
+    { group: 'ACADEMIC_LEVEL', code: 'TRUNG_CAP', name: 'Trung cấp', order: 3 },
+    { group: 'ACADEMIC_LEVEL', code: 'SO_CAP', name: 'Sơ cấp', order: 4 },
+    { group: 'ACADEMIC_LEVEL', code: 'THPT', name: 'Trung học phổ thông', order: 5 },
+
+    // ACADEMIC_DEGREE
+    { group: 'ACADEMIC_DEGREE', code: 'TIEN_SI', name: 'Tiến sĩ', order: 1 },
+    { group: 'ACADEMIC_DEGREE', code: 'THAC_SI', name: 'Thạc sĩ', order: 2 },
+    { group: 'ACADEMIC_DEGREE', code: 'CU_NHAN', name: 'Cử nhân', order: 3 },
+    { group: 'ACADEMIC_DEGREE', code: 'KY_SU', name: 'Kỹ sư', order: 4 },
+
+    // ACADEMIC_RANK
+    { group: 'ACADEMIC_RANK', code: 'GIAO_SU', name: 'Giáo sư', order: 1 },
+    { group: 'ACADEMIC_RANK', code: 'PHO_GIAO_SU', name: 'Phó Giáo sư', order: 2 },
+
+    // POLITICAL_THEORY
+    { group: 'POLITICAL_THEORY', code: 'CAO_CAP', name: 'Cao cấp', order: 1 },
+    { group: 'POLITICAL_THEORY', code: 'TRUNG_CAP', name: 'Trung cấp', order: 2 },
+    { group: 'POLITICAL_THEORY', code: 'SO_CAP', name: 'Sơ cấp', order: 3 },
+
+    // STATE_MANAGEMENT
+    { group: 'STATE_MANAGEMENT', code: 'CVC_CAO_CAP', name: 'Chuyên viên cao cấp', order: 1 },
+    { group: 'STATE_MANAGEMENT', code: 'CVC_CHINH', name: 'Chuyên viên chính', order: 2 },
+    { group: 'STATE_MANAGEMENT', code: 'CHUYEN_VIEN', name: 'Chuyên viên', order: 3 },
+    { group: 'STATE_MANAGEMENT', code: 'CAN_SU', name: 'Cán sự', order: 4 },
+
+    // POST_CATEGORY
+    { group: 'POST_CATEGORY', code: 'TIN_TUC', name: 'Tin tức & Sự kiện', order: 1 },
+    { group: 'POST_CATEGORY', code: 'THONG_BAO', name: 'Thông báo', order: 2 },
+    { group: 'POST_CATEGORY', code: 'VAN_BAN_CHI_DAO', name: 'Văn bản chỉ đạo', order: 3 },
+    { group: 'POST_CATEGORY', code: 'HUONG_DAN', name: 'Hướng dẫn nghiệp vụ', order: 4 },
+
+    // ORG_LEVEL
+    { group: 'ORG_LEVEL', code: 'TINH', name: 'Cấp Tỉnh/Thành phố', order: 1 },
+    { group: 'ORG_LEVEL', code: 'HUYEN', name: 'Cấp Sở/Ngành/Quận/Huyện', order: 2 },
+    { group: 'ORG_LEVEL', code: 'XA', name: 'Cấp Phòng/Ban/Xã/Phường', order: 3 },
   ];
 
   console.log(`📦 Seeding ${categoriesData.length} categories...`);
