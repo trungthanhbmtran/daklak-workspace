@@ -113,9 +113,17 @@ async function main() {
     { group: 'DISTRICT', code: '47_01', name: 'Thành phố Buôn Ma Thuột', order: 1 },
     { group: 'DISTRICT', code: '47_02', name: 'Thị xã Buôn Hồ', order: 2 },
     { group: 'DISTRICT', code: '47_03', name: 'Huyện Krông Pắc', order: 3 },
+    { group: 'DISTRICT', code: '47_04', name: 'Huyện Krông Năng', order: 4 },
+    { group: 'DISTRICT', code: '47_05', name: 'Huyện Ea H\'leo', order: 5 },
+    { group: 'DISTRICT', code: '47_06', name: 'Huyện Buôn Đôn', order: 6 },
+    { group: 'DISTRICT', code: '47_07', name: 'Huyện Cư M\'gar', order: 7 },
+    { group: 'DISTRICT', code: '47_08', name: 'Huyện Ea Kar', order: 8 },
 
     { group: 'WARD', code: '47_01_01', name: 'Phường Tân Lợi', order: 1 },
     { group: 'WARD', code: '47_01_02', name: 'Phường Tân Hòa', order: 2 },
+    { group: 'WARD', code: '47_01_03', name: 'Phường Tân Lập', order: 3 },
+    { group: 'WARD', code: '47_01_04', name: 'Phường Tân An', order: 4 },
+    { group: 'WARD', code: '47_01_05', name: 'Phường Thắng Lợi', order: 5 },
 
     { group: 'GEO_AREA', code: 'TAY_NGUYEN', name: 'Khu vực Tây Nguyên', order: 1 },
     { group: 'GEO_AREA', code: 'MIEN_TRUNG', name: 'Khu vực Miền Trung', order: 2 },
@@ -139,6 +147,8 @@ async function main() {
     { group: 'DOCUMENT_DOMAIN', code: 'HANH_CHINH', name: 'Hành chính', order: 1 },
     { group: 'DOCUMENT_DOMAIN', code: 'KHOA_HOC', name: 'Khoa học công nghệ', order: 2 },
     { group: 'DOCUMENT_DOMAIN', code: 'TAI_CHINH', name: 'Tài chính', order: 3 },
+    { group: 'DOCUMENT_DOMAIN', code: 'GIAO_THONG', name: 'Giao thông vận tải', order: 4 },
+    { group: 'DOCUMENT_DOMAIN', code: 'Y_TE', name: 'Y tế', order: 5 },
 
     { group: 'STORAGE_PERIOD', code: '5_YEARS', name: '05 năm', order: 1 },
     { group: 'STORAGE_PERIOD', code: '10_YEARS', name: '10 năm', order: 2 },
@@ -195,6 +205,9 @@ async function main() {
 
     { group: 'DOMAIN', code: 'KHCN', name: 'Khoa học công nghệ', order: 1 },
     { group: 'DOMAIN', code: 'GIAO_DUC', name: 'Giáo dục', order: 2 },
+    { group: 'DOMAIN', code: 'Y_TE', name: 'Y tế', order: 3 },
+    { group: 'DOMAIN', code: 'NONG_NGHIEP', name: 'Nông nghiệp & PTNT', order: 4 },
+    { group: 'DOMAIN', code: 'CONG_THUONG', name: 'Công thương', order: 5 },
 
     { group: 'CONTENT_TYPE', code: 'ARTICLE', name: 'Bài viết', order: 1 },
     { group: 'CONTENT_TYPE', code: 'NOTIF', name: 'Thông báo', order: 2 },
@@ -384,6 +397,73 @@ async function main() {
     update: { passwordHash },
     create: { userId: superAdmin.id, passwordHash },
   });
+
+  // ==========================================================
+  // 7. JOB TITLES
+  // ==========================================================
+  console.log('📦 Seeding Job Titles...');
+  const jobTitlesData = [
+    { code: 'CHU_TICH', name: 'Chủ tịch' },
+    { code: 'PHO_CHU_TICH', name: 'Phó Chủ tịch' },
+    { code: 'GIAM_DOC', name: 'Giám đốc' },
+    { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc' },
+    { code: 'TRUONG_PHONG', name: 'Trưởng phòng' },
+    { code: 'PHO_PHONG', name: 'Phó Trưởng phòng' },
+    { code: 'CHUYEN_VIEN', name: 'Chuyên viên' },
+  ];
+
+  for (const jt of jobTitlesData) {
+    await prisma.jobTitle.upsert({
+      where: { code: jt.code },
+      update: { name: jt.name },
+      create: jt,
+    });
+  }
+
+  // ==========================================================
+  // 8. ORGANIZATIONS (DAK LAK PROVINCE)
+  // ==========================================================
+  console.log('📦 Seeding Organization Units...');
+  const unitTypes = await prisma.category.findMany({ where: { group: 'UNIT_TYPE' } });
+  const cqnnId = unitTypes.find(c => c.code === 'CQNN')?.id || 1;
+
+  const province = await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_TINH_DAKLAK' },
+    update: { name: 'UBND Tỉnh Đắk Lắk', typeId: cqnnId },
+    create: { code: 'UBND_TINH_DAKLAK', name: 'UBND Tỉnh Đắk Lắk', typeId: cqnnId, shortName: 'UBND Tỉnh' },
+  });
+
+  const depts = [
+    { code: 'SO_KHCN', name: 'Sở Khoa học và Công nghệ', shortName: 'Sở KH&CN' },
+    { code: 'SO_GTVT', name: 'Sở Giao thông vận tải', shortName: 'Sở GTVT' },
+    { code: 'SO_YTE', name: 'Sở Y tế', shortName: 'Sở Y tế' },
+    { code: 'SO_GDDT', name: 'Sở Giáo dục và Đào tạo', shortName: 'Sở GD&ĐT' },
+    { code: 'SO_TC', name: 'Sở Tài chính', shortName: 'Sở Tài chính' },
+    { code: 'SO_KHDT', name: 'Sở Kế hoạch và Đầu tư', shortName: 'Sở KH&ĐT' },
+    { code: 'SO_NV', name: 'Sở Nội vụ', shortName: 'Sở Nội vụ' },
+    { code: 'VP_UBND', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND' },
+  ];
+
+  for (const d of depts) {
+    await prisma.organizationUnit.upsert({
+      where: { code: d.code },
+      update: { parentId: province.id, typeId: cqnnId },
+      create: { ...d, parentId: province.id, typeId: cqnnId },
+    });
+  }
+
+  const districtsUnits = [
+    { code: 'UBND_BMT', name: 'UBND Thành phố Buôn Ma Thuột', shortName: 'UBND BMT' },
+    { code: 'UBND_BUON_HO', name: 'UBND Thị xã Buôn Hồ', shortName: 'UBND Buôn Hồ' },
+  ];
+
+  for (const d of districtsUnits) {
+    await prisma.organizationUnit.upsert({
+      where: { code: d.code },
+      update: { parentId: province.id, typeId: cqnnId },
+      create: { ...d, parentId: province.id, typeId: cqnnId },
+    });
+  }
 
   console.log('🎉 COMPREHENSIVE E-GOV SEED COMPLETED');
   console.log(`👉 SuperAdmin: superadmin@sys.com / ${DEFAULT_PASSWORD}`);
