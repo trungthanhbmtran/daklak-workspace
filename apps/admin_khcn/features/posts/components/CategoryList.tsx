@@ -35,7 +35,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     queryKey: ["posts-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      const payload = res.data;
+      const payload = res?.data;
+      if (!payload) return [];
       return payload.data || payload.items || (Array.isArray(payload) ? payload : []);
     },
   });

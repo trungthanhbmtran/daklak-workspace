@@ -36,7 +36,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     queryKey: ["banners"],
     queryFn: async () => {
       const res = await postsApi.getBanners();
-      const payload = res.data;
+      const payload = res?.data;
+      if (!payload) return [];
       return payload.data || payload.items || (Array.isArray(payload) ? payload : []);
     },
   });

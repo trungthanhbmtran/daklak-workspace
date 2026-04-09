@@ -77,7 +77,10 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   // Fetch detailed data if editing
   const { data: bannerData, isLoading: isFetching } = useQuery({
     queryKey: ["banner", editId],
-    queryFn: () => postsApi.getBanner(editId!).then(res => res.data),
+    queryFn: async () => {
+      const res = await postsApi.getBanner(editId!);
+      return res?.data;
+    },
     enabled: isEdit,
   });
 
@@ -85,6 +88,11 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     if (bannerData) {
       form.reset({
         ...bannerData,
+        name: bannerData.name || "",
+        slug: bannerData.slug || "",
+        description: bannerData.description || "",
+        imageUrl: bannerData.imageUrl || "",
+        customUrl: bannerData.customUrl || "",
         startAt: bannerData.startAt ? new Date(bannerData.startAt).toISOString().split('T')[0] : "",
         endAt: bannerData.endAt ? new Date(bannerData.endAt).toISOString().split('T')[0] : "",
       });

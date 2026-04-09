@@ -85,7 +85,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     queryFn: async () => {
       const res = await postsApi.getPost(editId!);
       // Gateway trả về { success: true, data: Post, timestamp }
-      return res.data;
+      return res?.data;
     },
     enabled: isEdit,
   });
@@ -93,12 +93,12 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   useEffect(() => {
     if (postData) {
       form.reset({
-        title: postData.title,
-        slug: postData.slug,
+        title: postData.title || "",
+        slug: postData.slug || "",
         summary: postData.summary || "",
-        content: postData.content,
-        categoryId: postData.categoryId,
-        status: postData.status,
+        content: postData.content || "",
+        categoryId: postData.categoryId || "",
+        status: postData.status || "DRAFT",
         thumbnailId: postData.thumbnailId || "",
       });
     }

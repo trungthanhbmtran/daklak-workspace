@@ -1,4 +1,5 @@
-"use client";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle } from "lucide-react";
@@ -38,7 +39,9 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
       };
       const res = await postsApi.getPosts(params);
       // Bóc tách data từ Gateway Transformer
-      const payload = res.data;
+      const payload = res?.data;
+      if (!payload) return { items: [], meta: {} };
+      
       return {
         items: payload.items || payload.data || (Array.isArray(payload) ? payload : []),
         meta: payload.meta || {}
