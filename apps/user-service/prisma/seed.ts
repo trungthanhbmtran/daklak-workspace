@@ -49,6 +49,8 @@ async function main() {
 
     // CMS
     { code: 'POST', name: 'Quản lý Bài viết' },
+    { code: 'POST_CATEGORY', name: 'Quản lý Chuyên mục' },
+    { code: 'BANNER', name: 'Quản lý Banner & Quảng cáo' },
 
     // Workflow
     { code: 'WORKFLOW', name: 'Quy trình nghiệp vụ' },
@@ -366,7 +368,9 @@ async function main() {
 
   // 4. Content Module
   const postMenus = [
-    { code: 'CONTENT_MENU_POSTS', name: 'Bài viết & Tin tức', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
+    { code: 'CONTENT_MENU_POSTS', name: 'Duyệt bài viết', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
+    { code: 'CONTENT_MENU_CATEGORIES', name: 'Chuyên mục', route: 'categories', icon: 'list-outline', order: 2, res: 'POST_CATEGORY' },
+    { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 3, res: 'BANNER' },
   ];
 
   for (const { res, ...m } of postMenus) {
