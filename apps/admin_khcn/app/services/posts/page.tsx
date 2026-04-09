@@ -14,7 +14,7 @@ export default function PostsPage() {
 
   if (view === 'EDIT') {
     // Truyền editId vào PostForm để gọi API fetch chi tiết bài viết
-    return <PostForm onBack={() => setView('LIST')} />;
+    return <PostForm onBack={() => setView('LIST')} editId={editId} />;
   }
 
   return (

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send, 
   Loader2, X, UploadCloud, Maximize2 
@@ -19,7 +20,8 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 
 import { useImageUpload } from "../hooks/useImageUpload";
-import apiClient from "@/lib/axiosInstance";
+import { postsApi } from "../api";
+import { Category } from "../types";
 import dynamic from "next/dynamic";
 
 const LexicalEditorDynamic = dynamic(
@@ -31,13 +33,13 @@ const LexicalEditorDynamic = dynamic(
 const convertToSlug = (text: string) => {
   return text
     .toLowerCase()
-    .normalize("NFD") // Tách dấu
-    .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/[đĐ]/g, "d")
-    .replace(/([^0-9a-z-\s])/g, "") // Xóa ký tự đặc biệt
-    .replace(/(\s+)/g, "-") // Thay khoảng trắng bằng -
-    .replace(/-+/g, "-") // Xóa nhiều - liên tiếp
-    .replace(/^-+|-+$/g, ""); // Xóa - ở đầu và cuối
+    .replace(/([^0-9a-z-\s])/g, "")
+    .replace(/(\s+)/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 };
 
 const postSchema = z.object({
@@ -46,15 +48,17 @@ const postSchema = z.object({
   summary: z.string().max(300, "Tóm tắt không quá 300 ký tự").optional(),
   content: z.string().min(10, "Nội dung bài viết quá ngắn"), 
   categoryId: z.string().min(1, "Vui lòng chọn chuyên mục"),
-  status: z.enum(["DRAFT", "PENDING", "PUBLISHED"]),
+  status: z.enum(["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "EDITING"]),
   thumbnailId: z.string().optional(),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
 
-export function PostForm({ onBack }: { onBack: () => void }) {
+export function PostForm({ onBack, editId }: { onBack: () => void; editId?: string | null }) {
+  const queryClient = useQueryClient();
   const [showFullImage, setShowFullImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isEdit = !!editId;
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
@@ -64,31 +68,74 @@ export function PostForm({ onBack }: { onBack: () => void }) {
     },
   });
 
+  // Fetch Categories
+  const { data: categories } = useQuery({
+    queryKey: ["posts-categories"],
+    queryFn: async () => {
+      const res = await postsApi.getCategories();
+      return (res as any).data?.items || res.data || [];
+    },
+  });
+
+  // Fetch Post if Edit
+  const { data: postData, isLoading: isFetching } = useQuery({
+    queryKey: ["post", editId],
+    queryFn: () => postsApi.getPost(editId!).then(res => res.data),
+    enabled: isEdit,
+  });
+
+  useEffect(() => {
+    if (postData) {
+      form.reset({
+        title: postData.title,
+        slug: postData.slug,
+        summary: postData.summary || "",
+        content: postData.content,
+        categoryId: postData.categoryId,
+        status: postData.status,
+        thumbnailId: postData.thumbnailId || "",
+      });
+    }
+  }, [postData, form]);
+
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => form.setValue("thumbnailId", fileId, { shouldDirty: true }),
     onRemove: () => form.setValue("thumbnailId", "", { shouldDirty: true })
   });
 
-  // --- LOGIC: TỰ ĐỘNG SINH SLUG KHI GÕ TIÊU ĐỀ ---
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
     form.setValue("title", newTitle);
-
-    // Chỉ tự động đổi Slug nếu User chưa bao giờ chạm tay vào ô Slug (dirty check)
     if (!form.formState.dirtyFields.slug) {
       form.setValue("slug", convertToSlug(newTitle), { shouldValidate: true });
     }
   };
 
-  const handleOnSubmit = async (values: PostFormValues) => {
-    try {
-      console.log("🚀 Payload gửi về hệ thống:", values);
-      alert("Đã gửi bài viết thành công!");
+  const mutation = useMutation({
+    mutationFn: (values: PostFormValues) => {
+      if (isEdit) return postsApi.updatePost(editId!, values);
+      return postsApi.createPost(values);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      alert(isEdit ? "Cập nhật bài viết thành công!" : "Tạo bài viết thành công!");
       onBack();
-    } catch (error) {
-      alert("Có lỗi xảy ra khi lưu bài viết.");
-    }
-  };
+    },
+    onError: (err: any) => {
+      alert("Lỗi: " + (err.response?.data?.message || "Đã xảy ra lỗi hệ thống."));
+    },
+  });
+
+  const handleOnSubmit = (values: PostFormValues) => mutation.mutate(values);
+
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-3 text-muted-foreground">Đang tải dữ liệu bài viết...</span>
+      </div>
+    );
+  }
 
   return (
     <Form {...form}>
@@ -100,14 +147,30 @@ export function PostForm({ onBack }: { onBack: () => void }) {
             <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
           </Button>
           <div className="flex items-center gap-3">
-            <Button type="button" variant="outline" onClick={() => {
-                form.setValue("status", "DRAFT");
-                form.handleSubmit(handleOnSubmit)();
-              }}>
+            <Button 
+                type="button" 
+                variant="outline" 
+                disabled={mutation.isPending}
+                onClick={() => {
+                   form.setValue("status", "DRAFT");
+                   form.handleSubmit(handleOnSubmit)();
+                }}
+            >
               <Save className="h-4 w-4 mr-2" /> Lưu nháp
             </Button>
-            <Button type="button" className="bg-blue-600 hover:bg-blue-700 shadow-md text-white" onClick={form.handleSubmit(handleOnSubmit)}>
-              <Send className="h-4 w-4 mr-2" /> Gửi duyệt bài
+            <Button 
+                type="button" 
+                className="bg-blue-600 hover:bg-blue-700 shadow-md text-white" 
+                disabled={mutation.isPending}
+                onClick={() => {
+                    if (form.getValues("status") === "DRAFT") {
+                        form.setValue("status", "PENDING");
+                    }
+                    form.handleSubmit(handleOnSubmit)();
+                }}
+            >
+              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+              {isEdit ? "Cập nhật" : "Gửi duyệt bài"}
             </Button>
           </div>
         </div>
@@ -119,7 +182,7 @@ export function PostForm({ onBack }: { onBack: () => void }) {
             <Card className="border-none shadow-sm bg-muted/10">
               <CardContent className="p-6 space-y-6">
                 
-                <form className="space-y-5">
+                <div className="space-y-5">
                   <FormField control={form.control} name="title" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold">Tiêu đề bài viết <span className="text-destructive">*</span></FormLabel>
@@ -128,7 +191,7 @@ export function PostForm({ onBack }: { onBack: () => void }) {
                           placeholder="Nhập tiêu đề..." 
                           className="text-lg font-semibold h-12 bg-background" 
                           {...field} 
-                          onChange={handleTitleChange} // Chèn logic auto-slug vào đây
+                          onChange={handleTitleChange} 
                         />
                       </FormControl>
                       <FormMessage />
@@ -141,7 +204,7 @@ export function PostForm({ onBack }: { onBack: () => void }) {
                         <FormLabel className="text-xs font-bold uppercase text-muted-foreground tracking-tight">Đường dẫn tĩnh (Slug)</FormLabel>
                         <div className="flex items-center rounded-md border border-slate-200 bg-background overflow-hidden focus-within:ring-2 focus-within:ring-blue-500/20 focus-within:border-blue-500 transition-all">
                           <span className="px-3 py-2 text-[13px] text-muted-foreground border-r bg-muted/30 font-mono select-none">
-                            congthongtin.daklak.gov.vn/
+                            /
                           </span>
                           <FormControl>
                             <Input className="border-0 bg-transparent shadow-none font-mono text-sm h-9 focus-visible:ring-0" {...field} />
@@ -154,13 +217,14 @@ export function PostForm({ onBack }: { onBack: () => void }) {
                     <FormField control={form.control} name="categoryId" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-bold uppercase text-muted-foreground tracking-tight">Chuyên mục</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
                             <SelectTrigger className="bg-background h-10"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="1">Thông báo - Điều hành</SelectItem>
-                            <SelectItem value="2">Tin tức Khoa học & Công nghệ</SelectItem>
+                            {categories?.map((cat: Category) => (
+                              <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -177,7 +241,7 @@ export function PostForm({ onBack }: { onBack: () => void }) {
                       <FormMessage />
                     </FormItem>
                   )}/>
-                </form>
+                </div>
 
                 <Separator className="bg-slate-200" />
 
@@ -214,9 +278,9 @@ export function PostForm({ onBack }: { onBack: () => void }) {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     <p className="text-[11px] mt-2 font-medium uppercase tracking-widest text-muted-foreground">Đang xử lý...</p>
                   </div>
-                ) : previewUrl ? (
+                ) : (previewUrl || form.getValues("thumbnailId")) ? (
                   <div className="relative group rounded-lg overflow-hidden border">
-                    <img src={previewUrl} alt="Thumbnail" className="aspect-video object-cover w-full h-full" />
+                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} alt="Thumbnail" className="aspect-video object-cover w-full h-full" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi</Button>
@@ -239,30 +303,30 @@ export function PostForm({ onBack }: { onBack: () => void }) {
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-5">
-                <form>
-                  <FormField control={form.control} name="status" render={({ field }) => (
-                    <FormItem>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger className="bg-background"><SelectValue /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          <SelectItem value="DRAFT">Lưu bản nháp</SelectItem>
-                          <SelectItem value="PENDING">Chờ phê duyệt</SelectItem>
-                          <SelectItem value="PUBLISHED">Công khai ngay</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )}/>
-                </form>
+                <FormField control={form.control} name="status" render={({ field }) => (
+                  <FormItem>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl><SelectTrigger className="bg-background"><SelectValue /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        <SelectItem value="DRAFT">Lưu bản nháp</SelectItem>
+                        <SelectItem value="PENDING">Chờ phê duyệt</SelectItem>
+                        <SelectItem value="PUBLISHED">Công khai ngay</SelectItem>
+                        <SelectItem value="EDITING">Yêu cầu chỉnh sửa</SelectItem>
+                        <SelectItem value="REJECTED">Từ chối</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )}/>
               </CardContent>
             </Card>
           </div>
         </div>
 
         {/* LIGHTBOX MODAL */}
-        {showFullImage && previewUrl && (
+        {showFullImage && (previewUrl || form.getValues("thumbnailId")) && (
           <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/95 p-4 animate-in fade-in duration-200" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-6xl w-full" onClick={e => e.stopPropagation()}>
-               <img src={previewUrl} className="w-full h-auto max-h-[90vh] object-contain rounded-sm" />
+               <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[90vh] object-contain rounded-sm" />
                <Button type="button" variant="destructive" size="icon" className="absolute -top-4 -right-4 rounded-full border-2 border-white shadow-2xl" onClick={() => setShowFullImage(false)}>
                  <X className="h-5 w-5" />
                </Button>
