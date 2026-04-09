@@ -17,12 +17,14 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 export class S3StorageService implements OnModuleInit {
   private readonly logger = new Logger(S3StorageService.name);
   private s3Client: S3Client;
+  private signingClient: S3Client;
   private readonly bucket: string;
 
   constructor(private readonly configService: ConfigService) {
     const accessKeyId = this.configService.get<string>('MINIO_ACCESS_KEY');
     const secretAccessKey = this.configService.get<string>('MINIO_SECRET_KEY');
     const endpoint = this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000';
+    const externalEndpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000';
     const region = this.configService.get<string>('MINIO_REGION') || 'us-east-1';
     this.bucket = this.configService.get<string>('MINIO_BUCKET') || 'media-center';
 
@@ -31,12 +33,18 @@ export class S3StorageService implements OnModuleInit {
       throw new Error('Config missing for S3StorageService initialization');
     }
 
+    // Client for internal operations (backend-to-minio)
     this.s3Client = new S3Client({
       endpoint,
-      credentials: {
-        accessKeyId,
-        secretAccessKey,
-      },
+      credentials: { accessKeyId, secretAccessKey },
+      forcePathStyle: true,
+      region,
+    });
+
+    // Client for generating pre-signed URLs (browser-to-minio)
+    this.signingClient = new S3Client({
+      endpoint: externalEndpoint,
+      credentials: { accessKeyId, secretAccessKey },
       forcePathStyle: true,
       region,
     });
@@ -73,7 +81,7 @@ export class S3StorageService implements OnModuleInit {
       Key: key,
       ContentType: contentType,
     });
-    return getSignedUrl(this.s3Client, command, { expiresIn });
+    return getSignedUrl(this.signingClient, command, { expiresIn });
   }
 
   /**
@@ -84,7 +92,7 @@ export class S3StorageService implements OnModuleInit {
       Bucket: bucket || this.bucket,
       Key: key,
     });
-    return getSignedUrl(this.s3Client, command, { expiresIn });
+    return getSignedUrl(this.signingClient, command, { expiresIn });
   }
 
   /**
@@ -127,7 +135,7 @@ export class S3StorageService implements OnModuleInit {
         UploadId: uploadId,
         PartNumber: i,
       });
-      const url = await getSignedUrl(this.s3Client, command, { expiresIn });
+      const url = await getSignedUrl(this.signingClient, command, { expiresIn });
       urls.push(url);
     }
     return urls;
