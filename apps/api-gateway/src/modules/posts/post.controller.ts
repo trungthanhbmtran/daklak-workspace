@@ -36,13 +36,15 @@ export class PostController implements OnModuleInit {
   }
 
   @Post()
-  async createPost(@Body() body: any) {
-    return firstValueFrom(this.postService.CreatePost(body));
+  async createPost(@Body() body: any, @Req() req: any) {
+    const authorId = req.user?.id;
+    return firstValueFrom(this.postService.CreatePost({ ...body, authorId }));
   }
 
   @Put(':id')
-  async updatePost(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(this.postService.UpdatePost({ id, ...body }));
+  async updatePost(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    const authorId = req.user?.id;
+    return firstValueFrom(this.postService.UpdatePost({ id, ...body, authorId }));
   }
 
   @Delete(':id')

@@ -72,15 +72,21 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const { data: categories } = useQuery({
     queryKey: ["posts-categories"],
     queryFn: async () => {
-      const res = await postsApi.getCategories();
-      return (res as any).data?.items || res.data || [];
+      const res = await postsApi.getCategories({ pageSize: 100 });
+      // Bóc tách data từ Gateway Transformer
+      const payload = res.data;
+      return payload?.items || payload?.data || (Array.isArray(payload) ? payload : []);
     },
   });
 
   // Fetch Post if Edit
   const { data: postData, isLoading: isFetching } = useQuery({
     queryKey: ["post", editId],
-    queryFn: () => postsApi.getPost(editId!).then(res => res.data),
+    queryFn: async () => {
+      const res = await postsApi.getPost(editId!);
+      // Gateway trả về { success: true, data: Post, timestamp }
+      return res.data;
+    },
     enabled: isEdit,
   });
 
