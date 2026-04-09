@@ -29,29 +29,35 @@ interface LexicalEditorProps {
   minHeight?: string;
 }
 
-export function LexicalEditor({ onChange, placeholder = "Nhập nội dung...", minHeight = "500px" }: LexicalEditorProps) {
+export function LexicalEditor({ value, onChange, placeholder = "Nhập nội dung...", minHeight = "500px" }: LexicalEditorProps) {
+  // Cấu hình khởi tạo với giá trị ban đầu nếu có
+  const config = {
+    ...initialConfig,
+    editorState: value ? value : undefined,
+  };
+
   return (
-    <LexicalComposer initialConfig={initialConfig}>
+    <LexicalComposer initialConfig={config}>
       <div className="border rounded-xl shadow-sm bg-background flex flex-col focus-within:ring-2 focus-within:ring-primary/20">
-        
+
         {/* THANH CÔNG CỤ BÂY GIỜ LÀ MỘT PLUGIN */}
         <ToolbarPlugin />
-        
+
         <div className="relative flex-1 overflow-x-auto max-w-full" style={{ minHeight }}>
           <RichTextPlugin
             contentEditable={<ContentEditable className="p-5 outline-none min-h-full prose max-w-none" style={{ minHeight }} />}
             placeholder={<div className="absolute top-5 left-5 text-muted-foreground">{placeholder}</div>}
             ErrorBoundary={LexicalErrorBoundary as any}
           />
-          <TableContextMenuPlugin/>
-          <TableResizerPlugin/>
+          <TableContextMenuPlugin />
+          <TableResizerPlugin />
           {/* CÁC PLUGINS KHÔNG CÓ GIAO DIỆN CHẠY NGẦM BÊN DƯỚI */}
           <HistoryPlugin />
-          <MediaContextMenuPlugin/>
+          <MediaContextMenuPlugin />
           <ListPlugin />
           <LinkPlugin />
           <TablePlugin hasCellMerge={true} hasCellBackgroundColor={false} />
-          <ImageResizerPlugin/>
+          <ImageResizerPlugin />
           <ImagePlugin />
           <PasteLogPlugin />
           {/* <MarkdownShortcutPlugin transformers={CUSTOM_TRANSFORMERS} /> */}
