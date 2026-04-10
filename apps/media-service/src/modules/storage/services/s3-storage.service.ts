@@ -21,15 +21,15 @@ export class S3StorageService implements OnModuleInit {
   private readonly bucket: string;
 
   constructor(private readonly configService: ConfigService) {
-    const accessKeyId = this.configService.get<string>('MINIO_ACCESS_KEY') || this.configService.get<string>('MINIO_ROOT_USER');
-    const secretAccessKey = this.configService.get<string>('MINIO_SECRET_KEY') || this.configService.get<string>('MINIO_ROOT_PASSWORD');
+    const accessKeyId = this.configService.get<string>('MINIO_ACCESS_KEY');
+    const secretAccessKey = this.configService.get<string>('MINIO_SECRET_KEY');
     const endpoint = this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000';
     const externalEndpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000';
     const region = this.configService.get<string>('MINIO_REGION') || 'us-east-1';
     this.bucket = this.configService.get<string>('MINIO_BUCKET') || 'media-center';
 
     if (!accessKeyId || !secretAccessKey) {
-      this.logger.error('MinIO (Key/Secret) configurations are missing in environment variables. Checked: MINIO_ACCESS_KEY/SECRET_KEY and MINIO_ROOT_USER/ROOT_PASSWORD');
+      this.logger.error('MinIO (Key/Secret) configurations are missing in environment variables');
       throw new Error('Config missing for S3StorageService initialization');
     }
 

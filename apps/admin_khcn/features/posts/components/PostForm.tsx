@@ -5,9 +5,9 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Save, ArrowLeft, ImagePlus, Globe, Tag, Send, 
-  Loader2, X, UploadCloud, Maximize2 
+import {
+  Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
+  Loader2, X, UploadCloud, Maximize2
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,7 +46,7 @@ const postSchema = z.object({
   title: z.string().min(5, "Tiêu đề phải có ít nhất 5 ký tự"),
   slug: z.string().min(1, "Đường dẫn tĩnh không được để trống"),
   summary: z.string().max(300, "Tóm tắt không quá 300 ký tự").optional(),
-  content: z.string().min(10, "Nội dung bài viết quá ngắn"), 
+  content: z.string().min(10, "Nội dung bài viết quá ngắn"),
   categoryId: z.string().min(1, "Vui lòng chọn chuyên mục"),
   status: z.enum(["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "EDITING"]),
   thumbnailId: z.string().optional(),
@@ -146,34 +146,34 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   return (
     <Form {...form}>
       <div className="space-y-6 pb-10 relative">
-        
+
         {/* TOP ACTION BAR */}
         <div className="flex items-center justify-between sticky top-0 z-20 bg-background/95 backdrop-blur py-4 border-b">
           <Button type="button" variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
           </Button>
           <div className="flex items-center gap-3">
-            <Button 
-                type="button" 
-                variant="outline" 
-                disabled={mutation.isPending}
-                onClick={() => {
-                   form.setValue("status", "DRAFT");
-                   form.handleSubmit(handleOnSubmit)();
-                }}
+            <Button
+              type="button"
+              variant="outline"
+              disabled={mutation.isPending}
+              onClick={() => {
+                form.setValue("status", "DRAFT");
+                form.handleSubmit(handleOnSubmit)();
+              }}
             >
               <Save className="h-4 w-4 mr-2" /> Lưu nháp
             </Button>
-            <Button 
-                type="button" 
-                className="bg-blue-600 hover:bg-blue-700 shadow-md text-white" 
-                disabled={mutation.isPending}
-                onClick={() => {
-                    if (form.getValues("status") === "DRAFT") {
-                        form.setValue("status", "PENDING");
-                    }
-                    form.handleSubmit(handleOnSubmit)();
-                }}
+            <Button
+              type="button"
+              className="bg-blue-600 hover:bg-blue-700 shadow-md text-white"
+              disabled={mutation.isPending}
+              onClick={() => {
+                if (form.getValues("status") === "DRAFT") {
+                  form.setValue("status", "PENDING");
+                }
+                form.handleSubmit(handleOnSubmit)();
+              }}
             >
               {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
               {isEdit ? "Cập nhật" : "Gửi duyệt bài"}
@@ -182,27 +182,27 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
+
           {/* CỘT TRÁI: NỘI DUNG CHÍNH */}
           <div className="lg:col-span-8 space-y-6">
             <Card className="border-none shadow-sm bg-muted/10">
               <CardContent className="p-6 space-y-6">
-                
+
                 <div className="space-y-5">
                   <FormField control={form.control} name="title" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-bold">Tiêu đề bài viết <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Nhập tiêu đề..." 
-                          className="text-lg font-semibold h-12 bg-background" 
-                          {...field} 
-                          onChange={handleTitleChange} 
+                        <Input
+                          placeholder="Nhập tiêu đề..."
+                          className="text-lg font-semibold h-12 bg-background"
+                          {...field}
+                          onChange={handleTitleChange}
                         />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}/>
+                  )} />
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField control={form.control} name="slug" render={({ field }) => (
@@ -218,8 +218,8 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         </div>
                         <FormMessage />
                       </FormItem>
-                    )}/>
-                    
+                    )} />
+
                     <FormField control={form.control} name="categoryId" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="text-xs font-bold uppercase text-muted-foreground tracking-tight">Chuyên mục</FormLabel>
@@ -235,7 +235,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         </Select>
                         <FormMessage />
                       </FormItem>
-                    )}/>
+                    )} />
                   </div>
 
                   <FormField control={form.control} name="summary" render={({ field }) => (
@@ -246,7 +246,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       </FormControl>
                       <FormMessage />
                     </FormItem>
-                  )}/>
+                  )} />
                 </div>
 
                 <Separator className="bg-slate-200" />
@@ -286,7 +286,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   </div>
                 ) : (previewUrl || form.getValues("thumbnailId")) ? (
                   <div className="relative group rounded-lg overflow-hidden border">
-                    <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnailId")}`} alt="Thumbnail" className="aspect-video object-cover w-full h-full" />
+                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} alt="Thumbnail" className="aspect-video object-cover w-full h-full" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi</Button>
@@ -322,7 +322,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       </SelectContent>
                     </Select>
                   </FormItem>
-                )}/>
+                )} />
               </CardContent>
             </Card>
           </div>
@@ -332,10 +332,10 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {showFullImage && (previewUrl || form.getValues("thumbnailId")) && (
           <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/95 p-4 animate-in fade-in duration-200" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-6xl w-full" onClick={e => e.stopPropagation()}>
-               <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[90vh] object-contain rounded-sm" />
-               <Button type="button" variant="destructive" size="icon" className="absolute -top-4 -right-4 rounded-full border-2 border-white shadow-2xl" onClick={() => setShowFullImage(false)}>
-                 <X className="h-5 w-5" />
-               </Button>
+              <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[90vh] object-contain rounded-sm" />
+              <Button type="button" variant="destructive" size="icon" className="absolute -top-4 -right-4 rounded-full border-2 border-white shadow-2xl" onClick={() => setShowFullImage(false)}>
+                <X className="h-5 w-5" />
+              </Button>
             </div>
           </div>
         )}
