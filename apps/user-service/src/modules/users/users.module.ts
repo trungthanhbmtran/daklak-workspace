@@ -21,7 +21,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       isGlobal: true,
       useFactory: (config: ConfigService) => ({
         store: redisStore,
-        host: config.get('REDIS_HOST', 'localhost'),
+        host: config.get('REDIS_HOST', 'redis'),
         port: parseInt(config.get('REDIS_PORT') ?? '6379', 10),
         ttl: 600,
       }),
@@ -32,7 +32,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'NOTIFICATION_SERVICE', // Tên để Inject vào Service
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://localhost:5672'],
+          urls: [process.env.RABBITMQ_URL || 'amqp://rabbitmq:5672'],
           queue: process.env.NOTIFICATION_QUEUE || 'notifications', // Cùng queue với notification_service
           queueOptions: {
             durable: false, // Queue tạm thời hay bền vững

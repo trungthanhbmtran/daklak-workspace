@@ -1,4 +1,5 @@
 # Daklak Workspace Deployment Guide
+npx prisma migrate dev --name init
 npx prisma generate
 Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
 
