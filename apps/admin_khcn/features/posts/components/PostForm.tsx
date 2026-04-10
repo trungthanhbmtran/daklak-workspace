@@ -72,10 +72,19 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const { data: categories } = useQuery({
     queryKey: ["posts-categories"],
     queryFn: async () => {
-      const res = await postsApi.getCategories({ pageSize: 100 });
-      // Bóc tách data từ Gateway Transformer
-      const payload = res.data;
-      return payload?.items || payload?.data || (Array.isArray(payload) ? payload : []);
+      try {
+        const res = await postsApi.getCategories({ pageSize: 100 });
+        console.log("Fetched Categories Raw:", res);
+        // Bóc tách data từ Gateway Transformer
+        // Gateway: { success: true, data: { data: [...] } } OR { success: true, data: [...] }
+        const payload = res.data;
+        const list = payload?.data || payload?.items || (Array.isArray(payload) ? payload : []);
+        console.log("Processed Categories List:", list);
+        return list;
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+        return [];
+      }
     },
   });
 

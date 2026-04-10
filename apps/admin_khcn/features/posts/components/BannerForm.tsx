@@ -5,9 +5,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  ArrowLeft, Save, Loader2, ImagePlus, 
-  Trash2, Monitor, Globe, Info, ExternalLink 
+import {
+  ArrowLeft, Save, Loader2, ImagePlus,
+  Trash2, Monitor, Globe, Info, ExternalLink
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
@@ -16,21 +16,21 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage, 
-  FormDescription 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription
 } from "@/components/ui/form";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
 import { bannerSchema } from "../schemas";
 import { postsApi } from "../api";
@@ -66,10 +66,10 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => {
-        // Here, we'd normally get the download URL from the confirm-upload in useImageUpload
-        // For simplification, useImageUpload in this project seems to handle setPreviewUrl internally.
-        // But we need the URL to save to the database. 
-        // In the provided useImageUpload, the ID is req.fileId and preview is conf.downloadUrl.
+      // Here, we'd normally get the download URL from the confirm-upload in useImageUpload
+      // For simplification, useImageUpload in this project seems to handle setPreviewUrl internally.
+      // But we need the URL to save to the database. 
+      // In the provided useImageUpload, the ID is req.fileId and preview is conf.downloadUrl.
     },
     onRemove: () => form.setValue("imageUrl", ""),
   });
@@ -142,7 +142,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            
+
             {/* Cột chính: 8/12 */}
             <div className="lg:col-span-8 space-y-6">
               <Card className="border-none shadow-md">
@@ -320,7 +320,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                 </CardHeader>
                 <CardContent className="p-5">
                   <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-                  
+
                   {isUploading ? (
                     <div className="aspect-video border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -335,8 +335,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                       </div>
                     </div>
                   ) : (
-                    <div 
-                      onClick={() => fileInputRef.current?.click()} 
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
                       className="aspect-video border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all"
                     >
                       <ImagePlus className="h-8 w-8 text-muted-foreground/40 mb-2" />
