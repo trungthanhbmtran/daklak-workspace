@@ -15,7 +15,7 @@ export default function CategoriesPage() {
           </p>
         </div>
       </div>
-      
+
       {/* Gọi Client Component để xử lý logic bảng và Popup */}
       <CategoryClient />
     </div>
