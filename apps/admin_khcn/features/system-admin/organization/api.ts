@@ -62,7 +62,7 @@ export const organizationApi = {
     apiClient.delete(`/organizations/${id}`),
 
   getUnitTypes: () =>
-    apiClient.get("/categories", { params: { group: "UNIT_TYPE" } }),
+    apiClient.get("/organizations/unit-types"),
 
   getDomains: () =>
     apiClient.get("/categories", { params: { group: "DOMAIN" } }),
@@ -110,6 +110,8 @@ function normalizeJobTitleItem(j: any): JobTitleItem {
     monitoredUnitNames: j.monitoredUnitNames ?? j.monitored_unit_names ?? [],
     geographicAreaId: j.geographicAreaId ?? j.geographic_area_id,
     geographicAreaName: j.geographicAreaName ?? j.geographic_area_name,
+    category: j.category,
+    rank: j.rank,
   };
 }
 

@@ -125,7 +125,7 @@ export class OrganizationsService {
       }
     }
     return this.prisma.organizationUnit.findUniqueOrThrow({
-      where: { id },
+      where: { id: unit.id },
       include: { type: true, unitDomains: { include: { domain: true } } },
     });
   }
@@ -322,5 +322,12 @@ export class OrganizationsService {
       },
     });
     return updated!;
+  }
+
+  // --- 3. QUẢN LÝ LOẠI ĐƠN VỊ ---
+  async listUnitTypes() {
+    return this.prisma.unitType.findMany({
+      orderBy: { level: 'asc' },
+    });
   }
 }

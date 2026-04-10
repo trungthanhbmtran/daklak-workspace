@@ -42,6 +42,8 @@ export interface JobTitleItem {
   monitoredUnitNames?: string[];
   geographicAreaId?: number;
   geographicAreaName?: string;
+  category?: string;
+  rank?: number;
 }
 
 /** Phân công riêng từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực theo slot */

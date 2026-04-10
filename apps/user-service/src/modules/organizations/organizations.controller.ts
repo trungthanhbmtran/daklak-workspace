@@ -237,6 +237,19 @@ export class OrganizationsController {
     return this.mapJobTitleItem(j);
   }
 
+  @GrpcMethod('OrganizationService', 'ListUnitTypes')
+  async listUnitTypes() {
+    const list = await this.orgService.listUnitTypes();
+    return {
+      items: list.map((ut: any) => ({
+        id: ut.id,
+        code: ut.code,
+        name: ut.name,
+        level: ut.level,
+      })),
+    };
+  }
+
   private mapJobTitleItem(j: any) {
     return {
       id: j.id,
@@ -248,6 +261,8 @@ export class OrganizationsController {
       monitoredUnitNames: (j.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
       geographicAreaId: j.geographicAreaId ?? 0,
       geographicAreaName: j.geographicArea?.name ?? '',
+      category: j.category ?? '',
+      rank: j.rank ?? 0,
     };
   }
 }

@@ -15,6 +15,7 @@ service OrganizationService {
   rpc SetStaffingSlot (SetStaffingSlotRequest) returns (StaffingSlotItem);  // Phân công từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực riêng
   rpc ListJobTitles (ListJobTitlesRequest) returns (ListJobTitlesResponse);
   rpc UpdateJobTitle (UpdateJobTitleRequest) returns (JobTitleItem);
+  rpc ListUnitTypes (Empty) returns (ListUnitTypesResponse);
 }
 
 // unit_id: nếu có thì chỉ trả về chức danh áp dụng cho loại đơn vị đó (VD Sở không có Chủ tịch)
@@ -173,6 +174,19 @@ message JobTitleItem {
   // Khu vực địa lý phụ trách
   int32 geographic_area_id = 8;
   string geographic_area_name = 9;
+  string category = 10;
+  int32 rank = 11;
+}
+
+message UnitTypeItem {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  int32 level = 4;
+}
+
+message ListUnitTypesResponse {
+  repeated UnitTypeItem items = 1;
 }
 
 message ListJobTitlesResponse {

@@ -58,6 +58,14 @@ export class OrganizationsController implements OnModuleInit {
     }
   }
 
+  @Get('unit-types')
+  @ApiOperation({ summary: 'Lấy danh sách loại đơn vị (UBND, Sở, Phòng...)' })
+  @ApiResponse({ status: 200, description: 'Danh sách loại đơn vị' })
+  async getUnitTypes() {
+    const res = await firstValueFrom(this.orgService.ListUnitTypes({}));
+    return (res as any)?.items ?? [];
+  }
+
   @Get('tree')
   @ApiOperation({ summary: 'Cây tổ chức toàn bộ' })
   @ApiResponse({ status: 200, description: 'Cây đơn vị (root nodes có children)' })
