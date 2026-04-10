@@ -13,11 +13,18 @@ import { hrmApi, hrmKeys } from "@/features/hrm";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-function flattenUnits(nodes: unknown[], acc: { id: number; name: string; code?: string }[] = []): { id: number; name: string; code?: string }[] {
+function flattenUnits(
+  nodes: unknown[],
+  acc: { id: number; name: string; code?: string }[] = [],
+  level: number = 0
+): { id: number; name: string; code?: string }[] {
   for (const n of nodes || []) {
     const node = n as { id?: number; name?: string; code?: string; children?: unknown[] };
-    if (node.id != null) acc.push({ id: node.id, name: node.name ?? "", code: node.code });
-    flattenUnits(node.children ?? [], acc);
+    if (node.id != null) {
+      const prefix = level > 0 ? "— ".repeat(level) : "";
+      acc.push({ id: node.id, name: `${prefix}${node.name ?? ""}`, code: node.code });
+    }
+    flattenUnits(node.children ?? [], acc, level + 1);
   }
   return acc;
 }
@@ -45,8 +52,9 @@ export default function CreateEmployeePage() {
     queryFn: () => organizationApi.getTree(),
   });
   const { data: jobTitlesRes } = useQuery({
-    queryKey: ["organizations", "job-titles"],
-    queryFn: () => organizationApi.getJobTitles(),
+    queryKey: ["organizations", "job-titles", form.departmentId],
+    queryFn: () => organizationApi.getJobTitles(form.departmentId ? parseInt(form.departmentId, 10) : undefined),
+    enabled: !!form.departmentId,
   });
 
   const units = flattenUnits(Array.isArray(treeNodes) ? treeNodes : []);
@@ -214,7 +222,7 @@ export default function CreateEmployeePage() {
                     id="department"
                     className="flex h-11 w-full rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-2 text-sm text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500"
                     value={form.departmentId}
-                    onChange={(e) => setForm((f) => ({ ...f, departmentId: e.target.value }))}
+                    onChange={(e) => setForm((f) => ({ ...f, departmentId: e.target.value, jobTitleId: "" }))}
                     required
                   >
                     <option value="">-- Chọn đơn vị --</option>
