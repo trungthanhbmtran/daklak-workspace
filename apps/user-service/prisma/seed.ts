@@ -202,8 +202,6 @@ async function main() {
     { group: 'LANGUAGE_SKILL', code: 'ENGLISH_B2', name: 'Tiếng Anh B2', order: 2 },
 
     // --- OTHER ---
-    { group: 'UNIT_TYPE', code: 'CQNN', name: 'Cơ quan nhà nước', order: 1 },
-    { group: 'UNIT_TYPE', code: 'DVSN', name: 'Đơn vị sự nghiệp', order: 2 },
 
     { group: 'DOMAIN', code: 'KHCN', name: 'Khoa học công nghệ', order: 1 },
     { group: 'DOMAIN', code: 'GIAO_DUC', name: 'Giáo dục', order: 2 },
@@ -228,6 +226,29 @@ async function main() {
     });
   }
   console.log('✅ Categories seeded');
+
+  // ==========================================================
+  // 3.1 UNIT TYPES (New Model)
+  // ==========================================================
+  console.log('📦 Seeding Unit Types...');
+  const unitTypesData = [
+    { code: 'CQNN', name: 'Cơ quan nhà nước', level: 1 },
+    { code: 'DVSN', name: 'Đơn vị sự nghiệp', level: 1 },
+    { code: 'UBND', name: 'UBND các cấp', level: 1 },
+    { code: 'SO_NGANH', name: 'Sở, Ban, Ngành', level: 2 },
+    { code: 'PHONG_BAN', name: 'Phòng, Ban chuyên môn', level: 3 },
+  ];
+
+  const unitTypeMap: Record<string, any> = {};
+  for (const ut of unitTypesData) {
+    const created = await prisma.unitType.upsert({
+      where: { code: ut.code },
+      update: { name: ut.name, level: ut.level },
+      create: ut,
+    });
+    unitTypeMap[ut.code] = created;
+  }
+  console.log('✅ Unit Types seeded');
 
   // ==========================================================
   // 4. ROLES
@@ -407,34 +428,64 @@ async function main() {
   // ==========================================================
   console.log('📦 Seeding Job Titles...');
   const jobTitlesData = [
-    { code: 'CHU_TICH', name: 'Chủ tịch' },
-    { code: 'PHO_CHU_TICH', name: 'Phó Chủ tịch' },
-    { code: 'GIAM_DOC', name: 'Giám đốc' },
-    { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc' },
-    { code: 'TRUONG_PHONG', name: 'Trưởng phòng' },
-    { code: 'PHO_PHONG', name: 'Phó Trưởng phòng' },
-    { code: 'CHUYEN_VIEN', name: 'Chuyên viên' },
+    { code: 'CHU_TICH', name: 'Chủ tịch', category: 'EXECUTIVE', rank: 1 },
+    { code: 'PHO_CHU_TICH', name: 'Phó Chủ tịch', category: 'EXECUTIVE', rank: 2 },
+    { code: 'GIAM_DOC', name: 'Giám đốc', category: 'EXECUTIVE', rank: 1 },
+    { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc', category: 'EXECUTIVE', rank: 2 },
+    { code: 'TRUONG_PHONG', name: 'Trưởng phòng', category: 'MANAGER', rank: 1 },
+    { code: 'PHO_PHONG', name: 'Phó Trưởng phòng', category: 'MANAGER', rank: 2 },
+    { code: 'CHUYEN_VIEN', name: 'Chuyên viên', category: 'STAFF', rank: 3 },
   ];
 
   for (const jt of jobTitlesData) {
     await prisma.jobTitle.upsert({
       where: { code: jt.code },
-      update: { name: jt.name },
+      update: { name: jt.name, category: jt.category, rank: jt.rank },
       create: jt,
     });
+  }
+
+  // 7.1 LINK JOB TITLES TO UNIT TYPES (Using Template)
+  console.log('📦 Linking Job Titles to Unit Types...');
+  const links = [
+    { jt: 'CHU_TICH', types: ['UBND'] },
+    { jt: 'PHO_CHU_TICH', types: ['UBND'] },
+    { jt: 'GIAM_DOC', types: ['SO_NGANH'] },
+    { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH'] },
+    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN'] },
+    { jt: 'PHO_PHONG', types: ['PHONG_BAN'] },
+    { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN'] },
+  ];
+
+  for (const link of links) {
+    const jobTitle = await prisma.jobTitle.findUnique({ where: { code: link.jt } });
+    if (jobTitle) {
+      for (const typeCode of link.types) {
+        const typeId = unitTypeMap[typeCode]?.id;
+        if (typeId) {
+          await prisma.unitTypeJobTemplate.upsert({
+            where: { unitTypeId_jobTitleId: { unitTypeId: typeId, jobTitleId: jobTitle.id } },
+            update: {},
+            create: { unitTypeId: typeId, jobTitleId: jobTitle.id },
+          });
+        }
+      }
+    }
   }
 
   // ==========================================================
   // 8. ORGANIZATIONS (DAK LAK PROVINCE)
   // ==========================================================
   console.log('📦 Seeding Organization Units...');
-  const unitTypes = await prisma.category.findMany({ where: { group: 'UNIT_TYPE' } });
-  const cqnnId = unitTypes.find(c => c.code === 'CQNN')?.id || 1;
+  const cqnnId = unitTypeMap['CQNN'].id;
+  const ubndTypeId = unitTypeMap['UBND'].id;
+  const soTypeId = unitTypeMap['SO_NGANH'].id;
+  const phongTypeId = unitTypeMap['PHONG_BAN'].id;
 
   const province = await prisma.organizationUnit.upsert({
     where: { code: 'UBND_TINH_DAKLAK' },
-    update: { name: 'UBND Tỉnh Đắk Lắk', typeId: cqnnId },
-    create: { code: 'UBND_TINH_DAKLAK', name: 'UBND Tỉnh Đắk Lắk', typeId: cqnnId, shortName: 'UBND Tỉnh' },
+    update: { name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTypeId },
+    create: { code: 'UBND_TINH_DAKLAK', name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTypeId, shortName: 'UBND Tỉnh' },
   });
 
   const depts = [
@@ -451,8 +502,8 @@ async function main() {
   for (const d of depts) {
     await prisma.organizationUnit.upsert({
       where: { code: d.code },
-      update: { parentId: province.id, typeId: cqnnId },
-      create: { ...d, parentId: province.id, typeId: cqnnId },
+      update: { parentId: province.id, typeId: soTypeId },
+      create: { ...d, parentId: province.id, typeId: soTypeId },
     });
   }
 
@@ -464,8 +515,8 @@ async function main() {
   for (const d of districtsUnits) {
     await prisma.organizationUnit.upsert({
       where: { code: d.code },
-      update: { parentId: province.id, typeId: cqnnId },
-      create: { ...d, parentId: province.id, typeId: cqnnId },
+      update: { parentId: province.id, typeId: ubndTypeId },
+      create: { ...d, parentId: province.id, typeId: ubndTypeId },
     });
   }
 
@@ -488,7 +539,7 @@ async function main() {
         code: dept.code,
         name: dept.name,
         parentId: parent.id,
-        typeId: cqnnId,
+        typeId: phongTypeId,
       },
     });
   };

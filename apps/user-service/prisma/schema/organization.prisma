@@ -6,7 +6,7 @@ model OrganizationUnit {
   name          String
   shortName     String?   @map("short_name") 
   typeId        Int       @map("type_id")
-  type          Category  @relation("OrgType", fields: [typeId], references: [id])
+  type          UnitType  @relation(fields: [typeId], references: [id])
   parentId      Int?      @map("parent_id")
   parent        OrganizationUnit?   @relation("OrgHierarchy", fields: [parentId], references: [id])
   children      OrganizationUnit[]  @relation("OrgHierarchy")
@@ -51,6 +51,8 @@ model JobTitle {
   description   String?
   domainId       Int?      @map("domain_id")
   domain         Category? @relation("JobTitleDomain", fields: [domainId], references: [id])
+  category       String?   // EXECUTIVE, MANAGER, STAFF
+  rank           Int       @default(0)
   authorityLevel String?   @map("authority_level") 
   reportsToJobTitleId Int? @map("reports_to_position_id")
   reportsTo           JobTitle?  @relation("JobTitleReportsTo", fields: [reportsToJobTitleId], references: [id])
@@ -58,7 +60,7 @@ model JobTitle {
   geographicAreaId    Int?      @map("geographic_area_id")
   geographicArea      Category? @relation("JobTitleGeographicArea", fields: [geographicAreaId], references: [id])
   monitoredUnits      JobTitleMonitoredUnit[]
-  applicableUnitTypes JobTitleUnitType[]
+  applicableUnitTemplates UnitTypeJobTemplate[]
   jobPositions  JobPosition[]          
   staffingPlans OrganizationStaffing[] 
   @@index([domainId])
@@ -67,14 +69,6 @@ model JobTitle {
   @@map("job_titles")
 }
 
-model JobTitleUnitType {
-  jobTitleId   Int @map("job_title_id")
-  unitTypeId   Int @map("unit_type_id")  
-  jobTitle    JobTitle @relation(fields: [jobTitleId], references: [id], onDelete: Cascade)
-  unitType    Category @relation("JobTitleUnitType", fields: [unitTypeId], references: [id], onDelete: Cascade)
-  @@id([jobTitleId, unitTypeId])
-  @@map("job_title_unit_types")
-}
 
 model JobTitleMonitoredUnit {
   jobTitleId Int @map("job_title_id")

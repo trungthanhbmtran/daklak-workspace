@@ -88,7 +88,7 @@ export class OrganizationsService {
     }
 
     if (data.typeId !== undefined && data.typeId > 0) {
-      const typeExists = await this.prisma.category.findUnique({ where: { id: data.typeId } });
+      const typeExists = await this.prisma.unitType.findUnique({ where: { id: data.typeId } });
       if (!typeExists) throw new RpcException({ message: 'Loại đơn vị không tồn tại', code: 3 });
     }
 
@@ -231,8 +231,8 @@ export class OrganizationsService {
       include,
       where: {
         OR: [
-          { applicableUnitTypes: { none: {} } },
-          { applicableUnitTypes: { some: { unitTypeId: typeId } } },
+          { applicableUnitTemplates: { none: {} } },
+          { applicableUnitTemplates: { some: { unitTypeId: typeId } } },
         ],
       },
     });
