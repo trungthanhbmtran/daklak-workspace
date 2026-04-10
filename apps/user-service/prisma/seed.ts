@@ -232,11 +232,20 @@ async function main() {
   // ==========================================================
   console.log('📦 Seeding Unit Types...');
   const unitTypesData = [
-    { code: 'CQNN', name: 'Cơ quan nhà nước', level: 1 },
-    { code: 'DVSN', name: 'Đơn vị sự nghiệp', level: 1 },
-    { code: 'UBND', name: 'UBND các cấp', level: 1 },
+    { code: 'CQ_TU', name: 'Cơ quan Trung ương', level: 1 },
+    { code: 'UBND_TINH', name: 'UBND Cấp Tỉnh', level: 1 },
+    { code: 'HDND_TINH', name: 'HĐND Cấp Tỉnh', level: 1 },
     { code: 'SO_NGANH', name: 'Sở, Ban, Ngành', level: 2 },
-    { code: 'PHONG_BAN', name: 'Phòng, Ban chuyên môn', level: 3 },
+    { code: 'UBND_HUYEN', name: 'UBND Cấp Huyện', level: 2 },
+    { code: 'HDND_HUYEN', name: 'HĐND Cấp Huyện', level: 2 },
+    { code: 'PHONG_BAN_HUYEN', name: 'Phòng, Ban chuyên môn cấp Huyện', level: 3 },
+    { code: 'UBND_XA', name: 'UBND Cấp Xã/Phường', level: 3 },
+    { code: 'HDND_XA', name: 'HĐND Cấp Xã', level: 3 },
+    { code: 'DVSN', name: 'Đơn vị sự nghiệp', level: 2 },
+    { code: 'CHI_CUC', name: 'Chi cục / Tổng cục', level: 2 },
+    { code: 'TRUNG_TAM', name: 'Trung tâm', level: 3 },
+    { code: 'CQ_DANG', name: 'Cơ quan Đảng', level: 1 },
+    { code: 'TO_CHUC_CTXH', name: 'Tổ chức Chính trị - Xã hội', level: 2 },
   ];
 
   const unitTypeMap: Record<string, any> = {};
@@ -448,13 +457,13 @@ async function main() {
   // 7.1 LINK JOB TITLES TO UNIT TYPES (Using Template)
   console.log('📦 Linking Job Titles to Unit Types...');
   const links = [
-    { jt: 'CHU_TICH', types: ['UBND'] },
-    { jt: 'PHO_CHU_TICH', types: ['UBND'] },
-    { jt: 'GIAM_DOC', types: ['SO_NGANH'] },
-    { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH'] },
-    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN'] },
-    { jt: 'PHO_PHONG', types: ['PHONG_BAN'] },
-    { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN'] },
+    { jt: 'CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
+    { jt: 'PHO_CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
+    { jt: 'GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'PHO_PHONG', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'CQ_TU', 'UBND_TINH', 'UBND_HUYEN'] },
   ];
 
   for (const link of links) {
@@ -477,15 +486,18 @@ async function main() {
   // 8. ORGANIZATIONS (DAK LAK PROVINCE)
   // ==========================================================
   console.log('📦 Seeding Organization Units...');
-  const cqnnId = unitTypeMap['CQNN'].id;
-  const ubndTypeId = unitTypeMap['UBND'].id;
+  const ubndTinhTypeId = unitTypeMap['UBND_TINH'].id;
+  const ubndHuyenTypeId = unitTypeMap['UBND_HUYEN'].id;
+  const ubndXaTypeId = unitTypeMap['UBND_XA'].id;
   const soTypeId = unitTypeMap['SO_NGANH'].id;
-  const phongTypeId = unitTypeMap['PHONG_BAN'].id;
+  const phongTypeId = unitTypeMap['PHONG_BAN_HUYEN'].id;
+  const dvsnTypeId = unitTypeMap['DVSN'].id;
+  const trungTamTypeId = unitTypeMap['TRUNG_TAM'].id;
 
   const province = await prisma.organizationUnit.upsert({
     where: { code: 'UBND_TINH_DAKLAK' },
-    update: { name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTypeId },
-    create: { code: 'UBND_TINH_DAKLAK', name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTypeId, shortName: 'UBND Tỉnh' },
+    update: { name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTinhTypeId },
+    create: { code: 'UBND_TINH_DAKLAK', name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTinhTypeId, shortName: 'UBND Tỉnh' },
   });
 
   const depts = [
@@ -515,8 +527,28 @@ async function main() {
   for (const d of districtsUnits) {
     await prisma.organizationUnit.upsert({
       where: { code: d.code },
-      update: { parentId: province.id, typeId: ubndTypeId },
-      create: { ...d, parentId: province.id, typeId: ubndTypeId },
+      update: { parentId: province.id, typeId: ubndHuyenTypeId },
+      create: { ...d, parentId: province.id, typeId: ubndHuyenTypeId },
+    });
+  }
+
+  // Thêm ví dụ UBND Xã
+  const ubndBmt = await prisma.organizationUnit.findUnique({ where: { code: 'UBND_BMT' } });
+  if (ubndBmt) {
+    await prisma.organizationUnit.upsert({
+      where: { code: 'UBND_XA_TAN_LOI' },
+      update: { parentId: ubndBmt.id, typeId: ubndXaTypeId },
+      create: { code: 'UBND_XA_TAN_LOI', name: 'UBND Phường Tân Lợi', parentId: ubndBmt.id, typeId: ubndXaTypeId },
+    });
+  }
+
+  // Thêm Đơn vị sự nghiệp tiêu biểu
+  const soKhcn = await prisma.organizationUnit.findUnique({ where: { code: 'SO_KHCN' } });
+  if (soKhcn) {
+    await prisma.organizationUnit.upsert({
+      where: { code: 'TT_CNTT_KHCN' },
+      update: { parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: { code: 'TT_CNTT_KHCN', name: 'Trung tâm Công nghệ thông tin và Khoa học công nghệ', parentId: soKhcn.id, typeId: trungTamTypeId },
     });
   }
 
