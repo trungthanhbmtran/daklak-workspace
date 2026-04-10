@@ -286,7 +286,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   </div>
                 ) : (previewUrl || form.getValues("thumbnailId")) ? (
                   <div className="relative group rounded-lg overflow-hidden border">
-                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} alt="Thumbnail" className="aspect-video object-cover w-full h-full" />
+                    <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnailId")}`} alt="Thumbnail" className="aspect-video object-cover w-full h-full" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-sm">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi</Button>
@@ -332,7 +332,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {showFullImage && (previewUrl || form.getValues("thumbnailId")) && (
           <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/95 p-4 animate-in fade-in duration-200" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-6xl w-full" onClick={e => e.stopPropagation()}>
-               <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[90vh] object-contain rounded-sm" />
+               <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[90vh] object-contain rounded-sm" />
                <Button type="button" variant="destructive" size="icon" className="absolute -top-4 -right-4 rounded-full border-2 border-white shadow-2xl" onClick={() => setShowFullImage(false)}>
                  <X className="h-5 w-5" />
                </Button>

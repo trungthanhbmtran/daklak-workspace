@@ -8,7 +8,9 @@ import {
     UseGuards,
     OnModuleInit,
     Req,
+    Res,
   } from '@nestjs/common';
+  import { Response } from 'express';
   import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
   import { firstValueFrom } from 'rxjs';
   import { MICROSERVICES } from '../../core/constants/services';
@@ -128,5 +130,12 @@ import {
     @ApiResponse({ status: 200, description: 'Thông tin Media kèm downloadUrl' })
     async getMedia(@Param('id') id: string) {
       return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+    }
+  
+    @Get('download/:id')
+    @ApiOperation({ summary: 'Chuyển hướng trực tiếp tới link tải của tệp tin (Dùng cho thẻ img)' })
+    async downloadMedia(@Param('id') id: string, @Res() res: Response) {
+      const media = await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+      return res.redirect(media.downloadUrl);
     }
   }

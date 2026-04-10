@@ -26,8 +26,14 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
 
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(req.fileId);
-    } catch (error) {
-      alert("Lỗi tải ảnh");
+    } catch (error: any) {
+      console.error("Image upload failed:", {
+        message: error.message,
+        response: error.response?.data,
+        config: error.config
+      });
+      const errorMsg = error.response?.data?.message || "Lỗi hệ thống khi tải ảnh. Vui lòng thử lại.";
+      alert(`Lỗi tải ảnh: ${errorMsg}`);
     } finally {
       setIsUploading(false);
     }
