@@ -471,6 +471,79 @@ async function main() {
 
   console.log('🎉 COMPREHENSIVE E-GOV SEED COMPLETED');
   console.log(`👉 SuperAdmin: superadmin@sys.com / ${DEFAULT_PASSWORD}`);
+
+  console.log('📦 Seeding Departments for Organizations...');
+
+  // helper tạo phòng ban
+  const createDept = async (parentCode: string, dept: { code: string; name: string }) => {
+    const parent = await prisma.organizationUnit.findUnique({
+      where: { code: parentCode },
+    });
+    if (!parent) return;
+
+    await prisma.organizationUnit.upsert({
+      where: { code: dept.code },
+      update: { parentId: parent.id },
+      create: {
+        code: dept.code,
+        name: dept.name,
+        parentId: parent.id,
+        typeId: cqnnId,
+      },
+    });
+  };
+
+  // ==========================
+  // 1. SỞ KHOA HỌC & CÔNG NGHỆ
+  // ==========================
+  await createDept('SO_KHCN', { code: 'SO_KHCN_VP', name: 'Văn phòng Sở' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_TT', name: 'Thanh tra Sở' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_KHTC', name: 'Phòng Kế hoạch - Tài chính' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_QLKH', name: 'Phòng Quản lý Khoa học' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_CNSH', name: 'Phòng Công nghệ & Sở hữu trí tuệ' });
+
+  // ==========================
+  // 2. SỞ Y TẾ
+  // ==========================
+  await createDept('SO_YTE', { code: 'SO_YTE_VP', name: 'Văn phòng Sở' });
+  await createDept('SO_YTE', { code: 'SO_YTE_TT', name: 'Thanh tra Sở' });
+  await createDept('SO_YTE', { code: 'SO_YTE_KHTC', name: 'Phòng Kế hoạch - Tài chính' });
+  await createDept('SO_YTE', { code: 'SO_YTE_NVY', name: 'Phòng Nghiệp vụ Y' });
+  await createDept('SO_YTE', { code: 'SO_YTE_DUOC', name: 'Phòng Quản lý Dược' });
+
+  // ==========================
+  // 3. SỞ GIÁO DỤC
+  // ==========================
+  await createDept('SO_GDDT', { code: 'SO_GDDT_VP', name: 'Văn phòng Sở' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_TT', name: 'Thanh tra Sở' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_KHTC', name: 'Phòng Kế hoạch - Tài chính' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_TCCB', name: 'Phòng Tổ chức Cán bộ' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_GDTRH', name: 'Phòng Giáo dục Trung học' });
+
+  // ==========================
+  // 4. SỞ TÀI CHÍNH
+  // ==========================
+  await createDept('SO_TC', { code: 'SO_TC_VP', name: 'Văn phòng Sở' });
+  await createDept('SO_TC', { code: 'SO_TC_TT', name: 'Thanh tra Sở' });
+  await createDept('SO_TC', { code: 'SO_TC_NS', name: 'Phòng Ngân sách' });
+  await createDept('SO_TC', { code: 'SO_TC_HCSN', name: 'Phòng Hành chính sự nghiệp' });
+
+  // ==========================
+  // 5. UBND TP BUÔN MA THUỘT
+  // ==========================
+  await createDept('UBND_BMT', { code: 'BMT_VP', name: 'Văn phòng HĐND & UBND' });
+  await createDept('UBND_BMT', { code: 'BMT_NV', name: 'Phòng Nội vụ' });
+  await createDept('UBND_BMT', { code: 'BMT_TC_KH', name: 'Phòng Tài chính - Kế hoạch' });
+  await createDept('UBND_BMT', { code: 'BMT_KT', name: 'Phòng Kinh tế' });
+  await createDept('UBND_BMT', { code: 'BMT_TNMT', name: 'Phòng Tài nguyên & Môi trường' });
+
+  // ==========================
+  // 6. UBND BUÔN HỒ
+  // ==========================
+  await createDept('UBND_BUON_HO', { code: 'BH_VP', name: 'Văn phòng HĐND & UBND' });
+  await createDept('UBND_BUON_HO', { code: 'BH_NV', name: 'Phòng Nội vụ' });
+  await createDept('UBND_BUON_HO', { code: 'BH_TC_KH', name: 'Phòng Tài chính - Kế hoạch' });
+  await createDept('UBND_BUON_HO', { code: 'BH_KT_HT', name: 'Phòng Kinh tế - Hạ tầng' });
 }
 
 main()
