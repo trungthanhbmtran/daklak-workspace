@@ -71,11 +71,12 @@ CREATE TABLE `sys_menus` (
     `route` VARCHAR(191) NULL,
     `icon` VARCHAR(191) NULL,
     `order` INTEGER NOT NULL DEFAULT 0,
+    `description` VARCHAR(191) NULL,
+    `icon_color` VARCHAR(191) NULL,
     `service_code` VARCHAR(191) NULL,
     `application` VARCHAR(191) NOT NULL DEFAULT 'ADMIN_PORTAL',
     `target` VARCHAR(191) NOT NULL DEFAULT 'SELF',
     `parent_id` INTEGER NULL,
-    `required_permission_id` INTEGER NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
@@ -83,6 +84,14 @@ CREATE TABLE `sys_menus` (
     UNIQUE INDEX `sys_menus_code_key`(`code`),
     INDEX `sys_menus_application_parent_id_order_idx`(`application`, `parent_id`, `order`),
     PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `menu_required_permissions` (
+    `menu_id` INTEGER NOT NULL,
+    `permission_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`menu_id`, `permission_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -94,6 +103,7 @@ CREATE TABLE `organization_units` (
     `type_id` INTEGER NOT NULL,
     `parent_id` INTEGER NULL,
     `hierarchy_path` VARCHAR(191) NULL,
+    `scope` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `phone_number` VARCHAR(191) NULL,
     `email` VARCHAR(191) NULL,
@@ -111,14 +121,39 @@ CREATE TABLE `organization_units` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `organization_unit_domains` (
+    `unit_id` INTEGER NOT NULL,
+    `domain_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`unit_id`, `domain_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `job_titles` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
+    `domain_id` INTEGER NULL,
+    `category` VARCHAR(191) NULL,
+    `rank` INTEGER NOT NULL DEFAULT 0,
+    `authority_level` VARCHAR(191) NULL,
+    `reports_to_position_id` INTEGER NULL,
+    `geographic_area_id` INTEGER NULL,
 
     UNIQUE INDEX `job_titles_code_key`(`code`),
+    INDEX `job_titles_domain_id_idx`(`domain_id`),
+    INDEX `job_titles_reports_to_position_id_idx`(`reports_to_position_id`),
+    INDEX `job_titles_geographic_area_id_idx`(`geographic_area_id`),
     PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `job_title_monitored_units` (
+    `job_title_id` INTEGER NOT NULL,
+    `unit_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`job_title_id`, `unit_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -134,6 +169,35 @@ CREATE TABLE `org_staffing` (
 
     UNIQUE INDEX `org_staffing_unit_id_job_title_id_key`(`unit_id`, `job_title_id`),
     PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `staffing_slots` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `staffing_id` INTEGER NOT NULL,
+    `slot_order` INTEGER NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `geographic_area_id` INTEGER NULL,
+
+    INDEX `staffing_slots_staffing_id_idx`(`staffing_id`),
+    UNIQUE INDEX `staffing_slots_staffing_id_slot_order_key`(`staffing_id`, `slot_order`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `staffing_slot_domains` (
+    `slot_id` INTEGER NOT NULL,
+    `domain_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`slot_id`, `domain_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `staffing_slot_monitored_units` (
+    `slot_id` INTEGER NOT NULL,
+    `unit_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`slot_id`, `unit_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -168,6 +232,29 @@ CREATE TABLE `resources` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `unit_types` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `code` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` VARCHAR(191) NULL,
+    `level` INTEGER NOT NULL DEFAULT 1,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `unit_types_code_key`(`code`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `unit_type_job_templates` (
+    `unit_type_id` INTEGER NOT NULL,
+    `job_title_id` INTEGER NOT NULL,
+
+    PRIMARY KEY (`unit_type_id`, `job_title_id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `users` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `email` VARCHAR(191) NOT NULL,
@@ -175,6 +262,8 @@ CREATE TABLE `users` (
     `full_name` VARCHAR(191) NULL,
     `phone_number` VARCHAR(191) NULL,
     `avatar_url` VARCHAR(191) NULL,
+    `cccd` VARCHAR(191) NULL,
+    `employee_code` VARCHAR(191) NULL,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
@@ -191,6 +280,8 @@ CREATE TABLE `job_positions` (
     `unit_id` INTEGER NOT NULL,
     `job_title_id` INTEGER NOT NULL,
     `is_primary` BOOLEAN NOT NULL DEFAULT false,
+    `is_unit_leader` BOOLEAN NOT NULL DEFAULT false,
+    `is_deputy_leader` BOOLEAN NOT NULL DEFAULT false,
     `start_date` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `end_date` DATETIME(3) NULL,
 
@@ -255,13 +346,37 @@ ALTER TABLE `auth_refresh_tokens` ADD CONSTRAINT `auth_refresh_tokens_user_id_fk
 ALTER TABLE `sys_menus` ADD CONSTRAINT `sys_menus_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `sys_menus`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `sys_menus` ADD CONSTRAINT `sys_menus_required_permission_id_fkey` FOREIGN KEY (`required_permission_id`) REFERENCES `permissions`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `menu_required_permissions` ADD CONSTRAINT `menu_required_permissions_menu_id_fkey` FOREIGN KEY (`menu_id`) REFERENCES `sys_menus`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `organization_units` ADD CONSTRAINT `organization_units_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `sys_categories`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `menu_required_permissions` ADD CONSTRAINT `menu_required_permissions_permission_id_fkey` FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `organization_units` ADD CONSTRAINT `organization_units_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `unit_types`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `organization_units` ADD CONSTRAINT `organization_units_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `organization_units`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `organization_unit_domains` ADD CONSTRAINT `organization_unit_domains_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `organization_unit_domains` ADD CONSTRAINT `organization_unit_domains_domain_id_fkey` FOREIGN KEY (`domain_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_domain_id_fkey` FOREIGN KEY (`domain_id`) REFERENCES `sys_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_reports_to_position_id_fkey` FOREIGN KEY (`reports_to_position_id`) REFERENCES `job_titles`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `job_title_monitored_units` ADD CONSTRAINT `job_title_monitored_units_job_title_id_fkey` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `job_title_monitored_units` ADD CONSTRAINT `job_title_monitored_units_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `org_staffing` ADD CONSTRAINT `org_staffing_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -270,7 +385,31 @@ ALTER TABLE `org_staffing` ADD CONSTRAINT `org_staffing_unit_id_fkey` FOREIGN KE
 ALTER TABLE `org_staffing` ADD CONSTRAINT `org_staffing_job_title_id_fkey` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `staffing_slots` ADD CONSTRAINT `staffing_slots_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slots` ADD CONSTRAINT `staffing_slots_staffing_id_fkey` FOREIGN KEY (`staffing_id`) REFERENCES `org_staffing`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_domains` ADD CONSTRAINT `staffing_slot_domains_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_domains` ADD CONSTRAINT `staffing_slot_domains_domain_id_fkey` FOREIGN KEY (`domain_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monitored_units_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monitored_units_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `permissions` ADD CONSTRAINT `permissions_resource_id_fkey` FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `unit_type_job_templates` ADD CONSTRAINT `unit_type_job_templates_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_types`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `unit_type_job_templates` ADD CONSTRAINT `unit_type_job_templates_job_title_id_fkey` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `job_positions` ADD CONSTRAINT `job_positions_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
