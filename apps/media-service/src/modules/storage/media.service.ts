@@ -115,16 +115,33 @@ export class MediaService {
   /**
    * Hoàn thành quá trình upload multipart
    */
-  async completeMultipartUpload(fileId: string, fileKey: string, uploadId: string, parts: { PartNumber: number, ETag: string }[]) {
+  async completeMultipartUpload(
+    fileId: string,
+    fileKey: string,
+    uploadId: string,
+    parts: { PartNumber: number; ETag: string }[]
+  ) {
     try {
-      // 1. Báo cho storage provider hoàn tất việc ráp file
+      // 1. Complete multipart
       await this.storageProvider.completeMultipartUpload(fileKey, uploadId, parts);
 
-      // 2. Cập nhật trạng thái sang COMPLETED
+      // 2. VERIFY FILE EXISTS
+      const exists = await this.storageProvider.checkObjectExists(
+        fileKey,
+        this.storageProvider.getBucketName()
+      );
+
+      if (!exists) {
+        throw new Error('Multipart upload hoàn tất nhưng file không tồn tại trên storage');
+      }
+
+      // 3. Update DB
       return this.mediaRepository.updateStatus(fileId, MediaStatus.COMPLETED);
     } catch (error) {
       this.logger.error('Error in completeMultipartUpload:', error);
-      throw new InternalServerErrorException('Lỗi khi ráp file Multipart, vui lòng thử lại');
+      throw new InternalServerErrorException(
+        error.message || 'Lỗi khi ráp file Multipart, vui lòng thử lại'
+      );
     }
   }
 
