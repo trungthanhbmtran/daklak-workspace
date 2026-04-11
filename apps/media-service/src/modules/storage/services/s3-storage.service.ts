@@ -10,6 +10,7 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
   GetObjectCommand,
+  PutBucketCorsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -68,7 +69,28 @@ export class S3StorageService implements OnModuleInit {
         this.logger.log(`🎉 Successfully created bucket "${this.bucket}".`);
       } else {
         this.logger.error("❌ Error checking MinIO bucket:", error);
+        return;
       }
+    }
+
+    // Configure CORS
+    try {
+      const corsCommand = new PutBucketCorsCommand({
+        Bucket: this.bucket,
+        CORSConfiguration: {
+          CORSRules: [
+            {
+              AllowedHeaders: ["*"],
+              AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
+              AllowedOrigins: ["*"],
+            },
+          ],
+        },
+      });
+      await this.s3Client.send(corsCommand);
+      this.logger.log(`✅ CORS configuration for bucket "${this.bucket}" applied.`);
+    } catch (corsError) {
+      this.logger.error("❌ Error applying CORS to MinIO bucket:", corsError);
     }
   }
 
