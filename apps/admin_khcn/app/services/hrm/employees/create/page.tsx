@@ -208,7 +208,7 @@ export default function CreateEmployeePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Photo & Basic info */}
                   <div className="col-span-full flex items-center gap-6 pb-4 border-b border-slate-100 mb-2">
-                    <div 
+                    <div
                       onClick={() => fileInputRef.current?.click()}
                       className="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer overflow-hidden relative group"
                     >
@@ -231,10 +231,10 @@ export default function CreateEmployeePage() {
                         </div>
                       )}
                     </div>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      className="hidden"
                       accept="image/*"
                       onChange={handleImageUpload}
                     />
