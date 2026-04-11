@@ -33,9 +33,16 @@ export class MediaService {
       // 1. Tạo link pre-signed từ storage provider (vẫn truyền host để ký đúng domain)
       let uploadUrl = await this.storageProvider.generateUploadUrl(fileKey, data.type, 300, host);
 
-      // 🔥 CHÈN /media VÀO URL TRƯỚC KHI TRẢ VỀ CHO CLIENT
-      if (host && uploadUrl.includes(host)) {
-        uploadUrl = uploadUrl.replace(host, `${host}/media`);
+      this.logger.log(`Generated Raw Upload URL: ${uploadUrl} for host: ${host}`);
+
+      // 🔥 CHÈN /media VÀO URL NẾU CÓ HOST
+      // Thay vì check includes(host), ta lấy host/media để route qua Nginx
+      if (host) {
+        // Tìm vị trí của path bắt đầu từ sau bucket name hoặc host
+        // Đảm bảo URL luôn đi qua Nginx proxy /media
+        const urlObj = new URL(uploadUrl);
+        uploadUrl = `${host}/media${urlObj.pathname}${urlObj.search}`;
+        this.logger.log(`Final Upload URL (Proxied): ${uploadUrl}`);
       }
 
       // 2. Lưu Metadata vào DB thông qua Repository
@@ -157,9 +164,10 @@ export class MediaService {
   async getPresignedDownloadUrl(bucket: string, fileName: string, host?: string): Promise<string> {
     let url = await this.storageProvider.generateDownloadUrl(fileName, bucket, 3600, host);
     
-    // 🔥 CHÈN /media VÀO URL DOWNLOAD NẾU CẦN
-    if (host && url.includes(host)) {
-      url = url.replace(host, `${host}/media`);
+    // 🔥 CHÈN /media VÀO URL DOWNLOAD NẾU CÓ HOST
+    if (host) {
+      const urlObj = new URL(url);
+      url = `${host}/media${urlObj.pathname}${urlObj.search}`;
     }
 
     return url;

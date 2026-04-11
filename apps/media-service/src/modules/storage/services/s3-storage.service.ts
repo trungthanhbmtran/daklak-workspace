@@ -149,11 +149,6 @@ export class S3StorageService implements OnModuleInit {
 
     let url = await getSignedUrl(signingClient, command, { expiresIn });
 
-    // 🔥 CHÈN /media VÀO URL DOWNLOAD NẾU CẦN
-    if (externalHost && url.includes(externalHost)) {
-      url = url.replace(externalHost, `${externalHost}/media`);
-    }
-
     return url;
   }
 
