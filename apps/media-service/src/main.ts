@@ -5,22 +5,12 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 
 function getProtoPath() {
-  const root = process.env.PROTO_PATH || join(process.cwd(), '..', '..', 'shared', 'protos');
-  
-  const envPath = process.env.PROTO_PATH ? join(process.env.PROTO_PATH, 'media/media.proto') : null;
-  if (envPath && existsSync(envPath)) return envPath;
-  
-  const tries = [
-    join(__dirname, '../../protos/media/media.proto'),
-    join(__dirname, '../protos/media/media.proto'),
-    join(__dirname, '../../../shared/protos/media/media.proto'),
-    join(process.cwd(), 'protos/media/media.proto'),
-    join(process.cwd(), '../protos/media/media.proto'),
-  ];
-  for (const p of tries) {
-    if (existsSync(p)) return p;
-  }
-  throw new Error(`media.proto not found`);
+  const base = process.env.PROTO_PATH || join(process.cwd(), 'protos');
+  const proto = join(base, 'media/media.proto');
+
+  if (existsSync(proto)) return proto;
+
+  throw new Error(`media.proto not found at ${proto}`);
 }
 
 async function bootstrap() {
@@ -39,7 +29,7 @@ async function bootstrap() {
           longs: String,
           enums: String,
           defaults: true,
-          includeDirs: [join(process.cwd(), 'protos'), '/app/protos'],
+          includeDirs: [process.env.PROTO_PATH || join(process.cwd(), 'protos')],
         },
       },
     },

@@ -10,7 +10,6 @@ import {
   UploadPartCommand,
   CompleteMultipartUploadCommand,
   GetObjectCommand,
-  PutBucketCorsCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
@@ -24,136 +23,150 @@ export class S3StorageService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {
     const accessKeyId = this.configService.get<string>('MINIO_ACCESS_KEY');
     const secretAccessKey = this.configService.get<string>('MINIO_SECRET_KEY');
-    const endpoint = this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000';
-    const externalEndpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000';
+    const endpoint =
+      this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000';
+    const externalEndpoint =
+      this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000';
     const region = this.configService.get<string>('MINIO_REGION') || 'us-east-1';
+
     this.bucket = this.configService.get<string>('MINIO_BUCKET') || 'media-center';
 
     if (!accessKeyId || !secretAccessKey) {
-      this.logger.error('MinIO (Key/Secret) configurations are missing in environment variables');
-      throw new Error('Config missing for S3StorageService initialization');
+      throw new Error('Missing MinIO credentials');
     }
 
-    // Client for internal operations (backend-to-minio)
-    this.s3Client = new S3Client({
-      endpoint,
+    const baseConfig = {
       credentials: { accessKeyId, secretAccessKey },
       forcePathStyle: true,
       region,
-      requestChecksumCalculation: "WHEN_REQUIRED",
-      responseChecksumValidation: "WHEN_REQUIRED",
+      requestChecksumCalculation: 'WHEN_REQUIRED' as const,
+      responseChecksumValidation: 'WHEN_REQUIRED' as const,
+    };
+
+    // Internal client
+    this.s3Client = new S3Client({
+      ...baseConfig,
+      endpoint,
     });
 
-    // Client for generating pre-signed URLs (browser-to-minio)
+    // External (signed URL)
     this.signingClient = new S3Client({
+      ...baseConfig,
       endpoint: externalEndpoint,
-      credentials: { accessKeyId, secretAccessKey },
-      forcePathStyle: true,
-      region,
-      requestChecksumCalculation: "WHEN_REQUIRED",
-      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
 
   async onModuleInit() {
-    await this.checkAndCreateBucket();
+    await this.ensureBucket();
   }
 
   /**
-   * Check if the bucket exists and create it if it doesn't.
+   * Ensure bucket exists
    */
-  private async checkAndCreateBucket() {
+  private async ensureBucket() {
     try {
-      await this.s3Client.send(new HeadBucketCommand({ Bucket: this.bucket }));
-      this.logger.log(`✅ Bucket "${this.bucket}" is ready.`);
+      await this.s3Client.send(
+        new HeadBucketCommand({ Bucket: this.bucket }),
+      );
+      this.logger.log(`✅ Bucket "${this.bucket}" exists`);
     } catch (error: any) {
-      if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
-        this.logger.warn(`⚠️ Bucket "${this.bucket}" does not exist. Creating...`);
-        await this.s3Client.send(new CreateBucketCommand({ Bucket: this.bucket }));
-        this.logger.log(`🎉 Successfully created bucket "${this.bucket}".`);
+      if (error.$metadata?.httpStatusCode === 404) {
+        this.logger.warn(`⚠️ Bucket not found, creating: ${this.bucket}`);
+
+        await this.s3Client.send(
+          new CreateBucketCommand({ Bucket: this.bucket }),
+        );
+
+        this.logger.log(`🎉 Bucket created: ${this.bucket}`);
       } else {
-        this.logger.error("❌ Error checking MinIO bucket:", error);
-        return;
+        this.logger.error('❌ Bucket check failed', error);
       }
     }
 
-    // Configure CORS
-    try {
-      const corsCommand = new PutBucketCorsCommand({
-        Bucket: this.bucket,
-        CORSConfiguration: {
-          CORSRules: [
-            {
-              AllowedHeaders: ["*"],
-              AllowedMethods: ["GET", "PUT", "POST", "DELETE", "HEAD"],
-              AllowedOrigins: ["*"],
-            },
-          ],
-        },
-      });
-      await this.s3Client.send(corsCommand);
-      this.logger.log(`✅ CORS configuration for bucket "${this.bucket}" applied.`);
-    } catch (corsError) {
-      this.logger.error("❌ Error applying CORS to MinIO bucket:", corsError);
-    }
+    // ❌ KHÔNG set CORS bằng SDK nữa (tránh lỗi 501)
+    this.logger.warn(
+      '⚠️ Skipping CORS setup via SDK (use MinIO config or mc instead)',
+    );
   }
 
   /**
-   * Generate a pre-signed URL for direct upload.
+   * Upload URL
    */
-  async generateUploadUrl(key: string, contentType: string, expiresIn = 300): Promise<string> {
+  async generateUploadUrl(
+    key: string,
+    contentType: string,
+    expiresIn = 300,
+  ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
       ContentType: contentType,
     });
+
     return getSignedUrl(this.signingClient, command, { expiresIn });
   }
 
   /**
-   * Generate a pre-signed URL for downloading a file.
+   * Download URL
    */
-  async generateDownloadUrl(key: string, bucket?: string, expiresIn = 3600): Promise<string> {
+  async generateDownloadUrl(
+    key: string,
+    bucket?: string,
+    expiresIn = 3600,
+  ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: bucket || this.bucket,
       Key: key,
     });
+
     return getSignedUrl(this.signingClient, command, { expiresIn });
   }
 
   /**
-   * Check if an object exists in the storage.
+   * Check object exists
    */
-  async checkObjectExists(key: string, bucket?: string): Promise<boolean> {
+  async checkObjectExists(
+    key: string,
+    bucket?: string,
+  ): Promise<boolean> {
     try {
-      await this.s3Client.send(new HeadObjectCommand({
-        Bucket: bucket || this.bucket,
-        Key: key,
-      }));
+      await this.s3Client.send(
+        new HeadObjectCommand({
+          Bucket: bucket || this.bucket,
+          Key: key,
+        }),
+      );
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
 
   /**
-   * Create a multipart upload session.
+   * Multipart upload
    */
-  async createMultipartUpload(key: string, contentType: string): Promise<string> {
-    const command = new CreateMultipartUploadCommand({
-      Bucket: this.bucket,
-      Key: key,
-      ContentType: contentType,
-    });
-    const response = await this.s3Client.send(command);
-    return response.UploadId || '';
+  async createMultipartUpload(
+    key: string,
+    contentType: string,
+  ): Promise<string> {
+    const res = await this.s3Client.send(
+      new CreateMultipartUploadCommand({
+        Bucket: this.bucket,
+        Key: key,
+        ContentType: contentType,
+      }),
+    );
+    return res.UploadId || '';
   }
 
-  /**
-   * Generate pre-signed URLs for parts of a multipart upload.
-   */
-  async generatePresignedUrlsForParts(key: string, uploadId: string, partsCount: number, expiresIn = 3600): Promise<string[]> {
+  async generatePresignedUrlsForParts(
+    key: string,
+    uploadId: string,
+    partsCount: number,
+    expiresIn = 3600,
+  ): Promise<string[]> {
     const urls: string[] = [];
+
     for (let i = 1; i <= partsCount; i++) {
       const command = new UploadPartCommand({
         Bucket: this.bucket,
@@ -161,31 +174,32 @@ export class S3StorageService implements OnModuleInit {
         UploadId: uploadId,
         PartNumber: i,
       });
-      const url = await getSignedUrl(this.signingClient, command, { expiresIn });
-      urls.push(url);
+
+      urls.push(
+        await getSignedUrl(this.signingClient, command, { expiresIn }),
+      );
     }
+
     return urls;
   }
 
-  /**
-   * Complete a multipart upload session.
-   */
-  async completeMultipartUpload(key: string, uploadId: string, parts: { PartNumber: number, ETag: string }[]): Promise<void> {
-    const sortedParts = parts.sort((a, b) => a.PartNumber - b.PartNumber);
-    const command = new CompleteMultipartUploadCommand({
-      Bucket: this.bucket,
-      Key: key,
-      UploadId: uploadId,
-      MultipartUpload: {
-        Parts: sortedParts,
-      },
-    });
-    await this.s3Client.send(command);
+  async completeMultipartUpload(
+    key: string,
+    uploadId: string,
+    parts: { PartNumber: number; ETag: string }[],
+  ) {
+    const sorted = parts.sort((a, b) => a.PartNumber - b.PartNumber);
+
+    await this.s3Client.send(
+      new CompleteMultipartUploadCommand({
+        Bucket: this.bucket,
+        Key: key,
+        UploadId: uploadId,
+        MultipartUpload: { Parts: sorted },
+      }),
+    );
   }
 
-  /**
-   * Get the current default bucket name.
-   */
   getBucketName(): string {
     return this.bucket;
   }
