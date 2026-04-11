@@ -9,6 +9,7 @@ import {
   X, FileSpreadsheet, Building2, Calendar, ShieldCheck, FileArchive,
   FilePlus
 } from "lucide-react";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -31,6 +32,7 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
   // Tách biệt 2 loại file để validate chuẩn nhà nước
   const [decisionPdf, setDecisionPdf] = useState<File | null>(null);
   const [attachmentExcels, setAttachmentExcels] = useState<File[]>([]);
+  const { uploadFile, isUploading } = useFileUpload();
 
   const form = useForm<FinanceFormValues>({
     resolver: zodResolver(financeSchema),
@@ -84,15 +86,39 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
     setAttachmentExcels(attachmentExcels.filter((_, index) => index !== indexToRemove));
   };
 
-  const onSubmit = (values: FinanceFormValues) => {
+  const onSubmit = async (values: FinanceFormValues) => {
     if (!decisionPdf) return alert("BẮT BUỘC: Vui lòng đính kèm File PDF Quyết định công khai (Có dấu/Chữ ký số)!");
     if (attachmentExcels.length === 0) return alert("BẮT BUỘC: Vui lòng đính kèm ít nhất 1 biểu mẫu phụ lục (File Excel)!");
 
-    console.log("Upload Tài chính:", values, "PDF:", decisionPdf.name, "Excels:", attachmentExcels.map(f => f.name));
-    onClose();
-    form.reset();
-    setDecisionPdf(null);
-    setAttachmentExcels([]);
+    try {
+      // 1. Upload file Quyết định chính
+      const decisionMedia = await uploadFile(decisionPdf);
+
+      // 2. Upload các file phụ lục song song
+      const excelUploads = await Promise.all(
+        attachmentExcels.map(file => uploadFile(file))
+      );
+
+      console.log("Dữ liệu sẵn sàng lưu DB:", {
+        ...values,
+        decisionFile: {
+          id: decisionMedia.id,
+          url: decisionMedia.downloadUrl
+        },
+        attachments: excelUploads.map(m => ({
+          id: m.id,
+          url: m.downloadUrl,
+          name: m.fileName
+        }))
+      });
+
+      onClose();
+      form.reset();
+      setDecisionPdf(null);
+      setAttachmentExcels([]);
+    } catch (error) {
+      console.error("Lỗi khi xử lý hồ sơ tài chính:", error);
+    }
   };
 
   return (
@@ -267,8 +293,9 @@ export function FinanceUploadModal({ isOpen, onClose }: { isOpen: boolean, onClo
 
         <DialogFooter className="p-4 border-t bg-muted/10 shrink-0">
           <Button variant="outline" onClick={onClose} className="w-24 bg-background">Hủy bỏ</Button>
-          <Button onClick={form.handleSubmit(onSubmit)} className="w-48 shadow-md">
-            <CheckCircle2 className="h-4 w-4 mr-2" /> Trình duyệt & Công khai
+          <Button onClick={form.handleSubmit(onSubmit)} className="w-48 shadow-md" disabled={isUploading}>
+            {isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            Trình duyệt & Công khai
           </Button>
         </DialogFooter>
       </DialogContent>

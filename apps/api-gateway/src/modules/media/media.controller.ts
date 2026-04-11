@@ -88,11 +88,10 @@ export class MediaGatewayController implements OnModuleInit {
     }));
   }
 
-  // =========================================================================
-  // LUỒNG 2: MULTIPART UPLOAD (VIDEO, FILE NẶNG)
-  // =========================================================================
-
-  @Post('multipart/init')
+  /**
+   * LUỒNG 2: MULTIPART UPLOAD (VIDEO, FILE NẶNG)
+   */
+  @Post('init-multipart-upload')
   @ApiOperation({ summary: 'Khởi tạo tiến trình Upload Multipart cho file dung lượng lớn' })
   @ApiBody({
     schema: {
@@ -115,7 +114,7 @@ export class MediaGatewayController implements OnModuleInit {
     return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
   }
 
-  @Post('multipart/presigned-urls')
+  @Post('get-multipart-pre-signed-urls')
   @ApiOperation({ summary: 'Lấy danh sách các URL để upload từng phần (chunks)' })
   @ApiBody({
     schema: {
@@ -128,7 +127,7 @@ export class MediaGatewayController implements OnModuleInit {
     return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls(body));
   }
 
-  @Post('multipart/complete')
+  @Post('complete-multipart-upload')
   @ApiOperation({ summary: 'Xác nhận đã upload xong tất cả các phần (chunks) và yêu cầu ráp file' })
   @ApiBody({
     schema: {

@@ -8,6 +8,7 @@ import {
   UploadCloud, Link as LinkIcon, FileText, X, CheckCircle2,
   CalendarIcon, Building2, UserCircle, Loader2, ShieldCheck, AlertTriangle
 } from "lucide-react";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -40,6 +41,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
   // States quản lý tiến trình bóc tách OCR & Chữ ký số
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureStatus, setSignatureStatus] = useState<'VALID' | 'INVALID' | 'NONE' | null>(null);
+  const { uploadFile, isUploading } = useFileUpload();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -107,10 +109,24 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
     form.reset();
   };
 
-  const onSubmit = (values: DocumentFormValues) => {
+  const onSubmit = async (values: DocumentFormValues) => {
     if (!uploadedFile) return alert("Vui lòng đính kèm file văn bản!");
-    console.log("Payload lưu Database:", { ...values, signatureValid: signatureStatus === 'VALID' });
-    onClose();
+    
+    try {
+      // 1. Thực hiện upload file lên MinIO và xác nhận với Media Service
+      const media = await uploadFile(uploadedFile);
+      
+      console.log("Payload lưu Database:", { 
+        ...values, 
+        fileId: media.id, 
+        downloadUrl: media.downloadUrl,
+        signatureValid: signatureStatus === 'VALID' 
+      });
+
+      onClose();
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
   };
 
   return (
@@ -329,7 +345,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
             className="w-32 shadow-md"
             disabled={isProcessing}
           >
-            {isProcessing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            {isProcessing || isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
             Vào sổ văn bản
           </Button>
         </DialogFooter>
