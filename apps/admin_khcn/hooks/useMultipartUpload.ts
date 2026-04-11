@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import axios from 'axios';
 // Giả sử Mạnh đang dùng một instance axios có gắn sẵn token cho API nội bộ
-import apiClient from "@/lib/axiosInstance"; 
+import apiClient from "@/lib/axiosInstance";
 
 // Hằng số S3: Cắt mỗi cục 5MB
-const CHUNK_SIZE = 5 * 1024 * 1024; 
+const CHUNK_SIZE = 5 * 1024 * 1024;
 
 export const useMultipartUpload = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -45,7 +45,7 @@ export const useMultipartUpload = () => {
         const chunk = file.slice(start, end); // Hàm cắt băm file của Javascript
 
         const response = await axios.put(url, chunk, {
-          headers: { 
+          headers: {
             // KHÔNG set Content-Type ở đây vì backend lúc tạo Part URL không ép kiểu
           }
         });
@@ -59,7 +59,7 @@ export const useMultipartUpload = () => {
 
         return {
           PartNumber: index + 1,
-          ETag: eTag, 
+          ETag: eTag,
         };
       });
 
@@ -75,9 +75,9 @@ export const useMultipartUpload = () => {
       });
 
       setIsUploading(false);
-      
+
       // Trả về thông tin file hoàn chỉnh (có kèm downloadUrl)
-      return completeData; 
+      return completeData;
 
     } catch (error) {
       console.error('Lỗi quá trình Multipart Upload:', error);

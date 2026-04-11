@@ -1,19 +1,19 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { MediaService } from './media.service';
-import { 
-  UploadRequest, 
-  UploadResponse, 
-  ConfirmRequest, 
-  MediaIdRequest, 
-  MediaInfo 
+import {
+  UploadRequest,
+  UploadResponse,
+  ConfirmRequest,
+  MediaIdRequest,
+  MediaInfo
 } from './interfaces/media.interface';
 
 @Controller()
 export class MediaController {
   constructor(
     private readonly mediaService: MediaService,
-  ) {}
+  ) { }
 
   // =========================================================================
   // LUỒNG 1: UPLOAD ĐƠN (ẢNH, FILE NHẸ)
@@ -21,16 +21,17 @@ export class MediaController {
 
   @GrpcMethod('MediaService', 'RequestUpload')
   async requestUpload(data: UploadRequest): Promise<UploadResponse> {
+    console.log("data", data);
     try {
       const result = await this.mediaService.generateUploadUrl(
-        data.ownerId, 
+        data.ownerId,
         {
           name: data.originalName,
           type: data.mimeType,
           size: Number(data.size),
         }
       );
-      
+
       return {
         uploadUrl: result.uploadUrl,
         fileId: result.fileId,
@@ -51,7 +52,7 @@ export class MediaController {
 
       // Generate pre-signed URL for response
       const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
-        updatedMedia.bucket, 
+        updatedMedia.bucket,
         updatedMedia.fileName
       );
 
@@ -59,7 +60,7 @@ export class MediaController {
         id: updatedMedia.id,
         fileName: updatedMedia.fileName,
         downloadUrl: presignedUrl,
-        status: updatedMedia.status, 
+        status: updatedMedia.status,
         mimeType: updatedMedia.mimeType,
       };
     } catch (error: any) {
@@ -75,12 +76,12 @@ export class MediaController {
   async initMultipartUpload(data: any) {
     try {
       const fileKey = `${data.ownerId}/${Date.now()}-${data.originalName}`;
-      
+
       return await this.mediaService.createMultipartUpload(
-        fileKey, 
-        data.mimeType, 
-        data.ownerId, 
-        data.originalName, 
+        fileKey,
+        data.mimeType,
+        data.ownerId,
+        data.originalName,
         Number(data.size)
       );
     } catch (error: any) {
@@ -96,11 +97,11 @@ export class MediaController {
     try {
       const { fileKey, uploadId, partsCount } = data;
       const presignedUrls = await this.mediaService.generatePresignedUrlsForParts(
-        fileKey, 
-        uploadId, 
+        fileKey,
+        uploadId,
         partsCount
       );
-      
+
       return { presignedUrls };
     } catch (error: any) {
       throw new RpcException({
@@ -117,8 +118,8 @@ export class MediaController {
 
       const updatedMedia = await this.mediaService.completeMultipartUpload(
         fileId,
-        fileKey, 
-        uploadId, 
+        fileKey,
+        uploadId,
         parts
       );
 
@@ -154,7 +155,7 @@ export class MediaController {
 
       // Generate pre-signed download URL
       const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
-        media.bucket, 
+        media.bucket,
         media.fileName
       );
 
