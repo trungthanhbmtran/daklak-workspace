@@ -15,16 +15,16 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
     try {
       const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200, fileType: 'image/webp' });
 
-      const { data: req } = await apiClient.post("/media/request-upload", {
+      const req: any = await apiClient.post("/media/request-upload", {
         originalName: `thumb-${Date.now()}.webp`,
         mimeType: compressed.type,
         size: compressed.size,
       });
 
-      console.log("req", req);
+      console.log("req (fixed)", req);
 
       await axios.put(req.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
-      const { data: conf } = await apiClient.post("/media/confirm-upload", { fileId: req.fileId });
+      const conf: any = await apiClient.post("/media/confirm-upload", { fileId: req.fileId });
 
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(req.fileId);
