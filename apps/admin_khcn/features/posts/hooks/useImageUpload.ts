@@ -21,6 +21,8 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
         size: compressed.size,
       });
 
+      console.log("req", req);
+
       await axios.put(req.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
       const { data: conf } = await apiClient.post("/media/confirm-upload", { fileId: req.fileId });
 

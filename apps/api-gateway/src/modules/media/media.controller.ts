@@ -57,7 +57,6 @@ export class MediaGatewayController implements OnModuleInit {
     @Req() req: any,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
-    console.log("body", body);
     const ownerId = req.user?.id || req.user?.sub || 'system-user';
     const payload = { ...body, ownerId: String(ownerId) };
     return await firstValueFrom(this.mediaService.RequestUpload(payload));
