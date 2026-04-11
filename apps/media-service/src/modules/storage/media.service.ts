@@ -55,7 +55,9 @@ export class MediaService {
    * Xác nhận file đã được upload thành công lên storage
    */
   async confirmUpload(fileId: string): Promise<Media> {
+    console.log("fileId", fileId);
     const media = await this.mediaRepository.findById(fileId);
+    console.log("media", media);
     if (!media) {
       throw new NotFoundException('Không tìm thấy thông tin tệp tin');
     }
