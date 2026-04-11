@@ -19,6 +19,7 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
     email: String(row.email ?? ""),
     phone: String(row.phone ?? ""),
     identityCard: String(row.identityCard ?? row.identity_card ?? ""),
+    avatar: String(row.avatar ?? ""),
     departmentId:
       row.departmentId != null ? Number(row.departmentId) : row.department_id != null ? Number(row.department_id) : undefined,
     jobTitleId:
@@ -130,6 +131,7 @@ export const hrmApi = {
     gender?: string;
     birthday?: string;
     address?: string;
+    avatar?: string;
     status?: string;
   }): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
     return apiClient.post(HRM_EMPLOYEES_PATH, payload).then((res: unknown) => {

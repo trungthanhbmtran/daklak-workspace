@@ -12,6 +12,7 @@ export interface HrmEmployee {
   email: string;
   phone: string;
   identityCard: string;
+  avatar?: string;
   departmentId?: number;
   jobTitleId?: number;
   department?: { id: number; name: string; code: string };

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
+import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -42,7 +43,17 @@ export default function CreateEmployeePage() {
     firstname: "", lastname: "", employeeCode: "", email: "",
     phone: "", identityCard: "", departmentId: "", jobTitleId: "",
     startDate: new Date().toISOString().slice(0, 10), birthday: "",
+    avatar: "",
   });
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { isUploading, previewUrl, handleImageUpload } = useImageUpload();
+
+  useEffect(() => {
+    if (previewUrl) {
+      setForm(prev => ({ ...prev, avatar: previewUrl }));
+    }
+  }, [previewUrl]);
 
   const { data: treeNodes } = useQuery({
     queryKey: ["organizations", "tree"],
@@ -197,9 +208,36 @@ export default function CreateEmployeePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Photo & Basic info */}
                   <div className="col-span-full flex items-center gap-6 pb-4 border-b border-slate-100 mb-2">
-                    <div className="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer">
-                      <Camera size={30} />
+                    <div 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="h-24 w-24 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all cursor-pointer overflow-hidden relative group"
+                    >
+                      {isUploading ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                          <span className="text-[10px] font-bold text-blue-600 uppercase">Uploading</span>
+                        </div>
+                      ) : form.avatar ? (
+                        <>
+                          <img src={form.avatar} alt="Avatar" className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Camera size={20} className="text-white" />
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1">
+                          <Camera size={24} />
+                          <span className="text-[10px] font-bold uppercase">Ảnh thẻ</span>
+                        </div>
+                      )}
                     </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                    />
                     <div className="flex-1 grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <Label className="font-bold text-slate-700 text-sm">Họ và đệm *</Label>
