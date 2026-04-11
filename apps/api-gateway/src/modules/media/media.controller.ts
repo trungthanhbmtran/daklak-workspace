@@ -18,13 +18,13 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 // Interface hứng dữ liệu từ gRPC (Khớp với file proto)
 interface MediaGrpcService {
   RequestUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string; host: string }): any;
-  ConfirmUpload(data: { fileId: string }): any;
-  GetMedia(data: { fileId: string }): any;
+  ConfirmUpload(data: { fileId: string; host: string }): any;
+  GetMedia(data: { fileId: string; host: string }): any;
 
   // --- THÊM 3 HÀM MỚI CHO MULTIPART UPLOAD ---
   InitMultipartUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string; host: string }): any;
   GetMultipartPreSignedUrls(data: { fileKey: string; uploadId: string; partsCount: number }): any;
-  CompleteMultipartUpload(data: { fileId: string; fileKey: string; uploadId: string; parts: { PartNumber: number; ETag: string }[] }): any;
+  CompleteMultipartUpload(data: { fileId: string; fileKey: string; uploadId: string; parts: { PartNumber: number; ETag: string }[]; host: string }): any;
 }
 
 @ApiTags('Quản lý Tệp tin (Media)')
@@ -76,8 +76,16 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Xác nhận file đã upload xong lên Storage' })
   @ApiBody({ schema: { example: { fileId: 'uuid-cua-file' } } })
   @ApiResponse({ status: 200, description: 'Cập nhật trạng thái thành COMPLETED và trả về link tải' })
-  async confirmUpload(@Body() body: { fileId: string }) {
-    return await firstValueFrom(this.mediaService.ConfirmUpload({ fileId: body.fileId }));
+  async confirmUpload(
+    @Req() req: any,
+    @Headers('host') host: string,
+    @Body() body: { fileId: string }
+  ) {
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    return await firstValueFrom(this.mediaService.ConfirmUpload({ 
+      fileId: body.fileId, 
+      host: `${protocol}://${host}` 
+    }));
   }
 
   // =========================================================================
@@ -93,10 +101,17 @@ export class MediaGatewayController implements OnModuleInit {
   })
   async initMultipartUpload(
     @Req() req: any,
+    @Headers('host') host: string,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
     const ownerId = req.user?.id || req.user?.sub || 'system-user';
-    const payload = { ...body, ownerId: String(ownerId) };
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    
+    const payload = { 
+      ...body, 
+      ownerId: String(ownerId),
+      host: `${protocol}://${host}`
+    };
     return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
   }
 
@@ -124,9 +139,13 @@ export class MediaGatewayController implements OnModuleInit {
     }
   })
   async completeMultipartUpload(
+    @Headers('host') host: string,
+    @Req() req: any,
     @Body() body: { fileId: string; fileKey: string; uploadId: string; parts: { PartNumber: number; ETag: string }[] },
   ) {
-    return await firstValueFrom(this.mediaService.CompleteMultipartUpload(body));
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const payload = { ...body, host: `${protocol}://${host}` };
+    return await firstValueFrom(this.mediaService.CompleteMultipartUpload(payload));
   }
 
   // =========================================================================
@@ -136,7 +155,12 @@ export class MediaGatewayController implements OnModuleInit {
   @Get(':id')
   @ApiOperation({ summary: 'Lấy thông tin và link tải/xem của một tệp tin' })
   @ApiResponse({ status: 200, description: 'Thông tin Media kèm downloadUrl' })
-  async getMedia(@Param('id') id: string) {
-    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+  async getMedia(
+    @Param('id') id: string,
+    @Headers('host') host: string,
+    @Req() req: any,
+  ) {
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id, host: `${protocol}://${host}` }));
   }
 }

@@ -33,10 +33,12 @@ message UploadResponse {
 
 message ConfirmRequest {
   string fileId = 1;
+  string host = 2;
 }
 
 message MediaIdRequest {
   string fileId = 1;
+  string host = 2;
 }
 
 message MediaInfo {
@@ -52,6 +54,7 @@ message InitMultipartRequest {
   string mimeType = 2;
   int64 size = 3;
   string ownerId = 4;
+  string host = 5;
 }
 
 message InitMultipartResponse {
@@ -80,4 +83,5 @@ message CompleteMultipartRequest {
   string fileKey = 2;
   string uploadId = 3;
   repeated PartInfo parts = 4; // Mảng các tem xác nhận
+  string host = 5;
 }

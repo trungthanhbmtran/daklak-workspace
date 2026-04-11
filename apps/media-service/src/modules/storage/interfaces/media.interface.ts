@@ -15,6 +15,7 @@ export interface UploadRequest {
   
   export interface ConfirmRequest {
     fileId: string;
+    host: string;
   }
   
   export interface MediaIdRequest {

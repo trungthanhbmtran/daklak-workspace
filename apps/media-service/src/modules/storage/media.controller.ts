@@ -53,7 +53,8 @@ export class MediaController {
       // Generate pre-signed URL for response
       const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
         updatedMedia.bucket,
-        updatedMedia.fileName
+        updatedMedia.fileName,
+        data.host
       );
 
       return {
@@ -115,17 +116,18 @@ export class MediaController {
   @GrpcMethod('MediaService', 'CompleteMultipartUpload')
   async completeMultipartUpload(data: any): Promise<MediaInfo> {
     try {
-      const { fileId, fileKey, uploadId, parts } = data;
+      const { fileId, fileKey, uploadId, parts, host } = data;
 
       const updatedMedia = await this.mediaService.completeMultipartUpload(
         fileId,
         fileKey,
         uploadId,
-        parts
+        parts,
+        host
       );
 
       // Build static public URL if requested or use pre-signed
-      const downloadUrl = this.mediaService.buildPublicUrl(updatedMedia.bucket, updatedMedia.fileName);
+      const downloadUrl = this.mediaService.buildPublicUrl(updatedMedia.bucket, updatedMedia.fileName, host);
 
       return {
         id: updatedMedia.id,
@@ -157,7 +159,8 @@ export class MediaController {
       // Generate pre-signed download URL
       const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
         media.bucket,
-        media.fileName
+        media.fileName,
+        data.host
       );
 
       return {

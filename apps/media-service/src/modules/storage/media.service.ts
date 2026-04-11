@@ -124,7 +124,8 @@ export class MediaService {
     fileId: string,
     fileKey: string,
     uploadId: string,
-    parts: { PartNumber: number; ETag: string }[]
+    parts: { PartNumber: number; ETag: string }[],
+    host?: string
   ) {
     try {
       // 1. Complete multipart
@@ -153,7 +154,24 @@ export class MediaService {
   /**
    * Sinh link tải xuống có chữ ký (on-the-fly)
    */
-  async getPresignedDownloadUrl(bucket: string, fileName: string): Promise<string> {
-    return this.storageProvider.generateDownloadUrl(fileName, bucket);
+  async getPresignedDownloadUrl(bucket: string, fileName: string, host?: string): Promise<string> {
+    let url = await this.storageProvider.generateDownloadUrl(fileName, bucket, 3600, host);
+    
+    // 🔥 CHÈN /media VÀO URL DOWNLOAD NẾU CẦN
+    if (host && url.includes(host)) {
+      url = url.replace(host, `${host}/media`);
+    }
+
+    return url;
+  }
+
+  /**
+   * Tạo URL tĩnh (nếu storage công khai)
+   */
+  buildPublicUrl(bucket: string, key: string, host?: string): string {
+    if (host) {
+      return `${host}/media/${bucket}/${key}`;
+    }
+    return `/${bucket}/${key}`;
   }
 }
