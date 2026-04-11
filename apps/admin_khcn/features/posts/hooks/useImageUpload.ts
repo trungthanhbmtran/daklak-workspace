@@ -15,19 +15,23 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
     try {
       const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200, fileType: 'image/webp' });
 
-      const req: any = await apiClient.post("/media/request-upload", {
+      const res: any = await apiClient.post("/media/request-upload", {
         originalName: `thumb-${Date.now()}.webp`,
         mimeType: compressed.type,
         size: compressed.size,
       });
 
-      console.log("req (fixed)", req);
+      // Gateway wraps everything in { success: true, data: ... }
+      const uploadInfo = res.data;
+      console.log("Upload Info:", uploadInfo);
 
-      await axios.put(req.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
-      const conf: any = await apiClient.post("/media/confirm-upload", { fileId: req.fileId });
+      await axios.put(uploadInfo.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
+
+      const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId: uploadInfo.fileId });
+      const conf = confirmRes.data;
 
       setPreviewUrl(conf.downloadUrl);
-      options?.onSuccess?.(req.fileId);
+      options?.onSuccess?.(uploadInfo.fileId);
     } catch (error) {
       alert("Lỗi tải ảnh");
     } finally {
