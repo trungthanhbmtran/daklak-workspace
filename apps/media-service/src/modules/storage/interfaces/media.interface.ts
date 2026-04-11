@@ -4,6 +4,7 @@ export interface UploadRequest {
     mimeType: string;
     size: number | string;
     ownerId: string;
+    host: string;
   }
   
   export interface UploadResponse {

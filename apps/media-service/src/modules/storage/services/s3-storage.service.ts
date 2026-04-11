@@ -96,6 +96,7 @@ export class S3StorageService implements OnModuleInit {
     key: string,
     contentType: string,
     expiresIn = 300,
+    externalHost?: string,
   ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucket,
@@ -103,7 +104,20 @@ export class S3StorageService implements OnModuleInit {
       ContentType: contentType,
     });
 
-    return getSignedUrl(this.signingClient, command, { expiresIn });
+    const signingClient = externalHost
+      ? new S3Client({
+          endpoint: externalHost,
+          region: this.configService.get('MINIO_REGION') || 'us-east-1',
+          credentials: {
+            accessKeyId: this.configService.get('MINIO_ACCESS_KEY'),
+            secretAccessKey: this.configService.get('MINIO_SECRET_KEY'),
+          },
+          forcePathStyle: true,
+          requestChecksumCalculation: 'WHEN_REQUIRED',
+        })
+      : this.signingClient;
+
+    return getSignedUrl(signingClient, command, { expiresIn });
   }
 
   /**
@@ -113,13 +127,34 @@ export class S3StorageService implements OnModuleInit {
     key: string,
     bucket?: string,
     expiresIn = 3600,
+    externalHost?: string,
   ): Promise<string> {
     const command = new GetObjectCommand({
       Bucket: bucket || this.bucket,
       Key: key,
     });
 
-    return getSignedUrl(this.signingClient, command, { expiresIn });
+    const signingClient = externalHost
+      ? new S3Client({
+          endpoint: externalHost,
+          region: this.configService.get('MINIO_REGION') || 'us-east-1',
+          credentials: {
+            accessKeyId: this.configService.get('MINIO_ACCESS_KEY'),
+            secretAccessKey: this.configService.get('MINIO_SECRET_KEY'),
+          },
+          forcePathStyle: true,
+          requestChecksumCalculation: 'WHEN_REQUIRED',
+        })
+      : this.signingClient;
+
+    let url = await getSignedUrl(signingClient, command, { expiresIn });
+
+    // 🔥 CHÈN /media VÀO URL DOWNLOAD NẾU CẦN
+    if (externalHost && url.includes(externalHost)) {
+      url = url.replace(externalHost, `${externalHost}/media`);
+    }
+
+    return url;
   }
 
   /**

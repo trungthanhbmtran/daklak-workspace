@@ -21,7 +21,6 @@ export class MediaController {
 
   @GrpcMethod('MediaService', 'RequestUpload')
   async requestUpload(data: UploadRequest): Promise<UploadResponse> {
-    console.log("data", data);
     try {
       const result = await this.mediaService.generateUploadUrl(
         data.ownerId,
@@ -29,7 +28,8 @@ export class MediaController {
           name: data.originalName,
           type: data.mimeType,
           size: Number(data.size),
-        }
+        },
+        data.host,
       );
 
       return {
@@ -82,7 +82,8 @@ export class MediaController {
         data.mimeType,
         data.ownerId,
         data.originalName,
-        Number(data.size)
+        Number(data.size),
+        data.host,
       );
     } catch (error: any) {
       throw new RpcException({

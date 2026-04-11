@@ -8,6 +8,7 @@ import {
   UseGuards,
   OnModuleInit,
   Req,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -16,12 +17,12 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 
 // Interface hứng dữ liệu từ gRPC (Khớp với file proto)
 interface MediaGrpcService {
-  RequestUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string }): any;
+  RequestUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string; host: string }): any;
   ConfirmUpload(data: { fileId: string }): any;
   GetMedia(data: { fileId: string }): any;
 
   // --- THÊM 3 HÀM MỚI CHO MULTIPART UPLOAD ---
-  InitMultipartUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string }): any;
+  InitMultipartUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string; host: string }): any;
   GetMultipartPreSignedUrls(data: { fileKey: string; uploadId: string; partsCount: number }): any;
   CompleteMultipartUpload(data: { fileId: string; fileKey: string; uploadId: string; parts: { PartNumber: number; ETag: string }[] }): any;
 }
@@ -55,10 +56,19 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiResponse({ status: 201, description: 'Trả về uploadUrl (Pre-signed) và fileId' })
   async requestUpload(
     @Req() req: any,
+    @Headers('host') host: string,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
     const ownerId = req.user?.id || req.user?.sub || 'system-user';
-    const payload = { ...body, ownerId: String(ownerId) };
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    
+    // Nếu host có cổng (localhost:8080), nó sẽ được giữ nguyên
+    const payload = { 
+      ...body, 
+      ownerId: String(ownerId),
+      host: `${protocol}://${host}`
+    };
+    
     return await firstValueFrom(this.mediaService.RequestUpload(payload));
   }
 

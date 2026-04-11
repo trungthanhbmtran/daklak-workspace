@@ -22,6 +22,7 @@ message UploadRequest {
   string mimeType = 2;
   int64 size = 3;
   string ownerId = 4;
+  string host = 5;
 }
 
 message UploadResponse {

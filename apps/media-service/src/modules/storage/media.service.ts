@@ -26,12 +26,17 @@ export class MediaService {
    * LUỒNG 1: UPLOAD ĐƠN (ẢNH, FILE NHẸ)
    * Tạo link pre-signed để client upload trực tiếp lên S3/MinIO
    */
-  async generateUploadUrl(userId: string, data: { name: string, type: string, size: number }) {
+  async generateUploadUrl(userId: string, data: { name: string, type: string, size: number }, host?: string) {
     const fileKey = `${userId}/${Date.now()}-${data.name}`;
 
     try {
-      // 1. Tạo link pre-signed từ storage provider
-      const uploadUrl = await this.storageProvider.generateUploadUrl(fileKey, data.type);
+      // 1. Tạo link pre-signed từ storage provider (vẫn truyền host để ký đúng domain)
+      let uploadUrl = await this.storageProvider.generateUploadUrl(fileKey, data.type, 300, host);
+
+      // 🔥 CHÈN /media VÀO URL TRƯỚC KHI TRẢ VỀ CHO CLIENT
+      if (host && uploadUrl.includes(host)) {
+        uploadUrl = uploadUrl.replace(host, `${host}/media`);
+      }
 
       // 2. Lưu Metadata vào DB thông qua Repository
       const media = await this.mediaRepository.create({
@@ -55,9 +60,7 @@ export class MediaService {
    * Xác nhận file đã được upload thành công lên storage
    */
   async confirmUpload(fileId: string): Promise<Media> {
-    console.log("fileId", fileId);
     const media = await this.mediaRepository.findById(fileId);
-    console.log("media", media);
     if (!media) {
       throw new NotFoundException('Không tìm thấy thông tin tệp tin');
     }
@@ -83,7 +86,7 @@ export class MediaService {
    * LUỒNG 2: MULTIPART UPLOAD (VIDEO, FILE NẶNG)
    * Khởi tạo quá trình upload nhiều phần (chunks)
    */
-  async createMultipartUpload(fileKey: string, mimeType: string, userId: string, originalName: string, size: number) {
+  async createMultipartUpload(fileKey: string, mimeType: string, userId: string, originalName: string, size: number, host?: string) {
     try {
       // 1. Khởi tạo multipart upload trên S3
       const uploadId = await this.storageProvider.createMultipartUpload(fileKey, mimeType);
