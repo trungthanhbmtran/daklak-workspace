@@ -59,7 +59,9 @@ export class MediaGatewayController implements OnModuleInit {
   ) {
     const ownerId = req.user?.id || req.user?.sub || 'system-user';
     const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaService.RequestUpload(payload));
+    const response = await firstValueFrom(this.mediaService.RequestUpload(payload));
+    console.log("[Gateway] RequestUpload Response:", response);
+    return response;
   }
 
   @Post('confirm-upload')
@@ -67,6 +69,7 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiBody({ schema: { example: { fileId: 'uuid-cua-file' } } })
   @ApiResponse({ status: 200, description: 'Cập nhật trạng thái thành COMPLETED và trả về link tải' })
   async confirmUpload(@Body() body: { fileId: string }) {
+    console.log("[Gateway] ConfirmUpload Body:", body);
     return await firstValueFrom(this.mediaService.ConfirmUpload({ fileId: body.fileId }));
   }
 
