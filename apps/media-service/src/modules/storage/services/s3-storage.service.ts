@@ -40,6 +40,8 @@ export class S3StorageService implements OnModuleInit {
       credentials: { accessKeyId, secretAccessKey },
       forcePathStyle: true,
       region,
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
 
     // Client for generating pre-signed URLs (browser-to-minio)
@@ -48,6 +50,8 @@ export class S3StorageService implements OnModuleInit {
       credentials: { accessKeyId, secretAccessKey },
       forcePathStyle: true,
       region,
+      requestChecksumCalculation: "WHEN_REQUIRED",
+      responseChecksumValidation: "WHEN_REQUIRED",
     });
   }
 
