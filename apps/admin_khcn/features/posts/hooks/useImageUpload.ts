@@ -23,13 +23,12 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
 
       // Gateway wraps everything in { success: true, data: ... }
       const uploadInfo = res.data;
-      console.log("Upload Info:", uploadInfo);
+      // console.log("Upload Info:", uploadInfo);
 
       await axios.put(uploadInfo.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
 
       const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId: uploadInfo.fileId });
       const conf = confirmRes.data;
-      console.log("Confirm Res:", conf);
 
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(uploadInfo.fileId);
