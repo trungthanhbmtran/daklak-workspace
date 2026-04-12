@@ -62,6 +62,7 @@ message CreateEmployeeRequest {
   string startDate = 11;
   string status = 12;
   string address = 13;
+  string avatar = 14;
 }
 
 message UpdateEmployeeRequest {

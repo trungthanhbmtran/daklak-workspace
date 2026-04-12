@@ -22,6 +22,7 @@ export class EmployeesController {
       startDate: data.startDate,
       status: data.status,
       address: data.address,
+      avatar: data.avatar,
     });
   }
 

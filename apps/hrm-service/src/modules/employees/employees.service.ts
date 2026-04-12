@@ -82,6 +82,7 @@ export class EmployeesService {
     startDate?: string;
     status?: string;
     address?: string;
+    avatar?: string;
   }) {
     const code = (data.employeeCode ?? '').trim() || `E${Date.now()}`;
     const existing = await this.prisma.employee.findUnique({ where: { employeeCode: code } });
@@ -105,6 +106,7 @@ export class EmployeesService {
         departmentId: data.departmentId,
         jobTitleId: data.jobTitleId,
         startDate: data.startDate ? new Date(data.startDate) : new Date(),
+        avatar: data.avatar ?? null,
       },
     });
     return { success: true, message: 'Thêm mới nhân sự thành công', data: this.toEmployee(emp) };
