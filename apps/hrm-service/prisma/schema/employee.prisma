@@ -11,7 +11,7 @@ model Employee {
   identityCard String?  @map("identity_card")
   status       String   @default("active")
   address      String?  @db.LongText
-  avatar       String?
+  avatar       String?  @db.Text
   departmentId Int      @map("department_id")  // ID đơn vị trong user-service (OrganizationUnit)
   jobTitleId   Int      @map("job_title_id")   // ID chức danh trong user-service (JobTitle)
   startDate    DateTime @db.Date @map("start_date")

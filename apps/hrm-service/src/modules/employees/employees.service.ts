@@ -4,7 +4,7 @@ import { PrismaService } from '@/database/prisma.service';
 
 @Injectable()
 export class EmployeesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   private toEmployee(row: {
     id: number;
