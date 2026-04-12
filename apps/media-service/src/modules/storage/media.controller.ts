@@ -160,7 +160,6 @@ export class MediaController {
       const presignedUrl = await this.mediaService.getPresignedDownloadUrl(
         media.bucket,
         media.fileName,
-        data.host
       );
 
       return {

@@ -7,7 +7,8 @@ import * as z from "zod";
 import {
   PieChart, UploadCloud, CheckCircle2, FileText,
   X, FileSpreadsheet, Building2, Calendar, ShieldCheck, FileArchive,
-  FilePlus
+  FilePlus,
+  Loader2
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 

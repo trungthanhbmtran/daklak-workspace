@@ -106,15 +106,15 @@ export class S3StorageService implements OnModuleInit {
 
     const signingClient = externalHost
       ? new S3Client({
-          endpoint: externalHost,
-          region: this.configService.get('MINIO_REGION') || 'us-east-1',
-          credentials: {
-            accessKeyId: this.configService.get('MINIO_ACCESS_KEY'),
-            secretAccessKey: this.configService.get('MINIO_SECRET_KEY'),
-          },
-          forcePathStyle: true,
-          requestChecksumCalculation: 'WHEN_REQUIRED',
-        })
+        endpoint: externalHost,
+        region: this.configService.get('MINIO_REGION') || 'us-east-1',
+        credentials: {
+          accessKeyId: this.configService.get<string>('MINIO_ACCESS_KEY') || '',
+          secretAccessKey: this.configService.get<string>('MINIO_SECRET_KEY') || '',
+        },
+        forcePathStyle: true,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+      })
       : this.signingClient;
 
     return getSignedUrl(signingClient, command, { expiresIn });
@@ -136,15 +136,15 @@ export class S3StorageService implements OnModuleInit {
 
     const signingClient = externalHost
       ? new S3Client({
-          endpoint: externalHost,
-          region: this.configService.get('MINIO_REGION') || 'us-east-1',
-          credentials: {
-            accessKeyId: this.configService.get('MINIO_ACCESS_KEY'),
-            secretAccessKey: this.configService.get('MINIO_SECRET_KEY'),
-          },
-          forcePathStyle: true,
-          requestChecksumCalculation: 'WHEN_REQUIRED',
-        })
+        endpoint: externalHost,
+        region: this.configService.get('MINIO_REGION') || 'us-east-1',
+        credentials: {
+          accessKeyId: this.configService.get<string>('MINIO_ACCESS_KEY') || '',
+          secretAccessKey: this.configService.get<string>('MINIO_SECRET_KEY') || '',
+        },
+        forcePathStyle: true,
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+      })
       : this.signingClient;
 
     let url = await getSignedUrl(signingClient, command, { expiresIn });

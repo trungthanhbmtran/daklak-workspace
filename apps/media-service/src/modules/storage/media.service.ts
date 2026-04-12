@@ -17,10 +17,10 @@ export class MediaService {
   /**
    * Helper function: Build static public URL
    */
-  public buildPublicUrl(bucket: string, fileName: string): string {
-    const endpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:30000';
-    return `${endpoint}/${bucket}/${fileName}`;
-  }
+  // public buildPublicUrl(bucket: string, fileName: string): string {
+  //   const endpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:30000';
+  //   return `${endpoint}/${bucket}/${fileName}`;
+  // }
 
   /**
    * LUỒNG 1: UPLOAD ĐƠN (ẢNH, FILE NHẸ)
@@ -163,7 +163,7 @@ export class MediaService {
    */
   async getPresignedDownloadUrl(bucket: string, fileName: string, host?: string): Promise<string> {
     let url = await this.storageProvider.generateDownloadUrl(fileName, bucket, 3600, host);
-    
+
     // 🔥 CHÈN /media VÀO URL DOWNLOAD NẾU CÓ HOST
     if (host) {
       const urlObj = new URL(url);
