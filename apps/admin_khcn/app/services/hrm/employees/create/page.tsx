@@ -48,6 +48,7 @@ export default function CreateEmployeePage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { isUploading, previewUrl, handleImageUpload } = useImageUpload();
+  console.log("isUploading", previewUrl);
 
   useEffect(() => {
     if (previewUrl) {
