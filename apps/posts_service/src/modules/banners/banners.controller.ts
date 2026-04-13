@@ -22,7 +22,11 @@ export class BannersController {
   @GrpcMethod('BannerService', 'ListBanners')
   async listBanners(data: { position?: string }) {
     const banners = await this.bannersService.findAll(data.position);
-    return { data: banners };
+    return { 
+      data: banners, 
+      success: true, 
+      message: 'OK' 
+    };
   }
 
   @GrpcMethod('BannerService', 'UpdateBanner')

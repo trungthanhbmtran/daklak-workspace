@@ -9,13 +9,18 @@ import { Banner } from '@generated/prisma/client';
 export class BannersService {
   constructor(private readonly bannersRepository: BannersRepository) {}
 
-  async create(data: CreateBannerDto): Promise<Banner> {
+  async create(data: CreateBannerDto): Promise<any> {
     const createData = {
       ...data,
       startAt: data.startAt ? new Date(data.startAt) : undefined,
       endAt: data.endAt ? new Date(data.endAt) : undefined,
     };
-    return this.bannersRepository.create(createData as any);
+    const banner = await this.bannersRepository.create(createData as any);
+    return {
+      success: true,
+      message: 'Tạo banner thành công',
+      data: banner,
+    };
   }
 
   async findById(id: string): Promise<Banner> {
@@ -26,14 +31,19 @@ export class BannersService {
     return banner;
   }
 
-  async update(id: string, data: UpdateBannerDto): Promise<Banner> {
+  async update(id: string, data: UpdateBannerDto): Promise<any> {
     await this.findById(id); // Check existence
     const updateData = {
       ...data,
       startAt: data.startAt ? new Date(data.startAt) : undefined,
       endAt: data.endAt ? new Date(data.endAt) : undefined,
     };
-    return this.bannersRepository.update(id, updateData as any);
+    const updated = await this.bannersRepository.update(id, updateData as any);
+    return {
+      success: true,
+      message: 'Cập nhật banner thành công',
+      data: updated,
+    };
   }
 
   async delete(id: string): Promise<Banner> {

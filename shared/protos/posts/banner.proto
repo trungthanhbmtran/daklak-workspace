@@ -78,6 +78,8 @@ message ListBannersRequest {
 message ListBannersResponse {
   repeated Banner data = 1;
   common.Meta meta = 2;
+  bool success = 3;
+  string message = 4;
 }
 
 // ====================== Update ======================
@@ -108,4 +110,5 @@ message DeleteBannerRequest {
 message BannerResponse {
   Banner data = 1;
   string message = 2;
+  bool success = 3;
 }

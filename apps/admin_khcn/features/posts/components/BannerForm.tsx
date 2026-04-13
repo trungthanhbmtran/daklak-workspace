@@ -66,10 +66,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => {
-      // Here, we'd normally get the download URL from the confirm-upload in useImageUpload
-      // For simplification, useImageUpload in this project seems to handle setPreviewUrl internally.
-      // But we need the URL to save to the database. 
-      // In the provided useImageUpload, the ID is req.fileId and preview is conf.downloadUrl.
+      form.setValue("imageUrl", fileId);
     },
     onRemove: () => form.setValue("imageUrl", ""),
   });
@@ -115,10 +112,6 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   });
 
   const onSubmit = (values: any) => {
-    // If we have a previewUrl but imageUrl in form is empty/changed, we should use previewUrl
-    if (previewUrl) {
-      values.imageUrl = previewUrl;
-    }
     mutation.mutate(values);
   };
 
