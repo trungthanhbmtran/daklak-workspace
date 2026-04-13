@@ -19,16 +19,28 @@ export class BannersService {
     return {
       success: true,
       message: 'Tạo banner thành công',
-      data: banner,
+      data: {
+        ...banner,
+        startAt: banner.startAt?.toISOString(),
+        endAt: banner.endAt?.toISOString(),
+        createdAt: banner.createdAt?.toISOString(),
+        updatedAt: banner.updatedAt?.toISOString(),
+      },
     };
   }
 
-  async findById(id: string): Promise<Banner> {
+  async findById(id: string): Promise<any> {
     const banner = await this.bannersRepository.findById(id);
     if (!banner) {
       throw new RpcException({ code: 5, message: 'Banner not found' });
     }
-    return banner;
+    return {
+      ...banner,
+      startAt: banner.startAt?.toISOString(),
+      endAt: banner.endAt?.toISOString(),
+      createdAt: banner.createdAt?.toISOString(),
+      updatedAt: banner.updatedAt?.toISOString(),
+    };
   }
 
   async update(id: string, data: UpdateBannerDto): Promise<any> {
@@ -42,7 +54,13 @@ export class BannersService {
     return {
       success: true,
       message: 'Cập nhật banner thành công',
-      data: updated,
+      data: {
+        ...updated,
+        startAt: updated.startAt?.toISOString(),
+        endAt: updated.endAt?.toISOString(),
+        createdAt: updated.createdAt?.toISOString(),
+        updatedAt: updated.updatedAt?.toISOString(),
+      },
     };
   }
 
@@ -51,7 +69,14 @@ export class BannersService {
     return this.bannersRepository.delete(id);
   }
 
-  async findAll(position?: string): Promise<Banner[]> {
-    return this.bannersRepository.findActiveByPosition(position);
+  async findAll(position?: string): Promise<any> {
+    const banners = await this.bannersRepository.findActiveByPosition(position);
+    return banners.map((banner) => ({
+      ...banner,
+      startAt: banner.startAt?.toISOString(),
+      endAt: banner.endAt?.toISOString(),
+      createdAt: banner.createdAt?.toISOString(),
+      updatedAt: banner.updatedAt?.toISOString(),
+    }));
   }
 }

@@ -18,7 +18,7 @@ service BannerService {
 
 message Banner {
   string id = 1;
-  string title = 2;
+  string name = 2;
   string slug = 3;
   string description = 4;
   string imageUrl = 5;
@@ -86,7 +86,7 @@ message ListBannersResponse {
 
 message UpdateBannerRequest {
   string id = 1;
-  string title = 2;
+  string name = 2;
   string description = 3;
   string imageUrl = 4;
   string linkType = 5;
