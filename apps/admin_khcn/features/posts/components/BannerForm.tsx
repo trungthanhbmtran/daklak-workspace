@@ -313,34 +313,42 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-5">
-                  <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-
-                  {isUploading ? (
-                    <div className="aspect-video border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
-                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                      <p className="text-[10px] mt-2 text-muted-foreground uppercase font-bold tracking-tighter">Đang xử lý ảnh...</p>
-                    </div>
-                  ) : (previewUrl || form.getValues("imageUrl")) ? (
-                    <div className="relative group rounded-lg overflow-hidden border">
-                      <img src={previewUrl || form.getValues("imageUrl")} alt="Banner" className="aspect-video object-cover w-full" />
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                        <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Thay đổi</Button>
-                        <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => fileInputRef.current?.click()}
-                      className="aspect-video border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all"
-                    >
-                      <ImagePlus className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                      <p className="text-[12px] font-semibold text-muted-foreground">Nhấp để tải ảnh (21:9)</p>
-                    </div>
-                  )}
                   <FormField
                     control={form.control}
                     name="imageUrl"
-                    render={({ field }) => <FormMessage className="mt-2" />}
+                    render={({ field }) => (
+                      <FormItem className="space-y-4">
+                        <FormControl>
+                          <div className="space-y-4">
+                            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                            
+                            {isUploading ? (
+                              <div className="aspect-video border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
+                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                <p className="text-[10px] mt-2 text-muted-foreground uppercase font-bold tracking-tighter">Đang xử lý ảnh...</p>
+                              </div>
+                            ) : (previewUrl || field.value) ? (
+                              <div className="relative group rounded-lg overflow-hidden border">
+                                <img src={previewUrl || field.value} alt="Banner" className="aspect-video object-cover w-full" />
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                                  <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Thay đổi</Button>
+                                  <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="aspect-video border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all"
+                              >
+                                <ImagePlus className="h-8 w-8 text-muted-foreground/40 mb-2" />
+                                <p className="text-[12px] font-semibold text-muted-foreground">Nhấp để tải ảnh (21:9)</p>
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </CardContent>
               </Card>
