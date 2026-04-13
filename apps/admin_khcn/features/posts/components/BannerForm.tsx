@@ -231,7 +231,11 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                                 </div>
                               ) : (previewUrl || field.value) ? (
                                 <div className="relative group rounded-lg overflow-hidden border shadow-sm">
-                                  <img src={previewUrl || field.value} alt="Banner Preview" className="aspect-[21/9] object-cover w-full" />
+                                  <img 
+                                    src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/media/download/${field.value}`)} 
+                                    alt="Banner Preview" 
+                                    className="aspect-[21/9] object-cover w-full" 
+                                  />
                                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
                                     <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Thay đổi</Button>
                                     <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>

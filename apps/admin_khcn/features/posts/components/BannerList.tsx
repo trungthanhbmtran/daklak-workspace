@@ -95,7 +95,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
             <Card key={banner.id} className="group overflow-hidden border shadow-sm hover:shadow-md transition-all flex flex-col bg-card rounded-xl">
               <div className="relative aspect-[21/9] overflow-hidden bg-muted">
                 <img 
-                  src={banner.imageUrl} 
+                  src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/media/download/${banner.imageUrl}`} 
                   alt={banner.name} 
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
