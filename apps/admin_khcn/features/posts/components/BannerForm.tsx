@@ -66,11 +66,27 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => {
-      console.log("Upload success, setting imageUrl to:", fileId);
       form.setValue("imageUrl", fileId, { shouldValidate: true, shouldDirty: true });
     },
     onRemove: () => form.setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true }),
   });
+
+  // Slugify logic
+  const watchedName = form.watch("name");
+  useEffect(() => {
+    if (!isEdit && watchedName) {
+      const slug = watchedName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
+        .replace(/([^0-9a-z-\s])/g, "")
+        .replace(/(\s+)/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      form.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [watchedName, isEdit, form]);
 
   // Fetch detailed data if editing
   const { data: bannerData, isLoading: isFetching } = useQuery({
@@ -91,8 +107,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
         description: bannerData.description || "",
         imageUrl: bannerData.imageUrl || "",
         customUrl: bannerData.customUrl || "",
-        startAt: bannerData.startAt ? new Date(bannerData.startAt).toISOString().split('T')[0] : "",
-        endAt: bannerData.endAt ? new Date(bannerData.endAt).toISOString().split('T')[0] : "",
+        startAt: bannerData.startAt ? new Date(bannerData.startAt).getUTCFullYear() > 1 ? new Date(bannerData.startAt).toISOString().split('T')[0] : "" : "",
+        endAt: bannerData.endAt ? new Date(bannerData.endAt).getUTCFullYear() > 1 ? new Date(bannerData.endAt).toISOString().split('T')[0] : "" : "",
       });
     }
   }, [bannerData, form]);
@@ -126,24 +142,30 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   }
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa Banner" : "Thêm Banner mới"}</h2>
+          <p className="text-muted-foreground">Cấu hình thông tin hiển thị và liên kết banner cho cổng thông tin.</p>
+        </div>
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại
         </Button>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-            {/* Cột chính: 8/12 */}
-            <div className="lg:col-span-8 space-y-6">
-              <Card className="border-none shadow-md">
-                <CardHeader>
-                  <CardTitle>Nội dung Banner</CardTitle>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* 1. Thông tin cơ bản */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" /> Thông tin cơ bản
+                  </CardTitle>
+                  <CardDescription>Các thông tin định danh và mô tả nội dung banner.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="pt-6 space-y-4">
                   <FormField
                     control={form.control}
                     name="name"
@@ -151,109 +173,142 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                       <FormItem>
                         <FormLabel>Tên Banner <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
-                          <Input placeholder="Ví dụ: Banner Chào mừng năm mới 2026..." {...field} />
+                          <Input placeholder="Ví dụ: Banner Chào mừng năm mới..." {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="slug"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Mã định danh (Slug)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="banner-homepage-top" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="position"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Vị trí hiển thị</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Chọn vị trí" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="top">Phía trên (Top)</SelectItem>
-                              <SelectItem value="middle">Giữa trang (Middle)</SelectItem>
-                              <SelectItem value="bottom">Phía dưới (Bottom)</SelectItem>
-                              <SelectItem value="custom">Tùy chỉnh (Custom)</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mã định danh (Slug) <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="banner-homepage-top" {...field} />
+                        </FormControl>
+                        <FormDescription>Đường dẫn tĩnh duy nhất, tự động tạo từ tên.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
                   <FormField
                     control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Ghi chú / Mô tả</FormLabel>
+                        <FormLabel>Mô tả / Ghi chú</FormLabel>
                         <FormControl>
-                          <Textarea placeholder="Ghi chú về mục đích sử dụng banner..." className="h-20" {...field} />
+                          <Textarea 
+                            placeholder="Mô tả ngắn gọn về mục đích hoặc vị trí sử dụng..." 
+                            className="min-h-[100px] resize-none" 
+                            {...field} 
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
+                  <div className="space-y-3 pt-2">
+                    <FormLabel>Hình ảnh Banner <span className="text-destructive">*</span></FormLabel>
+                    <FormField
+                      control={form.control}
+                      name="imageUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <div className="space-y-4">
+                              <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                              
+                              {isUploading ? (
+                                <div className="aspect-[21/9] border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
+                                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                  <p className="text-sm mt-2 text-muted-foreground">Đang tải ảnh lên...</p>
+                                </div>
+                              ) : (previewUrl || field.value) ? (
+                                <div className="relative group rounded-lg overflow-hidden border shadow-sm">
+                                  <img src={previewUrl || field.value} alt="Banner Preview" className="aspect-[21/9] object-cover w-full" />
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                    <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Thay đổi</Button>
+                                    <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  onClick={() => fileInputRef.current?.click()}
+                                  className="aspect-[21/9] border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors group"
+                                >
+                                  <div className="p-3 rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
+                                    <ImagePlus className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                                  </div>
+                                  <p className="mt-3 font-medium text-muted-foreground group-hover:text-primary">Tải lên hình ảnh banner</p>
+                                  <p className="text-xs text-muted-foreground mt-1">Kích thước khuyến nghị: 1920x820px (Tỉ lệ 21:9)</p>
+                                </div>
+                              )}
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </CardContent>
               </Card>
 
-              <Card className="border-none shadow-md overflow-hidden">
-                <CardHeader className="bg-muted/10 border-b">
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-primary" /> Cấu hình Liên kết & Thời gian
+              {/* 3. Liên kết & Điều hướng */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ExternalLink className="h-5 w-5 text-primary" /> Liên kết & Điều hướng
                   </CardTitle>
+                  <CardDescription>Cấu hình hành động khi người dùng nhấp vào banner.</CardDescription>
                 </CardHeader>
-                <CardContent className="p-6 space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="pt-6 space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="linkType"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Loại liên kết</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Chọn loại liên kết" />
+                              </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="internal">Link nội bộ (Internal)</SelectItem>
-                              <SelectItem value="external">Link ngoài trang (External)</SelectItem>
+                              <SelectItem value="internal">Liên kết nội bộ (Trang con)</SelectItem>
+                              <SelectItem value="external">Liên kết ngoài (URL tự do)</SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
+
                     <FormField
                       control={form.control}
                       name="target"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Mục tiêu (Target)</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
+                          <FormLabel>Cách thức mở trang</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger><SelectValue /></SelectTrigger>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                               <SelectItem value="_self">Mở tại tab hiện tại</SelectItem>
-                              <SelectItem value="_blank">Mở tab mới</SelectItem>
+                              <SelectItem value="_blank">Mở trong cửa sổ/tab mới</SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormMessage />
                         </FormItem>
                       )}
                     />
@@ -266,109 +321,64 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                       <FormItem>
                         <FormLabel>Đường dẫn liên kết (URL)</FormLabel>
                         <FormControl>
-                          <div className="flex items-center rounded-md border border-input bg-muted/20 overflow-hidden">
-                            <span className="px-3 text-muted-foreground"><ExternalLink className="h-3 w-3" /></span>
-                            <Input className="border-0 bg-transparent focus-visible:ring-0 text-sm h-10" placeholder="https://..." {...field} />
+                          <div className="relative">
+                            <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input placeholder="https://..." className="pl-9" {...field} />
                           </div>
                         </FormControl>
+                        <FormDescription>Để trống nếu banner không có liên kết.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="startAt"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ngày bắt đầu hiển thị</FormLabel>
-                          <FormControl><Input type="date" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="endAt"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ngày kết thúc hiển thị</FormLabel>
-                          <FormControl><Input type="date" {...field} /></FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Cột phụ: 4/12 */}
-            <div className="lg:col-span-4 space-y-6">
-              <Card className="border-none shadow-md">
-                <CardHeader className="bg-muted/10 border-b py-3">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
-                    <ImagePlus className="h-4 w-4" /> Hình ảnh Banner
+            <div className="space-y-6">
+              {/* 2. Cấu hình hiển thị */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Monitor className="h-5 w-5 text-primary" /> Cấu hình hiển thị
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-5">
+                <CardContent className="pt-6 space-y-5">
                   <FormField
                     control={form.control}
-                    name="imageUrl"
+                    name="position"
                     render={({ field }) => (
-                      <FormItem className="space-y-4">
-                        <FormControl>
-                          <div className="space-y-4">
-                            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-                            
-                            {isUploading ? (
-                              <div className="aspect-video border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
-                                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                <p className="text-[10px] mt-2 text-muted-foreground uppercase font-bold tracking-tighter">Đang xử lý ảnh...</p>
-                              </div>
-                            ) : (previewUrl || field.value) ? (
-                              <div className="relative group rounded-lg overflow-hidden border">
-                                <img src={previewUrl || field.value} alt="Banner" className="aspect-video object-cover w-full" />
-                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                                  <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Thay đổi</Button>
-                                  <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>
-                                </div>
-                              </div>
-                            ) : (
-                              <div
-                                onClick={() => fileInputRef.current?.click()}
-                                className="aspect-video border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all"
-                              >
-                                <ImagePlus className="h-8 w-8 text-muted-foreground/40 mb-2" />
-                                <p className="text-[12px] font-semibold text-muted-foreground">Nhấp để tải ảnh (21:9)</p>
-                              </div>
-                            )}
-                          </div>
-                        </FormControl>
+                      <FormItem>
+                        <FormLabel>Vị trí hiển thị</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn vị trí" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="top">Phía trên (Header/Top)</SelectItem>
+                            <SelectItem value="middle">Giữa trang (Body)</SelectItem>
+                            <SelectItem value="bottom">Phía dưới (Footer)</SelectItem>
+                            <SelectItem value="custom">Vị trí tùy chỉnh</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </CardContent>
-              </Card>
 
-              <Card className="border-none shadow-md">
-                <CardHeader className="bg-muted/10 border-b py-3">
-                  <CardTitle className="text-sm font-bold flex items-center gap-2 text-primary">
-                    <Monitor className="h-4 w-4" /> Hiển thị
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-5 space-y-5">
                   <FormField
                     control={form.control}
                     name="orderIndex"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs">Thứ tự ưu tiên</FormLabel>
+                        <FormLabel>Thứ tự hiển thị</FormLabel>
                         <FormControl>
                           <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
                         </FormControl>
+                        <FormDescription>Số càng nhỏ hiển thị càng ưu tiên.</FormDescription>
+                        <FormMessage />
                       </FormItem>
                     )}
                   />
@@ -377,8 +387,11 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                     control={form.control}
                     name="status"
                     render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/20">
-                        <FormLabel className="text-xs cursor-pointer">Trạng thái hiển thị</FormLabel>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-muted/10 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Trạng thái</FormLabel>
+                          <div className="text-xs text-muted-foreground">Kích hoạt hiển thị ngay lập tức</div>
+                        </div>
                         <FormControl>
                           <Switch
                             checked={field.value}
@@ -388,19 +401,61 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                       </FormItem>
                     )}
                   />
-
-                  <Button type="submit" className="w-full bg-primary hover:bg-primary/90 shadow-lg h-11" disabled={mutation.isPending}>
-                    {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    {isEdit ? "Cập nhật Banner" : "Xuất bản Banner"}
-                  </Button>
                 </CardContent>
               </Card>
 
-              <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex gap-3">
-                <Info className="h-4 w-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="text-[11px] text-amber-700 leading-relaxed">
-                  <strong>Tip:</strong> Hãy sử dụng ảnh có kích thước chuẩn 1920x820px hoặc tỉ lệ 21:9 để banner hiển thị đẹp nhất trên mọi thiết bị.
-                </div>
+              {/* 4. Thời gian hiển thị */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-primary" /> Lịch hiển thị
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="startAt"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ngày bắt đầu</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="endAt"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Ngày kết thúc</FormLabel>
+                        <FormControl>
+                          <Input type="date" {...field} />
+                        </FormControl>
+                        <FormDescription>Để trống để hiển thị vô thời hạn.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              <div className="pt-2">
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-lg shadow-md" 
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  ) : (
+                    <Save className="h-5 w-5 mr-2" />
+                  )}
+                  {isEdit ? "Cập nhật Banner" : "Xuất bản Banner"}
+                </Button>
               </div>
             </div>
           </div>

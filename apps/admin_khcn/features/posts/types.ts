@@ -47,6 +47,8 @@ export interface Banner {
   position: BannerPosition;
   orderIndex: number;
   status: boolean;
+  metaTitle?: string;
+  metaDescription?: string;
   startAt?: string;
   endAt?: string;
   createdAt: string;
