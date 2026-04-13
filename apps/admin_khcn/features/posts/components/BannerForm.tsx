@@ -66,9 +66,10 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => {
-      form.setValue("imageUrl", fileId);
+      console.log("Upload success, setting imageUrl to:", fileId);
+      form.setValue("imageUrl", fileId, { shouldValidate: true, shouldDirty: true });
     },
-    onRemove: () => form.setValue("imageUrl", ""),
+    onRemove: () => form.setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true }),
   });
 
   // Fetch detailed data if editing
