@@ -7,23 +7,28 @@ import { Category } from '@generated/prisma/client';
 
 @Injectable()
 export class CategoryService {
-  constructor(private readonly categoriesRepository: CategoriesRepository) {}
+  constructor(private readonly categoriesRepository: CategoriesRepository) { }
 
   async create(data: CreateCategoryDto): Promise<Category> {
-    if (data.parentId === '') data.parentId = null;
+    if (data.parentId === '') {
+      data.parentId = null;
+    }
     return this.categoriesRepository.create(data);
   }
 
   async findById(id: string): Promise<Category> {
     const category = await this.categoriesRepository.findById(id);
-    if (!category)
+    if (!category) {
       throw new RpcException({ code: 5, message: 'Category not found' });
+    }
     return category;
   }
 
   async update(id: string, data: UpdateCategoryDto): Promise<Category> {
     await this.findById(id); // Check existence
-    if (data.parentId === '') data.parentId = null;
+    if (data.parentId === '') {
+      data.parentId = null;
+    }
     return this.categoriesRepository.update(id, data);
   }
 
