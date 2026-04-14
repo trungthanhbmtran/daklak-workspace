@@ -103,21 +103,28 @@ export class CategoriesRepository extends BaseRepository<
       if (!target) throw new Error('Category not found');
 
       const width = target.rgt - target.lft + 1;
+      const lft = target.lft;
+      const rgt = target.rgt;
 
       // Delete target and descendants
-      const deleted = await tx.category.delete({ where: { id } });
+      const deleted = await tx.category.deleteMany({
+        where: {
+          lft: { gte: lft },
+          rgt: { lte: rgt },
+        },
+      });
 
       // Shift other nodes
       await tx.category.updateMany({
-        where: { lft: { gt: target.rgt } },
+        where: { lft: { gt: rgt } },
         data: { lft: { decrement: width } },
       });
       await tx.category.updateMany({
-        where: { rgt: { gt: target.rgt } },
+        where: { rgt: { gt: rgt } },
         data: { rgt: { decrement: width } },
       });
 
-      return deleted;
+      return target; // Return the target node info as it was deleted
     });
   }
 
@@ -155,7 +162,7 @@ export class CategoriesRepository extends BaseRepository<
   async findById(id: string): Promise<Category | null> {
     return this.prisma.category.findUnique({
       where: { id },
-      include: { children: true, parent: true },
+      include: { children: true },
     });
   }
 

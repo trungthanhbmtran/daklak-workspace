@@ -10,7 +10,17 @@ export interface Category {
   parentId?: string | null;
   status: boolean;
   orderIndex: number;
-  level?: number;
+  lft: number;
+  rgt: number;
+  depth: number;
+  thumbnail?: string;
+  linkType?: string;
+  customUrl?: string;
+  target?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  createdAt?: string;
+  updatedAt?: string;
   children?: Category[];
 }
 

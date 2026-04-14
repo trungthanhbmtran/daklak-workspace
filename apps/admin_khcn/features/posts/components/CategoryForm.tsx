@@ -67,7 +67,7 @@ export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const name = e.target.value;
     setValue("name", name);
-    
+
     // Chỉ tự động tạo slug nếu người dùng chưa sửa slug thủ công
     if (!dirtyFields.slug) {
       setValue("slug", convertToSlug(name), { shouldValidate: true });
@@ -89,7 +89,7 @@ export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="ghost" onClick={onBack} disabled={mutation.isPending}>Hủy bỏ</Button>
-          <Button 
+          <Button
             onClick={handleSubmit((data) => mutation.mutate({
               ...data,
               parentId: data.parentId === "root" ? null : data.parentId
@@ -153,10 +153,10 @@ export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
                 <Label htmlFor="desc" className="text-sm font-semibold flex items-center gap-2">
                   <AlignLeft className="h-4 w-4" /> Mô tả ngắn
                 </Label>
-                <Textarea 
-                  id="desc" 
-                  {...register("description")} 
-                  placeholder="Nhập mô tả cho chuyên mục này..." 
+                <Textarea
+                  id="desc"
+                  {...register("description")}
+                  placeholder="Nhập mô tả cho chuyên mục này..."
                   className="min-h-[120px] bg-slate-50/50 focus:bg-white resize-none border-slate-200"
                 />
               </div>

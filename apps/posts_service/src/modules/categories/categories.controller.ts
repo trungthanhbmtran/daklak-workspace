@@ -17,7 +17,8 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'GetCategory')
   async getCategory(data: { id: string }) {
-    return this.categoryService.findById(data.id);
+    const result = await this.categoryService.findById(data.id);
+    return { data: result };
   }
 
   @GrpcMethod('CategoryService', 'GetCategorySubTree')

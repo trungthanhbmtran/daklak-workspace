@@ -130,9 +130,9 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-1 font-mono text-[10px]">
-                        <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100">{cat.left}</span>
+                        <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100">{cat.lft}</span>
                         <span className="text-muted-foreground">-</span>
-                        <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded border border-purple-100">{cat.right}</span>
+                        <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded border border-purple-100">{cat.rgt}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">

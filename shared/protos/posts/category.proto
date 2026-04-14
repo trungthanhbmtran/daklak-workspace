@@ -7,7 +7,7 @@ import "common/common.proto";
 // ===================== CATEGORY SERVICE =====================
 service CategoryService {
   rpc CreateCategory(CreateCategoryRequest) returns (CategoryResponse) {}
-  rpc GetCategory(GetCategoryRequest) returns (Category) {}
+  rpc GetCategory(GetCategoryRequest) returns (CategoryResponse) {}
   rpc ListCategories(common.ListRequest) returns (CategoryTreeResponse) {}
   rpc UpdateCategory(UpdateCategoryRequest) returns (CategoryResponse) {}
   rpc DeleteCategory(DeleteCategoryRequest) returns (common.DeleteResponse) {}
@@ -33,6 +33,9 @@ message Category {
   string customUrl = 15;
   string target = 16;
   int32 orderIndex = 17;
+  string description = 18;
+  string metaTitle = 19;
+  string metaDescription = 20;
 }
 
 // Response chuẩn cho create / update
@@ -47,9 +50,13 @@ message CreateCategoryRequest {
   string parentId = 3;
   string thumbnail = 4;
   string customUrl = 5;
-  string linkType = 6;   // "default" | "custom"
+  string linkType = 6;   // "standard" | "static" | "external"
   string target = 7;     // "_self" | "_blank"
   int32 orderIndex = 8;
+  string description = 9;
+  bool status = 10;
+  string metaTitle = 11;
+  string metaDescription = 12;
 }
 
 message UpdateCategoryRequest {
@@ -63,6 +70,9 @@ message UpdateCategoryRequest {
   string target = 8;
   int32 orderIndex = 9;
   bool status = 10;
+  string description = 11;
+  string metaTitle = 12;
+  string metaDescription = 13;
 }
 
 message GetCategoryRequest {
