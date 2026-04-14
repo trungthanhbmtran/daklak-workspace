@@ -34,13 +34,11 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     queryKey: ["posts-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      // QUAN TRỌNG: API phải trả về data đã ORDER BY left_value ASC
-      const items = res?.data?.data || [];
-      return items as Category[];
+      // Quá trình unwrap đã diễn ra ở layer API (api.ts)
+      return res.data as Category[];
     },
   });
 
-  console.log("categories", categories);
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deleteCategory(id),

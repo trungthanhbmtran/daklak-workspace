@@ -3,27 +3,62 @@
 import apiClient from "@/lib/axiosInstance";
 import { Post, Category, Banner, PostStatus } from "./types";
 
+/**
+ * Helper để bóc tách dữ liệu từ Gateway response.
+ * Gateway format: { success: true, data: { data: [...], meta: {...} }, timestamp }
+ */
+function unwrapData<T>(res: any): T {
+  if (res?.data && typeof res.data === "object" && "data" in res.data) {
+    return res.data.data as T;
+  }
+  return (res?.data ?? res) as T;
+}
+
+function unwrapMeta(res: any): any {
+  return res?.data?.meta || res?.meta;
+}
+
 export const postsApi = {
   // Posts
-  getPosts: (params: any) => apiClient.get("/posts", { params }),
-  getPost: (id: string) => apiClient.get(`/posts/${id}`),
-  createPost: (data: any) => apiClient.post("/posts", data),
-  updatePost: (id: string, data: any) => apiClient.put(`/posts/${id}`, data),
-  deletePost: (id: string) => apiClient.delete(`/posts/${id}`),
+  getPosts: (params: any) =>
+    apiClient.get("/posts", { params }).then((res) => ({
+      data: unwrapData<Post[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  getPost: (id: string) => apiClient.get(`/posts/${id}`).then((res) => unwrapData<Post>(res)),
+  createPost: (data: any) => apiClient.post("/posts", data).then((res) => unwrapData<Post>(res)),
+  updatePost: (id: string, data: any) =>
+    apiClient.put(`/posts/${id}`, data).then((res) => unwrapData<Post>(res)),
+  deletePost: (id: string) => apiClient.delete(`/posts/${id}`).then((res) => unwrapData<any>(res)),
   reviewPost: (id: string, data: { status: PostStatus; moderationNote?: string }) =>
-    apiClient.put(`/posts/${id}/review`, data),
+    apiClient.put(`/posts/${id}/review`, data).then((res) => unwrapData<any>(res)),
 
   // Categories
-  getCategories: (params?: any) => apiClient.get("/posts/categories", { params }),
-  getCategory: (id: string) => apiClient.get(`/posts/categories/${id}`),
-  createCategory: (data: any) => apiClient.post("/posts/categories", data),
-  updateCategory: (id: string, data: any) => apiClient.put(`/posts/categories/${id}`, data),
-  deleteCategory: (id: string) => apiClient.delete(`/posts/categories/${id}`),
+  getCategories: (params?: any) =>
+    apiClient.get("/posts/categories", { params }).then((res) => ({
+      data: unwrapData<Category[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  getCategory: (id: string) =>
+    apiClient.get(`/posts/categories/${id}`).then((res) => unwrapData<Category>(res)),
+  createCategory: (data: any) =>
+    apiClient.post("/posts/categories", data).then((res) => unwrapData<Category>(res)),
+  updateCategory: (id: string, data: any) =>
+    apiClient.put(`/posts/categories/${id}`, data).then((res) => unwrapData<Category>(res)),
+  deleteCategory: (id: string) =>
+    apiClient.delete(`/posts/categories/${id}`).then((res) => unwrapData<any>(res)),
 
   // Banners
-  getBanners: (params?: any) => apiClient.get("/banners", { params }),
-  getBanner: (id: string) => apiClient.get(`/banners/${id}`),
-  createBanner: (data: any) => apiClient.post("/banners", data),
-  updateBanner: (id: string, data: any) => apiClient.put(`/banners/${id}`, data),
-  deleteBanner: (id: string) => apiClient.delete(`/banners/${id}`),
+  getBanners: (params?: any) =>
+    apiClient.get("/banners", { params }).then((res) => ({
+      data: unwrapData<Banner[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  getBanner: (id: string) => apiClient.get(`/banners/${id}`).then((res) => unwrapData<Banner>(res)),
+  createBanner: (data: any) =>
+    apiClient.post("/banners", data).then((res) => unwrapData<Banner>(res)),
+  updateBanner: (id: string, data: any) =>
+    apiClient.put(`/banners/${id}`, data).then((res) => unwrapData<Banner>(res)),
+  deleteBanner: (id: string) =>
+    apiClient.delete(`/banners/${id}`).then((res) => unwrapData<any>(res)),
 };
