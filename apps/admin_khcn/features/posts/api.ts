@@ -10,15 +10,15 @@ export const postsApi = {
   createPost: (data: any) => apiClient.post("/admin/posts", data),
   updatePost: (id: string, data: any) => apiClient.put(`/admin/posts/${id}`, data),
   deletePost: (id: string) => apiClient.delete(`/admin/posts/${id}`),
-  reviewPost: (id: string, data: { status: PostStatus; moderationNote?: string }) => 
+  reviewPost: (id: string, data: { status: PostStatus; moderationNote?: string }) =>
     apiClient.put(`/admin/posts/${id}/review`, data),
 
   // Categories
-  getCategories: (params?: any) => apiClient.get("/admin/posts/categories", { params }),
-  getCategory: (id: string) => apiClient.get(`/admin/posts/categories/${id}`),
-  createCategory: (data: any) => apiClient.post("/admin/posts/categories", data),
-  updateCategory: (id: string, data: any) => apiClient.put(`/admin/posts/categories/${id}`, data),
-  deleteCategory: (id: string) => apiClient.delete(`/admin/posts/categories/${id}`),
+  getCategories: (params?: any) => apiClient.get("/posts/categories", { params }),
+  getCategory: (id: string) => apiClient.get(`/posts/categories/${id}`),
+  createCategory: (data: any) => apiClient.post("/posts/categories", data),
+  updateCategory: (id: string, data: any) => apiClient.put(`/posts/categories/${id}`, data),
+  deleteCategory: (id: string) => apiClient.delete(`/posts/categories/${id}`),
 
   // Banners
   getBanners: (params?: any) => apiClient.get("/admin/banners", { params }),
