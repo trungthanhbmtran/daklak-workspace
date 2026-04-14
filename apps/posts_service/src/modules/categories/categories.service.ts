@@ -10,7 +10,7 @@ export class CategoryService {
   constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
   async create(data: CreateCategoryDto): Promise<Category> {
-    // Here you would normally calculate lft/rgt if not automated
+    if (data.parentId === '') data.parentId = null;
     return this.categoriesRepository.create(data);
   }
 
@@ -23,6 +23,7 @@ export class CategoryService {
 
   async update(id: string, data: UpdateCategoryDto): Promise<Category> {
     await this.findById(id); // Check existence
+    if (data.parentId === '') data.parentId = null;
     return this.categoriesRepository.update(id, data);
   }
 

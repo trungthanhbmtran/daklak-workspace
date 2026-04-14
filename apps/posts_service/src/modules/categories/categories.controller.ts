@@ -11,7 +11,8 @@ export class CategoriesController {
   @GrpcMethod('CategoryService', 'CreateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
   async createCategory(data: CreateCategoryDto) {
-    return this.categoryService.create(data);
+    const result = await this.categoryService.create(data);
+    return { data: result };
   }
 
   @GrpcMethod('CategoryService', 'GetCategory')
@@ -50,7 +51,9 @@ export class CategoriesController {
   @GrpcMethod('CategoryService', 'UpdateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateCategory(data: UpdateCategoryDto & { id: string }) {
-    return this.categoryService.update(data.id, data);
+    const { id, ...updateData } = data;
+    const result = await this.categoryService.update(id, updateData);
+    return { data: result };
   }
 
   @GrpcMethod('CategoryService', 'DeleteCategory')
