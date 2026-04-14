@@ -3,8 +3,8 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Search, Plus, Edit, Trash2, Image as ImageIcon, 
+import {
+  Search, Plus, Edit, Trash2, Image as ImageIcon,
   ExternalLink, Link as LinkIcon, Loader2, MoreVertical,
   Calendar, MapPin, CheckCircle2, XCircle
 } from "lucide-react";
@@ -16,11 +16,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { postsApi } from "../api";
 import { Banner } from "../types";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
 interface BannerListProps {
@@ -51,7 +51,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     onError: () => alert("Có lỗi xảy ra khi xóa banner."),
   });
 
-  const filteredBanners = (banners || []).filter((b: Banner) => 
+  const filteredBanners = (banners || []).filter((b: Banner) =>
     b.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -76,8 +76,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
       <Card className="p-4 bg-card border shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center rounded-xl">
         <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Tìm theo tên banner..." 
+          <Input
+            placeholder="Tìm theo tên banner..."
             className="pl-9 h-10 bg-muted/20 focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -94,9 +94,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
           filteredBanners.map((banner: Banner) => (
             <Card key={banner.id} className="group overflow-hidden border shadow-sm hover:shadow-md transition-all flex flex-col bg-card rounded-xl">
               <div className="relative aspect-[21/9] overflow-hidden bg-muted">
-                <img 
-                  src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/media/download/${banner.imageUrl}`} 
-                  alt={banner.name} 
+                <img
+                  src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/media/download/${banner.imageUrl}`}
+                  alt={banner.name}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
                 />
                 <div className="absolute top-2 right-2">
@@ -110,7 +110,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       <DropdownMenuItem onClick={() => onNavigateToEdit(banner.id)}>
                         <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
                       </DropdownMenuItem>
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         className="text-destructive focus:text-destructive focus:bg-destructive/10"
                         onClick={() => {
                           if (confirm(`Bạn có chắc muốn xóa banner "${banner.name}"?`)) {
@@ -124,18 +124,18 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                   </DropdownMenu>
                 </div>
                 <div className="absolute bottom-2 left-2 flex gap-1">
-                   <Badge variant="secondary" className="bg-black/50 text-white text-[10px] backdrop-blur-sm border-none">
-                     <MapPin className="h-2 w-2 mr-1" /> {banner.position.toUpperCase()}
-                   </Badge>
-                   {banner.status ? (
-                     <Badge variant="outline" className="bg-emerald-500/80 text-white text-[10px] backdrop-blur-sm border-none">
-                       <CheckCircle2 className="h-2 w-2 mr-1" /> ACTIVE
-                     </Badge>
-                   ) : (
-                     <Badge variant="outline" className="bg-rose-500/80 text-white text-[10px] backdrop-blur-sm border-none">
-                       <XCircle className="h-2 w-2 mr-1" /> DISABLED
-                     </Badge>
-                   )}
+                  <Badge variant="secondary" className="bg-black/50 text-white text-[10px] backdrop-blur-sm border-none">
+                    <MapPin className="h-2 w-2 mr-1" /> {banner.position.toUpperCase()}
+                  </Badge>
+                  {banner.status ? (
+                    <Badge variant="outline" className="bg-emerald-500/80 text-white text-[10px] backdrop-blur-sm border-none">
+                      <CheckCircle2 className="h-2 w-2 mr-1" /> ACTIVE
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-rose-500/80 text-white text-[10px] backdrop-blur-sm border-none">
+                      <XCircle className="h-2 w-2 mr-1" /> DISABLED
+                    </Badge>
+                  )}
                 </div>
               </div>
 
@@ -148,7 +148,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                 <div className="flex flex-col gap-1.5 text-xs text-muted-foreground flex-1">
                   <div className="flex items-center gap-2">
                     {banner.linkType === 'external' ? <ExternalLink className="h-3 w-3" /> : <LinkIcon className="h-3 w-3" />}
-                    <span className="truncate">{banner.customUrl || '/'+banner.slug}</span>
+                    <span className="truncate">{banner.customUrl || '/' + banner.slug}</span>
                   </div>
                   {(banner.startAt || banner.endAt) && (
                     <div className="flex items-center gap-2">
@@ -158,9 +158,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                   )}
                 </div>
 
-                <Button 
-                  variant="outline" 
-                  size="sm" 
+                <Button
+                  variant="outline"
+                  size="sm"
                   className="w-full mt-2"
                   onClick={() => onNavigateToEdit(banner.id)}
                 >

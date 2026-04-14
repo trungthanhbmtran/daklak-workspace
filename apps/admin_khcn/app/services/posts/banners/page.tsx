@@ -19,7 +19,7 @@ export default function BannersPage() {
   }
 
   return (
-    <BannerList 
+    <BannerList
       onNavigateToCreate={() => setView('CREATE')}
       onNavigateToEdit={(id) => {
         setEditId(id);

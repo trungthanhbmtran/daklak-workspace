@@ -1,5 +1,4 @@
 // app/services/posts/categories/page.tsx
-
 "use client";
 
 import { useState } from "react";
@@ -14,9 +13,9 @@ export default function CategoriesPage() {
     return <CategoryForm onBack={() => setView('LIST')} />;
   }
 
-  if (view === 'EDIT') {
-    return <CategoryForm onBack={() => setView('LIST')} editId={editId} />;
-  }
+  // if (view === 'EDIT') {
+  //   return <CategoryForm onBack={() => setView('LIST')} editId={editId} />;
+  // }
 
   return (
     <CategoryList
