@@ -31,7 +31,11 @@ export class CategoriesController {
     let result;
     switch (data.mode) {
       case 'flat':
-        result = await this.categoryService.getAllFlat();
+        const flatCategories = await this.categoryService.getAllFlat();
+        result = flatCategories.map(cat => ({
+          ...cat,
+          children: []
+        }));
         break;
       case 'tree':
         result = await this.categoryService.getFullTree();
@@ -40,10 +44,18 @@ export class CategoriesController {
         result = await this.categoryService.getSubTree(data.id!);
         break;
       case 'forPost':
-        result = await this.categoryService.getAllForPost();
+        const activeCategories = await this.categoryService.getAllForPost();
+        result = activeCategories.map(cat => ({
+          ...cat,
+          children: []
+        }));
         break;
       default:
-        result = await this.categoryService.getAllFlat();
+        const defaultCategories = await this.categoryService.getAllFlat();
+        result = defaultCategories.map(cat => ({
+          ...cat,
+          children: []
+        }));
     }
     return { data: result };
   }

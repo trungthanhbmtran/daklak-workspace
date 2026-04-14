@@ -108,12 +108,14 @@ message CategoryTreeNode {
   int32 lft = 5;
   int32 rgt = 6;
   int32 depth = 7;
-  string thumbnail=8;
-  string linkType =9;
-  string customUrl =10;
+  string thumbnail = 8;
+  string linkType = 9;
+  string customUrl = 10;
   string target = 11;
-  string orderIndex = 12;
+  int32 orderIndex = 12;
   repeated CategoryTreeNode children = 13;
+  string description = 14;
+  bool status = 15;
 }
 
 message CategoryTreeResponse {
