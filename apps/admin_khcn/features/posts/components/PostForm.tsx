@@ -7,7 +7,7 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
-  Loader2, X, UploadCloud, Maximize2, Star, Bell, LayoutDashboard, FileText
+  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,9 +34,17 @@ const LexicalEditorDynamic = dynamic(
   }
 );
 
+// --- HÀM BIẾN TIẾNG VIỆT THÀNH SLUG ---
 const convertToSlug = (text: string) => {
-  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[đĐ]/g, "d")
-    .replace(/([^0-9a-z-\s])/g, "").replace(/(\s+)/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[đĐ]/g, "d")
+    .replace(/([^0-9a-z-\s])/g, "")
+    .replace(/(\s+)/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+|-+$/g, "");
 };
 
 const postSchema = z.object({
@@ -69,6 +77,17 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
       tags: [], isFeatured: false, sendNotification: false,
     },
   });
+
+  // Chức năng tự tạo slug khi gõ tiêu đề
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>, onChangeOriginal: (...event: any[]) => void) => {
+    const newTitle = e.target.value;
+    onChangeOriginal(newTitle); // Cập nhật giá trị Title cho hook form
+
+    // Nếu người dùng chưa tự sửa slug thủ công thì mới tự động cập nhật slug theo tiêu đề
+    if (!form.formState.dirtyFields.slug) {
+      form.setValue("slug", convertToSlug(newTitle), { shouldValidate: true });
+    }
+  };
 
   const { data: categories } = useQuery({
     queryKey: ["posts-categories"],
@@ -109,6 +128,8 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     }
   };
 
+  if (isFetching) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto h-8 w-8" /></div>;
+
   return (
     <Form {...form}>
       <div className="max-w-[1400px] mx-auto space-y-6 pb-20">
@@ -116,171 +137,182 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {/* HEADER BAR */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-background/80 backdrop-blur-md py-4 border-b">
           <div className="flex items-center gap-4">
-            <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full">
+            <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm">
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}</h1>
-              <p className="text-xs text-muted-foreground">Quản lý nội dung và cấu hình xuất bản</p>
+              <h1 className="text-xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa nội dung" : "Tạo bài viết mới"}</h1>
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">Bản thảo nội dung & cấu hình</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" disabled={mutation.isPending} onClick={() => {
               form.setValue("status", "DRAFT");
               form.handleSubmit(v => mutation.mutate(v))();
             }}>
               Lưu nháp
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[120px]" disabled={mutation.isPending} onClick={() => {
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20" disabled={mutation.isPending} onClick={() => {
               if (form.getValues("status") === "DRAFT") form.setValue("status", "PENDING");
               form.handleSubmit(v => mutation.mutate(v))();
             }}>
               {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-              {isEdit ? "Cập nhật" : "Xuất bản"}
+              {isEdit ? "Cập nhật ngay" : "Gửi phê duyệt"}
             </Button>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-          {/* LEFT: MAIN CONTENT */}
+          {/* LEFT: CONTENT CARD */}
           <div className="lg:col-span-8 space-y-6">
             <Card className="shadow-sm border-none bg-card">
               <CardHeader className="pb-4">
-                <CardTitle className="text-lg flex items-center gap-2 font-semibold">
-                  <FileText className="h-5 w-5 text-blue-500" /> Nội dung chính
+                <CardTitle className="text-lg flex items-center gap-2 font-bold uppercase text-slate-700 tracking-tight">
+                  <FileText className="h-5 w-5 text-blue-500" /> Thông tin bài viết
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-5">
+              <CardContent className="p-6 pt-0 space-y-6">
+
+                {/* TIÊU ĐỀ */}
                 <FormField control={form.control} name="title" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Tiêu đề bài viết</FormLabel>
+                    <FormLabel className="font-semibold">Tiêu đề chính <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="VD: 10 Cách tối ưu React hiệu quả..."
-                        className="text-lg py-6 focus-visible:ring-blue-500"
+                        placeholder="VD: Bí quyết học lập trình hiệu quả..."
+                        className="text-lg py-6 focus-visible:ring-blue-500 bg-slate-50/50"
                         {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          if (!form.formState.dirtyFields.slug) form.setValue("slug", convertToSlug(e.target.value));
-                        }}
+                        onChange={(e) => handleTitleChange(e, field.onChange)}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )} />
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* CATEGORY */}
                   <FormField control={form.control} name="categoryId" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Chuyên mục</FormLabel>
+                      <FormLabel className="font-semibold">Chuyên mục</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
+                        <FormControl><SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
                         <SelectContent>
                           {categories?.map((cat: Category) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )} />
 
+                  {/* SLUG */}
                   <FormField control={form.control} name="slug" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Slug (URL)</FormLabel>
-                      <FormControl><Input className="font-mono text-xs bg-muted/30" {...field} /></FormControl>
+                      <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <span className="absolute left-3 top-2.5 text-slate-400 text-sm font-mono">/</span>
+                          <Input className="font-mono text-sm bg-muted/30 pl-6" {...field} />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
                   )} />
                 </div>
 
                 <FormField control={form.control} name="summary" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-sm font-medium">Tóm tắt ngắn gọn</FormLabel>
-                    <FormControl><Textarea placeholder="Viết vài dòng giới thiệu thu hút..." className="min-h-[100px] resize-none" {...field} /></FormControl>
-                    <FormDescription className="text-[11px]">Sẽ hiển thị ngoài danh sách bài viết.</FormDescription>
+                    <FormLabel className="font-semibold">Tóm tắt ngắn (Summary)</FormLabel>
+                    <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
+                    <FormDescription className="text-[11px]">Sẽ hiển thị trên kết quả tìm kiếm Google và danh sách bài viết.</FormDescription>
                   </FormItem>
                 )} />
 
-                <div className="pt-4 border-t">
-                  <FormLabel className="text-sm font-medium mb-3 block">Nội dung chi tiết</FormLabel>
+                <div className="pt-4 border-t space-y-4">
+                  <Label className="font-semibold text-base block">Nội dung chi tiết</Label>
                   <Controller
                     control={form.control}
                     name="content"
                     render={({ field }) => <LexicalEditorDynamic value={field.value} onChange={field.onChange} />}
                   />
+                  {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* RIGHT: SIDEBAR CONFIG */}
+          {/* RIGHT: SIDEBAR */}
           <div className="lg:col-span-4 space-y-6">
 
-            {/* THUMBNAIL */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="py-3 px-5 border-b bg-muted/20">
-                <CardTitle className="text-sm font-bold flex items-center gap-2"><ImagePlus className="h-4 w-4 text-primary" /> Ảnh đại diện</CardTitle>
+            {/* THUMBNAIL CARD */}
+            <Card className="shadow-sm overflow-hidden">
+              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+                <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><ImagePlus className="h-4 w-4 text-blue-600" /> Ảnh bài viết</CardTitle>
               </CardHeader>
-              <CardContent className="p-4">
+              <CardContent className="p-5">
                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                 {isUploading ? (
-                  <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin" /></div>
+                  <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (previewUrl || form.getValues("thumbnailId")) ? (
-                  <div className="relative group rounded-xl overflow-hidden border">
+                  <div className="relative group rounded-xl overflow-hidden border shadow-inner">
                     <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
+                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-[2px]">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
-                      <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Thay đổi</Button>
+                      <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi ảnh</Button>
                       <Button type="button" variant="destructive" size="icon" onClick={removeImage}><X className="h-4 w-4" /></Button>
                     </div>
                   </div>
                 ) : (
-                  <div onClick={() => fileInputRef.current?.click()} className="aspect-video border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer">
-                    <ImagePlus className="h-8 w-8 text-slate-300 mb-2" />
-                    <span className="text-xs font-medium text-slate-500">Tải lên ảnh bài viết</span>
+                  <div onClick={() => fileInputRef.current?.click()} className="aspect-video border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group">
+                    <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
+                      <ImagePlus className="h-6 w-6 text-slate-400" />
+                    </div>
+                    <span className="text-[13px] font-semibold text-slate-500">Tải lên ảnh tiêu đề</span>
                   </div>
                 )}
               </CardContent>
             </Card>
 
-            {/* STATUS & PUBLISH */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="py-3 px-5 border-b bg-muted/20">
-                <CardTitle className="text-sm font-bold flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Thiết lập xuất bản</CardTitle>
+            {/* PUBLISH CONFIG CARD */}
+            <Card className="shadow-sm">
+              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+                <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Globe className="h-4 w-4 text-blue-600" /> Cấu hình hiển thị</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-6">
                 <FormField control={form.control} name="status" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-xs font-semibold text-muted-foreground uppercase">Trạng thái hiện tại</FormLabel>
+                    <FormLabel className="text-[11px] font-bold text-muted-foreground uppercase">Trạng thái xuất bản</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="font-medium"><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="DRAFT">Bản nháp</SelectItem>
-                        <SelectItem value="PENDING">Chờ phê duyệt</SelectItem>
-                        <SelectItem value="PUBLISHED">Công khai</SelectItem>
-                        <SelectItem value="EDITING">Đang chỉnh sửa</SelectItem>
-                        <SelectItem value="REJECTED">Từ chối</SelectItem>
+                        <SelectItem value="DRAFT" className="text-slate-500">Lưu bản nháp</SelectItem>
+                        <SelectItem value="PENDING" className="text-orange-600 font-medium">Chờ phê duyệt</SelectItem>
+                        <SelectItem value="PUBLISHED" className="text-green-600 font-medium">Công khai ngay</SelectItem>
+                        <SelectItem value="EDITING">Yêu cầu chỉnh sửa</SelectItem>
+                        <SelectItem value="REJECTED" className="text-red-600">Từ chối bài</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
                 )} />
 
-                <Separator className="opacity-60" />
+                <Separator />
 
                 <div className="space-y-4">
                   <FormField control={form.control} name="isFeatured" render={({ field }) => (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
                       <div className="space-y-0.5">
-                        <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="f-mode"><Star className="h-3 w-3" /> Bài viết nổi bật</Label>
-                        <p className="text-[11px] text-muted-foreground">Hiển thị lên mục đặc biệt trang chủ</p>
+                        <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="f-mode"><Star className={`h-3.5 w-3.5 ${field.value ? 'fill-yellow-400 text-yellow-500' : ''}`} /> Tin nổi bật</Label>
+                        <p className="text-[10px] text-muted-foreground italic">Ghim lên đầu trang chủ</p>
                       </div>
                       <Switch id="f-mode" checked={field.value} onCheckedChange={field.onChange} />
                     </div>
                   )} />
 
                   <FormField control={form.control} name="sendNotification" render={({ field }) => (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
                       <div className="space-y-0.5">
-                        <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="n-mode"><Bell className="h-3 w-3" /> Gửi thông báo</Label>
-                        <p className="text-[11px] text-muted-foreground">Thông báo đến người dùng app</p>
+                        <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="n-mode"><Bell className={`h-3.5 w-3.5 ${field.value ? 'fill-blue-400 text-blue-500' : ''}`} /> Gửi thông báo</Label>
+                        <p className="text-[10px] text-muted-foreground italic">Gửi Notify cho khách hàng</p>
                       </div>
                       <Switch id="n-mode" checked={field.value} onCheckedChange={field.onChange} />
                     </div>
@@ -289,15 +321,15 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               </CardContent>
             </Card>
 
-            {/* TAGS */}
-            <Card className="shadow-sm border-slate-200">
-              <CardHeader className="py-3 px-5 border-b bg-muted/20">
-                <CardTitle className="text-sm font-bold flex items-center gap-2"><Tag className="h-4 w-4 text-primary" /> Nhãn gắn kèm</CardTitle>
+            {/* TAGS CARD */}
+            <Card className="shadow-sm">
+              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+                <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Tag className="h-4 w-4 text-blue-600" /> Nhãn gắn (Tags)</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-4">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="VD: React, Tech..."
+                    placeholder="Nhập và nhấn Enter..."
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
@@ -305,13 +337,13 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   />
                   <Button type="button" size="sm" variant="secondary" onClick={addTag}>Thêm</Button>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {form.watch("tags").length > 0 ? form.watch("tags").map((tag) => (
-                    <Badge key={tag} variant="secondary" className="pl-2 pr-1 py-1 gap-1 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors">
+                    <Badge key={tag} variant="secondary" className="pl-2 pr-1 py-1 gap-1 border-blue-100 bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors cursor-default">
                       {tag}
-                      <X className="h-3 w-3 cursor-pointer" onClick={() => form.setValue("tags", form.getValues("tags").filter(t => t !== tag))} />
+                      <X className="h-3 w-3 cursor-pointer hover:text-red-500" onClick={() => form.setValue("tags", form.getValues("tags").filter(t => t !== tag))} />
                     </Badge>
-                  )) : <p className="text-[11px] text-muted-foreground italic">Chưa có tag nào...</p>}
+                  )) : <p className="text-[11px] text-muted-foreground italic px-1 text-center w-full">Thêm từ khóa để SEO bài viết tốt hơn</p>}
                 </div>
               </CardContent>
             </Card>
@@ -322,7 +354,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {showFullImage && (previewUrl || form.getValues("thumbnailId")) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
-              <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[85vh] object-contain rounded-lg" alt="Full" />
+              <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20" alt="Full" />
               <Button type="button" variant="ghost" size="icon" className="absolute -top-12 right-0 text-white hover:bg-white/10" onClick={() => setShowFullImage(false)}><X className="h-8 w-8" /></Button>
             </div>
           </div>
