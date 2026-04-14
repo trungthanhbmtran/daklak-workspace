@@ -1,291 +1,137 @@
 // features/posts/components/CategoryForm.tsx
-
 "use client";
 
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Save, Loader2, Info } from "lucide-react";
-import { useEffect } from "react";
-
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage, 
-  FormDescription 
-} from "@/components/ui/form";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { categorySchema } from "../schemas";
 import { postsApi } from "../api";
 import { Category } from "../types";
 
 interface CategoryFormProps {
+  initialData?: Category;
   onBack: () => void;
-  editId?: string | null;
 }
 
-export function CategoryForm({ onBack, editId }: CategoryFormProps) {
+export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
   const queryClient = useQueryClient();
-  const isEdit = !!editId;
+  const isEdit = !!initialData;
 
-  const form = useForm({
-    resolver: zodResolver(categorySchema),
-    defaultValues: {
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+    defaultValues: initialData || {
       name: "",
       slug: "",
+      parentId: "root",
       description: "",
-      parentId: null,
-      status: true,
-      orderIndex: 0,
-    },
+      status: true
+    }
   });
 
-  // Fetch all categories for parent selection
-  const { data: allCategories } = useQuery({
+  const { data: categories } = useQuery({
     queryKey: ["posts-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return (res as any).data?.items || res.data || [];
-    },
-  });
-
-  // Fetch detailed data if editing
-  const { data: categoryData, isLoading: isFetching } = useQuery({
-    queryKey: ["posts-category", editId],
-    queryFn: () => postsApi.getCategory(editId!).then(res => res.data),
-    enabled: isEdit,
-  });
-
-  useEffect(() => {
-    if (categoryData) {
-      form.reset({
-        name: categoryData.name,
-        slug: categoryData.slug,
-        description: categoryData.description || "",
-        parentId: categoryData.parentId || null,
-        status: categoryData.status,
-        orderIndex: categoryData.orderIndex,
-      });
+      return (res?.data?.data || []) as Category[];
     }
-  }, [categoryData, form]);
+  });
 
   const mutation = useMutation({
-    mutationFn: (values: any) => {
-      if (isEdit) return postsApi.updateCategory(editId!, values);
-      return postsApi.createCategory(values);
-    },
+    mutationFn: (data: any) => isEdit ? postsApi.updateCategory(initialData.id, data) : postsApi.createCategory(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts-categories"] });
-      alert(isEdit ? "Cập nhật thành công!" : "Tạo chuyên mục mới thành công!");
       onBack();
-    },
-    onError: (err: any) => {
-      alert("Lỗi: " + (err.response?.data?.message || "Đã xảy ra lỗi hệ thống."));
-    },
+    }
   });
 
-  const onSubmit = (values: any) => mutation.mutate(values);
-
-  // Auto-slug
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    form.setValue("name", value);
-    if (!form.formState.dirtyFields.slug) {
-      const slug = value.toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-        .replace(/[đĐ]/g, "d")
-        .replace(/([^0-9a-z-\s])/g, "")
-        .replace(/(\s+)/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-+|-+$/g, "");
-      form.setValue("slug", slug, { shouldValidate: true });
-    }
-  };
-
-  if (isFetching) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Đang tải dữ liệu chuyên mục...</span>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={onBack} className="text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại danh sách
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
+          <ArrowLeft className="h-5 w-5" />
         </Button>
+        <div>
+          <h2 className="text-xl font-bold">{isEdit ? "Chỉnh sửa chuyên mục" : "Thêm chuyên mục mới"}</h2>
+          <p className="text-sm text-muted-foreground">Vị trí sẽ được tự động tính toán theo cấu trúc cây</p>
+        </div>
       </div>
 
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-6">
-              <Card className="border-none shadow-md bg-card">
-                <CardHeader>
-                  <CardTitle className="text-xl">Thông tin chuyên mục</CardTitle>
-                  <CardDescription>Cung cấp các thông tin cơ bản về chuyên mục này.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tên chuyên mục <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <Input placeholder="Ví dụ: Tin tức Khoa học..." {...field} onChange={handleNameChange} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Slug (Đường dẫn tĩnh) <span className="text-destructive">*</span></FormLabel>
-                        <FormControl>
-                          <div className="flex items-center rounded-md border border-input bg-muted/20 overflow-hidden">
-                            <span className="pl-3 pr-1 text-xs text-muted-foreground font-mono">/</span>
-                            <Input className="border-0 bg-transparent focus-visible:ring-0 font-mono text-sm h-10" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mô tả ngắn</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Mô tả về chuyên mục..." className="min-h-[100px] resize-none" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </CardContent>
-              </Card>
+      <form onSubmit={handleSubmit((data) => mutation.mutate({
+        ...data,
+        parentId: data.parentId === "root" ? null : data.parentId
+      }))} className="space-y-4">
+        <Card className="border-2 shadow-none">
+          <CardContent className="pt-6 space-y-5">
+            {/* Tên & Slug */}
+            <div className="grid gap-2">
+              <Label htmlFor="name" className="font-semibold">Tên hiển thị</Label>
+              <Input
+                id="name"
+                placeholder="VD: Điện thoại di động"
+                {...register("name", { required: true })}
+              />
             </div>
 
-            <div className="space-y-6">
-              <Card className="border-none shadow-md bg-card">
-                <CardHeader>
-                  <CardTitle className="text-base">Thiết lập</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-5">
-                  <FormField
-                    control={form.control}
-                    name="parentId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Chuyên mục cha</FormLabel>
-                        <Select 
-                          onValueChange={(val) => field.onChange(val === "none" ? null : val)} 
-                          value={field.value || "none"}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Không có (Chuyên mục cấp 1)" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="none">Không có (Chuyên mục cấp 1)</SelectItem>
-                            {allCategories
-                              ?.filter((c: Category) => c.id !== editId)
-                              .map((c: Category) => (
-                                <SelectItem key={c.id} value={c.id}>
-                                  {c.name}
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="orderIndex"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Thứ tự hiển thị</FormLabel>
-                        <FormControl>
-                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
-                        </FormControl>
-                        <FormDescription className="text-[10px]">Thứ tự nhỏ sẽ hiển thị trước.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between rounded-lg border p-3 bg-muted/20">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-sm">Trạng thái</FormLabel>
-                          <FormDescription className="text-[10px]">Kích hoạt để sử dụng.</FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                    {mutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <Save className="h-4 w-4 mr-2" />
-                    )}
-                    {isEdit ? "Cập nhật chuyên mục" : "Tạo chuyên mục"}
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 space-y-2">
-                <div className="flex items-center gap-2 text-blue-700 font-bold text-xs uppercase tracking-wider">
-                  <Info className="h-3 w-3" /> Lưu ý
-                </div>
-                <p className="text-[11px] text-blue-600 leading-relaxed">
-                  Chuyên mục giúp phân loại bài viết. Chuyên mục cấp cha sẽ bao gồm cả các bài viết của chuyên mục con. 
-                  Hãy cẩn thận khi đổi slug của chuyên mục đã có sẵn bài viết.
+            {/* Chọn vị trí trong cây */}
+            <div className="grid gap-2">
+              <Label className="font-semibold">Vị trí trong hệ thống</Label>
+              <Select
+                onValueChange={(v) => setValue("parentId", v)}
+                defaultValue={watch("parentId") || "root"}
+              >
+                <SelectTrigger className="bg-muted/20">
+                  <SelectValue placeholder="Chọn chuyên mục cha" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="root" className="font-bold text-primary italic">
+                    -- Là chuyên mục Gốc (Cấp 0) --
+                  </SelectItem>
+                  {categories?.filter(c => c.id !== initialData?.id).map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {"  ".repeat(cat.depth)} {cat.depth > 0 ? "└─ " : ""}{cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-blue-700">
+                <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                <p className="text-[11px] leading-relaxed">
+                  Khi bạn chọn một chuyên mục cha, hệ thống sẽ chèn chuyên mục mới này vào vị trí cuối cùng của nhánh con thuộc cha đó và cập nhật lại toàn bộ chỉ số Left/Right của các nhánh liên quan.
                 </p>
               </div>
             </div>
-          </div>
-        </form>
-      </Form>
+
+            <div className="grid gap-2">
+              <Label htmlFor="desc">Mô tả ngắn</Label>
+              <Textarea id="desc" {...register("description")} placeholder="Nhập mô tả..." rows={3} />
+            </div>
+
+            <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/10">
+              <div className="space-y-0.5">
+                <Label>Trạng thái hiển thị</Label>
+                <p className="text-xs text-muted-foreground">Cho phép chuyên mục xuất hiện trên website</p>
+              </div>
+              <Switch
+                checked={watch("status")}
+                onCheckedChange={(val) => setValue("status", val)}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onBack}>Hủy bỏ</Button>
+          <Button type="submit" className="min-w-[120px]" disabled={mutation.isPending}>
+            {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+            Lưu thay đổi
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
