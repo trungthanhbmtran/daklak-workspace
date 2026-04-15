@@ -28,7 +28,17 @@ export class PostsController {
   @GrpcMethod('PostService', 'ListPosts')
   @UsePipes(new ValidationPipe({ transform: true }))
   async listPosts(data: QueryPostDto) {
-    return this.postsService.getList(data);
+    const { rows, count } = await this.postsService.getList(data);
+    return {
+      data: rows,
+      meta: {
+        pagination: {
+          total: count,
+          page: data.page || 1,
+          pageSize: data.limit || 10,
+        },
+      },
+    };
   }
 
   @GrpcMethod('PostService', 'UpdatePost')
