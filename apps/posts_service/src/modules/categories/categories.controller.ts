@@ -28,9 +28,10 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
-  async listCategories(data: { mode: string; id?: string }) {
+  async listCategories(data: { mode?: string; id?: string }) {
+    const { mode, id } = data;
     let result;
-    switch (data.mode) {
+    switch (mode) {
       case 'flat':
         const flatCategories = await this.categoryService.getAllFlat();
         result = flatCategories.map(cat => ({
