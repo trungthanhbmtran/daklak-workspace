@@ -1,10 +1,11 @@
+// features/posts/components/CategoryList.tsx
+
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Search, Plus, Edit, Trash2, FolderTree,
-  CheckCircle2, XCircle, Loader2, MoreVertical,
-  ChevronRight, Subtitles
+  Search, Plus, Edit, Trash2, Loader2, MoreVertical,
+  ChevronRight, ChevronDown, CheckCircle2, XCircle, Layout
 } from "lucide-react";
 import { useState } from "react";
 
@@ -20,6 +21,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface CategoryListProps {
   onNavigateToCreate: () => void;
@@ -31,34 +40,36 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data: categories, isLoading } = useQuery({
-    queryKey: ["posts-categories"],
+    queryKey: ["categories_all"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      // Quá trình unwrap đã diễn ra ở layer API (api.ts)
-      return res.data as Category[];
+      const payload = res?.data;
+      if (!payload) return [];
+      // Gateway might return nested or flat. We handle flat for the table display.
+      return payload.data || payload.items || (Array.isArray(payload) ? payload : []);
     },
   });
-
-  console.log("categories", categories);
-
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deleteCategory(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts-categories"] });
-      alert("Xóa chuyên mục và các nhánh con thành công!");
+      queryClient.invalidateQueries({ queryKey: ["categories_all"] });
+      alert("Xóa chuyên mục thành công!");
+    },
+    onError: (err: any) => {
+      alert("Lỗi: " + (err.response?.data?.message || "Có lỗi xảy ra khi xóa chuyên mục."));
     },
   });
 
-  const filteredCategories = (categories || []).filter((cat) =>
-    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = (categories || []).filter((c: Category) =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 space-y-4">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        <p className="text-muted-foreground animate-pulse">Đang đồng bộ cấu trúc Nested Set...</p>
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-3 text-muted-foreground">Đang tải danh sách chuyên mục...</span>
       </div>
     );
   }
@@ -67,119 +78,119 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Cấu trúc chuyên mục</h2>
-          <p className="text-sm text-muted-foreground">Quản lý phân cấp theo mô hình Nested Set</p>
+          <h2 className="text-2xl font-bold tracking-tight">Quản lý Chuyên mục</h2>
+          <p className="text-muted-foreground">Tổ chức nội dung bài viết theo cấu trúc phân cấp.</p>
         </div>
-        <Button onClick={onNavigateToCreate} className="bg-primary hover:bg-primary/90 shadow-lg">
-          <Plus className="h-4 w-4 mr-2" /> Thêm chuyên mục
+        <Button onClick={onNavigateToCreate} className="shadow-md bg-primary hover:bg-primary/90">
+          <Plus className="h-4 w-4 mr-2" /> Thêm chuyên mục mới
         </Button>
       </div>
 
-      <Card className="p-4 border-none shadow-sm bg-muted/30 flex gap-4 items-center rounded-xl">
-        <div className="relative flex-1 max-w-sm">
+      <Card className="p-4 bg-card border shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center rounded-xl">
+        <div className="relative w-full sm:w-80">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Tìm kiếm trong cây chuyên mục..."
-            className="pl-9 bg-background focus-visible:ring-primary/20"
+            placeholder="Tìm theo tên chuyên mục..."
+            className="pl-9 h-10 bg-muted/20 focus-visible:ring-primary/20"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </Card>
 
-      <Card className="border shadow-md rounded-xl overflow-hidden bg-background">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-muted-foreground uppercase bg-muted/50 border-b">
-              <tr>
-                <th className="px-6 py-4 font-semibold">Cấu trúc phân cấp</th>
-                <th className="px-6 py-4 font-semibold w-[120px]">Chỉ số (L-R)</th>
-                <th className="px-6 py-4 font-semibold text-center">Trạng thái</th>
-                <th className="px-6 py-4 font-semibold text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40">
-              {filteredCategories.length === 0 ? (
-                <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground italic">
-                    Chưa có dữ liệu chuyên mục.
-                  </td>
-                </tr>
-              ) : (
-                filteredCategories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-primary/5 transition-colors group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        {/* Đường kẻ phân cấp */}
-                        {[...Array(cat.depth)].map((_, i) => (
-                          <div key={i} className="w-6 h-10 border-r border-border/60 mr-2 flex-shrink-0" />
-                        ))}
-
-                        <div className="flex items-center gap-3">
-                          {cat.depth > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground/50 -ml-1" />}
-                          <div className={`h-8 w-8 rounded-lg flex items-center justify-center shrink-0 shadow-sm
-                            ${cat.depth === 0 ? 'bg-primary text-primary-foreground' : 'bg-background border text-muted-foreground'}`}>
-                            <FolderTree className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className={`font-medium ${cat.depth === 0 ? 'text-base' : 'text-sm'}`}>
-                              {cat.name}
-                            </p>
-                            <p className="text-[10px] font-mono text-muted-foreground italic">/{cat.slug}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 font-mono text-[10px]">
-                        <span className="px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded border border-blue-100">{cat.lft}</span>
-                        <span className="text-muted-foreground">-</span>
-                        <span className="px-1.5 py-0.5 bg-purple-50 text-purple-600 rounded border border-purple-100">{cat.rgt}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <Badge variant={cat.status ? "default" : "secondary"} className={cat.status ? "bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200" : ""}>
-                        {cat.status ? "Hoạt động" : "Ẩn"}
+      <Card className="border shadow-sm overflow-hidden rounded-xl">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow>
+              <TableHead className="w-[400px]">Tên chuyên mục</TableHead>
+              <TableHead>Mã định danh (Slug)</TableHead>
+              <TableHead>Thứ tự</TableHead>
+              <TableHead>Trạng thái</TableHead>
+              <TableHead>Tiêu chuẩn NN</TableHead>
+              <TableHead className="text-right">Thao tác</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredCategories.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-48 text-center text-muted-foreground">
+                  Không tìm thấy chuyên mục nào.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredCategories.map((category: Category) => (
+                <TableRow key={category.id} className="hover:bg-muted/10">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center">
+                      {/* Thụt lề dựa trên độ sâu (depth) nếu có */}
+                      {Array.from({ length: category.depth || 0 }).map((_, i) => (
+                        <div key={i} className="w-6 h-px border-l-2 border-muted-foreground/20 ml-3 first:ml-0" />
+                      ))}
+                      {category.depth > 0 && <ChevronRight className="h-3 w-3 mr-1 text-muted-foreground/50" />}
+                      <span className={category.depth === 0 ? "font-bold text-primary" : ""}>
+                        {category.name}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <code className="bg-muted px-1.5 py-0.5 rounded text-xs">{category.slug}</code>
+                  </TableCell>
+                  <TableCell>{category.orderIndex}</TableCell>
+                  <TableCell>
+                    {category.status ? (
+                      <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 border-emerald-200 gap-1 px-2">
+                        <CheckCircle2 className="h-3 w-3" /> Hoạt động
                       </Badge>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
-                          onClick={() => onNavigateToEdit(cat.id)}
-                        >
-                          <Edit className="h-4 w-4" />
+                    ) : (
+                      <Badge variant="outline" className="bg-rose-500/10 text-rose-600 border-rose-200 gap-1 px-2">
+                        <XCircle className="h-3 w-3" /> Tạm khóa
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {category.isGovStandard ? (
+                      <Badge variant="secondary" className="bg-blue-500/10 text-blue-600 border-blue-200">
+                        Chuẩn NN
+                      </Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-xs">—</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-muted">
+                          <MoreVertical className="h-4 w-4" />
                         </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem
-                              className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                              onClick={() => {
-                                if (confirm(`CẢNH BÁO: Xóa "${cat.name}" sẽ xóa TẤT CẢ chuyên mục con bên trong. Bạn chắc chắn chứ?`)) {
-                                  deleteMutation.mutate(cat.id);
-                                }
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" /> Xóa toàn bộ nhánh
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem onClick={() => onNavigateToEdit(category.id)}>
+                          <Edit className="h-4 w-4 mr-2" /> Chỉnh sửa
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive focus:bg-destructive/5"
+                          onClick={() => {
+                            if (confirm(`Bạn có chắc muốn xóa chuyên mục "${category.name}"?`)) {
+                              deleteMutation.mutate(category.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Xóa
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
       </Card>
+      
+      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
+        <Layout className="h-4 w-4 text-primary" />
+        <span>Gợi ý: Bạn có thể tạo cấu trúc chuyên mục đa cấp để phân loại nội dung bài viết tốt hơn.</span>
+      </div>
     </div>
   );
 }

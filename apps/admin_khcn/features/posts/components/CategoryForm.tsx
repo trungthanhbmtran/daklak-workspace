@@ -1,245 +1,398 @@
 // features/posts/components/CategoryForm.tsx
+
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Save, Loader2, Info, LayoutGrid, Hash, AlignLeft, Eye, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  ArrowLeft, Save, Loader2, Info, Layout, 
+  Settings, ImagePlus, Trash2, ShieldCheck
+} from "lucide-react";
+import { useEffect, useRef } from "react";
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Separator } from "@/components/ui/separator";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { categorySchema } from "../schemas";
 import { postsApi } from "../api";
-import { Category } from "../types";
+import { useImageUpload } from "../hooks/useImageUpload";
 
 interface CategoryFormProps {
-  initialData?: Category;
   onBack: () => void;
+  editId?: string | null;
 }
 
-// --- HÀM BIẾN TIẾNG VIỆT THÀNH SLUG ---
-const convertToSlug = (text: string) => {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .replace(/([^0-9a-z-\s])/g, "")
-    .replace(/(\s+)/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
-
-export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
+export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   const queryClient = useQueryClient();
-  const isEdit = !!initialData;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isEdit = !!editId;
 
-  const { register, handleSubmit, setValue, watch, formState: { errors, dirtyFields } } = useForm({
-    defaultValues: initialData || {
+  const form = useForm({
+    resolver: zodResolver(categorySchema),
+    defaultValues: {
       name: "",
       slug: "",
-      parentId: "root",
       description: "",
+      parentId: null,
       status: true,
-      isGovStandard: false
-    }
+      orderIndex: 0,
+      isGovStandard: false,
+      thumbnail: "",
+    },
   });
 
+  const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
+    onSuccess: (fileId) => {
+      form.setValue("thumbnail", fileId, { shouldValidate: true, shouldDirty: true });
+    },
+    onRemove: () => form.setValue("thumbnail", "", { shouldValidate: true, shouldDirty: true }),
+  });
+
+  // Slugify logic
+  const watchedName = form.watch("name");
+  useEffect(() => {
+    if (!isEdit && watchedName) {
+      const slug = watchedName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[đĐ]/g, "d")
+        .replace(/([^0-9a-z-\s])/g, "")
+        .replace(/(\s+)/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      form.setValue("slug", slug, { shouldValidate: true });
+    }
+  }, [watchedName, isEdit, form]);
+
+  // Fetch list of categories for parent selection
   const { data: categories } = useQuery({
-    queryKey: ["posts-categories"],
+    queryKey: ["categories_for_select"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return (res?.data || []) as Category[];
-    }
+      const payload = res?.data;
+      const list = payload?.data || payload?.items || (Array.isArray(payload) ? payload : []);
+      // Filter out self to prevent circular parent
+      return list.filter((c: any) => c.id !== editId);
+    },
   });
+
+  // Fetch detailed data if editing
+  const { data: categoryData, isLoading: isFetching } = useQuery({
+    queryKey: ["category", editId],
+    queryFn: async () => {
+      const res = await postsApi.getCategory(editId!);
+      return res?.data;
+    },
+    enabled: isEdit,
+  });
+
+  useEffect(() => {
+    if (categoryData) {
+      form.reset({
+        ...categoryData,
+        name: categoryData.name || "",
+        slug: categoryData.slug || "",
+        description: categoryData.description || "",
+        parentId: categoryData.parentId || null,
+        isGovStandard: !!categoryData.isGovStandard,
+        thumbnail: categoryData.thumbnail || "",
+      });
+    }
+  }, [categoryData, form]);
 
   const mutation = useMutation({
-    mutationFn: (data: any) => isEdit ? postsApi.updateCategory(initialData.id, data) : postsApi.createCategory(data),
+    mutationFn: (values: any) => {
+      // Ensure parentId is null if "none" or empty string
+      const payload = { ...values };
+      if (payload.parentId === "none" || payload.parentId === "") {
+        payload.parentId = null;
+      }
+      
+      if (isEdit) return postsApi.updateCategory(editId!, payload);
+      return postsApi.createCategory(payload);
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["posts-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["categories_all"] });
+      queryClient.invalidateQueries({ queryKey: ["categories_for_select"] });
+      alert(isEdit ? "Cập nhật chuyên mục thành công!" : "Tạo chuyên mục thành công!");
       onBack();
-    }
+    },
+    onError: (err: any) => {
+      alert("Lỗi: " + (err.response?.data?.message || "Đã xảy ra lỗi hệ thống."));
+    },
   });
 
-  // Tự động tạo slug khi gõ tên
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    setValue("name", name);
-
-    // Chỉ tự động tạo slug nếu người dùng chưa sửa slug thủ công
-    if (!dirtyFields.slug) {
-      setValue("slug", convertToSlug(name), { shouldValidate: true });
-    }
+  const onSubmit = (values: any) => {
+    mutation.mutate(values);
   };
 
+  if (isFetching) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-3 text-muted-foreground">Đang tải dữ liệu chuyên mục...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-10">
-      {/* HEADER SECTION */}
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="outline" size="icon" onClick={onBack} className="rounded-full h-10 w-10 shadow-sm border-slate-200">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-slate-800">{isEdit ? "Chỉnh sửa chuyên mục" : "Thêm chuyên mục mới"}</h2>
-            <p className="text-sm text-muted-foreground">Quản lý cấu trúc phân cấp và hiển thị của chuyên mục</p>
-          </div>
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">{isEdit ? "Chỉnh sửa Chuyên mục" : "Thêm Chuyên mục mới"}</h2>
+          <p className="text-muted-foreground">Thiết lập thông tin định danh và phân cấp cho chuyên mục.</p>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" onClick={onBack} disabled={mutation.isPending}>Hủy bỏ</Button>
-          <Button
-            onClick={handleSubmit((data) => mutation.mutate({
-              ...data,
-              parentId: data.parentId === "root" ? null : data.parentId
-            }))}
-            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 min-w-[140px]"
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-            {isEdit ? "Cập nhật" : "Lưu dữ liệu"}
-          </Button>
-        </div>
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* LEFT COLUMN: MAIN INFO */}
-        <div className="md:col-span-2 space-y-6">
-          <Card className="border-none shadow-sm ring-1 ring-slate-200">
-            <CardHeader className="pb-3 border-b bg-slate-50/50">
-              <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4 text-blue-500" /> Thông tin cơ bản
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-5">
-              {/* Tên hiển thị */}
-              <div className="grid gap-2">
-                <Label htmlFor="name" className="text-sm font-semibold flex items-center gap-1">
-                  Tên hiển thị <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="name"
-                  placeholder="VD: Tin tức nổi bật"
-                  className="h-11 bg-slate-50/50 focus:bg-white transition-all border-slate-200"
-                  {...register("name", { required: true })}
-                  onChange={handleNameChange}
-                />
-              </div>
-
-              {/* Đường dẫn tĩnh (Slug) */}
-              <div className="grid gap-2">
-                <Label htmlFor="slug" className="text-sm font-semibold flex items-center gap-1">
-                  Đường dẫn tĩnh (Slug) <span className="text-destructive">*</span>
-                </Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-slate-400">
-                    <Hash className="h-4 w-4" />
-                  </span>
-                  <Input
-                    id="slug"
-                    placeholder="tin-tuc-noi-bat"
-                    className="h-11 pl-9 font-mono text-sm bg-slate-50/10 border-slate-200"
-                    {...register("slug", { required: true })}
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              {/* 1. Thông tin cơ bản */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" /> Thông tin cơ bản
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tên Chuyên mục <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="Ví dụ: Tin tức, Sự kiện..." {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
-                <p className="text-[11px] text-muted-foreground italic">Slug sẽ được tự động tạo từ tên nếu bạn không nhập thủ công.</p>
-              </div>
 
-              <Separator className="my-2" />
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mã định danh (Slug) <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input placeholder="tin-tuc" {...field} />
+                        </FormControl>
+                        <FormDescription>Đường dẫn tĩnh duy nhất, tự động tạo từ tên.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              {/* Mô tả */}
-              <div className="grid gap-2">
-                <Label htmlFor="desc" className="text-sm font-semibold flex items-center gap-2">
-                  <AlignLeft className="h-4 w-4" /> Mô tả ngắn
-                </Label>
-                <Textarea
-                  id="desc"
-                  {...register("description")}
-                  placeholder="Nhập mô tả cho chuyên mục này..."
-                  className="min-h-[120px] bg-slate-50/50 focus:bg-white resize-none border-slate-200"
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mô tả</FormLabel>
+                        <FormControl>
+                          <Textarea 
+                            placeholder="Mô tả ngắn gọn về chuyên mục này..." 
+                            className="min-h-[100px] resize-none" 
+                            {...field} 
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
 
-        {/* RIGHT COLUMN: CONFIGURATION */}
-        <div className="space-y-6">
-          <Card className="border-none shadow-sm ring-1 ring-slate-200">
-            <CardHeader className="pb-3 border-b bg-slate-50/50">
-              <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                <LayoutGrid className="h-4 w-4 text-blue-500" /> Cấu hình & Vị trí
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6 space-y-6">
-              {/* Vị trí trong cây */}
-              <div className="grid gap-2">
-                <Label className="text-sm font-semibold">Chuyên mục cha</Label>
-                <Select
-                  onValueChange={(v) => setValue("parentId", v)}
-                  defaultValue={watch("parentId") || "root"}
+              {/* 2. Hình ảnh & Đại diện (Optional) */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <ImagePlus className="h-5 w-5 text-primary" /> Hình ảnh đại diện
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <FormField
+                    control={form.control}
+                    name="thumbnail"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="space-y-4">
+                            <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                            
+                            {isUploading ? (
+                              <div className="w-40 aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
+                                <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                              </div>
+                            ) : (previewUrl || field.value) ? (
+                              <div className="relative group w-40 aspect-square rounded-lg overflow-hidden border shadow-sm">
+                                <img 
+                                  src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/media/download/${field.value}`)} 
+                                  alt="Thumb Preview" 
+                                  className="w-full h-full object-cover" 
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                  <Button type="button" variant="secondary" size="icon" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}><ImagePlus className="h-4 w-4" /></Button>
+                                  <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div
+                                onClick={() => fileInputRef.current?.click()}
+                                className="w-40 aspect-square border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors group"
+                              >
+                                <ImagePlus className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                                <p className="mt-2 text-xs font-medium text-muted-foreground group-hover:text-primary text-center px-2">Tải ảnh lên</p>
+                              </div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormDescription>Ảnh đại diện cho chuyên mục (tùy chọn).</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+            </div>
+
+            <div className="space-y-6">
+              {/* 3. Cấu hình phân cấp & Hiển thị */}
+              <Card className="shadow-sm">
+                <CardHeader className="pb-3 border-b bg-muted/5">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Settings className="h-5 w-5 text-primary" /> Cấu hình
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6 space-y-5">
+                  <FormField
+                    control={form.control}
+                    name="parentId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Chuyên mục cha</FormLabel>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value || "none"}
+                          value={field.value || "none"}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Chọn chuyên mục cha" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">--- Không có (Gốc) ---</SelectItem>
+                            {categories?.map((c: any) => (
+                              <SelectItem key={c.id} value={c.id}>
+                                {Array.from({ length: c.depth || 0 }).map(() => "— ")}
+                                {c.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="orderIndex"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Thứ tự hiển thị</FormLabel>
+                        <FormControl>
+                          <Input type="number" {...field} onChange={e => field.onChange(parseInt(e.target.value))} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-muted/10 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-sm font-medium">Trạng thái</FormLabel>
+                          <div className="text-[10px] text-muted-foreground">Hiển thị chuyên mục</div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="isGovStandard"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 bg-blue-50/50 border-blue-100 shadow-sm">
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-blue-600" />
+                          <FormLabel className="text-sm font-medium text-blue-900">Chuẩn NN</FormLabel>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </CardContent>
+              </Card>
+
+              <div className="pt-2">
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 text-lg shadow-md" 
+                  disabled={mutation.isPending}
                 >
-                  <SelectTrigger className="w-full bg-slate-50/50 border-slate-200 h-10">
-                    <SelectValue placeholder="Chọn chuyên mục cha" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    <SelectItem value="root" className="font-bold text-blue-600 focus:text-blue-700">
-                      -- Là chuyên mục Gốc (Cấp 0) --
-                    </SelectItem>
-                    {categories?.filter(c => c.id !== initialData?.id).map((cat) => (
-                      <SelectItem key={cat.id} value={cat.id}>
-                        {cat.depth > 0 && "  ".repeat(cat.depth)}
-                        {cat.depth > 0 ? "└─ " : ""}
-                        {cat.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <div className="p-3 bg-blue-50/50 rounded-lg border border-blue-100 flex gap-2">
-                  <Info className="h-4 w-4 text-blue-500 shrink-0 mt-0.5" />
-                  <p className="text-[10px] leading-relaxed text-blue-700 font-medium">
-                    Cấu trúc cây (Nested Set) sẽ tự động cập nhật lại các chỉ số Left/Right khi bạn lưu.
-                  </p>
-                </div>
+                  {mutation.isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  ) : (
+                    <Save className="h-5 w-5 mr-2" />
+                  )}
+                  {isEdit ? "Cập nhật" : "Tạo mới"}
+                </Button>
               </div>
-
-              <Separator />
-
-              {/* Phân loại chính phủ */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50/50 border border-emerald-100">
-                <div className="space-y-0.5">
-                  <Label className="flex items-center gap-2 text-sm font-semibold cursor-pointer text-emerald-800" htmlFor="gov-switch">
-                    <Star className={`h-4 w-4 ${watch("isGovStandard") ? "fill-emerald-500 text-emerald-500" : "text-emerald-400"}`} /> Chuẩn CP
-                  </Label>
-                  <p className="text-[10px] text-emerald-600/80 italic font-medium">Theo chuẩn Cổng TTĐT Chính phủ</p>
-                </div>
-                <Switch
-                  id="gov-switch"
-                  checked={watch("isGovStandard")}
-                  onCheckedChange={(val) => setValue("isGovStandard", val, { shouldDirty: true })}
-                />
-              </div>
-
-              {/* Trạng thái */}
-              <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50/50 border border-slate-100">
-                <div className="space-y-0.5">
-                  <Label className="flex items-center gap-2 text-sm font-semibold cursor-pointer" htmlFor="status-switch">
-                    <Eye className="h-4 w-4 text-slate-500" /> Hiển thị
-                  </Label>
-                  <p className="text-[10px] text-muted-foreground italic">Kích hoạt trên giao diện web</p>
-                </div>
-                <Switch
-                  id="status-switch"
-                  checked={watch("status")}
-                  onCheckedChange={(val) => setValue("status", val, { shouldDirty: true })}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+            </div>
+          </div>
+        </form>
+      </Form>
     </div>
   );
 }
