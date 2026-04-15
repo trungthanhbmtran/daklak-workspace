@@ -5,10 +5,11 @@ import { TranslationsController } from './translations.controller';
 import { TranslationsWorker } from './translations.worker';
 import { TranslationsRepository } from './repositories/translations.repository';
 import { PostsModule } from '../posts/posts.module';
+import { forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [
-    PostsModule,
+    forwardRef(() => PostsModule),
     ClientsModule.register([
       {
         name: 'RABBITMQ_SERVICE',
@@ -27,4 +28,4 @@ import { PostsModule } from '../posts/posts.module';
   providers: [TranslationService, TranslationsRepository],
   exports: [TranslationService],
 })
-export class TranslationsModule {}
+export class TranslationsModule { }

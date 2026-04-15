@@ -7,14 +7,16 @@ import { QueryPostDto } from './dto/query-post.dto';
 import { PostStatus } from '@generated/prisma/client';
 import { CensorService } from './censor.service';
 import { TranslationService } from '../translations/translations.service';
+import { forwardRef, Inject } from '@nestjs/common';
 
 @Injectable()
 export class PostsService {
   constructor(
     private readonly postsRepository: PostsRepository,
     private readonly censorService: CensorService,
+    @Inject(forwardRef(() => TranslationService))
     private readonly translationService: TranslationService,
-  ) {}
+  ) { }
 
   async createPost(data: CreatePostDto) {
     // 1. Kiểm duyệt nội dung tự động (Moderation)
@@ -32,8 +34,8 @@ export class PostsService {
     const processedData = {
       ...data,
       autoModerationStatus: isSafe ? 'SAFE' : 'FLAGGED',
-      autoModerationNote: isSafe 
-        ? 'Nội dung an toàn' 
+      autoModerationNote: isSafe
+        ? 'Nội dung an toàn'
         : `Phát hiện từ ngữ nhạy cảm: ${flaggedWords.join(', ')}`,
       status: isSafe ? (data.status || PostStatus.pending) : PostStatus.rejected,
     };
@@ -43,12 +45,12 @@ export class PostsService {
 
     // 3. Tự động dịch nếu nội dung an toàn (Automatic Translation)
     if (isSafe && post.language === 'vi') {
-        try {
-            await this.translationService.triggerTranslationManual(post.id, 'en');
-            await this.postsRepository.update(post.id, { isTranslated: true } as any);
-        } catch (error) {
-            console.error('❌ [PostsService] Lỗi khi kích hoạt tự động dịch:', error);
-        }
+      try {
+        await this.translationService.triggerTranslationManual(post.id, 'en');
+        await this.postsRepository.update(post.id, { isTranslated: true } as any);
+      } catch (error) {
+        console.error('❌ [PostsService] Lỗi khi kích hoạt tự động dịch:', error);
+      }
     }
 
     return post;
