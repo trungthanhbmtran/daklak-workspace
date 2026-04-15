@@ -39,6 +39,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     },
   });
 
+  console.log("categories", categories);
+
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deleteCategory(id),
