@@ -172,10 +172,32 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                         </Badge>
                       </td>
                       <td className="px-5 py-4">
-                        <Badge variant="outline" className={`font-medium text-[11px] flex w-fit items-center gap-1 ${statusColor}`}>
-                          <StatusIcon className="h-3 w-3" />
-                          {statusLabel}
-                        </Badge>
+                        <div className="flex flex-col gap-1.5 w-fit">
+                          <Badge variant="outline" className={`font-medium text-[10px] flex items-center gap-1 ${statusColor}`}>
+                            <StatusIcon className="h-3 w-3" />
+                            {statusLabel}
+                          </Badge>
+                          
+                          {/* Automated Moderation Badge */}
+                          {post.autoModerationStatus && (
+                            <Badge variant="outline" className={`font-medium text-[10px] flex items-center gap-1 ${
+                              post.autoModerationStatus === 'SAFE' 
+                              ? 'bg-green-50 text-green-600 border-green-200' 
+                              : 'bg-rose-50 text-rose-600 border-rose-200'
+                            }`}>
+                              <AlertCircle className="h-2.5 w-2.5" />
+                              {post.autoModerationStatus === 'SAFE' ? 'An toàn' : 'Bị nghi ngờ'}
+                            </Badge>
+                          )}
+
+                          {/* Translation Badge */}
+                          {post.isTranslated && (
+                            <Badge variant="outline" className="font-medium text-[10px] flex items-center gap-1 bg-indigo-50 text-indigo-600 border-indigo-200">
+                              <Globe className="h-2.5 w-2.5" />
+                              Đã dịch
+                            </Badge>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-4">
                         <p className="font-medium text-foreground text-xs">{post.authorId.substring(0, 8)}</p>

@@ -43,7 +43,8 @@ export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
       slug: "",
       parentId: "root",
       description: "",
-      status: true
+      status: true,
+      isGovStandard: false
     }
   });
 
@@ -206,13 +207,28 @@ export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
 
               <Separator />
 
+              {/* Phân loại chính phủ */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-50/50 border border-emerald-100">
+                <div className="space-y-0.5">
+                  <Label className="flex items-center gap-2 text-sm font-semibold cursor-pointer text-emerald-800" htmlFor="gov-switch">
+                    <Star className={`h-4 w-4 ${watch("isGovStandard") ? "fill-emerald-500 text-emerald-500" : "text-emerald-400"}`} /> Chuẩn CP
+                  </Label>
+                  <p className="text-[10px] text-emerald-600/80 italic font-medium">Theo chuẩn Cổng TTĐT Chính phủ</p>
+                </div>
+                <Switch
+                  id="gov-switch"
+                  checked={watch("isGovStandard")}
+                  onCheckedChange={(val) => setValue("isGovStandard", val, { shouldDirty: true })}
+                />
+              </div>
+
               {/* Trạng thái */}
               <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50/50 border border-slate-100">
                 <div className="space-y-0.5">
                   <Label className="flex items-center gap-2 text-sm font-semibold cursor-pointer" htmlFor="status-switch">
                     <Eye className="h-4 w-4 text-slate-500" /> Hiển thị
                   </Label>
-                  <p className="text-[10px] text-muted-foreground">Kích hoạt trên giao diện web</p>
+                  <p className="text-[10px] text-muted-foreground italic">Kích hoạt trên giao diện web</p>
                 </div>
                 <Switch
                   id="status-switch"

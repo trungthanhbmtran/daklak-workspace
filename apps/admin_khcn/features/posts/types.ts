@@ -19,6 +19,7 @@ export interface Category {
   target?: string;
   metaTitle?: string;
   metaDescription?: string;
+  isGovStandard?: boolean;
   createdAt?: string;
   updatedAt?: string;
   children?: Category[];
@@ -37,6 +38,9 @@ export interface Post {
   authorId: string;
   reviewerId?: string;
   moderationNote?: string;
+  autoModerationStatus?: string;
+  autoModerationNote?: string;
+  isTranslated?: boolean;
   publishedAt?: string;
   createdAt: string;
   updatedAt: string;

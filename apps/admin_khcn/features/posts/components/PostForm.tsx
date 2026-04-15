@@ -173,6 +173,24 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-0 space-y-6">
+                {/* AUTOMATED MODERATION ALERT */}
+                {postData?.autoModerationStatus && (
+                  <div className={`p-4 rounded-xl border flex items-start gap-4 mb-2 ${
+                    postData.autoModerationStatus === 'SAFE' 
+                    ? 'bg-green-50 border-green-100 text-green-800' 
+                    : 'bg-rose-50 border-rose-100 text-rose-800'
+                  }`}>
+                    {postData.autoModerationStatus === 'SAFE' ? (
+                      <CheckCircle2 className="h-5 w-5 text-green-500 mt-0.5" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5 text-rose-500 mt-0.5" />
+                    )}
+                    <div>
+                      <p className="text-sm font-bold uppercase tracking-tight">Kiểm duyệt tự động: {postData.autoModerationStatus === 'SAFE' ? 'Hợp lệ' : 'Cảnh báo'}</p>
+                      <p className="text-xs mt-1 opacity-90">{postData.autoModerationNote}</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* TIÊU ĐỀ */}
                 <FormField control={form.control} name="title" render={({ field }) => (

@@ -9,6 +9,7 @@ export const categorySchema = z.object({
   parentId: z.string().nullable().optional(),
   status: z.boolean().default(true),
   orderIndex: z.number().int().default(0),
+  isGovStandard: z.boolean().default(false),
 });
 
 export const bannerSchema = z.object({
