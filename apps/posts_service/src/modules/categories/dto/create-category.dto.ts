@@ -55,4 +55,7 @@ export class CreateCategoryDto {
   @IsOptional()
   metaDescription?: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isGovStandard?: boolean;
 }

@@ -44,6 +44,9 @@ export type PostMinAggregateOutputType = {
   categoryId: string | null
   reviewerId: string | null
   moderationNote: string | null
+  autoModerationStatus: string | null
+  autoModerationNote: string | null
+  isTranslated: boolean | null
   language: string | null
   status: $Enums.PostStatus | null
   thumbnail: string | null
@@ -65,6 +68,9 @@ export type PostMaxAggregateOutputType = {
   categoryId: string | null
   reviewerId: string | null
   moderationNote: string | null
+  autoModerationStatus: string | null
+  autoModerationNote: string | null
+  isTranslated: boolean | null
   language: string | null
   status: $Enums.PostStatus | null
   thumbnail: string | null
@@ -87,6 +93,9 @@ export type PostCountAggregateOutputType = {
   categoryId: number
   reviewerId: number
   moderationNote: number
+  autoModerationStatus: number
+  autoModerationNote: number
+  isTranslated: number
   language: number
   status: number
   thumbnail: number
@@ -118,6 +127,9 @@ export type PostMinAggregateInputType = {
   categoryId?: true
   reviewerId?: true
   moderationNote?: true
+  autoModerationStatus?: true
+  autoModerationNote?: true
+  isTranslated?: true
   language?: true
   status?: true
   thumbnail?: true
@@ -139,6 +151,9 @@ export type PostMaxAggregateInputType = {
   categoryId?: true
   reviewerId?: true
   moderationNote?: true
+  autoModerationStatus?: true
+  autoModerationNote?: true
+  isTranslated?: true
   language?: true
   status?: true
   thumbnail?: true
@@ -161,6 +176,9 @@ export type PostCountAggregateInputType = {
   categoryId?: true
   reviewerId?: true
   moderationNote?: true
+  autoModerationStatus?: true
+  autoModerationNote?: true
+  isTranslated?: true
   language?: true
   status?: true
   thumbnail?: true
@@ -270,6 +288,9 @@ export type PostGroupByOutputType = {
   categoryId: string | null
   reviewerId: string | null
   moderationNote: string | null
+  autoModerationStatus: string | null
+  autoModerationNote: string | null
+  isTranslated: boolean
   language: string
   status: $Enums.PostStatus
   thumbnail: string | null
@@ -315,6 +336,9 @@ export type PostWhereInput = {
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
   reviewerId?: Prisma.StringNullableFilter<"Post"> | string | null
   moderationNote?: Prisma.StringNullableFilter<"Post"> | string | null
+  autoModerationStatus?: Prisma.StringNullableFilter<"Post"> | string | null
+  autoModerationNote?: Prisma.StringNullableFilter<"Post"> | string | null
+  isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   language?: Prisma.StringFilter<"Post"> | string
   status?: Prisma.EnumPostStatusFilter<"Post"> | $Enums.PostStatus
   thumbnail?: Prisma.StringNullableFilter<"Post"> | string | null
@@ -341,6 +365,9 @@ export type PostOrderByWithRelationInput = {
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
   moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoModerationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoModerationNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  isTranslated?: Prisma.SortOrder
   language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -371,6 +398,9 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
   reviewerId?: Prisma.StringNullableFilter<"Post"> | string | null
   moderationNote?: Prisma.StringNullableFilter<"Post"> | string | null
+  autoModerationStatus?: Prisma.StringNullableFilter<"Post"> | string | null
+  autoModerationNote?: Prisma.StringNullableFilter<"Post"> | string | null
+  isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   language?: Prisma.StringFilter<"Post"> | string
   status?: Prisma.EnumPostStatusFilter<"Post"> | $Enums.PostStatus
   thumbnail?: Prisma.StringNullableFilter<"Post"> | string | null
@@ -397,6 +427,9 @@ export type PostOrderByWithAggregationInput = {
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
   moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoModerationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoModerationNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  isTranslated?: Prisma.SortOrder
   language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -427,6 +460,9 @@ export type PostScalarWhereWithAggregatesInput = {
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   reviewerId?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   moderationNote?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  autoModerationStatus?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  autoModerationNote?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  isTranslated?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   language?: Prisma.StringWithAggregatesFilter<"Post"> | string
   status?: Prisma.EnumPostStatusWithAggregatesFilter<"Post"> | $Enums.PostStatus
   thumbnail?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
@@ -448,6 +484,9 @@ export type PostCreateInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -474,6 +513,9 @@ export type PostUncheckedCreateInput = {
   categoryId?: string | null
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -498,6 +540,9 @@ export type PostUpdateInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -524,6 +569,9 @@ export type PostUncheckedUpdateInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -549,6 +597,9 @@ export type PostCreateManyInput = {
   categoryId?: string | null
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -570,6 +621,9 @@ export type PostUpdateManyMutationInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -592,6 +646,9 @@ export type PostUncheckedUpdateManyInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -630,6 +687,9 @@ export type PostCountOrderByAggregateInput = {
   categoryId?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   moderationNote?: Prisma.SortOrder
+  autoModerationStatus?: Prisma.SortOrder
+  autoModerationNote?: Prisma.SortOrder
+  isTranslated?: Prisma.SortOrder
   language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
@@ -655,6 +715,9 @@ export type PostMaxOrderByAggregateInput = {
   categoryId?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   moderationNote?: Prisma.SortOrder
+  autoModerationStatus?: Prisma.SortOrder
+  autoModerationNote?: Prisma.SortOrder
+  isTranslated?: Prisma.SortOrder
   language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
@@ -676,6 +739,9 @@ export type PostMinOrderByAggregateInput = {
   categoryId?: Prisma.SortOrder
   reviewerId?: Prisma.SortOrder
   moderationNote?: Prisma.SortOrder
+  autoModerationStatus?: Prisma.SortOrder
+  autoModerationNote?: Prisma.SortOrder
+  isTranslated?: Prisma.SortOrder
   language?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
@@ -818,6 +884,9 @@ export type PostCreateWithoutCategoryInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -842,6 +911,9 @@ export type PostUncheckedCreateWithoutCategoryInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -896,6 +968,9 @@ export type PostScalarWhereInput = {
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
   reviewerId?: Prisma.StringNullableFilter<"Post"> | string | null
   moderationNote?: Prisma.StringNullableFilter<"Post"> | string | null
+  autoModerationStatus?: Prisma.StringNullableFilter<"Post"> | string | null
+  autoModerationNote?: Prisma.StringNullableFilter<"Post"> | string | null
+  isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   language?: Prisma.StringFilter<"Post"> | string
   status?: Prisma.EnumPostStatusFilter<"Post"> | $Enums.PostStatus
   thumbnail?: Prisma.StringNullableFilter<"Post"> | string | null
@@ -917,6 +992,9 @@ export type PostCreateWithoutTagsInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -942,6 +1020,9 @@ export type PostUncheckedCreateWithoutTagsInput = {
   categoryId?: string | null
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -986,6 +1067,9 @@ export type PostCreateWithoutTranslationsInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -1011,6 +1095,9 @@ export type PostUncheckedCreateWithoutTranslationsInput = {
   categoryId?: string | null
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -1050,6 +1137,9 @@ export type PostUpdateWithoutTranslationsInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1075,6 +1165,9 @@ export type PostUncheckedUpdateWithoutTranslationsInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1098,6 +1191,9 @@ export type PostCreateWithoutVariablesInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -1123,6 +1219,9 @@ export type PostUncheckedCreateWithoutVariablesInput = {
   categoryId?: string | null
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -1162,6 +1261,9 @@ export type PostUpdateWithoutVariablesInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1187,6 +1289,9 @@ export type PostUncheckedUpdateWithoutVariablesInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1210,6 +1315,9 @@ export type PostCreateManyCategoryInput = {
   authorId: string
   reviewerId?: string | null
   moderationNote?: string | null
+  autoModerationStatus?: string | null
+  autoModerationNote?: string | null
+  isTranslated?: boolean
   language?: string
   status?: $Enums.PostStatus
   thumbnail?: string | null
@@ -1231,6 +1339,9 @@ export type PostUpdateWithoutCategoryInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1255,6 +1366,9 @@ export type PostUncheckedUpdateWithoutCategoryInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1279,6 +1393,9 @@ export type PostUncheckedUpdateManyWithoutCategoryInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1300,6 +1417,9 @@ export type PostUpdateWithoutTagsInput = {
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1325,6 +1445,9 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1349,6 +1472,9 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   language?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.EnumPostStatusFieldUpdateOperationsInput | $Enums.PostStatus
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1420,6 +1546,9 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   categoryId?: boolean
   reviewerId?: boolean
   moderationNote?: boolean
+  autoModerationStatus?: boolean
+  autoModerationNote?: boolean
+  isTranslated?: boolean
   language?: boolean
   status?: boolean
   thumbnail?: boolean
@@ -1449,6 +1578,9 @@ export type PostSelectScalar = {
   categoryId?: boolean
   reviewerId?: boolean
   moderationNote?: boolean
+  autoModerationStatus?: boolean
+  autoModerationNote?: boolean
+  isTranslated?: boolean
   language?: boolean
   status?: boolean
   thumbnail?: boolean
@@ -1460,7 +1592,7 @@ export type PostSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "content" | "contentJson" | "description" | "slug" | "authorId" | "categoryId" | "reviewerId" | "moderationNote" | "language" | "status" | "thumbnail" | "isFeatured" | "isNotification" | "viewCount" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "content" | "contentJson" | "description" | "slug" | "authorId" | "categoryId" | "reviewerId" | "moderationNote" | "autoModerationStatus" | "autoModerationNote" | "isTranslated" | "language" | "status" | "thumbnail" | "isFeatured" | "isNotification" | "viewCount" | "publishedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
@@ -1488,6 +1620,9 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     categoryId: string | null
     reviewerId: string | null
     moderationNote: string | null
+    autoModerationStatus: string | null
+    autoModerationNote: string | null
+    isTranslated: boolean
     language: string
     status: $Enums.PostStatus
     thumbnail: string | null
@@ -1880,6 +2015,9 @@ export interface PostFieldRefs {
   readonly categoryId: Prisma.FieldRef<"Post", 'String'>
   readonly reviewerId: Prisma.FieldRef<"Post", 'String'>
   readonly moderationNote: Prisma.FieldRef<"Post", 'String'>
+  readonly autoModerationStatus: Prisma.FieldRef<"Post", 'String'>
+  readonly autoModerationNote: Prisma.FieldRef<"Post", 'String'>
+  readonly isTranslated: Prisma.FieldRef<"Post", 'Boolean'>
   readonly language: Prisma.FieldRef<"Post", 'String'>
   readonly status: Prisma.FieldRef<"Post", 'PostStatus'>
   readonly thumbnail: Prisma.FieldRef<"Post", 'String'>

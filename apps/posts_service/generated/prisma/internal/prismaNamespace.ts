@@ -884,6 +884,7 @@ export const CategoryScalarFieldEnum = {
   status: 'status',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
+  isGovStandard: 'isGovStandard',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -902,6 +903,9 @@ export const PostScalarFieldEnum = {
   categoryId: 'categoryId',
   reviewerId: 'reviewerId',
   moderationNote: 'moderationNote',
+  autoModerationStatus: 'autoModerationStatus',
+  autoModerationNote: 'autoModerationNote',
+  isTranslated: 'isTranslated',
   language: 'language',
   status: 'status',
   thumbnail: 'thumbnail',
@@ -938,6 +942,8 @@ export const PostTranslateScalarFieldEnum = {
   contentJson: 'contentJson',
   content: 'content',
   status: 'status',
+  moderationStatus: 'moderationStatus',
+  moderationNote: 'moderationNote',
   metaData: 'metaData',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1046,6 +1052,8 @@ export const PostOrderByRelevanceFieldEnum = {
   categoryId: 'categoryId',
   reviewerId: 'reviewerId',
   moderationNote: 'moderationNote',
+  autoModerationStatus: 'autoModerationStatus',
+  autoModerationNote: 'autoModerationNote',
   language: 'language',
   thumbnail: 'thumbnail'
 } as const
@@ -1069,7 +1077,9 @@ export const PostTranslateOrderByRelevanceFieldEnum = {
   language: 'language',
   title: 'title',
   description: 'description',
-  content: 'content'
+  content: 'content',
+  moderationStatus: 'moderationStatus',
+  moderationNote: 'moderationNote'
 } as const
 
 export type PostTranslateOrderByRelevanceFieldEnum = (typeof PostTranslateOrderByRelevanceFieldEnum)[keyof typeof PostTranslateOrderByRelevanceFieldEnum]

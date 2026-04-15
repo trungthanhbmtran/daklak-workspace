@@ -21,6 +21,7 @@ model Category {
   status          Boolean   @default(true)
   metaTitle       String?   @map("meta_title") @db.VarChar(255)
   metaDescription String?   @map("meta_description") @db.Text
+  isGovStandard   Boolean   @default(false) @map("is_gov_standard")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 

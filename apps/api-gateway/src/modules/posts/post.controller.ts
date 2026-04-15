@@ -67,10 +67,10 @@ export class PostController implements OnModuleInit {
   //   return firstValueFrom(this.postService.SetCategoryForPost({ postId, categoryId: body.categoryId }));
   // }
 
-  // @Put(':id/review')
-  // async reviewPost(@Param('id') id: string, @Body() body: any, @Req() req: any) {
-  //   const reviewerId = req.user?.id || 'system-admin';
-  //   const payload = { id, ...body, reviewerId };
-  //   return firstValueFrom(this.postService.ReviewPost(payload));
-  // }
+  @Put(':id/review')
+  async reviewPost(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+    const reviewerId = req.user?.id || 'system-admin';
+    const payload = { id, ...body, reviewerId };
+    return firstValueFrom(this.postService.ReviewPost(payload));
+  }
 }

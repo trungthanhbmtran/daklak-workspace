@@ -1,10 +1,15 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
+import { TranslationsRepository } from './repositories/translations.repository';
+import { CensorService } from '../posts/censor.service';
 import { PrismaService } from '@/database/prisma.service';
 
 @Controller()
 export class TranslationsWorker {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private censorService: CensorService,
+  ) { }
 
   @EventPattern('translation_results')
   async handleTranslationResults(@Payload() data: any) {
@@ -21,35 +26,47 @@ export class TranslationsWorker {
         return;
       }
 
+      // 1. Kiểm duyệt nội dung dịch (Moderation for translation)
+      const titleCheck = this.censorService.checkContent(payload.title);
+      const contentCheck = this.censorService.checkContent(payload.description || '');
+
+      const isSafe = titleCheck.isSafe && contentCheck.isSafe;
+
       const dataToSave = {
-        postId: payload.postId,
-        language: payload.lang,
+        postId: payload.postId as string,
+        language: payload.lang as string,
         description: payload.description,
         title: payload.title,
         contentJson: payload.content,
-        status: 'pending_review',
+        status: isSafe ? 'pending_review' : 'rejected',
+        moderationStatus: isSafe ? 'SAFE' : 'FLAGGED',
+        moderationNote: isSafe ? 'Dịch thuật an toàn' : 'Phát hiện từ ngữ nhạy cảm trong bản dịch',
       };
 
       await this.prisma.postTranslate.upsert({
         where: {
           postId_language: {
-            postId: payload.postId,
-            language: payload.lang,
+            postId: dataToSave.postId,
+            language: dataToSave.language,
           },
         },
         update: {
-          description: payload.description,
-          title: payload.title,
-          contentJson: payload.content,
-          status: 'pending_review',
+          description: dataToSave.description,
+          title: dataToSave.title,
+          contentJson: dataToSave.contentJson,
+          status: dataToSave.status as any,
+          moderationStatus: dataToSave.moderationStatus,
+          moderationNote: dataToSave.moderationNote,
         },
         create: {
-          post: { connect: { id: payload.postId } },
-          language: payload.lang,
-          description: payload.description,
-          title: payload.title,
-          contentJson: payload.content,
-          status: 'pending_review',
+          post: { connect: { id: dataToSave.postId } },
+          language: dataToSave.language,
+          description: dataToSave.description,
+          title: dataToSave.title,
+          contentJson: dataToSave.contentJson,
+          status: dataToSave.status as any,
+          moderationStatus: dataToSave.moderationStatus,
+          moderationNote: dataToSave.moderationNote,
         },
       });
 

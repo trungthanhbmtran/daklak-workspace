@@ -57,6 +57,7 @@ export type CategoryMinAggregateOutputType = {
   status: boolean | null
   metaTitle: string | null
   metaDescription: string | null
+  isGovStandard: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -78,6 +79,7 @@ export type CategoryMaxAggregateOutputType = {
   status: boolean | null
   metaTitle: string | null
   metaDescription: string | null
+  isGovStandard: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -99,6 +101,7 @@ export type CategoryCountAggregateOutputType = {
   status: number
   metaTitle: number
   metaDescription: number
+  isGovStandard: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -136,6 +139,7 @@ export type CategoryMinAggregateInputType = {
   status?: true
   metaTitle?: true
   metaDescription?: true
+  isGovStandard?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -157,6 +161,7 @@ export type CategoryMaxAggregateInputType = {
   status?: true
   metaTitle?: true
   metaDescription?: true
+  isGovStandard?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -178,6 +183,7 @@ export type CategoryCountAggregateInputType = {
   status?: true
   metaTitle?: true
   metaDescription?: true
+  isGovStandard?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -286,6 +292,7 @@ export type CategoryGroupByOutputType = {
   status: boolean
   metaTitle: string | null
   metaDescription: string | null
+  isGovStandard: boolean
   createdAt: Date
   updatedAt: Date
   _count: CategoryCountAggregateOutputType | null
@@ -330,6 +337,7 @@ export type CategoryWhereInput = {
   status?: Prisma.BoolFilter<"Category"> | boolean
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableFilter<"Category"> | string | null
+  isGovStandard?: Prisma.BoolFilter<"Category"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   parent?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
@@ -354,6 +362,7 @@ export type CategoryOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   metaDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  isGovStandard?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   parent?: Prisma.CategoryOrderByWithRelationInput
@@ -382,6 +391,7 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.BoolFilter<"Category"> | boolean
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableFilter<"Category"> | string | null
+  isGovStandard?: Prisma.BoolFilter<"Category"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   parent?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
@@ -406,6 +416,7 @@ export type CategoryOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   metaDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  isGovStandard?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.CategoryCountOrderByAggregateInput
@@ -435,6 +446,7 @@ export type CategoryScalarWhereWithAggregatesInput = {
   status?: Prisma.BoolWithAggregatesFilter<"Category"> | boolean
   metaTitle?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
+  isGovStandard?: Prisma.BoolWithAggregatesFilter<"Category"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Category"> | Date | string
 }
@@ -455,6 +467,7 @@ export type CategoryCreateInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   parent?: Prisma.CategoryCreateNestedOneWithoutChildrenInput
@@ -479,6 +492,7 @@ export type CategoryUncheckedCreateInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.CategoryUncheckedCreateNestedManyWithoutParentInput
@@ -501,6 +515,7 @@ export type CategoryUpdateInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parent?: Prisma.CategoryUpdateOneWithoutChildrenNestedInput
@@ -525,6 +540,7 @@ export type CategoryUncheckedUpdateInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.CategoryUncheckedUpdateManyWithoutParentNestedInput
@@ -548,6 +564,7 @@ export type CategoryCreateManyInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -568,6 +585,7 @@ export type CategoryUpdateManyMutationInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -589,6 +607,7 @@ export type CategoryUncheckedUpdateManyInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -631,6 +650,7 @@ export type CategoryCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
   metaDescription?: Prisma.SortOrder
+  isGovStandard?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -659,6 +679,7 @@ export type CategoryMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
   metaDescription?: Prisma.SortOrder
+  isGovStandard?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -680,6 +701,7 @@ export type CategoryMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
   metaDescription?: Prisma.SortOrder
+  isGovStandard?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -785,6 +807,7 @@ export type CategoryCreateWithoutChildrenInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   parent?: Prisma.CategoryCreateNestedOneWithoutChildrenInput
@@ -808,6 +831,7 @@ export type CategoryUncheckedCreateWithoutChildrenInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   posts?: Prisma.PostUncheckedCreateNestedManyWithoutCategoryInput
@@ -834,6 +858,7 @@ export type CategoryCreateWithoutParentInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.CategoryCreateNestedManyWithoutParentInput
@@ -856,6 +881,7 @@ export type CategoryUncheckedCreateWithoutParentInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.CategoryUncheckedCreateNestedManyWithoutParentInput
@@ -899,6 +925,7 @@ export type CategoryUpdateWithoutChildrenInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parent?: Prisma.CategoryUpdateOneWithoutChildrenNestedInput
@@ -922,6 +949,7 @@ export type CategoryUncheckedUpdateWithoutChildrenInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   posts?: Prisma.PostUncheckedUpdateManyWithoutCategoryNestedInput
@@ -963,6 +991,7 @@ export type CategoryScalarWhereInput = {
   status?: Prisma.BoolFilter<"Category"> | boolean
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableFilter<"Category"> | string | null
+  isGovStandard?: Prisma.BoolFilter<"Category"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Category"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Category"> | Date | string
 }
@@ -983,6 +1012,7 @@ export type CategoryCreateWithoutPostsInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   parent?: Prisma.CategoryCreateNestedOneWithoutChildrenInput
@@ -1006,6 +1036,7 @@ export type CategoryUncheckedCreateWithoutPostsInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.CategoryUncheckedCreateNestedManyWithoutParentInput
@@ -1043,6 +1074,7 @@ export type CategoryUpdateWithoutPostsInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parent?: Prisma.CategoryUpdateOneWithoutChildrenNestedInput
@@ -1066,6 +1098,7 @@ export type CategoryUncheckedUpdateWithoutPostsInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.CategoryUncheckedUpdateManyWithoutParentNestedInput
@@ -1087,6 +1120,7 @@ export type CategoryCreateManyParentInput = {
   status?: boolean
   metaTitle?: string | null
   metaDescription?: string | null
+  isGovStandard?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1107,6 +1141,7 @@ export type CategoryUpdateWithoutParentInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.CategoryUpdateManyWithoutParentNestedInput
@@ -1129,6 +1164,7 @@ export type CategoryUncheckedUpdateWithoutParentInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.CategoryUncheckedUpdateManyWithoutParentNestedInput
@@ -1151,6 +1187,7 @@ export type CategoryUncheckedUpdateManyWithoutParentInput = {
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1212,6 +1249,7 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   status?: boolean
   metaTitle?: boolean
   metaDescription?: boolean
+  isGovStandard?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   parent?: boolean | Prisma.Category$parentArgs<ExtArgs>
@@ -1239,11 +1277,12 @@ export type CategorySelectScalar = {
   status?: boolean
   metaTitle?: boolean
   metaDescription?: boolean
+  isGovStandard?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "thumbnail" | "linkType" | "customUrl" | "target" | "parentId" | "lft" | "rgt" | "depth" | "orderIndex" | "status" | "metaTitle" | "metaDescription" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "description" | "thumbnail" | "linkType" | "customUrl" | "target" | "parentId" | "lft" | "rgt" | "depth" | "orderIndex" | "status" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.Category$parentArgs<ExtArgs>
   children?: boolean | Prisma.Category$childrenArgs<ExtArgs>
@@ -1275,6 +1314,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     status: boolean
     metaTitle: string | null
     metaDescription: string | null
+    isGovStandard: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["category"]>
@@ -1665,6 +1705,7 @@ export interface CategoryFieldRefs {
   readonly status: Prisma.FieldRef<"Category", 'Boolean'>
   readonly metaTitle: Prisma.FieldRef<"Category", 'String'>
   readonly metaDescription: Prisma.FieldRef<"Category", 'String'>
+  readonly isGovStandard: Prisma.FieldRef<"Category", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Category", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Category", 'DateTime'>
 }

@@ -5,13 +5,53 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { QueryPostDto } from './dto/query-post.dto';
 import { PostStatus } from '@generated/prisma/client';
+import { CensorService } from './censor.service';
+import { TranslationService } from '../translations/translations.service';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly postsRepository: PostsRepository) {}
+  constructor(
+    private readonly postsRepository: PostsRepository,
+    private readonly censorService: CensorService,
+    private readonly translationService: TranslationService,
+  ) {}
 
   async createPost(data: CreatePostDto) {
-    return this.postsRepository.create(data);
+    // 1. Kiểm duyệt nội dung tự động (Moderation)
+    const titleCheck = this.censorService.checkContent(data.title);
+    const contentCheck = this.censorService.checkContent(data.content || '');
+    const descriptionCheck = this.censorService.checkContent(data.description || '');
+
+    const isSafe = titleCheck.isSafe && contentCheck.isSafe && descriptionCheck.isSafe;
+    const flaggedWords = Array.from(new Set([
+      ...titleCheck.flaggedWords,
+      ...contentCheck.flaggedWords,
+      ...descriptionCheck.flaggedWords,
+    ]));
+
+    const processedData = {
+      ...data,
+      autoModerationStatus: isSafe ? 'SAFE' : 'FLAGGED',
+      autoModerationNote: isSafe 
+        ? 'Nội dung an toàn' 
+        : `Phát hiện từ ngữ nhạy cảm: ${flaggedWords.join(', ')}`,
+      status: isSafe ? (data.status || PostStatus.pending) : PostStatus.rejected,
+    };
+
+    // 2. Lưu post vào DB
+    const post = await this.postsRepository.create(processedData as any);
+
+    // 3. Tự động dịch nếu nội dung an toàn (Automatic Translation)
+    if (isSafe && post.language === 'vi') {
+        try {
+            await this.translationService.triggerTranslationManual(post.id, 'en');
+            await this.postsRepository.update(post.id, { isTranslated: true } as any);
+        } catch (error) {
+            console.error('❌ [PostsService] Lỗi khi kích hoạt tự động dịch:', error);
+        }
+    }
+
+    return post;
   }
 
   async findById(id: string) {

@@ -32,6 +32,8 @@ export type PostTranslateMinAggregateOutputType = {
   description: string | null
   content: string | null
   status: $Enums.TranslationStatus | null
+  moderationStatus: string | null
+  moderationNote: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,8 @@ export type PostTranslateMaxAggregateOutputType = {
   description: string | null
   content: string | null
   status: $Enums.TranslationStatus | null
+  moderationStatus: string | null
+  moderationNote: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -57,6 +61,8 @@ export type PostTranslateCountAggregateOutputType = {
   contentJson: number
   content: number
   status: number
+  moderationStatus: number
+  moderationNote: number
   metaData: number
   createdAt: number
   updatedAt: number
@@ -72,6 +78,8 @@ export type PostTranslateMinAggregateInputType = {
   description?: true
   content?: true
   status?: true
+  moderationStatus?: true
+  moderationNote?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -84,6 +92,8 @@ export type PostTranslateMaxAggregateInputType = {
   description?: true
   content?: true
   status?: true
+  moderationStatus?: true
+  moderationNote?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -97,6 +107,8 @@ export type PostTranslateCountAggregateInputType = {
   contentJson?: true
   content?: true
   status?: true
+  moderationStatus?: true
+  moderationNote?: true
   metaData?: true
   createdAt?: true
   updatedAt?: true
@@ -184,6 +196,8 @@ export type PostTranslateGroupByOutputType = {
   contentJson: runtime.JsonValue | null
   content: string | null
   status: $Enums.TranslationStatus
+  moderationStatus: string | null
+  moderationNote: string | null
   metaData: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
@@ -219,6 +233,8 @@ export type PostTranslateWhereInput = {
   contentJson?: Prisma.JsonNullableFilter<"PostTranslate">
   content?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
   status?: Prisma.EnumTranslationStatusFilter<"PostTranslate"> | $Enums.TranslationStatus
+  moderationStatus?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
+  moderationNote?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
   metaData?: Prisma.JsonNullableFilter<"PostTranslate">
   createdAt?: Prisma.DateTimeFilter<"PostTranslate"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PostTranslate"> | Date | string
@@ -234,6 +250,8 @@ export type PostTranslateOrderByWithRelationInput = {
   contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   metaData?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -254,6 +272,8 @@ export type PostTranslateWhereUniqueInput = Prisma.AtLeast<{
   contentJson?: Prisma.JsonNullableFilter<"PostTranslate">
   content?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
   status?: Prisma.EnumTranslationStatusFilter<"PostTranslate"> | $Enums.TranslationStatus
+  moderationStatus?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
+  moderationNote?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
   metaData?: Prisma.JsonNullableFilter<"PostTranslate">
   createdAt?: Prisma.DateTimeFilter<"PostTranslate"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PostTranslate"> | Date | string
@@ -269,6 +289,8 @@ export type PostTranslateOrderByWithAggregationInput = {
   contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   metaData?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -289,6 +311,8 @@ export type PostTranslateScalarWhereWithAggregatesInput = {
   contentJson?: Prisma.JsonNullableWithAggregatesFilter<"PostTranslate">
   content?: Prisma.StringNullableWithAggregatesFilter<"PostTranslate"> | string | null
   status?: Prisma.EnumTranslationStatusWithAggregatesFilter<"PostTranslate"> | $Enums.TranslationStatus
+  moderationStatus?: Prisma.StringNullableWithAggregatesFilter<"PostTranslate"> | string | null
+  moderationNote?: Prisma.StringNullableWithAggregatesFilter<"PostTranslate"> | string | null
   metaData?: Prisma.JsonNullableWithAggregatesFilter<"PostTranslate">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PostTranslate"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PostTranslate"> | Date | string
@@ -302,6 +326,8 @@ export type PostTranslateCreateInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: string | null
   status?: $Enums.TranslationStatus
+  moderationStatus?: string | null
+  moderationNote?: string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -317,6 +343,8 @@ export type PostTranslateUncheckedCreateInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: string | null
   status?: $Enums.TranslationStatus
+  moderationStatus?: string | null
+  moderationNote?: string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -330,6 +358,8 @@ export type PostTranslateUpdateInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -345,6 +375,8 @@ export type PostTranslateUncheckedUpdateInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -359,6 +391,8 @@ export type PostTranslateCreateManyInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: string | null
   status?: $Enums.TranslationStatus
+  moderationStatus?: string | null
+  moderationNote?: string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -372,6 +406,8 @@ export type PostTranslateUpdateManyMutationInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -386,6 +422,8 @@ export type PostTranslateUncheckedUpdateManyInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -421,6 +459,8 @@ export type PostTranslateCountOrderByAggregateInput = {
   contentJson?: Prisma.SortOrder
   content?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrder
   metaData?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -434,6 +474,8 @@ export type PostTranslateMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -446,6 +488,8 @@ export type PostTranslateMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  moderationStatus?: Prisma.SortOrder
+  moderationNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -504,6 +548,8 @@ export type PostTranslateCreateWithoutPostInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: string | null
   status?: $Enums.TranslationStatus
+  moderationStatus?: string | null
+  moderationNote?: string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -517,6 +563,8 @@ export type PostTranslateUncheckedCreateWithoutPostInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: string | null
   status?: $Enums.TranslationStatus
+  moderationStatus?: string | null
+  moderationNote?: string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -560,6 +608,8 @@ export type PostTranslateScalarWhereInput = {
   contentJson?: Prisma.JsonNullableFilter<"PostTranslate">
   content?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
   status?: Prisma.EnumTranslationStatusFilter<"PostTranslate"> | $Enums.TranslationStatus
+  moderationStatus?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
+  moderationNote?: Prisma.StringNullableFilter<"PostTranslate"> | string | null
   metaData?: Prisma.JsonNullableFilter<"PostTranslate">
   createdAt?: Prisma.DateTimeFilter<"PostTranslate"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PostTranslate"> | Date | string
@@ -573,6 +623,8 @@ export type PostTranslateCreateManyPostInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: string | null
   status?: $Enums.TranslationStatus
+  moderationStatus?: string | null
+  moderationNote?: string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -586,6 +638,8 @@ export type PostTranslateUpdateWithoutPostInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -599,6 +653,8 @@ export type PostTranslateUncheckedUpdateWithoutPostInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -612,6 +668,8 @@ export type PostTranslateUncheckedUpdateManyWithoutPostInput = {
   contentJson?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumTranslationStatusFieldUpdateOperationsInput | $Enums.TranslationStatus
+  moderationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaData?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -628,6 +686,8 @@ export type PostTranslateSelect<ExtArgs extends runtime.Types.Extensions.Interna
   contentJson?: boolean
   content?: boolean
   status?: boolean
+  moderationStatus?: boolean
+  moderationNote?: boolean
   metaData?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -645,12 +705,14 @@ export type PostTranslateSelectScalar = {
   contentJson?: boolean
   content?: boolean
   status?: boolean
+  moderationStatus?: boolean
+  moderationNote?: boolean
   metaData?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PostTranslateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "language" | "title" | "description" | "contentJson" | "content" | "status" | "metaData" | "createdAt" | "updatedAt", ExtArgs["result"]["postTranslate"]>
+export type PostTranslateOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "language" | "title" | "description" | "contentJson" | "content" | "status" | "moderationStatus" | "moderationNote" | "metaData" | "createdAt" | "updatedAt", ExtArgs["result"]["postTranslate"]>
 export type PostTranslateInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }
@@ -669,6 +731,8 @@ export type $PostTranslatePayload<ExtArgs extends runtime.Types.Extensions.Inter
     contentJson: runtime.JsonValue | null
     content: string | null
     status: $Enums.TranslationStatus
+    moderationStatus: string | null
+    moderationNote: string | null
     metaData: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
@@ -1050,6 +1114,8 @@ export interface PostTranslateFieldRefs {
   readonly contentJson: Prisma.FieldRef<"PostTranslate", 'Json'>
   readonly content: Prisma.FieldRef<"PostTranslate", 'String'>
   readonly status: Prisma.FieldRef<"PostTranslate", 'TranslationStatus'>
+  readonly moderationStatus: Prisma.FieldRef<"PostTranslate", 'String'>
+  readonly moderationNote: Prisma.FieldRef<"PostTranslate", 'String'>
   readonly metaData: Prisma.FieldRef<"PostTranslate", 'Json'>
   readonly createdAt: Prisma.FieldRef<"PostTranslate", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PostTranslate", 'DateTime'>

@@ -36,6 +36,7 @@ message Category {
   string description = 18;
   string metaTitle = 19;
   string metaDescription = 20;
+  bool isGovStandard = 21;
 }
 
 // Response chuẩn cho create / update

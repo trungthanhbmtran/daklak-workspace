@@ -44,6 +44,9 @@ message Post {
   category.Category category = 18;
   string contentJson = 19;
   string moderationNote  = 20;
+  string autoModerationStatus = 21;
+  string autoModerationNote = 22;
+  bool isTranslated = 23;
 }
 
 message ReviewPostRequest {

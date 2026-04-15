@@ -14,6 +14,8 @@ model PostTranslate {
   contentJson   Json?             @map("content_json")
   content       String?           @db.LongText
   status        TranslationStatus @default(draft)
+  moderationStatus String?       @map("moderation_status") @db.VarChar(50)
+  moderationNote   String?       @map("moderation_note") @db.Text
   metaData      Json?             @map("meta_data")
   createdAt     DateTime          @default(now()) @map("created_at")
   updatedAt     DateTime          @updatedAt @map("updated_at")
