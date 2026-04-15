@@ -5,13 +5,13 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 
 @ApiTags('Posts - Categories')
-@Controller('admin/posts/categories')
+@Controller('posts/categories')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class PostsCategoryController implements OnModuleInit {
   private categoryService: any;
 
-  constructor(@Inject(MICROSERVICES.POSTS_CATEGORY.SYMBOL) private readonly client: any) {}
+  constructor(@Inject(MICROSERVICES.POSTS_CATEGORY.SYMBOL) private readonly client: any) { }
 
   onModuleInit() {
     this.categoryService = this.client.getService(MICROSERVICES.POSTS_CATEGORY.SERVICE);
