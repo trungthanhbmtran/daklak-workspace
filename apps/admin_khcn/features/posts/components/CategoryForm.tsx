@@ -3,7 +3,7 @@
 
 import { useForm } from "react-hook-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Save, Loader2, Info, LayoutGrid, Hash, AlignLeft, Eye } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Info, LayoutGrid, Hash, AlignLeft, Eye, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,7 +52,7 @@ export function CategoryForm({ initialData, onBack }: CategoryFormProps) {
     queryKey: ["posts-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return (res?.data?.data || []) as Category[];
+      return (res?.data || []) as Category[];
     }
   });
 

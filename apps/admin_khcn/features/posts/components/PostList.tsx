@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle } from "lucide-react";
+import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle, Globe } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -40,7 +40,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
       // Bóc tách data từ Gateway Transformer
       const payload = res?.data;
       if (!payload) return { items: [], meta: {} };
-      
+
       return {
         items: payload.items || payload.data || (Array.isArray(payload) ? payload : []),
         meta: payload.meta || {}
@@ -66,14 +66,14 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
         <div className="flex flex-1 w-full flex-col sm:flex-row gap-3">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm theo tiêu đề bài viết..." 
+            <Input
+              placeholder="Tìm theo tiêu đề bài viết..."
               className="pl-9 h-10 bg-muted/20 focus-visible:ring-primary/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-full sm:w-[160px] h-10 bg-background">
               <SelectValue placeholder="Trạng thái" />
@@ -120,8 +120,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                 <tr>
                   <td colSpan={5} className="px-5 py-20 text-center">
                     <div className="flex flex-col items-center gap-2">
-                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                       <p className="text-muted-foreground text-xs">Đang tải danh sách bài viết...</p>
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="text-muted-foreground text-xs">Đang tải danh sách bài viết...</p>
                     </div>
                   </td>
                 </tr>
@@ -129,9 +129,9 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                 <tr>
                   <td colSpan={5} className="px-5 py-20 text-center">
                     <div className="flex flex-col items-center gap-2 text-destructive">
-                       <AlertCircle className="h-8 w-8" />
-                       <p className="font-medium">Không thể tải dữ liệu</p>
-                       <p className="text-xs">{(error as any)?.message || "Vui lòng thử lại sau"}</p>
+                      <AlertCircle className="h-8 w-8" />
+                      <p className="font-medium">Không thể tải dữ liệu</p>
+                      <p className="text-xs">{(error as any)?.message || "Vui lòng thử lại sau"}</p>
                     </div>
                   </td>
                 </tr>
@@ -146,7 +146,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                   const StatusIcon = STATUS_CONFIG[post.status]?.icon || FileText;
                   const statusLabel = STATUS_CONFIG[post.status]?.label || post.status;
                   const statusColor = STATUS_CONFIG[post.status]?.color || "bg-slate-100 text-slate-700";
-                  
+
                   return (
                     <tr key={post.id} className="hover:bg-muted/30 transition-colors group">
                       <td className="px-5 py-4">
@@ -177,14 +177,13 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             <StatusIcon className="h-3 w-3" />
                             {statusLabel}
                           </Badge>
-                          
+
                           {/* Automated Moderation Badge */}
                           {post.autoModerationStatus && (
-                            <Badge variant="outline" className={`font-medium text-[10px] flex items-center gap-1 ${
-                              post.autoModerationStatus === 'SAFE' 
-                              ? 'bg-green-50 text-green-600 border-green-200' 
+                            <Badge variant="outline" className={`font-medium text-[10px] flex items-center gap-1 ${post.autoModerationStatus === 'SAFE'
+                              ? 'bg-green-50 text-green-600 border-green-200'
                               : 'bg-rose-50 text-rose-600 border-rose-200'
-                            }`}>
+                              }`}>
                               <AlertCircle className="h-2.5 w-2.5" />
                               {post.autoModerationStatus === 'SAFE' ? 'An toàn' : 'Bị nghi ngờ'}
                             </Badge>
@@ -210,10 +209,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onNavigateToEdit(post.id)} title="Sửa bài viết">
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             title="Xóa"
                             onClick={() => {
                               if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
