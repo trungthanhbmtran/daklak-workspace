@@ -11,7 +11,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 export class PostController implements OnModuleInit {
   private postService: any;
 
-  constructor(@Inject(MICROSERVICES.POST.SYMBOL) private readonly client: any) {}
+  constructor(@Inject(MICROSERVICES.POST.SYMBOL) private readonly client: any) { }
 
   onModuleInit() {
     this.postService = this.client.getService(MICROSERVICES.POST.SERVICE);
@@ -52,25 +52,25 @@ export class PostController implements OnModuleInit {
     return firstValueFrom(this.postService.DeletePost({ id }));
   }
 
-  @Post(':postId/tags')
-  async addTagsToPost(@Param('postId') postId: string, @Body() body: { tagIds: string[] }) {
-    return firstValueFrom(this.postService.AddTagsToPost({ postId, tagIds: body.tagIds || [] }));
-  }
+  // @Post(':postId/tags')
+  // async addTagsToPost(@Param('postId') postId: string, @Body() body: { tagIds: string[] }) {
+  //   return firstValueFrom(this.postService.AddTagsToPost({ postId, tagIds: body.tagIds || [] }));
+  // }
 
-  @Delete(':postId/tags/:tagId')
-  async removeTagFromPost(@Param('postId') postId: string, @Param('tagId') tagId: string) {
-    return firstValueFrom(this.postService.RemoveTagFromPost({ postId, tagId }));
-  }
+  // @Delete(':postId/tags/:tagId')
+  // async removeTagFromPost(@Param('postId') postId: string, @Param('tagId') tagId: string) {
+  //   return firstValueFrom(this.postService.RemoveTagFromPost({ postId, tagId }));
+  // }
 
-  @Put(':postId/category')
-  async setCategoryForPost(@Param('postId') postId: string, @Body() body: { categoryId: string }) {
-    return firstValueFrom(this.postService.SetCategoryForPost({ postId, categoryId: body.categoryId }));
-  }
+  // @Put(':postId/category')
+  // async setCategoryForPost(@Param('postId') postId: string, @Body() body: { categoryId: string }) {
+  //   return firstValueFrom(this.postService.SetCategoryForPost({ postId, categoryId: body.categoryId }));
+  // }
 
-  @Put(':id/review')
-  async reviewPost(@Param('id') id: string, @Body() body: any, @Req() req: any) {
-    const reviewerId = req.user?.id || 'system-admin';
-    const payload = { id, ...body, reviewerId };
-    return firstValueFrom(this.postService.ReviewPost(payload));
-  }
+  // @Put(':id/review')
+  // async reviewPost(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+  //   const reviewerId = req.user?.id || 'system-admin';
+  //   const payload = { id, ...body, reviewerId };
+  //   return firstValueFrom(this.postService.ReviewPost(payload));
+  // }
 }

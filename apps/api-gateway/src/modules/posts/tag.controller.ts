@@ -5,7 +5,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 
 @ApiTags('Posts - Tags')
-@Controller('admin/posts/tags')
+@Controller('posts/tags')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class TagController implements OnModuleInit {

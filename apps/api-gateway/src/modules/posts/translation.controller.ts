@@ -5,7 +5,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 
 @ApiTags('Posts - Translations')
-@Controller('admin/posts/translations')
+@Controller('posts/translations')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class TranslationController implements OnModuleInit {
