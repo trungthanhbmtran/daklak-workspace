@@ -15,6 +15,6 @@ import { TranslationController } from './translation.controller';
     registerGrpcService(MICROSERVICES.POSTS_TAG),
     registerGrpcService(MICROSERVICES.TRANSLATE),
   ],
-  controllers: [PostController, PostsCategoryController, BannerController, TagController, TranslationController],
+  controllers: [PostsCategoryController, BannerController, TagController, TranslationController, PostController],
 })
 export class PostsModule { }
