@@ -18,7 +18,7 @@ interface CategoryInput extends CreateCategoryDto {
 
 @Controller()
 export class CategoriesController {
-  constructor(private readonly categoryService: CategoryService) { }
+  constructor(private readonly categoryService: CategoryService) {}
 
   @GrpcMethod('CategoryService', 'CreateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
@@ -83,13 +83,14 @@ export class CategoriesController {
       const { mode, id } = data;
       let result;
       switch (mode) {
-        case 'flat':
+        case 'flat': {
           const flatCategories = await this.categoryService.getAllFlat();
           result = flatCategories.map((cat) => ({
             ...cat,
             children: [],
           }));
           break;
+        }
         case 'tree':
           result = await this.categoryService.getFullTree();
           break;
@@ -101,19 +102,21 @@ export class CategoriesController {
             });
           result = await this.categoryService.getSubTree(id);
           break;
-        case 'forPost':
+        case 'forPost': {
           const activeCategories = await this.categoryService.getAllForPost();
           result = activeCategories.map((cat) => ({
             ...cat,
             children: [],
           }));
           break;
-        default:
+        }
+        default: {
           const defaultCategories = await this.categoryService.getAllFlat();
           result = defaultCategories.map((cat) => ({
             ...cat,
             children: [],
           }));
+        }
       }
       return { data: result };
     } catch (error: any) {

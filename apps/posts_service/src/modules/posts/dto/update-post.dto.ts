@@ -10,4 +10,7 @@ export class UpdatePostDto extends PartialType(CreatePostDto) {
   @IsString()
   @IsOptional()
   moderationNote?: string;
+
+  @IsOptional()
+  isTranslated?: boolean;
 }

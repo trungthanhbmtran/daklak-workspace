@@ -29,4 +29,8 @@ export class QueryPostDto {
   @IsOptional()
   @IsString()
   authorId?: string;
+
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
 }

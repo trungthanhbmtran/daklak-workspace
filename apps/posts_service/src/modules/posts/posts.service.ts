@@ -54,7 +54,7 @@ export class PostsService {
         await this.translationService.triggerTranslationManual(post.id, 'en');
         await this.postsRepository.update(post.id, {
           isTranslated: true,
-        } as any);
+        });
       } catch (error) {
         console.error(
           '❌ [PostsService] Lỗi khi kích hoạt tự động dịch:',

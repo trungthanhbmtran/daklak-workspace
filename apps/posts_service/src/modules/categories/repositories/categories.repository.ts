@@ -16,7 +16,10 @@ export class CategoriesRepository extends BaseRepository<
     super(prisma, prisma.category);
   }
 
-  protected prepareQuery(query: any): {
+  protected prepareQuery(query: {
+    where?: Prisma.CategoryWhereInput;
+    orderBy?: Prisma.CategoryOrderByWithRelationInput;
+  }): {
     skip?: number;
     take?: number;
     where?: Prisma.CategoryWhereInput;
@@ -108,7 +111,7 @@ export class CategoriesRepository extends BaseRepository<
       const rgt = target.rgt;
 
       // Delete target and descendants
-      const deleted = await tx.category.deleteMany({
+      await tx.category.deleteMany({
         where: {
           lft: { gte: lft },
           rgt: { lte: rgt },

@@ -55,13 +55,13 @@ export class TranslationsRepository extends BaseRepository<
         language: data.language,
         title: data.title,
         description: data.description || '',
-        contentJson: data.contentJson || {},
+        contentJson: (data.contentJson as Prisma.InputJsonValue) || {},
         status: data.status,
       },
       update: {
         title: data.title,
         description: data.description || '',
-        contentJson: data.contentJson || {},
+        contentJson: (data.contentJson as Prisma.InputJsonValue) || {},
         status: data.status,
       },
     });

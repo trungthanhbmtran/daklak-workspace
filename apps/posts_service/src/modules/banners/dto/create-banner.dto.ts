@@ -4,7 +4,6 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
-  IsUrl,
   IsDateString,
 } from 'class-validator';
 import { BannerPosition, BannerLinkType } from '@generated/prisma/client';

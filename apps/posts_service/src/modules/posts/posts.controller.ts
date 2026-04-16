@@ -69,7 +69,7 @@ export class PostsController {
       const { rows, count } = await this.postsService.getList({
         ...payload,
         categoryId: data.categoryId ?? data.category_id,
-      } as any); // Cast as any here because getList expects QueryPostDto, adding extra fields later
+      });
 
       return {
         data: rows,
