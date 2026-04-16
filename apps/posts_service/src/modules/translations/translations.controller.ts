@@ -22,8 +22,8 @@ export class TranslationsController {
         data.id,
       );
       return { success: true, data: translation };
-    } catch (error) {
-      throw new RpcException(error);
+    } catch (error: unknown) {
+      throw new RpcException((error as Error).message);
     }
   }
 
@@ -36,8 +36,8 @@ export class TranslationsController {
         data,
       );
       return { success: true, data: updated };
-    } catch (error) {
-      throw new RpcException(error);
+    } catch (error: unknown) {
+      throw new RpcException((error as Error).message);
     }
   }
 

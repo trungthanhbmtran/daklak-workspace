@@ -7,7 +7,7 @@ import { Banner } from '@generated/prisma/client';
 
 @Injectable()
 export class BannersService {
-  constructor(private readonly bannersRepository: BannersRepository) { }
+  constructor(private readonly bannersRepository: BannersRepository) {}
 
   private ensureDate(d: any) {
     if (!d) return undefined;
@@ -20,10 +20,22 @@ export class BannersService {
     return {
       ...banner,
       title: banner.name, // Keep for compatibility
-      startAt: banner.startAt instanceof Date ? banner.startAt.toISOString() : banner.startAt,
-      endAt: banner.endAt instanceof Date ? banner.endAt.toISOString() : banner.endAt,
-      createdAt: banner.createdAt instanceof Date ? banner.createdAt.toISOString() : banner.createdAt,
-      updatedAt: banner.updatedAt instanceof Date ? banner.updatedAt.toISOString() : banner.updatedAt,
+      startAt:
+        banner.startAt instanceof Date
+          ? banner.startAt.toISOString()
+          : banner.startAt,
+      endAt:
+        banner.endAt instanceof Date
+          ? banner.endAt.toISOString()
+          : banner.endAt,
+      createdAt:
+        banner.createdAt instanceof Date
+          ? banner.createdAt.toISOString()
+          : banner.createdAt,
+      updatedAt:
+        banner.updatedAt instanceof Date
+          ? banner.updatedAt.toISOString()
+          : banner.updatedAt,
     };
   }
 
@@ -72,7 +84,10 @@ export class BannersService {
         startAt: this.ensureDate(data.startAt),
         endAt: this.ensureDate(data.endAt),
       };
-      const updated = await this.bannersRepository.update(id, updateData as any);
+      const updated = await this.bannersRepository.update(
+        id,
+        updateData as any,
+      );
       return {
         success: true,
         message: 'Cập nhật banner thành công',
@@ -103,7 +118,8 @@ export class BannersService {
 
   async findAll(position?: string): Promise<any> {
     try {
-      const banners = await this.bannersRepository.findActiveByPosition(position);
+      const banners =
+        await this.bannersRepository.findActiveByPosition(position);
       return (banners || []).map((banner) => this.formatBanner(banner));
     } catch (error) {
       throw new RpcException({

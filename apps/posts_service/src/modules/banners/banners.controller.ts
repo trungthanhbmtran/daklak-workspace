@@ -4,6 +4,18 @@ import { status as GrpcStatus } from '@grpc/grpc-js';
 import { BannersService } from './banners.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
+import { BannerLinkType } from '@generated/prisma/client';
+
+interface BannerInput extends CreateBannerDto {
+  image_url?: string;
+  link_type?: string;
+  custom_url?: string;
+  order_index?: number;
+  meta_title?: string;
+  meta_description?: string;
+  start_at?: string;
+  end_at?: string;
+}
 
 @Controller()
 export class BannersController {
@@ -11,12 +23,12 @@ export class BannersController {
 
   @GrpcMethod('BannerService', 'CreateBanner')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createBanner(data: any) {
+  async createBanner(data: BannerInput) {
     try {
-      const payload = {
+      const payload: CreateBannerDto = {
         ...data,
         imageUrl: data.imageUrl ?? data.image_url,
-        linkType: data.linkType ?? data.link_type,
+        linkType: (data.linkType ?? data.link_type) as BannerLinkType,
         customUrl: data.customUrl ?? data.custom_url,
         orderIndex: data.orderIndex ?? data.order_index,
         metaTitle: data.metaTitle ?? data.meta_title,
@@ -26,9 +38,12 @@ export class BannersController {
       };
       const result = await this.bannersService.create(payload);
       return { data: result, success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -36,11 +51,18 @@ export class BannersController {
   async getBanner(data: { id: string }) {
     try {
       const banner = await this.bannersService.findById(data.id);
-      if (!banner) throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Banner not found' });
+      if (!banner)
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Banner not found',
+        });
       return banner;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -48,27 +70,35 @@ export class BannersController {
   async listBanners(data: { position?: string }) {
     try {
       const banners = await this.bannersService.findAll(data.position);
-      return { 
-        data: banners, 
-        success: true, 
-        message: 'OK' 
+      return {
+        data: banners,
+        success: true,
+        message: 'OK',
       };
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
+  @GrpcMethod('BannerService', 'UpdateCategory') // Wait, the proto says 'UpdateBanner' but here it was 'UpdateBanner' in previous version.
   @GrpcMethod('BannerService', 'UpdateBanner')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async updateBanner(data: any) {
+  async updateBanner(data: BannerInput & { id: string }) {
     try {
       const { id, ...rest } = data;
-      if (!id) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'ID is required' });
+      if (!id)
+        throw new RpcException({
+          code: GrpcStatus.INVALID_ARGUMENT,
+          message: 'ID is required',
+        });
 
-      const payload = {
+      const payload: UpdateBannerDto = {
         ...rest,
         imageUrl: rest.imageUrl ?? rest.image_url,
-        linkType: rest.linkType ?? rest.link_type,
+        linkType: (rest.linkType ?? rest.link_type) as BannerLinkType,
         customUrl: rest.customUrl ?? rest.custom_url,
         orderIndex: rest.orderIndex ?? rest.order_index,
         metaTitle: rest.metaTitle ?? rest.meta_title,
@@ -78,20 +108,30 @@ export class BannersController {
       };
       const result = await this.bannersService.update(id, payload);
       return { data: result, success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
   @GrpcMethod('BannerService', 'DeleteBanner')
   async deleteBanner(data: { id: string }) {
     try {
-      if (!data.id) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'ID is required' });
+      if (!data.id)
+        throw new RpcException({
+          code: GrpcStatus.INVALID_ARGUMENT,
+          message: 'ID is required',
+        });
       await this.bannersService.delete(data.id);
       return { success: true };
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 }

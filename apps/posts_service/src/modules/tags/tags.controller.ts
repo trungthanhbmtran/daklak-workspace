@@ -14,8 +14,11 @@ export class TagsController {
   async createTag(data: CreateTagDto) {
     try {
       return await this.tagsService.create(data);
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -23,11 +26,18 @@ export class TagsController {
   async getTag(data: { id: string }) {
     try {
       const tag = await this.tagsService.findById(data.id);
-      if (!tag) throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Tag not found' });
+      if (!tag)
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Tag not found',
+        });
       return tag;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -36,8 +46,11 @@ export class TagsController {
     try {
       const tags = await this.tagsService.findAll();
       return { data: tags };
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -46,8 +59,11 @@ export class TagsController {
   async updateTag(data: UpdateTagDto & { id: string }) {
     try {
       return await this.tagsService.update(data.id, data);
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -56,8 +72,11 @@ export class TagsController {
     try {
       await this.tagsService.delete(data.id);
       return { success: true };
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 }

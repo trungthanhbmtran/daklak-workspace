@@ -17,7 +17,7 @@ export class CreatePostDto {
   content?: string;
 
   @IsOptional()
-  contentJson?: any;
+  contentJson?: Record<string, unknown> | Array<unknown>;
 
   @IsString()
   @IsOptional()

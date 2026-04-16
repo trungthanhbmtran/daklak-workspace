@@ -43,7 +43,7 @@ export class PostsRepository extends BaseRepository<
     }
 
     if (query.status) {
-      where.status = query.status as any;
+      where.status = query.status as Prisma.EnumPostStatusFilter;
     }
 
     if (query.authorId) {
@@ -90,7 +90,7 @@ export class PostsRepository extends BaseRepository<
     const { tagIds, ...postData } = data;
     return this.prisma.post.create({
       data: {
-        ...postData,
+        ...(postData as unknown as Prisma.PostUncheckedCreateInput),
         tags: tagIds
           ? {
               connect: tagIds.map((id: string) => ({ id })),
@@ -113,7 +113,7 @@ export class PostsRepository extends BaseRepository<
     return this.prisma.post.update({
       where: { id },
       data: {
-        ...(updateData as any),
+        ...(updateData as Prisma.PostUpdateInput),
         tags: tagIds
           ? {
               set: tagIds.map((id: string) => ({ id })),

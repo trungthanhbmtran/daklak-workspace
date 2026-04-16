@@ -7,7 +7,7 @@ import { Category } from '@generated/prisma/client';
 
 @Injectable()
 export class CategoryService {
-  constructor(private readonly categoriesRepository: CategoriesRepository) { }
+  constructor(private readonly categoriesRepository: CategoriesRepository) {}
 
   async create(data: CreateCategoryDto): Promise<Category> {
     if (data.parentId === '') {

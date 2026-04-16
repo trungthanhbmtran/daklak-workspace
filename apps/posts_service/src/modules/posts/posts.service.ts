@@ -16,20 +16,25 @@ export class PostsService {
     private readonly censorService: CensorService,
     @Inject(forwardRef(() => TranslationService))
     private readonly translationService: TranslationService,
-  ) { }
+  ) {}
 
   async createPost(data: CreatePostDto) {
     // 1. Kiểm duyệt nội dung tự động (Moderation)
     const titleCheck = this.censorService.checkContent(data.title);
     const contentCheck = this.censorService.checkContent(data.content || '');
-    const descriptionCheck = this.censorService.checkContent(data.description || '');
+    const descriptionCheck = this.censorService.checkContent(
+      data.description || '',
+    );
 
-    const isSafe = titleCheck.isSafe && contentCheck.isSafe && descriptionCheck.isSafe;
-    const flaggedWords = Array.from(new Set([
-      ...titleCheck.flaggedWords,
-      ...contentCheck.flaggedWords,
-      ...descriptionCheck.flaggedWords,
-    ]));
+    const isSafe =
+      titleCheck.isSafe && contentCheck.isSafe && descriptionCheck.isSafe;
+    const flaggedWords = Array.from(
+      new Set([
+        ...titleCheck.flaggedWords,
+        ...contentCheck.flaggedWords,
+        ...descriptionCheck.flaggedWords,
+      ]),
+    );
 
     const processedData = {
       ...data,
@@ -37,19 +42,24 @@ export class PostsService {
       autoModerationNote: isSafe
         ? 'Nội dung an toàn'
         : `Phát hiện từ ngữ nhạy cảm: ${flaggedWords.join(', ')}`,
-      status: isSafe ? (data.status || PostStatus.pending) : PostStatus.rejected,
+      status: isSafe ? data.status || PostStatus.pending : PostStatus.rejected,
     };
 
     // 2. Lưu post vào DB
-    const post = await this.postsRepository.create(processedData as any);
+    const post = await this.postsRepository.create(processedData);
 
     // 3. Tự động dịch nếu nội dung an toàn (Automatic Translation)
     if (isSafe && post.language === 'vi') {
       try {
         await this.translationService.triggerTranslationManual(post.id, 'en');
-        await this.postsRepository.update(post.id, { isTranslated: true } as any);
+        await this.postsRepository.update(post.id, {
+          isTranslated: true,
+        } as any);
       } catch (error) {
-        console.error('❌ [PostsService] Lỗi khi kích hoạt tự động dịch:', error);
+        console.error(
+          '❌ [PostsService] Lỗi khi kích hoạt tự động dịch:',
+          error,
+        );
       }
     }
 
@@ -111,7 +121,7 @@ export class PostsService {
   }
 
   async reviewPost(id: string, data: UpdatePostDto) {
-    const post = await this.findById(id);
+    await this.findById(id);
     const { status, moderationNote: note, reviewerId, ...otherData } = data;
 
     let finalNote = note;

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsUUID, IsJSON } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsUUID } from 'class-validator';
 import { TranslationStatus } from '@generated/prisma/client';
 
 export class CreateTranslationDto {

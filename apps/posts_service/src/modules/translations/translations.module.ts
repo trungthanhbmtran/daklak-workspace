@@ -28,4 +28,4 @@ import { forwardRef } from '@nestjs/common';
   providers: [TranslationService, TranslationsRepository],
   exports: [TranslationService],
 })
-export class TranslationsModule { }
+export class TranslationsModule {}

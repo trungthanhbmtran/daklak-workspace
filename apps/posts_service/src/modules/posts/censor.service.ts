@@ -4,10 +4,22 @@ import { Injectable } from '@nestjs/common';
 export class CensorService {
   private readonly blacklist = [
     // Vietnamese sensitive words (examples)
-    'phản động', 'biểu tình', 'lật đổ', 'chế độ', 'kích động',
-    'xấu xa', 'ngu ngốc', 'đanh đá', 'vô giáo dục',
+    'phản động',
+    'biểu tình',
+    'lật đổ',
+    'chế độ',
+    'kích động',
+    'xấu xa',
+    'ngu ngốc',
+    'đanh đá',
+    'vô giáo dục',
     // English sensitive words (examples)
-    'fuck', 'shit', 'idiot', 'scam', 'violence', 'terrorist',
+    'fuck',
+    'shit',
+    'idiot',
+    'scam',
+    'violence',
+    'terrorist',
   ];
 
   /**

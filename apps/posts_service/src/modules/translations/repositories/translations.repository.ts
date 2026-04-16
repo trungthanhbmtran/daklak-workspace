@@ -23,8 +23,10 @@ export class TranslationsRepository extends BaseRepository<
     orderBy?: Prisma.PostTranslateOrderByWithRelationInput;
   } {
     return {
-      where: query.where,
-      orderBy: query.orderBy || { createdAt: 'desc' },
+      where: (query as { where?: Prisma.PostTranslateWhereInput }).where,
+      orderBy: (
+        query as { orderBy?: Prisma.PostTranslateOrderByWithRelationInput }
+      ).orderBy || { createdAt: 'desc' },
     };
   }
 
@@ -48,8 +50,20 @@ export class TranslationsRepository extends BaseRepository<
       where: {
         postId_language: { postId: data.postId, language: data.language },
       },
-      create: data as any,
-      update: data as any,
+      create: {
+        postId: data.postId,
+        language: data.language,
+        title: data.title,
+        description: data.description || '',
+        contentJson: data.contentJson || {},
+        status: data.status,
+      },
+      update: {
+        title: data.title,
+        description: data.description || '',
+        contentJson: data.contentJson || {},
+        status: data.status,
+      },
     });
   }
 }

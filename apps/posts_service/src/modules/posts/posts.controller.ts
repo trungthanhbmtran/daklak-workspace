@@ -15,17 +15,17 @@ export class PostsController {
   async createPost(data: CreatePostDto & { author_id?: string }) {
     try {
       // Handle flexible authorId/author_id
-      const payload = {
+      const payload: CreatePostDto = {
         ...data,
         authorId: data.authorId ?? data.author_id,
       };
       const post = await this.postsService.createPost(payload);
       return { data: post };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: error.message || 'Error creating post',
+        message: (error as Error).message || 'Error creating post',
       });
     }
   }
@@ -41,25 +41,36 @@ export class PostsController {
         });
       }
       return post;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: error.message,
+        message: (error as Error).message,
       });
     }
   }
 
   @GrpcMethod('PostService', 'ListPosts')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async listPosts(data: QueryPostDto & { author_id?: string; category_id?: string; categoryId?: string }) {
+  async listPosts(
+    data: QueryPostDto & {
+      author_id?: string;
+      category_id?: string;
+      categoryId?: string;
+    },
+  ) {
     try {
-      const payload = {
+      const payload: QueryPostDto = {
         ...data,
         authorId: data.authorId ?? data.author_id,
-        categoryId: data.categoryId ?? data.category_id,
+        categorySlug: data.categorySlug, // Ensure compatibility
       };
-      const { rows, count } = await this.postsService.getList(payload);
+      // We also handle categoryId if passed via gRPC
+      const { rows, count } = await this.postsService.getList({
+        ...payload,
+        categoryId: data.categoryId ?? data.category_id,
+      } as any); // Cast as any here because getList expects QueryPostDto, adding extra fields later
+
       return {
         data: rows,
         meta: {
@@ -70,30 +81,36 @@ export class PostsController {
           },
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: error.message,
+        message: (error as Error).message,
       });
     }
   }
 
   @GrpcMethod('PostService', 'UpdatePost')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async updatePost(data: UpdatePostDto & { id: string; category_id?: string; tag_ids?: string[] }) {
+  async updatePost(
+    data: UpdatePostDto & {
+      id: string;
+      category_id?: string;
+      tag_ids?: string[];
+    },
+  ) {
     try {
-      const payload = {
+      const payload: UpdatePostDto = {
         ...data,
         categoryId: data.categoryId ?? data.category_id,
         tagIds: data.tagIds ?? data.tag_ids,
       };
       const post = await this.postsService.update(data.id, payload);
       return { data: post };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: error.message,
+        message: (error as Error).message,
       });
     }
   }
@@ -103,41 +120,65 @@ export class PostsController {
     try {
       await this.postsService.delete(data.id);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: error.message,
+        message: (error as Error).message,
       });
     }
   }
 
   @GrpcMethod('PostService', 'AddTagsToPost')
-  async addTagsToPost(data: { postId?: string; post_id?: string; tagIds?: string[]; tag_ids?: string[] }) {
+  async addTagsToPost(data: {
+    postId?: string;
+    post_id?: string;
+    tagIds?: string[];
+    tag_ids?: string[];
+  }) {
     try {
       const postId = data.postId ?? data.post_id;
       const tagIds = data.tagIds ?? data.tag_ids ?? [];
-      if (!postId) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'postId is required' });
-      
+      if (!postId)
+        throw new RpcException({
+          code: GrpcStatus.INVALID_ARGUMENT,
+          message: 'postId is required',
+        });
+
       await this.postsService.addTagsToPost(postId, tagIds);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
   @GrpcMethod('PostService', 'RemoveTagFromPost')
-  async removeTagFromPost(data: { postId?: string; post_id?: string; tagId?: string; tag_id?: string }) {
+  async removeTagFromPost(data: {
+    postId?: string;
+    post_id?: string;
+    tagId?: string;
+    tag_id?: string;
+  }) {
     try {
       const postId = data.postId ?? data.post_id;
       const tagId = data.tagId ?? data.tag_id;
-      if (!postId || !tagId) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'postId and tagId are required' });
+      if (!postId || !tagId)
+        throw new RpcException({
+          code: GrpcStatus.INVALID_ARGUMENT,
+          message: 'postId and tagId are required',
+        });
 
       await this.postsService.removeTagFromPost(postId, tagId);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -145,27 +186,46 @@ export class PostsController {
   async getTagsByPost(data: { postId?: string; post_id?: string }) {
     try {
       const postId = data.postId ?? data.post_id;
-      if (!postId) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'postId is required' });
+      if (!postId)
+        throw new RpcException({
+          code: GrpcStatus.INVALID_ARGUMENT,
+          message: 'postId is required',
+        });
 
       const tags = await this.postsService.getTagsByPost(postId);
       return { tags };
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
   @GrpcMethod('PostService', 'SetCategoryForPost')
-  async setCategoryForPost(data: { postId?: string; post_id?: string; categoryId?: string; category_id?: string }) {
+  async setCategoryForPost(data: {
+    postId?: string;
+    post_id?: string;
+    categoryId?: string;
+    category_id?: string;
+  }) {
     try {
       const postId = data.postId ?? data.post_id;
       const categoryId = data.categoryId ?? data.category_id;
-      if (!postId || !categoryId) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'postId and categoryId are required' });
+      if (!postId || !categoryId)
+        throw new RpcException({
+          code: GrpcStatus.INVALID_ARGUMENT,
+          message: 'postId and categoryId are required',
+        });
 
       await this.postsService.setCategoryForPost(postId, categoryId);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -173,11 +233,18 @@ export class PostsController {
   async getPostBySlug(data: { slug: string }) {
     try {
       const post = await this.postsService.findBySlug(data.slug);
-      if (!post) throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Post not found' });
+      if (!post)
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Post not found',
+        });
       return post;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
@@ -185,23 +252,35 @@ export class PostsController {
   async getPostsByCategorySlug(data: { slug: string }) {
     try {
       return await this.postsService.getPostsByCategorySlug(data.slug);
-    } catch (error: any) {
-      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    } catch (error: unknown) {
+      throw new RpcException({
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
+      });
     }
   }
 
   @GrpcMethod('PostService', 'ReviewPost')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async reviewPost(data: UpdatePostDto & { id: string; reviewer_id?: string; reviewerId?: string }) {
+  async reviewPost(
+    data: UpdatePostDto & {
+      id: string;
+      reviewer_id?: string;
+      reviewerId?: string;
+    },
+  ) {
     try {
       const reviewerId = data.reviewerId ?? data.reviewer_id;
-      const post = await this.postsService.reviewPost(data.id, { ...data, reviewerId });
+      const post = await this.postsService.reviewPost(data.id, {
+        ...data,
+        reviewerId,
+      });
       return { success: true, data: post };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: error.message,
+        message: (error as Error).message,
       });
     }
   }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BaseRepository } from '../../../database/repositories/base.repository';
-import { Banner, Prisma } from '@generated/prisma/client';
+import { Banner, Prisma, BannerPosition } from '@generated/prisma/client';
 import { PrismaService } from '../../../database/prisma.service';
 import { CreateBannerDto } from '../dto/create-banner.dto';
 import { UpdateBannerDto } from '../dto/update-banner.dto';
@@ -10,7 +10,7 @@ export class BannersRepository extends BaseRepository<
   Banner,
   CreateBannerDto,
   UpdateBannerDto,
-  any
+  unknown
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.banner);
@@ -23,8 +23,9 @@ export class BannersRepository extends BaseRepository<
     orderBy?: Prisma.BannerOrderByWithRelationInput;
   } {
     return {
-      where: query.where,
-      orderBy: query.orderBy || { orderIndex: 'asc' },
+      where: (query as { where?: Prisma.BannerWhereInput }).where,
+      orderBy: (query as { orderBy?: Prisma.BannerOrderByWithRelationInput })
+        .orderBy || { orderIndex: 'asc' },
     };
   }
 
@@ -32,7 +33,7 @@ export class BannersRepository extends BaseRepository<
     return this.prisma.banner.findMany({
       where: {
         status: true,
-        position: (position as any) || undefined,
+        position: (position as BannerPosition) || undefined,
       },
       orderBy: { orderIndex: 'asc' },
     });

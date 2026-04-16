@@ -10,7 +10,7 @@ export class TagsRepository extends BaseRepository<
   Tag,
   CreateTagDto,
   UpdateTagDto,
-  any
+  unknown
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.tag);
@@ -23,8 +23,9 @@ export class TagsRepository extends BaseRepository<
     orderBy?: Prisma.TagOrderByWithRelationInput;
   } {
     return {
-      where: query.where,
-      orderBy: query.orderBy || { createdAt: 'desc' },
+      where: (query as { where?: Prisma.TagWhereInput }).where,
+      orderBy: (query as { orderBy?: Prisma.TagOrderByWithRelationInput })
+        .orderBy || { createdAt: 'desc' },
     };
   }
 

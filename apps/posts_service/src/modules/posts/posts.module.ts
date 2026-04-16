@@ -12,4 +12,4 @@ import { forwardRef } from '@nestjs/common';
   providers: [PostsService, PostsRepository, CensorService],
   exports: [PostsService, PostsRepository, CensorService],
 })
-export class PostsModule { }
+export class PostsModule {}

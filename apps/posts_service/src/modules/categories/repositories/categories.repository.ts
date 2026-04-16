@@ -23,8 +23,9 @@ export class CategoriesRepository extends BaseRepository<
     orderBy?: Prisma.CategoryOrderByWithRelationInput;
   } {
     return {
-      where: query.where,
-      orderBy: query.orderBy || { lft: 'asc' },
+      where: (query as { where?: Prisma.CategoryWhereInput }).where,
+      orderBy: (query as { orderBy?: Prisma.CategoryOrderByWithRelationInput })
+        .orderBy || { lft: 'asc' },
     };
   }
 
@@ -76,11 +77,11 @@ export class CategoriesRepository extends BaseRepository<
     // If parentId is changing, it's a move operation
     if (data.parentId !== undefined && data.parentId !== existing.parentId) {
       // Simplest move strategy: delete and re-insert
-      // But we can just use the update method and then call a "rebuild" 
+      // But we can just use the update method and then call a "rebuild"
       // or implement the move logic.
       // For now, let's just update the fields and then rebuild if parent changed
       // or just update fields if parent didn't change.
-      
+
       // Let's implement a full rebuild to keep it simple and correct for now
       // This is less efficient but much more reliable than complex node shifting logic
       const result = await this.prisma.category.update({
@@ -134,7 +135,11 @@ export class CategoriesRepository extends BaseRepository<
         orderBy: { orderIndex: 'asc' },
       });
 
-      const build = async (parentId: string | null, left: number, depth: number): Promise<number> => {
+      const build = async (
+        parentId: string | null,
+        left: number,
+        depth: number,
+      ): Promise<number> => {
         let right = left + 1;
         const children = categories.filter((c) => c.parentId === parentId);
 
