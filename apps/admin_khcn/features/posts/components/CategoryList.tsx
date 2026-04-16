@@ -46,7 +46,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
       const payload = res?.data;
       if (!payload) return [];
       // Gateway might return nested or flat. We handle flat for the table display.
-      return payload.data || payload.items || (Array.isArray(payload) ? payload : []);
+      return payload
     },
   });
 
@@ -186,7 +186,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
           </TableBody>
         </Table>
       </Card>
-      
+
       <div className="flex items-center gap-2 text-xs text-muted-foreground bg-primary/5 p-3 rounded-lg border border-primary/10">
         <Layout className="h-4 w-4 text-primary" />
         <span>Gợi ý: Bạn có thể tạo cấu trúc chuyên mục đa cấp để phân loại nội dung bài viết tốt hơn.</span>
