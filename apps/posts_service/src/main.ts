@@ -60,4 +60,5 @@ async function bootstrap() {
   // But user-service seems to be purely gRPC.
   console.log('Posts Service (gRPC + RMQ) started');
 }
-bootstrap();
+
+void bootstrap();

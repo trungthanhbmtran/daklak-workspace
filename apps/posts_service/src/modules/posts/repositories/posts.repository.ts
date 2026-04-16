@@ -90,7 +90,7 @@ export class PostsRepository extends BaseRepository<
     const { tagIds, ...postData } = data;
     return this.prisma.post.create({
       data: {
-        ...(postData as unknown as Prisma.PostUncheckedCreateInput),
+        ...(postData as Prisma.PostUncheckedCreateInput),
         tags: tagIds
           ? {
               connect: tagIds.map((id: string) => ({ id })),

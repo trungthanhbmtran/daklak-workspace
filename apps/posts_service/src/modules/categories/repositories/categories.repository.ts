@@ -10,7 +10,7 @@ export class CategoriesRepository extends BaseRepository<
   Category,
   CreateCategoryDto,
   UpdateCategoryDto,
-  any
+  Prisma.CategoryWhereInput
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.category);
@@ -174,7 +174,7 @@ export class CategoriesRepository extends BaseRepository<
     });
   }
 
-  async findAllFlat() {
+  async findAllFlat(): Promise<Category[]> {
     return this.prisma.category.findMany({
       orderBy: { lft: 'asc' },
     });

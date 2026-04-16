@@ -16,7 +16,10 @@ export class TagsRepository extends BaseRepository<
     super(prisma, prisma.tag);
   }
 
-  protected prepareQuery(query: any): {
+  protected prepareQuery(query: {
+    where?: Prisma.TagWhereInput;
+    orderBy?: Prisma.TagOrderByWithRelationInput;
+  }): {
     skip?: number;
     take?: number;
     where?: Prisma.TagWhereInput;

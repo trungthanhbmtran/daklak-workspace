@@ -4,17 +4,6 @@ import { status as GrpcStatus } from '@grpc/grpc-js';
 import { CategoryService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { LinkType } from '@generated/prisma/client';
-
-interface CategoryInput extends CreateCategoryDto {
-  parent_id?: string;
-  link_type?: string;
-  custom_url?: string;
-  order_index?: number;
-  meta_title?: string;
-  meta_description?: string;
-  is_gov_standard?: boolean;
-}
 
 @Controller()
 export class CategoriesController {
@@ -22,21 +11,11 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'CreateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createCategory(data: CategoryInput) {
+  async createCategory(data: CreateCategoryDto) {
     try {
-      const payload: CreateCategoryDto = {
-        ...data,
-        parentId: data.parentId ?? data.parent_id,
-        linkType: (data.linkType ?? data.link_type) as LinkType,
-        customUrl: data.customUrl ?? data.custom_url,
-        orderIndex: data.orderIndex ?? data.order_index,
-        metaTitle: data.metaTitle ?? data.meta_title,
-        metaDescription: data.metaDescription ?? data.meta_description,
-        isGovStandard: data.isGovStandard ?? data.is_gov_standard,
-      };
-      const result = await this.categoryService.create(payload);
+      const result = await this.categoryService.create(data);
       return { data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
@@ -55,7 +34,7 @@ export class CategoriesController {
           message: 'Category not found',
         });
       return { data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
@@ -69,7 +48,7 @@ export class CategoriesController {
     try {
       const result = await this.categoryService.getSubTree(data.id);
       return { data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
         message: (error as Error).message,
@@ -81,7 +60,7 @@ export class CategoriesController {
   async listCategories(data: { mode?: string; id?: string }) {
     try {
       const { mode, id } = data;
-      let result;
+      let result: any[];
       switch (mode) {
         case 'flat': {
           const flatCategories = await this.categoryService.getAllFlat();
@@ -119,7 +98,7 @@ export class CategoriesController {
         }
       }
       return { data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
@@ -130,7 +109,7 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async updateCategory(data: CategoryInput & { id: string }) {
+  async updateCategory(data: UpdateCategoryDto & { id: string }) {
     try {
       const { id, ...rest } = data;
       if (!id)
@@ -139,20 +118,9 @@ export class CategoriesController {
           message: 'ID is required',
         });
 
-      const payload: UpdateCategoryDto = {
-        ...rest,
-        parentId: rest.parentId ?? rest.parent_id,
-        linkType: (rest.linkType ?? rest.link_type) as LinkType,
-        customUrl: rest.customUrl ?? rest.custom_url,
-        orderIndex: rest.orderIndex ?? rest.order_index,
-        metaTitle: rest.metaTitle ?? rest.meta_title,
-        metaDescription: rest.metaDescription ?? rest.meta_description,
-        isGovStandard: rest.isGovStandard ?? rest.is_gov_standard,
-      };
-
-      const result = await this.categoryService.update(id, payload);
+      const result = await this.categoryService.update(id, rest);
       return { data: result };
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
@@ -171,7 +139,7 @@ export class CategoriesController {
         });
       await this.categoryService.delete(data.id);
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
         message: (error as Error).message,

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { status as GrpcStatus } from '@grpc/grpc-js';
 import { BannersRepository } from './repositories/banners.repository';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
@@ -9,74 +10,65 @@ import { Banner } from '@generated/prisma/client';
 export class BannersService {
   constructor(private readonly bannersRepository: BannersRepository) {}
 
-  private ensureDate(d: any) {
+  private ensureDate(d: string | Date | undefined): Date | undefined {
     if (!d) return undefined;
     const date = new Date(d);
     return isNaN(date.getTime()) ? undefined : date;
   }
 
-  private formatBanner(banner: any) {
+  private formatBanner(banner: Banner) {
     if (!banner) return null;
     return {
       ...banner,
-      title: banner.name, // Keep for compatibility
-      startAt:
-        banner.startAt instanceof Date
-          ? banner.startAt.toISOString()
-          : banner.startAt,
-      endAt:
-        banner.endAt instanceof Date
-          ? banner.endAt.toISOString()
-          : banner.endAt,
-      createdAt:
-        banner.createdAt instanceof Date
-          ? banner.createdAt.toISOString()
-          : banner.createdAt,
-      updatedAt:
-        banner.updatedAt instanceof Date
-          ? banner.updatedAt.toISOString()
-          : banner.updatedAt,
+      startAt: banner.startAt?.toISOString(),
+      endAt: banner.endAt?.toISOString(),
+      createdAt: banner.createdAt.toISOString(),
+      updatedAt: banner.updatedAt.toISOString(),
     };
   }
 
-  async create(data: CreateBannerDto): Promise<any> {
+  async create(data: CreateBannerDto) {
     try {
       const createData = {
         ...data,
         startAt: this.ensureDate(data.startAt),
         endAt: this.ensureDate(data.endAt),
       };
-      const banner = await this.bannersRepository.create(createData as any);
+      const banner = await this.bannersRepository.create(
+        createData as CreateBannerDto,
+      );
       return {
         success: true,
-        message: 'Tạo banner thành công',
         data: this.formatBanner(banner),
       };
-    } catch (error) {
+    } catch (error: unknown) {
       throw new RpcException({
-        code: 13,
-        message: `Lỗi tạo banner: ${error.message}`,
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
       });
     }
   }
 
-  async findById(id: string): Promise<any> {
+  async findById(id: string) {
     try {
       const banner = await this.bannersRepository.findById(id);
       if (!banner) {
-        throw new RpcException({ code: 5, message: 'Banner không tìm thấy' });
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Banner not found',
+        });
       }
       return this.formatBanner(banner);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
-        code: 13,
-        message: `Lỗi truy vấn banner: ${error.message}`,
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
       });
     }
   }
 
-  async update(id: string, data: UpdateBannerDto): Promise<any> {
+  async update(id: string, data: UpdateBannerDto) {
     try {
       await this.findById(id); // Check existence
       const updateData = {
@@ -90,41 +82,38 @@ export class BannersService {
       );
       return {
         success: true,
-        message: 'Cập nhật banner thành công',
         data: this.formatBanner(updated),
       };
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
-        code: 13,
-        message: `Lỗi cập nhật banner: ${error.message}`,
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
       });
     }
   }
 
-  async delete(id: string): Promise<any> {
+  async delete(id: string) {
     try {
-      await this.findById(id); // Check existence
       const deleted = await this.bannersRepository.delete(id);
       return { success: true, data: this.formatBanner(deleted) };
-    } catch (error) {
-      if (error instanceof RpcException) throw error;
+    } catch (error: unknown) {
       throw new RpcException({
-        code: 13,
-        message: `Lỗi xóa banner: ${error.message}`,
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
       });
     }
   }
 
-  async findAll(position?: string): Promise<any> {
+  async findAll(position?: string) {
     try {
       const banners =
         await this.bannersRepository.findActiveByPosition(position);
-      return (banners || []).map((banner) => this.formatBanner(banner));
-    } catch (error) {
+      return banners.map((banner) => this.formatBanner(banner));
+    } catch (error: unknown) {
       throw new RpcException({
-        code: 13,
-        message: `Lỗi lấy danh sách banner: ${error.message}`,
+        code: GrpcStatus.INTERNAL,
+        message: (error as Error).message,
       });
     }
   }

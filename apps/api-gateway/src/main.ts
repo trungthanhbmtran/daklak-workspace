@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { TransformInterceptor } from './core/interceptors/transform.interceptor';
+import { RpcExceptionFilter } from './core/filters/rpc-exception.filter';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
@@ -49,9 +50,9 @@ async function bootstrap() {
     transform: true,
   }));
 
-  // 4. Áp dụng Interceptor toàn cục
-  // Mọi API trả về sẽ có dạng chuẩn: { success: true, data: ..., timestamp: ... }
+  // 4. Áp dụng Interceptor và Filter toàn cục
   app.useGlobalInterceptors(new TransformInterceptor());
+  app.useGlobalFilters(new RpcExceptionFilter());
 
   const port = process.env.PORT || 8080;
   await app.listen(port, '0.0.0.0');

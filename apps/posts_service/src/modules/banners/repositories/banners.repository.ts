@@ -16,7 +16,10 @@ export class BannersRepository extends BaseRepository<
     super(prisma, prisma.banner);
   }
 
-  protected prepareQuery(query: any): {
+  protected prepareQuery(query: {
+    where?: Prisma.BannerWhereInput;
+    orderBy?: Prisma.BannerOrderByWithRelationInput;
+  }): {
     skip?: number;
     take?: number;
     where?: Prisma.BannerWhereInput;

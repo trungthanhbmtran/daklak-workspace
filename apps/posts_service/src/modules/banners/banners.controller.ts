@@ -4,18 +4,6 @@ import { status as GrpcStatus } from '@grpc/grpc-js';
 import { BannersService } from './banners.service';
 import { CreateBannerDto } from './dto/create-banner.dto';
 import { UpdateBannerDto } from './dto/update-banner.dto';
-import { BannerLinkType } from '@generated/prisma/client';
-
-interface BannerInput extends CreateBannerDto {
-  image_url?: string;
-  link_type?: string;
-  custom_url?: string;
-  order_index?: number;
-  meta_title?: string;
-  meta_description?: string;
-  start_at?: string;
-  end_at?: string;
-}
 
 @Controller()
 export class BannersController {
@@ -23,21 +11,10 @@ export class BannersController {
 
   @GrpcMethod('BannerService', 'CreateBanner')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createBanner(data: BannerInput) {
+  async createBanner(data: CreateBannerDto) {
     try {
-      const payload: CreateBannerDto = {
-        ...data,
-        imageUrl: data.imageUrl ?? data.image_url,
-        linkType: (data.linkType ?? data.link_type) as BannerLinkType,
-        customUrl: data.customUrl ?? data.custom_url,
-        orderIndex: data.orderIndex ?? data.order_index,
-        metaTitle: data.metaTitle ?? data.meta_title,
-        metaDescription: data.metaDescription ?? data.meta_description,
-        startAt: data.startAt ?? data.start_at,
-        endAt: data.endAt ?? data.end_at,
-      };
-      const result = await this.bannersService.create(payload);
-      return { data: result, success: true };
+      const result = await this.bannersService.create(data);
+      return result; // Result already contains { data, success, message }
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
@@ -51,12 +28,7 @@ export class BannersController {
   async getBanner(data: { id: string }) {
     try {
       const banner = await this.bannersService.findById(data.id);
-      if (!banner)
-        throw new RpcException({
-          code: GrpcStatus.NOT_FOUND,
-          message: 'Banner not found',
-        });
-      return banner;
+      return { data: banner };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
@@ -73,7 +45,6 @@ export class BannersController {
       return {
         data: banners,
         success: true,
-        message: 'OK',
       };
     } catch (error: unknown) {
       throw new RpcException({
@@ -83,10 +54,9 @@ export class BannersController {
     }
   }
 
-  @GrpcMethod('BannerService', 'UpdateCategory') // Wait, the proto says 'UpdateBanner' but here it was 'UpdateBanner' in previous version.
   @GrpcMethod('BannerService', 'UpdateBanner')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async updateBanner(data: BannerInput & { id: string }) {
+  async updateBanner(data: UpdateBannerDto & { id: string }) {
     try {
       const { id, ...rest } = data;
       if (!id)
@@ -95,19 +65,8 @@ export class BannersController {
           message: 'ID is required',
         });
 
-      const payload: UpdateBannerDto = {
-        ...rest,
-        imageUrl: rest.imageUrl ?? rest.image_url,
-        linkType: (rest.linkType ?? rest.link_type) as BannerLinkType,
-        customUrl: rest.customUrl ?? rest.custom_url,
-        orderIndex: rest.orderIndex ?? rest.order_index,
-        metaTitle: rest.metaTitle ?? rest.meta_title,
-        metaDescription: rest.metaDescription ?? rest.meta_description,
-        startAt: rest.startAt ?? rest.start_at,
-        endAt: rest.endAt ?? rest.end_at,
-      };
-      const result = await this.bannersService.update(id, payload);
-      return { data: result, success: true };
+      const result = await this.bannersService.update(id, rest);
+      return result;
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({

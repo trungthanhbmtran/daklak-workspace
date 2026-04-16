@@ -10,13 +10,16 @@ export class TranslationsRepository extends BaseRepository<
   PostTranslate,
   CreateTranslationDto,
   UpdateTranslationDto,
-  any
+  unknown
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.postTranslate);
   }
 
-  protected prepareQuery(query: any): {
+  protected prepareQuery(query: {
+    where?: Prisma.PostTranslateWhereInput;
+    orderBy?: Prisma.PostTranslateOrderByWithRelationInput;
+  }): {
     skip?: number;
     take?: number;
     where?: Prisma.PostTranslateWhereInput;

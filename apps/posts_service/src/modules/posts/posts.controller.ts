@@ -12,20 +12,15 @@ export class PostsController {
 
   @GrpcMethod('PostService', 'CreatePost')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createPost(data: CreatePostDto & { author_id?: string }) {
+  async createPost(data: CreatePostDto) {
     try {
-      // Handle flexible authorId/author_id
-      const payload: CreatePostDto = {
-        ...data,
-        authorId: data.authorId ?? data.author_id,
-      };
-      const post = await this.postsService.createPost(payload);
+      const post = await this.postsService.createPost(data);
       return { data: post };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
         code: GrpcStatus.INTERNAL,
-        message: (error as Error).message || 'Error creating post',
+        message: (error as Error).message,
       });
     }
   }
@@ -52,24 +47,9 @@ export class PostsController {
 
   @GrpcMethod('PostService', 'ListPosts')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async listPosts(
-    data: QueryPostDto & {
-      author_id?: string;
-      category_id?: string;
-      categoryId?: string;
-    },
-  ) {
+  async listPosts(data: QueryPostDto) {
     try {
-      const payload: QueryPostDto = {
-        ...data,
-        authorId: data.authorId ?? data.author_id,
-        categorySlug: data.categorySlug, // Ensure compatibility
-      };
-      // We also handle categoryId if passed via gRPC
-      const { rows, count } = await this.postsService.getList({
-        ...payload,
-        categoryId: data.categoryId ?? data.category_id,
-      });
+      const { rows, count } = await this.postsService.getList(data);
 
       return {
         data: rows,
@@ -91,20 +71,10 @@ export class PostsController {
 
   @GrpcMethod('PostService', 'UpdatePost')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async updatePost(
-    data: UpdatePostDto & {
-      id: string;
-      category_id?: string;
-      tag_ids?: string[];
-    },
-  ) {
+  async updatePost(data: UpdatePostDto & { id: string }) {
     try {
-      const payload: UpdatePostDto = {
-        ...data,
-        categoryId: data.categoryId ?? data.category_id,
-        tagIds: data.tagIds ?? data.tag_ids,
-      };
-      const post = await this.postsService.update(data.id, payload);
+      const { id, ...payload } = data;
+      const post = await this.postsService.update(id, payload);
       return { data: post };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
@@ -129,22 +99,9 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'AddTagsToPost')
-  async addTagsToPost(data: {
-    postId?: string;
-    post_id?: string;
-    tagIds?: string[];
-    tag_ids?: string[];
-  }) {
+  async addTagsToPost(data: { postId: string; tagIds: string[] }) {
     try {
-      const postId = data.postId ?? data.post_id;
-      const tagIds = data.tagIds ?? data.tag_ids ?? [];
-      if (!postId)
-        throw new RpcException({
-          code: GrpcStatus.INVALID_ARGUMENT,
-          message: 'postId is required',
-        });
-
-      await this.postsService.addTagsToPost(postId, tagIds);
+      await this.postsService.addTagsToPost(data.postId, data.tagIds);
       return { success: true };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
@@ -156,22 +113,9 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'RemoveTagFromPost')
-  async removeTagFromPost(data: {
-    postId?: string;
-    post_id?: string;
-    tagId?: string;
-    tag_id?: string;
-  }) {
+  async removeTagFromPost(data: { postId: string; tagId: string }) {
     try {
-      const postId = data.postId ?? data.post_id;
-      const tagId = data.tagId ?? data.tag_id;
-      if (!postId || !tagId)
-        throw new RpcException({
-          code: GrpcStatus.INVALID_ARGUMENT,
-          message: 'postId and tagId are required',
-        });
-
-      await this.postsService.removeTagFromPost(postId, tagId);
+      await this.postsService.removeTagFromPost(data.postId, data.tagId);
       return { success: true };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
@@ -183,16 +127,9 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'GetTagsByPost')
-  async getTagsByPost(data: { postId?: string; post_id?: string }) {
+  async getTagsByPost(data: { postId: string }) {
     try {
-      const postId = data.postId ?? data.post_id;
-      if (!postId)
-        throw new RpcException({
-          code: GrpcStatus.INVALID_ARGUMENT,
-          message: 'postId is required',
-        });
-
-      const tags = await this.postsService.getTagsByPost(postId);
+      const tags = await this.postsService.getTagsByPost(data.postId);
       return { tags };
     } catch (error: unknown) {
       throw new RpcException({
@@ -203,22 +140,9 @@ export class PostsController {
   }
 
   @GrpcMethod('PostService', 'SetCategoryForPost')
-  async setCategoryForPost(data: {
-    postId?: string;
-    post_id?: string;
-    categoryId?: string;
-    category_id?: string;
-  }) {
+  async setCategoryForPost(data: { postId: string; categoryId: string }) {
     try {
-      const postId = data.postId ?? data.post_id;
-      const categoryId = data.categoryId ?? data.category_id;
-      if (!postId || !categoryId)
-        throw new RpcException({
-          code: GrpcStatus.INVALID_ARGUMENT,
-          message: 'postId and categoryId are required',
-        });
-
-      await this.postsService.setCategoryForPost(postId, categoryId);
+      await this.postsService.setCategoryForPost(data.postId, data.categoryId);
       return { success: true };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
@@ -262,19 +186,10 @@ export class PostsController {
 
   @GrpcMethod('PostService', 'ReviewPost')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async reviewPost(
-    data: UpdatePostDto & {
-      id: string;
-      reviewer_id?: string;
-      reviewerId?: string;
-    },
-  ) {
+  async reviewPost(data: UpdatePostDto & { id: string }) {
     try {
-      const reviewerId = data.reviewerId ?? data.reviewer_id;
-      const post = await this.postsService.reviewPost(data.id, {
-        ...data,
-        reviewerId,
-      });
+      const { id, ...rest } = data;
+      const post = await this.postsService.reviewPost(id, rest);
       return { success: true, data: post };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
