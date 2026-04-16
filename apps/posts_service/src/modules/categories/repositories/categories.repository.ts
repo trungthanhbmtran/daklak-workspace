@@ -10,7 +10,10 @@ export class CategoriesRepository extends BaseRepository<
   Category,
   CreateCategoryDto,
   UpdateCategoryDto,
-  Prisma.CategoryWhereInput
+  {
+    where?: Prisma.CategoryWhereInput;
+    orderBy?: Prisma.CategoryOrderByWithRelationInput;
+  }
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.category);

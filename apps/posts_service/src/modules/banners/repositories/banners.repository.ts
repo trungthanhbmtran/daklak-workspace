@@ -10,7 +10,10 @@ export class BannersRepository extends BaseRepository<
   Banner,
   CreateBannerDto,
   UpdateBannerDto,
-  unknown
+  {
+    where?: Prisma.BannerWhereInput;
+    orderBy?: Prisma.BannerOrderByWithRelationInput;
+  }
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.banner);

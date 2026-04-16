@@ -10,7 +10,10 @@ export class TagsRepository extends BaseRepository<
   Tag,
   CreateTagDto,
   UpdateTagDto,
-  unknown
+  {
+    where?: Prisma.TagWhereInput;
+    orderBy?: Prisma.TagOrderByWithRelationInput;
+  }
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.tag);
