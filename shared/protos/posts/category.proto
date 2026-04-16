@@ -58,6 +58,7 @@ message CreateCategoryRequest {
   bool status = 10;
   string metaTitle = 11;
   string metaDescription = 12;
+  bool isGovStandard = 13;
 }
 
 message UpdateCategoryRequest {
@@ -74,6 +75,7 @@ message UpdateCategoryRequest {
   string description = 11;
   string metaTitle = 12;
   string metaDescription = 13;
+  bool isGovStandard = 14;
 }
 
 message GetCategoryRequest {
