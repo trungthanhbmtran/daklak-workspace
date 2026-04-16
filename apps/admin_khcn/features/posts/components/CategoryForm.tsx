@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  ArrowLeft, Save, Loader2, Info, Layout, 
+  ArrowLeft, Save, Loader2, Info, Layout,
   Settings, ImagePlus, Trash2, ShieldCheck
 } from "lucide-react";
 import { useEffect, useRef } from "react";
@@ -127,7 +127,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       if (payload.parentId === "none" || payload.parentId === "") {
         payload.parentId = null;
       }
-      
+
       if (isEdit) return postsApi.updateCategory(editId!, payload);
       return postsApi.createCategory(payload);
     },
@@ -215,10 +215,10 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                       <FormItem>
                         <FormLabel>Mô tả</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Mô tả ngắn gọn về chuyên mục này..." 
-                            className="min-h-[100px] resize-none" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Mô tả ngắn gọn về chuyên mục này..."
+                            className="min-h-[100px] resize-none"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -244,17 +244,17 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                         <FormControl>
                           <div className="space-y-4">
                             <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
-                            
+
                             {isUploading ? (
                               <div className="w-40 aspect-square border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
                                 <Loader2 className="h-6 w-6 animate-spin text-primary" />
                               </div>
                             ) : (previewUrl || field.value) ? (
                               <div className="relative group w-40 aspect-square rounded-lg overflow-hidden border shadow-sm">
-                                <img 
-                                  src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/media/download/${field.value}`)} 
-                                  alt="Thumb Preview" 
-                                  className="w-full h-full object-cover" 
+                                <img
+                                  src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/media/download/${field.value}`)}
+                                  alt="Thumb Preview"
+                                  className="w-full h-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                                   <Button type="button" variant="secondary" size="icon" className="h-8 w-8" onClick={() => fileInputRef.current?.click()}><ImagePlus className="h-4 w-4" /></Button>
@@ -296,8 +296,8 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Chuyên mục cha</FormLabel>
-                        <Select 
-                          onValueChange={field.onChange} 
+                        <Select
+                          onValueChange={field.onChange}
                           defaultValue={field.value || "none"}
                           value={field.value || "none"}
                         >
@@ -376,9 +376,9 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
               </Card>
 
               <div className="pt-2">
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-lg shadow-md" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-lg shadow-md"
                   disabled={mutation.isPending}
                 >
                   {mutation.isPending ? (

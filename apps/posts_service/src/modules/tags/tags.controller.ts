@@ -1,5 +1,6 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { status as GrpcStatus } from '@grpc/grpc-js';
 import { TagsService } from './tags.service';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { UpdateTagDto } from './dto/update-tag.dto';
@@ -11,28 +12,52 @@ export class TagsController {
   @GrpcMethod('TagService', 'CreateTag')
   @UsePipes(new ValidationPipe({ transform: true }))
   async createTag(data: CreateTagDto) {
-    return this.tagsService.create(data);
+    try {
+      return await this.tagsService.create(data);
+    } catch (error: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('TagService', 'GetTag')
   async getTag(data: { id: string }) {
-    return this.tagsService.findById(data.id);
+    try {
+      const tag = await this.tagsService.findById(data.id);
+      if (!tag) throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Tag not found' });
+      return tag;
+    } catch (error: any) {
+      if (error instanceof RpcException) throw error;
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('TagService', 'ListTags')
   async listTags() {
-    const tags = await this.tagsService.findAll();
-    return { data: tags };
+    try {
+      const tags = await this.tagsService.findAll();
+      return { data: tags };
+    } catch (error: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('TagService', 'UpdateTag')
   @UsePipes(new ValidationPipe({ transform: true }))
   async updateTag(data: UpdateTagDto & { id: string }) {
-    return this.tagsService.update(data.id, data);
+    try {
+      return await this.tagsService.update(data.id, data);
+    } catch (error: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('TagService', 'DeleteTag')
   async deleteTag(data: { id: string }) {
-    return { success: true };
+    try {
+      await this.tagsService.delete(data.id);
+      return { success: true };
+    } catch (error: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 }

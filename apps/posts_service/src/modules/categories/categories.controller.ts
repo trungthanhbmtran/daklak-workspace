@@ -1,5 +1,6 @@
 import { Controller, UsePipes, ValidationPipe } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { status as GrpcStatus } from '@grpc/grpc-js';
 import { CategoryService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
@@ -10,69 +11,123 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'CreateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async createCategory(data: CreateCategoryDto) {
-    const result = await this.categoryService.create(data);
-    return { data: result };
+  async createCategory(data: any) {
+    try {
+      const payload = {
+        ...data,
+        parentId: data.parentId ?? data.parent_id,
+        linkType: data.linkType ?? data.link_type,
+        customUrl: data.customUrl ?? data.custom_url,
+        orderIndex: data.orderIndex ?? data.order_index,
+        metaTitle: data.metaTitle ?? data.meta_title,
+        metaDescription: data.metaDescription ?? data.meta_description,
+        isGovStandard: data.isGovStandard ?? data.is_gov_standard,
+      };
+      const result = await this.categoryService.create(payload);
+      return { data: result };
+    } catch (error: any) {
+      if (error instanceof RpcException) throw error;
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('CategoryService', 'GetCategory')
   async getCategory(data: { id: string }) {
-    const result = await this.categoryService.findById(data.id);
-    return { data: result };
+    try {
+      const result = await this.categoryService.findById(data.id);
+      if (!result) throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Category not found' });
+      return { data: result };
+    } catch (error: any) {
+      if (error instanceof RpcException) throw error;
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('CategoryService', 'GetCategorySubTree')
   async getCategorySubTree(data: { id: string }) {
-    const result = await this.categoryService.getSubTree(data.id);
-    return { data: result };
+    try {
+      const result = await this.categoryService.getSubTree(data.id);
+      return { data: result };
+    } catch (error: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
   async listCategories(data: { mode?: string; id?: string }) {
-    const { mode, id } = data;
-    let result;
-    switch (mode) {
-      case 'flat':
-        const flatCategories = await this.categoryService.getAllFlat();
-        result = flatCategories.map(cat => ({
-          ...cat,
-          children: []
-        }));
-        break;
-      case 'tree':
-        result = await this.categoryService.getFullTree();
-        break;
-      case 'subtree':
-        result = await this.categoryService.getSubTree(data.id!);
-        break;
-      case 'forPost':
-        const activeCategories = await this.categoryService.getAllForPost();
-        result = activeCategories.map(cat => ({
-          ...cat,
-          children: []
-        }));
-        break;
-      default:
-        const defaultCategories = await this.categoryService.getAllFlat();
-        result = defaultCategories.map(cat => ({
-          ...cat,
-          children: []
-        }));
+    try {
+      const { mode, id } = data;
+      let result;
+      switch (mode) {
+        case 'flat':
+          const flatCategories = await this.categoryService.getAllFlat();
+          result = flatCategories.map(cat => ({
+            ...cat,
+            children: []
+          }));
+          break;
+        case 'tree':
+          result = await this.categoryService.getFullTree();
+          break;
+        case 'subtree':
+          if (!id) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'ID is required for subtree mode' });
+          result = await this.categoryService.getSubTree(id);
+          break;
+        case 'forPost':
+          const activeCategories = await this.categoryService.getAllForPost();
+          result = activeCategories.map(cat => ({
+            ...cat,
+            children: []
+          }));
+          break;
+        default:
+          const defaultCategories = await this.categoryService.getAllFlat();
+          result = defaultCategories.map(cat => ({
+            ...cat,
+            children: []
+          }));
+      }
+      return { data: result };
+    } catch (error: any) {
+      if (error instanceof RpcException) throw error;
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
     }
-    return { data: result };
   }
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
   @UsePipes(new ValidationPipe({ transform: true }))
-  async updateCategory(data: UpdateCategoryDto & { id: string }) {
-    const { id, ...updateData } = data;
-    const result = await this.categoryService.update(id, updateData);
-    return { data: result };
+  async updateCategory(data: any) {
+    try {
+      const { id, ...rest } = data;
+      if (!id) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'ID is required' });
+
+      const payload = {
+        ...rest,
+        parentId: rest.parentId ?? rest.parent_id,
+        linkType: rest.linkType ?? rest.link_type,
+        customUrl: rest.customUrl ?? rest.custom_url,
+        orderIndex: rest.orderIndex ?? rest.order_index,
+        metaTitle: rest.metaTitle ?? rest.meta_title,
+        metaDescription: rest.metaDescription ?? rest.meta_description,
+        isGovStandard: rest.isGovStandard ?? rest.is_gov_standard,
+      };
+      
+      const result = await this.categoryService.update(id, payload);
+      return { data: result };
+    } catch (error: any) {
+      if (error instanceof RpcException) throw error;
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 
   @GrpcMethod('CategoryService', 'DeleteCategory')
   async deleteCategory(data: { id: string }) {
-    await this.categoryService.delete(data.id);
-    return { success: true };
+    try {
+      if (!data.id) throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: 'ID is required' });
+      await this.categoryService.delete(data.id);
+      return { success: true };
+    } catch (error: any) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: error.message });
+    }
   }
 }
