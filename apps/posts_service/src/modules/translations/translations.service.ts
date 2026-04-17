@@ -4,13 +4,13 @@ import { TranslationsRepository } from './repositories/translations.repository';
 import { CreateTranslationDto } from './dto/create-translation.dto';
 import { UpdateTranslationDto } from './dto/update-translation.dto';
 import { PostTranslate } from '@generated/prisma/client';
-import { PostsRepository } from '../posts/repositories/posts.repository';
+import { IPostRepository } from '../posts/domain/post.repository.interface';
 
 @Injectable()
 export class TranslationService {
   constructor(
     private readonly translationsRepository: TranslationsRepository,
-    private readonly postsRepository: PostsRepository,
+    @Inject(IPostRepository) private readonly postsRepository: IPostRepository,
     @Inject('RABBITMQ_SERVICE') private readonly rabbitClient: ClientProxy,
   ) {}
 

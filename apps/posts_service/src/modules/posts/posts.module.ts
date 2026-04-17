@@ -17,6 +17,6 @@ import { TranslationsModule } from '../translations/translations.module';
       useClass: PrismaPostRepository,
     },
   ],
-  exports: [PostsService],
+  exports: [PostsService, IPostRepository],
 })
 export class PostsModule {}
