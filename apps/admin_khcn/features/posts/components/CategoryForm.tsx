@@ -115,8 +115,15 @@ export function CategoryForm({ onBack, editId }: { onBack: () => void; editId?: 
   });
 
   const mutation = useMutation({
-    mutationFn: (v: CategoryFormValues) => 
-      isEdit ? postsApi.updateCategory(editId!, v) : postsApi.createCategory(v),
+    mutationFn: (v: CategoryFormValues) => {
+      // Chuẩn hóa dữ liệu trước khi gửi: Nếu parentId là chuỗi rỗng thì xóa đi hoặc để undefined
+      // để vượt qua validation IsUUID ở Gateway, Gateway sẽ gửi chuỗi rỗng sang gRPC
+      const payload = { ...v };
+      if (!payload.parentId || payload.parentId === "") {
+        delete payload.parentId;
+      }
+      return isEdit ? postsApi.updateCategory(editId!, payload) : postsApi.createCategory(payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["categories"] });
       onBack();
