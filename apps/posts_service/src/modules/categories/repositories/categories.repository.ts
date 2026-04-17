@@ -5,33 +5,31 @@ import { PrismaService } from '../../../database/prisma.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 
+export interface CategoryQuery {
+  where?: Prisma.CategoryWhereInput;
+  orderBy?: Prisma.CategoryOrderByWithRelationInput;
+}
+
 @Injectable()
 export class CategoriesRepository extends BaseRepository<
   Category,
   CreateCategoryDto,
   UpdateCategoryDto,
-  {
-    where?: Prisma.CategoryWhereInput;
-    orderBy?: Prisma.CategoryOrderByWithRelationInput;
-  }
+  CategoryQuery
 > {
   constructor(prisma: PrismaService) {
     super(prisma, prisma.category);
   }
 
-  protected prepareQuery(query: {
-    where?: Prisma.CategoryWhereInput;
-    orderBy?: Prisma.CategoryOrderByWithRelationInput;
-  }): {
+  protected prepareQuery(query: CategoryQuery): {
     skip?: number;
     take?: number;
     where?: Prisma.CategoryWhereInput;
     orderBy?: Prisma.CategoryOrderByWithRelationInput;
   } {
     return {
-      where: (query as { where?: Prisma.CategoryWhereInput }).where,
-      orderBy: (query as { orderBy?: Prisma.CategoryOrderByWithRelationInput })
-        .orderBy || { lft: 'asc' },
+      where: query?.where,
+      orderBy: query?.orderBy || { lft: 'asc' },
     };
   }
 

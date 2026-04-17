@@ -1,24 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, forwardRef, Inject } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { PostsRepository } from './repositories/posts.repository';
+import { status as GrpcStatus } from '@grpc/grpc-js';
+import { IPostRepository } from './domain/post.repository.interface';
+import { Post, DomainPostStatus } from './domain/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { QueryPostDto } from './dto/query-post.dto';
-import { PostStatus } from '@generated/prisma/client';
 import { CensorService } from './censor.service';
 import { TranslationService } from '../translations/translations.service';
-import { forwardRef, Inject } from '@nestjs/common';
 
 @Injectable()
 export class PostsService {
   constructor(
-    private readonly postsRepository: PostsRepository,
+    private readonly postsRepository: IPostRepository,
     private readonly censorService: CensorService,
     @Inject(forwardRef(() => TranslationService))
     private readonly translationService: TranslationService,
   ) {}
 
-  async createPost(data: CreatePostDto) {
+  async createPost(data: CreatePostDto): Promise<Post> {
     // 1. Kiểm duyệt nội dung tự động (Moderation)
     const titleCheck = this.censorService.checkContent(data.title);
     const contentCheck = this.censorService.checkContent(data.content || '');
@@ -36,25 +36,34 @@ export class PostsService {
       ]),
     );
 
-    const processedData = {
+    const isSafeStatus = isSafe ? 'SAFE' : 'FLAGGED';
+    const moderationNote = isSafe
+      ? 'Nội dung an toàn'
+      : `Phát hiện từ ngữ nhạy cảm: ${flaggedWords.join(', ')}`;
+    
+    const postStatus = isSafe 
+      ? (data.status as unknown as DomainPostStatus) || DomainPostStatus.pending 
+      : DomainPostStatus.rejected;
+
+    const post = Post.create({
       ...data,
-      autoModerationStatus: isSafe ? 'SAFE' : 'FLAGGED',
-      autoModerationNote: isSafe
-        ? 'Nội dung an toàn'
-        : `Phát hiện từ ngữ nhạy cảm: ${flaggedWords.join(', ')}`,
-      status: isSafe ? data.status || PostStatus.pending : PostStatus.rejected,
-    };
+      status: postStatus,
+      autoModerationStatus: isSafeStatus,
+      autoModerationNote: moderationNote,
+      isFeatured: data.isFeatured || false,
+      isNotification: data.isNotification || false,
+    } as any);
 
     // 2. Lưu post vào DB
-    const post = await this.postsRepository.create(processedData);
+    const createdPost = await this.postsRepository.create(post);
 
     // 3. Tự động dịch nếu nội dung an toàn (Automatic Translation)
-    if (isSafe && post.language === 'vi') {
+    if (isSafe && createdPost.props_copy.language === 'vi') {
       try {
-        await this.translationService.triggerTranslationManual(post.id, 'en');
-        await this.postsRepository.update(post.id, {
+        await this.translationService.triggerTranslationManual(createdPost.id, 'en');
+        await this.postsRepository.update(createdPost.id, {
           isTranslated: true,
-        });
+        } as any);
       } catch (error) {
         console.error(
           '❌ [PostsService] Lỗi khi kích hoạt tự động dịch:',
@@ -63,36 +72,53 @@ export class PostsService {
       }
     }
 
-    return post;
+    return createdPost;
   }
 
-  async findById(id: string) {
+  async findById(id: string): Promise<Post> {
     const post = await this.postsRepository.findById(id);
     if (!post) {
-      throw new RpcException({ code: 5, message: 'Post not found' });
+      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Post not found' });
     }
     return post;
   }
 
-  async findBySlug(slug: string) {
+  async findBySlug(slug: string): Promise<Post> {
     const post = await this.postsRepository.findBySlug(slug);
     if (!post) {
-      throw new RpcException({ code: 5, message: 'Post not found' });
+      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Post not found' });
     }
     return post;
   }
 
   async getList(query: QueryPostDto) {
-    return this.postsRepository.findMany(query);
+    return this.postsRepository.findAll(query);
   }
 
-  async update(id: string, data: UpdatePostDto) {
-    await this.findById(id); // Check existence
-    return this.postsRepository.update(id, data);
+  async update(id: string, data: UpdatePostDto, userId?: string) {
+    const post = await this.findById(id);
+    
+    // Check ownership if userId is provided
+    if (userId && !post.isOwnedBy(userId)) {
+      throw new RpcException({ 
+        code: GrpcStatus.PERMISSION_DENIED, 
+        message: 'You do not have permission to update this post' 
+      });
+    }
+
+    return this.postsRepository.update(id, data as any);
   }
 
-  async delete(id: string) {
-    await this.findById(id); // Check existence
+  async delete(id: string, userId?: string, isAdmin = false) {
+    const post = await this.findById(id);
+    
+    if (!isAdmin && userId && !post.isOwnedBy(userId)) {
+      throw new RpcException({ 
+        code: GrpcStatus.PERMISSION_DENIED, 
+        message: 'You do not have permission to delete this post' 
+      });
+    }
+
     return this.postsRepository.delete(id);
   }
 
@@ -106,11 +132,6 @@ export class PostsService {
     return this.postsRepository.removeTag(postId, tagId);
   }
 
-  async getTagsByPost(postId: string) {
-    await this.findById(postId);
-    return this.postsRepository.getTags(postId);
-  }
-
   async setCategoryForPost(postId: string, categoryId: string) {
     await this.findById(postId);
     return this.postsRepository.setCategory(postId, categoryId);
@@ -121,35 +142,42 @@ export class PostsService {
   }
 
   async reviewPost(id: string, data: UpdatePostDto) {
-    await this.findById(id);
+    const post = await this.findById(id);
     const { status, moderationNote: note, reviewerId, ...otherData } = data;
 
     let finalNote = note;
-    if (status === PostStatus.published) {
+    const targetStatus = status as unknown as DomainPostStatus;
+
+    if (targetStatus === DomainPostStatus.published) {
       finalNote = '';
     } else if (!note) {
-      switch (status) {
-        case PostStatus.rejected:
+      switch (targetStatus) {
+        case DomainPostStatus.rejected:
           finalNote = 'Nội dung bị từ chối bởi quản trị viên';
           break;
-        case PostStatus.editing:
+        case DomainPostStatus.editing:
           finalNote = 'Yêu cầu chỉnh sửa lại nội dung';
           break;
-        case PostStatus.approved:
+        case DomainPostStatus.approved:
           finalNote = 'Nội dung đã được thông qua';
           break;
-        case PostStatus.pending:
+        case DomainPostStatus.pending:
           finalNote = 'Đang chờ thẩm định';
           break;
       }
     }
 
-    return this.postsRepository.update(id, {
+    const updatePayload: any = {
       ...otherData,
-      status,
+      status: targetStatus,
       reviewerId,
       moderationNote: finalNote,
-      publishedAt: status === PostStatus.published ? new Date() : undefined,
-    } as UpdatePostDto);
+    };
+
+    if (targetStatus === DomainPostStatus.published) {
+      updatePayload.publishedAt = new Date();
+    }
+
+    return this.postsRepository.update(id, updatePayload);
   }
 }

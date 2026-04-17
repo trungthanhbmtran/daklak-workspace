@@ -51,7 +51,7 @@ message CreateCategoryRequest {
   string parentId = 3;
   string thumbnail = 4;
   string customUrl = 5;
-  string linkType = 6;   // "standard" | "static" | "external"
+  string linkType = 6;   // "standard" | "static" | "external"  
   string target = 7;     // "_self" | "_blank"
   int32 orderIndex = 8;
   string description = 9;
