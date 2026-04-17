@@ -152,8 +152,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                       <td className="px-5 py-4">
                         <div className="flex items-start gap-3">
                           <div className="h-12 w-16 bg-muted rounded border overflow-hidden flex items-center justify-center shrink-0">
-                            {post.thumbnailId ? (
-                              <img src={`/api/v1/media/download/${post.thumbnailId}`} alt="" className="w-full h-full object-cover" />
+                            {post.thumbnail ? (
+                              <img src={`/api/v1/media/download/${post.thumbnail}`} alt="" className="w-full h-full object-cover" />
                             ) : (
                               <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
                             )}

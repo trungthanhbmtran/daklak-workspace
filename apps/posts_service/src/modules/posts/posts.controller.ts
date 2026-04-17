@@ -30,7 +30,7 @@ export class PostsController {
   async getPost(data: { id: string }) {
     try {
       const post = await this.postsService.findById(data.id);
-      return PostMapper.toResponse(post);
+      return { data: PostMapper.toResponse(post) };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({
@@ -114,7 +114,7 @@ export class PostsController {
   async getPostBySlug(data: { slug: string }) {
     try {
       const post = await this.postsService.findBySlug(data.slug);
-      return PostMapper.toResponse(post);
+      return { data: PostMapper.toResponse(post) };
     } catch (error: unknown) {
       if (error instanceof RpcException) throw error;
       throw new RpcException({

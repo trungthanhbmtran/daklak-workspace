@@ -50,14 +50,14 @@ const convertToSlug = (text: string) => {
 const postSchema = z.object({
   title: z.string().min(5, "Tiêu đề quá ngắn"),
   slug: z.string().min(1, "Slug không được để trống"),
-  summary: z.string().max(300, "Tóm tắt tối đa 300 ký tự").optional(),
+  description: z.string().max(300, "Tóm tắt tối đa 300 ký tự").optional(),
   content: z.string().min(10, "Nội dung quá ngắn"),
   categoryId: z.string().min(1, "Chọn chuyên mục"),
-  status: z.enum(["DRAFT", "PENDING", "PUBLISHED", "REJECTED", "EDITING"]),
-  thumbnailId: z.string().optional(),
+  status: z.enum(["DRAFT", "PENDING", "APPROVED", "REJECTED", "PUBLISHED", "EDITING"]),
+  thumbnail: z.string().optional(),
   tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
-  sendNotification: z.boolean().default(false),
+  isNotification: z.boolean().default(false),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -72,9 +72,9 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema),
     defaultValues: {
-      title: "", slug: "", summary: "", content: "",
-      categoryId: "", status: "DRAFT", thumbnailId: "",
-      tags: [], isFeatured: false, sendNotification: false,
+      title: "", slug: "", description: "", content: "",
+      categoryId: "", status: "DRAFT", thumbnail: "",
+      tags: [], isFeatured: false, isNotification: false,
     },
   });
 
@@ -104,12 +104,12 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   });
 
   useEffect(() => {
-    if (postData) form.reset({ ...postData, sendNotification: false });
+    if (postData) form.reset({ ...postData });
   }, [postData, form]);
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
-    onSuccess: (id) => form.setValue("thumbnailId", id, { shouldDirty: true }),
-    onRemove: () => form.setValue("thumbnailId", "", { shouldDirty: true })
+    onSuccess: (id) => form.setValue("thumbnail", id, { shouldDirty: true }),
+    onRemove: () => form.setValue("thumbnail", "", { shouldDirty: true })
   });
 
   const mutation = useMutation({
@@ -238,9 +238,9 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   )} />
                 </div>
 
-                <FormField control={form.control} name="summary" render={({ field }) => (
+                <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold">Tóm tắt ngắn (Summary)</FormLabel>
+                    <FormLabel className="font-semibold">Tóm tắt ngắn (Description)</FormLabel>
                     <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
                     <FormDescription className="text-[11px]">Sẽ hiển thị trên kết quả tìm kiếm Google và danh sách bài viết.</FormDescription>
                   </FormItem>
@@ -271,9 +271,9 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
                 {isUploading ? (
                   <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
-                ) : (previewUrl || form.getValues("thumbnailId")) ? (
+                ) : (previewUrl || form.getValues("thumbnail")) ? (
                   <div className="relative group rounded-xl overflow-hidden border shadow-inner">
-                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
+                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnail")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-[2px]">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi ảnh</Button>
@@ -326,7 +326,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     </div>
                   )} />
 
-                  <FormField control={form.control} name="sendNotification" render={({ field }) => (
+                  <FormField control={form.control} name="isNotification" render={({ field }) => (
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="n-mode"><Bell className={`h-3.5 w-3.5 ${field.value ? 'fill-blue-400 text-blue-500' : ''}`} /> Gửi thông báo</Label>
@@ -369,10 +369,10 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         </div>
 
         {/* MODAL FULL IMAGE */}
-        {showFullImage && (previewUrl || form.getValues("thumbnailId")) && (
+        {showFullImage && (previewUrl || form.getValues("thumbnail")) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
-              <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnailId")}`} className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20" alt="Full" />
+              <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnail")}`} className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20" alt="Full" />
               <Button type="button" variant="ghost" size="icon" className="absolute -top-12 right-0 text-white hover:bg-white/10" onClick={() => setShowFullImage(false)}><X className="h-8 w-8" /></Button>
             </div>
           </div>

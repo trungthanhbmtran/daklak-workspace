@@ -16,9 +16,8 @@ export class CreatePostDto {
   content: string;
 
   @ApiPropertyOptional()
-  @IsString()
   @IsOptional()
-  contentJson?: string;
+  contentJson?: any;
 
   @ApiPropertyOptional()
   @IsString()
@@ -51,36 +50,31 @@ export class CreatePostDto {
   @IsOptional()
   isNotification?: boolean;
 
-  @ApiPropertyOptional({ default: 'draft' })
+  @ApiPropertyOptional({ enum: ['DRAFT', 'PENDING', 'APPROVED', 'REJECTED', 'PUBLISHED', 'EDITING'], default: 'DRAFT' })
   @IsString()
   @IsOptional()
   status?: string;
+  
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  language?: string;
 }
 
 export class UpdatePostDto extends CreatePostDto {}
 
 export class ReviewPostDto {
-  @ApiProperty({ enum: ['approved', 'rejected', 'editing', 'published'] })
+  @ApiProperty({ enum: ['APPROVED', 'REJECTED', 'EDITING', 'PUBLISHED'] })
   @IsString()
   status: string;
 
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  note?: string;
+  moderationNote?: string;
 
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  title?: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  description?: string;
-
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  contentJson?: string;
+  reviewerId?: string;
 }
