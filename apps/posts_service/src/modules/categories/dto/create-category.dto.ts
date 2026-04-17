@@ -5,6 +5,7 @@ import {
   IsEnum,
   IsInt,
   IsUUID,
+  ValidateIf,
 } from 'class-validator';
 import { LinkType } from '@generated/prisma/client';
 
@@ -35,8 +36,9 @@ export class CreateCategoryDto {
   @IsOptional()
   target?: string;
 
-  @IsUUID()
   @IsOptional()
+  @ValidateIf((o) => o.parentId !== '' && o.parentId !== null)
+  @IsUUID()
   parentId?: string | null;
 
   @IsInt()
