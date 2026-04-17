@@ -60,13 +60,15 @@ export function CategoryForm({ onBack, editId }: { onBack: () => void; editId?: 
       name: "",
       slug: "",
       description: "",
-      parentId: null,
+      parentId: "", // Sử dụng chuỗi rỗng thay vì null để tương thích gRPC
       status: true,
       orderIndex: 0,
       isGovStandard: false,
       thumbnail: "",
       metaTitle: "",
-      metaDescription: ""
+      metaDescription: "",
+      linkType: "standard",
+      target: "_self",
     },
   });
 
@@ -102,7 +104,7 @@ export function CategoryForm({ onBack, editId }: { onBack: () => void; editId?: 
     if (categoryData) {
       form.reset({
         ...categoryData,
-        parentId: categoryData.parentId || null
+        parentId: categoryData.parentId || ""
       });
     }
   }, [categoryData, form]);
@@ -191,7 +193,7 @@ export function CategoryForm({ onBack, editId }: { onBack: () => void; editId?: 
                     <FormItem>
                       <FormLabel className="font-semibold">Chuyên mục cha</FormLabel>
                       <Select 
-                        onValueChange={(val) => field.onChange(val === "root" ? null : val)} 
+                        onValueChange={(val) => field.onChange(val === "root" ? "" : val)} 
                         value={field.value || "root"}
                       >
                         <FormControl>
