@@ -6,11 +6,13 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { TagsModule } from './modules/tags/tags.module';
 import { BannersModule } from './modules/banners/banners.module';
 import { TranslationsModule } from './modules/translations/translations.module';
+import { CensorModule } from './shared/censor/censor.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     PrismaModule,
+    CensorModule,
     PostsModule,
     CategoriesModule,
     TagsModule,

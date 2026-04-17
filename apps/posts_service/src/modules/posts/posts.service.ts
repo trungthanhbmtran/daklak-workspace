@@ -6,7 +6,7 @@ import { Post, DomainPostStatus } from './domain/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { QueryPostDto } from './dto/query-post.dto';
-import { CensorService } from './censor.service';
+import { CensorService } from '../../shared/censor/censor.service';
 import { TranslationService } from '../translations/translations.service';
 
 @Injectable()

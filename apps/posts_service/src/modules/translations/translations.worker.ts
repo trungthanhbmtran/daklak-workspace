@@ -1,6 +1,6 @@
 import { Controller } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
-import { CensorService } from '../posts/censor.service';
+import { CensorService } from '../../shared/censor/censor.service';
 import { PrismaService } from '@/database/prisma.service';
 import { TranslationStatus } from '@generated/prisma/client';
 
