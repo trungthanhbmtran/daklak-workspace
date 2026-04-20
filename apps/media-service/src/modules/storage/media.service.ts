@@ -120,8 +120,17 @@ export class MediaService {
   /**
    * Tạo danh sách links pre-signed cho các chunks của file
    */
-  async generatePresignedUrlsForParts(fileKey: string, uploadId: string, partsCount: number): Promise<string[]> {
-    return this.storageProvider.generatePresignedUrlsForParts(fileKey, uploadId, partsCount);
+  async generatePresignedUrlsForParts(fileKey: string, uploadId: string, partsCount: number, host?: string): Promise<string[]> {
+    const urls = await this.storageProvider.generatePresignedUrlsForParts(fileKey, uploadId, partsCount);
+
+    if (host) {
+      return urls.map(url => {
+        const urlObj = new URL(url);
+        return `${host}/media${urlObj.pathname}${urlObj.search}`;
+      });
+    }
+
+    return urls;
   }
 
   /**

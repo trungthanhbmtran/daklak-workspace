@@ -67,6 +67,7 @@ message GetMultipartUrlsRequest {
   string fileKey = 1;
   string uploadId = 2;
   int32 partsCount = 3;    // Tổng số cục chunk (VD: 10)
+  string host = 4;
 }
 
 message GetMultipartUrlsResponse {

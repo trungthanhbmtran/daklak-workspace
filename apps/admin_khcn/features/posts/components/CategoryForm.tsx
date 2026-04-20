@@ -6,9 +6,10 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { 
   ArrowLeft, Save, Loader2, ImagePlus, X, 
-  Info, ExternalLink, Settings, Layout 
+  Info, ExternalLink, Settings, Layout, FileText, UploadCloud
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,7 @@ const categorySchema = z.object({
   description: z.string().optional(),
   parentId: z.string().nullable().optional(),
   thumbnail: z.string().optional(),
+  attachmentId: z.string().optional(),
   orderIndex: z.number().default(0),
   linkType: z.enum(["internal", "external"]).default("internal"),
   customUrl: z.string().optional(),
@@ -55,15 +57,19 @@ interface CategoryFormProps {
 export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
   const isEdit = !!editId;
 
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
       name: "", slug: "", description: "", parentId: null, 
-      thumbnail: "", orderIndex: 0, linkType: "internal", customUrl: ""
+      thumbnail: "", attachmentId: "", orderIndex: 0, linkType: "internal", customUrl: ""
     },
   });
+
+  const [isUploadingDoc, setIsUploadingDoc] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (id) => form.setValue("thumbnail", id, { shouldDirty: true }),
@@ -101,6 +107,53 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       onBack();
     },
   });
+
+  const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files?.[0]) return;
+    const file = e.target.files[0];
+    
+    setIsUploadingDoc(true);
+    setUploadProgress(0);
+    
+    try {
+      // 1. Request Upload (Standard flow via Gateway)
+      // Host will be auto-filled by Gateway if we use headers or it handles it
+      // For now, let's assume postsApi has a generic upload request or we use the specific media one
+      // Since postsApi doesn't have it, we use a custom one or add it to postsApi
+      
+      const res: any = await axios.post("/api/v1/admin/media/request-upload", {
+        originalName: file.name,
+        mimeType: file.type,
+        size: file.size,
+      }, {
+        headers: {
+           // Auth is handled by axiosInstance if we used it, but here we use base axios
+           // In this project, apiClient (axiosInstance) should be used
+        }
+      });
+      
+      const uploadInfo = res.data;
+
+      // 2. Upload to MinIO (via Nginx proxy /media)
+      await axios.put(uploadInfo.uploadUrl, file, {
+        headers: { "Content-Type": file.type },
+        onUploadProgress: (p) => setUploadProgress(Math.round((p.loaded * 100) / (p.total || 1))),
+      });
+
+      // 3. Confirm
+      const confirmRes = await axios.post("/api/v1/admin/media/confirm-upload", {
+        fileId: uploadInfo.fileId
+      });
+      
+      form.setValue("attachmentId", confirmRes.data.id, { shouldDirty: true });
+      alert("Tải lên văn bản thành công!");
+    } catch (error) {
+      console.error(error);
+      alert("Lỗi khi tải văn bản!");
+    } finally {
+      setIsUploadingDoc(false);
+    }
+  };
 
   const onSubmit = (values: CategoryFormValues) => {
     mutation.mutate(values);
@@ -176,6 +229,41 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     <FormControl><Textarea className="min-h-[100px] resize-none" {...field} /></FormControl>
                   </FormItem>
                 )} />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-3 border-b bg-muted/5">
+                <CardTitle className="text-base flex items-center gap-2"><FileText className="h-4 w-4 text-blue-600" /> Văn bản đính kèm (Quy định/Hướng dẫn)</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-4">
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => docInputRef.current?.click()}
+                      disabled={isUploadingDoc}
+                    >
+                      {isUploadingDoc ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <UploadCloud className="mr-2 h-4 w-4" />}
+                      {form.watch("attachmentId") ? "Thay đổi văn bản" : "Tải lên văn bản"}
+                    </Button>
+                    <input id="doc-upload" type="file" className="hidden" ref={docInputRef} onChange={handleDocUpload} />
+                    
+                    {form.watch("attachmentId") && !isUploadingDoc && (
+                      <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
+                        <FileText className="h-4 w-4" /> Đã có tệp đính kèm
+                        <Button variant="ghost" size="sm" className="text-destructive h-7 px-2" onClick={() => form.setValue("attachmentId", "")}>Xóa</Button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {isUploadingDoc && (
+                    <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                      <div className="bg-blue-600 h-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

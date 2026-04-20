@@ -1,9 +1,9 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Plus, Search, Edit2, Trash2, Folder, 
-  MoreHorizontal, ChevronRight, Loader2, Image as ImageIcon
+import {
+  Plus, Search, Edit2, Trash2, Folder,
+  MoreHorizontal, ChevronRight, Loader2, Image as ImageIcon, FileText, Download
 } from "lucide-react";
 import { useState } from "react";
 
@@ -104,6 +104,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                 <TableHead className="w-[80px] pl-6 text-xs font-bold uppercase tracking-wider">Ảnh</TableHead>
                 <TableHead className="text-xs font-bold uppercase tracking-wider">Tên chuyên mục</TableHead>
                 <TableHead className="text-xs font-bold uppercase tracking-wider">Slug</TableHead>
+                <TableHead className="text-xs font-bold uppercase tracking-wider">Văn bản</TableHead>
                 <TableHead className="text-xs font-bold uppercase tracking-wider">Thứ tự</TableHead>
                 <TableHead className="text-xs font-bold uppercase tracking-wider">Bài viết</TableHead>
                 <TableHead className="w-[100px] text-right pr-6"></TableHead>
@@ -116,9 +117,9 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                     <TableCell className="pl-6">
                       <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">
                         {cat.thumbnail ? (
-                          <img 
-                            src={`/api/v1/media/download/${cat.thumbnail}`} 
-                            alt={cat.name} 
+                          <img
+                            src={`/api/v1/media/download/${cat.thumbnail}`}
+                            alt={cat.name}
                             className="w-full h-full object-cover"
                           />
                         ) : (
@@ -133,6 +134,20 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs text-slate-500">{cat.slug}</TableCell>
+                    <TableCell>
+                      {cat.attachmentId ? (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2"
+                          onClick={() => window.open(`/api/v1/media/download/${cat.attachmentId}`, '_blank')}
+                        >
+                          <FileText className="h-4 w-4 mr-1" /> Xem
+                        </Button>
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">N/A</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm font-medium text-slate-600">{cat.orderIndex}</TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="font-medium bg-blue-50 text-blue-700 border-blue-100">
@@ -150,8 +165,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                           <DropdownMenuItem onClick={() => onNavigateToEdit(cat.id)}>
                             <Edit2 className="mr-2 h-3.5 w-3.5" /> Chỉnh sửa
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="text-destructive focus:text-destructive" 
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
                             onClick={() => handleDelete(cat.id)}
                           >
                             <Trash2 className="mr-2 h-3.5 w-3.5" /> Xóa

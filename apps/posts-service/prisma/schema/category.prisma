@@ -8,6 +8,7 @@ model Category {
   depth           Int      @default(0)
   status          Boolean  @default(true)
   thumbnail       String?
+  attachmentId    String?  @map("attachment_id")
   linkType        String?  @default("standard") @map("link_type") // standard | static | external
   customUrl       String?  @map("custom_url")
   target          String?  @default("_self") // _self | _blank

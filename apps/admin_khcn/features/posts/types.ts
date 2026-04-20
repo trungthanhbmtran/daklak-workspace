@@ -14,6 +14,7 @@ export interface Category {
   rgt: number;
   depth: number;
   thumbnail?: string;
+  attachmentId?: string;
   linkType?: string;
   customUrl?: string;
   target?: string;
@@ -23,6 +24,9 @@ export interface Category {
   createdAt?: string;
   updatedAt?: string;
   children?: Category[];
+  _count?: {
+    posts: number;
+  };
 }
 
 export interface Post {

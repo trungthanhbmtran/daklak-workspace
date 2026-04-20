@@ -23,7 +23,7 @@ interface MediaGrpcService {
 
   // --- THÊM 3 HÀM MỚI CHO MULTIPART UPLOAD ---
   InitMultipartUpload(data: { originalName: string; mimeType: string; size: number; ownerId: string; host: string }): any;
-  GetMultipartPreSignedUrls(data: { fileKey: string; uploadId: string; partsCount: number }): any;
+  GetMultipartPreSignedUrls(data: { fileKey: string; uploadId: string; partsCount: number; host: string }): any;
   CompleteMultipartUpload(data: { fileId: string; fileKey: string; uploadId: string; parts: { PartNumber: number; ETag: string }[]; host: string }): any;
 }
 
@@ -122,9 +122,15 @@ export class MediaGatewayController implements OnModuleInit {
     }
   })
   async getMultipartUrls(
+    @Headers('host') host: string,
+    @Req() req: any,
     @Body() body: { fileKey: string; uploadId: string; partsCount: number },
   ) {
-    return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls(body));
+    const protocol = req.headers['x-forwarded-proto'] || 'http';
+    return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls({
+      ...body,
+      host: `${protocol}://${host}`
+    }));
   }
 
   @Post('complete-multipart-upload')

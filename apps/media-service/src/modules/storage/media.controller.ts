@@ -97,11 +97,12 @@ export class MediaController {
   @GrpcMethod('MediaService', 'GetMultipartPreSignedUrls')
   async getMultipartPreSignedUrls(data: any) {
     try {
-      const { fileKey, uploadId, partsCount } = data;
+      const { fileKey, uploadId, partsCount, host } = data;
       const presignedUrls = await this.mediaService.generatePresignedUrlsForParts(
         fileKey,
         uploadId,
-        partsCount
+        partsCount,
+        host
       );
 
       return { presignedUrls };
