@@ -1,20 +1,23 @@
 import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
-import { PostController } from './post.controller';
+import { PostsController } from './posts.controller';
 import { PostsCategoryController } from './posts-category.controller';
-import { BannerController } from './banner.controller';
-import { TagController } from './tag.controller';
-import { TranslationController } from './translation.controller';
+import { PostsTagController } from './posts-tag.controller';
+import { PostsBannerController } from './posts-banner.controller';
 
 @Module({
   imports: [
     registerGrpcService(MICROSERVICES.POST),
     registerGrpcService(MICROSERVICES.POSTS_CATEGORY),
-    registerGrpcService(MICROSERVICES.BANNER),
     registerGrpcService(MICROSERVICES.POSTS_TAG),
-    registerGrpcService(MICROSERVICES.TRANSLATE),
+    registerGrpcService(MICROSERVICES.BANNER),
   ],
-  controllers: [PostsCategoryController, BannerController, TagController, TranslationController, PostController],
+  controllers: [
+    PostsController,
+    PostsCategoryController,
+    PostsTagController,
+    PostsBannerController,
+  ],
 })
-export class PostsModule { }
+export class PostsModule {}

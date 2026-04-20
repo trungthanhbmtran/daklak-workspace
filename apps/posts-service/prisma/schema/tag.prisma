@@ -1,0 +1,9 @@
+model Tag {
+  id    String @id @default(uuid())
+  name  String @unique
+  slug  String @unique
+  
+  posts Post[] @relation("PostToTag")
+
+  @@map("posts_tags")
+}

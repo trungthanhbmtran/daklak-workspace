@@ -59,6 +59,20 @@ services:
     env_file:
       - apps/user-service/.env
 
+  posts-service:
+    build:
+      context: .
+      dockerfile: apps/posts-service/Dockerfile
+    container_name: posts-service
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "50055:50055"
+    env_file:
+      - apps/posts-service/.env
+
 volumes:
   mysql_data:
   minio_data:

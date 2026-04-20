@@ -1,0 +1,33 @@
+model Post {
+  id                    String   @id @default(uuid())
+  title                 String
+  description           String?  @db.Text
+  content               String?  @db.LongText
+  contentJson           String?  @db.LongText @map("content_json")
+  slug                  String   @unique
+  thumbnail             String?
+  authorId              String   @map("author_id")
+  status                String   @default("draft") // draft | published | review | deleted
+  isFeatured            Boolean  @default(false) @map("is_featured")
+  isNotification        Boolean  @default(false) @map("is_notification")
+  viewCount             Int      @default(0) @map("view_count")
+  
+  moderationNote        String?  @db.Text @map("moderation_note")
+  autoModerationStatus  String?  @map("auto_moderation_status")
+  autoModerationNote    String?  @db.Text @map("auto_moderation_note")
+  isTranslated          Boolean  @default(false) @map("is_translated")
+  
+  publishedAt           DateTime? @map("published_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  categoryId            String?   @map("category_id")
+  category              Category? @relation(fields: [categoryId], references: [id])
+  
+  tags                  Tag[]     @relation("PostToTag")
+
+  @@index([authorId])
+  @@index([categoryId])
+  @@index([status])
+  @@map("posts")
+}
