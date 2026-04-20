@@ -131,6 +131,7 @@ message CategoryTreeNode {
   int32 orderIndex = 12;
   repeated CategoryTreeNode children = 13;
   string description = 14;
+  bool status = 15;
   bool isGovStandard = 16;
   string attachmentId = 17;
 }
