@@ -59,6 +59,7 @@ export class MediaGatewayController implements OnModuleInit {
     @Headers('host') host: string,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
+    const ownerId = req.user?.id || req.user?.sub || 'system-user';
     const forwardedHost = req.headers['x-forwarded-host'];
     const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
@@ -107,6 +108,7 @@ export class MediaGatewayController implements OnModuleInit {
     @Headers('host') host: string,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
+    const ownerId = req.user?.id || req.user?.sub || 'system-user';
     const forwardedHost = req.headers['x-forwarded-host'];
     const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
