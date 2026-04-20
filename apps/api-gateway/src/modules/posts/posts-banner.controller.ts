@@ -9,9 +9,9 @@ import {
   Inject,
   Query,
 } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '../../../core/constants/services';
+import { MICROSERVICES } from '../../core/constants/services';
 
 @Controller('admin/banners')
 export class PostsBannerController {

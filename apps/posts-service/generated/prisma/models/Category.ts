@@ -50,6 +50,7 @@ export type CategoryMinAggregateOutputType = {
   depth: number | null
   status: boolean | null
   thumbnail: string | null
+  attachmentId: string | null
   linkType: string | null
   customUrl: string | null
   target: string | null
@@ -72,6 +73,7 @@ export type CategoryMaxAggregateOutputType = {
   depth: number | null
   status: boolean | null
   thumbnail: string | null
+  attachmentId: string | null
   linkType: string | null
   customUrl: string | null
   target: string | null
@@ -94,6 +96,7 @@ export type CategoryCountAggregateOutputType = {
   depth: number
   status: number
   thumbnail: number
+  attachmentId: number
   linkType: number
   customUrl: number
   target: number
@@ -132,6 +135,7 @@ export type CategoryMinAggregateInputType = {
   depth?: true
   status?: true
   thumbnail?: true
+  attachmentId?: true
   linkType?: true
   customUrl?: true
   target?: true
@@ -154,6 +158,7 @@ export type CategoryMaxAggregateInputType = {
   depth?: true
   status?: true
   thumbnail?: true
+  attachmentId?: true
   linkType?: true
   customUrl?: true
   target?: true
@@ -176,6 +181,7 @@ export type CategoryCountAggregateInputType = {
   depth?: true
   status?: true
   thumbnail?: true
+  attachmentId?: true
   linkType?: true
   customUrl?: true
   target?: true
@@ -285,6 +291,7 @@ export type CategoryGroupByOutputType = {
   depth: number
   status: boolean
   thumbnail: string | null
+  attachmentId: string | null
   linkType: string | null
   customUrl: string | null
   target: string | null
@@ -330,6 +337,7 @@ export type CategoryWhereInput = {
   depth?: Prisma.IntFilter<"Category"> | number
   status?: Prisma.BoolFilter<"Category"> | boolean
   thumbnail?: Prisma.StringNullableFilter<"Category"> | string | null
+  attachmentId?: Prisma.StringNullableFilter<"Category"> | string | null
   linkType?: Prisma.StringNullableFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableFilter<"Category"> | string | null
   target?: Prisma.StringNullableFilter<"Category"> | string | null
@@ -355,6 +363,7 @@ export type CategoryOrderByWithRelationInput = {
   depth?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
+  attachmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   linkType?: Prisma.SortOrderInput | Prisma.SortOrder
   customUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   target?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -384,6 +393,7 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   depth?: Prisma.IntFilter<"Category"> | number
   status?: Prisma.BoolFilter<"Category"> | boolean
   thumbnail?: Prisma.StringNullableFilter<"Category"> | string | null
+  attachmentId?: Prisma.StringNullableFilter<"Category"> | string | null
   linkType?: Prisma.StringNullableFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableFilter<"Category"> | string | null
   target?: Prisma.StringNullableFilter<"Category"> | string | null
@@ -409,6 +419,7 @@ export type CategoryOrderByWithAggregationInput = {
   depth?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
+  attachmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   linkType?: Prisma.SortOrderInput | Prisma.SortOrder
   customUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   target?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -439,6 +450,7 @@ export type CategoryScalarWhereWithAggregatesInput = {
   depth?: Prisma.IntWithAggregatesFilter<"Category"> | number
   status?: Prisma.BoolWithAggregatesFilter<"Category"> | boolean
   thumbnail?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
+  attachmentId?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   linkType?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   target?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
@@ -460,6 +472,7 @@ export type CategoryCreateInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -485,6 +498,7 @@ export type CategoryUncheckedCreateInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -508,6 +522,7 @@ export type CategoryUpdateInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -533,6 +548,7 @@ export type CategoryUncheckedUpdateInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -557,6 +573,7 @@ export type CategoryCreateManyInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -578,6 +595,7 @@ export type CategoryUpdateManyMutationInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -600,6 +618,7 @@ export type CategoryUncheckedUpdateManyInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -643,6 +662,7 @@ export type CategoryCountOrderByAggregateInput = {
   depth?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
+  attachmentId?: Prisma.SortOrder
   linkType?: Prisma.SortOrder
   customUrl?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -672,6 +692,7 @@ export type CategoryMaxOrderByAggregateInput = {
   depth?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
+  attachmentId?: Prisma.SortOrder
   linkType?: Prisma.SortOrder
   customUrl?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -694,6 +715,7 @@ export type CategoryMinOrderByAggregateInput = {
   depth?: Prisma.SortOrder
   status?: Prisma.SortOrder
   thumbnail?: Prisma.SortOrder
+  attachmentId?: Prisma.SortOrder
   linkType?: Prisma.SortOrder
   customUrl?: Prisma.SortOrder
   target?: Prisma.SortOrder
@@ -796,6 +818,7 @@ export type CategoryCreateWithoutChildrenInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -820,6 +843,7 @@ export type CategoryUncheckedCreateWithoutChildrenInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -847,6 +871,7 @@ export type CategoryCreateWithoutParentInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -870,6 +895,7 @@ export type CategoryUncheckedCreateWithoutParentInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -914,6 +940,7 @@ export type CategoryUpdateWithoutChildrenInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -938,6 +965,7 @@ export type CategoryUncheckedUpdateWithoutChildrenInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -980,6 +1008,7 @@ export type CategoryScalarWhereInput = {
   depth?: Prisma.IntFilter<"Category"> | number
   status?: Prisma.BoolFilter<"Category"> | boolean
   thumbnail?: Prisma.StringNullableFilter<"Category"> | string | null
+  attachmentId?: Prisma.StringNullableFilter<"Category"> | string | null
   linkType?: Prisma.StringNullableFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableFilter<"Category"> | string | null
   target?: Prisma.StringNullableFilter<"Category"> | string | null
@@ -1001,6 +1030,7 @@ export type CategoryCreateWithoutPostsInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -1025,6 +1055,7 @@ export type CategoryUncheckedCreateWithoutPostsInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -1063,6 +1094,7 @@ export type CategoryUpdateWithoutPostsInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1087,6 +1119,7 @@ export type CategoryUncheckedUpdateWithoutPostsInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1109,6 +1142,7 @@ export type CategoryCreateManyParentInput = {
   depth?: number
   status?: boolean
   thumbnail?: string | null
+  attachmentId?: string | null
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
@@ -1130,6 +1164,7 @@ export type CategoryUpdateWithoutParentInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1153,6 +1188,7 @@ export type CategoryUncheckedUpdateWithoutParentInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1176,6 +1212,7 @@ export type CategoryUncheckedUpdateManyWithoutParentInput = {
   depth?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.BoolFieldUpdateOperationsInput | boolean
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  attachmentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1238,6 +1275,7 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   depth?: boolean
   status?: boolean
   thumbnail?: boolean
+  attachmentId?: boolean
   linkType?: boolean
   customUrl?: boolean
   target?: boolean
@@ -1266,6 +1304,7 @@ export type CategorySelectScalar = {
   depth?: boolean
   status?: boolean
   thumbnail?: boolean
+  attachmentId?: boolean
   linkType?: boolean
   customUrl?: boolean
   target?: boolean
@@ -1278,7 +1317,7 @@ export type CategorySelectScalar = {
   updatedAt?: boolean
 }
 
-export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "lft" | "rgt" | "depth" | "status" | "thumbnail" | "linkType" | "customUrl" | "target" | "orderIndex" | "description" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "lft" | "rgt" | "depth" | "status" | "thumbnail" | "attachmentId" | "linkType" | "customUrl" | "target" | "orderIndex" | "description" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.Category$parentArgs<ExtArgs>
   children?: boolean | Prisma.Category$childrenArgs<ExtArgs>
@@ -1303,6 +1342,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     depth: number
     status: boolean
     thumbnail: string | null
+    attachmentId: string | null
     linkType: string | null
     customUrl: string | null
     target: string | null
@@ -1694,6 +1734,7 @@ export interface CategoryFieldRefs {
   readonly depth: Prisma.FieldRef<"Category", 'Int'>
   readonly status: Prisma.FieldRef<"Category", 'Boolean'>
   readonly thumbnail: Prisma.FieldRef<"Category", 'String'>
+  readonly attachmentId: Prisma.FieldRef<"Category", 'String'>
   readonly linkType: Prisma.FieldRef<"Category", 'String'>
   readonly customUrl: Prisma.FieldRef<"Category", 'String'>
   readonly target: Prisma.FieldRef<"Category", 'String'>
