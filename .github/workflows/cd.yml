@@ -39,7 +39,7 @@ jobs:
             hrm-service: 'apps/hrm-service/**'
             media-service: 'apps/media-service/**'
             notification_service: 'apps/notification_service/**'
-            posts_service: 'apps/posts_service/**'
+            posts-service: 'apps/posts-service/**'
             translate_service: 'apps/translate_service/**'
             user-service: 'apps/user-service/**'
             workflow-service: 'apps/workflow-service/**'
