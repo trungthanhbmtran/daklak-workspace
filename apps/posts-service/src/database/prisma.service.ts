@@ -1,20 +1,14 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '../../generated/prisma';
-
+import { PrismaClient } from '@generated/prisma/client';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor(config: ConfigService) {
     const url = config.getOrThrow<string>('DATABASE_URL');
-    // Using standard PrismaClient as the schema defines the datasource provider as "mysql"
-    super({
-      datasources: {
-        db: {
-          url,
-        }
-      }
-    });
+    const adapter = new PrismaMariaDb(url);
+    super({ adapter });
   }
 
   async onModuleInit() {

@@ -4,7 +4,7 @@ import { BannersService } from './banners.service';
 
 @Controller()
 export class BannersController {
-  constructor(private readonly bannersService: BannersService) {}
+  constructor(private readonly bannersService: BannersService) { }
 
   @GrpcMethod('BannerService', 'CreateBanner')
   async createBanner(data: any) {
