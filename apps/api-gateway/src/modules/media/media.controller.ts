@@ -59,14 +59,15 @@ export class MediaGatewayController implements OnModuleInit {
     @Headers('host') host: string,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
-    const ownerId = req.user?.id || req.user?.sub || 'system-user';
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     
     // Nếu host có cổng (localhost:8080), nó sẽ được giữ nguyên
     const payload = { 
       ...body, 
       ownerId: String(ownerId),
-      host: `${protocol}://${host}`
+      host: `${protocol}://${currentHost}`
     };
     
     return await firstValueFrom(this.mediaService.RequestUpload(payload));
@@ -82,9 +83,12 @@ export class MediaGatewayController implements OnModuleInit {
     @Body() body: { fileId: string }
   ) {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
+
     return await firstValueFrom(this.mediaService.ConfirmUpload({ 
       fileId: body.fileId, 
-      host: `${protocol}://${host}` 
+      host: `${protocol}://${currentHost}` 
     }));
   }
 
@@ -103,13 +107,14 @@ export class MediaGatewayController implements OnModuleInit {
     @Headers('host') host: string,
     @Body() body: { originalName: string; mimeType: string; size: number },
   ) {
-    const ownerId = req.user?.id || req.user?.sub || 'system-user';
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
     const protocol = req.headers['x-forwarded-proto'] || 'http';
     
     const payload = { 
       ...body, 
       ownerId: String(ownerId),
-      host: `${protocol}://${host}`
+      host: `${protocol}://${currentHost}`
     };
     return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
   }
@@ -127,9 +132,12 @@ export class MediaGatewayController implements OnModuleInit {
     @Body() body: { fileKey: string; uploadId: string; partsCount: number },
   ) {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
+
     return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls({
       ...body,
-      host: `${protocol}://${host}`
+      host: `${protocol}://${currentHost}`
     }));
   }
 
@@ -149,7 +157,10 @@ export class MediaGatewayController implements OnModuleInit {
     @Body() body: { fileId: string; fileKey: string; uploadId: string; parts: { PartNumber: number; ETag: string }[] },
   ) {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
-    const payload = { ...body, host: `${protocol}://${host}` };
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
+
+    const payload = { ...body, host: `${protocol}://${currentHost}` };
     return await firstValueFrom(this.mediaService.CompleteMultipartUpload(payload));
   }
 
@@ -166,6 +177,9 @@ export class MediaGatewayController implements OnModuleInit {
     @Req() req: any,
   ) {
     const protocol = req.headers['x-forwarded-proto'] || 'http';
-    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id, host: `${protocol}://${host}` }));
+    const forwardedHost = req.headers['x-forwarded-host'];
+    const currentHost = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || host;
+
+    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id, host: `${protocol}://${currentHost}` }));
   }
 }
