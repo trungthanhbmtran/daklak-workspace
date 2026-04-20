@@ -66,7 +66,7 @@ export class MediaService {
   /**
    * Xác nhận file đã được upload thành công lên storage
    */
-  async confirmUpload(fileId: string): Promise<Media> {
+  async confirmUpload(fileId: string, host?: string) {
     const media = await this.mediaRepository.findById(fileId);
     if (!media) {
       throw new NotFoundException('Không tìm thấy thông tin tệp tin');
@@ -79,7 +79,16 @@ export class MediaService {
     }
 
     // 2. Cập nhật trạng thái thành COMPLETED
-    return this.mediaRepository.updateStatus(fileId, MediaStatus.COMPLETED);
+    const updatedMedia = await this.mediaRepository.updateStatus(fileId, MediaStatus.COMPLETED);
+
+    // 3. Tạo link tải về để frontend hiển thị preview ngay lập tức
+    const downloadUrl = await this.getPresignedDownloadUrl(updatedMedia.bucket, updatedMedia.fileName, host);
+
+    return {
+      fileId: updatedMedia.id,
+      downloadUrl: downloadUrl,
+      status: updatedMedia.status,
+    };
   }
 
   /**
