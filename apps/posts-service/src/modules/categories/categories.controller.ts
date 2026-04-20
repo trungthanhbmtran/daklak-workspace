@@ -40,6 +40,6 @@ export class CategoriesController {
   @GrpcMethod('CategoryService', 'GetCategorySubTree')
   async getCategorySubTree(data: { id: string }) {
     const result = await this.categoriesService.findOne(data.id);
-    return { data: [result] }; // Simplified
+    return { data: result ? [result] : [] };
   }
 }

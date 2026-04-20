@@ -37,6 +37,7 @@ message Category {
   string metaTitle = 19;
   string metaDescription = 20;
   bool isGovStandard = 21;
+  string attachmentId = 22;
 }
 
 // Response chuẩn cho create / update
@@ -59,6 +60,7 @@ message CreateCategoryRequest {
   string metaTitle = 11;
   string metaDescription = 12;
   bool isGovStandard = 13;
+  string attachmentId = 14;
 }
 
 message UpdateCategoryRequest {
@@ -76,6 +78,7 @@ message UpdateCategoryRequest {
   string metaTitle = 12;
   string metaDescription = 13;
   bool isGovStandard = 14;
+  string attachmentId = 15;
 }
 
 message GetCategoryRequest {
@@ -128,8 +131,8 @@ message CategoryTreeNode {
   int32 orderIndex = 12;
   repeated CategoryTreeNode children = 13;
   string description = 14;
-  bool status = 15;
   bool isGovStandard = 16;
+  string attachmentId = 17;
 }
 
 message CategoryTreeResponse {
