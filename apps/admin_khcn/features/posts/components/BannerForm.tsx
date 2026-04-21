@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import apiClient from "@/lib/axiosInstance";
+import { useState } from "react";
 
 import {
   Form,
@@ -65,7 +66,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       startAt: "",
       endAt: "",
     },
-  });  const [isUploading, setIsUploading] = useState(false);
+  }); const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,10 +76,10 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     setIsUploading(true);
     try {
       // 1. Compress image
-      const compressed = await imageCompression(file, { 
-        maxSizeMB: 0.8, 
-        maxWidthOrHeight: 1920, 
-        fileType: 'image/webp' 
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.8,
+        maxWidthOrHeight: 1920,
+        fileType: 'image/webp'
       });
 
       // 2. Request upload URL from Gateway -> Media Service
@@ -91,17 +92,17 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       const { uploadUrl, fileId } = res.data;
 
       // 3. Upload directly to storage (MinIO via Nginx Proxy)
-      await axios.put(uploadUrl, compressed, { 
-        headers: { "Content-Type": compressed.type } 
+      await axios.put(uploadUrl, compressed, {
+        headers: { "Content-Type": compressed.type }
       });
 
       // 4. Confirm upload to Gateway -> Media Service
       const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId });
-      
+
       // 5. Update form and preview
       setPreviewUrl(confirmRes.data.downloadUrl);
       form.setValue("imageUrl", fileId, { shouldValidate: true, shouldDirty: true });
-      
+
     } catch (error: any) {
       console.error("Upload error:", error);
       alert("Lỗi tải ảnh: " + (error.response?.data?.message || error.message));
