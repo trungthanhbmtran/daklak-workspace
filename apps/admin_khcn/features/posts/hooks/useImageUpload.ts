@@ -16,9 +16,9 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
       const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200, fileType: 'image/webp' });
 
       // 1. Request presigned URL
-      console.log("📤 Requesting upload URL for:", data.originalName);
+      console.log("📤 Requesting upload URL for:", file.name);
       const res: any = await apiClient.post("/media/request-upload", {
-        originalName: data.originalName,
+        originalName: file.name,
         mimeType: compressed.type,
         size: compressed.size,
       });
