@@ -21,8 +21,8 @@ export class MinioService implements OnModuleInit {
   private readonly bucket: string;
 
   constructor(private readonly configService: ConfigService) {
-    const accessKeyId = this.configService.get<string>('MINIO_ACCESS_KEY');
-    const secretAccessKey = this.configService.get<string>('MINIO_SECRET_KEY');
+    const accessKeyId = this.configService.get<string>('MINIO_ROOT_USER') || '';
+    const secretAccessKey = this.configService.get<string>('MINIO_ROOT_PASSWORD') || '';
     const endpoint = this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000';
     const externalEndpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000';
     const region = this.configService.get<string>('MINIO_REGION') || 'us-east-1';

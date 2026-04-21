@@ -10,7 +10,7 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { ClientGrpc } from '@nestjs/microservices';
+import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -39,8 +39,8 @@ export class MediaGatewayController implements OnModuleInit {
   private mediaService: MediaGrpcService;
 
   constructor(
-    @Inject(MICROSERVICES.MEDIA.SYMBOL) private readonly client: ClientGrpc,
-  ) {}
+    @Inject(MICROSERVICES.MEDIA.SYMBOL) private readonly client: microservices.ClientGrpc,
+  ) { }
 
   onModuleInit() {
     this.mediaService = this.client.getService<MediaGrpcService>(MICROSERVICES.MEDIA.SERVICE);

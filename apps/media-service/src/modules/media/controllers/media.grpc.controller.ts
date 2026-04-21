@@ -118,7 +118,10 @@ export class MediaGrpcController {
         data.fileId,
         data.fileKey,
         data.uploadId,
-        data.parts,
+        data.parts.map((p) => ({
+          PartNumber: p.partNumber,
+          ETag: p.eTag,
+        })),
       );
 
       const { downloadUrl } = await this.mediaService.getMedia(media.id);

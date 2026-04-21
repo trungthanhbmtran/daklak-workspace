@@ -9,7 +9,7 @@ export class MediaMapper {
       downloadUrl: downloadUrl,
       status: media.status,
       mimeType: media.mimeType,
-      size: BigInt(media.size), // gRPC int64 is BigInt in TS
+      size: media.size,
       createdAt: media.createdAt.toISOString(),
     };
   }

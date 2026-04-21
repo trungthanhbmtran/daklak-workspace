@@ -27,7 +27,7 @@ export interface MediaInfo {
   downloadUrl: string;
   status: string;
   mimeType: string;
-  size: bigint;
+  size: number;
   createdAt: string;
 }
 
