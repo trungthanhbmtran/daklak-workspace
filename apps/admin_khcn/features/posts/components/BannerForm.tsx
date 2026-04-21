@@ -232,7 +232,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                               ) : (previewUrl || field.value) ? (
                                 <div className="relative group rounded-lg overflow-hidden border shadow-sm">
                                   <img 
-                                    src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/media/download/${field.value}`)} 
+                                    src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/admin/media/download/${field.value}`)} 
                                     alt="Banner Preview" 
                                     className="aspect-[21/9] object-cover w-full" 
                                   />

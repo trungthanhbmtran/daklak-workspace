@@ -8,7 +8,9 @@ import {
   UseGuards,
   OnModuleInit,
   Req,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -87,5 +89,16 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {
     return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+  }
+
+  @Get('download/:id')
+  @ApiOperation({ summary: 'Download media file by ID (Redirect)' })
+  @ApiResponse({ status: 302, description: 'Redirects to the signed download URL' })
+  async downloadMedia(@Param('id') id: string, @Res() res: Response) {
+    const data = await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+    if (data?.downloadUrl) {
+      return res.redirect(data.downloadUrl);
+    }
+    return res.status(404).json({ message: 'Media not found' });
   }
 }
