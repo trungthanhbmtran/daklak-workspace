@@ -16,6 +16,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import axios from "axios";
+import imageCompression from "browser-image-compression";
+import apiClient from "@/lib/axiosInstance";
+
 import {
   Form,
   FormControl,
@@ -34,7 +38,6 @@ import {
 } from "@/components/ui/select";
 import { bannerSchema } from "../schemas";
 import { postsApi } from "../api";
-import { useImageUpload } from "../hooks/useImageUpload";
 
 interface BannerFormProps {
   onBack: () => void;
@@ -62,14 +65,56 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       startAt: "",
       endAt: "",
     },
-  });
+  });  const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
-    onSuccess: (fileId) => {
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      // 1. Compress image
+      const compressed = await imageCompression(file, { 
+        maxSizeMB: 0.8, 
+        maxWidthOrHeight: 1920, 
+        fileType: 'image/webp' 
+      });
+
+      // 2. Request upload URL from Gateway -> Media Service
+      const res: any = await apiClient.post("/media/request-upload", {
+        originalName: file.name,
+        mimeType: compressed.type,
+        size: compressed.size,
+      });
+
+      const { uploadUrl, fileId } = res.data;
+
+      // 3. Upload directly to storage (MinIO via Nginx Proxy)
+      await axios.put(uploadUrl, compressed, { 
+        headers: { "Content-Type": compressed.type } 
+      });
+
+      // 4. Confirm upload to Gateway -> Media Service
+      const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId });
+      
+      // 5. Update form and preview
+      setPreviewUrl(confirmRes.data.downloadUrl);
       form.setValue("imageUrl", fileId, { shouldValidate: true, shouldDirty: true });
-    },
-    onRemove: () => form.setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true }),
-  });
+      
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      alert("Lỗi tải ảnh: " + (error.response?.data?.message || error.message));
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setPreviewUrl(null);
+    form.setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true });
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   // Slugify logic
   const watchedName = form.watch("name");
@@ -213,14 +258,14 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                     )}
                   />
 
-                    <div className="space-y-3 pt-2">
+                  <div className="space-y-3 pt-2">
                     <FormLabel className="flex items-center justify-between">
                       <span>Hình ảnh Banner <span className="text-destructive">*</span></span>
                       {(previewUrl || form.getValues("imageUrl")) && (
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
                           className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                           onClick={removeImage}
                         >
@@ -235,14 +280,14 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                         <FormItem>
                           <FormControl>
                             <div className="space-y-4">
-                              <input 
-                                type="file" 
-                                accept="image/*" 
-                                className="hidden" 
-                                ref={fileInputRef} 
-                                onChange={handleImageUpload} 
+                              <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleImageUpload}
                               />
-                              
+
                               {isUploading ? (
                                 <div className="aspect-[21/9] border-2 border-dashed rounded-xl flex flex-col items-center justify-center bg-muted/20 animate-pulse">
                                   <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
@@ -250,25 +295,25 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                                 </div>
                               ) : (previewUrl || field.value) ? (
                                 <div className="relative group rounded-xl overflow-hidden border-2 border-muted shadow-lg bg-black">
-                                  <img 
-                                    src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/admin/media/download/${field.value}`)} 
-                                    alt="Banner Preview" 
-                                    className="aspect-[21/9] object-cover w-full group-hover:opacity-80 transition-opacity duration-300" 
+                                  <img
+                                    src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/admin/media/download/${field.value}`)}
+                                    alt="Banner Preview"
+                                    className="aspect-[21/9] object-cover w-full group-hover:opacity-80 transition-opacity duration-300"
                                   />
                                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6 gap-4">
-                                    <Button 
-                                      type="button" 
-                                      variant="secondary" 
-                                      size="sm" 
+                                    <Button
+                                      type="button"
+                                      variant="secondary"
+                                      size="sm"
                                       className="shadow-xl backdrop-blur-sm bg-white/90"
                                       onClick={() => fileInputRef.current?.click()}
                                     >
                                       <UploadCloud className="h-4 w-4 mr-2" /> Thay đổi ảnh
                                     </Button>
-                                    <Button 
-                                      type="button" 
-                                      variant="destructive" 
-                                      size="icon" 
+                                    <Button
+                                      type="button"
+                                      variant="destructive"
+                                      size="icon"
                                       className="shadow-xl"
                                       onClick={removeImage}
                                     >
