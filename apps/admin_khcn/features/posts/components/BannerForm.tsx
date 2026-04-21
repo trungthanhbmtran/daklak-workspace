@@ -92,7 +92,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   const { data: bannerData, isLoading: isFetching } = useQuery({
     queryKey: ["banner", editId],
     queryFn: async () => {
-      const res = await postsApi.getBanner(editId!);
+      const res: any = await postsApi.getBanner(editId!);
       return res?.data;
     },
     enabled: isEdit,
@@ -202,10 +202,10 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                       <FormItem>
                         <FormLabel>Mô tả / Ghi chú</FormLabel>
                         <FormControl>
-                          <Textarea 
-                            placeholder="Mô tả ngắn gọn về mục đích hoặc vị trí sử dụng..." 
-                            className="min-h-[100px] resize-none" 
-                            {...field} 
+                          <Textarea
+                            placeholder="Mô tả ngắn gọn về mục đích hoặc vị trí sử dụng..."
+                            className="min-h-[100px] resize-none"
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
@@ -213,8 +213,21 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                     )}
                   />
 
-                  <div className="space-y-3 pt-2">
-                    <FormLabel>Hình ảnh Banner <span className="text-destructive">*</span></FormLabel>
+                    <div className="space-y-3 pt-2">
+                    <FormLabel className="flex items-center justify-between">
+                      <span>Hình ảnh Banner <span className="text-destructive">*</span></span>
+                      {(previewUrl || form.getValues("imageUrl")) && (
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-7 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={removeImage}
+                        >
+                          <Trash2 className="h-3 w-3 mr-1" /> Xóa ảnh
+                        </Button>
+                      )}
+                    </FormLabel>
                     <FormField
                       control={form.control}
                       name="imageUrl"
@@ -222,35 +235,59 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                         <FormItem>
                           <FormControl>
                             <div className="space-y-4">
-                              <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleImageUpload} />
+                              <input 
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                ref={fileInputRef} 
+                                onChange={handleImageUpload} 
+                              />
                               
                               {isUploading ? (
-                                <div className="aspect-[21/9] border-2 border-dashed rounded-lg flex flex-col items-center justify-center bg-muted/20">
-                                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                                  <p className="text-sm mt-2 text-muted-foreground">Đang tải ảnh lên...</p>
+                                <div className="aspect-[21/9] border-2 border-dashed rounded-xl flex flex-col items-center justify-center bg-muted/20 animate-pulse">
+                                  <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
+                                  <p className="text-xs mt-3 font-medium text-muted-foreground">Đang tải ảnh lên hệ thống...</p>
                                 </div>
                               ) : (previewUrl || field.value) ? (
-                                <div className="relative group rounded-lg overflow-hidden border shadow-sm">
+                                <div className="relative group rounded-xl overflow-hidden border-2 border-muted shadow-lg bg-black">
                                   <img 
                                     src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/admin/media/download/${field.value}`)} 
                                     alt="Banner Preview" 
-                                    className="aspect-[21/9] object-cover w-full" 
+                                    className="aspect-[21/9] object-cover w-full group-hover:opacity-80 transition-opacity duration-300" 
                                   />
-                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                                    <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Thay đổi</Button>
-                                    <Button type="button" variant="destructive" size="icon" className="h-8 w-8" onClick={removeImage}><Trash2 className="h-4 w-4" /></Button>
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6 gap-4">
+                                    <Button 
+                                      type="button" 
+                                      variant="secondary" 
+                                      size="sm" 
+                                      className="shadow-xl backdrop-blur-sm bg-white/90"
+                                      onClick={() => fileInputRef.current?.click()}
+                                    >
+                                      <UploadCloud className="h-4 w-4 mr-2" /> Thay đổi ảnh
+                                    </Button>
+                                    <Button 
+                                      type="button" 
+                                      variant="destructive" 
+                                      size="icon" 
+                                      className="shadow-xl"
+                                      onClick={removeImage}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
                                   </div>
                                 </div>
                               ) : (
                                 <div
                                   onClick={() => fileInputRef.current?.click()}
-                                  className="aspect-[21/9] border-2 border-dashed border-muted-foreground/30 hover:border-primary/50 hover:bg-primary/5 rounded-lg flex flex-col items-center justify-center cursor-pointer transition-colors group"
+                                  className="aspect-[21/9] border-2 border-dashed border-muted-foreground/20 hover:border-primary/40 hover:bg-primary/5 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all duration-300 group shadow-sm"
                                 >
-                                  <div className="p-3 rounded-full bg-muted group-hover:bg-primary/10 transition-colors">
-                                    <ImagePlus className="h-8 w-8 text-muted-foreground group-hover:text-primary" />
+                                  <div className="p-4 rounded-full bg-muted/50 group-hover:bg-primary/10 transition-colors duration-300 shadow-inner">
+                                    <ImagePlus className="h-10 w-10 text-muted-foreground/60 group-hover:text-primary/70" />
                                   </div>
-                                  <p className="mt-3 font-medium text-muted-foreground group-hover:text-primary">Tải lên hình ảnh banner</p>
-                                  <p className="text-xs text-muted-foreground mt-1">Kích thước khuyến nghị: 1920x820px (Tỉ lệ 21:9)</p>
+                                  <div className="mt-4 text-center">
+                                    <p className="font-semibold text-muted-foreground group-hover:text-primary/80">Kéo thả hoặc nhấp để tải ảnh</p>
+                                    <p className="text-[11px] text-muted-foreground/60 mt-1 uppercase tracking-wider font-medium">Hỗ trợ WEBP, PNG, JPG (Max 2MB)</p>
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -448,9 +485,9 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
               </Card>
 
               <div className="pt-2">
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 text-lg shadow-md" 
+                <Button
+                  type="submit"
+                  className="w-full h-12 text-lg shadow-md"
                   disabled={mutation.isPending}
                 >
                   {mutation.isPending ? (

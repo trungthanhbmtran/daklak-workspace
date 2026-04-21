@@ -273,7 +273,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (previewUrl || form.getValues("thumbnail")) ? (
                   <div className="relative group rounded-xl overflow-hidden border shadow-inner">
-                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnail")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
+                    <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-[2px]">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi ảnh</Button>

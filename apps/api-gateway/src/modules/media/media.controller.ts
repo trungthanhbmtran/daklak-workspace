@@ -95,10 +95,14 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiOperation({ summary: 'Download media file by ID (Redirect)' })
   @ApiResponse({ status: 302, description: 'Redirects to the signed download URL' })
   async downloadMedia(@Param('id') id: string, @Res() res: Response) {
-    const data = await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
-    if (data?.downloadUrl) {
-      return res.redirect(data.downloadUrl);
+    try {
+      const data = await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+      if (data?.downloadUrl) {
+        return res.redirect(data.downloadUrl);
+      }
+      return res.status(404).json({ message: 'Media link not found' });
+    } catch (e) {
+      return res.status(404).json({ message: 'Media not found' });
     }
-    return res.status(404).json({ message: 'Media not found' });
   }
 }
