@@ -6,11 +6,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { GlobalRpcExceptionFilter } from './common/filters/rpc-exception.filter';
 
 async function bootstrap() {
+  const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
+  const protoPath = join(protoRoot, 'media', 'media.proto');
+
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.GRPC,
     options: {
       package: 'media',
-      protoPath: join(process.cwd(), '../../shared/protos/media/media.proto'),
+      protoPath,
       url: process.env.GRPC_URL || '0.0.0.0:50059',
       loader: {
         keepCase: true, // Use keepCase for compatibility with proto definitions
