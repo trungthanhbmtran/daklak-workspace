@@ -73,7 +73,9 @@ export class MinioService implements OnModuleInit {
       Key: key,
       ContentType: contentType,
     });
-    return getSignedUrl(this.signingClient, command, { expiresIn });
+    const url = await getSignedUrl(this.signingClient, command, { expiresIn });
+    const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
+    return prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
   }
 
   async generateDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
@@ -81,7 +83,9 @@ export class MinioService implements OnModuleInit {
       Bucket: this.bucket,
       Key: key,
     });
-    return getSignedUrl(this.signingClient, command, { expiresIn });
+    const url = await getSignedUrl(this.signingClient, command, { expiresIn });
+    const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
+    return prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
   }
 
   async checkObjectExists(key: string): Promise<boolean> {
@@ -113,7 +117,9 @@ export class MinioService implements OnModuleInit {
         UploadId: uploadId,
         PartNumber: i,
       });
-      urls.push(await getSignedUrl(this.signingClient, command, { expiresIn }));
+      const url = await getSignedUrl(this.signingClient, command, { expiresIn });
+      const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
+      urls.push(prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url);
     }
     return urls;
   }

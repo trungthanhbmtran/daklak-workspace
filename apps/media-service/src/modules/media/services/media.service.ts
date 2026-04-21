@@ -17,6 +17,9 @@ export class MediaService {
    * Request a presigned URL for a single file upload
    */
   async requestUpload(ownerId: string, data: { originalName: string; mimeType: string; size: number }) {
+    if (!data.originalName) {
+      throw new Error('originalName is required');
+    }
     const fileKey = `${ownerId}/${Date.now()}-${data.originalName}`;
 
     try {
