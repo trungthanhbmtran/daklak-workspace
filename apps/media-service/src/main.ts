@@ -14,7 +14,7 @@ async function bootstrap() {
     options: {
       package: 'media',
       protoPath,
-      url: process.env.GRPC_URL || '0.0.0.0:50059',
+      url: process.env.MEDIA_SERVICE_GRPC_URL || '0.0.0.0:50059',
       loader: {
         keepCase: true, // Use keepCase for compatibility with proto definitions
         longs: String,
@@ -32,6 +32,6 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalRpcExceptionFilter());
 
   await app.listen();
-  console.log('🚀 Media Service (gRPC) is running on', process.env.GRPC_URL || '0.0.0.0:50059');
+  console.log('🚀 Media Service (gRPC) is running on', process.env.MEDIA_SERVICE_GRPC_URL || '0.0.0.0:50059');
 }
 bootstrap();

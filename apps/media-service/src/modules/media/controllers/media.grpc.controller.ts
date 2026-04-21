@@ -1,4 +1,4 @@
-import { Controller, UseFilters } from '@nestjs/common';
+import { Controller, UseFilters, Logger } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { MediaService } from '../services/media.service';
 import { MediaMapper } from '../mappers/media.mapper';
@@ -20,10 +20,12 @@ import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class MediaGrpcController {
+  private readonly logger = new Logger(MediaGrpcController.name);
   constructor(private readonly mediaService: MediaService) { }
 
   @GrpcMethod('MediaService', 'RequestUpload')
   async requestUpload(data: UploadRequestDto): Promise<UploadResponse> {
+    this.logger.log(`Incoming request: RequestUpload, data: ${JSON.stringify(data)}`);
     try {
       const result = await this.mediaService.requestUpload(data.ownerId, {
         originalName: data.originalName,
@@ -46,6 +48,7 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'ConfirmUpload')
   async confirmUpload(data: ConfirmRequestDto): Promise<MediaInfo> {
+    this.logger.log(`Incoming request: ConfirmUpload, data: ${JSON.stringify(data)}`);
     try {
       const media = await this.mediaService.confirmUpload(data.fileId);
       const downloadUrl = await this.mediaService.getMedia(media.id);
@@ -60,6 +63,7 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'GetMedia')
   async getMedia(data: MediaIdRequestDto): Promise<MediaInfo> {
+    this.logger.log(`Incoming request: GetMedia, data: ${JSON.stringify(data)}`);
     try {
       const { media, downloadUrl } = await this.mediaService.getMedia(data.fileId);
       return MediaMapper.toGrpcResponse(media, downloadUrl);
@@ -73,6 +77,7 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'InitMultipartUpload')
   async initMultipartUpload(data: InitMultipartRequestDto): Promise<InitMultipartResponse> {
+    this.logger.log(`Incoming request: InitMultipartUpload, data: ${JSON.stringify(data)}`);
     try {
       const result = await this.mediaService.initMultipartUpload(data.ownerId, {
         originalName: data.originalName,
@@ -95,6 +100,7 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'GetMultipartPreSignedUrls')
   async getMultipartPreSignedUrls(data: GetMultipartUrlsRequestDto): Promise<GetMultipartUrlsResponse> {
+    this.logger.log(`Incoming request: GetMultipartPreSignedUrls, data: ${JSON.stringify(data)}`);
     try {
       const urls = await this.mediaService.getMultipartPreSignedUrls(
         data.fileKey,
@@ -113,6 +119,7 @@ export class MediaGrpcController {
 
   @GrpcMethod('MediaService', 'CompleteMultipartUpload')
   async completeMultipartUpload(data: CompleteMultipartRequestDto): Promise<MediaInfo> {
+    this.logger.log(`Incoming request: CompleteMultipartUpload, data: ${JSON.stringify(data)}`);
     try {
       const media = await this.mediaService.completeMultipartUpload(
         data.fileId,

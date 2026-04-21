@@ -51,11 +51,8 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiResponse({ status: 201, description: 'Returns uploadUrl and fileId' })
   async requestUpload(@Req() req: any, @Body() body: RequestUploadDto) {
     const ownerId = req.user?.id || req.user?.sub || 'anonymous';
-    console.log(`[Gateway] 📥 Received upload request for: ${body.originalName} from user ${ownerId}`);
     const payload = { ...body, ownerId: String(ownerId) };
-    const result = await firstValueFrom(this.mediaService.RequestUpload(payload));
-    console.log(`[Gateway] 🔗 Proxying result:`, result);
-    return result;
+    return await firstValueFrom(this.mediaService.RequestUpload(payload));
   }
 
   @Post('confirm-upload')

@@ -15,40 +15,25 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
     try {
       const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1200, fileType: 'image/webp' });
 
-      // 1. Request presigned URL
-      console.log("📤 Requesting upload URL for:", file.name);
       const res: any = await apiClient.post("/media/request-upload", {
-        originalName: file.name,
+        originalName: `thumb-${Date.now()}.webp`,
         mimeType: compressed.type,
         size: compressed.size,
       });
 
+      // Gateway wraps everything in { success: true, data: ... }
       const uploadInfo = res.data;
-      console.log("🔗 Received Upload URL:", uploadInfo.uploadUrl);
-      console.log("📄 File ID:", uploadInfo.fileId);
+      // console.log("Upload Info:", uploadInfo);
 
-      // 2. Perform direct upload to MinIO/Nginx
-      console.log("🚀 Starting physical upload to storage...");
-      await axios.put(uploadInfo.uploadUrl, compressed, { 
-        headers: { "Content-Type": compressed.type } 
-      });
-      console.log("✅ Physical upload completed.");
+      await axios.put(uploadInfo.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
 
-      // 3. Confirm with Media Service
-      console.log("🔄 Confirming upload with server...");
       const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId: uploadInfo.fileId });
       const conf = confirmRes.data;
 
-      console.log("✨ Upload fully confirmed. Download URL:", conf.downloadUrl);
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(uploadInfo.fileId);
-    } catch (error: any) {
-      console.error("❌ Upload failed:", error);
-      if (error.response) {
-        console.error("Error Response Data:", error.response.data);
-        console.error("Error Status:", error.response.status);
-      }
-      alert("Lỗi tải ảnh. Xem console để biết chi tiết.");
+    } catch (error) {
+      alert("Lỗi tải ảnh");
     } finally {
       setIsUploading(false);
     }

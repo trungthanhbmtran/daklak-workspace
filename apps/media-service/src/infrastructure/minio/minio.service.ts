@@ -23,8 +23,8 @@ export class MinioService implements OnModuleInit {
   constructor(private readonly configService: ConfigService) {
     const accessKeyId = this.configService.get<string>('MINIO_ROOT_USER') || '';
     const secretAccessKey = this.configService.get<string>('MINIO_ROOT_PASSWORD') || '';
-    const endpoint = (this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000').replace(/\/+$/, '');
-    const externalEndpoint = (this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000').replace(/\/+$/, '');
+    const endpoint = this.configService.get<string>('MINIO_INTERNAL_ENDPOINT') || 'http://minio:9000';
+    const externalEndpoint = this.configService.get<string>('MINIO_EXTERNAL_ENDPOINT') || 'http://localhost:9000';
     const region = this.configService.get<string>('MINIO_REGION') || 'us-east-1';
 
     this.bucket = this.configService.get<string>('MINIO_BUCKET') || 'media-center';
@@ -46,9 +46,6 @@ export class MinioService implements OnModuleInit {
       ...baseConfig,
       endpoint: externalEndpoint,
     });
-
-    this.logger.log(`📡 MinIO Internal Endpoint: ${endpoint}`);
-    this.logger.log(`📡 MinIO External Endpoint (Signing): ${externalEndpoint}`);
   }
 
   async onModuleInit() {
