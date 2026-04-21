@@ -20,8 +20,10 @@ export class MediaService {
     const fileKey = `${ownerId}/${Date.now()}-${data.originalName}`;
 
     try {
+      this.logger.log(`📥 Requesting upload: ${data.originalName} (${data.mimeType}, ${data.size} bytes) for owner: ${ownerId}`);
       // 1. Generate presigned URL from Minio
       const uploadUrl = await this.minioService.generateUploadUrl(fileKey, data.mimeType);
+      this.logger.log(`🔗 Generated Upload URL (External): ${uploadUrl}`);
 
       // 2. Save metadata to DB
       const media = await this.mediaRepository.create({

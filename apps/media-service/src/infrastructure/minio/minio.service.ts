@@ -46,6 +46,9 @@ export class MinioService implements OnModuleInit {
       ...baseConfig,
       endpoint: externalEndpoint,
     });
+
+    this.logger.log(`📡 MinIO Internal Endpoint: ${endpoint}`);
+    this.logger.log(`📡 MinIO External Endpoint (Signing): ${externalEndpoint}`);
   }
 
   async onModuleInit() {
