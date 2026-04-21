@@ -120,7 +120,7 @@ export const MICROSERVICES = {
   MEDIA: {
     PACKAGE: 'media',
     SYMBOL: 'MEDIA_PACKAGE',
-    PROTO: 'media/media.proto',
+    PROTO: 'media.proto', // Adjusted for new path
     URL: getMediaUrl(),
     SERVICE: 'MediaService',
   },

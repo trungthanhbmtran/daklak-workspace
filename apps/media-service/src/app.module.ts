@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@/config/config.module';
-import { StorageModule } from '@/modules/storage/storage.module';
-import { PrismaModule } from '@/database/prisma.module';
-
+import { ConfigModule } from '@nestjs/config';
+import { MediaModule } from './modules/media/media.module';
 
 @Module({
   imports: [
-    ConfigModule,
-    PrismaModule,
-    StorageModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env'],
+    }),
+    MediaModule,
   ],
 })
-export class AppModule { }
+export class AppModule {}
