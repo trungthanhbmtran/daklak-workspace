@@ -6,12 +6,9 @@ export class BannersService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: any) {
-    const slug = data.slug || data.name.toLowerCase().replace(/ /g, '-');
+    const formattedData = this.formatBannerData(data);
     return this.prisma.banner.create({
-      data: {
-        ...data,
-        slug,
-      },
+      data: formattedData,
     });
   }
 
@@ -49,9 +46,10 @@ export class BannersService {
   }
 
   async update(id: string, data: any) {
+    const formattedData = this.formatBannerData(data);
     return this.prisma.banner.update({
       where: { id },
-      data,
+      data: formattedData,
     });
   }
 
@@ -59,5 +57,34 @@ export class BannersService {
     return this.prisma.banner.delete({
       where: { id },
     });
+  }
+
+  private formatBannerData(data: any) {
+    const { startAt, endAt, name, slug, ...rest } = data;
+
+    const formatted: any = {
+      ...rest,
+      name,
+      slug: slug || name?.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '') || `banner-${Date.now()}`,
+    };
+
+    if (startAt && startAt !== '') {
+      formatted.startAt = new Date(startAt);
+    } else {
+      formatted.startAt = null;
+    }
+
+    if (endAt && endAt !== '') {
+      formatted.endAt = new Date(endAt);
+    } else {
+      formatted.endAt = null;
+    }
+
+    // Ensure numeric fields are correctly typed
+    if (formatted.orderIndex !== undefined) {
+      formatted.orderIndex = Number(formatted.orderIndex);
+    }
+
+    return formatted;
   }
 }
