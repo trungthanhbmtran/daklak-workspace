@@ -14,7 +14,7 @@ export function registerGrpcService(serviceConfig: any) {
         protoPath: join(PROTO_ROOT, serviceConfig.PROTO),
         url: serviceConfig.URL,
         loader: {
-          keepCase: true,
+          keepCase: false,
           longs: String,
           enums: String,
           defaults: true,
