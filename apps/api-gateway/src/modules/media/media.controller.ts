@@ -84,13 +84,6 @@ export class MediaGatewayController implements OnModuleInit {
     return await firstValueFrom(this.mediaService.CompleteMultipartUpload(body));
   }
 
-  @Get(':id')
-  @ApiOperation({ summary: 'Get media metadata and download link' })
-  @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
-  async getMedia(@Param('id') id: string) {
-    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
-  }
-
   @Get('download/:id')
   @ApiOperation({ summary: 'Download media file by ID (Redirect)' })
   @ApiResponse({ status: 302, description: 'Redirects to the signed download URL' })
@@ -104,5 +97,12 @@ export class MediaGatewayController implements OnModuleInit {
     } catch (e) {
       return res.status(404).json({ message: 'Media not found' });
     }
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Get media metadata and download link' })
+  @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
+  async getMedia(@Param('id') id: string) {
+    return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
   }
 }

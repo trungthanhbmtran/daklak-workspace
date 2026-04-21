@@ -5,11 +5,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft, Save, Loader2, ImagePlus,
-  Trash2, Monitor, Globe, Info, ExternalLink
+  Trash2, Monitor, Globe, Info, ExternalLink,
+  UploadCloud, AlertCircle, CheckCircle2
 } from "lucide-react";
-import { useEffect, useRef } from "react";
+
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,7 +21,7 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import apiClient from "@/lib/axiosInstance";
-import { useState } from "react";
+
 
 import {
   Form,
@@ -66,8 +68,11 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       startAt: "",
       endAt: "",
     },
-  }); const [isUploading, setIsUploading] = useState(false);
+  });
+
+  const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
