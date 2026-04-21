@@ -39,14 +39,24 @@ message MediaIdRequest {
   string fileId = 1;
 }
 
+enum MediaStatus {
+  PENDING = 0;
+  COMPLETED = 1;
+  FAILED = 2;
+}
+
 message MediaInfo {
   string id = 1;
   string fileName = 2;
   string downloadUrl = 3;
-  string status = 4;
+  MediaStatus status = 4;
   string mimeType = 5;
   int64 size = 6;
-  string createdAt = 7;
+  string originalName = 7;
+  string bucket = 8;
+  string ownerId = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
 }
 
 message InitMultipartRequest {

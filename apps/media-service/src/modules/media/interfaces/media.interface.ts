@@ -24,11 +24,15 @@ export interface MediaIdRequest {
 export interface MediaInfo {
   id: string;
   fileName: string;
+  originalName: string;
   downloadUrl: string;
-  status: string;
+  status: any; // Using any for gRPC enum compatibility or specific enum if preferred
   mimeType: string;
   size: number;
+  bucket: string;
+  ownerId: string;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface InitMultipartRequest {
