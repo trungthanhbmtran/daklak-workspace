@@ -48,8 +48,8 @@ export class MediaGrpcController {
   async confirmUpload(data: ConfirmRequestDto): Promise<MediaInfo> {
     try {
       const media = await this.mediaService.confirmUpload(data.fileId);
-      const downloadUrl = await this.mediaService.getMedia(media.id);
-      return MediaMapper.toGrpcResponse(media, downloadUrl.downloadUrl);
+      const { downloadUrl } = await this.mediaService.getMedia(media.id);
+      return MediaMapper.toGrpcResponse(media, downloadUrl);
     } catch (error) {
       throw new RpcException({
         code: error.status === 404 ? status.NOT_FOUND : status.INTERNAL,
@@ -67,6 +67,18 @@ export class MediaGrpcController {
       throw new RpcException({
         code: error.status === 404 ? status.NOT_FOUND : status.INTERNAL,
         message: error.message || 'Media not found',
+      });
+    }
+  }
+
+  @GrpcMethod('MediaService', 'DeleteMedia')
+  async deleteMedia(data: MediaIdRequestDto) {
+    try {
+      return await this.mediaService.deleteMedia(data.fileId);
+    } catch (error) {
+      throw new RpcException({
+        code: error.status === 404 ? status.NOT_FOUND : status.INTERNAL,
+        message: error.message || 'Failed to delete media',
       });
     }
   }

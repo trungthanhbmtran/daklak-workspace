@@ -26,6 +26,7 @@ interface MediaGrpcService {
   RequestUpload(data: any): any;
   ConfirmUpload(data: any): any;
   GetMedia(data: any): any;
+  DeleteMedia(data: any): any;
   InitMultipartUpload(data: any): any;
   GetMultipartPreSignedUrls(data: any): any;
   CompleteMultipartUpload(data: any): any;
@@ -87,5 +88,11 @@ export class MediaGatewayController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {
     return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
+  }
+
+  @Post('delete/:id') // Using POST or DELETE depending on preference, sticking to common DELETE
+  @ApiOperation({ summary: 'Delete media from storage and database' })
+  async deleteMedia(@Param('id') id: string) {
+    return await firstValueFrom(this.mediaService.DeleteMedia({ fileId: id }));
   }
 }

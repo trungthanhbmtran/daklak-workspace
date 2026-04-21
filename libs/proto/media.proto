@@ -12,10 +12,19 @@ service MediaService {
   // get media metadata and download URL
   rpc GetMedia (MediaIdRequest) returns (MediaInfo);
 
+  // cleanup file from storage and database
+  rpc DeleteMedia (MediaIdRequest) returns (DeleteResponse);
+
   // --- Multipart Upload ---
   rpc InitMultipartUpload (InitMultipartRequest) returns (InitMultipartResponse);
   rpc GetMultipartPreSignedUrls (GetMultipartUrlsRequest) returns (GetMultipartUrlsResponse);
   rpc CompleteMultipartUpload (CompleteMultipartRequest) returns (MediaInfo);
+}
+
+enum MediaStatus {
+  PENDING = 0;
+  COMPLETED = 1;
+  FAILED = 2;
 }
 
 message UploadRequest {
@@ -39,14 +48,23 @@ message MediaIdRequest {
   string fileId = 1;
 }
 
+message DeleteResponse {
+  bool success = 1;
+  string message = 2;
+}
+
 message MediaInfo {
   string id = 1;
   string fileName = 2;
-  string downloadUrl = 3;
-  string status = 4;
-  string mimeType = 5;
-  int64 size = 6;
-  string createdAt = 7;
+  string originalName = 3;
+  string downloadUrl = 4;
+  string status = 5; // matches MediaStatus enum name
+  string mimeType = 6;
+  int64 size = 7;
+  string bucket = 8;
+  string ownerId = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
 }
 
 message InitMultipartRequest {

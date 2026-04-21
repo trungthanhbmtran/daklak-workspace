@@ -130,6 +130,22 @@ export class MinioService implements OnModuleInit {
     );
   }
 
+  async deleteObject(key: string): Promise<void> {
+    try {
+      const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
+      await this.s3Client.send(
+        new DeleteObjectCommand({
+          Bucket: this.bucket,
+          Key: key,
+        }),
+      );
+      this.logger.log(`🗑️ Deleted object: ${key} from bucket ${this.bucket}`);
+    } catch (error) {
+      this.logger.error(`❌ Failed to delete object ${key}: ${error.message}`);
+      throw error;
+    }
+  }
+
   getBucketName(): string {
     return this.bucket;
   }
