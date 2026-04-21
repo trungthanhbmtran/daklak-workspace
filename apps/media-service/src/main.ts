@@ -16,7 +16,7 @@ async function bootstrap() {
       protoPath,
       url: process.env.MEDIA_SERVICE_GRPC_URL || '0.0.0.0:50059',
       loader: {
-        keepCase: true, // Use keepCase for compatibility with proto definitions
+        keepCase: false, // Use keepCase for compatibility with proto definitions
         longs: String,
         enums: String,
         defaults: true,
@@ -27,7 +27,7 @@ async function bootstrap() {
 
   // Enable validation pipe for DTOs
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-  
+
   // Apply centralized gRPC error handling
   app.useGlobalFilters(new GlobalRpcExceptionFilter());
 
