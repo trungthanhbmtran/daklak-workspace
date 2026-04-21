@@ -6,15 +6,11 @@ export class MediaMapper {
     return {
       id: media.id,
       fileName: media.fileName,
-      originalName: media.originalName,
       downloadUrl: downloadUrl,
       status: media.status,
       mimeType: media.mimeType,
       size: media.size,
-      bucket: media.bucket || '',
-      ownerId: media.ownerId || '',
       createdAt: media.createdAt.toISOString(),
-      updatedAt: media.updatedAt.toISOString(),
     };
   }
 }

@@ -21,23 +21,14 @@ export interface MediaIdRequest {
   fileId: string;
 }
 
-export interface DeleteResponse {
-  success: boolean;
-  message: string;
-}
-
 export interface MediaInfo {
   id: string;
   fileName: string;
-  originalName: string;
   downloadUrl: string;
   status: string;
   mimeType: string;
   size: number;
-  bucket: string;
-  ownerId: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface InitMultipartRequest {
@@ -79,7 +70,6 @@ export interface MediaServiceGrpc {
   RequestUpload(request: UploadRequest): Observable<UploadResponse>;
   ConfirmUpload(request: ConfirmRequest): Observable<MediaInfo>;
   GetMedia(request: MediaIdRequest): Observable<MediaInfo>;
-  DeleteMedia(request: MediaIdRequest): Observable<DeleteResponse>;
   InitMultipartUpload(request: InitMultipartRequest): Observable<InitMultipartResponse>;
   GetMultipartPreSignedUrls(request: GetMultipartUrlsRequest): Observable<GetMultipartUrlsResponse>;
   CompleteMultipartUpload(request: CompleteMultipartRequest): Observable<MediaInfo>;

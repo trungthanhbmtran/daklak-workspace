@@ -3,15 +3,16 @@ syntax = "proto3";
 package media;
 
 service MediaService {
-  // Gateway gọi xuống để lấy link cho Client upload trực tiếp lên MinIO
+  // request a presigned URL for single file upload
   rpc RequestUpload (UploadRequest) returns (UploadResponse);
   
-  // Client gọi sau khi upload xong để Media Service kiểm tra và xác nhận
+  // confirm that the file has been uploaded to storage
   rpc ConfirmUpload (ConfirmRequest) returns (MediaInfo);
   
-  // Các service khác gọi để lấy link download/view tài liệu
+  // get media metadata and download URL
   rpc GetMedia (MediaIdRequest) returns (MediaInfo);
 
+  // --- Multipart Upload ---
   rpc InitMultipartUpload (InitMultipartRequest) returns (InitMultipartResponse);
   rpc GetMultipartPreSignedUrls (GetMultipartUrlsRequest) returns (GetMultipartUrlsResponse);
   rpc CompleteMultipartUpload (CompleteMultipartRequest) returns (MediaInfo);
@@ -22,7 +23,6 @@ message UploadRequest {
   string mimeType = 2;
   int64 size = 3;
   string ownerId = 4;
-  string host = 5;
 }
 
 message UploadResponse {
@@ -33,12 +33,10 @@ message UploadResponse {
 
 message ConfirmRequest {
   string fileId = 1;
-  string host = 2;
 }
 
 message MediaIdRequest {
   string fileId = 1;
-  string host = 2;
 }
 
 message MediaInfo {
@@ -47,6 +45,8 @@ message MediaInfo {
   string downloadUrl = 3;
   string status = 4;
   string mimeType = 5;
+  int64 size = 6;
+  string createdAt = 7;
 }
 
 message InitMultipartRequest {
@@ -54,35 +54,32 @@ message InitMultipartRequest {
   string mimeType = 2;
   int64 size = 3;
   string ownerId = 4;
-  string host = 5;
 }
 
 message InitMultipartResponse {
-  string uploadId = 1;     // Mã phiên upload MinIO cấp
-  string fileKey = 2;      // Tên file vật lý (vd: 177228-video.mp4)
-  string fileId = 3;       // ID bản ghi trong Database
+  string uploadId = 1;
+  string fileKey = 2;
+  string fileId = 3;
 }
 
 message GetMultipartUrlsRequest {
   string fileKey = 1;
   string uploadId = 2;
-  int32 partsCount = 3;    // Tổng số cục chunk (VD: 10)
-  string host = 4;
+  int32 partsCount = 3;
 }
 
 message GetMultipartUrlsResponse {
-  repeated string presignedUrls = 1; // Trả về mảng 10 cái link
+  repeated string presignedUrls = 1;
 }
 
 message PartInfo {
   int32 partNumber = 1;
-  string eTag = 2;         // Tem xác nhận của từng cục
+  string eTag = 2;
 }
 
 message CompleteMultipartRequest {
   string fileId = 1;
   string fileKey = 2;
   string uploadId = 3;
-  repeated PartInfo parts = 4; // Mảng các tem xác nhận
-  string host = 5;
+  repeated PartInfo parts = 4;
 }

@@ -10,7 +10,7 @@ async function bootstrap() {
     transport: Transport.GRPC,
     options: {
       package: 'media',
-      protoPath: join(process.cwd(), '../../libs/proto/media.proto'),
+      protoPath: join(process.cwd(), '../../shared/protos/media/media.proto'),
       url: process.env.GRPC_URL || '0.0.0.0:50059',
       loader: {
         keepCase: true, // Use keepCase for compatibility with proto definitions

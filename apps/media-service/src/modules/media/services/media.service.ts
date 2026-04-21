@@ -11,7 +11,7 @@ export class MediaService {
   constructor(
     private readonly minioService: MinioService,
     private readonly mediaRepository: MediaRepository,
-  ) {}
+  ) { }
 
   /**
    * Request a presigned URL for a single file upload
@@ -60,7 +60,7 @@ export class MediaService {
     }
 
     const updatedMedia = await this.mediaRepository.updateStatus(fileId, MediaStatus.COMPLETED);
-    
+
     return updatedMedia;
   }
 
@@ -74,31 +74,8 @@ export class MediaService {
     }
 
     const downloadUrl = await this.minioService.generateDownloadUrl(media.fileName);
-    
+
     return { media, downloadUrl };
-  }
-
-  /**
-   * Delete media from storage and database
-   */
-  async deleteMedia(fileId: string) {
-    const media = await this.mediaRepository.findById(fileId);
-    if (!media) {
-      throw new NotFoundException('Media info not found');
-    }
-
-    try {
-      // 1. Delete from MinIO
-      await this.minioService.deleteObject(media.fileName);
-
-      // 2. Delete from DB
-      await this.mediaRepository.delete(fileId);
-
-      return { success: true, message: 'Media deleted successfully' };
-    } catch (error) {
-      this.logger.error(`Failed to delete media ${fileId}: ${error.message}`);
-      throw error;
-    }
   }
 
   /**
