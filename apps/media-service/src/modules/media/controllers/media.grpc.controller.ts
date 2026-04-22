@@ -51,8 +51,8 @@ export class MediaGrpcController {
     this.logger.log(`Incoming request: ConfirmUpload, data: ${JSON.stringify(data)}`);
     try {
       const media = await this.mediaService.confirmUpload(data.fileId);
-      const downloadUrl = await this.mediaService.getMedia(media.id);
-      return MediaMapper.toGrpcResponse(media, downloadUrl.downloadUrl);
+      const { downloadUrl } = await this.mediaService.getMedia(media.id);
+      return MediaMapper.toGrpcResponse(media, downloadUrl);
     } catch (error) {
       throw new RpcException({
         code: error.status === 404 ? status.NOT_FOUND : status.INTERNAL,

@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { PostsService } from './posts.service';
+import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class PostsController {
@@ -15,18 +16,27 @@ export class PostsController {
   @GrpcMethod('PostService', 'GetPost')
   async getPost(data: { id: string }) {
     const result = await this.postsService.findOne(data.id);
-    return result; // Wrapper is in response proto? No, proto says "returns (Post)"
+    if (!result) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: `Post with ID ${data.id} not found`,
+      });
+    }
+    return result;
   }
 
   @GrpcMethod('PostService', 'ListPosts')
   async listPosts(query: any) {
     const { items, total } = await this.postsService.findAll(query);
     return {
-      data: items,
+      data: items || [],
       meta: {
-        total,
-        page: query.page || 1,
-        limit: query.limit || 10,
+        pagination: {
+          total: total || 0,
+          page: Number(query.page) || 1,
+          pageSize: Number(query.limit) || 10,
+          totalPages: Math.ceil((total || 0) / (Number(query.limit) || 10)),
+        },
       }
     };
   }
@@ -47,6 +57,12 @@ export class PostsController {
   @GrpcMethod('PostService', 'GetPostBySlug')
   async getPostBySlug(data: { slug: string }) {
     const result = await this.postsService.findBySlug(data.slug);
+    if (!result) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: `Post with slug ${data.slug} not found`,
+      });
+    }
     return result;
   }
 

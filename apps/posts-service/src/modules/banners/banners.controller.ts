@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { BannersService } from './banners.service';
+import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class BannersController {
@@ -15,6 +16,12 @@ export class BannersController {
   @GrpcMethod('BannerService', 'GetBanner')
   async getBanner(data: { id: string }) {
     const result = await this.bannersService.findOne(data.id);
+    if (!result) {
+      throw new RpcException({
+        code: status.NOT_FOUND,
+        message: `Banner with ID ${data.id} not found`,
+      });
+    }
     return result;
   }
 
@@ -22,11 +29,14 @@ export class BannersController {
   async listBanners(query: any) {
     const { items, total } = await this.bannersService.findAll(query);
     return {
-      data: items,
+      data: items || [],
       meta: {
-        total,
-        page: query.page || 1,
-        limit: query.limit || 10,
+        pagination: {
+          total: total || 0,
+          page: Number(query.page) || 1,
+          pageSize: Number(query.limit) || 10,
+          totalPages: Math.ceil((total || 0) / (Number(query.limit) || 10)),
+        },
       },
       success: true
     };

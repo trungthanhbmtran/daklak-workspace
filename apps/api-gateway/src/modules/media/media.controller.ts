@@ -35,7 +35,6 @@ interface MediaGrpcService {
 
 @ApiTags('Media Management')
 @Controller('admin/media')
-@UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class MediaGatewayController implements OnModuleInit {
   private mediaService: MediaGrpcService;
@@ -46,42 +45,6 @@ export class MediaGatewayController implements OnModuleInit {
 
   onModuleInit() {
     this.mediaService = this.client.getService<MediaGrpcService>(MICROSERVICES.MEDIA.SERVICE);
-  }
-
-  @Post('request-upload')
-  @ApiOperation({ summary: 'Request a presigned URL for direct upload to storage' })
-  @ApiResponse({ status: 201, description: 'Returns uploadUrl and fileId' })
-  async requestUpload(@Req() req: any, @Body() body: RequestUploadDto) {
-    const ownerId = req.user?.id || req.user?.sub || 'anonymous';
-    const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaService.RequestUpload(payload));
-  }
-
-  @Post('confirm-upload')
-  @ApiOperation({ summary: 'Confirm file upload completion' })
-  @ApiResponse({ status: 200, description: 'Returns media info and download URL' })
-  async confirmUpload(@Body() body: ConfirmUploadDto) {
-    return await firstValueFrom(this.mediaService.ConfirmUpload(body));
-  }
-
-  @Post('init-multipart-upload')
-  @ApiOperation({ summary: 'Initialize multipart upload for large files' })
-  async initMultipartUpload(@Req() req: any, @Body() body: InitMultipartUploadDto) {
-    const ownerId = req.user?.id || req.user?.sub || 'anonymous';
-    const payload = { ...body, ownerId: String(ownerId) };
-    return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
-  }
-
-  @Post('get-multipart-urls')
-  @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
-  async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
-    return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls(body));
-  }
-
-  @Post('complete-multipart-upload')
-  @ApiOperation({ summary: 'Complete multipart upload after all parts are uploaded' })
-  async completeMultipartUpload(@Body() body: CompleteMultipartUploadDto) {
-    return await firstValueFrom(this.mediaService.CompleteMultipartUpload(body));
   }
 
   @Get('download/:id')
@@ -99,7 +62,49 @@ export class MediaGatewayController implements OnModuleInit {
     }
   }
 
+  @Post('request-upload')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Request a presigned URL for direct upload to storage' })
+  @ApiResponse({ status: 201, description: 'Returns uploadUrl and fileId' })
+  async requestUpload(@Req() req: any, @Body() body: RequestUploadDto) {
+    const ownerId = req.user?.id || req.user?.sub || 'anonymous';
+    const payload = { ...body, ownerId: String(ownerId) };
+    return await firstValueFrom(this.mediaService.RequestUpload(payload));
+  }
+
+  @Post('confirm-upload')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Confirm file upload completion' })
+  @ApiResponse({ status: 200, description: 'Returns media info and download URL' })
+  async confirmUpload(@Body() body: ConfirmUploadDto) {
+    return await firstValueFrom(this.mediaService.ConfirmUpload(body));
+  }
+
+  @Post('init-multipart-upload')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Initialize multipart upload for large files' })
+  async initMultipartUpload(@Req() req: any, @Body() body: InitMultipartUploadDto) {
+    const ownerId = req.user?.id || req.user?.sub || 'anonymous';
+    const payload = { ...body, ownerId: String(ownerId) };
+    return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
+  }
+
+  @Post('get-multipart-urls')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
+  async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
+    return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls(body));
+  }
+
+  @Post('complete-multipart-upload')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Complete multipart upload after all parts are uploaded' })
+  async completeMultipartUpload(@Body() body: CompleteMultipartUploadDto) {
+    return await firstValueFrom(this.mediaService.CompleteMultipartUpload(body));
+  }
+
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get media metadata and download link' })
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {
