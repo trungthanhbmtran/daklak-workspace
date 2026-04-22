@@ -95,9 +95,15 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
             <Card key={banner.id} className="group overflow-hidden border shadow-sm hover:shadow-md transition-all flex flex-col bg-card rounded-xl">
               <div className="relative aspect-[21/9] overflow-hidden bg-muted">
                 <img
-                  src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/media/download/${banner.imageUrl}`}
+                  src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/admin/media/download/${banner.imageUrl}`}
                   alt={banner.name}
                   className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (banner.imageUrl && !target.src.includes('/media/download/')) {
+                      target.src = `/api/v1/admin/media/download/${banner.imageUrl}`;
+                    }
+                  }}
                 />
                 <div className="absolute top-2 right-2">
                   <DropdownMenu>

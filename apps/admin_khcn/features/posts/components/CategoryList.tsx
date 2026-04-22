@@ -118,9 +118,15 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                       <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">
                         {cat.thumbnail ? (
                           <img
-                            src={`/api/v1/media/download/${cat.thumbnail}`}
+                            src={`/api/v1/admin/media/download/${cat.thumbnail}`}
                             alt={cat.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              if (cat.thumbnail && !target.src.includes('/media/download/')) {
+                                target.src = `/api/v1/admin/media/download/${cat.thumbnail}`;
+                              }
+                            }}
                           />
                         ) : (
                           <Folder className="h-5 w-5 text-slate-400" />
@@ -140,7 +146,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                           variant="ghost" 
                           size="sm" 
                           className="h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2"
-                          onClick={() => window.open(`/api/v1/media/download/${cat.attachmentId}`, '_blank')}
+                          onClick={() => window.open(`/api/v1/admin/media/download/${cat.attachmentId}`, '_blank')}
                         >
                           <FileText className="h-4 w-4 mr-1" /> Xem
                         </Button>
