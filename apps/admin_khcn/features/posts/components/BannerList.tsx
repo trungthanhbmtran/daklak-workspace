@@ -42,6 +42,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     },
   });
 
+  console.log('banners', banners);
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deleteBanner(id),
     onSuccess: () => {
