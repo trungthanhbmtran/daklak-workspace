@@ -19,7 +19,8 @@ export class BannersService {
   }
 
   async findAll(query: any) {
-    const { page = 1, limit = 10, search, position, status } = query;
+    const page = Number(query.page) > 0 ? Number(query.page) : 1;
+    const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -30,7 +31,8 @@ export class BannersService {
       ];
     }
     if (position) where.position = position;
-    if (status !== undefined) where.status = status;
+    if (status === true) where.status = true;
+    // Note: We skip status = false default from gRPC to show all banners unless explicitly filtered
 
     const [items, total] = await Promise.all([
       this.prisma.banner.findMany({

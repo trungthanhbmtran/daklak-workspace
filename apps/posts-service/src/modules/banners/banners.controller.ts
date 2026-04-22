@@ -31,14 +31,14 @@ export class BannersController {
     
     // Aligned with common.PaginationMeta proto
     const pageSize = Number(query.limit) || 10;
-    const currentPage = Number(query.page) || 1;
+    const page = Number(query.page) || 1;
     
     return {
       data: items || [],
       meta: {
         pagination: {
           total: total || 0,
-          page: currentPage,
+          page: page,
           pageSize: pageSize,
           totalPages: Math.ceil((total || 0) / pageSize),
         }
