@@ -54,7 +54,10 @@ export const ModelName = {
   Banner: 'Banner',
   Category: 'Category',
   Post: 'Post',
-  Tag: 'Tag'
+  Tag: 'Tag',
+  PostVersion: 'PostVersion',
+  ModerationLog: 'ModerationLog',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -132,16 +135,16 @@ export const PostScalarFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
+  currentVersion: 'currentVersion',
   isFeatured: 'isFeatured',
   isNotification: 'isNotification',
   viewCount: 'viewCount',
-  moderationNote: 'moderationNote',
-  autoModerationStatus: 'autoModerationStatus',
-  autoModerationNote: 'autoModerationNote',
   isTranslated: 'isTranslated',
+  isDeleted: 'isDeleted',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   categoryId: 'categoryId'
 } as const
 
@@ -155,6 +158,52 @@ export const TagScalarFieldEnum = {
 } as const
 
 export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const PostVersionScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  version: 'version',
+  title: 'title',
+  description: 'description',
+  content: 'content',
+  contentJson: 'contentJson',
+  editorId: 'editorId',
+  changeNote: 'changeNote',
+  createdAt: 'createdAt'
+} as const
+
+export type PostVersionScalarFieldEnum = (typeof PostVersionScalarFieldEnum)[keyof typeof PostVersionScalarFieldEnum]
+
+
+export const ModerationLogScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  reviewerId: 'reviewerId',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  decision: 'decision',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type ModerationLogScalarFieldEnum = (typeof ModerationLogScalarFieldEnum)[keyof typeof ModerationLogScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  actorId: 'actorId',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  metadata: 'metadata',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -218,9 +267,6 @@ export const PostOrderByRelevanceFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
-  moderationNote: 'moderationNote',
-  autoModerationStatus: 'autoModerationStatus',
-  autoModerationNote: 'autoModerationNote',
   categoryId: 'categoryId'
 } as const
 
@@ -234,4 +280,46 @@ export const TagOrderByRelevanceFieldEnum = {
 } as const
 
 export type TagOrderByRelevanceFieldEnum = (typeof TagOrderByRelevanceFieldEnum)[keyof typeof TagOrderByRelevanceFieldEnum]
+
+
+export const PostVersionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  title: 'title',
+  description: 'description',
+  content: 'content',
+  contentJson: 'contentJson',
+  editorId: 'editorId',
+  changeNote: 'changeNote'
+} as const
+
+export type PostVersionOrderByRelevanceFieldEnum = (typeof PostVersionOrderByRelevanceFieldEnum)[keyof typeof PostVersionOrderByRelevanceFieldEnum]
+
+
+export const ModerationLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  reviewerId: 'reviewerId',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  decision: 'decision',
+  note: 'note'
+} as const
+
+export type ModerationLogOrderByRelevanceFieldEnum = (typeof ModerationLogOrderByRelevanceFieldEnum)[keyof typeof ModerationLogOrderByRelevanceFieldEnum]
+
+
+export const AuditLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  actorId: 'actorId',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  metadata: 'metadata',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent'
+} as const
+
+export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
 

@@ -59,3 +59,18 @@ export type Post = Prisma.PostModel
  * 
  */
 export type Tag = Prisma.TagModel
+/**
+ * Model PostVersion
+ * 
+ */
+export type PostVersion = Prisma.PostVersionModel
+/**
+ * Model ModerationLog
+ * 
+ */
+export type ModerationLog = Prisma.ModerationLogModel
+/**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel

@@ -1,0 +1,58 @@
+model PostVersion {
+  id            String   @id @default(uuid())
+  postId        String   @map("post_id")
+  version       Int
+  title         String
+  description   String?  @db.Text
+  content       String?  @db.LongText
+  contentJson   String?  @db.LongText @map("content_json")
+  editorId      String   @map("editor_id")
+  changeNote    String?  @db.Text @map("change_note")
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([version])
+  @@map("posts_versions")
+}
+
+model ModerationLog {
+  id          String   @id @default(uuid())
+  postId      String   @map("post_id")
+  reviewerId  String   @map("reviewer_id")
+  oldStatus   String   @map("old_status")
+  newStatus   String   @map("new_status")
+  decision    String   // APPROVE | REJECT | REQUEST_CHANGES
+  note        String?  @db.Text
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+  @@index([reviewerId])
+  @@map("posts_moderation_logs")
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  postId      String?  @map("post_id")
+  actorId     String   @map("actor_id")
+  action      String   // CREATE | UPDATE | SUBMIT | APPROVE | REJECT | PUBLISH | UNPUBLISH | DELETE
+  entityType  String   @default("POST") @map("entity_type")
+  entityId    String   @map("entity_id")
+  metadata    String?  @db.LongText // JSON metadata
+  ipAddress   String?  @map("ip_address")
+  userAgent   String?  @map("user_agent")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  post        Post?    @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([postId])
+  @@index([actorId])
+  @@index([action])
+  @@map("posts_audit_logs")
+}

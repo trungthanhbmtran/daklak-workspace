@@ -387,7 +387,10 @@ export const ModelName = {
   Banner: 'Banner',
   Category: 'Category',
   Post: 'Post',
-  Tag: 'Tag'
+  Tag: 'Tag',
+  PostVersion: 'PostVersion',
+  ModerationLog: 'ModerationLog',
+  AuditLog: 'AuditLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -403,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "banner" | "category" | "post" | "tag"
+    modelProps: "banner" | "category" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -671,6 +674,204 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PostVersion: {
+      payload: Prisma.$PostVersionPayload<ExtArgs>
+      fields: Prisma.PostVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.PostVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>
+        }
+        findMany: {
+          args: Prisma.PostVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>[]
+        }
+        create: {
+          args: Prisma.PostVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>
+        }
+        createMany: {
+          args: Prisma.PostVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PostVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>
+        }
+        update: {
+          args: Prisma.PostVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.PostVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PostVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.PostVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostVersion>
+        }
+        groupBy: {
+          args: Prisma.PostVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    ModerationLog: {
+      payload: Prisma.$ModerationLogPayload<ExtArgs>
+      fields: Prisma.ModerationLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ModerationLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ModerationLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>
+        }
+        findFirst: {
+          args: Prisma.ModerationLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ModerationLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>
+        }
+        findMany: {
+          args: Prisma.ModerationLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>[]
+        }
+        create: {
+          args: Prisma.ModerationLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>
+        }
+        createMany: {
+          args: Prisma.ModerationLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ModerationLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>
+        }
+        update: {
+          args: Prisma.ModerationLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.ModerationLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ModerationLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ModerationLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ModerationLogPayload>
+        }
+        aggregate: {
+          args: Prisma.ModerationLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateModerationLog>
+        }
+        groupBy: {
+          args: Prisma.ModerationLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ModerationLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ModerationLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ModerationLogCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuditLog: {
+      payload: Prisma.$AuditLogPayload<ExtArgs>
+      fields: Prisma.AuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.AuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.AuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.AuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.AuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        update: {
+          args: Prisma.AuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.AuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuditLog>
+        }
+        groupBy: {
+          args: Prisma.AuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -769,16 +970,16 @@ export const PostScalarFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
+  currentVersion: 'currentVersion',
   isFeatured: 'isFeatured',
   isNotification: 'isNotification',
   viewCount: 'viewCount',
-  moderationNote: 'moderationNote',
-  autoModerationStatus: 'autoModerationStatus',
-  autoModerationNote: 'autoModerationNote',
   isTranslated: 'isTranslated',
+  isDeleted: 'isDeleted',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt',
   categoryId: 'categoryId'
 } as const
 
@@ -792,6 +993,52 @@ export const TagScalarFieldEnum = {
 } as const
 
 export type TagScalarFieldEnum = (typeof TagScalarFieldEnum)[keyof typeof TagScalarFieldEnum]
+
+
+export const PostVersionScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  version: 'version',
+  title: 'title',
+  description: 'description',
+  content: 'content',
+  contentJson: 'contentJson',
+  editorId: 'editorId',
+  changeNote: 'changeNote',
+  createdAt: 'createdAt'
+} as const
+
+export type PostVersionScalarFieldEnum = (typeof PostVersionScalarFieldEnum)[keyof typeof PostVersionScalarFieldEnum]
+
+
+export const ModerationLogScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  reviewerId: 'reviewerId',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  decision: 'decision',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type ModerationLogScalarFieldEnum = (typeof ModerationLogScalarFieldEnum)[keyof typeof ModerationLogScalarFieldEnum]
+
+
+export const AuditLogScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  actorId: 'actorId',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  metadata: 'metadata',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -855,9 +1102,6 @@ export const PostOrderByRelevanceFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
-  moderationNote: 'moderationNote',
-  autoModerationStatus: 'autoModerationStatus',
-  autoModerationNote: 'autoModerationNote',
   categoryId: 'categoryId'
 } as const
 
@@ -871,6 +1115,48 @@ export const TagOrderByRelevanceFieldEnum = {
 } as const
 
 export type TagOrderByRelevanceFieldEnum = (typeof TagOrderByRelevanceFieldEnum)[keyof typeof TagOrderByRelevanceFieldEnum]
+
+
+export const PostVersionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  title: 'title',
+  description: 'description',
+  content: 'content',
+  contentJson: 'contentJson',
+  editorId: 'editorId',
+  changeNote: 'changeNote'
+} as const
+
+export type PostVersionOrderByRelevanceFieldEnum = (typeof PostVersionOrderByRelevanceFieldEnum)[keyof typeof PostVersionOrderByRelevanceFieldEnum]
+
+
+export const ModerationLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  reviewerId: 'reviewerId',
+  oldStatus: 'oldStatus',
+  newStatus: 'newStatus',
+  decision: 'decision',
+  note: 'note'
+} as const
+
+export type ModerationLogOrderByRelevanceFieldEnum = (typeof ModerationLogOrderByRelevanceFieldEnum)[keyof typeof ModerationLogOrderByRelevanceFieldEnum]
+
+
+export const AuditLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  actorId: 'actorId',
+  action: 'action',
+  entityType: 'entityType',
+  entityId: 'entityId',
+  metadata: 'metadata',
+  ipAddress: 'ipAddress',
+  userAgent: 'userAgent'
+} as const
+
+export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
 
 
 
@@ -1012,6 +1298,9 @@ export type GlobalOmitConfig = {
   category?: Prisma.CategoryOmit
   post?: Prisma.PostOmit
   tag?: Prisma.TagOmit
+  postVersion?: Prisma.PostVersionOmit
+  moderationLog?: Prisma.ModerationLogOmit
+  auditLog?: Prisma.AuditLogOmit
 }
 
 /* Types for Logging */

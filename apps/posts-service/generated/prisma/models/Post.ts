@@ -27,10 +27,12 @@ export type AggregatePost = {
 }
 
 export type PostAvgAggregateOutputType = {
+  currentVersion: number | null
   viewCount: number | null
 }
 
 export type PostSumAggregateOutputType = {
+  currentVersion: number | null
   viewCount: number | null
 }
 
@@ -44,16 +46,16 @@ export type PostMinAggregateOutputType = {
   thumbnail: string | null
   authorId: string | null
   status: string | null
+  currentVersion: number | null
   isFeatured: boolean | null
   isNotification: boolean | null
   viewCount: number | null
-  moderationNote: string | null
-  autoModerationStatus: string | null
-  autoModerationNote: string | null
   isTranslated: boolean | null
+  isDeleted: boolean | null
   publishedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
   categoryId: string | null
 }
 
@@ -67,16 +69,16 @@ export type PostMaxAggregateOutputType = {
   thumbnail: string | null
   authorId: string | null
   status: string | null
+  currentVersion: number | null
   isFeatured: boolean | null
   isNotification: boolean | null
   viewCount: number | null
-  moderationNote: string | null
-  autoModerationStatus: string | null
-  autoModerationNote: string | null
   isTranslated: boolean | null
+  isDeleted: boolean | null
   publishedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
+  deletedAt: Date | null
   categoryId: string | null
 }
 
@@ -90,26 +92,28 @@ export type PostCountAggregateOutputType = {
   thumbnail: number
   authorId: number
   status: number
+  currentVersion: number
   isFeatured: number
   isNotification: number
   viewCount: number
-  moderationNote: number
-  autoModerationStatus: number
-  autoModerationNote: number
   isTranslated: number
+  isDeleted: number
   publishedAt: number
   createdAt: number
   updatedAt: number
+  deletedAt: number
   categoryId: number
   _all: number
 }
 
 
 export type PostAvgAggregateInputType = {
+  currentVersion?: true
   viewCount?: true
 }
 
 export type PostSumAggregateInputType = {
+  currentVersion?: true
   viewCount?: true
 }
 
@@ -123,16 +127,16 @@ export type PostMinAggregateInputType = {
   thumbnail?: true
   authorId?: true
   status?: true
+  currentVersion?: true
   isFeatured?: true
   isNotification?: true
   viewCount?: true
-  moderationNote?: true
-  autoModerationStatus?: true
-  autoModerationNote?: true
   isTranslated?: true
+  isDeleted?: true
   publishedAt?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   categoryId?: true
 }
 
@@ -146,16 +150,16 @@ export type PostMaxAggregateInputType = {
   thumbnail?: true
   authorId?: true
   status?: true
+  currentVersion?: true
   isFeatured?: true
   isNotification?: true
   viewCount?: true
-  moderationNote?: true
-  autoModerationStatus?: true
-  autoModerationNote?: true
   isTranslated?: true
+  isDeleted?: true
   publishedAt?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   categoryId?: true
 }
 
@@ -169,16 +173,16 @@ export type PostCountAggregateInputType = {
   thumbnail?: true
   authorId?: true
   status?: true
+  currentVersion?: true
   isFeatured?: true
   isNotification?: true
   viewCount?: true
-  moderationNote?: true
-  autoModerationStatus?: true
-  autoModerationNote?: true
   isTranslated?: true
+  isDeleted?: true
   publishedAt?: true
   createdAt?: true
   updatedAt?: true
+  deletedAt?: true
   categoryId?: true
   _all?: true
 }
@@ -279,16 +283,16 @@ export type PostGroupByOutputType = {
   thumbnail: string | null
   authorId: string
   status: string
+  currentVersion: number
   isFeatured: boolean
   isNotification: boolean
   viewCount: number
-  moderationNote: string | null
-  autoModerationStatus: string | null
-  autoModerationNote: string | null
   isTranslated: boolean
+  isDeleted: boolean
   publishedAt: Date | null
   createdAt: Date
   updatedAt: Date
+  deletedAt: Date | null
   categoryId: string | null
   _count: PostCountAggregateOutputType | null
   _avg: PostAvgAggregateOutputType | null
@@ -325,19 +329,22 @@ export type PostWhereInput = {
   thumbnail?: Prisma.StringNullableFilter<"Post"> | string | null
   authorId?: Prisma.StringFilter<"Post"> | string
   status?: Prisma.StringFilter<"Post"> | string
+  currentVersion?: Prisma.IntFilter<"Post"> | number
   isFeatured?: Prisma.BoolFilter<"Post"> | boolean
   isNotification?: Prisma.BoolFilter<"Post"> | boolean
   viewCount?: Prisma.IntFilter<"Post"> | number
-  moderationNote?: Prisma.StringNullableFilter<"Post"> | string | null
-  autoModerationStatus?: Prisma.StringNullableFilter<"Post"> | string | null
-  autoModerationNote?: Prisma.StringNullableFilter<"Post"> | string | null
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
+  isDeleted?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   tags?: Prisma.TagListRelationFilter
+  versions?: Prisma.PostVersionListRelationFilter
+  moderationLogs?: Prisma.ModerationLogListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
 }
 
 export type PostOrderByWithRelationInput = {
@@ -350,19 +357,22 @@ export type PostOrderByWithRelationInput = {
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
   authorId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  currentVersion?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
-  moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
-  autoModerationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
-  autoModerationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.CategoryOrderByWithRelationInput
   tags?: Prisma.TagOrderByRelationAggregateInput
+  versions?: Prisma.PostVersionOrderByRelationAggregateInput
+  moderationLogs?: Prisma.ModerationLogOrderByRelationAggregateInput
+  auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   _relevance?: Prisma.PostOrderByRelevanceInput
 }
 
@@ -379,19 +389,22 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   thumbnail?: Prisma.StringNullableFilter<"Post"> | string | null
   authorId?: Prisma.StringFilter<"Post"> | string
   status?: Prisma.StringFilter<"Post"> | string
+  currentVersion?: Prisma.IntFilter<"Post"> | number
   isFeatured?: Prisma.BoolFilter<"Post"> | boolean
   isNotification?: Prisma.BoolFilter<"Post"> | boolean
   viewCount?: Prisma.IntFilter<"Post"> | number
-  moderationNote?: Prisma.StringNullableFilter<"Post"> | string | null
-  autoModerationStatus?: Prisma.StringNullableFilter<"Post"> | string | null
-  autoModerationNote?: Prisma.StringNullableFilter<"Post"> | string | null
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
+  isDeleted?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   tags?: Prisma.TagListRelationFilter
+  versions?: Prisma.PostVersionListRelationFilter
+  moderationLogs?: Prisma.ModerationLogListRelationFilter
+  auditLogs?: Prisma.AuditLogListRelationFilter
 }, "id" | "slug">
 
 export type PostOrderByWithAggregationInput = {
@@ -404,16 +417,16 @@ export type PostOrderByWithAggregationInput = {
   thumbnail?: Prisma.SortOrderInput | Prisma.SortOrder
   authorId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  currentVersion?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
-  moderationNote?: Prisma.SortOrderInput | Prisma.SortOrder
-  autoModerationStatus?: Prisma.SortOrderInput | Prisma.SortOrder
-  autoModerationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   categoryId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.PostCountOrderByAggregateInput
   _avg?: Prisma.PostAvgOrderByAggregateInput
@@ -435,16 +448,16 @@ export type PostScalarWhereWithAggregatesInput = {
   thumbnail?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   authorId?: Prisma.StringWithAggregatesFilter<"Post"> | string
   status?: Prisma.StringWithAggregatesFilter<"Post"> | string
+  currentVersion?: Prisma.IntWithAggregatesFilter<"Post"> | number
   isFeatured?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   isNotification?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   viewCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
-  moderationNote?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
-  autoModerationStatus?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
-  autoModerationNote?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   isTranslated?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  isDeleted?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   categoryId?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
 }
 
@@ -458,18 +471,21 @@ export type PostCreateInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateInput = {
@@ -482,18 +498,21 @@ export type PostUncheckedCreateInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   categoryId?: string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostUpdateInput = {
@@ -506,18 +525,21 @@ export type PostUpdateInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateInput = {
@@ -530,18 +552,21 @@ export type PostUncheckedUpdateInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateManyInput = {
@@ -554,16 +579,16 @@ export type PostCreateManyInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   categoryId?: string | null
 }
 
@@ -577,16 +602,16 @@ export type PostUpdateManyMutationInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PostUncheckedUpdateManyInput = {
@@ -599,16 +624,16 @@ export type PostUncheckedUpdateManyInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -638,20 +663,21 @@ export type PostCountOrderByAggregateInput = {
   thumbnail?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  currentVersion?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
-  moderationNote?: Prisma.SortOrder
-  autoModerationStatus?: Prisma.SortOrder
-  autoModerationNote?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
 }
 
 export type PostAvgOrderByAggregateInput = {
+  currentVersion?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
 }
 
@@ -665,16 +691,16 @@ export type PostMaxOrderByAggregateInput = {
   thumbnail?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  currentVersion?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
-  moderationNote?: Prisma.SortOrder
-  autoModerationStatus?: Prisma.SortOrder
-  autoModerationNote?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
 }
 
@@ -688,21 +714,32 @@ export type PostMinOrderByAggregateInput = {
   thumbnail?: Prisma.SortOrder
   authorId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  currentVersion?: Prisma.SortOrder
   isFeatured?: Prisma.SortOrder
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
-  moderationNote?: Prisma.SortOrder
-  autoModerationStatus?: Prisma.SortOrder
-  autoModerationNote?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  deletedAt?: Prisma.SortOrder
   categoryId?: Prisma.SortOrder
 }
 
 export type PostSumOrderByAggregateInput = {
+  currentVersion?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
+}
+
+export type PostScalarRelationFilter = {
+  is?: Prisma.PostWhereInput
+  isNot?: Prisma.PostWhereInput
+}
+
+export type PostNullableScalarRelationFilter = {
+  is?: Prisma.PostWhereInput | null
+  isNot?: Prisma.PostWhereInput | null
 }
 
 export type PostCreateNestedManyWithoutCategoryInput = {
@@ -785,6 +822,50 @@ export type PostUncheckedUpdateManyWithoutTagsNestedInput = {
   deleteMany?: Prisma.PostScalarWhereInput | Prisma.PostScalarWhereInput[]
 }
 
+export type PostCreateNestedOneWithoutVersionsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutVersionsInput, Prisma.PostUncheckedCreateWithoutVersionsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutVersionsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneRequiredWithoutVersionsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutVersionsInput, Prisma.PostUncheckedCreateWithoutVersionsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutVersionsInput
+  upsert?: Prisma.PostUpsertWithoutVersionsInput
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutVersionsInput, Prisma.PostUpdateWithoutVersionsInput>, Prisma.PostUncheckedUpdateWithoutVersionsInput>
+}
+
+export type PostCreateNestedOneWithoutModerationLogsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutModerationLogsInput, Prisma.PostUncheckedCreateWithoutModerationLogsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutModerationLogsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneRequiredWithoutModerationLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutModerationLogsInput, Prisma.PostUncheckedCreateWithoutModerationLogsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutModerationLogsInput
+  upsert?: Prisma.PostUpsertWithoutModerationLogsInput
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutModerationLogsInput, Prisma.PostUpdateWithoutModerationLogsInput>, Prisma.PostUncheckedUpdateWithoutModerationLogsInput>
+}
+
+export type PostCreateNestedOneWithoutAuditLogsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutAuditLogsInput, Prisma.PostUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutAuditLogsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneWithoutAuditLogsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutAuditLogsInput, Prisma.PostUncheckedCreateWithoutAuditLogsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutAuditLogsInput
+  upsert?: Prisma.PostUpsertWithoutAuditLogsInput
+  disconnect?: Prisma.PostWhereInput | boolean
+  delete?: Prisma.PostWhereInput | boolean
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.PostUpdateWithoutAuditLogsInput>, Prisma.PostUncheckedUpdateWithoutAuditLogsInput>
+}
+
 export type PostCreateWithoutCategoryInput = {
   id?: string
   title: string
@@ -795,17 +876,20 @@ export type PostCreateWithoutCategoryInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutCategoryInput = {
@@ -818,17 +902,20 @@ export type PostUncheckedCreateWithoutCategoryInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutCategoryInput = {
@@ -870,16 +957,16 @@ export type PostScalarWhereInput = {
   thumbnail?: Prisma.StringNullableFilter<"Post"> | string | null
   authorId?: Prisma.StringFilter<"Post"> | string
   status?: Prisma.StringFilter<"Post"> | string
+  currentVersion?: Prisma.IntFilter<"Post"> | number
   isFeatured?: Prisma.BoolFilter<"Post"> | boolean
   isNotification?: Prisma.BoolFilter<"Post"> | boolean
   viewCount?: Prisma.IntFilter<"Post"> | number
-  moderationNote?: Prisma.StringNullableFilter<"Post"> | string | null
-  autoModerationStatus?: Prisma.StringNullableFilter<"Post"> | string | null
-  autoModerationNote?: Prisma.StringNullableFilter<"Post"> | string | null
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
+  isDeleted?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
+  deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
 }
 
@@ -893,17 +980,20 @@ export type PostCreateWithoutTagsInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
+  versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
 
 export type PostUncheckedCreateWithoutTagsInput = {
@@ -916,17 +1006,20 @@ export type PostUncheckedCreateWithoutTagsInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
   categoryId?: string | null
+  versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
 
 export type PostCreateOrConnectWithoutTagsInput = {
@@ -950,6 +1043,366 @@ export type PostUpdateManyWithWhereWithoutTagsInput = {
   data: Prisma.XOR<Prisma.PostUpdateManyMutationInput, Prisma.PostUncheckedUpdateManyWithoutTagsInput>
 }
 
+export type PostCreateWithoutVersionsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
+  tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutVersionsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  categoryId?: string | null
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutVersionsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutVersionsInput, Prisma.PostUncheckedCreateWithoutVersionsInput>
+}
+
+export type PostUpsertWithoutVersionsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutVersionsInput, Prisma.PostUncheckedUpdateWithoutVersionsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutVersionsInput, Prisma.PostUncheckedCreateWithoutVersionsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutVersionsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutVersionsInput, Prisma.PostUncheckedUpdateWithoutVersionsInput>
+}
+
+export type PostUpdateWithoutVersionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
+  tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutVersionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
+}
+
+export type PostCreateWithoutModerationLogsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
+  tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutModerationLogsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  categoryId?: string | null
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutModerationLogsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutModerationLogsInput, Prisma.PostUncheckedCreateWithoutModerationLogsInput>
+}
+
+export type PostUpsertWithoutModerationLogsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutModerationLogsInput, Prisma.PostUncheckedUpdateWithoutModerationLogsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutModerationLogsInput, Prisma.PostUncheckedCreateWithoutModerationLogsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutModerationLogsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutModerationLogsInput, Prisma.PostUncheckedUpdateWithoutModerationLogsInput>
+}
+
+export type PostUpdateWithoutModerationLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
+  tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutModerationLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
+}
+
+export type PostCreateWithoutAuditLogsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
+  tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutAuditLogsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  categoryId?: string | null
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutAuditLogsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutAuditLogsInput, Prisma.PostUncheckedCreateWithoutAuditLogsInput>
+}
+
+export type PostUpsertWithoutAuditLogsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutAuditLogsInput, Prisma.PostUncheckedUpdateWithoutAuditLogsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutAuditLogsInput, Prisma.PostUncheckedCreateWithoutAuditLogsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutAuditLogsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutAuditLogsInput, Prisma.PostUncheckedUpdateWithoutAuditLogsInput>
+}
+
+export type PostUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
+  tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutAuditLogsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
+}
+
 export type PostCreateManyCategoryInput = {
   id?: string
   title: string
@@ -960,16 +1413,16 @@ export type PostCreateManyCategoryInput = {
   thumbnail?: string | null
   authorId: string
   status?: string
+  currentVersion?: number
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: number
-  moderationNote?: string | null
-  autoModerationStatus?: string | null
-  autoModerationNote?: string | null
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  deletedAt?: Date | string | null
 }
 
 export type PostUpdateWithoutCategoryInput = {
@@ -982,17 +1435,20 @@ export type PostUpdateWithoutCategoryInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutCategoryInput = {
@@ -1005,17 +1461,20 @@ export type PostUncheckedUpdateWithoutCategoryInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateManyWithoutCategoryInput = {
@@ -1028,16 +1487,16 @@ export type PostUncheckedUpdateManyWithoutCategoryInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type PostUpdateWithoutTagsInput = {
@@ -1050,17 +1509,20 @@ export type PostUpdateWithoutTagsInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateWithoutTagsInput = {
@@ -1073,17 +1535,20 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostUncheckedUpdateManyWithoutTagsInput = {
@@ -1096,16 +1561,16 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
   thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   authorId?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
   isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  moderationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationStatus?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  autoModerationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
@@ -1116,10 +1581,16 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
 
 export type PostCountOutputType = {
   tags: number
+  versions: number
+  moderationLogs: number
+  auditLogs: number
 }
 
 export type PostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tags?: boolean | PostCountOutputTypeCountTagsArgs
+  versions?: boolean | PostCountOutputTypeCountVersionsArgs
+  moderationLogs?: boolean | PostCountOutputTypeCountModerationLogsArgs
+  auditLogs?: boolean | PostCountOutputTypeCountAuditLogsArgs
 }
 
 /**
@@ -1139,6 +1610,27 @@ export type PostCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Exten
   where?: Prisma.TagWhereInput
 }
 
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PostVersionWhereInput
+}
+
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountModerationLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ModerationLogWhereInput
+}
+
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountAuditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AuditLogWhereInput
+}
+
 
 export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1150,19 +1642,22 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   thumbnail?: boolean
   authorId?: boolean
   status?: boolean
+  currentVersion?: boolean
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: boolean
-  moderationNote?: boolean
-  autoModerationStatus?: boolean
-  autoModerationNote?: boolean
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   categoryId?: boolean
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
+  versions?: boolean | Prisma.Post$versionsArgs<ExtArgs>
+  moderationLogs?: boolean | Prisma.Post$moderationLogsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Post$auditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["post"]>
 
@@ -1178,23 +1673,26 @@ export type PostSelectScalar = {
   thumbnail?: boolean
   authorId?: boolean
   status?: boolean
+  currentVersion?: boolean
   isFeatured?: boolean
   isNotification?: boolean
   viewCount?: boolean
-  moderationNote?: boolean
-  autoModerationStatus?: boolean
-  autoModerationNote?: boolean
   isTranslated?: boolean
+  isDeleted?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  deletedAt?: boolean
   categoryId?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentJson" | "slug" | "thumbnail" | "authorId" | "status" | "isFeatured" | "isNotification" | "viewCount" | "moderationNote" | "autoModerationStatus" | "autoModerationNote" | "isTranslated" | "publishedAt" | "createdAt" | "updatedAt" | "categoryId", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentJson" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isDeleted" | "publishedAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
+  versions?: boolean | Prisma.Post$versionsArgs<ExtArgs>
+  moderationLogs?: boolean | Prisma.Post$moderationLogsArgs<ExtArgs>
+  auditLogs?: boolean | Prisma.Post$auditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -1203,6 +1701,9 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   objects: {
     category: Prisma.$CategoryPayload<ExtArgs> | null
     tags: Prisma.$TagPayload<ExtArgs>[]
+    versions: Prisma.$PostVersionPayload<ExtArgs>[]
+    moderationLogs: Prisma.$ModerationLogPayload<ExtArgs>[]
+    auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1214,16 +1715,16 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     thumbnail: string | null
     authorId: string
     status: string
+    currentVersion: number
     isFeatured: boolean
     isNotification: boolean
     viewCount: number
-    moderationNote: string | null
-    autoModerationStatus: string | null
-    autoModerationNote: string | null
     isTranslated: boolean
+    isDeleted: boolean
     publishedAt: Date | null
     createdAt: Date
     updatedAt: Date
+    deletedAt: Date | null
     categoryId: string | null
   }, ExtArgs["result"]["post"]>
   composites: {}
@@ -1567,6 +2068,9 @@ export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Typ
   readonly [Symbol.toStringTag]: "PrismaPromise"
   category<T extends Prisma.Post$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$categoryArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   tags<T extends Prisma.Post$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  versions<T extends Prisma.Post$versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  moderationLogs<T extends Prisma.Post$moderationLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$moderationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ModerationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  auditLogs<T extends Prisma.Post$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1605,16 +2109,16 @@ export interface PostFieldRefs {
   readonly thumbnail: Prisma.FieldRef<"Post", 'String'>
   readonly authorId: Prisma.FieldRef<"Post", 'String'>
   readonly status: Prisma.FieldRef<"Post", 'String'>
+  readonly currentVersion: Prisma.FieldRef<"Post", 'Int'>
   readonly isFeatured: Prisma.FieldRef<"Post", 'Boolean'>
   readonly isNotification: Prisma.FieldRef<"Post", 'Boolean'>
   readonly viewCount: Prisma.FieldRef<"Post", 'Int'>
-  readonly moderationNote: Prisma.FieldRef<"Post", 'String'>
-  readonly autoModerationStatus: Prisma.FieldRef<"Post", 'String'>
-  readonly autoModerationNote: Prisma.FieldRef<"Post", 'String'>
   readonly isTranslated: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly isDeleted: Prisma.FieldRef<"Post", 'Boolean'>
   readonly publishedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Post", 'DateTime'>
+  readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly categoryId: Prisma.FieldRef<"Post", 'String'>
 }
     
@@ -2004,6 +2508,78 @@ export type Post$tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   take?: number
   skip?: number
   distinct?: Prisma.TagScalarFieldEnum | Prisma.TagScalarFieldEnum[]
+}
+
+/**
+ * Post.versions
+ */
+export type Post$versionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PostVersion
+   */
+  select?: Prisma.PostVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PostVersion
+   */
+  omit?: Prisma.PostVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PostVersionInclude<ExtArgs> | null
+  where?: Prisma.PostVersionWhereInput
+  orderBy?: Prisma.PostVersionOrderByWithRelationInput | Prisma.PostVersionOrderByWithRelationInput[]
+  cursor?: Prisma.PostVersionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PostVersionScalarFieldEnum | Prisma.PostVersionScalarFieldEnum[]
+}
+
+/**
+ * Post.moderationLogs
+ */
+export type Post$moderationLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ModerationLog
+   */
+  select?: Prisma.ModerationLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ModerationLog
+   */
+  omit?: Prisma.ModerationLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ModerationLogInclude<ExtArgs> | null
+  where?: Prisma.ModerationLogWhereInput
+  orderBy?: Prisma.ModerationLogOrderByWithRelationInput | Prisma.ModerationLogOrderByWithRelationInput[]
+  cursor?: Prisma.ModerationLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ModerationLogScalarFieldEnum | Prisma.ModerationLogScalarFieldEnum[]
+}
+
+/**
+ * Post.auditLogs
+ */
+export type Post$auditLogsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AuditLog
+   */
+  select?: Prisma.AuditLogSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AuditLog
+   */
+  omit?: Prisma.AuditLogOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AuditLogInclude<ExtArgs> | null
+  where?: Prisma.AuditLogWhereInput
+  orderBy?: Prisma.AuditLogOrderByWithRelationInput | Prisma.AuditLogOrderByWithRelationInput[]
+  cursor?: Prisma.AuditLogWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AuditLogScalarFieldEnum | Prisma.AuditLogScalarFieldEnum[]
 }
 
 /**

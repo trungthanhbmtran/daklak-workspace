@@ -48,6 +48,8 @@ export class PostsController {
     return { data: result };
   }
 
+
+
   @GrpcMethod('PostService', 'DeletePost')
   async deletePost(data: { id: string }) {
     await this.postsService.remove(data.id);
@@ -66,9 +68,52 @@ export class PostsController {
     return result;
   }
 
+  @GrpcMethod('PostService', 'SubmitPost')
+  async submitPost(data: { id: string, actorId: string, note?: string }) {
+    const result = await this.postsService.submit(data.id, data.actorId, data.note);
+    return { data: result };
+  }
+
   @GrpcMethod('PostService', 'ReviewPost')
-  async reviewPost(data: any) {
-    const result = await this.postsService.review(data);
-    return { success: true, data: result };
+  async reviewPost(data: { id: string, reviewerId: string, note?: string }) {
+    const result = await this.postsService.review(data.id, data.reviewerId, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('PostService', 'ApprovePost')
+  async approvePost(data: { id: string, reviewerId: string, note?: string }) {
+    const result = await this.postsService.approve(data.id, data.reviewerId, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('PostService', 'RejectPost')
+  async rejectPost(data: { id: string, reviewerId: string, note?: string }) {
+    const result = await this.postsService.reject(data.id, data.reviewerId, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('PostService', 'PublishPost')
+  async publishPost(data: { id: string, actorId: string, note?: string }) {
+    const result = await this.postsService.publish(data.id, data.actorId, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('PostService', 'UnpublishPost')
+  async unpublishPost(data: { id: string, actorId: string, note?: string }) {
+    const result = await this.postsService.unpublish(data.id, data.actorId, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('PostService', 'ArchivePost')
+  async archivePost(data: { id: string, actorId: string, note?: string }) {
+    const result = await this.postsService.archive(data.id, data.actorId, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('PostService', 'GetPostHistory')
+  async getPostHistory(data: { id: string }) {
+    const items = await this.postsService.getHistory(data.id);
+    return { items };
   }
 }
+

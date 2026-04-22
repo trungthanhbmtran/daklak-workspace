@@ -12,14 +12,26 @@ service PostService {
   rpc ListPosts(ListPostsRequest) returns (ListPostsResponse) {}
   rpc UpdatePost(UpdatePostRequest) returns (PostResponse) {}
   rpc DeletePost(DeletePostRequest) returns (common.DeleteResponse) {}
+  
+  // Workflow methods
+  rpc SubmitPost(WorkflowRequest) returns (PostResponse) {}
+  rpc ReviewPost(ReviewRequest) returns (PostResponse) {}
+  rpc ApprovePost(ReviewRequest) returns (PostResponse) {}
+  rpc RejectPost(ReviewRequest) returns (PostResponse) {}
+  rpc PublishPost(WorkflowRequest) returns (PostResponse) {}
+  rpc UnpublishPost(WorkflowRequest) returns (PostResponse) {}
+  rpc ArchivePost(WorkflowRequest) returns (PostResponse) {}
+  
+  rpc GetPostHistory(GetPostRequest) returns (HistoryResponse) {}
+
   rpc AddTagsToPost(AddTagsToPostRequest) returns (common.DeleteResponse) {}
   rpc RemoveTagFromPost(RemoveTagFromPostRequest) returns (common.DeleteResponse) {}
   rpc GetTagsByPost(GetTagsByPostRequest) returns (GetTagsByPostResponse) {}
   rpc SetCategoryForPost(SetCategoryForPostRequest) returns (common.DeleteResponse) {}
   rpc GetPostBySlug(GetPostBySlugRequest) returns (Post) {}
   rpc GetPostsByCategorySlug(GetPostsByCategorySlugRequest) returns (ListPostsResponse) {}
-  rpc ReviewPost (ReviewPostRequest) returns (ReviewPostResponse);
 }
+
 
 // ====================== Post Object ======================
 
@@ -43,31 +55,40 @@ message Post {
   string categoryId = 17;
   category.Category category = 18;
   string contentJson = 19;
-  string moderationNote  = 20;
-  string autoModerationStatus = 21;
-  string autoModerationNote = 22;
   bool isTranslated = 23;
+  int32 currentVersion = 24;
 }
 
-message ReviewPostRequest {
+message WorkflowRequest {
   string id = 1;
-  string status = 2;
-  optional string note = 3;         
-  optional string reviewerId = 4;   
-  optional string title = 5;
-  optional string description = 6;
-  optional string contentJson = 7; 
+  string actorId = 2;
+  optional string note = 3;
 }
 
-message ReviewPostResponse {
-  bool success = 1;
-  Post data = 2; 
+message ReviewRequest {
+  string id = 1;
+  string reviewerId = 2;
+  optional string note = 3;
+  optional string decision = 4;
 }
 
-// Response wrapper
+message PostHistory {
+  string id = 1;
+  int32 version = 2;
+  string title = 3;
+  string editorId = 4;
+  string createdAt = 5;
+  string changeNote = 6;
+}
+
+message HistoryResponse {
+  repeated PostHistory items = 1;
+}
+
 message PostResponse {
   Post data = 1;
 }
+
 
 // ====================== Create ======================
 

@@ -3,31 +3,40 @@ model Post {
   title                 String
   description           String?  @db.Text
   content               String?  @db.LongText
-  contentJson           String?  @db.LongText @map("content_json")
+  contentJson           String?  @db.LongText @map("content_json") // Lexical format
   slug                  String   @unique
   thumbnail             String?
   authorId              String   @map("author_id")
-  status                String   @default("draft") // draft | published | review | deleted
+  
+  // Lifecycle & Workflow
+  status                String   @default("DRAFT") // DRAFT | SUBMITTED | UNDER_REVIEW | REJECTED | APPROVED | PUBLISHED | UNPUBLISHED | ARCHIVED
+  currentVersion        Int      @default(1) @map("current_version")
+  
   isFeatured            Boolean  @default(false) @map("is_featured")
   isNotification        Boolean  @default(false) @map("is_notification")
   viewCount             Int      @default(0) @map("view_count")
   
-  moderationNote        String?  @db.Text @map("moderation_note")
-  autoModerationStatus  String?  @map("auto_moderation_status")
-  autoModerationNote    String?  @db.Text @map("auto_moderation_note")
   isTranslated          Boolean  @default(false) @map("is_translated")
+  isDeleted             Boolean  @default(false) @map("is_deleted")
   
   publishedAt           DateTime? @map("published_at")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
+  deletedAt             DateTime? @map("deleted_at")
 
+  // Relations
   categoryId            String?   @map("category_id")
   category              Category? @relation(fields: [categoryId], references: [id])
   
   tags                  Tag[]     @relation("PostToTag")
+  versions              PostVersion[]
+  moderationLogs        ModerationLog[]
+  auditLogs             AuditLog[]
 
   @@index([authorId])
   @@index([categoryId])
   @@index([status])
+  @@index([isDeleted])
   @@map("posts")
 }
+

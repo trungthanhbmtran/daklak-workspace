@@ -35,38 +35,26 @@ export class CategoriesController {
   @GrpcMethod('CategoryService', 'CreateCategory')
   async createCategory(data: any) {
     const result = await this.categoriesService.create(data);
-    return {
-      data: sanitizeCategory(result),
-      success: true
-    };
+    return { data: sanitizeCategory(result) };
   }
 
   @GrpcMethod('CategoryService', 'GetCategory')
   async getCategory(data: { id: string }) {
     const result = await this.categoriesService.findOne(data.id);
-    return {
-      data: sanitizeCategory(result),
-      success: true
-    };
+    return { data: sanitizeCategory(result) };
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
   async listCategories() {
     const result = await this.categoriesService.getTree();
-    return {
-      data: (result || []).map(sanitizeCategory).filter(Boolean),
-      success: true
-    };
+    return { data: (result || []).map(sanitizeCategory).filter(Boolean) };
   }
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
   async updateCategory(data: any) {
     const { id, ...rest } = data;
     const result = await this.categoriesService.update(id, rest);
-    return {
-      data: sanitizeCategory(result),
-      success: true
-    };
+    return { data: sanitizeCategory(result) };
   }
 
   @GrpcMethod('CategoryService', 'DeleteCategory')

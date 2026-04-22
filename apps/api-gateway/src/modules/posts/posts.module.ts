@@ -14,10 +14,10 @@ import { PostsBannerController } from './posts-banner.controller';
     registerGrpcService(MICROSERVICES.BANNER),
   ],
   controllers: [
+    PostsController,
     PostsCategoryController,
     PostsTagController,
     PostsBannerController,
-    PostsController,
   ],
 })
-export class PostsModule {}
+export class PostsModule { }
