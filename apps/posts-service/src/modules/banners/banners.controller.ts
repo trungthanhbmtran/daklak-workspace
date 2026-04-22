@@ -28,15 +28,20 @@ export class BannersController {
   @GrpcMethod('BannerService', 'ListBanners')
   async listBanners(query: any) {
     const { items, total } = await this.bannersService.findAll(query);
+    
+    // Aligned with common.PaginationMeta proto
+    const pageSize = Number(query.limit) || 10;
+    const currentPage = Number(query.page) || 1;
+    
     return {
       data: items || [],
       meta: {
         pagination: {
           total: total || 0,
-          page: Number(query.page) || 1,
-          pageSize: Number(query.limit) || 10,
-          totalPages: Math.ceil((total || 0) / (Number(query.limit) || 10)),
-        },
+          page: currentPage,
+          pageSize: pageSize,
+          totalPages: Math.ceil((total || 0) / pageSize),
+        }
       },
       success: true
     };
