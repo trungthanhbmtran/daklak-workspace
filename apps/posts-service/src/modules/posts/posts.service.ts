@@ -3,7 +3,7 @@ import { PrismaService } from '@/database/prisma.service';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
     const { tagIds, ...rest } = data;
@@ -47,6 +47,7 @@ export class PostsService {
   }
 
   async findAll(query: any) {
+    const { authorId, categoryId, search } = query;
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
@@ -75,12 +76,15 @@ export class PostsService {
       this.prisma.post.count({ where }),
     ]);
 
+    console.log('items', items);
+    console.log('total', total);
+
     return { items, total };
   }
 
   async update(id: string, data: any) {
     const { tagIds, ...rest } = data;
-    
+
     // Logic for updating tags: disconnect all and connect new ones (simplest way)
     return this.prisma.post.update({
       where: { id },

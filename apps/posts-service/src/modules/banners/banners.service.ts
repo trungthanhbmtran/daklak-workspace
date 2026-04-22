@@ -19,6 +19,7 @@ export class BannersService {
   }
 
   async findAll(query: any) {
+    const { search, position, status } = query;
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
