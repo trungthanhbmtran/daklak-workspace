@@ -16,7 +16,7 @@ export default function CategoriesPage() {
   }
 
   return (
-    <CategoryList 
+    <CategoryList
       onNavigateToCreate={() => setView('CREATE')}
       onNavigateToEdit={(id) => {
         setEditId(id);

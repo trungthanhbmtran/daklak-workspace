@@ -3,7 +3,7 @@ import { PrismaService } from '@/database/prisma.service';
 
 @Injectable()
 export class BannersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
     const formattedData = this.formatBannerData(data);

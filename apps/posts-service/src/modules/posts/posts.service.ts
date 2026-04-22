@@ -76,8 +76,8 @@ export class PostsService {
       this.prisma.post.count({ where }),
     ]);
 
-    console.log('items', items);
-    console.log('total', total);
+    // console.log('items', items);
+    // console.log('total', total);
 
     return { items, total };
   }

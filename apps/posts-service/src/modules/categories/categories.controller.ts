@@ -21,8 +21,8 @@ function sanitizeCategory(cat: any): any {
     status: cat.status !== undefined ? cat.status : true,
     isGovStandard: cat.isGovStandard !== undefined ? cat.isGovStandard : false,
     attachmentId: cat.attachmentId || '',
-    children: Array.isArray(cat.children) 
-      ? cat.children.filter((c: any) => !!c).map(sanitizeCategory) 
+    children: Array.isArray(cat.children)
+      ? cat.children.filter((c: any) => !!c).map(sanitizeCategory)
       : [],
     postsCount: (cat as any)._count?.posts || cat.postsCount || 0,
   };
@@ -30,31 +30,43 @@ function sanitizeCategory(cat: any): any {
 
 @Controller()
 export class CategoriesController {
-  constructor(private readonly categoriesService: CategoriesService) {}
+  constructor(private readonly categoriesService: CategoriesService) { }
 
   @GrpcMethod('CategoryService', 'CreateCategory')
   async createCategory(data: any) {
     const result = await this.categoriesService.create(data);
-    return { data: sanitizeCategory(result) };
+    return {
+      data: sanitizeCategory(result),
+      success: true
+    };
   }
 
   @GrpcMethod('CategoryService', 'GetCategory')
   async getCategory(data: { id: string }) {
     const result = await this.categoriesService.findOne(data.id);
-    return { data: sanitizeCategory(result) };
+    return {
+      data: sanitizeCategory(result),
+      success: true
+    };
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
   async listCategories() {
     const result = await this.categoriesService.getTree();
-    return { data: (result || []).map(sanitizeCategory).filter(Boolean) };
+    return {
+      data: (result || []).map(sanitizeCategory).filter(Boolean),
+      success: true
+    };
   }
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
   async updateCategory(data: any) {
     const { id, ...rest } = data;
     const result = await this.categoriesService.update(id, rest);
-    return { data: sanitizeCategory(result) };
+    return {
+      data: sanitizeCategory(result),
+      success: true
+    };
   }
 
   @GrpcMethod('CategoryService', 'DeleteCategory')
