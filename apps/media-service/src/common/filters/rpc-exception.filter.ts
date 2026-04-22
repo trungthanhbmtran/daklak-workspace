@@ -24,6 +24,12 @@ export class GlobalRpcExceptionFilter implements RpcExceptionFilter {
         code = status.NOT_FOUND;
       } else if (status_code === HttpStatus.BAD_REQUEST) {
         code = status.INVALID_ARGUMENT;
+        // Extract validation error messages if available
+        if (exception.response && exception.response.message) {
+          message = Array.isArray(exception.response.message)
+            ? exception.response.message.join(', ')
+            : exception.response.message;
+        }
       }
     }
 

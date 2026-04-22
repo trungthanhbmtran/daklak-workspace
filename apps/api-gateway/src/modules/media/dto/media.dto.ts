@@ -15,6 +15,7 @@ export class RequestUploadDto {
 
   @ApiProperty({ example: 1048576 })
   @IsInt()
+  @Type(() => Number)
   size: number;
 }
 
@@ -38,6 +39,7 @@ export class InitMultipartUploadDto {
 
   @ApiProperty({ example: 524288000 })
   @IsInt()
+  @Type(() => Number)
   size: number;
 }
 

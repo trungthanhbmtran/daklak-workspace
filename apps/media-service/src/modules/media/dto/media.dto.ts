@@ -11,6 +11,7 @@ export class UploadRequestDto {
   mimeType: string;
 
   @IsInt()
+  @Type(() => Number)
   size: number;
 
   @IsString()
@@ -40,6 +41,7 @@ export class InitMultipartRequestDto {
   mimeType: string;
 
   @IsInt()
+  @Type(() => Number)
   size: number;
 
   @IsString()

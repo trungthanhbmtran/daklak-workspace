@@ -17,7 +17,7 @@ async function bootstrap() {
       url: process.env.MEDIA_SERVICE_GRPC_URL || '0.0.0.0:50059',
       loader: {
         keepCase: false, // Use keepCase for compatibility with proto definitions
-        longs: String,
+        longs: Number,
         enums: String,
         defaults: true,
         oneofs: true,
