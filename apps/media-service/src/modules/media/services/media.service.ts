@@ -17,6 +17,7 @@ export class MediaService {
    * Request a presigned URL for a single file upload
    */
   async requestUpload(ownerId: string, data: { originalName: string; mimeType: string; size: number }) {
+    this.logger.log(`Requesting upload for owner: ${ownerId}, file: ${data.originalName}`);
     if (!data.originalName) {
       throw new Error('originalName is required');
     }
@@ -25,17 +26,24 @@ export class MediaService {
     try {
       // 1. Generate presigned URL from Minio
       const uploadUrl = await this.minioService.generateUploadUrl(fileKey, data.mimeType);
+      this.logger.log(`Generated upload URL for key: ${fileKey}`);
 
       // 2. Save metadata to DB
       const media = await this.mediaRepository.create({
         fileName: fileKey,
         originalName: data.originalName,
         mimeType: data.mimeType,
-        size: data.size,
+        size: Number(data.size), // Ensure it's a number
         ownerId: ownerId,
         bucket: this.minioService.getBucketName(),
         status: MediaStatus.PENDING,
       });
+
+      if (!media) {
+        throw new Error('Failed to create media metadata in database');
+      }
+
+      this.logger.log(`Created media metadata with ID: ${media.id}`);
 
       return {
         uploadUrl,

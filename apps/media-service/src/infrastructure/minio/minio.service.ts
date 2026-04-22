@@ -75,7 +75,9 @@ export class MinioService implements OnModuleInit {
     });
     const url = await getSignedUrl(this.signingClient, command, { expiresIn });
     const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
-    return prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
+    const finalUrl = prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
+    this.logger.debug(`Generated upload URL: ${finalUrl}`);
+    return finalUrl;
   }
 
   async generateDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
