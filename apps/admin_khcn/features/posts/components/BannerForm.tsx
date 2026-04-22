@@ -305,6 +305,13 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                                     src={previewUrl || (field.value?.startsWith('http') ? field.value : `/api/v1/admin/media/download/${field.value}`)}
                                     alt="Banner Preview"
                                     className="aspect-[21/9] object-cover w-full group-hover:opacity-80 transition-opacity duration-300"
+                                    onError={(e) => {
+                                      // Fallback to gateway download if previewUrl fails
+                                      const target = e.target as HTMLImageElement;
+                                      if (field.value && !target.src.includes('/media/download/')) {
+                                        target.src = `/api/v1/admin/media/download/${field.value}`;
+                                      }
+                                    }}
                                   />
                                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end justify-center pb-6 gap-4">
                                     <Button
