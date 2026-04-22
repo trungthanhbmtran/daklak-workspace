@@ -81,25 +81,32 @@ export class MinioService implements OnModuleInit {
   }
 
   async generateDownloadUrl(key: string, expiresIn = 3600): Promise<string> {
+    this.logger.debug(`Generating download URL for key: ${key}, expires in: ${expiresIn}s`);
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
     });
     const url = await getSignedUrl(this.signingClient, command, { expiresIn });
     const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
-    return prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
+    const finalUrl = prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
+    this.logger.debug(`Generated download URL: ${finalUrl}`);
+    return finalUrl;
   }
 
   async checkObjectExists(key: string): Promise<boolean> {
     try {
+      this.logger.debug(`Checking if object exists: ${key} in bucket ${this.bucket}`);
       await this.s3Client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
+      this.logger.debug(`Object exists: ${key}`);
       return true;
-    } catch {
+    } catch (error) {
+      this.logger.debug(`Object check failed for ${key}: ${error.message}`);
       return false;
     }
   }
 
   async createMultipartUpload(key: string, contentType: string): Promise<string> {
+    this.logger.log(`Initiating multipart upload for key: ${key}, type: ${contentType}`);
     const res = await this.s3Client.send(
       new CreateMultipartUploadCommand({
         Bucket: this.bucket,
@@ -107,10 +114,12 @@ export class MinioService implements OnModuleInit {
         ContentType: contentType,
       }),
     );
+    this.logger.log(`Multipart upload initiated. UploadId: ${res.UploadId}`);
     return res.UploadId || '';
   }
 
   async generatePresignedUrlsForParts(key: string, uploadId: string, partsCount: number, expiresIn = 3600): Promise<string[]> {
+    this.logger.debug(`Generating ${partsCount} presigned URLs for uploadId: ${uploadId}`);
     const urls: string[] = [];
     for (let i = 1; i <= partsCount; i++) {
       const command = new UploadPartCommand({
@@ -123,10 +132,12 @@ export class MinioService implements OnModuleInit {
       const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
       urls.push(prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url);
     }
+    this.logger.debug(`Successfully generated ${urls.length} part URLs`);
     return urls;
   }
 
   async completeMultipartUpload(key: string, uploadId: string, parts: { PartNumber: number; ETag: string }[]) {
+    this.logger.log(`Completing multipart upload for key: ${key}, uploadId: ${uploadId} with ${parts.length} parts`);
     const sortedParts = [...parts].sort((a, b) => a.PartNumber - b.PartNumber);
     await this.s3Client.send(
       new CompleteMultipartUploadCommand({
@@ -136,6 +147,7 @@ export class MinioService implements OnModuleInit {
         MultipartUpload: { Parts: sortedParts },
       }),
     );
+    this.logger.log(`Successfully completed multipart upload for key: ${key}`);
   }
 
   getBucketName(): string {
