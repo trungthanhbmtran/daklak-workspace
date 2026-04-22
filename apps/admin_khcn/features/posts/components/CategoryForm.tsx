@@ -4,8 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  ArrowLeft, Save, Loader2, ImagePlus, X, 
+import {
+  ArrowLeft, Save, Loader2, ImagePlus, X,
   Info, ExternalLink, Settings, Layout, FileText, UploadCloud
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -63,7 +63,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categorySchema),
     defaultValues: {
-      name: "", slug: "", description: "", parentId: null, 
+      name: "", slug: "", description: "", parentId: null,
       thumbnail: "", attachmentId: "", orderIndex: 0, linkType: "internal", customUrl: ""
     },
   });
@@ -111,27 +111,27 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   const handleDocUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.[0]) return;
     const file = e.target.files[0];
-    
+
     setIsUploadingDoc(true);
     setUploadProgress(0);
-    
+
     try {
       // 1. Request Upload (Standard flow via Gateway)
       // Host will be auto-filled by Gateway if we use headers or it handles it
       // For now, let's assume postsApi has a generic upload request or we use the specific media one
       // Since postsApi doesn't have it, we use a custom one or add it to postsApi
-      
+
       const res: any = await axios.post("/api/v1/admin/media/request-upload", {
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
       }, {
         headers: {
-           // Auth is handled by axiosInstance if we used it, but here we use base axios
-           // In this project, apiClient (axiosInstance) should be used
+          // Auth is handled by axiosInstance if we used it, but here we use base axios
+          // In this project, apiClient (axiosInstance) should be used
         }
       });
-      
+
       const uploadInfo = res.data;
 
       // 2. Upload to MinIO (via Nginx proxy /media)
@@ -144,7 +144,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       const confirmRes = await axios.post("/api/v1/admin/media/confirm-upload", {
         fileId: uploadInfo.fileId
       });
-      
+
       form.setValue("attachmentId", confirmRes.data.id, { shouldDirty: true });
       alert("Tải lên văn bản thành công!");
     } catch (error) {
@@ -207,15 +207,15 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                   <FormField control={form.control} name="parentId" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold">Chuyên mục cha</FormLabel>
-                      <Select 
-                        onValueChange={(val) => field.onChange(val === "none" ? null : val)} 
+                      <Select
+                        onValueChange={(val) => field.onChange(val === "none" ? null : val)}
                         value={field.value || "none"}
                       >
                         <FormControl><SelectTrigger><SelectValue placeholder="Chọn cấp cha" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="none">-- Không có (Cấp gốc) --</SelectItem>
                           {categories?.map((cat: Category) => (
-                             cat.id !== editId && <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                            cat.id !== editId && <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -239,9 +239,9 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
               <CardContent className="p-6 space-y-4">
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-4">
-                    <Button 
-                      type="button" 
-                      variant="outline" 
+                    <Button
+                      type="button"
+                      variant="outline"
                       onClick={() => docInputRef.current?.click()}
                       disabled={isUploadingDoc}
                     >
@@ -249,7 +249,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                       {form.watch("attachmentId") ? "Thay đổi văn bản" : "Tải lên văn bản"}
                     </Button>
                     <input id="doc-upload" type="file" className="hidden" ref={docInputRef} onChange={handleDocUpload} />
-                    
+
                     {form.watch("attachmentId") && !isUploadingDoc && (
                       <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
                         <FileText className="h-4 w-4" /> Đã có tệp đính kèm
@@ -257,7 +257,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                       </div>
                     )}
                   </div>
-                  
+
                   {isUploadingDoc && (
                     <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
                       <div className="bg-blue-600 h-full transition-all" style={{ width: `${uploadProgress}%` }}></div>
@@ -309,21 +309,10 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                   <div className="aspect-square border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (previewUrl || form.getValues("thumbnail")) ? (
                   <div className="relative group rounded-xl overflow-hidden border shadow-inner aspect-square">
-                    <img 
-                      src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} 
-                      className="w-full h-full object-cover" 
-                      alt="Thumbnail" 
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        const thumbnail = form.getValues("thumbnail");
-                        if (thumbnail && !target.src.includes('/media/download/')) {
-                          target.src = `/api/v1/admin/media/download/${thumbnail}`;
-                        }
-                      }}
-                    />
+                    <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnail")}`} className="w-full h-full object-cover" alt="Thumbnail" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2">
-                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Đổi ảnh</Button>
-                       <Button type="button" variant="destructive" size="icon" onClick={removeImage}><X className="h-4 w-4" /></Button>
+                      <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>Đổi ảnh</Button>
+                      <Button type="button" variant="destructive" size="icon" onClick={removeImage}><X className="h-4 w-4" /></Button>
                     </div>
                   </div>
                 ) : (

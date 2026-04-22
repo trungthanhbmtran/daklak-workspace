@@ -272,18 +272,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (previewUrl || form.getValues("thumbnail")) ? (
                   <div className="relative group rounded-xl overflow-hidden border shadow-inner">
-                    <img 
-                      src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} 
-                      className="w-full aspect-video object-cover" 
-                      alt="Thumbnail" 
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        const thumbnail = form.getValues("thumbnail");
-                        if (thumbnail && !target.src.includes('/media/download/')) {
-                          target.src = `/api/v1/admin/media/download/${thumbnail}`;
-                        }
-                      }}
-                    />
+                    <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-[2px]">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi ảnh</Button>
@@ -382,18 +371,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {showFullImage && (previewUrl || form.getValues("thumbnail")) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
-              <img 
-                src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} 
-                className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20" 
-                alt="Full" 
-                onError={(e) => {
-                  const target = e.target as HTMLImageElement;
-                  const thumbnail = form.getValues("thumbnail");
-                  if (thumbnail && !target.src.includes('/media/download/')) {
-                    target.src = `/api/v1/admin/media/download/${thumbnail}`;
-                  }
-                }}
-              />
+              <img src={previewUrl || `/api/v1/media/download/${form.getValues("thumbnail")}`} className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20" alt="Full" />
               <Button type="button" variant="ghost" size="icon" className="absolute -top-12 right-0 text-white hover:bg-white/10" onClick={() => setShowFullImage(false)}><X className="h-8 w-8" /></Button>
             </div>
           </div>

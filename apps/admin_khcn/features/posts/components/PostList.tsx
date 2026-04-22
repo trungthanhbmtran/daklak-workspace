@@ -153,17 +153,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                         <div className="flex items-start gap-3">
                           <div className="h-12 w-16 bg-muted rounded border overflow-hidden flex items-center justify-center shrink-0">
                             {post.thumbnail ? (
-                              <img 
-                                src={`/api/v1/admin/media/download/${post.thumbnail}`} 
-                                alt="" 
-                                className="w-full h-full object-cover" 
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  if (post.thumbnail && !target.src.includes('/media/download/')) {
-                                    target.src = `/api/v1/admin/media/download/${post.thumbnail}`;
-                                  }
-                                }}
-                              />
+                              <img src={`/api/v1/media/download/${post.thumbnail}`} alt="" className="w-full h-full object-cover" />
                             ) : (
                               <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
                             )}
