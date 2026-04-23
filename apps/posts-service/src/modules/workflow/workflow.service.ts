@@ -18,7 +18,7 @@ export class WorkflowService {
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
-  ) {}
+  ) { }
 
   async canTransition(postId: string, action: string, actorRole: string): Promise<boolean> {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
@@ -48,6 +48,8 @@ export class WorkflowService {
 
   async transition(postId: string, action: string, actorId: string, note?: string) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+
     const oldStatus = post.status;
     let newStatus: PostStatus;
 
