@@ -206,9 +206,15 @@ export class UsersService {
       String(user.id),
       REFRESH_TTL_SECONDS,
     );
+    const userWithRoles = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      include: { roles: true },
+    });
+    const roles = userWithRoles?.roles?.map((r) => r.code) ?? [];
+
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email },
+      { sub: user.id, email: user.email, roles },
       { expiresIn: jwtExpiresIn },
     );
     const firstPosition = user.jobPositions?.[0];
@@ -258,9 +264,11 @@ export class UsersService {
       String(user.id),
       REFRESH_TTL_SECONDS,
     );
+    const roles = user.roles?.map((r) => r.code) ?? [];
+
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email },
+      { sub: user.id, email: user.email, roles },
       { expiresIn: jwtExpiresIn },
     );
     const firstPosition = user.jobPositions?.[0];

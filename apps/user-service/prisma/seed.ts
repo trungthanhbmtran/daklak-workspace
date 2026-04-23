@@ -290,10 +290,9 @@ async function main() {
 
   // --- CMS ROLES ---
   const cmsRoles = [
-    { code: 'CMS_AUTHOR', name: 'Biên tập viên', permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW'] },
-    { code: 'CMS_REVIEWER', name: 'Thẩm định viên', permissions: ['READ', 'VIEW', 'UPDATE', 'APPROVE'] },
-    { code: 'CMS_APPROVER', name: 'Lãnh đạo phê duyệt', permissions: ['READ', 'VIEW', 'APPROVE', 'REJECT'] },
-    { code: 'CMS_PUBLISHER', name: 'Cán bộ xuất bản', permissions: ['READ', 'VIEW', 'PUBLISH'] },
+    { code: 'AUTHOR', name: 'Biên tập viên', permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW'] },
+    { code: 'REVIEWER', name: 'Thẩm định & Phê duyệt', permissions: ['READ', 'VIEW', 'UPDATE', 'APPROVE', 'REJECT'] },
+    { code: 'PUBLISHER', name: 'Cán bộ xuất bản', permissions: ['READ', 'VIEW', 'PUBLISH'] },
   ];
 
   const roleMap: Record<string, any> = { SUPER_ADMIN: superAdminRole, ADMIN: adminRole };
@@ -472,10 +471,10 @@ async function main() {
 
   // --- CMS USERS ---
   const cmsUsers = [
-    { email: 'author@daklak.gov.vn', username: 'author', fullName: 'Nguyễn Văn Biên Tập', role: 'CMS_AUTHOR' },
-    { email: 'reviewer@daklak.gov.vn', username: 'reviewer', fullName: 'Lê Văn Thẩm Định', role: 'CMS_REVIEWER' },
-    { email: 'approver@daklak.gov.vn', username: 'approver', fullName: 'Phạm Phê Duyệt', role: 'CMS_APPROVER' },
-    { email: 'publisher@daklak.gov.vn', username: 'publisher', fullName: 'Trần Xuất Bản', role: 'CMS_PUBLISHER' },
+    { email: 'author@daklak.gov.vn', username: 'author', fullName: 'Nguyễn Văn Biên Tập', role: 'AUTHOR' },
+    { email: 'reviewer@daklak.gov.vn', username: 'reviewer', fullName: 'Lê Văn Thẩm Định', role: 'REVIEWER' },
+    { email: 'approver@daklak.gov.vn', username: 'approver', fullName: 'Phạm Phê Duyệt', role: 'REVIEWER' },
+    { email: 'publisher@daklak.gov.vn', username: 'publisher', fullName: 'Trần Xuất Bản', role: 'PUBLISHER' },
   ];
 
   for (const u of cmsUsers) {

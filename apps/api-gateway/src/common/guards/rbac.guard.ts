@@ -15,13 +15,11 @@ export class RbacGuard implements CanActivate {
       return true;
     }
     const { user } = context.switchToHttp().getRequest();
-    if (!user || !user.role) {
-      return false;
-    }
+    const userRoles = Array.isArray(user.roles) ? user.roles : [];
     
     // ADMIN has all permissions
-    if (user.role === Role.ADMIN) return true;
+    if (userRoles.includes(Role.ADMIN)) return true;
 
-    return requiredRoles.includes(user.role);
+    return requiredRoles.some(role => userRoles.includes(role));
   }
 }
