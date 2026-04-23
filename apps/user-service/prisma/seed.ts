@@ -288,6 +288,35 @@ async function main() {
     },
   });
 
+  // --- CMS ROLES ---
+  const cmsRoles = [
+    { code: 'CMS_AUTHOR', name: 'Biên tập viên', permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW'] },
+    { code: 'CMS_REVIEWER', name: 'Thẩm định viên', permissions: ['READ', 'VIEW', 'UPDATE', 'APPROVE'] },
+    { code: 'CMS_APPROVER', name: 'Lãnh đạo phê duyệt', permissions: ['READ', 'VIEW', 'APPROVE', 'REJECT'] },
+    { code: 'CMS_PUBLISHER', name: 'Cán bộ xuất bản', permissions: ['READ', 'VIEW', 'PUBLISH'] },
+  ];
+
+  const roleMap: Record<string, any> = { SUPER_ADMIN: superAdminRole, ADMIN: adminRole };
+
+  for (const r of cmsRoles) {
+    const rolePerms = [];
+    const postResId = resources['POST'].id;
+
+    for (const action of r.permissions) {
+      const perm = await prisma.permission.findUnique({
+        where: { action_resourceId: { action: action === 'REJECT' ? 'UPDATE' : action, resourceId: postResId } }
+      });
+      if (perm) rolePerms.push({ id: perm.id });
+    }
+
+    const createdRole = await prisma.role.upsert({
+      where: { code: r.code },
+      update: { name: r.name, permissions: { set: rolePerms } },
+      create: { code: r.code, name: r.name, permissions: { connect: rolePerms } },
+    });
+    roleMap[r.code] = createdRole;
+  }
+
   // ==========================================================
   // 5. MENUS (ADMIN_PORTAL) - PBAC Implementation
   // ==========================================================
@@ -440,6 +469,33 @@ async function main() {
     update: { passwordHash },
     create: { userId: superAdmin.id, passwordHash },
   });
+
+  // --- CMS USERS ---
+  const cmsUsers = [
+    { email: 'author@daklak.gov.vn', username: 'author', fullName: 'Nguyễn Văn Biên Tập', role: 'CMS_AUTHOR' },
+    { email: 'reviewer@daklak.gov.vn', username: 'reviewer', fullName: 'Lê Văn Thẩm Định', role: 'CMS_REVIEWER' },
+    { email: 'approver@daklak.gov.vn', username: 'approver', fullName: 'Phạm Phê Duyệt', role: 'CMS_APPROVER' },
+    { email: 'publisher@daklak.gov.vn', username: 'publisher', fullName: 'Trần Xuất Bản', role: 'CMS_PUBLISHER' },
+  ];
+
+  for (const u of cmsUsers) {
+    const user = await prisma.user.upsert({
+      where: { email: u.email },
+      update: { fullName: u.fullName, roles: { set: [{ id: roleMap[u.role].id }] } },
+      create: {
+        email: u.email,
+        username: u.username,
+        fullName: u.fullName,
+        roles: { connect: [{ id: roleMap[u.role].id }] },
+      },
+    });
+
+    await prisma.credential.upsert({
+      where: { userId: user.id },
+      update: { passwordHash },
+      create: { userId: user.id, passwordHash },
+    });
+  }
 
   // ==========================================================
   // 7. JOB TITLES
