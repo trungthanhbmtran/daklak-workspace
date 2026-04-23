@@ -9,22 +9,22 @@ function sanitizeCategory(cat: any): any {
     name: cat.name || '',
     slug: cat.slug || '',
     parentId: cat.parentId || '',
-    lft: cat.lft || 0,
-    rgt: cat.rgt || 0,
-    depth: cat.depth || 0,
+    lft: Number(cat.lft) || 0,
+    rgt: Number(cat.rgt) || 0,
+    depth: Number(cat.depth) || 0,
     thumbnail: cat.thumbnail || '',
     linkType: cat.linkType || 'standard',
     customUrl: cat.customUrl || '',
     target: cat.target || '_self',
-    orderIndex: cat.orderIndex || 0,
+    orderIndex: Number(cat.orderIndex) || 0,
     description: cat.description || '',
-    status: cat.status !== undefined ? cat.status : true,
-    isGovStandard: cat.isGovStandard !== undefined ? cat.isGovStandard : false,
+    status: cat.status === true || cat.status === 1,
+    isGovStandard: cat.isGovStandard === true || cat.isGovStandard === 1,
     attachmentId: cat.attachmentId || '',
     children: Array.isArray(cat.children)
       ? cat.children.filter((c: any) => !!c).map(sanitizeCategory)
       : [],
-    postsCount: (cat as any)._count?.posts || cat.postsCount || 0,
+    postsCount: Number((cat as any)._count?.posts || cat.postsCount || 0),
   };
 }
 
@@ -45,9 +45,21 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'ListCategories')
-  async listCategories() {
-    const result = await this.categoriesService.getTree();
-    return { data: (result || []).map(sanitizeCategory).filter(Boolean) };
+  async listCategories(data: any) {
+    const mode = data?.mode || 'flat';
+    console.log(`CategoryService.ListCategories called with mode: ${mode}`);
+    try {
+      const result = mode === 'tree'
+        ? await this.categoriesService.getTree()
+        : await this.categoriesService.findAll();
+
+      console.log(`Result count: ${result?.length}`);
+      const sanitized = (result || []).map(sanitizeCategory).filter(Boolean);
+      return { data: sanitized };
+    } catch (error) {
+      console.error('Error in listCategories:', error);
+      throw error;
+    }
   }
 
   @GrpcMethod('CategoryService', 'UpdateCategory')
