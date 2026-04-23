@@ -7,8 +7,10 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
-  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText
+  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText,
+  CheckCircle2, AlertCircle
 } from "lucide-react";
+
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
