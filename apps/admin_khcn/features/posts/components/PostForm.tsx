@@ -7,10 +7,8 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
-  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText,
-  CheckCircle2, AlertCircle
+  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText
 } from "lucide-react";
-
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -56,7 +54,7 @@ const postSchema = z.object({
   content: z.string().min(10, "Nội dung quá ngắn"),
   categoryId: z.string().min(1, "Chọn chuyên mục"),
   status: z.enum([
-    "DRAFT", "SUBMITTED", "UNDER_REVIEW", "REJECTED", 
+    "DRAFT", "SUBMITTED", "UNDER_REVIEW", "REJECTED",
     "APPROVED", "PUBLISHED", "UNPUBLISHED", "ARCHIVED"
   ]),
   thumbnail: z.string().optional(),
@@ -158,7 +156,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             }}>
               Lưu nháp
             </Button>
-            
+
             {(!isEdit || form.watch("status") === "DRAFT" || form.watch("status") === "REJECTED") && (
               <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20" disabled={mutation.isPending} onClick={() => {
                 form.setValue("status", "SUBMITTED");

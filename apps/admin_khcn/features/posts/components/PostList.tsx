@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle, Globe, X, Send } from "lucide-react";
-
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -246,7 +245,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                               <Send className="h-3 w-3 mr-1" /> Gửi duyệt
                             </Button>
                           )}
-                          
+
                           {(post.status === 'SUBMITTED' || post.status === 'UNDER_REVIEW') && (
                             <>
                               <Button variant="outline" size="sm" className="h-8 text-[10px] px-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => workflowMutation.mutate({ id: post.id, action: 'approve' })}>
