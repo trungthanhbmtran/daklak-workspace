@@ -299,7 +299,7 @@ async function main() {
   const roleMap: Record<string, any> = { SUPER_ADMIN: superAdminRole, ADMIN: adminRole };
 
   for (const r of cmsRoles) {
-    const rolePerms = [];
+    const rolePerms: { id: number }[] = [];
     const postResId = resources['POST'].id;
 
     for (const action of r.permissions) {
