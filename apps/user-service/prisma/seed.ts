@@ -277,8 +277,15 @@ async function main() {
 
   const adminRole = await prisma.role.upsert({
     where: { code: 'ADMIN' },
-    update: { name: 'Quản trị viên hệ thống' },
-    create: { code: 'ADMIN', name: 'Quản trị viên hệ thống' },
+    update: {
+      name: 'Quản trị viên hệ thống',
+      permissions: { set: allPermissions },
+    },
+    create: {
+      code: 'ADMIN',
+      name: 'Quản trị viên hệ thống',
+      permissions: { connect: allPermissions },
+    },
   });
 
   // ==========================================================
@@ -371,6 +378,7 @@ async function main() {
     { code: 'DOC_MENU_PUBLISH', name: 'Phát hành', route: 'publish', icon: 'globe-outline', order: 4, res: 'DOC_PUBLISH' },
     { code: 'DOC_MENU_TRANSPARENCY', name: 'Công khai', route: 'transparency', icon: 'folder-outline', order: 5, res: 'DOC_TRANSPARENCY' },
     { code: 'DOC_MENU_CONSULTATION', name: 'Xin ý kiến', route: 'consultations', icon: 'people-outline', order: 6, res: 'DOC_CONSULTATION' },
+    { code: 'DOC_MENU_FEEDBACKS', name: 'Duyệt Góp ý Công chúng', route: 'consultations/public-feedbacks', icon: 'megaphone-outline', order: 7, res: 'DOC_CONSULTATION' },
   ];
 
   for (const { res, ...m } of docMenus) {
@@ -398,9 +406,10 @@ async function main() {
 
   // 4. Content Module
   const postMenus = [
-    { code: 'CONTENT_MENU_POSTS', name: 'Duyệt bài viết', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
-    { code: 'CONTENT_MENU_CATEGORIES', name: 'Chuyên mục', route: 'categories', icon: 'list-outline', order: 2, res: 'POST_CATEGORY' },
-    { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 3, res: 'BANNER' },
+    { code: 'CONTENT_MENU_POSTS', name: 'Danh sách bài viết', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
+    { code: 'CONTENT_MENU_MODERATION', name: 'Kiểm duyệt bài viết', route: '', icon: 'shield-checkmark-outline', order: 2, res: 'POST' },
+    { code: 'CONTENT_MENU_CATEGORIES', name: 'Chuyên mục', route: 'categories', icon: 'list-outline', order: 3, res: 'POST_CATEGORY' },
+    { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 4, res: 'BANNER' },
   ];
 
   for (const { res, ...m } of postMenus) {

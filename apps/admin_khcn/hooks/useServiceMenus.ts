@@ -96,7 +96,7 @@ const getRealBranches = (nodes: MenuNode[]): MenuNode[] => {
 const flattenMenus = (nodes: MenuNode[], basePath: string): SidebarItem[] => {
   return nodes.reduce<SidebarItem[]>((acc, node) => {
     const route = (node.route ?? "").trim();
-    
+
     // Nếu node có route, thêm vào list
     if (route) {
       acc.push({
@@ -133,7 +133,7 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
   });
 
   const branches = getRealBranches(data ?? []);
-  
+
   // Tìm nhánh gốc của Service này
   const targetRoot = branches.find((b) => (b.service ?? "").trim() === config?.serviceCode);
 
@@ -144,7 +144,7 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
   if (targetRoot) {
     serviceName = (targetRoot.name ?? "").trim() || serviceKey;
     serviceIcon = getIcon(targetRoot.icon);
-    
+
     // Làm phẳng và sắp xếp theo order
     menuItems = flattenMenus(targetRoot.children ?? [], config.basePath).sort(
       (a, b) => a.order - b.order
@@ -179,7 +179,7 @@ export function useHubServices() {
     .map((b) => {
       const svcCode = (b.service ?? "").trim();
       const serviceKey = SERVICE_TO_KEY[svcCode];
-      
+
       return {
         id: serviceKey,
         title: (b.name ?? "").trim() || serviceKey,
