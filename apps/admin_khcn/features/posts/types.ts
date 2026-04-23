@@ -1,6 +1,15 @@
 // features/posts/types.ts
 
-export type PostStatus = 'DRAFT' | 'PENDING' | 'APPROVED' | 'REJECTED' | 'PUBLISHED' | 'EDITING';
+export type PostStatus = 
+  | 'DRAFT' 
+  | 'SUBMITTED' 
+  | 'UNDER_REVIEW' 
+  | 'REJECTED' 
+  | 'APPROVED' 
+  | 'PUBLISHED' 
+  | 'UNPUBLISHED' 
+  | 'ARCHIVED';
+
 
 export interface Category {
   id: string;
@@ -41,6 +50,7 @@ export interface Post {
   status: PostStatus;
   thumbnail?: string;
   authorId: string;
+  currentVersion: number;
   reviewerId?: string;
   moderationNote?: string;
   autoModerationStatus?: string;

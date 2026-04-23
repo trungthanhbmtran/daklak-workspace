@@ -53,12 +53,16 @@ const postSchema = z.object({
   description: z.string().max(300, "Tóm tắt tối đa 300 ký tự").optional(),
   content: z.string().min(10, "Nội dung quá ngắn"),
   categoryId: z.string().min(1, "Chọn chuyên mục"),
-  status: z.enum(["DRAFT", "PENDING", "APPROVED", "REJECTED", "PUBLISHED", "EDITING"]),
+  status: z.enum([
+    "DRAFT", "SUBMITTED", "UNDER_REVIEW", "REJECTED", 
+    "APPROVED", "PUBLISHED", "UNPUBLISHED", "ARCHIVED"
+  ]),
   thumbnail: z.string().optional(),
   tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
   isNotification: z.boolean().default(false),
 });
+
 
 type PostFormValues = z.infer<typeof postSchema>;
 
@@ -152,14 +156,27 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             }}>
               Lưu nháp
             </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20" disabled={mutation.isPending} onClick={() => {
-              if (form.getValues("status") === "DRAFT") form.setValue("status", "PENDING");
-              form.handleSubmit(v => mutation.mutate(v))();
-            }}>
-              {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
-              {isEdit ? "Cập nhật ngay" : "Gửi phê duyệt"}
-            </Button>
+            
+            {(!isEdit || form.watch("status") === "DRAFT" || form.watch("status") === "REJECTED") && (
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20" disabled={mutation.isPending} onClick={() => {
+                form.setValue("status", "SUBMITTED");
+                form.handleSubmit(v => mutation.mutate(v))();
+              }}>
+                {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
+                {isEdit ? "Gửi lại phê duyệt" : "Gửi phê duyệt"}
+              </Button>
+            )}
+
+            {isEdit && (form.watch("status") !== "DRAFT" && form.watch("status") !== "REJECTED") && (
+              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[140px] shadow-lg shadow-emerald-500/20" disabled={mutation.isPending} onClick={() => {
+                form.handleSubmit(v => mutation.mutate(v))();
+              }}>
+                {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Lưu thay đổi
+              </Button>
+            )}
           </div>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -303,10 +320,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       <FormControl><SelectTrigger className="font-medium"><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
                         <SelectItem value="DRAFT" className="text-slate-500">Lưu bản nháp</SelectItem>
-                        <SelectItem value="PENDING" className="text-orange-600 font-medium">Chờ phê duyệt</SelectItem>
-                        <SelectItem value="PUBLISHED" className="text-green-600 font-medium">Công khai ngay</SelectItem>
-                        <SelectItem value="EDITING">Yêu cầu chỉnh sửa</SelectItem>
-                        <SelectItem value="REJECTED" className="text-red-600">Từ chối bài</SelectItem>
+                        <SelectItem value="SUBMITTED" className="text-orange-600 font-medium">Chờ phê duyệt</SelectItem>
+                        <SelectItem value="UNDER_REVIEW" className="text-blue-600 font-medium">Đang thẩm định</SelectItem>
+                        <SelectItem value="APPROVED" className="text-indigo-600 font-medium">Đã phê duyệt</SelectItem>
+                        <SelectItem value="PUBLISHED" className="text-emerald-600 font-medium">Đã xuất bản</SelectItem>
+                        <SelectItem value="REJECTED" className="text-rose-600">Bị từ chối</SelectItem>
+                        <SelectItem value="UNPUBLISHED" className="text-slate-600">Đã gỡ bài</SelectItem>
+                        <SelectItem value="ARCHIVED" className="text-slate-400">Lưu trữ</SelectItem>
+
                       </SelectContent>
                     </Select>
                   </FormItem>

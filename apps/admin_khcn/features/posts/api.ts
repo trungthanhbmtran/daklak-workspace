@@ -30,8 +30,21 @@ export const postsApi = {
   updatePost: (id: string, data: any) =>
     apiClient.put(`/posts/${id}`, data).then((res) => unwrapData<Post>(res)),
   deletePost: (id: string) => apiClient.delete(`/posts/${id}`).then((res) => unwrapData<any>(res)),
-  reviewPost: (id: string, data: { status: PostStatus; moderationNote?: string }) =>
-    apiClient.put(`/posts/${id}/review`, data).then((res) => unwrapData<any>(res)),
+  reviewPost: (id: string, data: { note?: string }) =>
+    apiClient.post(`/posts/${id}/review`, data).then((res) => unwrapData<any>(res)),
+  submitPost: (id: string, data: { note?: string }) =>
+    apiClient.post(`/posts/${id}/submit`, data).then((res) => unwrapData<any>(res)),
+  approvePost: (id: string, data: { note?: string }) =>
+    apiClient.post(`/posts/${id}/approve`, data).then((res) => unwrapData<any>(res)),
+  rejectPost: (id: string, data: { note?: string }) =>
+    apiClient.post(`/posts/${id}/reject`, data).then((res) => unwrapData<any>(res)),
+  publishPost: (id: string, data: { note?: string }) =>
+    apiClient.post(`/posts/${id}/publish`, data).then((res) => unwrapData<any>(res)),
+  unpublishPost: (id: string, data: { note?: string }) =>
+    apiClient.post(`/posts/${id}/unpublish`, data).then((res) => unwrapData<any>(res)),
+  getPostHistory: (id: string) =>
+    apiClient.get(`/posts/${id}/history`).then((res) => unwrapData<any[]>(res)),
+
 
   // Categories
   getCategories: (params?: any) =>

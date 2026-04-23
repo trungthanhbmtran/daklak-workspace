@@ -15,12 +15,16 @@ import { vi } from "date-fns/locale";
 // types are imported from ../types
 
 const STATUS_CONFIG: Record<PostStatus, { label: string; color: string; icon: any }> = {
-  PUBLISHED: { label: "Đã xuất bản", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-  PENDING: { label: "Chờ duyệt", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
   DRAFT: { label: "Bản nháp", color: "bg-slate-100 text-slate-700 border-slate-200", icon: FileText },
-  EDITING: { label: "Yêu cầu sửa", color: "bg-blue-100 text-blue-700 border-blue-200", icon: FileText },
-  REJECTED: { label: "Bị từ chối", color: "bg-rose-100 text-rose-700 border-rose-200", icon: EyeOff },
+  SUBMITTED: { label: "Chờ duyệt", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
+  UNDER_REVIEW: { label: "Đang thẩm định", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Search },
+  APPROVED: { label: "Đã phê duyệt", color: "bg-indigo-100 text-indigo-700 border-indigo-200", icon: CheckCircle2 },
+  REJECTED: { label: "Từ chối", color: "bg-rose-100 text-rose-700 border-rose-200", icon: X },
+  PUBLISHED: { label: "Đã xuất bản", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+  UNPUBLISHED: { label: "Đã gỡ bài", color: "bg-orange-100 text-orange-700 border-orange-200", icon: EyeOff },
+  ARCHIVED: { label: "Lưu trữ", color: "bg-gray-100 text-gray-700 border-gray-200", icon: FileText },
 };
+
 
 export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateToCreate: () => void, onNavigateToEdit: (id: string) => void }) {
   const queryClient = useQueryClient();
@@ -52,10 +56,28 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
     mutationFn: (id: string) => postsApi.deletePost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      // Thay bằng toast nếu có
       alert("Xóa bài viết thành công!");
     },
   });
+
+  const workflowMutation = useMutation({
+    mutationFn: ({ id, action, note }: { id: string, action: string, note?: string }) => {
+      switch (action) {
+        case 'submit': return postsApi.submitPost(id, { note });
+        case 'approve': return postsApi.approvePost(id, { note });
+        case 'reject': return postsApi.rejectPost(id, { note });
+        case 'publish': return postsApi.publishPost(id, { note });
+        case 'unpublish': return postsApi.unpublishPost(id, { note });
+        case 'review': return postsApi.reviewPost(id, { note });
+        default: throw new Error("Invalid action");
+      }
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      alert(`Thực hiện thao tác ${variables.action} thành công!`);
+    },
+  });
+
 
   const posts = data?.items || [];
 
@@ -80,10 +102,14 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-              <SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
-              <SelectItem value="PENDING">Chờ duyệt</SelectItem>
               <SelectItem value="DRAFT">Bản nháp</SelectItem>
+              <SelectItem value="SUBMITTED">Chờ duyệt</SelectItem>
+              <SelectItem value="UNDER_REVIEW">Đang thẩm định</SelectItem>
+              <SelectItem value="APPROVED">Đã phê duyệt</SelectItem>
+              <SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
+              <SelectItem value="UNPUBLISHED">Đã gỡ bài</SelectItem>
             </SelectContent>
+
           </Select>
 
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -110,9 +136,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
               <tr>
                 <th className="px-5 py-4 font-semibold w-[40%]">Bài viết</th>
                 <th className="px-5 py-4 font-semibold">Chuyên mục</th>
-                <th className="px-5 py-4 font-semibold">Trạng thái</th>
+                <th className="px-5 py-4 font-semibold">Trạng thái & Phiên bản</th>
                 <th className="px-5 py-4 font-semibold">Tác giả & Ngày đăng</th>
                 <th className="px-5 py-4 font-semibold text-right">Thao tác</th>
+
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -188,6 +215,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             {statusLabel}
                           </Badge>
 
+                          <Badge variant="outline" className="text-[9px] font-mono border-slate-200 text-slate-500">
+                            v{post.currentVersion || 1}
+                          </Badge>
+
                           {/* Automated Moderation Badge */}
                           {post.autoModerationStatus && (
                             <Badge variant="outline" className={`font-medium text-[10px] flex items-center gap-1 ${post.autoModerationStatus === 'SAFE'
@@ -198,24 +229,51 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                               {post.autoModerationStatus === 'SAFE' ? 'An toàn' : 'Bị nghi ngờ'}
                             </Badge>
                           )}
-
-                          {/* Translation Badge */}
-                          {post.isTranslated && (
-                            <Badge variant="outline" className="font-medium text-[10px] flex items-center gap-1 bg-indigo-50 text-indigo-600 border-indigo-200">
-                              <Globe className="h-2.5 w-2.5" />
-                              Đã dịch
-                            </Badge>
-                          )}
                         </div>
                       </td>
                       <td className="px-5 py-4">
                         <p className="font-medium text-foreground text-xs">{post.authorId.substring(0, 8)}</p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {post.publishedAt ? format(new Date(post.publishedAt), 'dd/MM/yyyy', { locale: vi }) : '—'}
+                          {post.publishedAt ? format(new Date(post.publishedAt), 'dd/MM/yyyy', { locale: vi }) : (post.createdAt ? format(new Date(post.createdAt), 'dd/MM/yyyy', { locale: vi }) : '—')}
                         </p>
                       </td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {/* Workflow Actions */}
+                          {post.status === 'DRAFT' && (
+                            <Button variant="outline" size="sm" className="h-8 text-[10px] px-2 text-blue-600 border-blue-200 hover:bg-blue-50" onClick={() => workflowMutation.mutate({ id: post.id, action: 'submit' })}>
+                              <Send className="h-3 w-3 mr-1" /> Gửi duyệt
+                            </Button>
+                          )}
+                          
+                          {(post.status === 'SUBMITTED' || post.status === 'UNDER_REVIEW') && (
+                            <>
+                              <Button variant="outline" size="sm" className="h-8 text-[10px] px-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50" onClick={() => workflowMutation.mutate({ id: post.id, action: 'approve' })}>
+                                <CheckCircle2 className="h-3 w-3 mr-1" /> Duyệt
+                              </Button>
+                              <Button variant="outline" size="sm" className="h-8 text-[10px] px-2 text-rose-600 border-rose-200 hover:bg-rose-50" onClick={() => {
+                                const note = prompt("Nhập lý do từ chối:");
+                                if (note) workflowMutation.mutate({ id: post.id, action: 'reject', note });
+                              }}>
+                                <X className="h-3 w-3 mr-1" /> Từ chối
+                              </Button>
+                            </>
+                          )}
+
+                          {post.status === 'APPROVED' && (
+                            <Button variant="outline" size="sm" className="h-8 text-[10px] px-2 text-indigo-600 border-indigo-200 hover:bg-indigo-50" onClick={() => workflowMutation.mutate({ id: post.id, action: 'publish' })}>
+                              <Globe className="h-3 w-3 mr-1" /> Xuất bản
+                            </Button>
+                          )}
+
+                          {post.status === 'PUBLISHED' && (
+                            <Button variant="outline" size="sm" className="h-8 text-[10px] px-2 text-orange-600 border-orange-200 hover:bg-orange-50" onClick={() => workflowMutation.mutate({ id: post.id, action: 'unpublish' })}>
+                              <EyeOff className="h-3 w-3 mr-1" /> Gỡ bài
+                            </Button>
+                          )}
+
+                          <div className="w-px h-4 bg-border mx-1" />
+
                           <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary" onClick={() => onNavigateToEdit(post.id)} title="Sửa bài viết">
                             <Edit className="h-4 w-4" />
                           </Button>
@@ -234,6 +292,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                           </Button>
                         </div>
                       </td>
+
                     </tr>
                   );
                 })
