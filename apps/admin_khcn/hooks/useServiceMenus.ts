@@ -97,8 +97,8 @@ const flattenMenus = (nodes: MenuNode[], basePath: string): SidebarItem[] => {
   return nodes.reduce<SidebarItem[]>((acc, node) => {
     const route = (node.route ?? "").trim();
 
-    // Nếu node có route, thêm vào list
-    if (route) {
+    // Nếu node có route (kể cả chuỗi rỗng - đại diện cho trang chủ của phân hệ), thêm vào list
+    if (route !== undefined && route !== null) {
       acc.push({
         name: (node.name ?? "").trim(),
         href: joinPath(basePath, route),
