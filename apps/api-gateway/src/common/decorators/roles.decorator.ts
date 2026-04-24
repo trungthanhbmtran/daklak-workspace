@@ -6,6 +6,7 @@ export enum Role {
   REVIEWER = 'REVIEWER',
   PUBLISHER = 'PUBLISHER',
   ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
 }
 
 export const ROLES_KEY = 'roles';

@@ -253,7 +253,10 @@ export class UsersService {
     await this.cache.del(redisKey);
     const user = await this.prisma.user.findFirst({
       where: { id: userId, isActive: true },
-      include: { jobPositions: { include: { unit: true }, orderBy: [{ isPrimary: 'desc' }] } },
+      include: { 
+        roles: true,
+        jobPositions: { include: { unit: true }, orderBy: [{ isPrimary: 'desc' }] } 
+      },
     });
     if (!user) {
       throw new RpcException({ message: 'User không tồn tại', code: GRPC.UNAUTHENTICATED });
