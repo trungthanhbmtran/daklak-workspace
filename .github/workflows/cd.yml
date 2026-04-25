@@ -48,7 +48,7 @@ jobs:
       - id: prepare
         run: |
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts_service","translate_service","user-service","workflow-service","document-service"]'
+            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts-service","translate_service","user-service","workflow-service","document-service"]'
           else
             SERVICES='${{ steps.filter.outputs.changes }}'
           fi
