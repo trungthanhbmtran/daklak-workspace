@@ -1,0 +1,114 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+
+@Injectable()
+export class DocumentService {
+  constructor(private prisma: PrismaService) {}
+
+  async create(data: any) {
+    const document = await this.prisma.document.create({
+      data: {
+        ...data,
+        issueDate: data.issueDate ? new Date(data.issueDate) : null,
+        arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
+      },
+      include: {
+        type: true,
+        field: true,
+      },
+    });
+    return { data: this.mapToProto(document) };
+  }
+
+  async findOne(id: string) {
+    const document = await this.prisma.document.findUnique({
+      where: { id },
+      include: {
+        type: true,
+        field: true,
+      },
+    });
+    return this.mapToProto(document);
+  }
+
+  async findAll(query: any) {
+    const { page = 1, limit = 10, search, typeId, fieldId, status, urgency, startDate, endDate } = query;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { documentNumber: { contains: search } },
+        { abstract: { contains: search } },
+      ];
+    }
+    if (typeId) where.typeId = typeId;
+    if (fieldId) where.fieldId = fieldId;
+    if (status) where.status = status;
+    if (urgency) where.urgency = urgency;
+    if (startDate || endDate) {
+      where.issueDate = {};
+      if (startDate) where.issueDate.gte = new Date(startDate);
+      if (endDate) where.issueDate.lte = new Date(endDate);
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.document.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          type: true,
+          field: true,
+        },
+      }),
+      this.prisma.document.count({ where }),
+    ]);
+
+    return {
+      data: items.map(item => this.mapToProto(item)),
+      meta: {
+        pagination: {
+          total,
+          page,
+          pageSize: limit,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
+    };
+  }
+
+  async update(id: string, data: any) {
+    const updateData = { ...data };
+    delete updateData.id;
+    if (updateData.issueDate) updateData.issueDate = new Date(updateData.issueDate);
+    if (updateData.arrivalDate) updateData.arrivalDate = new Date(updateData.arrivalDate);
+
+    const document = await this.prisma.document.update({
+      where: { id },
+      data: updateData,
+      include: {
+        type: true,
+        field: true,
+      },
+    });
+    return { data: this.mapToProto(document) };
+  }
+
+  async remove(id: string) {
+    await this.prisma.document.delete({ where: { id } });
+    return { success: true };
+  }
+
+  private mapToProto(doc: any) {
+    if (!doc) return null;
+    return {
+      ...doc,
+      issueDate: doc.issueDate?.toISOString(),
+      arrivalDate: doc.arrivalDate?.toISOString(),
+      createdAt: doc.createdAt.toISOString(),
+      updatedAt: doc.updatedAt.toISOString(),
+    };
+  }
+}

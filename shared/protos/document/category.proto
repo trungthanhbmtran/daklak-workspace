@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package category;
+
+import "common/common.proto";
+
+service CategoryService {
+  rpc CreateCategory(CreateCategoryRequest) returns (CategoryResponse) {}
+  rpc GetCategory(GetCategoryRequest) returns (Category) {}
+  rpc ListCategories(ListCategoriesRequest) returns (ListCategoriesResponse) {}
+  rpc UpdateCategory(UpdateCategoryRequest) returns (CategoryResponse) {}
+  rpc DeleteCategory(DeleteCategoryRequest) returns (common.DeleteResponse) {}
+}
+
+message Category {
+  string id = 1;
+  string name = 2;
+  string slug = 3;
+  string description = 4;
+  string type = 5; // e.g., "DOCUMENT_TYPE", "DOCUMENT_FIELD"
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message CategoryResponse {
+  Category data = 1;
+}
+
+message CreateCategoryRequest {
+  string name = 1;
+  string description = 2;
+  string type = 3;
+}
+
+message GetCategoryRequest {
+  string id = 1;
+}
+
+message ListCategoriesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string type = 3;
+  string search = 4;
+}
+
+message ListCategoriesResponse {
+  repeated Category data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateCategoryRequest {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message DeleteCategoryRequest {
+  string id = 1;
+}

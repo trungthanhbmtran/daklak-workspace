@@ -9,6 +9,7 @@ import {
   CalendarIcon, Building2, UserCircle, Loader2, ShieldCheck, AlertTriangle
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useDocuments } from "../hooks/useDocuments";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -42,6 +43,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureStatus, setSignatureStatus] = useState<'VALID' | 'INVALID' | 'NONE' | null>(null);
   const { uploadFile, isUploading } = useFileUpload();
+  const { createDocument, isLoading: isCreating } = useDocuments();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
@@ -116,11 +118,14 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
       // 1. Thực hiện upload file lên MinIO và xác nhận với Media Service
       const media = await uploadFile(uploadedFile);
       
-      console.log("Payload lưu Database:", { 
-        ...values, 
-        fileId: media.id, 
-        downloadUrl: media.downloadUrl,
-        signatureValid: signatureStatus === 'VALID' 
+      // 2. Lưu vào database thông qua document-service
+      await createDocument({
+        ...values,
+        fileId: media.id,
+        signatureValid: signatureStatus === 'VALID',
+        issueDate: values.promulgationDate,
+        issuerName: values.issuer,
+        signerName: values.signer,
       });
 
       onClose();

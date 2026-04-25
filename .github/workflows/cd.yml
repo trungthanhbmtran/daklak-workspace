@@ -43,11 +43,12 @@ jobs:
             translate_service: 'apps/translate_service/**'
             user-service: 'apps/user-service/**'
             workflow-service: 'apps/workflow-service/**'
+            document-service: 'apps/document-service/**'
 
       - id: prepare
         run: |
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts_service","translate_service","user-service","workflow-service"]'
+            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts_service","translate_service","user-service","workflow-service","document-service"]'
           else
             SERVICES='${{ steps.filter.outputs.changes }}'
           fi
@@ -123,6 +124,7 @@ jobs:
           docker compose --profile migrate run --rm media-service-migrate || true
           docker compose --profile migrate run --rm posts-service-migrate || true
           docker compose --profile migrate run --rm workflow-service-migrate || true
+          docker compose --profile migrate run --rm document-service-migrate || true
 
           echo "🚀 Start services..."
           docker compose up -d

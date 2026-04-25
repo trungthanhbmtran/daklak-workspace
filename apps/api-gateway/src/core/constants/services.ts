@@ -88,6 +88,13 @@ export const MICROSERVICES = {
     URL: getDocumentUrl(),
     SERVICE: 'CategoryService',
   },
+  DOCUMENT: {
+    PACKAGE: 'document',
+    SYMBOL: 'DOCUMENT_PACKAGE',
+    PROTO: 'document/document.proto',
+    URL: getDocumentUrl(),
+    SERVICE: 'DocumentService',
+  },
   // Posts (posts_service)
   POST: {
     PACKAGE: 'post',

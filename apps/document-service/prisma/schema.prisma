@@ -1,0 +1,58 @@
+datasource db {
+  provider = "mysql"
+}
+
+generator client {
+  provider     = "prisma-client-js"
+  output       = "../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+model Document {
+  id                 String   @id @default(uuid())
+  documentNumber     String
+  notation           String?
+  abstract           String   @db.Text
+  content            String?  @db.LongText
+  typeId             String?
+  fieldId            String?
+  issuingAuthorityId String?
+  issuerName         String?
+  signerId           String?
+  signerName         String?
+  signerPosition     String?
+  issueDate          DateTime?
+  arrivalDate        DateTime?
+  urgency            String   @default("NORMAL") // NORMAL, URGENT, FLASH
+  securityLevel      String   @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
+  status             String   @default("DRAFT")  // DRAFT, PUBLISHED, ARCHIVED
+  isPublic           Boolean  @default(false)
+  fileId             String?
+  signatureValid     Boolean  @default(false)
+  linkedDocumentId   String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  type               Category? @relation("DocumentType", fields: [typeId], references: [id])
+  field              Category? @relation("DocumentField", fields: [fieldId], references: [id])
+
+  @@index([documentNumber])
+  @@index([typeId])
+  @@index([fieldId])
+  @@index([status])
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?  @db.Text
+  type        String   // DOCUMENT_TYPE, DOCUMENT_FIELD
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  documentsByType  Document[] @relation("DocumentType")
+  documentsByField Document[] @relation("DocumentField")
+
+  @@index([type])
+}

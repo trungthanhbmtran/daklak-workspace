@@ -73,6 +73,22 @@ services:
     env_file:
       - apps/posts-service/.env
 
+  document-service:
+    build:
+      context: .
+      dockerfile: apps/document-service/Dockerfile
+    container_name: document-service
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "50056:50056"
+    env_file:
+      - apps/document-service/.env
+    environment:
+      - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_document
+
 volumes:
   mysql_data:
   minio_data:

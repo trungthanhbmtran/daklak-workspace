@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package document;
+
+import "common/common.proto";
+import "document/category.proto";
+
+service DocumentService {
+  rpc CreateDocument(CreateDocumentRequest) returns (DocumentResponse) {}
+  rpc GetDocument(GetDocumentRequest) returns (Document) {}
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {}
+  rpc UpdateDocument(UpdateDocumentRequest) returns (DocumentResponse) {}
+  rpc DeleteDocument(DeleteDocumentRequest) returns (common.DeleteResponse) {}
+}
+
+message Document {
+  string id = 1;
+  string documentNumber = 2;
+  string notation = 3; // Ký hiệu
+  string abstract = 4; // Trích yếu
+  string content = 5;
+  string typeId = 6; // Category ID (Loại văn bản)
+  string fieldId = 7; // Category ID (Lĩnh vực)
+  string issuingAuthorityId = 8;
+  string issuerName = 9; // Fallback if ID not found or external
+  string signerId = 10;
+  string signerName = 11;
+  string signerPosition = 12;
+  string issueDate = 13;
+  string arrivalDate = 14; // Ngày đến (cho văn bản đến)
+  string urgency = 15; // NORMAL, URGENT, FLASH
+  string securityLevel = 16; // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
+  string status = 17; // DRAFT, PUBLISHED, ARCHIVED
+  bool isPublic = 18;
+  string fileId = 19; // Media Service File ID
+  string fileUrl = 20;
+  bool signatureValid = 21;
+  string linkedDocumentId = 22;
+  string createdAt = 23;
+  string updatedAt = 24;
+  
+  category.Category type = 25;
+  category.Category field = 26;
+}
+
+message DocumentResponse {
+  Document data = 1;
+}
+
+message CreateDocumentRequest {
+  string documentNumber = 1;
+  string notation = 2;
+  string abstract = 3;
+  string content = 4;
+  string typeId = 5;
+  string fieldId = 6;
+  string issuingAuthorityId = 7;
+  string issuerName = 8;
+  string signerName = 9;
+  string signerPosition = 10;
+  string issueDate = 11;
+  string arrivalDate = 12;
+  string urgency = 13;
+  string securityLevel = 14;
+  string status = 15;
+  bool isPublic = 16;
+  string fileId = 17;
+  bool signatureValid = 18;
+  string linkedDocumentId = 19;
+}
+
+message GetDocumentRequest {
+  string id = 1;
+}
+
+message ListDocumentsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string typeId = 4;
+  string fieldId = 5;
+  string status = 6;
+  string urgency = 7;
+  string startDate = 8;
+  string endDate = 9;
+}
+
+message ListDocumentsResponse {
+  repeated Document data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateDocumentRequest {
+  string id = 1;
+  // All optional fields for update
+  optional string documentNumber = 2;
+  optional string notation = 3;
+  optional string abstract = 4;
+  optional string content = 5;
+  optional string typeId = 6;
+  optional string fieldId = 7;
+  optional string status = 8;
+  optional string urgency = 9;
+  optional bool isPublic = 10;
+}
+
+message DeleteDocumentRequest {
+  string id = 1;
+}

@@ -30,6 +30,7 @@ jobs:
             translate_service: 'apps/translate_service/**'
             user-service: 'apps/user-service/**'
             workflow-service: 'apps/workflow-service/**'
+            document-service: 'apps/document-service/**'
 
   build-push:
     needs: filter
