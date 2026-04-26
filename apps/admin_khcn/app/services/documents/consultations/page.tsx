@@ -21,8 +21,10 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
 
 export default function ConsultationsPage() {
+   const [isModalOpen, setIsModalOpen] = useState(false);
    const [searchTerm, setSearchTerm] = useState("");
    const [statusFilter, setStatusFilter] = useState("OPEN");
 
@@ -69,7 +71,10 @@ export default function ConsultationsPage() {
                   </Button>
                </Link>
 
-               <Button className="flex-1 md:flex-none rounded-xl shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 font-bold px-6">
+               <Button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex-1 md:flex-none rounded-xl shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 font-bold px-6"
+               >
                   <Plus className="h-4 w-4 mr-2" />
                   Tạo đợt lấy ý kiến
                </Button>
@@ -245,6 +250,10 @@ export default function ConsultationsPage() {
                );
             })}
          </div>
+         <ConsultationCreateModal 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+         />
       </div>
    );
 }

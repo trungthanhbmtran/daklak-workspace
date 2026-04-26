@@ -37,18 +37,37 @@ const mockCategories = {
 };
 
 import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { CategoryModal } from "@/features/document/components/CategoryModal";
 
 export default function DocumentCategoriesPage() {
    const [activeGroup, setActiveGroup] = useState('DOCUMENT_TYPE');
    const [searchTerm, setSearchTerm] = useState("");
+   const [selectedCategory, setSelectedCategory] = useState<any>(null);
+   const [isModalOpen, setIsModalOpen] = useState(false);
 
-   const { useCategories } = useDocuments();
+   const { useCategories, deleteCategory } = useDocuments();
    const { data: categories = [], isLoading } = useCategories(activeGroup);
 
    const filteredCategories = categories.filter((cat: any) =>
       cat.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       cat.code?.toLowerCase().includes(searchTerm.toLowerCase())
    );
+
+   const handleAdd = () => {
+      setSelectedCategory(null);
+      setIsModalOpen(true);
+   };
+
+   const handleEdit = (category: any) => {
+      setSelectedCategory(category);
+      setIsModalOpen(true);
+   };
+
+   const handleDelete = async (id: string) => {
+      if (confirm("Bạn có chắc chắn muốn xóa danh mục này?")) {
+         await deleteCategory(id);
+      }
+   };
 
    return (
       <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -62,7 +81,7 @@ export default function DocumentCategoriesPage() {
                   Quản lý các danh mục phân loại văn bản, lĩnh vực và cơ quan trong hệ thống.
                </p>
             </div>
-            <Button className="shadow-lg shadow-primary/20">
+            <Button className="shadow-lg shadow-primary/20 rounded-xl px-6" onClick={handleAdd}>
                <Plus className="h-4 w-4 mr-2" /> Thêm danh mục mới
             </Button>
          </div>
@@ -159,7 +178,7 @@ export default function DocumentCategoriesPage() {
                                  </td>
                                  <td className="px-6 py-5 text-right">
                                     <div className="flex items-center justify-end gap-1">
-                                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10">
+                                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10" onClick={() => handleEdit(cat)}>
                                           <Edit3 className="h-4 w-4" />
                                        </Button>
                                        <DropdownMenu>
@@ -169,7 +188,7 @@ export default function DocumentCategoriesPage() {
                                              </Button>
                                           </DropdownMenuTrigger>
                                           <DropdownMenuContent align="end" className="rounded-xl">
-                                             <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer">
+                                             <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer" onClick={() => handleDelete(cat.id)}>
                                                 <Trash2 className="h-4 w-4 mr-2" /> Xóa danh mục
                                              </DropdownMenuItem>
                                           </DropdownMenuContent>
@@ -189,6 +208,13 @@ export default function DocumentCategoriesPage() {
                </Card>
             </div>
          </div>
+
+         <CategoryModal 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            category={selectedCategory}
+            groupCode={activeGroup}
+         />
       </div>
    );
 }

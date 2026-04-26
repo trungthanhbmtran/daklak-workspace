@@ -12,7 +12,7 @@ export class ConsultationsController implements OnModuleInit {
   private consultationService: any;
 
   constructor(
-    @Inject(MICROSERVICES.DOCUMENT.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.CONSULTATION.SYMBOL) private readonly client: any,
   ) {}
 
   onModuleInit() {

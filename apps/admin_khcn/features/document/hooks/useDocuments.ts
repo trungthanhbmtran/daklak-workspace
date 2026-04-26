@@ -7,11 +7,11 @@ export function useDocuments() {
   const queryClient = useQueryClient();
 
   // 1. Categories
-  const useCategories = (type: string) => {
+  const useCategories = (groupCode: string) => {
     return useQuery({
-      queryKey: ['document-categories', type],
+      queryKey: ['document-categories', groupCode],
       queryFn: async () => {
-        const response = await fetch(`${API_BASE}/categories?type=${type}`, {
+        const response = await fetch(`${API_BASE}/categories?groupCode=${groupCode}`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         });
         if (!response.ok) throw new Error('Failed to fetch categories');
@@ -20,6 +20,59 @@ export function useDocuments() {
       },
     });
   };
+
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch(`${API_BASE}/categories`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create category');
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['document-categories', variables.groupCode] });
+      toast.success('Danh mục đã được tạo!');
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, ...data }: any) => {
+      const response = await fetch(`${API_BASE}/categories/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update category');
+      return response.json();
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
+      toast.success('Cập nhật danh mục thành công!');
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`${API_BASE}/categories/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      });
+      if (!response.ok) throw new Error('Failed to delete category');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
+      toast.success('Đã xóa danh mục');
+    },
+  });
 
   // 2. Documents
   const useListDocuments = (filters: any) => {
@@ -55,6 +108,40 @@ export function useDocuments() {
       toast.success('Văn bản đã được lưu vào sổ thành công!');
     },
     onError: () => toast.error('Có lỗi xảy ra khi lưu văn bản'),
+  });
+
+  const updateDocumentMutation = useMutation({
+    mutationFn: async ({ id, ...data }: any) => {
+      const response = await fetch(`${API_BASE}/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to update document');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Cập nhật văn bản thành công!');
+    },
+  });
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await fetch(`${API_BASE}/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+      });
+      if (!response.ok) throw new Error('Failed to delete document');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Đã xóa văn bản');
+    },
   });
 
   // 3. Consultations
@@ -112,8 +199,8 @@ export function useDocuments() {
   });
 
   // Compat for old code (if needed)
-  const getCategories = async (type: string) => {
-    const response = await fetch(`${API_BASE}/categories?type=${type}`, {
+  const getCategories = async (groupCode: string) => {
+    const response = await fetch(`${API_BASE}/categories?groupCode=${groupCode}`, {
       headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
     });
     const result = await response.json();
@@ -122,12 +209,23 @@ export function useDocuments() {
 
   return {
     useCategories,
+    createCategory: createCategoryMutation.mutateAsync,
+    updateCategory: updateCategoryMutation.mutateAsync,
+    deleteCategory: deleteCategoryMutation.mutateAsync,
     useListDocuments,
     createDocument: createDocumentMutation.mutateAsync,
+    updateDocument: updateDocumentMutation.mutateAsync,
+    deleteDocument: deleteDocumentMutation.mutateAsync,
     useListConsultations,
     createConsultation: createConsultationMutation.mutateAsync,
     createMinutes: createMinutesMutation.mutateAsync,
     getCategories, // legacy support
-    isLoading: createDocumentMutation.isPending || createConsultationMutation.isPending || createMinutesMutation.isPending,
+    isLoading: 
+      createDocumentMutation.isPending || 
+      createConsultationMutation.isPending || 
+      createMinutesMutation.isPending ||
+      createCategoryMutation.isPending ||
+      updateCategoryMutation.isPending ||
+      deleteCategoryMutation.isPending,
   };
 }

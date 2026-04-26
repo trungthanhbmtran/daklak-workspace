@@ -11,6 +11,7 @@ import { ConsultationsController } from './consultations.controller';
     registerGrpcService(MICROSERVICES.DOCUMENT_CATEGORY),
     registerGrpcService(MICROSERVICES.DOCUMENT),
     registerGrpcService(MICROSERVICES.MINUTES),
+    registerGrpcService(MICROSERVICES.CONSULTATION),
   ],
   controllers: [DocumentCategoryController, DocumentsController, MinutesController, ConsultationsController],
 })

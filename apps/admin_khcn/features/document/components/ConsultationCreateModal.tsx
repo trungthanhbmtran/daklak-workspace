@@ -1,160 +1,157 @@
 "use client";
 
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { 
-  MessageSquareShare, CalendarIcon, Building2, UploadCloud, 
-  CheckCircle2, FileText, X
-} from "lucide-react";
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter 
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useDocuments } from "../hooks/useDocuments";
+import { Loader2, Save, MessageSquareShare, Calendar, ShieldAlert } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 const consultationSchema = z.object({
-  title: z.string().min(10, "Tên dự thảo phải có ít nhất 10 ký tự"),
-  content: z.string().min(20, "Vui lòng nhập tóm tắt nội dung xin ý kiến"),
-  deadline: z.string().min(1, "Vui lòng chọn hạn chót nhận phản hồi"),
-  departmentIds: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 cơ quan để lấy ý kiến"),
+  title: z.string().min(5, "Tiêu đề đợt lấy ý kiến phải có ít nhất 5 ký tự"),
+  description: z.string().min(10, "Mô tả nội dung cần lấy ý kiến"),
+  documentId: z.string().optional(),
+  deadline: z.string().min(1, "Vui lòng chọn thời hạn góp ý"),
+  isUrgent: z.boolean().default(false),
 });
 
 type ConsultationFormValues = z.infer<typeof consultationSchema>;
 
-// Mock data cơ quan (Tích hợp với ORGANIZATION_API của bạn)
-const MOCK_DEPARTMENTS = [
-  { id: "1", name: "Sở Kế hoạch và Đầu tư" },
-  { id: "2", name: "Sở Tài chính" },
-  { id: "3", name: "Sở Thông tin và Truyền thông" },
-  { id: "4", name: "Sở Tư pháp" },
-  { id: "5", name: "UBND TP. Buôn Ma Thuột" },
-  { id: "6", name: "UBND Huyện Krông Pắc" },
-];
+interface ConsultationCreateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  documentId?: string;
+}
 
-export function ConsultationCreateModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
-  const [draftFile, setDraftFile] = useState<File | null>(null);
+export function ConsultationCreateModal({ isOpen, onClose, documentId }: ConsultationCreateModalProps) {
+  const { createConsultation, isLoading } = useDocuments();
 
   const form = useForm<ConsultationFormValues>({
     resolver: zodResolver(consultationSchema),
     defaultValues: {
       title: "",
-      content: "",
-      deadline: "",
-      departmentIds: [],
+      description: "",
+      documentId: documentId,
+      deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16),
+      isUrgent: false,
     },
   });
 
-  const onSubmit = (values: ConsultationFormValues) => {
-    if (!draftFile) return alert("Vui lòng đính kèm file Dự thảo gốc (Word/PDF)!");
-    console.log("Tạo luồng ý kiến:", values, "File:", draftFile.name);
-    onClose();
-    form.reset();
-    setDraftFile(null);
+  const onSubmit = async (values: ConsultationFormValues) => {
+    try {
+      await createConsultation({
+        ...values,
+        targetUnitIds: [], // Future: add unit selection
+      });
+      onClose();
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[700px] p-0 shadow-2xl">
-        <DialogHeader className="p-6 border-b bg-muted/20">
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <MessageSquareShare className="h-5 w-5 text-primary" /> Khởi tạo luồng Lấy ý kiến Dự thảo
-          </DialogTitle>
-          <DialogDescription>Gửi tệp dự thảo đến các Sở/Ngành/Địa phương và thiết lập thời hạn phản hồi.</DialogDescription>
-        </DialogHeader>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] rounded-3xl p-0 overflow-hidden border-none shadow-2xl">
+        <div className="bg-primary/5 p-6 border-b">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-primary/10 rounded-xl text-primary">
+                <MessageSquareShare className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-2xl font-black tracking-tight text-foreground">
+                Tạo đợt lấy ý kiến mới
+              </DialogTitle>
+            </div>
+            <DialogDescription className="font-medium text-muted-foreground">
+              Thiết lập luồng lấy ý kiến dự thảo văn bản từ các đơn vị chuyên môn.
+            </DialogDescription>
+          </DialogHeader>
+        </div>
 
         <Form {...form}>
-          <form className="max-h-[70vh] overflow-y-auto px-6 py-4 space-y-6 scrollbar-thin">
-            
-            <FormField control={form.control} name="title" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Tên văn bản dự thảo <span className="text-destructive">*</span></FormLabel>
-                <FormControl><Input placeholder="VD: Dự thảo Kế hoạch ứng dụng CNTT năm 2026..." {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}/>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-              <FormField control={form.control} name="deadline" render={({ field }) => (
+          <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Hạn chót nhận ý kiến <span className="text-destructive">*</span></FormLabel>
+                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Tiêu đề đợt lấy ý kiến</FormLabel>
                   <FormControl>
-                    <div className="relative">
-                      <Input type="date" {...field} className="pl-9" />
-                      <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    </div>
+                    <Input placeholder="VD: Lấy ý kiến dự thảo Kế hoạch KHCN 2026..." className="rounded-xl h-11" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
-              )}/>
+              )}
+            />
 
-              <div className="space-y-2">
-                <FormLabel>File dự thảo đính kèm <span className="text-destructive">*</span></FormLabel>
-                {!draftFile ? (
-                   <div className="border border-dashed rounded-md p-2 flex items-center justify-center bg-muted/20 hover:bg-muted/50 cursor-pointer" onClick={() => document.getElementById("draft-file")?.click()}>
-                     <UploadCloud className="h-4 w-4 text-muted-foreground mr-2" />
-                     <span className="text-sm text-muted-foreground">Click chọn file (Docx/PDF)</span>
-                     <input id="draft-file" type="file" className="hidden" accept=".doc,.docx,.pdf" onChange={(e) => {
-                       if (e.target.files?.[0]) setDraftFile(e.target.files[0]);
-                     }}/>
-                   </div>
-                ) : (
-                  <div className="border border-primary/30 bg-primary/5 rounded-md p-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-primary truncate max-w-[200px] flex items-center"><FileText className="h-4 w-4 mr-1.5 shrink-0" /> {draftFile.name}</span>
-                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => setDraftFile(null)}><X className="h-3 w-3" /></Button>
-                  </div>
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-xs font-bold uppercase text-muted-foreground">Nội dung / Yêu cầu góp ý</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Mô tả chi tiết các nội dung cần các đơn vị tập trung góp ý..." className="rounded-xl min-h-[120px] resize-none" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="deadline"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold uppercase text-muted-foreground flex items-center gap-2">
+                      <Calendar className="h-3 w-3 text-primary" /> Thời hạn góp ý
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" className="rounded-xl h-11" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-              </div>
+              />
+
+              <FormField
+                control={form.control}
+                name="isUrgent"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-xl border p-4 bg-muted/5 mt-5">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel className="text-sm font-bold flex items-center gap-2 text-rose-600">
+                        <ShieldAlert className="h-4 w-4" /> Yêu cầu khẩn
+                      </FormLabel>
+                    </div>
+                  </FormItem>
+                )}
+              />
             </div>
 
-            <FormField control={form.control} name="content" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Nội dung yêu cầu / Tóm tắt <span className="text-destructive">*</span></FormLabel>
-                <FormControl><Textarea placeholder="Ghi chú thêm cho các đơn vị nhận..." className="resize-none h-20" {...field} /></FormControl>
-                <FormMessage />
-              </FormItem>
-            )}/>
-
-            <FormField control={form.control} name="departmentIds" render={() => (
-              <FormItem>
-                <div className="flex items-center justify-between border-b pb-2 mb-2">
-                  <FormLabel className="flex items-center gap-2"><Building2 className="h-4 w-4 text-primary" /> Cơ quan nhận ý kiến <span className="text-destructive">*</span></FormLabel>
-                  <span className="text-xs font-mono bg-muted px-2 py-0.5 rounded">{form.watch("departmentIds").length} đã chọn</span>
-                </div>
-                <ScrollArea className="h-[180px] w-full border rounded-md p-3 bg-muted/10">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {MOCK_DEPARTMENTS.map((dept) => (
-                      <FormField key={dept.id} control={form.control} name="departmentIds" render={({ field }) => {
-                        const isChecked = field.value?.includes(dept.id);
-                        return (
-                          <FormItem className={`flex flex-row items-start space-x-3 space-y-0 p-2 rounded-md border transition-colors cursor-pointer ${isChecked ? "bg-primary/5 border-primary/30" : "hover:bg-muted/50"}`}>
-                            <FormControl>
-                              <Checkbox checked={isChecked} onCheckedChange={(checked) => {
-                                return checked ? field.onChange([...field.value, dept.id]) : field.onChange(field.value?.filter((value) => value !== dept.id));
-                              }}/>
-                            </FormControl>
-                            <FormLabel className="text-sm font-medium cursor-pointer leading-tight">{dept.name}</FormLabel>
-                          </FormItem>
-                        );
-                      }}/>
-                    ))}
-                  </div>
-                </ScrollArea>
-                <FormMessage />
-              </FormItem>
-            )}/>
-
+            <DialogFooter className="pt-4 gap-2">
+              <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl h-11 px-8 font-bold">Hủy bỏ</Button>
+              <Button type="submit" className="rounded-xl h-11 px-10 shadow-xl shadow-primary/20 bg-primary font-bold transition-all active:scale-95" disabled={isLoading}>
+                {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                Phát hành yêu cầu
+              </Button>
+            </DialogFooter>
           </form>
         </Form>
-
-        <DialogFooter className="p-4 border-t bg-muted/10">
-          <Button variant="ghost" onClick={onClose}>Hủy</Button>
-          <Button onClick={form.handleSubmit(onSubmit)} className="shadow-md"><CheckCircle2 className="h-4 w-4 mr-2" /> Phát hành lấy ý kiến</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
