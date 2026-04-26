@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  FileSignature, CornerUpRight, MessageSquare, History, 
+import {
+  FileSignature, CornerUpRight, MessageSquare, History,
   CheckCheck, XCircle, FileText, Download, Printer, Stamp
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,23 +44,23 @@ export default function DocumentProcessingWorkspace() {
         {/* CỘT TRÁI: Trình xem PDF (PDF Viewer Placeholder) */}
         <div className="flex-1 bg-muted/20 border rounded-lg flex flex-col overflow-hidden relative shadow-inner">
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
-             <span>Trang 1 / 3</span>
-             <Separator orientation="vertical" className="h-4" />
-             <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> Cong_van_125.pdf</span>
+            <span>Trang 1 / 3</span>
+            <Separator orientation="vertical" className="h-4" />
+            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> Cong_van_125.pdf</span>
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
             {/* Thực tế sẽ nhúng <iframe src="pdf_url"> hoặc react-pdf vào đây */}
             <div className="w-full max-w-2xl h-full bg-white shadow-md border rounded p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
-               <Stamp className="h-16 w-16 text-rose-500/20 mb-4 transform -rotate-12" />
-               <p>Khu vực hiển thị nội dung tệp PDF văn bản gốc</p>
-               <p className="text-xs mt-2">Hỗ trợ cuộn, phóng to, thu nhỏ và kéo thả chữ ký số</p>
+              <Stamp className="h-16 w-16 text-rose-500/20 mb-4 transform -rotate-12" />
+              <p>Khu vực hiển thị nội dung tệp PDF văn bản gốc</p>
+              <p className="text-xs mt-2">Hỗ trợ cuộn, phóng to, thu nhỏ và kéo thả chữ ký số</p>
             </div>
           </div>
         </div>
 
         {/* CỘT PHẢI: Thao tác & Lịch sử luân chuyển */}
         <div className="w-[400px] flex flex-col gap-4 shrink-0">
-          
+
           {/* Card Thao tác (Hành động của user hiện tại) */}
           <Card className="border shadow-sm shrink-0">
             <CardHeader className="p-4 border-b bg-muted/10">
@@ -71,8 +71,8 @@ export default function DocumentProcessingWorkspace() {
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold uppercase text-muted-foreground">Ý kiến xử lý / Bút phê:</label>
-                <Textarea 
-                  placeholder="Nhập nội dung trình Lãnh đạo hoặc ghi chú luân chuyển..." 
+                <Textarea
+                  placeholder="Nhập nội dung trình Lãnh đạo hoặc ghi chú luân chuyển..."
                   className="h-24 resize-none text-sm"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
@@ -126,7 +126,7 @@ export default function DocumentProcessingWorkspace() {
               </div>
             </ScrollArea>
           </Card>
-          
+
         </div>
       </div>
     </div>
