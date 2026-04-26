@@ -1,8 +1,8 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, OnModuleInit } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { ClientGrpc } from '@nestjs/microservices';
+import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { MICROSERVICES } from '@/core/constants/services';
+import { MICROSERVICES } from '../../core/constants/services';
 
 @ApiTags('Documents')
 @Controller('admin/documents/minutes')
@@ -10,7 +10,7 @@ export class MinutesController implements OnModuleInit {
   private minutesService: any;
 
   constructor(
-    @Inject(MICROSERVICES.MINUTES.SYMBOL) private readonly client: ClientGrpc,
+    @Inject(MICROSERVICES.MINUTES.SYMBOL) private readonly client: microservices.ClientGrpc,
   ) { }
 
   onModuleInit() {
