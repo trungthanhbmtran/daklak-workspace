@@ -16,4 +16,7 @@ export const QUERY_KEY_PREFIX = {
   ROLES: "roles",
   RESOURCES: "resources",
   CATEGORIES: "categories",
+  DOCUMENTS: "documents",
+  CONSULTATIONS: "consultations",
+  MINUTES: "minutes",
 } as const;
