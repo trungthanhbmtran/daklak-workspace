@@ -1,7 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import apiClient from "@/lib/axiosInstance";
 
-const API_BASE = '/api/v1/admin/documents';
+const API_BASE = '/documents';
 
 export function useDocuments() {
   const queryClient = useQueryClient();
@@ -11,28 +12,18 @@ export function useDocuments() {
     return useQuery({
       queryKey: ['document-categories', groupCode],
       queryFn: async () => {
-        const response = await fetch(`${API_BASE}/categories?groupCode=${groupCode}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        const response: any = await apiClient.get(`${API_BASE}/categories`, {
+          params: { groupCode }
         });
-        if (!response.ok) throw new Error('Failed to fetch categories');
-        const result = await response.json();
-        return result.data;
+        return response.data;
       },
     });
   };
 
   const createCategoryMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`${API_BASE}/categories`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to create category');
-      return response.json();
+      const response: any = await apiClient.post(`${API_BASE}/categories`, data);
+      return response;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['document-categories', variables.groupCode] });
@@ -42,86 +33,52 @@ export function useDocuments() {
 
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, ...data }: any) => {
-      const response = await fetch(`${API_BASE}/categories/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to update category');
-      return response.json();
+      const response: any = await apiClient.put(`${API_BASE}/categories/${id}`, data);
+      return response;
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
+      queryClient.invalidateQueries({ queryKey: ['document-categories', variables.groupCode] });
       toast.success('Cập nhật danh mục thành công!');
     },
   });
 
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`${API_BASE}/categories/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      });
-      if (!response.ok) throw new Error('Failed to delete category');
-      return response.json();
+      const response: any = await apiClient.delete(`${API_BASE}/categories/${id}`);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['document-categories'] });
-      toast.success('Đã xóa danh mục');
+      toast.success('Đã xóa danh mục!');
     },
   });
 
   // 2. Documents
-  const useListDocuments = (filters: any) => {
+  const useListDocuments = (params: any) => {
     return useQuery({
-      queryKey: ['documents', filters],
+      queryKey: ['documents', params],
       queryFn: async () => {
-        const queryParams = new URLSearchParams(filters).toString();
-        const response = await fetch(`${API_BASE}?${queryParams}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        });
-        if (!response.ok) throw new Error('Failed to fetch documents');
-        const result = await response.json();
-        return result.data;
+        const response: any = await apiClient.get(API_BASE, { params });
+        return response.data;
       },
     });
   };
 
   const createDocumentMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(API_BASE, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to create document');
-      return response.json();
+      const response: any = await apiClient.post(API_BASE, data);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success('Văn bản đã được lưu vào sổ thành công!');
+      toast.success('Văn bản đã được lưu!');
     },
-    onError: () => toast.error('Có lỗi xảy ra khi lưu văn bản'),
   });
 
   const updateDocumentMutation = useMutation({
     mutationFn: async ({ id, ...data }: any) => {
-      const response = await fetch(`${API_BASE}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to update document');
-      return response.json();
+      const response: any = await apiClient.put(`${API_BASE}/${id}`, data);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
@@ -131,110 +88,85 @@ export function useDocuments() {
 
   const deleteDocumentMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`${API_BASE}/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-      });
-      if (!response.ok) throw new Error('Failed to delete document');
-      return response.json();
+      const response: any = await apiClient.delete(`${API_BASE}/${id}`);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success('Đã xóa văn bản');
+      toast.success('Đã xóa văn bản!');
     },
   });
 
-  // 3. Consultations
-  const useListConsultations = (filters: any) => {
+  const useGetDocument = (id: string) => {
     return useQuery({
-      queryKey: ['consultations', filters],
+      queryKey: ['document', id],
       queryFn: async () => {
-        const queryParams = new URLSearchParams(filters).toString();
-        const response = await fetch(`${API_BASE}/consultations?${queryParams}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        });
-        if (!response.ok) throw new Error('Failed to fetch consultations');
-        const result = await response.json();
-        return result.data;
+        if (!id) return null;
+        const response: any = await apiClient.get(`${API_BASE}/${id}`);
+        return response.data;
+      },
+      enabled: !!id,
+    });
+  };
+
+  // 3. Consultations
+  const useListConsultations = (params: any) => {
+    return useQuery({
+      queryKey: ['consultations', params],
+      queryFn: async () => {
+        const response: any = await apiClient.get(`${API_BASE}/consultations`, { params });
+        return response.data;
       },
     });
   };
 
   const createConsultationMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`${API_BASE}/consultations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to create consultation');
-      return response.json();
+      const response: any = await apiClient.post(`${API_BASE}/consultations`, data);
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['consultations'] });
-      toast.success('Đã tạo luồng lấy ý kiến thành công!');
+      toast.success('Đợt lấy ý kiến đã được tạo!');
     },
   });
 
-  // 5. Minutes
-  const useListMinutes = (filters: any) => {
+  // 4. Minutes
+  const useListMinutes = (params: any) => {
     return useQuery({
-      queryKey: ['minutes', filters],
+      queryKey: ['minutes', params],
       queryFn: async () => {
-        const queryParams = new URLSearchParams(filters).toString();
-        const response = await fetch(`${API_BASE}/minutes?${queryParams}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        });
-        if (!response.ok) throw new Error('Failed to fetch minutes');
-        const result = await response.json();
-        return result.data;
+        const response: any = await apiClient.get(`${API_BASE}/minutes`, { params });
+        return response.data;
       },
     });
   };
 
   const createMinutesMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`${API_BASE}/minutes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) throw new Error('Failed to create minutes');
-      return response.json();
+      const response: any = await apiClient.post(`${API_BASE}/minutes`, data);
+      return response;
     },
     onSuccess: () => {
       toast.success('Biên bản đã được lưu thành công!');
     },
   });
 
-  // 6. Statistics
+  // 5. Statistics
   const useDocumentStats = () => {
     return useQuery({
       queryKey: ['document-stats'],
       queryFn: async () => {
-        const response = await fetch(`${API_BASE}/stats`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-        });
-        if (!response.ok) throw new Error('Failed to fetch statistics');
-        const result = await response.json();
-        return result.data;
+        const response: any = await apiClient.get(`${API_BASE}/stats`);
+        return response.data;
       },
     });
   };
 
   // Compat for old code (if needed)
   const getCategories = async (groupCode: string) => {
-    const response = await fetch(`${API_BASE}/categories?groupCode=${groupCode}`, {
-      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
-    });
-    const result = await response.json();
-    return result.data;
+    const response: any = await apiClient.get(`${API_BASE}/categories`, { params: { groupCode } });
+    return response.data;
   };
 
   return {
@@ -246,15 +178,16 @@ export function useDocuments() {
     createDocument: createDocumentMutation.mutateAsync,
     updateDocument: updateDocumentMutation.mutateAsync,
     deleteDocument: deleteDocumentMutation.mutateAsync,
+    useGetDocument,
     useListConsultations,
     useListMinutes,
     useDocumentStats,
     createConsultation: createConsultationMutation.mutateAsync,
     createMinutes: createMinutesMutation.mutateAsync,
     getCategories, // legacy support
-    isLoading: 
-      createDocumentMutation.isPending || 
-      createConsultationMutation.isPending || 
+    isLoading:
+      createDocumentMutation.isPending ||
+      createConsultationMutation.isPending ||
       createMinutesMutation.isPending ||
       createCategoryMutation.isPending ||
       updateCategoryMutation.isPending ||
