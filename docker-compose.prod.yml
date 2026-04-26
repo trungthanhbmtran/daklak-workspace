@@ -136,6 +136,17 @@ services:
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
 
+  document-service:
+    image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document
+
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
     restart: unless-stopped
@@ -192,6 +203,15 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
+
+  document-service-migrate:
+    image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
+    profiles: [ "migrate" ]
+    command: npx prisma migrate deploy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document
 
   # =============================
   # Nginx
