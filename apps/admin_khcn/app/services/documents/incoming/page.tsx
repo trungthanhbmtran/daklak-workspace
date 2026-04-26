@@ -1,11 +1,20 @@
+"use client";
+import { useState } from "react";
+
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Filter, Eye, ShieldCheck, Plus, Inbox, Trash2, Building2, FileText } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function IncomingDocumentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { useListDocuments, deleteDocument } = useDocuments();
-  
-  const { data: documentsData, isLoading } = useListDocuments({ 
+
+  const { data: documentsData, isLoading } = useListDocuments({
     search: searchTerm,
     // Add other filters as needed
   });
@@ -32,8 +41,8 @@ export default function IncomingDocumentsPage() {
             Quản lý và theo dõi các văn bản tiếp nhận từ cơ quan bên ngoài.
           </p>
         </div>
-        <Button 
-          onClick={() => setIsModalOpen(true)} 
+        <Button
+          onClick={() => setIsModalOpen(true)}
           className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 transition-all active:scale-95"
         >
           <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản đến
@@ -44,8 +53,8 @@ export default function IncomingDocumentsPage() {
         <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[300px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..." 
+            <Input
+              placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..."
               className="pl-11 h-12 bg-muted/20 border-none rounded-2xl focus-visible:ring-blue-500/20 font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -134,4 +143,5 @@ export default function IncomingDocumentsPage() {
     </div>
   );
 }
-import { Inbox, Trash2, Building2, FileText } from "lucide-react";
+
+

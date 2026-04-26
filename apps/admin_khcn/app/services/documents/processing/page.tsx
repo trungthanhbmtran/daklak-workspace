@@ -1,4 +1,13 @@
 import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useState } from 'react'
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Search, Filter, Plus, Clock, FileText, History, MessageSquare, ChevronRight } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+
 
 export default function ProcessingDocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -81,7 +90,7 @@ export default function ProcessingDocumentsPage() {
                 <tr><td colSpan={5} className="py-24 text-center text-muted-foreground font-medium italic">Đang tải luồng công việc...</td></tr>
               ) : docs.length === 0 ? (
                 <tr>
-                   <td colSpan={5} className="py-24 text-center">
+                  <td colSpan={5} className="py-24 text-center">
                     <div className="h-16 w-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
                       <FileText className="h-8 w-8 text-muted-foreground/50" />
                     </div>
@@ -117,18 +126,17 @@ export default function ProcessingDocumentsPage() {
 
                   <td className="px-8 py-6">
                     <div className="flex flex-col gap-2">
-                      <Badge className={`w-fit text-[9px] font-black uppercase tracking-wider shadow-none px-2 py-0.5 ${
-                        doc.status === 'OVERDUE' ? 'bg-rose-100 text-rose-700' :
+                      <Badge className={`w-fit text-[9px] font-black uppercase tracking-wider shadow-none px-2 py-0.5 ${doc.status === 'OVERDUE' ? 'bg-rose-100 text-rose-700' :
                         doc.status === 'PENDING_APPROVAL' ? 'bg-amber-100 text-amber-700' :
-                        'bg-blue-100 text-blue-700'
-                      }`}>
-                        {doc.status === 'PROCESSING' ? 'Đang xử lý' : 
-                         doc.status === 'PENDING_APPROVAL' ? 'Chờ phê duyệt' : 
-                         doc.status === 'OVERDUE' ? 'Quá hạn' : doc.status}
+                          'bg-blue-100 text-blue-700'
+                        }`}>
+                        {doc.status === 'PROCESSING' ? 'Đang xử lý' :
+                          doc.status === 'PENDING_APPROVAL' ? 'Chờ phê duyệt' :
+                            doc.status === 'OVERDUE' ? 'Quá hạn' : doc.status}
                       </Badge>
                       <span className="text-sm font-bold text-foreground flex items-center gap-2">
                         <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold text-muted-foreground uppercase">
-                           {doc.signerName?.charAt(0) || 'U'}
+                          {doc.signerName?.charAt(0) || 'U'}
                         </div>
                         {doc.signerName || 'Chưa phân công'}
                       </span>
@@ -161,4 +169,3 @@ export default function ProcessingDocumentsPage() {
   );
 }
 
-import { Plus } from "lucide-react";
