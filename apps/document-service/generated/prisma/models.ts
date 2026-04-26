@@ -10,4 +10,5 @@
  */
 export type * from './models/Category'
 export type * from './models/Document'
+export type * from './models/Minutes'
 export type * from './commonInputTypes'

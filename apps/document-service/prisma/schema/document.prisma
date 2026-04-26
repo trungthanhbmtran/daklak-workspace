@@ -1,27 +1,32 @@
 model Document {
-  id                 String   @id @default(uuid())
-  documentNumber     String
-  notation           String?
-  abstract           String   @db.Text
-  content            String?  @db.LongText
-  typeId             String?
-  fieldId            String?
-  issuingAuthorityId String?
-  issuerName         String?
-  signerId           String?
-  signerName         String?
-  signerPosition     String?
-  issueDate          DateTime?
-  arrivalDate        DateTime?
-  urgency            String   @default("NORMAL") // NORMAL, URGENT, FLASH
-  securityLevel      String   @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
-  status             String   @default("DRAFT")  // DRAFT, PUBLISHED, ARCHIVED
-  isPublic           Boolean  @default(false)
-  fileId             String?
-  signatureValid     Boolean  @default(false)
-  linkedDocumentId   String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                 String    @id @default(uuid())
+  documentNumber     String    @map("document_number") // Số văn bản (đi/đến)
+  notation           String?   // Ký hiệu (ví dụ: QĐ-UBND)
+  abstract           String    @db.Text // Trích yếu
+  content            String?   @db.LongText // Nội dung
+  typeId             String?   @map("type_id") // Loại văn bản (Quyết định, Công văn...)
+  fieldId            String?   @map("field_id") // Lĩnh vực (Khoa học, Công nghệ...)
+  issuingAuthorityId String?   @map("issuing_authority_id") // Cơ quan ban hành
+  issuerName         String?   @map("issuer_name")
+  signerId           String?   @map("signer_id")
+  signerName         String?   @map("signer_name")
+  signerPosition     String?   @map("signer_position")
+  issueDate          DateTime? @map("issue_date")
+  arrivalDate        DateTime? @map("arrival_date")
+  arrivalNumber      String?   @map("arrival_number") // Số đến (dành cho văn bản đến)
+  processingDeadline DateTime? @map("processing_deadline") // Hạn xử lý
+  recipients         String?   @db.Text // Nơi nhận
+  urgency            String    @default("NORMAL") // NORMAL, URGENT, FLASH
+  securityLevel      String    @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
+  status             String    @default("DRAFT")  // DRAFT, PUBLISHED, ARCHIVED
+  isPublic           Boolean   @default(false) @map("is_public")
+  fileId             String?   @map("file_id")
+  signatureValid     Boolean   @default(false) @map("signature_valid")
+  pageCount          Int       @default(1) @map("page_count")
+  attachmentCount    Int       @default(0) @map("attachment_count")
+  linkedDocumentId   String?   @map("linked_document_id")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   type               Category? @relation("DocumentType", fields: [typeId], references: [id])
   field              Category? @relation("DocumentField", fields: [fieldId], references: [id])
@@ -30,4 +35,5 @@ model Document {
   @@index([typeId])
   @@index([fieldId])
   @@index([status])
+  @@map("documents")
 }

@@ -16,31 +16,36 @@ service DocumentService {
 message Document {
   string id = 1;
   string documentNumber = 2;
-  string notation = 3; // Ký hiệu
-  string abstract = 4; // Trích yếu
+  string notation = 3;
+  string abstract = 4;
   string content = 5;
-  string typeId = 6; // Category ID (Loại văn bản)
-  string fieldId = 7; // Category ID (Lĩnh vực)
+  string typeId = 6;
+  string fieldId = 7;
   string issuingAuthorityId = 8;
-  string issuerName = 9; // Fallback if ID not found or external
+  string issuerName = 9;
   string signerId = 10;
   string signerName = 11;
   string signerPosition = 12;
   string issueDate = 13;
-  string arrivalDate = 14; // Ngày đến (cho văn bản đến)
-  string urgency = 15; // NORMAL, URGENT, FLASH
-  string securityLevel = 16; // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
-  string status = 17; // DRAFT, PUBLISHED, ARCHIVED
-  bool isPublic = 18;
-  string fileId = 19; // Media Service File ID
-  string fileUrl = 20;
-  bool signatureValid = 21;
-  string linkedDocumentId = 22;
-  string createdAt = 23;
-  string updatedAt = 24;
+  string arrivalDate = 14;
+  string arrivalNumber = 15;
+  string processingDeadline = 16;
+  string recipients = 17;
+  string urgency = 18;
+  string securityLevel = 19;
+  string status = 20;
+  bool isPublic = 21;
+  string fileId = 22;
+  string fileUrl = 23;
+  bool signatureValid = 24;
+  int32 pageCount = 25;
+  int32 attachmentCount = 26;
+  string linkedDocumentId = 27;
+  string createdAt = 28;
+  string updatedAt = 29;
   
-  category.Category type = 25;
-  category.Category field = 26;
+  category.Category type = 30;
+  category.Category field = 31;
 }
 
 message DocumentResponse {
@@ -60,13 +65,18 @@ message CreateDocumentRequest {
   string signerPosition = 10;
   string issueDate = 11;
   string arrivalDate = 12;
-  string urgency = 13;
-  string securityLevel = 14;
-  string status = 15;
-  bool isPublic = 16;
-  string fileId = 17;
-  bool signatureValid = 18;
-  string linkedDocumentId = 19;
+  string arrivalNumber = 13;
+  string processingDeadline = 14;
+  string recipients = 15;
+  string urgency = 16;
+  string securityLevel = 17;
+  string status = 18;
+  bool isPublic = 19;
+  string fileId = 20;
+  bool signatureValid = 21;
+  int32 pageCount = 22;
+  int32 attachmentCount = 23;
+  string linkedDocumentId = 24;
 }
 
 message GetDocumentRequest {

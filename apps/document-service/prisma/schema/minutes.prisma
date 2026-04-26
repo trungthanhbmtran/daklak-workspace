@@ -1,0 +1,18 @@
+model Minutes {
+  id              String   @id @default(uuid())
+  title           String   // Tiêu đề biên bản
+  startTime       DateTime @map("start_time") // Thời gian bắt đầu
+  endTime         DateTime? @map("end_time") // Thời gian kết thúc
+  location        String?  // Địa điểm
+  chairman        String?  // Chủ trì
+  secretary       String?  // Thư ký
+  attendees       String?  @db.Text // Thành phần tham dự (JSON string)
+  content         String?  @db.LongText // Nội dung cuộc họp
+  conclusion      String?  @db.Text // Kết luận
+  documentId      String?  @map("document_id") // Liên kết với văn bản (nếu có)
+  status          String   @default("DRAFT") // DRAFT, SIGNED, ARCHIVED
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("minutes")
+}

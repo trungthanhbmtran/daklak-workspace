@@ -19,12 +19,15 @@ export class CategoryService {
   async findOne(id: string) {
     const category = await this.prisma.category.findUnique({
       where: { id },
+      include: {
+        children: true,
+      },
     });
     return this.mapToProto(category);
   }
 
   async findAll(query: any) {
-    const { page = 1, limit = 10, search, type } = query;
+    const { page = 1, limit = 10, search, type, parentId, onlyRoot } = query;
     const skip = (page - 1) * limit;
 
     const where: any = {};
@@ -34,13 +37,23 @@ export class CategoryService {
     if (type) {
       where.type = type;
     }
+    if (parentId) {
+      where.parentId = parentId;
+    } else if (onlyRoot) {
+      where.parentId = null;
+    }
 
     const [items, total] = await Promise.all([
       this.prisma.category.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { name: 'asc' },
+        orderBy: { orderIndex: 'asc' },
+        include: {
+          _count: {
+            select: { children: true },
+          },
+        },
       }),
       this.prisma.category.count({ where }),
     ]);

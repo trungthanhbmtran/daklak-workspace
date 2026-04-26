@@ -95,6 +95,13 @@ export const MICROSERVICES = {
     URL: getDocumentUrl(),
     SERVICE: 'DocumentService',
   },
+  MINUTES: {
+    PACKAGE: 'minutes',
+    SYMBOL: 'MINUTES_PACKAGE',
+    PROTO: 'document/minutes.proto',
+    URL: getDocumentUrl(),
+    SERVICE: 'MinutesService',
+  },
   // Posts (posts_service)
   POST: {
     PACKAGE: 'post',

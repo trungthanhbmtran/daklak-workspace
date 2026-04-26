@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package minutes;
+
+import "common/common.proto";
+
+service MinutesService {
+  rpc CreateMinutes(CreateMinutesRequest) returns (MinutesResponse) {}
+  rpc GetMinutes(GetMinutesRequest) returns (Minutes) {}
+  rpc ListMinutes(ListMinutesRequest) returns (ListMinutesResponse) {}
+  rpc UpdateMinutes(UpdateMinutesRequest) returns (MinutesResponse) {}
+  rpc DeleteMinutes(DeleteMinutesRequest) returns (common.DeleteResponse) {}
+}
+
+message Minutes {
+  string id = 1;
+  string title = 2;
+  string startTime = 3;
+  string endTime = 4;
+  string location = 5;
+  string chairman = 6;
+  string secretary = 7;
+  string attendees = 8;
+  string content = 9;
+  string conclusion = 10;
+  string documentId = 11;
+  string status = 12;
+  string createdAt = 13;
+  string updatedAt = 14;
+}
+
+message MinutesResponse {
+  Minutes data = 1;
+}
+
+message CreateMinutesRequest {
+  string title = 1;
+  string startTime = 2;
+  string endTime = 3;
+  string location = 4;
+  string chairman = 5;
+  string secretary = 6;
+  string attendees = 7;
+  string content = 8;
+  string conclusion = 9;
+  string documentId = 10;
+  string status = 11;
+}
+
+message GetMinutesRequest {
+  string id = 1;
+}
+
+message ListMinutesRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string status = 4;
+}
+
+message ListMinutesResponse {
+  repeated Minutes data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateMinutesRequest {
+  string id = 1;
+  optional string title = 2;
+  optional string startTime = 3;
+  optional string endTime = 4;
+  optional string content = 5;
+  optional string status = 6;
+}
+
+message DeleteMinutesRequest {
+  string id = 1;
+}

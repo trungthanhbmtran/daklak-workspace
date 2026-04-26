@@ -20,8 +20,20 @@ export type DocumentModel = runtime.Types.Result.DefaultSelection<Prisma.$Docume
 
 export type AggregateDocument = {
   _count: DocumentCountAggregateOutputType | null
+  _avg: DocumentAvgAggregateOutputType | null
+  _sum: DocumentSumAggregateOutputType | null
   _min: DocumentMinAggregateOutputType | null
   _max: DocumentMaxAggregateOutputType | null
+}
+
+export type DocumentAvgAggregateOutputType = {
+  pageCount: number | null
+  attachmentCount: number | null
+}
+
+export type DocumentSumAggregateOutputType = {
+  pageCount: number | null
+  attachmentCount: number | null
 }
 
 export type DocumentMinAggregateOutputType = {
@@ -39,12 +51,17 @@ export type DocumentMinAggregateOutputType = {
   signerPosition: string | null
   issueDate: Date | null
   arrivalDate: Date | null
+  arrivalNumber: string | null
+  processingDeadline: Date | null
+  recipients: string | null
   urgency: string | null
   securityLevel: string | null
   status: string | null
   isPublic: boolean | null
   fileId: string | null
   signatureValid: boolean | null
+  pageCount: number | null
+  attachmentCount: number | null
   linkedDocumentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,12 +82,17 @@ export type DocumentMaxAggregateOutputType = {
   signerPosition: string | null
   issueDate: Date | null
   arrivalDate: Date | null
+  arrivalNumber: string | null
+  processingDeadline: Date | null
+  recipients: string | null
   urgency: string | null
   securityLevel: string | null
   status: string | null
   isPublic: boolean | null
   fileId: string | null
   signatureValid: boolean | null
+  pageCount: number | null
+  attachmentCount: number | null
   linkedDocumentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -91,18 +113,33 @@ export type DocumentCountAggregateOutputType = {
   signerPosition: number
   issueDate: number
   arrivalDate: number
+  arrivalNumber: number
+  processingDeadline: number
+  recipients: number
   urgency: number
   securityLevel: number
   status: number
   isPublic: number
   fileId: number
   signatureValid: number
+  pageCount: number
+  attachmentCount: number
   linkedDocumentId: number
   createdAt: number
   updatedAt: number
   _all: number
 }
 
+
+export type DocumentAvgAggregateInputType = {
+  pageCount?: true
+  attachmentCount?: true
+}
+
+export type DocumentSumAggregateInputType = {
+  pageCount?: true
+  attachmentCount?: true
+}
 
 export type DocumentMinAggregateInputType = {
   id?: true
@@ -119,12 +156,17 @@ export type DocumentMinAggregateInputType = {
   signerPosition?: true
   issueDate?: true
   arrivalDate?: true
+  arrivalNumber?: true
+  processingDeadline?: true
+  recipients?: true
   urgency?: true
   securityLevel?: true
   status?: true
   isPublic?: true
   fileId?: true
   signatureValid?: true
+  pageCount?: true
+  attachmentCount?: true
   linkedDocumentId?: true
   createdAt?: true
   updatedAt?: true
@@ -145,12 +187,17 @@ export type DocumentMaxAggregateInputType = {
   signerPosition?: true
   issueDate?: true
   arrivalDate?: true
+  arrivalNumber?: true
+  processingDeadline?: true
+  recipients?: true
   urgency?: true
   securityLevel?: true
   status?: true
   isPublic?: true
   fileId?: true
   signatureValid?: true
+  pageCount?: true
+  attachmentCount?: true
   linkedDocumentId?: true
   createdAt?: true
   updatedAt?: true
@@ -171,12 +218,17 @@ export type DocumentCountAggregateInputType = {
   signerPosition?: true
   issueDate?: true
   arrivalDate?: true
+  arrivalNumber?: true
+  processingDeadline?: true
+  recipients?: true
   urgency?: true
   securityLevel?: true
   status?: true
   isPublic?: true
   fileId?: true
   signatureValid?: true
+  pageCount?: true
+  attachmentCount?: true
   linkedDocumentId?: true
   createdAt?: true
   updatedAt?: true
@@ -221,6 +273,18 @@ export type DocumentAggregateArgs<ExtArgs extends runtime.Types.Extensions.Inter
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: DocumentAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: DocumentSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: DocumentMinAggregateInputType
@@ -251,6 +315,8 @@ export type DocumentGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   _count?: DocumentCountAggregateInputType | true
+  _avg?: DocumentAvgAggregateInputType
+  _sum?: DocumentSumAggregateInputType
   _min?: DocumentMinAggregateInputType
   _max?: DocumentMaxAggregateInputType
 }
@@ -270,16 +336,23 @@ export type DocumentGroupByOutputType = {
   signerPosition: string | null
   issueDate: Date | null
   arrivalDate: Date | null
+  arrivalNumber: string | null
+  processingDeadline: Date | null
+  recipients: string | null
   urgency: string
   securityLevel: string
   status: string
   isPublic: boolean
   fileId: string | null
   signatureValid: boolean
+  pageCount: number
+  attachmentCount: number
   linkedDocumentId: string | null
   createdAt: Date
   updatedAt: Date
   _count: DocumentCountAggregateOutputType | null
+  _avg: DocumentAvgAggregateOutputType | null
+  _sum: DocumentSumAggregateOutputType | null
   _min: DocumentMinAggregateOutputType | null
   _max: DocumentMaxAggregateOutputType | null
 }
@@ -317,12 +390,17 @@ export type DocumentWhereInput = {
   signerPosition?: Prisma.StringNullableFilter<"Document"> | string | null
   issueDate?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   arrivalDate?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  arrivalNumber?: Prisma.StringNullableFilter<"Document"> | string | null
+  processingDeadline?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  recipients?: Prisma.StringNullableFilter<"Document"> | string | null
   urgency?: Prisma.StringFilter<"Document"> | string
   securityLevel?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.StringFilter<"Document"> | string
   isPublic?: Prisma.BoolFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolFilter<"Document"> | boolean
+  pageCount?: Prisma.IntFilter<"Document"> | number
+  attachmentCount?: Prisma.IntFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
@@ -345,12 +423,17 @@ export type DocumentOrderByWithRelationInput = {
   signerPosition?: Prisma.SortOrderInput | Prisma.SortOrder
   issueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   arrivalDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  arrivalNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingDeadline?: Prisma.SortOrderInput | Prisma.SortOrder
+  recipients?: Prisma.SortOrderInput | Prisma.SortOrder
   urgency?: Prisma.SortOrder
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   fileId?: Prisma.SortOrderInput | Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -377,12 +460,17 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   signerPosition?: Prisma.StringNullableFilter<"Document"> | string | null
   issueDate?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   arrivalDate?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  arrivalNumber?: Prisma.StringNullableFilter<"Document"> | string | null
+  processingDeadline?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  recipients?: Prisma.StringNullableFilter<"Document"> | string | null
   urgency?: Prisma.StringFilter<"Document"> | string
   securityLevel?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.StringFilter<"Document"> | string
   isPublic?: Prisma.BoolFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolFilter<"Document"> | boolean
+  pageCount?: Prisma.IntFilter<"Document"> | number
+  attachmentCount?: Prisma.IntFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
@@ -405,18 +493,25 @@ export type DocumentOrderByWithAggregationInput = {
   signerPosition?: Prisma.SortOrderInput | Prisma.SortOrder
   issueDate?: Prisma.SortOrderInput | Prisma.SortOrder
   arrivalDate?: Prisma.SortOrderInput | Prisma.SortOrder
+  arrivalNumber?: Prisma.SortOrderInput | Prisma.SortOrder
+  processingDeadline?: Prisma.SortOrderInput | Prisma.SortOrder
+  recipients?: Prisma.SortOrderInput | Prisma.SortOrder
   urgency?: Prisma.SortOrder
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   fileId?: Prisma.SortOrderInput | Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
+  _avg?: Prisma.DocumentAvgOrderByAggregateInput
   _max?: Prisma.DocumentMaxOrderByAggregateInput
   _min?: Prisma.DocumentMinOrderByAggregateInput
+  _sum?: Prisma.DocumentSumOrderByAggregateInput
 }
 
 export type DocumentScalarWhereWithAggregatesInput = {
@@ -437,12 +532,17 @@ export type DocumentScalarWhereWithAggregatesInput = {
   signerPosition?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   issueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
   arrivalDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
+  arrivalNumber?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
+  processingDeadline?: Prisma.DateTimeNullableWithAggregatesFilter<"Document"> | Date | string | null
+  recipients?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   urgency?: Prisma.StringWithAggregatesFilter<"Document"> | string
   securityLevel?: Prisma.StringWithAggregatesFilter<"Document"> | string
   status?: Prisma.StringWithAggregatesFilter<"Document"> | string
   isPublic?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
+  pageCount?: Prisma.IntWithAggregatesFilter<"Document"> | number
+  attachmentCount?: Prisma.IntWithAggregatesFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
@@ -461,12 +561,17 @@ export type DocumentCreateInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -489,12 +594,17 @@ export type DocumentUncheckedCreateInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -513,12 +623,17 @@ export type DocumentUpdateInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -541,12 +656,17 @@ export type DocumentUncheckedUpdateInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -567,12 +687,17 @@ export type DocumentCreateManyInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -591,12 +716,17 @@ export type DocumentUpdateManyMutationInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -617,12 +747,17 @@ export type DocumentUncheckedUpdateManyInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -659,15 +794,25 @@ export type DocumentCountOrderByAggregateInput = {
   signerPosition?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   arrivalDate?: Prisma.SortOrder
+  arrivalNumber?: Prisma.SortOrder
+  processingDeadline?: Prisma.SortOrder
+  recipients?: Prisma.SortOrder
   urgency?: Prisma.SortOrder
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   fileId?: Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type DocumentAvgOrderByAggregateInput = {
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
 }
 
 export type DocumentMaxOrderByAggregateInput = {
@@ -685,12 +830,17 @@ export type DocumentMaxOrderByAggregateInput = {
   signerPosition?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   arrivalDate?: Prisma.SortOrder
+  arrivalNumber?: Prisma.SortOrder
+  processingDeadline?: Prisma.SortOrder
+  recipients?: Prisma.SortOrder
   urgency?: Prisma.SortOrder
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   fileId?: Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -711,15 +861,25 @@ export type DocumentMinOrderByAggregateInput = {
   signerPosition?: Prisma.SortOrder
   issueDate?: Prisma.SortOrder
   arrivalDate?: Prisma.SortOrder
+  arrivalNumber?: Prisma.SortOrder
+  processingDeadline?: Prisma.SortOrder
+  recipients?: Prisma.SortOrder
   urgency?: Prisma.SortOrder
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   fileId?: Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+}
+
+export type DocumentSumOrderByAggregateInput = {
+  pageCount?: Prisma.SortOrder
+  attachmentCount?: Prisma.SortOrder
 }
 
 export type DocumentCreateNestedManyWithoutTypeInput = {
@@ -810,10 +970,6 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type DocumentCreateWithoutTypeInput = {
   id?: string
   documentNumber: string
@@ -827,12 +983,17 @@ export type DocumentCreateWithoutTypeInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -853,12 +1014,17 @@ export type DocumentUncheckedCreateWithoutTypeInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -887,12 +1053,17 @@ export type DocumentCreateWithoutFieldInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -913,12 +1084,17 @@ export type DocumentUncheckedCreateWithoutFieldInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -968,12 +1144,17 @@ export type DocumentScalarWhereInput = {
   signerPosition?: Prisma.StringNullableFilter<"Document"> | string | null
   issueDate?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
   arrivalDate?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  arrivalNumber?: Prisma.StringNullableFilter<"Document"> | string | null
+  processingDeadline?: Prisma.DateTimeNullableFilter<"Document"> | Date | string | null
+  recipients?: Prisma.StringNullableFilter<"Document"> | string | null
   urgency?: Prisma.StringFilter<"Document"> | string
   securityLevel?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.StringFilter<"Document"> | string
   isPublic?: Prisma.BoolFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolFilter<"Document"> | boolean
+  pageCount?: Prisma.IntFilter<"Document"> | number
+  attachmentCount?: Prisma.IntFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
@@ -1009,12 +1190,17 @@ export type DocumentCreateManyTypeInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1034,12 +1220,17 @@ export type DocumentCreateManyFieldInput = {
   signerPosition?: string | null
   issueDate?: Date | string | null
   arrivalDate?: Date | string | null
+  arrivalNumber?: string | null
+  processingDeadline?: Date | string | null
+  recipients?: string | null
   urgency?: string
   securityLevel?: string
   status?: string
   isPublic?: boolean
   fileId?: string | null
   signatureValid?: boolean
+  pageCount?: number
+  attachmentCount?: number
   linkedDocumentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1058,12 +1249,17 @@ export type DocumentUpdateWithoutTypeInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1084,12 +1280,17 @@ export type DocumentUncheckedUpdateWithoutTypeInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1109,12 +1310,17 @@ export type DocumentUncheckedUpdateManyWithoutTypeInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1133,12 +1339,17 @@ export type DocumentUpdateWithoutFieldInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1159,12 +1370,17 @@ export type DocumentUncheckedUpdateWithoutFieldInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1184,12 +1400,17 @@ export type DocumentUncheckedUpdateManyWithoutFieldInput = {
   signerPosition?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   issueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   arrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  arrivalNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  processingDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  recipients?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   urgency?: Prisma.StringFieldUpdateOperationsInput | string
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  pageCount?: Prisma.IntFieldUpdateOperationsInput | number
+  attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1212,12 +1433,17 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   signerPosition?: boolean
   issueDate?: boolean
   arrivalDate?: boolean
+  arrivalNumber?: boolean
+  processingDeadline?: boolean
+  recipients?: boolean
   urgency?: boolean
   securityLevel?: boolean
   status?: boolean
   isPublic?: boolean
   fileId?: boolean
   signatureValid?: boolean
+  pageCount?: boolean
+  attachmentCount?: boolean
   linkedDocumentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1242,18 +1468,23 @@ export type DocumentSelectScalar = {
   signerPosition?: boolean
   issueDate?: boolean
   arrivalDate?: boolean
+  arrivalNumber?: boolean
+  processingDeadline?: boolean
+  recipients?: boolean
   urgency?: boolean
   securityLevel?: boolean
   status?: boolean
   isPublic?: boolean
   fileId?: boolean
   signatureValid?: boolean
+  pageCount?: boolean
+  attachmentCount?: boolean
   linkedDocumentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "urgency" | "securityLevel" | "status" | "isPublic" | "fileId" | "signatureValid" | "linkedDocumentId" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   type?: boolean | Prisma.Document$typeArgs<ExtArgs>
   field?: boolean | Prisma.Document$fieldArgs<ExtArgs>
@@ -1280,12 +1511,17 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     signerPosition: string | null
     issueDate: Date | null
     arrivalDate: Date | null
+    arrivalNumber: string | null
+    processingDeadline: Date | null
+    recipients: string | null
     urgency: string
     securityLevel: string
     status: string
     isPublic: boolean
     fileId: string | null
     signatureValid: boolean
+    pageCount: number
+    attachmentCount: number
     linkedDocumentId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1674,12 +1910,17 @@ export interface DocumentFieldRefs {
   readonly signerPosition: Prisma.FieldRef<"Document", 'String'>
   readonly issueDate: Prisma.FieldRef<"Document", 'DateTime'>
   readonly arrivalDate: Prisma.FieldRef<"Document", 'DateTime'>
+  readonly arrivalNumber: Prisma.FieldRef<"Document", 'String'>
+  readonly processingDeadline: Prisma.FieldRef<"Document", 'DateTime'>
+  readonly recipients: Prisma.FieldRef<"Document", 'String'>
   readonly urgency: Prisma.FieldRef<"Document", 'String'>
   readonly securityLevel: Prisma.FieldRef<"Document", 'String'>
   readonly status: Prisma.FieldRef<"Document", 'String'>
   readonly isPublic: Prisma.FieldRef<"Document", 'Boolean'>
   readonly fileId: Prisma.FieldRef<"Document", 'String'>
   readonly signatureValid: Prisma.FieldRef<"Document", 'Boolean'>
+  readonly pageCount: Prisma.FieldRef<"Document", 'Int'>
+  readonly attachmentCount: Prisma.FieldRef<"Document", 'Int'>
   readonly linkedDocumentId: Prisma.FieldRef<"Document", 'String'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>

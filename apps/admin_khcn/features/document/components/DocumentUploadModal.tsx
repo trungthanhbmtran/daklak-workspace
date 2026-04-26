@@ -23,13 +23,22 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
 const documentSchema = z.object({
-  type: z.string().min(1, "Vui lòng chọn loại văn bản"),
-  documentNumber: z.string().min(1, "Số/Ký hiệu không được để trống"),
-  promulgationDate: z.string().min(1, "Vui lòng chọn ngày ban hành"),
+  typeId: z.string().min(1, "Vui lòng chọn loại văn bản"),
+  fieldId: z.string().min(1, "Vui lòng chọn lĩnh vực"),
+  documentNumber: z.string().min(1, "Số văn bản không được để trống"),
+  notation: z.string().min(1, "Ký hiệu không được để trống"),
+  arrivalNumber: z.string().optional(),
+  issueDate: z.string().min(1, "Vui lòng chọn ngày ban hành"),
+  arrivalDate: z.string().optional(),
   abstract: z.string().min(10, "Trích yếu phải có ít nhất 10 ký tự"),
-  issuer: z.string().min(1, "Cơ quan ban hành không được để trống"),
-  signer: z.string().min(1, "Người ký không được để trống"),
+  issuerName: z.string().min(1, "Cơ quan ban hành không được để trống"),
+  signerName: z.string().min(1, "Người ký không được để trống"),
+  signerPosition: z.string().optional(),
+  recipients: z.string().optional(),
   urgency: z.enum(["NORMAL", "URGENT", "FLASH"]),
+  securityLevel: z.enum(["NORMAL", "CONFIDENTIAL", "SECRET", "TOP_SECRET"]),
+  pageCount: z.number().min(1),
+  attachmentCount: z.number().min(0),
   linkedDocumentId: z.string().optional(),
 });
 
@@ -38,47 +47,60 @@ type DocumentFormValues = z.infer<typeof documentSchema>;
 export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [categories, setCategories] = useState<{ types: any[], fields: any[] }>({ types: [], fields: [] });
 
-  // States quản lý tiến trình bóc tách OCR & Chữ ký số
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureStatus, setSignatureStatus] = useState<'VALID' | 'INVALID' | 'NONE' | null>(null);
   const { uploadFile, isUploading } = useFileUpload();
-  const { createDocument, isLoading: isCreating } = useDocuments();
+  const { createDocument, getCategories, isLoading: isCreating } = useDocuments();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema),
     defaultValues: {
-      type: "CONG_VAN",
+      typeId: "",
+      fieldId: "",
       documentNumber: "",
-      promulgationDate: "",
+      notation: "",
+      arrivalNumber: "",
+      issueDate: new Date().toISOString().split('T')[0],
+      arrivalDate: "",
       abstract: "",
-      issuer: "Sở Khoa học và Công nghệ tỉnh Đắk Lắk",
-      signer: "",
+      issuerName: "Sở Khoa học và Công nghệ tỉnh Đắk Lắk",
+      signerName: "",
+      signerPosition: "",
+      recipients: "",
       urgency: "NORMAL",
+      securityLevel: "NORMAL",
+      pageCount: 1,
+      attachmentCount: 0,
       linkedDocumentId: "",
     },
   });
 
   useEffect(() => {
-    form.setValue("promulgationDate", new Date().toISOString().split('T')[0]);
-  }, [form]);
+    const loadCategories = async () => {
+      const types = await getCategories("DOCUMENT_TYPE");
+      const fields = await getCategories("DOCUMENT_FIELD");
+      setCategories({ types, fields });
+    };
+    if (isOpen) loadCategories();
+  }, [isOpen]);
 
-  // Hàm giả lập luồng WebSocket nhận kết quả từ DOCUMENT_WORKER_SERVICE
   const processFileMetadata = (file: File) => {
     setIsProcessing(true);
     setSignatureStatus(null);
 
-    // Giả lập delay 2 giây để quét OCR và Verify Chữ ký số
     setTimeout(() => {
-      // 1. Kết quả kiểm tra chữ ký số (VGCA)
       setSignatureStatus('VALID');
-
-      // 2. Tự động điền (Auto-fill) các trường bóc tách được từ file PDF
-      form.setValue("type", "QUYET_DINH");
-      form.setValue("documentNumber", "125/QĐ-SKHCN");
+      form.setValue("documentNumber", "125");
+      form.setValue("notation", "QĐ-SKHCN");
       form.setValue("abstract", "Quyết định về việc ban hành quy chế bảo đảm an toàn thông tin mạng trong hoạt động của cơ quan nhà nước.");
-      form.setValue("signer", "Nguyễn Văn A");
-      form.setValue("issuer", "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
+      form.setValue("signerName", "Nguyễn Văn A");
+      form.setValue("signerPosition", "Giám đốc Sở");
+      form.setValue("issuerName", "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
+      form.setValue("pageCount", 5);
+      form.setValue("attachmentCount", 2);
+      form.setValue("recipients", "Văn phòng UBND tỉnh; Các phòng chuyên môn; Lưu VT.");
 
       setIsProcessing(false);
     }, 2000);
@@ -113,21 +135,14 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
 
   const onSubmit = async (values: DocumentFormValues) => {
     if (!uploadedFile) return alert("Vui lòng đính kèm file văn bản!");
-    
+
     try {
-      // 1. Thực hiện upload file lên MinIO và xác nhận với Media Service
       const media = await uploadFile(uploadedFile);
-      
-      // 2. Lưu vào database thông qua document-service
       await createDocument({
         ...values,
         fileId: media.id,
         signatureValid: signatureStatus === 'VALID',
-        issueDate: values.promulgationDate,
-        issuerName: values.issuer,
-        signerName: values.signer,
       });
-
       onClose();
     } catch (error) {
       console.error("Submit error:", error);
@@ -136,222 +151,288 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[750px] p-0 overflow-hidden shadow-2xl">
-        <DialogHeader className="p-6 border-b bg-muted/20">
-          <DialogTitle className="flex items-center gap-2 text-lg">
-            <UploadCloud className="h-5 w-5 text-primary" /> Vào sổ & Tải lên văn bản điện tử
+      <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden shadow-2xl border-none">
+        <DialogHeader className="p-6 border-b bg-gradient-to-r from-primary/10 via-background to-background">
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <div className="p-2 bg-primary/10 rounded-lg text-primary">
+              <UploadCloud className="h-5 w-5" />
+            </div>
+            Vào sổ & Tải lên văn bản điện tử
           </DialogTitle>
-          <DialogDescription>
-            Tự động bóc tách siêu dữ liệu OCR và xác thực chứng thư số của Ban Cơ yếu Chính phủ.
+          <DialogDescription className="text-muted-foreground font-medium">
+            Tuân thủ Nghị định 30/2020/NĐ-CP về công tác văn thư.
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form className="max-h-[75vh] overflow-y-auto px-6 py-4 space-y-6 scrollbar-thin">
+          <form className="max-h-[70vh] overflow-y-auto px-8 py-6 space-y-8 scrollbar-thin">
 
-            {/* 1. KHU VỰC UPLOAD & QUÉT DỮ LIỆU */}
-            <section className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                <FileText className="h-4 w-4" /> 1. Tệp văn bản đính kèm
-              </h3>
+            {/* Tệp đính kèm */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-bold flex items-center gap-2 text-primary">
+                  <FileText className="h-4 w-4" /> 1. TỆP VĂN BẢN ĐÍNH KÈM
+                </h3>
+              </div>
 
               {!uploadedFile ? (
                 <div
-                  className={`border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/20 hover:bg-muted/10 hover:border-primary/50"
+                  className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center text-center transition-all cursor-pointer ${isDragging ? "border-primary bg-primary/5 scale-[0.99]" : "border-muted-foreground/20 hover:bg-muted/5 hover:border-primary/40"
                     }`}
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
                   onClick={() => document.getElementById("file-upload")?.click()}
                 >
-                  <div className="p-3 bg-primary/10 rounded-full mb-3 text-primary">
-                    <UploadCloud className="h-8 w-8" />
+                  <div className="p-4 bg-primary/10 rounded-full mb-4 text-primary animate-bounce-subtle">
+                    <UploadCloud className="h-10 w-10" />
                   </div>
-                  <p className="font-semibold text-foreground text-sm">Kéo thả tệp PDF vào đây để bóc tách tự động</p>
-                  <p className="text-xs text-muted-foreground mt-1 mb-4">Hỗ trợ nhận diện OCR và Chữ ký số (Tối đa 20MB)</p>
+                  <p className="font-bold text-foreground">Kéo thả tệp PDF vào đây</p>
+                  <p className="text-xs text-muted-foreground mt-2 max-w-[300px]">
+                    Hệ thống sẽ tự động quét OCR bóc tách dữ liệu và xác thực chứng thư số của Ban Cơ yếu Chính phủ.
+                  </p>
                   <input id="file-upload" type="file" className="hidden" accept=".pdf" onChange={handleFileChange} />
                 </div>
               ) : (
-                <div className={`border rounded-xl p-4 flex flex-col gap-3 transition-colors ${isProcessing ? 'border-primary/50 bg-primary/5' : 'border-emerald-200 bg-emerald-50/30'}`}>
+                <div className={`border rounded-2xl p-5 flex flex-col gap-4 shadow-sm transition-all ${isProcessing ? 'border-primary/50 bg-primary/5' : 'border-emerald-200 bg-emerald-50/20'}`}>
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${isProcessing ? 'bg-primary/20 text-primary' : 'bg-emerald-100 text-emerald-700'}`}>
-                        {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <FileText className="h-6 w-6" />}
+                    <div className="flex items-center gap-4">
+                      <div className={`p-3 rounded-xl shadow-inner ${isProcessing ? 'bg-primary/10 text-primary' : 'bg-emerald-100 text-emerald-700'}`}>
+                        {isProcessing ? <Loader2 className="h-7 w-7 animate-spin" /> : <ShieldCheck className="h-7 w-7" />}
                       </div>
                       <div>
-                        <p className="font-semibold text-sm text-foreground">{uploadedFile.name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
+                        <p className="font-bold text-base text-foreground">{uploadedFile.name}</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="secondary" className="text-[10px] font-mono">{(uploadedFile.size / 1024 / 1024).toFixed(2)} MB</Badge>
+                          {!isProcessing && <Badge className="bg-emerald-600 text-white border-none text-[10px]">ĐÃ TỐI ƯU</Badge>}
+                        </div>
                       </div>
                     </div>
                     {!isProcessing && (
-                      <Button type="button" variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive" onClick={resetUpload}>
-                        <X className="h-4 w-4" />
+                      <Button type="button" variant="ghost" size="icon" className="rounded-full hover:bg-destructive/10 hover:text-destructive" onClick={resetUpload}>
+                        <X className="h-5 w-5" />
                       </Button>
                     )}
                   </div>
 
-                  {/* Thanh trạng thái xử lý */}
-                  <div className="bg-background rounded-lg p-3 border text-sm flex items-center justify-between">
+                  <div className="bg-background/80 backdrop-blur-sm rounded-xl p-4 border border-border/50 flex items-center justify-between shadow-inner">
                     {isProcessing ? (
-                      <span className="text-primary font-medium flex items-center gap-2 text-xs">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" /> Hệ thống đang bóc tách OCR và kiểm tra chữ ký số...
-                      </span>
+                      <div className="flex flex-col gap-2 w-full">
+                        <div className="flex justify-between text-[10px] font-bold text-primary uppercase tracking-tighter">
+                          <span>Đang bóc tách OCR & Verify Digital Signature...</span>
+                          <span>65%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-primary/10 rounded-full overflow-hidden">
+                          <div className="h-full bg-primary animate-progress-loading w-[65%] rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+                        </div>
+                      </div>
                     ) : (
-                      <div className="flex items-center gap-4">
-                        {signatureStatus === 'VALID' ? (
-                          <Badge variant="outline" className="bg-emerald-100 text-emerald-700 border-emerald-300 font-semibold px-2 py-1 flex items-center gap-1.5 shadow-none">
-                            <ShieldCheck className="h-3.5 w-3.5" /> Chữ ký số hợp lệ (VGCA)
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-300 font-semibold px-2 py-1 flex items-center gap-1.5 shadow-none">
-                            <AlertTriangle className="h-3.5 w-3.5" /> Không có chữ ký số hợp lệ
-                          </Badge>
-                        )}
-                        <span className="text-xs text-muted-foreground italic flex items-center gap-1">
-                          <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" /> Đã tự động điền thông tin OCR
-                        </span>
+                      <div className="flex flex-wrap items-center gap-3 w-full">
+                        <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-bold text-xs ${signatureStatus === 'VALID' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'
+                          }`}>
+                          {signatureStatus === 'VALID' ? <ShieldCheck className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+                          {signatureStatus === 'VALID' ? 'CHỨNG THƯ SỐ HỢP LỆ (VGCA)' : 'CHỮA CÓ CHỨNG THƯ SỐ'}
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-primary/20 bg-primary/5 text-primary font-bold text-xs">
+                          <CheckCircle2 className="h-4 w-4" /> TRÍCH XUẤT OCR THÀNH CÔNG
+                        </div>
                       </div>
                     )}
                   </div>
                 </div>
               )}
-            </section>
+            </div>
 
-            <Separator />
+            <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
 
-            {/* 2. SIÊU DỮ LIỆU VĂN BẢN (AUTO-FILLED) */}
-            <section className={`space-y-4 transition-opacity duration-500 ${isProcessing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                <Building2 className="h-4 w-4" /> 2. Trích xuất thông tin (Metadata)
-              </h3>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="documentNumber" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Số / Ký hiệu văn bản <span className="text-destructive">*</span></FormLabel>
-                    <FormControl><Input placeholder="VD: 123/QĐ-UBND" className="font-mono bg-muted/20" {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="promulgationDate" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ngày ban hành <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input type="date" {...field} className="pl-9 bg-muted/20" />
-                        <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+            {/* Thông tin metadata */}
+            <div className={`space-y-6 transition-all duration-700 ${isProcessing ? 'opacity-30 blur-[2px] pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}`}>
+              <div className="flex items-center gap-4">
+                <h3 className="text-sm font-bold flex items-center gap-2 text-primary whitespace-nowrap">
+                  <Building2 className="h-4 w-4" /> 2. THÔNG TIN VĂN BẢN (METADATA)
+                </h3>
+                <div className="h-px w-full bg-gradient-to-r from-border to-transparent" />
               </div>
 
-              <FormField control={form.control} name="abstract" render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Trích yếu nội dung <span className="text-destructive">*</span></FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Nhập tóm tắt nội dung văn bản..." className="resize-none h-20 bg-muted/20" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )} />
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <div className="md:col-span-4">
+                  <FormField control={form.control} name="documentNumber" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số văn bản <span className="text-destructive">*</span></FormLabel>
+                      <FormControl><Input placeholder="123" className="bg-muted/10 border-muted-foreground/10 focus:bg-background transition-all font-bold" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="md:col-span-4">
+                  <FormField control={form.control} name="notation" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Ký hiệu <span className="text-destructive">*</span></FormLabel>
+                      <FormControl><Input placeholder="QĐ-SKHCN" className="bg-muted/10 border-muted-foreground/10 focus:bg-background transition-all font-mono" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="md:col-span-4">
+                  <FormField control={form.control} name="arrivalNumber" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số đến (Nếu có)</FormLabel>
+                      <FormControl><Input placeholder="456/Đ" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="issuer" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Cơ quan ban hành <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input placeholder="VD: UBND Tỉnh Đắk Lắk" {...field} className="pl-9 bg-muted/20" />
-                        <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="signer" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Người ký <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input placeholder="Nhập tên người ký..." {...field} className="pl-9 bg-muted/20" />
-                        <UserCircle className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <div className="md:col-span-6">
+                  <FormField control={form.control} name="issueDate" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Ngày ban hành <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input type="date" {...field} className="pl-10 bg-muted/10 border-muted-foreground/10" />
+                          <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60" />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="md:col-span-6">
+                  <FormField control={form.control} name="arrivalDate" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Ngày nhận (Đối với VB Đến)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Input type="date" {...field} className="pl-10 bg-muted/10 border-muted-foreground/10" />
+                          <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary/60" />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div className="md:col-span-12">
+                  <FormField control={form.control} name="abstract" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Trích yếu nội dung <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Textarea placeholder="Tóm tắt nội dung chính của văn bản..." className="resize-none h-24 bg-muted/10 border-muted-foreground/10 focus:bg-background transition-all leading-relaxed" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div className="md:col-span-6">
+                  <FormField control={form.control} name="issuerName" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Cơ quan ban hành <span className="text-destructive">*</span></FormLabel>
+                      <FormControl><Input placeholder="VD: UBND Tỉnh Đắk Lắk" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="md:col-span-6">
+                  <FormField control={form.control} name="signerName" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Người ký <span className="text-destructive">*</span></FormLabel>
+                      <FormControl><Input placeholder="Họ và tên người ký" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div className="md:col-span-12">
+                  <FormField control={form.control} name="recipients" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Nơi nhận (Cách nhau bởi dấu chấm phẩy)</FormLabel>
+                      <FormControl><Input placeholder="VD: UBND tỉnh; Sở Tài chính; Lưu VT" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
               </div>
-            </section>
+            </div>
 
-            <Separator />
+            <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
 
-            {/* 3. KHU VỰC LIÊN KẾT & PHÂN LOẠI */}
-            <section className={`space-y-4 transition-opacity duration-500 ${isProcessing ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                <LinkIcon className="h-4 w-4" /> 3. Phân loại & Liên kết
-              </h3>
+            {/* Phân loại và Cấu hình */}
+            <div className={`space-y-6 transition-all duration-700 delay-100 ${isProcessing ? 'opacity-30 blur-[2px] pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}`}>
+              <div className="flex items-center gap-4">
+                <h3 className="text-sm font-bold flex items-center gap-2 text-primary whitespace-nowrap">
+                  <LinkIcon className="h-4 w-4" /> 3. PHÂN LOẠI & CẤU HÌNH HỆ THỐNG
+                </h3>
+                <div className="h-px w-full bg-gradient-to-r from-border to-transparent" />
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormField control={form.control} name="type" render={({ field }) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <FormField control={form.control} name="typeId" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Loại văn bản</FormLabel>
+                    <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Loại văn bản</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn loại..." /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="CONG_VAN">Công văn</SelectItem>
-                        <SelectItem value="QUYET_DINH">Quyết định</SelectItem>
-                        <SelectItem value="TO_TRINH">Tờ trình</SelectItem>
-                        <SelectItem value="BAO_CAO">Báo cáo</SelectItem>
+                        {categories.types.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
+                        {categories.types.length === 0 && <SelectItem value="QUYET_DINH">Quyết định</SelectItem>}
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="fieldId" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Lĩnh vực</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn lĩnh vực..." /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        {categories.fields.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
+                        {categories.fields.length === 0 && <SelectItem value="KHCN">Khoa học & Công nghệ</SelectItem>}
                       </SelectContent>
                     </Select>
                   </FormItem>
                 )} />
                 <FormField control={form.control} name="urgency" render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Độ khẩn</FormLabel>
+                    <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ khẩn</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
                         <SelectItem value="NORMAL">Bình thường</SelectItem>
-                        <SelectItem value="URGENT" className="text-amber-600 font-semibold">Khẩn</SelectItem>
-                        <SelectItem value="FLASH" className="text-destructive font-bold">Hỏa tốc</SelectItem>
+                        <SelectItem value="URGENT" className="text-amber-600 font-bold">Khẩn</SelectItem>
+                        <SelectItem value="FLASH" className="text-destructive font-black">Hỏa tốc</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormItem>
+                )} />
+                <FormField control={form.control} name="securityLevel" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ mật</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue /></SelectTrigger></FormControl>
+                      <SelectContent>
+                        <SelectItem value="NORMAL">Bình thường</SelectItem>
+                        <SelectItem value="CONFIDENTIAL" className="text-blue-600 font-bold">Mật</SelectItem>
+                        <SelectItem value="SECRET" className="text-amber-700 font-bold">Tối mật</SelectItem>
+                        <SelectItem value="TOP_SECRET" className="text-destructive font-black">Tuyệt mật</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormItem>
                 )} />
               </div>
-
-              <FormField control={form.control} name="linkedDocumentId" render={({ field }) => (
-                <FormItem className="bg-muted/10 p-4 border rounded-lg border-dashed">
-                  <FormLabel className="flex items-center gap-2">
-                    <LinkIcon className="h-4 w-4 text-primary" /> Hồ sơ/Văn bản liên quan (Tùy chọn)
-                  </FormLabel>
-                  <FormControl>
-                    <div className="flex gap-2">
-                      <Input placeholder="Nhập số ký hiệu văn bản trước đó..." {...field} className="bg-background" />
-                      <Button type="button" variant="secondary" className="shrink-0">Tra cứu</Button>
-                    </div>
-                  </FormControl>
-                </FormItem>
-              )} />
-            </section>
+            </div>
           </form>
         </Form>
 
-        <DialogFooter className="p-4 border-t bg-muted/10 shrink-0">
-          <Button type="button" variant="ghost" onClick={onClose} className="w-24">Hủy bỏ</Button>
+        <DialogFooter className="p-6 border-t bg-muted/5 gap-3 shrink-0">
+          <Button type="button" variant="outline" onClick={onClose} className="rounded-xl px-8 hover:bg-background transition-all">Hủy bỏ</Button>
           <Button
             type="button"
             onClick={form.handleSubmit(onSubmit)}
-            className="w-32 shadow-md"
-            disabled={isProcessing}
+            className="rounded-xl px-10 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all bg-primary hover:bg-primary/90"
+            disabled={isProcessing || isCreating || isUploading}
           >
-            {isProcessing || isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
-            Vào sổ văn bản
+            {isProcessing || isCreating || isUploading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <CheckCircle2 className="h-4 w-4 mr-2" />}
+            Xác nhận vào sổ
           </Button>
         </DialogFooter>
       </DialogContent>

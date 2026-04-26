@@ -52,7 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Category: 'Category',
-  Document: 'Document'
+  Document: 'Document',
+  Minutes: 'Minutes'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -75,8 +76,15 @@ export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
+  parentId: 'parentId',
+  lft: 'lft',
+  rgt: 'rgt',
+  depth: 'depth',
+  status: 'status',
+  orderIndex: 'orderIndex',
   description: 'description',
   type: 'type',
+  isGovStandard: 'isGovStandard',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -99,18 +107,43 @@ export const DocumentScalarFieldEnum = {
   signerPosition: 'signerPosition',
   issueDate: 'issueDate',
   arrivalDate: 'arrivalDate',
+  arrivalNumber: 'arrivalNumber',
+  processingDeadline: 'processingDeadline',
+  recipients: 'recipients',
   urgency: 'urgency',
   securityLevel: 'securityLevel',
   status: 'status',
   isPublic: 'isPublic',
   fileId: 'fileId',
   signatureValid: 'signatureValid',
+  pageCount: 'pageCount',
+  attachmentCount: 'attachmentCount',
   linkedDocumentId: 'linkedDocumentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const MinutesScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  location: 'location',
+  chairman: 'chairman',
+  secretary: 'secretary',
+  attendees: 'attendees',
+  content: 'content',
+  conclusion: 'conclusion',
+  documentId: 'documentId',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MinutesScalarFieldEnum = (typeof MinutesScalarFieldEnum)[keyof typeof MinutesScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -133,6 +166,7 @@ export const CategoryOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
+  parentId: 'parentId',
   description: 'description',
   type: 'type'
 } as const
@@ -153,6 +187,8 @@ export const DocumentOrderByRelevanceFieldEnum = {
   signerId: 'signerId',
   signerName: 'signerName',
   signerPosition: 'signerPosition',
+  arrivalNumber: 'arrivalNumber',
+  recipients: 'recipients',
   urgency: 'urgency',
   securityLevel: 'securityLevel',
   status: 'status',
@@ -161,4 +197,20 @@ export const DocumentOrderByRelevanceFieldEnum = {
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
+
+
+export const MinutesOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  location: 'location',
+  chairman: 'chairman',
+  secretary: 'secretary',
+  attendees: 'attendees',
+  content: 'content',
+  conclusion: 'conclusion',
+  documentId: 'documentId',
+  status: 'status'
+} as const
+
+export type MinutesOrderByRelevanceFieldEnum = (typeof MinutesOrderByRelevanceFieldEnum)[keyof typeof MinutesOrderByRelevanceFieldEnum]
 

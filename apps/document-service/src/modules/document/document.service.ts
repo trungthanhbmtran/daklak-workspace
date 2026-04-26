@@ -11,6 +11,7 @@ export class DocumentService {
         ...data,
         issueDate: data.issueDate ? new Date(data.issueDate) : null,
         arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
+        processingDeadline: data.processingDeadline ? new Date(data.processingDeadline) : null,
       },
       include: {
         type: true,
@@ -39,7 +40,9 @@ export class DocumentService {
     if (search) {
       where.OR = [
         { documentNumber: { contains: search } },
+        { arrivalNumber: { contains: search } },
         { abstract: { contains: search } },
+        { issuerName: { contains: search } },
       ];
     }
     if (typeId) where.typeId = typeId;
@@ -84,6 +87,7 @@ export class DocumentService {
     delete updateData.id;
     if (updateData.issueDate) updateData.issueDate = new Date(updateData.issueDate);
     if (updateData.arrivalDate) updateData.arrivalDate = new Date(updateData.arrivalDate);
+    if (updateData.processingDeadline) updateData.processingDeadline = new Date(updateData.processingDeadline);
 
     const document = await this.prisma.document.update({
       where: { id },
@@ -107,6 +111,7 @@ export class DocumentService {
       ...doc,
       issueDate: doc.issueDate?.toISOString(),
       arrivalDate: doc.arrivalDate?.toISOString(),
+      processingDeadline: doc.processingDeadline?.toISOString(),
       createdAt: doc.createdAt.toISOString(),
       updatedAt: doc.updatedAt.toISOString(),
     };

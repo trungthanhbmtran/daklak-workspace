@@ -16,10 +16,17 @@ message Category {
   string id = 1;
   string name = 2;
   string slug = 3;
-  string description = 4;
-  string type = 5; // e.g., "DOCUMENT_TYPE", "DOCUMENT_FIELD"
-  string createdAt = 6;
-  string updatedAt = 7;
+  string parentId = 4;
+  int32 lft = 5;
+  int32 rgt = 6;
+  int32 depth = 7;
+  bool status = 8;
+  int32 orderIndex = 9;
+  string description = 10;
+  string type = 11;
+  bool isGovStandard = 12;
+  string createdAt = 13;
+  string updatedAt = 14;
 }
 
 message CategoryResponse {
@@ -28,8 +35,12 @@ message CategoryResponse {
 
 message CreateCategoryRequest {
   string name = 1;
-  string description = 2;
-  string type = 3;
+  string slug = 2;
+  string parentId = 3;
+  string description = 4;
+  string type = 5;
+  bool isGovStandard = 6;
+  int32 orderIndex = 7;
 }
 
 message GetCategoryRequest {
@@ -41,6 +52,8 @@ message ListCategoriesRequest {
   int32 limit = 2;
   string type = 3;
   string search = 4;
+  string parentId = 5;
+  bool onlyRoot = 6;
 }
 
 message ListCategoriesResponse {
@@ -52,6 +65,9 @@ message UpdateCategoryRequest {
   string id = 1;
   string name = 2;
   string description = 3;
+  string parentId = 4;
+  int32 orderIndex = 5;
+  bool status = 6;
 }
 
 message DeleteCategoryRequest {

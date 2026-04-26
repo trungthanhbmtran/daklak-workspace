@@ -385,7 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Category: 'Category',
-  Document: 'Document'
+  Document: 'Document',
+  Minutes: 'Minutes'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -401,7 +402,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "category" | "document"
+    modelProps: "category" | "document" | "minutes"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -537,6 +538,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Minutes: {
+      payload: Prisma.$MinutesPayload<ExtArgs>
+      fields: Prisma.MinutesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MinutesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MinutesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>
+        }
+        findFirst: {
+          args: Prisma.MinutesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MinutesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>
+        }
+        findMany: {
+          args: Prisma.MinutesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>[]
+        }
+        create: {
+          args: Prisma.MinutesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>
+        }
+        createMany: {
+          args: Prisma.MinutesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.MinutesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>
+        }
+        update: {
+          args: Prisma.MinutesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>
+        }
+        deleteMany: {
+          args: Prisma.MinutesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MinutesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.MinutesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MinutesPayload>
+        }
+        aggregate: {
+          args: Prisma.MinutesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMinutes>
+        }
+        groupBy: {
+          args: Prisma.MinutesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MinutesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MinutesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MinutesCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -580,8 +647,15 @@ export const CategoryScalarFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
+  parentId: 'parentId',
+  lft: 'lft',
+  rgt: 'rgt',
+  depth: 'depth',
+  status: 'status',
+  orderIndex: 'orderIndex',
   description: 'description',
   type: 'type',
+  isGovStandard: 'isGovStandard',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -604,18 +678,43 @@ export const DocumentScalarFieldEnum = {
   signerPosition: 'signerPosition',
   issueDate: 'issueDate',
   arrivalDate: 'arrivalDate',
+  arrivalNumber: 'arrivalNumber',
+  processingDeadline: 'processingDeadline',
+  recipients: 'recipients',
   urgency: 'urgency',
   securityLevel: 'securityLevel',
   status: 'status',
   isPublic: 'isPublic',
   fileId: 'fileId',
   signatureValid: 'signatureValid',
+  pageCount: 'pageCount',
+  attachmentCount: 'attachmentCount',
   linkedDocumentId: 'linkedDocumentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
+
+
+export const MinutesScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  location: 'location',
+  chairman: 'chairman',
+  secretary: 'secretary',
+  attendees: 'attendees',
+  content: 'content',
+  conclusion: 'conclusion',
+  documentId: 'documentId',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MinutesScalarFieldEnum = (typeof MinutesScalarFieldEnum)[keyof typeof MinutesScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -638,6 +737,7 @@ export const CategoryOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
   slug: 'slug',
+  parentId: 'parentId',
   description: 'description',
   type: 'type'
 } as const
@@ -658,6 +758,8 @@ export const DocumentOrderByRelevanceFieldEnum = {
   signerId: 'signerId',
   signerName: 'signerName',
   signerPosition: 'signerPosition',
+  arrivalNumber: 'arrivalNumber',
+  recipients: 'recipients',
   urgency: 'urgency',
   securityLevel: 'securityLevel',
   status: 'status',
@@ -666,6 +768,22 @@ export const DocumentOrderByRelevanceFieldEnum = {
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
+
+
+export const MinutesOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  location: 'location',
+  chairman: 'chairman',
+  secretary: 'secretary',
+  attendees: 'attendees',
+  content: 'content',
+  conclusion: 'conclusion',
+  documentId: 'documentId',
+  status: 'status'
+} as const
+
+export type MinutesOrderByRelevanceFieldEnum = (typeof MinutesOrderByRelevanceFieldEnum)[keyof typeof MinutesOrderByRelevanceFieldEnum]
 
 
 
@@ -682,9 +800,9 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
 
 
 /**
- * Reference to a field of type 'DateTime'
+ * Reference to a field of type 'Int'
  */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
 
 
@@ -696,9 +814,16 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'Int'
+ * Reference to a field of type 'DateTime'
  */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
     
 
 /**
@@ -813,6 +938,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   category?: Prisma.CategoryOmit
   document?: Prisma.DocumentOmit
+  minutes?: Prisma.MinutesOmit
 }
 
 /* Types for Logging */

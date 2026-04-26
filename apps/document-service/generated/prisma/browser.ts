@@ -27,3 +27,8 @@ export type Category = Prisma.CategoryModel
  * 
  */
 export type Document = Prisma.DocumentModel
+/**
+ * Model Minutes
+ * 
+ */
+export type Minutes = Prisma.MinutesModel
