@@ -3,7 +3,8 @@
 import { 
   Inbox, Send, FileText, AlertTriangle, Clock, 
   CheckCircle2, TrendingUp, BarChart3, Activity, 
-  ShieldAlert, Calendar, ArrowRight, CornerUpRight
+  ShieldAlert, Calendar, ArrowRight, CornerUpRight,
+  MessageSquareShare, PieChart, ClipboardCheck, Settings2
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -190,12 +191,59 @@ export default function DocumentDashboardPage() {
                 ))}
               </div>
               <div className="p-3 border-t bg-muted/10 text-center">
-                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary">
-                  Xem tất cả văn bản chờ xử lý <ArrowRight className="h-3 w-3 ml-1" />
-                </Button>
+                <Link href="/services/documents/processing">
+                  <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary">
+                    Xem tất cả văn bản chờ xử lý <ArrowRight className="h-3 w-3 ml-1" />
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
+
+          {/* QUICK NAV: Các dịch vụ bổ sung */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Link href="/services/documents/consultations">
+              <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                    <MessageSquareShare className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-bold">Lấy ý kiến</h5>
+                    <p className="text-[10px] text-muted-foreground italic">Góp ý dự thảo</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+            
+            <Link href="/services/documents/transparency">
+              <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <PieChart className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-bold">Công khai</h5>
+                    <p className="text-[10px] text-muted-foreground italic">Minh bạch tài chính</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+
+            <Link href="/services/documents/minutes">
+              <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <ClipboardCheck className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h5 className="text-sm font-bold">Biên bản họp</h5>
+                    <p className="text-[10px] text-muted-foreground italic">Ghi chép hội nghị</p>
+                  </div>
+                </div>
+              </Card>
+            </Link>
+          </div>
         </div>
 
         {/* CỘT PHẢI: Giám sát toàn hệ thống (Chiếm 1/3) */}
@@ -212,7 +260,7 @@ export default function DocumentDashboardPage() {
                   <span className="text-foreground">Phòng Kế hoạch - Tài chính</span>
                   <span className="text-emerald-600">95%</span>
                 </div>
-                <Progress value={95} className="h-2 bg-muted" style={{ backgroundColor: '#66BB6A' }} />
+                <Progress value={95} className="h-2 bg-muted overflow-hidden" />
               </div>
               
               <div className="space-y-2">
@@ -220,7 +268,7 @@ export default function DocumentDashboardPage() {
                   <span className="text-foreground">Phòng Quản lý Khoa học</span>
                   <span className="text-blue-600">82%</span>
                 </div>
-                <Progress value={82} className="h-2 bg-muted" style={{ backgroundColor: '#2196F3' }} />
+                <Progress value={82} className="h-2 bg-muted overflow-hidden" />
               </div>
 
               <div className="space-y-2">
@@ -228,7 +276,7 @@ export default function DocumentDashboardPage() {
                   <span className="text-foreground">Văn phòng Sở</span>
                   <span className="text-amber-600">60% (Cảnh báo trễ)</span>
                 </div>
-                <Progress value={60} className="h-2 bg-muted" style={{ backgroundColor: '#EF5350' }} />
+                <Progress value={60} className="h-2 bg-muted overflow-hidden" />
               </div>
             </CardContent>
           </Card>
@@ -259,6 +307,12 @@ export default function DocumentDashboardPage() {
               </div>
             </CardContent>
           </Card>
+
+          <Link href="/services/documents/categories">
+             <Button variant="ghost" className="w-full text-xs font-bold text-muted-foreground hover:text-primary">
+                <Settings2 className="h-4 w-4 mr-2" /> Thiết lập Danh mục chung
+             </Button>
+          </Link>
         </div>
       </div>
     </div>
