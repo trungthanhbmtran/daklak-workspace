@@ -14,10 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function TransparencyPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [fiscalYear, setFiscalYear] = useState("2026");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { useListDocuments } = useDocuments();
   const { data: reportsData, isLoading } = useListDocuments({
@@ -44,11 +46,13 @@ export default function TransparencyPage() {
           <Button variant="outline" className="shadow-sm">
             <TrendingUp className="h-4 w-4 mr-2" /> Thống kê báo cáo
           </Button>
-          <Button className="shadow-sm bg-primary hover:bg-primary/90">
+          <Button className="shadow-sm bg-primary hover:bg-primary/90" onClick={() => setIsModalOpen(true)}>
             <Plus className="h-4 w-4 mr-2" /> Đăng tải báo cáo mới
           </Button>
         </div>
       </div>
+
+      <DocumentUploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
 
       {/* 2. OVERVIEW CARDS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

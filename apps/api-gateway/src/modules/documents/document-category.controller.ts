@@ -23,9 +23,9 @@ export class DocumentCategoryController implements OnModuleInit {
   async listCategories(@Query() query: any) {
     const req = {
       page: parseInt(query.page) || 1,
-      pageSize: parseInt(query.pageSize) || 10,
+      limit: parseInt(query.pageSize) || 10,
       search: query.search,
-      groupCode: query.groupCode,
+      type: query.groupCode || query.type,
       status: query.status,
     };
     return firstValueFrom(this.categoryService.ListCategories(req));

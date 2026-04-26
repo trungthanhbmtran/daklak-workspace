@@ -1,4 +1,15 @@
+"use client";
+
+import { useState } from "react";
+import { 
+  Search, Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe 
+} from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function OutgoingDocumentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -7,7 +18,6 @@ export default function OutgoingDocumentsPage() {
   
   const { data: documentsData, isLoading } = useListDocuments({ 
     search: searchTerm,
-    // Add other filters as needed
   });
 
   const documents = documentsData?.data || [];
@@ -136,4 +146,3 @@ export default function OutgoingDocumentsPage() {
     </div>
   );
 }
-import { Trash2, Building2, FileText, User, Globe } from "lucide-react";

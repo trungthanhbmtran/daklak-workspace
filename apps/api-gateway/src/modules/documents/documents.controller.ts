@@ -21,7 +21,7 @@ export class DocumentsController implements OnModuleInit {
 
   @Get()
   async listDocuments(@Query() query: any) {
-    const req = {
+    const req: any = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
       search: query.search,
@@ -31,10 +31,10 @@ export class DocumentsController implements OnModuleInit {
       urgency: query.urgency,
       startDate: query.startDate,
       endDate: query.endDate,
-      isPublic: query.isPublic === 'true',
-      fiscalYear: query.fiscalYear ? parseInt(query.fiscalYear) : 0,
-      transparencyCategory: query.transparencyCategory,
     };
+    if (query.isPublic !== undefined) req.isPublic = query.isPublic === 'true';
+    if (query.fiscalYear) req.fiscalYear = parseInt(query.fiscalYear);
+    if (query.transparencyCategory) req.transparencyCategory = query.transparencyCategory;
     return firstValueFrom(this.documentService.ListDocuments(req));
   }
 

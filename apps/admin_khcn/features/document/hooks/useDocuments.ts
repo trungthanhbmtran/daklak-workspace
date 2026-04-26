@@ -85,7 +85,7 @@ export function useDocuments() {
         });
         if (!response.ok) throw new Error('Failed to fetch documents');
         const result = await response.json();
-        return result;
+        return result.data;
       },
     });
   };
@@ -155,7 +155,7 @@ export function useDocuments() {
         });
         if (!response.ok) throw new Error('Failed to fetch consultations');
         const result = await response.json();
-        return result;
+        return result.data;
       },
     });
   };
@@ -179,7 +179,22 @@ export function useDocuments() {
     },
   });
 
-  // 4. Minutes
+  // 5. Minutes
+  const useListMinutes = (filters: any) => {
+    return useQuery({
+      queryKey: ['minutes', filters],
+      queryFn: async () => {
+        const queryParams = new URLSearchParams(filters).toString();
+        const response = await fetch(`${API_BASE}/minutes?${queryParams}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch minutes');
+        const result = await response.json();
+        return result.data;
+      },
+    });
+  };
+
   const createMinutesMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await fetch(`${API_BASE}/minutes`, {
@@ -217,6 +232,7 @@ export function useDocuments() {
     updateDocument: updateDocumentMutation.mutateAsync,
     deleteDocument: deleteDocumentMutation.mutateAsync,
     useListConsultations,
+    useListMinutes,
     createConsultation: createConsultationMutation.mutateAsync,
     createMinutes: createMinutesMutation.mutateAsync,
     getCategories, // legacy support
