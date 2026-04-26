@@ -43,7 +43,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
               </Badge>
             )}
             <span className="flex items-center gap-1">
-               Hạn xử lý: {document.processingDeadline ? new Date(document.processingDeadline).toLocaleDateString('vi-VN') : 'Không có hạn'}
+              Hạn xử lý: {document.processingDeadline ? new Date(document.processingDeadline).toLocaleDateString('vi-VN') : 'Không có hạn'}
             </span>
             <Separator orientation="vertical" className="h-3" />
             <span>Nguồn: {document.issuerName || 'Nội bộ'}</span>
@@ -62,7 +62,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
             <span>Trang 1 / 3</span>
             <Separator orientation="vertical" className="h-4" />
-            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${document.id.slice(0,5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
+            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${document.id.slice(0, 5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
             {/* Thực tế sẽ nhúng <iframe src="pdf_url"> hoặc react-pdf vào đây */}
@@ -116,7 +116,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
               </CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1 p-4">
-               {/* Lịch sử tạm thời vẫn để mock hoặc lấy từ một quan hệ khác nếu có */}
+              {/* Lịch sử tạm thời vẫn để mock hoặc lấy từ một quan hệ khác nếu có */}
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
                 {workflowHistory.map((step, index) => (
                   <div key={step.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
@@ -141,12 +141,6 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
               </div>
             </ScrollArea>
           </Card>
-        </div>
-      </div>
-    </div>
-  );
-}
-
         </div>
       </div>
     </div>
