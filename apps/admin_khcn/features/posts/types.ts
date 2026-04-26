@@ -57,6 +57,7 @@ export interface Post {
   autoModerationNote?: string;
   isFeatured: boolean;
   isNotification: boolean;
+  tags?: string[];
   language?: string;
   isTranslated?: boolean;
   publishedAt?: string;

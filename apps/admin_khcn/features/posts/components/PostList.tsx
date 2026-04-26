@@ -41,13 +41,9 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
         categoryId: categoryFilter === "ALL" ? undefined : categoryFilter,
       };
       const res = await postsApi.getPosts(params);
-      // Bóc tách data từ Gateway Transformer
-      const payload = res?.data;
-      if (!payload) return { items: [], meta: {} };
-
       return {
-        items: payload.items || payload.data || (Array.isArray(payload) ? payload : []),
-        meta: payload.meta || {}
+        items: res.data || [],
+        meta: res.meta || {}
       };
     },
   });

@@ -19,9 +19,6 @@ export function CategoryClient() {
   const serverData = useMemo(() => {
     if (!queryData) return [];
     if (Array.isArray(queryData)) return queryData;
-    if (typeof queryData === 'object' && 'data' in queryData && Array.isArray(queryData.data)) {
-      return queryData.data;
-    }
     return [];
   }, [queryData]);
 

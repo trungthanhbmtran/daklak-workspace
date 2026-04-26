@@ -41,7 +41,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     queryKey: ["posts-categories"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return res.data?.data || res.data?.items || (Array.isArray(res.data) ? res.data : []);
+      return res.data;
     },
   });
 
@@ -113,8 +113,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCategories?.length > 0 ? (
-                filteredCategories.map((cat: Category) => (
+              {(filteredCategories?.length ?? 0) > 0 ? (
+                (filteredCategories ?? []).map((cat: Category) => (
                   <TableRow key={cat.id} className="group hover:bg-slate-50/50 transition-colors">
                     <TableCell className="pl-6">
                       <div className="w-12 h-12 rounded-lg bg-slate-100 border overflow-hidden flex items-center justify-center">

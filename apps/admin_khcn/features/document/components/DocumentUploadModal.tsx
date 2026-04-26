@@ -58,7 +58,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
   const { createDocument, getCategories, isLoading: isCreating } = useDocuments();
 
   const form = useForm<DocumentFormValues>({
-    resolver: zodResolver(documentSchema),
+    resolver: zodResolver(documentSchema) as any,
     defaultValues: {
       typeId: "",
       fieldId: "",
@@ -262,7 +262,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 <div className="md:col-span-4">
-                  <FormField control={form.control} name="documentNumber" render={({ field }) => (
+                  <FormField name="documentNumber" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số văn bản <span className="text-destructive">*</span></FormLabel>
                       <FormControl><Input placeholder="123" className="bg-muted/10 border-muted-foreground/10 focus:bg-background transition-all font-bold" {...field} /></FormControl>
@@ -271,7 +271,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                   )} />
                 </div>
                 <div className="md:col-span-4">
-                  <FormField control={form.control} name="notation" render={({ field }) => (
+                  <FormField name="notation" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Ký hiệu <span className="text-destructive">*</span></FormLabel>
                       <FormControl><Input placeholder="QĐ-SKHCN" className="bg-muted/10 border-muted-foreground/10 focus:bg-background transition-all font-mono" {...field} /></FormControl>
@@ -280,7 +280,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                   )} />
                 </div>
                 <div className="md:col-span-4">
-                  <FormField control={form.control} name="arrivalNumber" render={({ field }) => (
+                  <FormField name="arrivalNumber" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số đến (Nếu có)</FormLabel>
                       <FormControl><Input placeholder="456/Đ" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
@@ -290,7 +290,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                 </div>
 
                 <div className="md:col-span-6">
-                  <FormField control={form.control} name="issueDate" render={({ field }) => (
+                  <FormField name="issueDate" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Ngày ban hành <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
@@ -304,7 +304,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                   )} />
                 </div>
                 <div className="md:col-span-6">
-                  <FormField control={form.control} name="arrivalDate" render={({ field }) => (
+                  <FormField name="arrivalDate" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Ngày nhận (Đối với VB Đến)</FormLabel>
                       <FormControl>
@@ -319,7 +319,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                 </div>
 
                 <div className="md:col-span-12">
-                  <FormField control={form.control} name="abstract" render={({ field }) => (
+                  <FormField name="abstract" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Trích yếu nội dung <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
@@ -331,7 +331,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                 </div>
 
                 <div className="md:col-span-6">
-                  <FormField control={form.control} name="issuerName" render={({ field }) => (
+                  <FormField name="issuerName" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Cơ quan ban hành <span className="text-destructive">*</span></FormLabel>
                       <FormControl><Input placeholder="VD: UBND Tỉnh Đắk Lắk" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
@@ -340,7 +340,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                   )} />
                 </div>
                 <div className="md:col-span-6">
-                  <FormField control={form.control} name="signerName" render={({ field }) => (
+                  <FormField name="signerName" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Người ký <span className="text-destructive">*</span></FormLabel>
                       <FormControl><Input placeholder="Họ và tên người ký" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
@@ -350,7 +350,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                 </div>
 
                 <div className="md:col-span-12">
-                  <FormField control={form.control} name="recipients" render={({ field }) => (
+                  <FormField name="recipients" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Nơi nhận (Cách nhau bởi dấu chấm phẩy)</FormLabel>
                       <FormControl><Input placeholder="VD: UBND tỉnh; Sở Tài chính; Lưu VT" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
@@ -365,7 +365,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                          <FormLabel className="text-sm font-bold text-primary uppercase">Công khai tài chính</FormLabel>
                          <p className="text-[10px] text-muted-foreground">Văn bản sẽ hiển thị tại mục "Công khai ngân sách"</p>
                       </div>
-                      <FormField control={form.control} name="isPublic" render={({ field }) => (
+                      <FormField name="isPublic" render={({ field }) => (
                         <FormItem className="flex items-center space-x-2">
                            <FormControl>
                               <input type="checkbox" checked={field.value} onChange={field.onChange} className="w-5 h-5 accent-primary cursor-pointer" />
@@ -376,13 +376,13 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                    
                    {form.watch("isPublic") && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                         <FormField control={form.control} name="fiscalYear" render={({ field }) => (
+                         <FormField name="fiscalYear" render={({ field }) => (
                            <FormItem>
                              <FormLabel className="text-[10px] font-bold uppercase">Năm tài chính</FormLabel>
                              <FormControl><Input type="number" className="bg-background border-primary/20 h-9" {...field} onChange={e => field.onChange(parseInt(e.target.value))} /></FormControl>
                            </FormItem>
                          )} />
-                         <FormField control={form.control} name="transparencyCategory" render={({ field }) => (
+                         <FormField name="transparencyCategory" render={({ field }) => (
                            <FormItem>
                              <FormLabel className="text-[10px] font-bold uppercase">Phân loại báo cáo</FormLabel>
                              <Select onValueChange={field.onChange} value={field.value}>
@@ -414,7 +414,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <FormField control={form.control} name="typeId" render={({ field }) => (
+                <FormField name="typeId" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Loại văn bản</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
@@ -426,7 +426,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                     </Select>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="fieldId" render={({ field }) => (
+                <FormField name="fieldId" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Lĩnh vực</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
@@ -438,7 +438,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                     </Select>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="urgency" render={({ field }) => (
+                <FormField name="urgency" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ khẩn</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
@@ -451,7 +451,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                     </Select>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="securityLevel" render={({ field }) => (
+                <FormField name="securityLevel" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ mật</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
@@ -474,7 +474,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
           <Button type="button" variant="outline" onClick={onClose} className="rounded-xl px-8 hover:bg-background transition-all">Hủy bỏ</Button>
           <Button
             type="button"
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={form.handleSubmit(((v: any) => onSubmit(v)) as any)}
             className="rounded-xl px-10 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all bg-primary hover:bg-primary/90"
             disabled={isProcessing || isCreating || isUploading}
           >

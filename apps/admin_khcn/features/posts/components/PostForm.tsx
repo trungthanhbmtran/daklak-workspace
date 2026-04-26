@@ -7,7 +7,7 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
-  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText
+  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText, AlertCircle, CheckCircle2
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,7 +74,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const isEdit = !!editId;
 
   const form = useForm<PostFormValues>({
-    resolver: zodResolver(postSchema),
+    resolver: zodResolver(postSchema) as any,
     defaultValues: {
       title: "", slug: "", description: "", content: "",
       categoryId: "", status: "DRAFT", thumbnail: "",
@@ -96,19 +96,32 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const { data: categories } = useQuery({
     queryKey: ["posts-categories"],
     queryFn: async () => {
-      const res = await postsApi.getCategories({ pageSize: 100 });
-      return res.data?.data || res.data?.items || (Array.isArray(res.data) ? res.data : []);
+      const res = await postsApi.getCategories();
+      return res.data;
     },
   });
 
   const { data: postData, isLoading: isFetching } = useQuery({
     queryKey: ["post", editId],
-    queryFn: async () => (await postsApi.getPost(editId!))?.data,
+    queryFn: async () => await postsApi.getPost(editId!),
     enabled: isEdit,
   });
 
   useEffect(() => {
-    if (postData) form.reset({ ...postData });
+    if (postData) {
+      form.reset({
+        title: postData.title,
+        slug: postData.slug,
+        description: postData.description || "",
+        content: postData.content,
+        categoryId: postData.categoryId || "",
+        status: postData.status,
+        thumbnail: postData.thumbnail || "",
+        tags: Array.isArray(postData.tags) ? postData.tags : [],
+        isFeatured: postData.isFeatured || false,
+        isNotification: postData.isNotification || false,
+      });
+    }
   }, [postData, form]);
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
@@ -152,7 +165,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
           <div className="flex items-center gap-3">
             <Button variant="ghost" disabled={mutation.isPending} onClick={() => {
               form.setValue("status", "DRAFT");
-              form.handleSubmit(v => mutation.mutate(v))();
+              form.handleSubmit(((v: any) => mutation.mutate(v)) as any)();
             }}>
               Lưu nháp
             </Button>
@@ -160,7 +173,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             {(!isEdit || form.watch("status") === "DRAFT" || form.watch("status") === "REJECTED") && (
               <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20" disabled={mutation.isPending} onClick={() => {
                 form.setValue("status", "SUBMITTED");
-                form.handleSubmit(v => mutation.mutate(v))();
+                form.handleSubmit(((v: any) => mutation.mutate(v)) as any)();
               }}>
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                 {isEdit ? "Gửi lại phê duyệt" : "Gửi phê duyệt"}
@@ -169,7 +182,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
             {isEdit && (form.watch("status") !== "DRAFT" && form.watch("status") !== "REJECTED") && (
               <Button className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[140px] shadow-lg shadow-emerald-500/20" disabled={mutation.isPending} onClick={() => {
-                form.handleSubmit(v => mutation.mutate(v))();
+                form.handleSubmit(((v: any) => mutation.mutate(v)) as any)();
               }}>
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Lưu thay đổi
@@ -209,7 +222,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 )}
 
                 {/* TIÊU ĐỀ */}
-                <FormField control={form.control} name="title" render={({ field }) => (
+                <FormField name="title" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">Tiêu đề chính <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
@@ -226,7 +239,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* CATEGORY */}
-                  <FormField control={form.control} name="categoryId" render={({ field }) => (
+                  <FormField name="categoryId" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold">Chuyên mục</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
@@ -240,7 +253,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   )} />
 
                   {/* SLUG */}
-                  <FormField control={form.control} name="slug" render={({ field }) => (
+                  <FormField name="slug" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
                       <FormControl>
@@ -254,7 +267,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   )} />
                 </div>
 
-                <FormField control={form.control} name="description" render={({ field }) => (
+                <FormField name="description" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">Tóm tắt ngắn (Description)</FormLabel>
                     <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
@@ -313,7 +326,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Globe className="h-4 w-4 text-blue-600" /> Cấu hình hiển thị</CardTitle>
               </CardHeader>
               <CardContent className="p-5 space-y-6">
-                <FormField control={form.control} name="status" render={({ field }) => (
+                <FormField name="status" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[11px] font-bold text-muted-foreground uppercase">Trạng thái xuất bản</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
@@ -336,7 +349,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 <Separator />
 
                 <div className="space-y-4">
-                  <FormField control={form.control} name="isFeatured" render={({ field }) => (
+                  <FormField name="isFeatured" render={({ field }) => (
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="f-mode"><Star className={`h-3.5 w-3.5 ${field.value ? 'fill-yellow-400 text-yellow-500' : ''}`} /> Tin nổi bật</Label>
@@ -346,7 +359,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     </div>
                   )} />
 
-                  <FormField control={form.control} name="isNotification" render={({ field }) => (
+                  <FormField name="isNotification" render={({ field }) => (
                     <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 transition-colors">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-semibold flex items-center gap-2 cursor-pointer" htmlFor="n-mode"><Bell className={`h-3.5 w-3.5 ${field.value ? 'fill-blue-400 text-blue-500' : ''}`} /> Gửi thông báo</Label>

@@ -36,11 +36,10 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     queryKey: ["banners"],
     queryFn: async () => {
       const res = await postsApi.getBanners();
-      console.log('raw banners response:', res);
-      const payload = res?.data;
-      const data = payload?.data || payload?.items || (Array.isArray(payload) ? payload : []);
-      console.log('processed banners data:', data);
-      return data;
+      return {
+        items: res.data || [],
+        meta: res.meta || {}
+      };
     },
   });
 
@@ -55,7 +54,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     onError: () => alert("Có lỗi xảy ra khi xóa banner."),
   });
 
-  const filteredBanners = (banners || []).filter((b: Banner) =>
+  const filteredBanners = (banners?.items || []).filter((b: Banner) =>
     b.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

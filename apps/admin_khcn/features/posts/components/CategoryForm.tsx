@@ -61,7 +61,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   const isEdit = !!editId;
 
   const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(categorySchema) as any,
     defaultValues: {
       name: "", slug: "", description: "", parentId: null,
       thumbnail: "", attachmentId: "", orderIndex: 0, linkType: "internal", customUrl: ""
@@ -80,13 +80,13 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     queryKey: ["posts-categories-simple"],
     queryFn: async () => {
       const res = await postsApi.getCategories();
-      return res.data?.data || res.data || [];
+      return res.data;
     },
   });
 
   const { data: categoryData, isLoading: isFetching } = useQuery({
     queryKey: ["category", editId],
-    queryFn: async () => (await postsApi.getCategory(editId!))?.data,
+    queryFn: async () => await postsApi.getCategory(editId!),
     enabled: isEdit,
   });
 
@@ -95,6 +95,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       form.reset({
         ...categoryData,
         parentId: categoryData.parentId || null,
+        linkType: (categoryData.linkType === "external" ? "external" : "internal") as "internal" | "external",
       });
     }
   }, [categoryData, form]);
@@ -173,7 +174,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
             <p className="text-sm text-muted-foreground">Phân loại nội dung để người dùng dễ dàng tìm kiếm.</p>
           </div>
         </div>
-        <Button onClick={form.handleSubmit(onSubmit)} className="bg-blue-600 hover:bg-blue-700 shadow-md min-w-[140px]" disabled={mutation.isPending}>
+        <Button onClick={form.handleSubmit(((v: any) => onSubmit(v)) as any)} className="bg-blue-600 hover:bg-blue-700 shadow-md min-w-[140px]" disabled={mutation.isPending}>
           {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
           {isEdit ? "Cập nhật ngay" : "Tạo chuyên mục"}
         </Button>
@@ -187,7 +188,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                 <CardTitle className="text-base flex items-center gap-2"><Info className="h-4 w-4 text-blue-600" /> Thông tin cơ bản</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <FormField control={form.control} name="name" render={({ field }) => (
+                <FormField name="name" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">Tên chuyên mục <span className="text-destructive">*</span></FormLabel>
                     <FormControl><Input placeholder="VD: Tin tức nổi bật, Sự kiện..." {...field} /></FormControl>
@@ -196,7 +197,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                 )} />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="slug" render={({ field }) => (
+                  <FormField name="slug" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold">Slug (Đường dẫn tĩnh)</FormLabel>
                       <FormControl><Input className="font-mono bg-slate-50" {...field} /></FormControl>
@@ -204,7 +205,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     </FormItem>
                   )} />
 
-                  <FormField control={form.control} name="parentId" render={({ field }) => (
+                  <FormField name="parentId" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold">Chuyên mục cha</FormLabel>
                       <Select
@@ -214,16 +215,18 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                         <FormControl><SelectTrigger><SelectValue placeholder="Chọn cấp cha" /></SelectTrigger></FormControl>
                         <SelectContent>
                           <SelectItem value="none">-- Không có (Cấp gốc) --</SelectItem>
-                          {categories?.map((cat: Category) => (
-                            cat.id !== editId && <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                          ))}
+                          {(categories?.length ?? 0) > 0 ? (
+                            (categories ?? []).map((cat: Category) => (
+                              cat.id !== editId && <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                            ))
+                          ) : null}
                         </SelectContent>
                       </Select>
                     </FormItem>
                   )} />
                 </div>
 
-                <FormField control={form.control} name="description" render={({ field }) => (
+                <FormField name="description" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">Mô tả ngắn</FormLabel>
                     <FormControl><Textarea className="min-h-[100px] resize-none" {...field} /></FormControl>
@@ -273,7 +276,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
               </CardHeader>
               <CardContent className="p-6 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField control={form.control} name="linkType" render={({ field }) => (
+                  <FormField name="linkType" render={({ field }) => (
                     <FormItem>
                       <FormLabel className="font-semibold">Loại liên kết</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
@@ -286,7 +289,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     </FormItem>
                   )} />
                   {form.watch("linkType") === "external" && (
-                    <FormField control={form.control} name="customUrl" render={({ field }) => (
+                    <FormField name="customUrl" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-semibold">URL đích</FormLabel>
                         <FormControl><Input placeholder="https://..." {...field} /></FormControl>
@@ -331,7 +334,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                 <CardTitle className="text-base flex items-center gap-2"><Settings className="h-4 w-4 text-blue-600" /> Cấu hình khác</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <FormField control={form.control} name="orderIndex" render={({ field }) => (
+                <FormField name="orderIndex" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold">Thứ tự hiển thị</FormLabel>
                     <FormControl><Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} /></FormControl>

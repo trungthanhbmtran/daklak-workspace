@@ -34,7 +34,7 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
   const { createConsultation, isLoading } = useDocuments();
 
   const form = useForm<ConsultationFormValues>({
-    resolver: zodResolver(consultationSchema),
+    resolver: zodResolver(consultationSchema) as any,
     defaultValues: {
       title: "",
       description: "",
@@ -76,9 +76,8 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
+          <form onSubmit={form.handleSubmit(((v: any) => onSubmit(v)) as any)} className="p-6 space-y-6">
             <FormField
-              control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
@@ -92,7 +91,6 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
             />
 
             <FormField
-              control={form.control}
               name="description"
               render={({ field }) => (
                 <FormItem>
@@ -107,7 +105,6 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
-                control={form.control}
                 name="deadline"
                 render={({ field }) => (
                   <FormItem>
@@ -123,7 +120,6 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
               />
 
               <FormField
-                control={form.control}
                 name="isUrgent"
                 render={({ field }) => (
                   <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-xl border p-4 bg-muted/5 mt-5">
