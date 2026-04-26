@@ -1,0 +1,35 @@
+model Consultation {
+  id              String   @id @default(uuid())
+  title           String   // Tiêu đề đợt lấy ý kiến
+  description     String?  @db.Text
+  documentId      String?  @map("document_id") // Văn bản dự thảo đính kèm
+  deadline        DateTime // Hạn góp ý
+  status          String   @default("OPEN") // OPEN, CLOSED, PENDING
+  issuerId        String?  @map("issuer_id") // Người tạo/Đơn vị chủ trì
+  issuerName      String?  @map("issuer_name")
+  isUrgent        Boolean  @default(false) @map("is_urgent")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  responses       ConsultationResponse[]
+
+  @@map("consultations")
+}
+
+model ConsultationResponse {
+  id              String   @id @default(uuid())
+  consultationId  String   @map("consultation_id")
+  unitId          String   @map("unit_id") // Đơn vị góp ý
+  unitName        String?  @map("unit_name")
+  userId          String?  @map("user_id") // Người góp ý
+  content         String?  @db.Text // Nội dung góp ý
+  fileId          String?  @map("file_id") // Tệp phản hồi (nếu có)
+  status          String   @default("PENDING") // PENDING, RESPONDED
+  respondedAt     DateTime? @map("responded_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  consultation    Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@map("consultation_responses")
+}

@@ -25,6 +25,8 @@ model Document {
   pageCount          Int       @default(1) @map("page_count")
   attachmentCount    Int       @default(0) @map("attachment_count")
   linkedDocumentId   String?   @map("linked_document_id")
+  fiscalYear         Int?      @map("fiscal_year") // Năm tài chính (cho công khai ngân sách)
+  transparencyCategory String? @map("transparency_category") // ESTIMATE, SETTLEMENT, EXECUTION
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 

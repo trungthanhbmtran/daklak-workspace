@@ -385,6 +385,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Category: 'Category',
+  Consultation: 'Consultation',
+  ConsultationResponse: 'ConsultationResponse',
   Document: 'Document',
   Minutes: 'Minutes'
 } as const
@@ -402,7 +404,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "category" | "document" | "minutes"
+    modelProps: "category" | "consultation" | "consultationResponse" | "document" | "minutes"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -469,6 +471,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CategoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    Consultation: {
+      payload: Prisma.$ConsultationPayload<ExtArgs>
+      fields: Prisma.ConsultationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConsultationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConsultationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>
+        }
+        findFirst: {
+          args: Prisma.ConsultationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConsultationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>
+        }
+        findMany: {
+          args: Prisma.ConsultationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>[]
+        }
+        create: {
+          args: Prisma.ConsultationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>
+        }
+        createMany: {
+          args: Prisma.ConsultationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ConsultationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>
+        }
+        update: {
+          args: Prisma.ConsultationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ConsultationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConsultationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ConsultationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationPayload>
+        }
+        aggregate: {
+          args: Prisma.ConsultationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConsultation>
+        }
+        groupBy: {
+          args: Prisma.ConsultationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsultationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConsultationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsultationCountAggregateOutputType> | number
+        }
+      }
+    }
+    ConsultationResponse: {
+      payload: Prisma.$ConsultationResponsePayload<ExtArgs>
+      fields: Prisma.ConsultationResponseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ConsultationResponseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ConsultationResponseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>
+        }
+        findFirst: {
+          args: Prisma.ConsultationResponseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ConsultationResponseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>
+        }
+        findMany: {
+          args: Prisma.ConsultationResponseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>[]
+        }
+        create: {
+          args: Prisma.ConsultationResponseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>
+        }
+        createMany: {
+          args: Prisma.ConsultationResponseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.ConsultationResponseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>
+        }
+        update: {
+          args: Prisma.ConsultationResponseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>
+        }
+        deleteMany: {
+          args: Prisma.ConsultationResponseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ConsultationResponseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.ConsultationResponseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ConsultationResponsePayload>
+        }
+        aggregate: {
+          args: Prisma.ConsultationResponseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateConsultationResponse>
+        }
+        groupBy: {
+          args: Prisma.ConsultationResponseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsultationResponseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ConsultationResponseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ConsultationResponseCountAggregateOutputType> | number
         }
       }
     }
@@ -663,6 +797,40 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const ConsultationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  documentId: 'documentId',
+  deadline: 'deadline',
+  status: 'status',
+  issuerId: 'issuerId',
+  issuerName: 'issuerName',
+  isUrgent: 'isUrgent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConsultationScalarFieldEnum = (typeof ConsultationScalarFieldEnum)[keyof typeof ConsultationScalarFieldEnum]
+
+
+export const ConsultationResponseScalarFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  unitId: 'unitId',
+  unitName: 'unitName',
+  userId: 'userId',
+  content: 'content',
+  fileId: 'fileId',
+  status: 'status',
+  respondedAt: 'respondedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConsultationResponseScalarFieldEnum = (typeof ConsultationResponseScalarFieldEnum)[keyof typeof ConsultationResponseScalarFieldEnum]
+
+
 export const DocumentScalarFieldEnum = {
   id: 'id',
   documentNumber: 'documentNumber',
@@ -690,6 +858,8 @@ export const DocumentScalarFieldEnum = {
   pageCount: 'pageCount',
   attachmentCount: 'attachmentCount',
   linkedDocumentId: 'linkedDocumentId',
+  fiscalYear: 'fiscalYear',
+  transparencyCategory: 'transparencyCategory',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -745,6 +915,33 @@ export const CategoryOrderByRelevanceFieldEnum = {
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
 
 
+export const ConsultationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  documentId: 'documentId',
+  status: 'status',
+  issuerId: 'issuerId',
+  issuerName: 'issuerName'
+} as const
+
+export type ConsultationOrderByRelevanceFieldEnum = (typeof ConsultationOrderByRelevanceFieldEnum)[keyof typeof ConsultationOrderByRelevanceFieldEnum]
+
+
+export const ConsultationResponseOrderByRelevanceFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  unitId: 'unitId',
+  unitName: 'unitName',
+  userId: 'userId',
+  content: 'content',
+  fileId: 'fileId',
+  status: 'status'
+} as const
+
+export type ConsultationResponseOrderByRelevanceFieldEnum = (typeof ConsultationResponseOrderByRelevanceFieldEnum)[keyof typeof ConsultationResponseOrderByRelevanceFieldEnum]
+
+
 export const DocumentOrderByRelevanceFieldEnum = {
   id: 'id',
   documentNumber: 'documentNumber',
@@ -764,7 +961,8 @@ export const DocumentOrderByRelevanceFieldEnum = {
   securityLevel: 'securityLevel',
   status: 'status',
   fileId: 'fileId',
-  linkedDocumentId: 'linkedDocumentId'
+  linkedDocumentId: 'linkedDocumentId',
+  transparencyCategory: 'transparencyCategory'
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
@@ -937,6 +1135,8 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   category?: Prisma.CategoryOmit
+  consultation?: Prisma.ConsultationOmit
+  consultationResponse?: Prisma.ConsultationResponseOmit
   document?: Prisma.DocumentOmit
   minutes?: Prisma.MinutesOmit
 }

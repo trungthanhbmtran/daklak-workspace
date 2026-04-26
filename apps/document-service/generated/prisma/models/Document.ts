@@ -29,11 +29,13 @@ export type AggregateDocument = {
 export type DocumentAvgAggregateOutputType = {
   pageCount: number | null
   attachmentCount: number | null
+  fiscalYear: number | null
 }
 
 export type DocumentSumAggregateOutputType = {
   pageCount: number | null
   attachmentCount: number | null
+  fiscalYear: number | null
 }
 
 export type DocumentMinAggregateOutputType = {
@@ -63,6 +65,8 @@ export type DocumentMinAggregateOutputType = {
   pageCount: number | null
   attachmentCount: number | null
   linkedDocumentId: string | null
+  fiscalYear: number | null
+  transparencyCategory: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -94,6 +98,8 @@ export type DocumentMaxAggregateOutputType = {
   pageCount: number | null
   attachmentCount: number | null
   linkedDocumentId: string | null
+  fiscalYear: number | null
+  transparencyCategory: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -125,6 +131,8 @@ export type DocumentCountAggregateOutputType = {
   pageCount: number
   attachmentCount: number
   linkedDocumentId: number
+  fiscalYear: number
+  transparencyCategory: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -134,11 +142,13 @@ export type DocumentCountAggregateOutputType = {
 export type DocumentAvgAggregateInputType = {
   pageCount?: true
   attachmentCount?: true
+  fiscalYear?: true
 }
 
 export type DocumentSumAggregateInputType = {
   pageCount?: true
   attachmentCount?: true
+  fiscalYear?: true
 }
 
 export type DocumentMinAggregateInputType = {
@@ -168,6 +178,8 @@ export type DocumentMinAggregateInputType = {
   pageCount?: true
   attachmentCount?: true
   linkedDocumentId?: true
+  fiscalYear?: true
+  transparencyCategory?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -199,6 +211,8 @@ export type DocumentMaxAggregateInputType = {
   pageCount?: true
   attachmentCount?: true
   linkedDocumentId?: true
+  fiscalYear?: true
+  transparencyCategory?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -230,6 +244,8 @@ export type DocumentCountAggregateInputType = {
   pageCount?: true
   attachmentCount?: true
   linkedDocumentId?: true
+  fiscalYear?: true
+  transparencyCategory?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -348,6 +364,8 @@ export type DocumentGroupByOutputType = {
   pageCount: number
   attachmentCount: number
   linkedDocumentId: string | null
+  fiscalYear: number | null
+  transparencyCategory: string | null
   createdAt: Date
   updatedAt: Date
   _count: DocumentCountAggregateOutputType | null
@@ -402,6 +420,8 @@ export type DocumentWhereInput = {
   pageCount?: Prisma.IntFilter<"Document"> | number
   attachmentCount?: Prisma.IntFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableFilter<"Document"> | string | null
+  fiscalYear?: Prisma.IntNullableFilter<"Document"> | number | null
+  transparencyCategory?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   type?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
@@ -435,6 +455,8 @@ export type DocumentOrderByWithRelationInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrderInput | Prisma.SortOrder
+  transparencyCategory?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   type?: Prisma.CategoryOrderByWithRelationInput
@@ -472,6 +494,8 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   pageCount?: Prisma.IntFilter<"Document"> | number
   attachmentCount?: Prisma.IntFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableFilter<"Document"> | string | null
+  fiscalYear?: Prisma.IntNullableFilter<"Document"> | number | null
+  transparencyCategory?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   type?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
@@ -505,6 +529,8 @@ export type DocumentOrderByWithAggregationInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrderInput | Prisma.SortOrder
+  transparencyCategory?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DocumentCountOrderByAggregateInput
@@ -544,6 +570,8 @@ export type DocumentScalarWhereWithAggregatesInput = {
   pageCount?: Prisma.IntWithAggregatesFilter<"Document"> | number
   attachmentCount?: Prisma.IntWithAggregatesFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
+  fiscalYear?: Prisma.IntNullableWithAggregatesFilter<"Document"> | number | null
+  transparencyCategory?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Document"> | Date | string
 }
@@ -573,6 +601,8 @@ export type DocumentCreateInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   type?: Prisma.CategoryCreateNestedOneWithoutDocumentsByTypeInput
@@ -606,6 +636,8 @@ export type DocumentUncheckedCreateInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -635,6 +667,8 @@ export type DocumentUpdateInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.CategoryUpdateOneWithoutDocumentsByTypeNestedInput
@@ -668,6 +702,8 @@ export type DocumentUncheckedUpdateInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -699,6 +735,8 @@ export type DocumentCreateManyInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -728,6 +766,8 @@ export type DocumentUpdateManyMutationInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -759,6 +799,8 @@ export type DocumentUncheckedUpdateManyInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -806,6 +848,8 @@ export type DocumentCountOrderByAggregateInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrder
+  transparencyCategory?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -813,6 +857,7 @@ export type DocumentCountOrderByAggregateInput = {
 export type DocumentAvgOrderByAggregateInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrder
 }
 
 export type DocumentMaxOrderByAggregateInput = {
@@ -842,6 +887,8 @@ export type DocumentMaxOrderByAggregateInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrder
+  transparencyCategory?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -873,6 +920,8 @@ export type DocumentMinOrderByAggregateInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
   linkedDocumentId?: Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrder
+  transparencyCategory?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -880,6 +929,7 @@ export type DocumentMinOrderByAggregateInput = {
 export type DocumentSumOrderByAggregateInput = {
   pageCount?: Prisma.SortOrder
   attachmentCount?: Prisma.SortOrder
+  fiscalYear?: Prisma.SortOrder
 }
 
 export type DocumentCreateNestedManyWithoutTypeInput = {
@@ -966,8 +1016,12 @@ export type DocumentUncheckedUpdateManyWithoutFieldNestedInput = {
   deleteMany?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type DocumentCreateWithoutTypeInput = {
@@ -995,6 +1049,8 @@ export type DocumentCreateWithoutTypeInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   field?: Prisma.CategoryCreateNestedOneWithoutDocumentsByFieldInput
@@ -1026,6 +1082,8 @@ export type DocumentUncheckedCreateWithoutTypeInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1065,6 +1123,8 @@ export type DocumentCreateWithoutFieldInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   type?: Prisma.CategoryCreateNestedOneWithoutDocumentsByTypeInput
@@ -1096,6 +1156,8 @@ export type DocumentUncheckedCreateWithoutFieldInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1156,6 +1218,8 @@ export type DocumentScalarWhereInput = {
   pageCount?: Prisma.IntFilter<"Document"> | number
   attachmentCount?: Prisma.IntFilter<"Document"> | number
   linkedDocumentId?: Prisma.StringNullableFilter<"Document"> | string | null
+  fiscalYear?: Prisma.IntNullableFilter<"Document"> | number | null
+  transparencyCategory?: Prisma.StringNullableFilter<"Document"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Document"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Document"> | Date | string
 }
@@ -1202,6 +1266,8 @@ export type DocumentCreateManyTypeInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1232,6 +1298,8 @@ export type DocumentCreateManyFieldInput = {
   pageCount?: number
   attachmentCount?: number
   linkedDocumentId?: string | null
+  fiscalYear?: number | null
+  transparencyCategory?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1261,6 +1329,8 @@ export type DocumentUpdateWithoutTypeInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   field?: Prisma.CategoryUpdateOneWithoutDocumentsByFieldNestedInput
@@ -1292,6 +1362,8 @@ export type DocumentUncheckedUpdateWithoutTypeInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1322,6 +1394,8 @@ export type DocumentUncheckedUpdateManyWithoutTypeInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1351,6 +1425,8 @@ export type DocumentUpdateWithoutFieldInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   type?: Prisma.CategoryUpdateOneWithoutDocumentsByTypeNestedInput
@@ -1382,6 +1458,8 @@ export type DocumentUncheckedUpdateWithoutFieldInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1412,6 +1490,8 @@ export type DocumentUncheckedUpdateManyWithoutFieldInput = {
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
   attachmentCount?: Prisma.IntFieldUpdateOperationsInput | number
   linkedDocumentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fiscalYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  transparencyCategory?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1445,6 +1525,8 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   pageCount?: boolean
   attachmentCount?: boolean
   linkedDocumentId?: boolean
+  fiscalYear?: boolean
+  transparencyCategory?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   type?: boolean | Prisma.Document$typeArgs<ExtArgs>
@@ -1480,11 +1562,13 @@ export type DocumentSelectScalar = {
   pageCount?: boolean
   attachmentCount?: boolean
   linkedDocumentId?: boolean
+  fiscalYear?: boolean
+  transparencyCategory?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "fiscalYear" | "transparencyCategory" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   type?: boolean | Prisma.Document$typeArgs<ExtArgs>
   field?: boolean | Prisma.Document$fieldArgs<ExtArgs>
@@ -1523,6 +1607,8 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     pageCount: number
     attachmentCount: number
     linkedDocumentId: string | null
+    fiscalYear: number | null
+    transparencyCategory: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["document"]>
@@ -1922,6 +2008,8 @@ export interface DocumentFieldRefs {
   readonly pageCount: Prisma.FieldRef<"Document", 'Int'>
   readonly attachmentCount: Prisma.FieldRef<"Document", 'Int'>
   readonly linkedDocumentId: Prisma.FieldRef<"Document", 'String'>
+  readonly fiscalYear: Prisma.FieldRef<"Document", 'Int'>
+  readonly transparencyCategory: Prisma.FieldRef<"Document", 'String'>
   readonly createdAt: Prisma.FieldRef<"Document", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Document", 'DateTime'>
 }

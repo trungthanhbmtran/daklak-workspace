@@ -49,6 +49,10 @@ export class DocumentService {
     if (fieldId) where.fieldId = fieldId;
     if (status) where.status = status;
     if (urgency) where.urgency = urgency;
+    if (query.isPublic !== undefined) where.isPublic = query.isPublic;
+    if (query.fiscalYear) where.fiscalYear = parseInt(query.fiscalYear.toString());
+    if (query.transparencyCategory) where.transparencyCategory = query.transparencyCategory;
+
     if (startDate || endDate) {
       where.issueDate = {};
       if (startDate) where.issueDate.gte = new Date(startDate);

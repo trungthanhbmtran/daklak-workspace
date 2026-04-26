@@ -52,6 +52,8 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Category: 'Category',
+  Consultation: 'Consultation',
+  ConsultationResponse: 'ConsultationResponse',
   Document: 'Document',
   Minutes: 'Minutes'
 } as const
@@ -92,6 +94,40 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const ConsultationScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  documentId: 'documentId',
+  deadline: 'deadline',
+  status: 'status',
+  issuerId: 'issuerId',
+  issuerName: 'issuerName',
+  isUrgent: 'isUrgent',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConsultationScalarFieldEnum = (typeof ConsultationScalarFieldEnum)[keyof typeof ConsultationScalarFieldEnum]
+
+
+export const ConsultationResponseScalarFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  unitId: 'unitId',
+  unitName: 'unitName',
+  userId: 'userId',
+  content: 'content',
+  fileId: 'fileId',
+  status: 'status',
+  respondedAt: 'respondedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ConsultationResponseScalarFieldEnum = (typeof ConsultationResponseScalarFieldEnum)[keyof typeof ConsultationResponseScalarFieldEnum]
+
+
 export const DocumentScalarFieldEnum = {
   id: 'id',
   documentNumber: 'documentNumber',
@@ -119,6 +155,8 @@ export const DocumentScalarFieldEnum = {
   pageCount: 'pageCount',
   attachmentCount: 'attachmentCount',
   linkedDocumentId: 'linkedDocumentId',
+  fiscalYear: 'fiscalYear',
+  transparencyCategory: 'transparencyCategory',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -174,6 +212,33 @@ export const CategoryOrderByRelevanceFieldEnum = {
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
 
 
+export const ConsultationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  documentId: 'documentId',
+  status: 'status',
+  issuerId: 'issuerId',
+  issuerName: 'issuerName'
+} as const
+
+export type ConsultationOrderByRelevanceFieldEnum = (typeof ConsultationOrderByRelevanceFieldEnum)[keyof typeof ConsultationOrderByRelevanceFieldEnum]
+
+
+export const ConsultationResponseOrderByRelevanceFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  unitId: 'unitId',
+  unitName: 'unitName',
+  userId: 'userId',
+  content: 'content',
+  fileId: 'fileId',
+  status: 'status'
+} as const
+
+export type ConsultationResponseOrderByRelevanceFieldEnum = (typeof ConsultationResponseOrderByRelevanceFieldEnum)[keyof typeof ConsultationResponseOrderByRelevanceFieldEnum]
+
+
 export const DocumentOrderByRelevanceFieldEnum = {
   id: 'id',
   documentNumber: 'documentNumber',
@@ -193,7 +258,8 @@ export const DocumentOrderByRelevanceFieldEnum = {
   securityLevel: 'securityLevel',
   status: 'status',
   fileId: 'fileId',
-  linkedDocumentId: 'linkedDocumentId'
+  linkedDocumentId: 'linkedDocumentId',
+  transparencyCategory: 'transparencyCategory'
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
