@@ -628,6 +628,16 @@ export type DocumentUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
+export type DocumentListRelationFilter = {
+  every?: Prisma.DocumentWhereInput
+  some?: Prisma.DocumentWhereInput
+  none?: Prisma.DocumentWhereInput
+}
+
+export type DocumentOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type DocumentOrderByRelevanceInput = {
   fields: Prisma.DocumentOrderByRelevanceFieldEnum | Prisma.DocumentOrderByRelevanceFieldEnum[]
   sort: Prisma.SortOrder
@@ -712,36 +722,6 @@ export type DocumentMinOrderByAggregateInput = {
   updatedAt?: Prisma.SortOrder
 }
 
-export type DocumentListRelationFilter = {
-  every?: Prisma.DocumentWhereInput
-  some?: Prisma.DocumentWhereInput
-  none?: Prisma.DocumentWhereInput
-}
-
-export type DocumentOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
-export type StringFieldUpdateOperationsInput = {
-  set?: string
-}
-
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
-}
-
 export type DocumentCreateNestedManyWithoutTypeInput = {
   create?: Prisma.XOR<Prisma.DocumentCreateWithoutTypeInput, Prisma.DocumentUncheckedCreateWithoutTypeInput> | Prisma.DocumentCreateWithoutTypeInput[] | Prisma.DocumentUncheckedCreateWithoutTypeInput[]
   connectOrCreate?: Prisma.DocumentCreateOrConnectWithoutTypeInput | Prisma.DocumentCreateOrConnectWithoutTypeInput[]
@@ -824,6 +804,14 @@ export type DocumentUncheckedUpdateManyWithoutFieldNestedInput = {
   update?: Prisma.DocumentUpdateWithWhereUniqueWithoutFieldInput | Prisma.DocumentUpdateWithWhereUniqueWithoutFieldInput[]
   updateMany?: Prisma.DocumentUpdateManyWithWhereWithoutFieldInput | Prisma.DocumentUpdateManyWithWhereWithoutFieldInput[]
   deleteMany?: Prisma.DocumentScalarWhereInput | Prisma.DocumentScalarWhereInput[]
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type DocumentCreateWithoutTypeInput = {

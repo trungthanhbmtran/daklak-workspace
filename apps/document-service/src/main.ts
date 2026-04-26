@@ -4,7 +4,7 @@ import { join } from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const protoRoot = process.env.PROTO_PATH ?? join(__dirname, '../../../shared/protos');
+  const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
   const docDir = join(protoRoot, 'document');
 
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
@@ -15,10 +15,20 @@ async function bootstrap() {
         join(docDir, 'document.proto'),
         join(docDir, 'category.proto'),
       ],
-      url: '0.0.0.0:50056',
+      url: process.env.GRPC_URL ?? '0.0.0.0:50056',
+      loader: {
+        keepCase: false,
+        longs: String,
+        enums: String,
+        defaults: true,
+        includeDirs: [protoRoot],
+      },
     },
   });
+
+  app.enableShutdownHooks();
+
   await app.listen();
-  console.log('Document Service is listening on 0.0.0.0:50056');
+  console.log('Document Service (gRPC) listening on', process.env.GRPC_URL ?? '0.0.0.0:50056');
 }
 bootstrap();
