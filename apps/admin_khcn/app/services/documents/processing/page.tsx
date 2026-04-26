@@ -1,3 +1,4 @@
+'use client'
 import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { useState } from 'react'
 import { Input } from "@/components/ui/input";
