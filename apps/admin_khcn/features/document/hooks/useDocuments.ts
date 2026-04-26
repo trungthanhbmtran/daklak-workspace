@@ -213,6 +213,21 @@ export function useDocuments() {
     },
   });
 
+  // 6. Statistics
+  const useDocumentStats = () => {
+    return useQuery({
+      queryKey: ['document-stats'],
+      queryFn: async () => {
+        const response = await fetch(`${API_BASE}/stats`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch statistics');
+        const result = await response.json();
+        return result.data;
+      },
+    });
+  };
+
   // Compat for old code (if needed)
   const getCategories = async (groupCode: string) => {
     const response = await fetch(`${API_BASE}/categories?groupCode=${groupCode}`, {
@@ -233,6 +248,7 @@ export function useDocuments() {
     deleteDocument: deleteDocumentMutation.mutateAsync,
     useListConsultations,
     useListMinutes,
+    useDocumentStats,
     createConsultation: createConsultationMutation.mutateAsync,
     createMinutes: createMinutesMutation.mutateAsync,
     getCategories, // legacy support

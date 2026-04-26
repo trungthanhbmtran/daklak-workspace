@@ -25,16 +25,17 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Badge } from "@/components/ui/badge";
 import { useLogout } from "@/hooks/useLogout";
 import { useHubServices } from "@/hooks/useServiceMenus";
+import { useUser } from "@/hooks/useUser";
 
 // 2. TÁCH HEADER COMPONENT: Cho code gọn gàng
 function PortalHeader() {
   const { handleLogout, isPending } = useLogout();
+  const { user } = useUser();
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-sm">
-      {/* Khung chứa bung full màn hình, cách lề 2 bên một chút cho đẹp */}
       <div className="flex h-16 w-full items-center justify-between px-4 lg:px-8">
         
-        {/* Logo & Tên cơ quan */}
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
             <ShieldCheck className="h-5 w-5" />
@@ -45,26 +46,26 @@ function PortalHeader() {
           </div>
         </div>
 
-        {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            {/* Nav rộng rồi nên show luôn tên User ra ngoài cho xịn */}
             <Button variant="ghost" className="relative h-11 flex items-center gap-3 rounded-full pl-2 pr-4 hover:bg-muted/60 transition-colors">
               <Avatar className="h-8 w-8 border border-border">
                 <AvatarImage src="" alt="Avatar" />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">CB</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
+                   {user?.fullName?.charAt(0) || 'U'}
+                </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-semibold leading-none">Cán bộ Quản trị</span>
-                <span className="text-[10px] text-muted-foreground mt-1 font-normal">admin@daklak.gov.vn</span>
+                <span className="text-sm font-semibold leading-none">{user?.fullName || 'Người dùng'}</span>
+                <span className="text-[10px] text-muted-foreground mt-1 font-normal">{user?.email || 'user@daklak.gov.vn'}</span>
               </div>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" align="end" forceMount>
             <DropdownMenuLabel className="font-normal">
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">Cán bộ Quản trị</p>
-                <p className="text-xs text-muted-foreground">admin@daklak.gov.vn</p>
+                <p className="text-sm font-medium leading-none">{user?.fullName}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
@@ -134,6 +135,7 @@ function AppCard({ app }: { app: AppItem }) {
 
 export default function HubPage() {
   const { apps, isLoading } = useHubServices();
+  const { user } = useUser();
   console.log("apps", apps);
 
   return (
@@ -141,7 +143,7 @@ export default function HubPage() {
       <PortalHeader />
       <main className="container mx-auto py-12 px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, Cán bộ!</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {user?.fullName?.split(' ').pop()}!</h1>
           <p className="text-muted-foreground mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
         </div>
         {isLoading ? (

@@ -19,19 +19,35 @@ const workflowHistory = [
   { id: 3, user: "Mạnh (Chuyên viên CNTT)", action: "Tiếp nhận xử lý", time: "25/02/2026 10:00", note: "" },
 ];
 
-export default function DocumentProcessingWorkspace() {
+export default function DocumentProcessingWorkspace({ document }: { document?: any }) {
   const [comment, setComment] = useState("");
+
+  if (!document) {
+    return (
+      <div className="flex items-center justify-center h-full text-muted-foreground italic">
+        Đang tải thông tin văn bản xử lý...
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-2rem)] bg-muted/5 gap-4 p-4">
       {/* Top Action Bar */}
       <div className="flex items-center justify-between bg-background p-3 rounded-lg border shadow-sm shrink-0">
         <div>
-          <h2 className="text-lg font-bold text-foreground">125/UBND-TH: V/v Đôn đốc triển khai nhiệm vụ CĐS</h2>
-          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
-            <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 shadow-none px-1.5 py-0 h-4 text-[10px]">HỎA TỐC</Badge>
-            Hạn xử lý: 28/02/2026
-          </p>
+          <h2 className="text-lg font-bold text-foreground">{document.documentNumber || document.arrivalNumber}: {document.abstract}</h2>
+          <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
+            {(document.urgency === 'URGENT' || document.urgency === 'FLASH') && (
+              <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 shadow-none px-1.5 py-0 h-4 text-[10px]">
+                {document.urgency === 'FLASH' ? 'HỎA TỐC' : 'KHẨN'}
+              </Badge>
+            )}
+            <span className="flex items-center gap-1">
+               Hạn xử lý: {document.processingDeadline ? new Date(document.processingDeadline).toLocaleDateString('vi-VN') : 'Không có hạn'}
+            </span>
+            <Separator orientation="vertical" className="h-3" />
+            <span>Nguồn: {document.issuerName || 'Nội bộ'}</span>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" /> In phiếu xử lý</Button>
@@ -46,7 +62,7 @@ export default function DocumentProcessingWorkspace() {
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
             <span>Trang 1 / 3</span>
             <Separator orientation="vertical" className="h-4" />
-            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> Cong_van_125.pdf</span>
+            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${document.id.slice(0,5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
             {/* Thực tế sẽ nhúng <iframe src="pdf_url"> hoặc react-pdf vào đây */}
@@ -100,14 +116,13 @@ export default function DocumentProcessingWorkspace() {
               </CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1 p-4">
+               {/* Lịch sử tạm thời vẫn để mock hoặc lấy từ một quan hệ khác nếu có */}
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
                 {workflowHistory.map((step, index) => (
                   <div key={step.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    {/* Icon timeline */}
                     <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-background bg-primary text-primary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 absolute left-2 md:left-1/2 z-10">
                       <CheckCheck className="h-3 w-3" />
                     </div>
-                    {/* Nội dung bước */}
                     <div className="w-[calc(100%-3rem)] md:w-[calc(50%-1.5rem)] ml-10 md:ml-0 p-3 rounded-lg border bg-background shadow-sm text-sm">
                       <div className="flex justify-between items-start mb-1">
                         <span className="font-bold text-primary text-xs">{step.user}</span>
@@ -126,6 +141,11 @@ export default function DocumentProcessingWorkspace() {
               </div>
             </ScrollArea>
           </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
 
         </div>
       </div>

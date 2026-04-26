@@ -9,8 +9,17 @@ service DocumentService {
   rpc CreateDocument(CreateDocumentRequest) returns (DocumentResponse) {}
   rpc GetDocument(GetDocumentRequest) returns (Document) {}
   rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse) {}
-  rpc UpdateDocument(UpdateDocumentRequest) returns (DocumentResponse) {}
+   rpc UpdateDocument(UpdateDocumentRequest) returns (DocumentResponse) {}
   rpc DeleteDocument(DeleteDocumentRequest) returns (common.DeleteResponse) {}
+  rpc GetStatistics(common.Empty) returns (GetStatisticsResponse) {}
+}
+
+message GetStatisticsResponse {
+  int32 incomingTotal = 1;
+  int32 incomingPending = 2;
+  int32 incomingLate = 3;
+  int32 outgoingTotal = 4;
+  int32 urgentTotal = 5;
 }
 
 message Document {

@@ -30,4 +30,9 @@ export class DocumentController {
   deleteDocument(data: { id: string }) {
     return this.documentService.remove(data.id);
   }
+
+  @GrpcMethod('DocumentService', 'GetStatistics')
+  getStatistics() {
+    return this.documentService.getStatistics();
+  }
 }

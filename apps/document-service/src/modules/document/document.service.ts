@@ -109,6 +109,47 @@ export class DocumentService {
     return { success: true };
   }
 
+  async getStatistics() {
+    const now = new Date();
+    const [
+      incomingTotal,
+      incomingPending,
+      incomingLate,
+      outgoingTotal,
+      urgentTotal
+    ] = await Promise.all([
+      // incomingTotal: Documents with arrivalNumber
+      this.prisma.document.count({ where: { arrivalNumber: { not: null } } }),
+      // incomingPending: Documents with arrivalNumber and status PROCESSING
+      this.prisma.document.count({ where: { arrivalNumber: { not: null }, status: 'PROCESSING' } }),
+      // incomingLate: Documents with arrivalNumber, status PROCESSING and deadline < now
+      this.prisma.document.count({ 
+        where: { 
+          arrivalNumber: { not: null }, 
+          status: 'PROCESSING', 
+          processingDeadline: { lt: now } 
+        } 
+      }),
+      // outgoingTotal: Documents WITHOUT arrivalNumber
+      this.prisma.document.count({ where: { arrivalNumber: null } }),
+      // urgentTotal: Urgency is URGENT or FLASH
+      this.prisma.document.count({ 
+        where: { 
+          urgency: { in: ['URGENT', 'FLASH'] },
+          status: 'PROCESSING'
+        } 
+      }),
+    ]);
+
+    return {
+      incomingTotal,
+      incomingPending,
+      incomingLate,
+      outgoingTotal,
+      urgentTotal
+    };
+  }
+
   private mapToProto(doc: any) {
     if (!doc) return null;
     return {

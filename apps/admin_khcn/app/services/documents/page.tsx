@@ -12,36 +12,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-// Mock Data: Thống kê tổng quan trong tháng
-const summaryStats = {
-  incomingTotal: 125,
-  incomingPending: 12,
-  incomingLate: 3,
-  outgoingTotal: 48,
-  urgentTotal: 5,
-};
-
-// Mock Data: Danh sách Văn bản chờ TÔI xử lý (My Action Items)
-const myPendingTasks = [
-  {
-    id: "doc-125", // ID này sẽ dùng để trỏ vào trang /processing/[id]
-    documentNumber: "456/UBND-TH",
-    title: "Công văn đôn đốc thực hiện nhiệm vụ chuyển đổi số quý I năm 2026 trên địa bàn tỉnh",
-    issuer: "UBND Tỉnh Đắk Lắk",
-    deadline: "26/02/2026",
-    urgency: "HỎA TỐC",
-  },
-  {
-    id: "doc-126",
-    documentNumber: "12/TTr-SKHCN",
-    title: "Tờ trình xin phê duyệt dự toán kinh phí triển khai hệ thống phần mềm dùng chung",
-    issuer: "Phòng Kế hoạch - Tài chính",
-    deadline: "28/02/2026",
-    urgency: "BÌNH THƯỜNG",
-  }
-];
+import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useUser } from "@/hooks/useUser";
 
 export default function DocumentDashboardPage() {
+  const { useDocumentStats, useListDocuments } = useDocuments();
+  const { user } = useUser();
+  
+  const { data: stats, isLoading: statsLoading } = useDocumentStats();
+  const { data: pendingTasksData, isLoading: tasksLoading } = useListDocuments({
+    status: 'PROCESSING',
+    // signerId: user?.id, // Uncomment if backend supports filtering by current user
+  });
+
+  const summaryStats = stats || {
+    incomingTotal: 0,
+    incomingPending: 0,
+    incomingLate: 0,
+    outgoingTotal: 0,
+    urgentTotal: 0,
+  };
+
+  const myPendingTasks = pendingTasksData?.data || [];
+
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
       
@@ -155,20 +148,22 @@ export default function DocumentDashboardPage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-border/50">
-                {myPendingTasks.map((task) => (
+                {myPendingTasks.map((task: any) => (
                   <div key={task.id} className="p-5 hover:bg-muted/30 transition-colors bg-background flex flex-col sm:flex-row gap-4 justify-between sm:items-center">
                     <div className="space-y-2 flex-1">
                       <div className="flex items-center gap-2">
-                        {task.urgency === "HỎA TỐC" && (
-                          <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-300 shadow-none text-[10px] px-1.5 py-0">HỎA TỐC</Badge>
+                        {(task.urgency === "URGENT" || task.urgency === "FLASH") && (
+                          <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-300 shadow-none text-[10px] px-1.5 py-0">
+                            {task.urgency === "FLASH" ? "HỎA TỐC" : "KHẨN"}
+                          </Badge>
                         )}
-                        <span className="font-mono text-xs font-bold text-muted-foreground">{task.documentNumber}</span>
+                        <span className="font-mono text-xs font-bold text-muted-foreground">{task.documentNumber || task.arrivalNumber || 'N/A'}</span>
                       </div>
                       <h4 className="font-bold text-foreground text-sm leading-snug line-clamp-2">
-                        {task.title}
+                        {task.abstract}
                       </h4>
                       <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5" /> Nguồn: {task.issuer}
+                        <FileText className="h-3.5 w-3.5" /> Nguồn: {task.issuerName || 'Nội bộ'}
                       </p>
                     </div>
 
@@ -176,7 +171,7 @@ export default function DocumentDashboardPage() {
                       <div className="text-left sm:text-right">
                         <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Hạn xử lý</p>
                         <p className="text-sm font-bold text-amber-600 flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5" /> {task.deadline}
+                          <Calendar className="h-3.5 w-3.5" /> {task.processingDeadline ? new Date(task.processingDeadline).toLocaleDateString('vi-VN') : 'Không có'}
                         </p>
                       </div>
                       

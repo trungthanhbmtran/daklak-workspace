@@ -19,6 +19,11 @@ export class DocumentsController implements OnModuleInit {
     this.documentService = this.client.getService(MICROSERVICES.DOCUMENT.SERVICE);
   }
 
+  @Get('stats')
+  async getStats() {
+    return firstValueFrom(this.documentService.GetStatistics({}));
+  }
+
   @Get()
   async listDocuments(@Query() query: any) {
     const req: any = {
