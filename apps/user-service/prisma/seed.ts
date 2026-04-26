@@ -43,6 +43,8 @@ async function main() {
     { code: 'DOC_PUBLISH', name: 'Phát hành văn bản' },
     { code: 'DOC_TRANSPARENCY', name: 'Công khai văn bản' },
     { code: 'DOC_CONSULTATION', name: 'Xin ý kiến văn bản' },
+    { code: 'DOC_MINUTES', name: 'Biên bản cuộc họp' },
+    { code: 'DOC_CATEGORIES', name: 'Danh mục văn bản' },
 
     // HRM
     { code: 'HRM_EMPLOYEE', name: 'Quản lý Nhân sự' },
@@ -407,6 +409,8 @@ async function main() {
     { code: 'DOC_MENU_TRANSPARENCY', name: 'Công khai', route: 'transparency', icon: 'folder-outline', order: 5, res: 'DOC_TRANSPARENCY' },
     { code: 'DOC_MENU_CONSULTATION', name: 'Xin ý kiến', route: 'consultations', icon: 'people-outline', order: 6, res: 'DOC_CONSULTATION' },
     { code: 'DOC_MENU_FEEDBACKS', name: 'Duyệt Góp ý Công chúng', route: 'consultations/public-feedbacks', icon: 'megaphone-outline', order: 7, res: 'DOC_CONSULTATION' },
+    { code: 'DOC_MENU_MINUTES', name: 'Biên bản cuộc họp', route: 'minutes', icon: 'list-outline', order: 8, res: 'DOC_MINUTES' },
+    { code: 'DOC_MENU_CATEGORIES', name: 'Danh mục dùng chung', route: 'categories', icon: 'settings-outline', order: 9, res: 'DOC_CATEGORIES' },
   ];
 
   for (const { res, ...m } of docMenus) {
