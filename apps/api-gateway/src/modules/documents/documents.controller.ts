@@ -31,6 +31,9 @@ export class DocumentsController implements OnModuleInit {
       urgency: query.urgency,
       startDate: query.startDate,
       endDate: query.endDate,
+      isPublic: query.isPublic === 'true',
+      fiscalYear: query.fiscalYear ? parseInt(query.fiscalYear) : 0,
+      transparencyCategory: query.transparencyCategory,
     };
     return firstValueFrom(this.documentService.ListDocuments(req));
   }

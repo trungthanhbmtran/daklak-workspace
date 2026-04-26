@@ -1,29 +1,45 @@
-import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
+const API_BASE = '/api/v1/admin/documents';
+
 export function useDocuments() {
-  const [isLoading, setIsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const getCategories = async (type: string) => {
-    try {
-      const response = await fetch(`/api/v1/admin/documents/categories?type=${type}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
-      });
-      if (!response.ok) throw new Error('Failed to fetch categories');
-      const result = await response.json();
-      return result.data;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
+  // 1. Categories
+  const useCategories = (type: string) => {
+    return useQuery({
+      queryKey: ['document-categories', type],
+      queryFn: async () => {
+        const response = await fetch(`${API_BASE}/categories?type=${type}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        const result = await response.json();
+        return result.data;
+      },
+    });
   };
 
-  const createDocument = async (data: any) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/v1/admin/documents', {
+  // 2. Documents
+  const useListDocuments = (filters: any) => {
+    return useQuery({
+      queryKey: ['documents', filters],
+      queryFn: async () => {
+        const queryParams = new URLSearchParams(filters).toString();
+        const response = await fetch(`${API_BASE}?${queryParams}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch documents');
+        const result = await response.json();
+        return result;
+      },
+    });
+  };
+
+  const createDocumentMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch(API_BASE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -31,27 +47,35 @@ export function useDocuments() {
         },
         body: JSON.stringify(data),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create document');
-      }
-
-      const result = await response.json();
+      if (!response.ok) throw new Error('Failed to create document');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
       toast.success('Văn bản đã được lưu vào sổ thành công!');
-      return result;
-    } catch (error) {
-      console.error(error);
-      toast.error('Có lỗi xảy ra khi lưu văn bản');
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: () => toast.error('Có lỗi xảy ra khi lưu văn bản'),
+  });
+
+  // 3. Consultations
+  const useListConsultations = (filters: any) => {
+    return useQuery({
+      queryKey: ['consultations', filters],
+      queryFn: async () => {
+        const queryParams = new URLSearchParams(filters).toString();
+        const response = await fetch(`${API_BASE}/consultations?${queryParams}`, {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        });
+        if (!response.ok) throw new Error('Failed to fetch consultations');
+        const result = await response.json();
+        return result;
+      },
+    });
   };
 
-  const createMinutes = async (data: any) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/v1/admin/documents/minutes', {
+  const createConsultationMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch(`${API_BASE}/consultations`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -59,27 +83,51 @@ export function useDocuments() {
         },
         body: JSON.stringify(data),
       });
+      if (!response.ok) throw new Error('Failed to create consultation');
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['consultations'] });
+      toast.success('Đã tạo luồng lấy ý kiến thành công!');
+    },
+  });
 
-      if (!response.ok) {
-        throw new Error('Failed to create minutes');
-      }
-
-      const result = await response.json();
+  // 4. Minutes
+  const createMinutesMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch(`${API_BASE}/minutes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error('Failed to create minutes');
+      return response.json();
+    },
+    onSuccess: () => {
       toast.success('Biên bản đã được lưu thành công!');
-      return result;
-    } catch (error) {
-      console.error(error);
-      toast.error('Có lỗi xảy ra khi lưu biên bản');
-      throw error;
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  // Compat for old code (if needed)
+  const getCategories = async (type: string) => {
+    const response = await fetch(`${API_BASE}/categories?type=${type}`, {
+      headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+    });
+    const result = await response.json();
+    return result.data;
   };
 
   return {
-    createDocument,
-    createMinutes,
-    getCategories,
-    isLoading,
+    useCategories,
+    useListDocuments,
+    createDocument: createDocumentMutation.mutateAsync,
+    useListConsultations,
+    createConsultation: createConsultationMutation.mutateAsync,
+    createMinutes: createMinutesMutation.mutateAsync,
+    getCategories, // legacy support
+    isLoading: createDocumentMutation.isPending || createConsultationMutation.isPending || createMinutesMutation.isPending,
   };
 }

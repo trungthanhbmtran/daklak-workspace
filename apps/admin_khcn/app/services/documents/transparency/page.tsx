@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  Search, Filter, Eye, Download, Calendar, 
+import {
+  Search, Filter, Eye, Download, Calendar,
   Building2, PieChart, ShieldCheck, FileText,
   TrendingUp, ArrowUpRight
 } from "lucide-react";
@@ -13,39 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Mock Data: Báo cáo công khai
-const mockTransparencyReports = [
-  {
-    id: "tr-1",
-    title: "Quyết định công khai dự toán thu - chi ngân sách nhà nước năm 2026 của Sở KH&CN",
-    year: "2026",
-    category: "Dự toán",
-    publishDate: "05/01/2026",
-    status: "PUBLISHED",
-    files: ["PDF", "XLSX"],
-  },
-  {
-    id: "tr-2",
-    title: "Báo cáo công khai số liệu quyết toán thu, chi ngân sách nhà nước năm 2025",
-    year: "2025",
-    category: "Quyết toán",
-    publishDate: "20/02/2026",
-    status: "PUBLISHED",
-    files: ["PDF"],
-  },
-  {
-    id: "tr-3",
-    title: "Công khai tình hình thực hiện dự toán ngân sách quý I năm 2026",
-    year: "2026",
-    category: "Thực hiện",
-    publishDate: "24/02/2026",
-    status: "DRAFT",
-    files: ["PDF"],
-  }
-];
+import { useDocuments } from "@/features/document/hooks/useDocuments";
 
 export default function TransparencyPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [fiscalYear, setFiscalYear] = useState("2026");
+
+  const { useListDocuments } = useDocuments();
+  const { data: reportsData, isLoading } = useListDocuments({
+    isPublic: 'true',
+    search: searchTerm,
+    fiscalYear: fiscalYear,
+  });
+
+  const reports = reportsData?.data || [];
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -119,13 +100,19 @@ export default function TransparencyPage() {
             <div className="flex gap-2 w-full sm:w-auto">
               <div className="relative flex-1 sm:w-64">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Tìm báo cáo..." className="pl-9 h-10 bg-background border-muted rounded-xl" />
+                <Input
+                  placeholder="Tìm báo cáo..."
+                  className="pl-9 h-10 bg-background border-muted rounded-xl"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <Select defaultValue="2026">
+              <Select value={fiscalYear} onValueChange={setFiscalYear}>
                 <SelectTrigger className="w-[110px] h-10 rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="2026">2026</SelectItem>
                   <SelectItem value="2025">2025</SelectItem>
+                  <SelectItem value="2024">2024</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -144,7 +131,11 @@ export default function TransparencyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40 bg-background">
-              {mockTransparencyReports.map((report) => (
+              {isLoading ? (
+                <tr><td colSpan={5} className="py-20 text-center text-muted-foreground">Đang tải báo cáo...</td></tr>
+              ) : reports.length === 0 ? (
+                <tr><td colSpan={5} className="py-20 text-center text-muted-foreground">Chưa có báo cáo nào được công khai trong năm {fiscalYear}.</td></tr>
+              ) : reports.map((report: any) => (
                 <tr key={report.id} className="hover:bg-primary/[0.02] transition-colors group">
                   <td className="px-6 py-5">
                     <div className="flex items-start gap-3">
@@ -153,11 +144,11 @@ export default function TransparencyPage() {
                       </div>
                       <div>
                         <p className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                          {report.title}
+                          {report.abstract}
                         </p>
                         <div className="flex items-center gap-2 mt-1.5">
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1 uppercase font-bold tracking-tighter">
-                            <Building2 className="h-3 w-3" /> Văn phòng Sở KH&CN
+                            <Building2 className="h-3 w-3" /> {report.issuerName || 'Sở Khoa học và Công nghệ'}
                           </span>
                         </div>
                       </div>
@@ -165,31 +156,32 @@ export default function TransparencyPage() {
                   </td>
                   <td className="px-6 py-5 text-center">
                     <Badge variant="outline" className="font-mono font-black text-primary border-primary/20 bg-primary/5 px-2 py-0.5">
-                      {report.year}
+                      {report.fiscalYear || fiscalYear}
                     </Badge>
                   </td>
                   <td className="px-6 py-5">
-                    <Badge className={`shadow-none font-bold text-[10px] ${
-                      report.category === 'Dự toán' ? 'bg-blue-100 text-blue-700' :
-                      report.category === 'Quyết toán' ? 'bg-emerald-100 text-emerald-700' :
-                      'bg-slate-100 text-slate-700'
-                    }`}>
-                      {report.category}
+                    <Badge className={`shadow-none font-bold text-[10px] ${report.transparencyCategory === 'ESTIMATE' ? 'bg-blue-100 text-blue-700' :
+                        report.transparencyCategory === 'SETTLEMENT' ? 'bg-emerald-100 text-emerald-700' :
+                          'bg-slate-100 text-slate-700'
+                      }`}>
+                      {report.transparencyCategory === 'ESTIMATE' ? 'Dự toán' : report.transparencyCategory === 'SETTLEMENT' ? 'Quyết toán' : 'Thực hiện'}
                     </Badge>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-foreground font-medium">{report.publishDate}</span>
+                      <span className="text-foreground font-medium">{new Date(report.createdAt).toLocaleDateString('vi-VN')}</span>
                       {report.status === 'DRAFT' && <span className="text-[10px] text-amber-600 font-bold uppercase tracking-tighter">Đang soạn thảo</span>}
                     </div>
                   </td>
                   <td className="px-6 py-5 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {report.files.map((ext) => (
-                        <Button key={ext} variant="ghost" size="sm" className="h-8 px-2 text-[11px] font-black hover:bg-primary/10 hover:text-primary transition-all rounded-lg border border-transparent hover:border-primary/20">
-                          <Download className="h-3.5 w-3.5 mr-1.5" /> {ext}
+                      {report.fileId && (
+                        <Button variant="ghost" size="sm" className="h-8 px-2 text-[11px] font-black hover:bg-primary/10 hover:text-primary transition-all rounded-lg border border-transparent hover:border-primary/20" asChild>
+                          <a href={`/api/v1/media/download/${report.fileId}`} target="_blank">
+                            <Download className="h-3.5 w-3.5 mr-1.5" /> Tải PDF
+                          </a>
                         </Button>
-                      ))}
+                      )}
                       <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                         <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
                       </Button>
@@ -200,9 +192,9 @@ export default function TransparencyPage() {
             </tbody>
           </table>
           <div className="p-4 border-t bg-muted/5 text-center">
-             <Button variant="ghost" size="sm" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">
-                Tải về toàn bộ hồ sơ năm 2026
-             </Button>
+            <Button variant="ghost" size="sm" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground hover:text-primary">
+              Tải về toàn bộ hồ sơ năm 2026
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -211,5 +203,5 @@ export default function TransparencyPage() {
 }
 
 const Plus = ({ className }: { className?: string }) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+  <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5v14" /></svg>
 );

@@ -41,11 +41,13 @@ message Document {
   int32 pageCount = 25;
   int32 attachmentCount = 26;
   string linkedDocumentId = 27;
-  string createdAt = 28;
-  string updatedAt = 29;
+  int32 fiscalYear = 28;
+  string transparencyCategory = 29;
+  string createdAt = 30;
+  string updatedAt = 31;
   
-  category.Category type = 30;
-  category.Category field = 31;
+  category.Category type = 32;
+  category.Category field = 33;
 }
 
 message DocumentResponse {
@@ -93,6 +95,9 @@ message ListDocumentsRequest {
   string urgency = 7;
   string startDate = 8;
   string endDate = 9;
+  bool isPublic = 10;
+  int32 fiscalYear = 11;
+  string transparencyCategory = 12;
 }
 
 message ListDocumentsResponse {

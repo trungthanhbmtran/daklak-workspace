@@ -40,6 +40,9 @@ const documentSchema = z.object({
   pageCount: z.number().min(1),
   attachmentCount: z.number().min(0),
   linkedDocumentId: z.string().optional(),
+  isPublic: z.boolean().default(false),
+  fiscalYear: z.number().optional(),
+  transparencyCategory: z.enum(["NONE", "ESTIMATE", "SETTLEMENT", "EXECUTION"]).default("NONE"),
 });
 
 type DocumentFormValues = z.infer<typeof documentSchema>;
@@ -74,6 +77,9 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
       pageCount: 1,
       attachmentCount: 0,
       linkedDocumentId: "",
+      isPublic: false,
+      fiscalYear: new Date().getFullYear(),
+      transparencyCategory: "NONE",
     },
   });
 
@@ -351,6 +357,47 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
                       <FormMessage />
                     </FormItem>
                   )} />
+                </div>
+
+                <div className="md:col-span-12 bg-primary/5 p-4 rounded-xl border border-primary/10">
+                   <div className="flex items-center justify-between mb-4">
+                      <div className="space-y-0.5">
+                         <FormLabel className="text-sm font-bold text-primary uppercase">Công khai tài chính</FormLabel>
+                         <p className="text-[10px] text-muted-foreground">Văn bản sẽ hiển thị tại mục "Công khai ngân sách"</p>
+                      </div>
+                      <FormField control={form.control} name="isPublic" render={({ field }) => (
+                        <FormItem className="flex items-center space-x-2">
+                           <FormControl>
+                              <input type="checkbox" checked={field.value} onChange={field.onChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                           </FormControl>
+                        </FormItem>
+                      )} />
+                   </div>
+                   
+                   {form.watch("isPublic") && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                         <FormField control={form.control} name="fiscalYear" render={({ field }) => (
+                           <FormItem>
+                             <FormLabel className="text-[10px] font-bold uppercase">Năm tài chính</FormLabel>
+                             <FormControl><Input type="number" className="bg-background border-primary/20 h-9" {...field} onChange={e => field.onChange(parseInt(e.target.value))} /></FormControl>
+                           </FormItem>
+                         )} />
+                         <FormField control={form.control} name="transparencyCategory" render={({ field }) => (
+                           <FormItem>
+                             <FormLabel className="text-[10px] font-bold uppercase">Phân loại báo cáo</FormLabel>
+                             <Select onValueChange={field.onChange} value={field.value}>
+                               <FormControl><SelectTrigger className="bg-background border-primary/20 h-9"><SelectValue /></SelectTrigger></FormControl>
+                               <SelectContent>
+                                 <SelectItem value="NONE">-- Chọn loại --</SelectItem>
+                                 <SelectItem value="ESTIMATE">Dự toán thu - chi</SelectItem>
+                                 <SelectItem value="SETTLEMENT">Quyết toán thu - chi</SelectItem>
+                                 <SelectItem value="EXECUTION">Thực hiện ngân sách</SelectItem>
+                               </SelectContent>
+                             </Select>
+                           </FormItem>
+                         )} />
+                      </div>
+                   )}
                 </div>
               </div>
             </div>

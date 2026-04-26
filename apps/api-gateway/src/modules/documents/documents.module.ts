@@ -4,6 +4,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { DocumentCategoryController } from './document-category.controller';
 import { DocumentsController } from './documents.controller';
 import { MinutesController } from './minutes.controller';
+import { ConsultationsController } from './consultations.controller';
 
 @Module({
   imports: [
@@ -11,6 +12,6 @@ import { MinutesController } from './minutes.controller';
     registerGrpcService(MICROSERVICES.DOCUMENT),
     registerGrpcService(MICROSERVICES.MINUTES),
   ],
-  controllers: [DocumentCategoryController, DocumentsController, MinutesController],
+  controllers: [DocumentCategoryController, DocumentsController, MinutesController, ConsultationsController],
 })
 export class DocumentsModule { }

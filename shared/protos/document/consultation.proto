@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package document;
+
+import "common/common.proto";
+
+service ConsultationService {
+  rpc CreateConsultation(CreateConsultationRequest) returns (ConsultationResponse) {}
+  rpc GetConsultation(GetConsultationRequest) returns (Consultation) {}
+  rpc ListConsultations(ListConsultationsRequest) returns (ListConsultationsResponse) {}
+  rpc UpdateConsultation(UpdateConsultationRequest) returns (ConsultationResponse) {}
+  rpc DeleteConsultation(DeleteConsultationRequest) returns (common.DeleteResponse) {}
+  
+  rpc SubmitResponse(SubmitResponseRequest) returns (ConsultationResponseItem) {}
+  rpc ListResponses(ListResponsesRequest) returns (ListResponsesResponse) {}
+}
+
+message Consultation {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string documentId = 4;
+  string deadline = 5;
+  string status = 6;
+  string issuerId = 7;
+  string issuerName = 8;
+  bool isUrgent = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+  
+  int32 totalResponses = 12;
+  int32 totalUnits = 13;
+}
+
+message ConsultationResponseItem {
+  string id = 1;
+  string consultationId = 2;
+  string unitId = 3;
+  string unitName = 4;
+  string userId = 5;
+  string content = 6;
+  string fileId = 7;
+  string status = 8;
+  string respondedAt = 9;
+}
+
+message CreateConsultationRequest {
+  string title = 1;
+  string description = 2;
+  string documentId = 3;
+  string deadline = 4;
+  bool isUrgent = 5;
+  repeated string targetUnitIds = 6;
+}
+
+message ConsultationResponse {
+  Consultation data = 1;
+}
+
+message GetConsultationRequest {
+  string id = 1;
+}
+
+message ListConsultationsRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string status = 4;
+}
+
+message ListConsultationsResponse {
+  repeated Consultation data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateConsultationRequest {
+  string id = 1;
+  optional string title = 2;
+  optional string deadline = 3;
+  optional string status = 4;
+}
+
+message DeleteConsultationRequest {
+  string id = 1;
+}
+
+message SubmitResponseRequest {
+  string consultationId = 1;
+  string content = 2;
+  string fileId = 3;
+}
+
+message ListResponsesRequest {
+  string consultationId = 1;
+}
+
+message ListResponsesResponse {
+  repeated ConsultationResponseItem data = 1;
+}
