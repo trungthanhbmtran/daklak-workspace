@@ -15,7 +15,6 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
-
     AuthModule,
     HrmModule,
     UsersModule,
@@ -23,7 +22,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     DocumentsModule,
     PostsModule,
     MediaModule,
-    WorkflowModule,
+    WorkflowModule
   ],
   controllers: [AppController],
   providers: [],
