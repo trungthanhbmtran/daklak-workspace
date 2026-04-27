@@ -85,9 +85,12 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
 
   useEffect(() => {
     const loadCategories = async () => {
-      const types = await getCategories("DOCUMENT_TYPE");
-      const fields = await getCategories("DOCUMENT_FIELD");
-      setCategories({ types, fields });
+      const typeRes = await getCategories("DOCUMENT_TYPE");
+      const fieldRes = await getCategories("DOCUMENT_FIELD");
+      setCategories({ 
+        types: typeRes?.data || [], 
+        fields: fieldRes?.data || [] 
+      });
     };
     if (isOpen) loadCategories();
   }, [isOpen]);

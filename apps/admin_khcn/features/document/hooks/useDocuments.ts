@@ -15,7 +15,7 @@ export function useDocuments() {
         const response: any = await apiClient.get(`${API_BASE}/categories`, {
           params: { groupCode }
         });
-        return response;
+        return response.data;
       },
     });
   };
@@ -103,7 +103,7 @@ export function useDocuments() {
       queryFn: async () => {
         if (!id) return null;
         const response: any = await apiClient.get(`${API_BASE}/${id}`);
-        return response;
+        return response.data;
       },
       enabled: !!id,
     });
@@ -115,7 +115,7 @@ export function useDocuments() {
       queryKey: ['consultations', params],
       queryFn: async () => {
         const response: any = await apiClient.get(`${API_BASE}/consultations`, { params });
-        return response;
+        return response.data;
       },
     });
   };
@@ -137,7 +137,7 @@ export function useDocuments() {
       queryKey: ['minutes', params],
       queryFn: async () => {
         const response: any = await apiClient.get(`${API_BASE}/minutes`, { params });
-        return response;
+        return response.data;
       },
     });
   };
@@ -158,7 +158,7 @@ export function useDocuments() {
       queryKey: ['document-stats'],
       queryFn: async () => {
         const response: any = await apiClient.get(`${API_BASE}/stats`);
-        return response;
+        return response.data;
       },
     });
   };
@@ -166,7 +166,7 @@ export function useDocuments() {
   // Compat for old code (if needed)
   const getCategories = async (groupCode: string) => {
     const response: any = await apiClient.get(`${API_BASE}/categories`, { params: { groupCode } });
-    return response;
+    return response.data;
   };
 
   return {

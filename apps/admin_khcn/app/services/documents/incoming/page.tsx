@@ -14,10 +14,17 @@ import { DocumentUploadModal } from "@/features/document/components/DocumentUplo
 export default function IncomingDocumentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const { useListDocuments, deleteDocument } = useDocuments();
 
-  const { data: documentsData, isLoading } = useListDocuments({
-    search: searchTerm,
+  // Debounce search
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const { data: documentsData, isLoading, error } = useListDocuments({
+    search: debouncedSearch,
     isIncoming: true,
   });
 
@@ -27,6 +34,13 @@ export default function IncomingDocumentsPage() {
     if (confirm("Bạn có chắc chắn muốn xóa văn bản này?")) {
       await deleteDocument(id);
     }
+  };
+
+  const formatDate = (dateString: string | null | undefined) => {
+    if (!dateString) return "---";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "---";
+    return date.toLocaleDateString('vi-VN');
   };
 
   return (
@@ -81,6 +95,8 @@ export default function IncomingDocumentsPage() {
             <tbody className="divide-y divide-border/50 bg-background/40">
               {isLoading ? (
                 <tr><td colSpan={5} className="py-20 text-center text-muted-foreground font-medium italic">Đang tải danh sách văn bản...</td></tr>
+              ) : error ? (
+                <tr><td colSpan={5} className="py-20 text-center text-rose-600 font-bold italic">Có lỗi xảy ra khi tải dữ liệu. Vui lòng kiểm tra lại API!</td></tr>
               ) : documents.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-24 text-center">
@@ -119,7 +135,7 @@ export default function IncomingDocumentsPage() {
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-bold text-foreground">{new Date(doc.arrivalDate || doc.createdAt).toLocaleDateString('vi-VN')}</span>
+                      <span className="font-bold text-foreground">{formatDate(doc.arrivalDate || doc.createdAt)}</span>
                       <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">Sổ số: {doc.arrivalNumber || '---'}</span>
                     </div>
                   </td>
