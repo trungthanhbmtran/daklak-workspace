@@ -1,24 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class DocumentService {
+  private readonly logger = new Logger(DocumentService.name);
+
   constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
-    const document = await this.prisma.document.create({
-      data: {
-        ...data,
-        issueDate: data.issueDate ? new Date(data.issueDate) : null,
-        arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
-        processingDeadline: data.processingDeadline ? new Date(data.processingDeadline) : null,
-      },
-      include: {
-        type: true,
-        field: true,
-      },
-    });
-    return { data: this.mapToProto(document) };
+    this.logger.log(`Creating document with data: ${JSON.stringify(data)}`);
+    try {
+      const document = await this.prisma.document.create({
+        data: {
+          ...data,
+          issueDate: data.issueDate ? new Date(data.issueDate) : null,
+          arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
+          processingDeadline: data.processingDeadline ? new Date(data.processingDeadline) : null,
+        },
+        include: {
+          type: true,
+          field: true,
+        },
+      });
+      this.logger.log(`Document created successfully with ID: ${document.id}`);
+      return { data: this.mapToProto(document) };
+    } catch (error) {
+      this.logger.error(`Failed to create document: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   async findOne(id: string) {
@@ -90,21 +99,28 @@ export class DocumentService {
   }
 
   async update(id: string, data: any) {
-    const updateData = { ...data };
-    delete updateData.id;
-    if (updateData.issueDate) updateData.issueDate = new Date(updateData.issueDate);
-    if (updateData.arrivalDate) updateData.arrivalDate = new Date(updateData.arrivalDate);
-    if (updateData.processingDeadline) updateData.processingDeadline = new Date(updateData.processingDeadline);
+    this.logger.log(`Updating document ${id} with data: ${JSON.stringify(data)}`);
+    try {
+      const updateData = { ...data };
+      delete updateData.id;
+      if (updateData.issueDate) updateData.issueDate = new Date(updateData.issueDate);
+      if (updateData.arrivalDate) updateData.arrivalDate = new Date(updateData.arrivalDate);
+      if (updateData.processingDeadline) updateData.processingDeadline = new Date(updateData.processingDeadline);
 
-    const document = await this.prisma.document.update({
-      where: { id },
-      data: updateData,
-      include: {
-        type: true,
-        field: true,
-      },
-    });
-    return { data: this.mapToProto(document) };
+      const document = await this.prisma.document.update({
+        where: { id },
+        data: updateData,
+        include: {
+          type: true,
+          field: true,
+        },
+      });
+      this.logger.log(`Document ${id} updated successfully`);
+      return { data: this.mapToProto(document) };
+    } catch (error) {
+      this.logger.error(`Failed to update document ${id}: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   async remove(id: string) {
