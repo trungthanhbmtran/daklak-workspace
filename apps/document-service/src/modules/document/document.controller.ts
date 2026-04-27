@@ -32,7 +32,7 @@ export class DocumentController {
   }
 
   @GrpcMethod('DocumentService', 'GetStatistics')
-  getStatistics() {
+  getStatistics(data: any) {
     return this.documentService.getStatistics();
   }
 }

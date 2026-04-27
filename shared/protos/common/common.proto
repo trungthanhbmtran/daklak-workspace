@@ -64,3 +64,5 @@ message StandardResponse {
 message DeleteResponse {
   bool success = 1;
 }
+
+message Empty {}

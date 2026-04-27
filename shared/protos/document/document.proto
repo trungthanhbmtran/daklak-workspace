@@ -104,7 +104,7 @@ message ListDocumentsRequest {
   string urgency = 7;
   string startDate = 8;
   string endDate = 9;
-  bool isPublic = 10;
+  optional bool isPublic = 10;
   int32 fiscalYear = 11;
   string transparencyCategory = 12;
 }

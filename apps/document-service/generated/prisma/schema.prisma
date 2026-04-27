@@ -1,0 +1,133 @@
+model Category {
+  id            String   @id @default(uuid())
+  name          String
+  slug          String   @unique
+  parentId      String?  @map("parent_id")
+  lft           Int      @default(0)
+  rgt           Int      @default(0)
+  depth         Int      @default(0)
+  status        Boolean  @default(true)
+  orderIndex    Int      @default(0) @map("order_index")
+  description   String?  @db.Text
+  type          String // DOCUMENT_TYPE, DOCUMENT_FIELD, ISSUING_AUTHORITY
+  isGovStandard Boolean  @default(false) @map("is_gov_standard")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  parent           Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  children         Category[] @relation("CategoryToCategory")
+  documentsByType  Document[] @relation("DocumentType")
+  documentsByField Document[] @relation("DocumentField")
+
+  @@index([lft, rgt])
+  @@index([parentId])
+  @@index([type])
+  @@map("document_categories")
+}
+
+model Consultation {
+  id          String   @id @default(uuid())
+  title       String // Tiêu đề đợt lấy ý kiến
+  description String?  @db.Text
+  documentId  String?  @map("document_id") // Văn bản dự thảo đính kèm
+  deadline    DateTime // Hạn góp ý
+  status      String   @default("OPEN") // OPEN, CLOSED, PENDING
+  issuerId    String?  @map("issuer_id") // Người tạo/Đơn vị chủ trì
+  issuerName  String?  @map("issuer_name")
+  isUrgent    Boolean  @default(false) @map("is_urgent")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  responses ConsultationResponse[]
+
+  @@map("consultations")
+}
+
+model ConsultationResponse {
+  id             String    @id @default(uuid())
+  consultationId String    @map("consultation_id")
+  unitId         String    @map("unit_id") // Đơn vị góp ý
+  unitName       String?   @map("unit_name")
+  userId         String?   @map("user_id") // Người góp ý
+  content        String?   @db.Text // Nội dung góp ý
+  fileId         String?   @map("file_id") // Tệp phản hồi (nếu có)
+  status         String    @default("PENDING") // PENDING, RESPONDED
+  respondedAt    DateTime? @map("responded_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@map("consultation_responses")
+}
+
+model Document {
+  id                   String    @id @default(uuid())
+  documentNumber       String    @map("document_number") // Số văn bản (đi/đến)
+  notation             String? // Ký hiệu (ví dụ: QĐ-UBND)
+  abstract             String    @db.Text // Trích yếu
+  content              String?   @db.LongText // Nội dung
+  typeId               String?   @map("type_id") // Loại văn bản (Quyết định, Công văn...)
+  fieldId              String?   @map("field_id") // Lĩnh vực (Khoa học, Công nghệ...)
+  issuingAuthorityId   String?   @map("issuing_authority_id") // Cơ quan ban hành
+  issuerName           String?   @map("issuer_name")
+  signerId             String?   @map("signer_id")
+  signerName           String?   @map("signer_name")
+  signerPosition       String?   @map("signer_position")
+  issueDate            DateTime? @map("issue_date")
+  arrivalDate          DateTime? @map("arrival_date")
+  arrivalNumber        String?   @map("arrival_number") // Số đến (dành cho văn bản đến)
+  processingDeadline   DateTime? @map("processing_deadline") // Hạn xử lý
+  recipients           String?   @db.Text // Nơi nhận
+  urgency              String    @default("NORMAL") // NORMAL, URGENT, FLASH
+  securityLevel        String    @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
+  status               String    @default("DRAFT") // DRAFT, PUBLISHED, ARCHIVED
+  isPublic             Boolean   @default(false) @map("is_public")
+  fileId               String?   @map("file_id")
+  signatureValid       Boolean   @default(false) @map("signature_valid")
+  pageCount            Int       @default(1) @map("page_count")
+  attachmentCount      Int       @default(0) @map("attachment_count")
+  linkedDocumentId     String?   @map("linked_document_id")
+  fiscalYear           Int?      @map("fiscal_year") // Năm tài chính (cho công khai ngân sách)
+  transparencyCategory String?   @map("transparency_category") // ESTIMATE, SETTLEMENT, EXECUTION
+  createdAt            DateTime  @default(now()) @map("created_at")
+  updatedAt            DateTime  @updatedAt @map("updated_at")
+
+  type  Category? @relation("DocumentType", fields: [typeId], references: [id])
+  field Category? @relation("DocumentField", fields: [fieldId], references: [id])
+
+  @@index([documentNumber])
+  @@index([typeId])
+  @@index([fieldId])
+  @@index([status])
+  @@map("documents")
+}
+
+generator client {
+  provider     = "prisma-client-js"
+  output       = "../../generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Minutes {
+  id         String    @id @default(uuid())
+  title      String // Tiêu đề biên bản
+  startTime  DateTime  @map("start_time") // Thời gian bắt đầu
+  endTime    DateTime? @map("end_time") // Thời gian kết thúc
+  location   String? // Địa điểm
+  chairman   String? // Chủ trì
+  secretary  String? // Thư ký
+  attendees  String?   @db.Text // Thành phần tham dự (JSON string)
+  content    String?   @db.LongText // Nội dung cuộc họp
+  conclusion String?   @db.Text // Kết luận
+  documentId String?   @map("document_id") // Liên kết với văn bản (nếu có)
+  status     String    @default("DRAFT") // DRAFT, SIGNED, ARCHIVED
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("minutes")
+}

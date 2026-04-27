@@ -33,7 +33,7 @@ export class DocumentCategoryController implements OnModuleInit {
 
   @Get(':id')
   async getCategory(@Param('id') id: string) {
-    return firstValueFrom(this.categoryService.GetCategory({ id: parseInt(id) }));
+    return firstValueFrom(this.categoryService.GetCategory({ id }));
   }
 
   @Post()
@@ -43,12 +43,12 @@ export class DocumentCategoryController implements OnModuleInit {
 
   @Put(':id')
   async updateCategory(@Param('id') id: string, @Body() body: any) {
-    const payload = { id: parseInt(id), ...body };
+    const payload = { id, ...body };
     return firstValueFrom(this.categoryService.UpdateCategory(payload));
   }
 
   @Delete(':id')
   async deleteCategory(@Param('id') id: string) {
-    return firstValueFrom(this.categoryService.DeleteCategory({ id: parseInt(id) }));
+    return firstValueFrom(this.categoryService.DeleteCategory({ id }));
   }
 }
