@@ -40,6 +40,7 @@ export class DocumentsController implements OnModuleInit {
     if (query.isPublic !== undefined) req.isPublic = query.isPublic === 'true';
     if (query.fiscalYear) req.fiscalYear = parseInt(query.fiscalYear);
     if (query.transparencyCategory) req.transparencyCategory = query.transparencyCategory;
+    if (query.isIncoming !== undefined) req.isIncoming = query.isIncoming === 'true';
     return firstValueFrom(this.documentService.ListDocuments(req));
   }
 

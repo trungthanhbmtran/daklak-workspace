@@ -52,6 +52,13 @@ export class DocumentService {
     if (query.isPublic !== undefined) where.isPublic = query.isPublic;
     if (query.fiscalYear) where.fiscalYear = parseInt(query.fiscalYear.toString());
     if (query.transparencyCategory) where.transparencyCategory = query.transparencyCategory;
+    if (query.isIncoming !== undefined) {
+      if (query.isIncoming) {
+        where.arrivalNumber = { not: null };
+      } else {
+        where.arrivalNumber = null;
+      }
+    }
 
     if (startDate || endDate) {
       where.issueDate = {};

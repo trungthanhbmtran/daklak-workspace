@@ -18,6 +18,7 @@ export default function IncomingDocumentsPage() {
 
   const { data: documentsData, isLoading } = useListDocuments({
     search: searchTerm,
+    isIncoming: true,
   });
 
   const documents = documentsData?.data || [];

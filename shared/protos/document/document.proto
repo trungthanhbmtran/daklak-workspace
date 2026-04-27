@@ -107,6 +107,7 @@ message ListDocumentsRequest {
   optional bool isPublic = 10;
   int32 fiscalYear = 11;
   string transparencyCategory = 12;
+  optional bool isIncoming = 13;
 }
 
 message ListDocumentsResponse {
