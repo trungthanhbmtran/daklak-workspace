@@ -20,7 +20,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     HrmModule,
     UsersModule,
     NotificationsModule,
-    // DocumentsModule, // Temporarily disabled: missing protos
+    DocumentsModule,
     PostsModule,
     MediaModule,
     WorkflowModule,
