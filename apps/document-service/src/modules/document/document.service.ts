@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class DocumentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
     const document = await this.prisma.document.create({
@@ -126,21 +126,21 @@ export class DocumentService {
       // incomingPending: Documents with isIncoming: true and status PROCESSING
       this.prisma.document.count({ where: { isIncoming: true, status: 'PROCESSING' } }),
       // incomingLate: Documents with isIncoming: true, status PROCESSING and deadline < now
-      this.prisma.document.count({ 
-        where: { 
-          isIncoming: true, 
-          status: 'PROCESSING', 
-          processingDeadline: { lt: now } 
-        } 
+      this.prisma.document.count({
+        where: {
+          isIncoming: true,
+          status: 'PROCESSING',
+          processingDeadline: { lt: now }
+        }
       }),
       // outgoingTotal: Documents with isIncoming: false
       this.prisma.document.count({ where: { isIncoming: false } }),
       // urgentTotal: Urgency is URGENT or FLASH
-      this.prisma.document.count({ 
-        where: { 
+      this.prisma.document.count({
+        where: {
           urgency: { in: ['URGENT', 'FLASH'] },
           status: 'PROCESSING'
-        } 
+        }
       }),
     ]);
 

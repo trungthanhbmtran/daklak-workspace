@@ -60,6 +60,7 @@ export type DocumentMinAggregateOutputType = {
   securityLevel: string | null
   status: string | null
   isPublic: boolean | null
+  isIncoming: boolean | null
   fileId: string | null
   signatureValid: boolean | null
   pageCount: number | null
@@ -93,6 +94,7 @@ export type DocumentMaxAggregateOutputType = {
   securityLevel: string | null
   status: string | null
   isPublic: boolean | null
+  isIncoming: boolean | null
   fileId: string | null
   signatureValid: boolean | null
   pageCount: number | null
@@ -126,6 +128,7 @@ export type DocumentCountAggregateOutputType = {
   securityLevel: number
   status: number
   isPublic: number
+  isIncoming: number
   fileId: number
   signatureValid: number
   pageCount: number
@@ -173,6 +176,7 @@ export type DocumentMinAggregateInputType = {
   securityLevel?: true
   status?: true
   isPublic?: true
+  isIncoming?: true
   fileId?: true
   signatureValid?: true
   pageCount?: true
@@ -206,6 +210,7 @@ export type DocumentMaxAggregateInputType = {
   securityLevel?: true
   status?: true
   isPublic?: true
+  isIncoming?: true
   fileId?: true
   signatureValid?: true
   pageCount?: true
@@ -239,6 +244,7 @@ export type DocumentCountAggregateInputType = {
   securityLevel?: true
   status?: true
   isPublic?: true
+  isIncoming?: true
   fileId?: true
   signatureValid?: true
   pageCount?: true
@@ -359,6 +365,7 @@ export type DocumentGroupByOutputType = {
   securityLevel: string
   status: string
   isPublic: boolean
+  isIncoming: boolean
   fileId: string | null
   signatureValid: boolean
   pageCount: number
@@ -415,6 +422,7 @@ export type DocumentWhereInput = {
   securityLevel?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.StringFilter<"Document"> | string
   isPublic?: Prisma.BoolFilter<"Document"> | boolean
+  isIncoming?: Prisma.BoolFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolFilter<"Document"> | boolean
   pageCount?: Prisma.IntFilter<"Document"> | number
@@ -450,6 +458,7 @@ export type DocumentOrderByWithRelationInput = {
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  isIncoming?: Prisma.SortOrder
   fileId?: Prisma.SortOrderInput | Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
   pageCount?: Prisma.SortOrder
@@ -489,6 +498,7 @@ export type DocumentWhereUniqueInput = Prisma.AtLeast<{
   securityLevel?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.StringFilter<"Document"> | string
   isPublic?: Prisma.BoolFilter<"Document"> | boolean
+  isIncoming?: Prisma.BoolFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolFilter<"Document"> | boolean
   pageCount?: Prisma.IntFilter<"Document"> | number
@@ -524,6 +534,7 @@ export type DocumentOrderByWithAggregationInput = {
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  isIncoming?: Prisma.SortOrder
   fileId?: Prisma.SortOrderInput | Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
   pageCount?: Prisma.SortOrder
@@ -565,6 +576,7 @@ export type DocumentScalarWhereWithAggregatesInput = {
   securityLevel?: Prisma.StringWithAggregatesFilter<"Document"> | string
   status?: Prisma.StringWithAggregatesFilter<"Document"> | string
   isPublic?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
+  isIncoming?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableWithAggregatesFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolWithAggregatesFilter<"Document"> | boolean
   pageCount?: Prisma.IntWithAggregatesFilter<"Document"> | number
@@ -596,6 +608,7 @@ export type DocumentCreateInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -631,6 +644,7 @@ export type DocumentUncheckedCreateInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -662,6 +676,7 @@ export type DocumentUpdateInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -697,6 +712,7 @@ export type DocumentUncheckedUpdateInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -730,6 +746,7 @@ export type DocumentCreateManyInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -761,6 +778,7 @@ export type DocumentUpdateManyMutationInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -794,6 +812,7 @@ export type DocumentUncheckedUpdateManyInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -843,6 +862,7 @@ export type DocumentCountOrderByAggregateInput = {
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  isIncoming?: Prisma.SortOrder
   fileId?: Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
   pageCount?: Prisma.SortOrder
@@ -882,6 +902,7 @@ export type DocumentMaxOrderByAggregateInput = {
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  isIncoming?: Prisma.SortOrder
   fileId?: Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
   pageCount?: Prisma.SortOrder
@@ -915,6 +936,7 @@ export type DocumentMinOrderByAggregateInput = {
   securityLevel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
+  isIncoming?: Prisma.SortOrder
   fileId?: Prisma.SortOrder
   signatureValid?: Prisma.SortOrder
   pageCount?: Prisma.SortOrder
@@ -1044,6 +1066,7 @@ export type DocumentCreateWithoutTypeInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -1077,6 +1100,7 @@ export type DocumentUncheckedCreateWithoutTypeInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -1118,6 +1142,7 @@ export type DocumentCreateWithoutFieldInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -1151,6 +1176,7 @@ export type DocumentUncheckedCreateWithoutFieldInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -1213,6 +1239,7 @@ export type DocumentScalarWhereInput = {
   securityLevel?: Prisma.StringFilter<"Document"> | string
   status?: Prisma.StringFilter<"Document"> | string
   isPublic?: Prisma.BoolFilter<"Document"> | boolean
+  isIncoming?: Prisma.BoolFilter<"Document"> | boolean
   fileId?: Prisma.StringNullableFilter<"Document"> | string | null
   signatureValid?: Prisma.BoolFilter<"Document"> | boolean
   pageCount?: Prisma.IntFilter<"Document"> | number
@@ -1261,6 +1288,7 @@ export type DocumentCreateManyTypeInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -1293,6 +1321,7 @@ export type DocumentCreateManyFieldInput = {
   securityLevel?: string
   status?: string
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: string | null
   signatureValid?: boolean
   pageCount?: number
@@ -1324,6 +1353,7 @@ export type DocumentUpdateWithoutTypeInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1357,6 +1387,7 @@ export type DocumentUncheckedUpdateWithoutTypeInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1389,6 +1420,7 @@ export type DocumentUncheckedUpdateManyWithoutTypeInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1420,6 +1452,7 @@ export type DocumentUpdateWithoutFieldInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1453,6 +1486,7 @@ export type DocumentUncheckedUpdateWithoutFieldInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1485,6 +1519,7 @@ export type DocumentUncheckedUpdateManyWithoutFieldInput = {
   securityLevel?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isIncoming?: Prisma.BoolFieldUpdateOperationsInput | boolean
   fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   signatureValid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pageCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1520,6 +1555,7 @@ export type DocumentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   securityLevel?: boolean
   status?: boolean
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: boolean
   signatureValid?: boolean
   pageCount?: boolean
@@ -1557,6 +1593,7 @@ export type DocumentSelectScalar = {
   securityLevel?: boolean
   status?: boolean
   isPublic?: boolean
+  isIncoming?: boolean
   fileId?: boolean
   signatureValid?: boolean
   pageCount?: boolean
@@ -1568,7 +1605,7 @@ export type DocumentSelectScalar = {
   updatedAt?: boolean
 }
 
-export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "fiscalYear" | "transparencyCategory" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
+export type DocumentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "documentNumber" | "notation" | "abstract" | "content" | "typeId" | "fieldId" | "issuingAuthorityId" | "issuerName" | "signerId" | "signerName" | "signerPosition" | "issueDate" | "arrivalDate" | "arrivalNumber" | "processingDeadline" | "recipients" | "urgency" | "securityLevel" | "status" | "isPublic" | "isIncoming" | "fileId" | "signatureValid" | "pageCount" | "attachmentCount" | "linkedDocumentId" | "fiscalYear" | "transparencyCategory" | "createdAt" | "updatedAt", ExtArgs["result"]["document"]>
 export type DocumentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   type?: boolean | Prisma.Document$typeArgs<ExtArgs>
   field?: boolean | Prisma.Document$fieldArgs<ExtArgs>
@@ -1602,6 +1639,7 @@ export type $DocumentPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     securityLevel: string
     status: string
     isPublic: boolean
+    isIncoming: boolean
     fileId: string | null
     signatureValid: boolean
     pageCount: number
@@ -2003,6 +2041,7 @@ export interface DocumentFieldRefs {
   readonly securityLevel: Prisma.FieldRef<"Document", 'String'>
   readonly status: Prisma.FieldRef<"Document", 'String'>
   readonly isPublic: Prisma.FieldRef<"Document", 'Boolean'>
+  readonly isIncoming: Prisma.FieldRef<"Document", 'Boolean'>
   readonly fileId: Prisma.FieldRef<"Document", 'String'>
   readonly signatureValid: Prisma.FieldRef<"Document", 'Boolean'>
   readonly pageCount: Prisma.FieldRef<"Document", 'Int'>

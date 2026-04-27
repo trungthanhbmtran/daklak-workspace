@@ -853,6 +853,7 @@ export const DocumentScalarFieldEnum = {
   securityLevel: 'securityLevel',
   status: 'status',
   isPublic: 'isPublic',
+  isIncoming: 'isIncoming',
   fileId: 'fileId',
   signatureValid: 'signatureValid',
   pageCount: 'pageCount',
