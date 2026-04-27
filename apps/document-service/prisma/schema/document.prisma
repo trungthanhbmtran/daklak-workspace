@@ -20,6 +20,7 @@ model Document {
   securityLevel      String    @default("NORMAL") // NORMAL, CONFIDENTIAL, SECRET, TOP_SECRET
   status             String    @default("DRAFT")  // DRAFT, PUBLISHED, ARCHIVED
   isPublic           Boolean   @default(false) @map("is_public")
+  isIncoming         Boolean   @default(true) @map("is_incoming")
   fileId             String?   @map("file_id")
   signatureValid     Boolean   @default(false) @map("signature_valid")
   pageCount          Int       @default(1) @map("page_count")

@@ -44,6 +44,7 @@ message Document {
   string securityLevel = 19;
   string status = 20;
   bool isPublic = 21;
+  bool isIncoming = 34;
   string fileId = 22;
   string fileUrl = 23;
   bool signatureValid = 24;
@@ -83,6 +84,7 @@ message CreateDocumentRequest {
   string securityLevel = 17;
   string status = 18;
   bool isPublic = 19;
+  bool isIncoming = 25;
   string fileId = 20;
   bool signatureValid = 21;
   int32 pageCount = 22;
@@ -127,6 +129,14 @@ message UpdateDocumentRequest {
   optional string status = 8;
   optional string urgency = 9;
   optional bool isPublic = 10;
+  optional bool isIncoming = 18;
+  optional string arrivalNumber = 11;
+  optional string arrivalDate = 12;
+  optional string issueDate = 13;
+  optional string issuerName = 14;
+  optional string signerName = 15;
+  optional string signerPosition = 16;
+  optional string recipients = 17;
 }
 
 message DeleteDocumentRequest {

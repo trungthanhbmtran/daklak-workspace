@@ -53,11 +53,7 @@ export class DocumentService {
     if (query.fiscalYear) where.fiscalYear = parseInt(query.fiscalYear.toString());
     if (query.transparencyCategory) where.transparencyCategory = query.transparencyCategory;
     if (query.isIncoming !== undefined) {
-      if (query.isIncoming) {
-        where.arrivalNumber = { not: null };
-      } else {
-        where.arrivalNumber = null;
-      }
+      where.isIncoming = query.isIncoming;
     }
 
     if (startDate || endDate) {
@@ -125,20 +121,20 @@ export class DocumentService {
       outgoingTotal,
       urgentTotal
     ] = await Promise.all([
-      // incomingTotal: Documents with arrivalNumber
-      this.prisma.document.count({ where: { arrivalNumber: { not: null } } }),
-      // incomingPending: Documents with arrivalNumber and status PROCESSING
-      this.prisma.document.count({ where: { arrivalNumber: { not: null }, status: 'PROCESSING' } }),
-      // incomingLate: Documents with arrivalNumber, status PROCESSING and deadline < now
+      // incomingTotal: Documents with isIncoming: true
+      this.prisma.document.count({ where: { isIncoming: true } }),
+      // incomingPending: Documents with isIncoming: true and status PROCESSING
+      this.prisma.document.count({ where: { isIncoming: true, status: 'PROCESSING' } }),
+      // incomingLate: Documents with isIncoming: true, status PROCESSING and deadline < now
       this.prisma.document.count({ 
         where: { 
-          arrivalNumber: { not: null }, 
+          isIncoming: true, 
           status: 'PROCESSING', 
           processingDeadline: { lt: now } 
         } 
       }),
-      // outgoingTotal: Documents WITHOUT arrivalNumber
-      this.prisma.document.count({ where: { arrivalNumber: null } }),
+      // outgoingTotal: Documents with isIncoming: false
+      this.prisma.document.count({ where: { isIncoming: false } }),
       // urgentTotal: Urgency is URGENT or FLASH
       this.prisma.document.count({ 
         where: { 

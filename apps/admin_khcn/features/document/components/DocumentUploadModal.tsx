@@ -47,7 +47,7 @@ const documentSchema = z.object({
 
 type DocumentFormValues = z.infer<typeof documentSchema>;
 
-export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { isOpen: boolean, onClose: () => void, isIncoming?: boolean }) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [categories, setCategories] = useState<{ types: any[], fields: any[] }>({ types: [], fields: [] });
@@ -150,6 +150,7 @@ export function DocumentUploadModal({ isOpen, onClose }: { isOpen: boolean, onCl
       await createDocument({
         ...values,
         fileId: media.id,
+        isIncoming,
         signatureValid: signatureStatus === 'VALID',
       });
       onClose();

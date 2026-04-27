@@ -157,7 +157,11 @@ export default function IncomingDocumentsPage() {
         </CardContent>
       </Card>
 
-      <DocumentUploadModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <DocumentUploadModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        isIncoming={true}
+      />
     </div>
   );
 }
