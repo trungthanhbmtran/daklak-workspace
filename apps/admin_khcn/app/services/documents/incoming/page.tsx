@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search, Filter, Eye, Plus, Inbox, Trash2, Building2, FileText, User, Calendar, ShieldCheck
 } from "lucide-react";
