@@ -90,6 +90,8 @@ message CreateDocumentRequest {
   int32 pageCount = 22;
   int32 attachmentCount = 23;
   string linkedDocumentId = 24;
+  int32 fiscalYear = 26;
+  string transparencyCategory = 27;
 }
 
 message GetDocumentRequest {
@@ -137,6 +139,8 @@ message UpdateDocumentRequest {
   optional string signerName = 15;
   optional string signerPosition = 16;
   optional string recipients = 17;
+  optional int32 fiscalYear = 19;
+  optional string transparencyCategory = 20;
 }
 
 message DeleteDocumentRequest {

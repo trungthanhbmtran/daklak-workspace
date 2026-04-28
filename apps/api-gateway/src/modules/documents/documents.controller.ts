@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -9,12 +9,11 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class DocumentsController implements OnModuleInit {
-  private readonly logger = new Logger(DocumentsController.name);
   private documentService: any;
 
   constructor(
     @Inject(MICROSERVICES.DOCUMENT.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.documentService = this.client.getService(MICROSERVICES.DOCUMENT.SERVICE);
@@ -52,29 +51,13 @@ export class DocumentsController implements OnModuleInit {
 
   @Post()
   async createDocument(@Body() body: any) {
-    this.logger.log(`POST /admin/documents - Body: ${JSON.stringify(body)}`);
-    try {
-      const result = await firstValueFrom(this.documentService.CreateDocument(body));
-      this.logger.log(`POST /admin/documents - Success`);
-      return result;
-    } catch (error) {
-      this.logger.error(`POST /admin/documents - Error: ${error.message}`);
-      throw error;
-    }
+    return firstValueFrom(this.documentService.CreateDocument(body));
   }
 
   @Put(':id')
   async updateDocument(@Param('id') id: string, @Body() body: any) {
-    this.logger.log(`PUT /admin/documents/${id} - Body: ${JSON.stringify(body)}`);
-    try {
-      const payload = { id, ...body };
-      const result = await firstValueFrom(this.documentService.UpdateDocument(payload));
-      this.logger.log(`PUT /admin/documents/${id} - Success`);
-      return result;
-    } catch (error) {
-      this.logger.error(`PUT /admin/documents/${id} - Error: ${error.message}`);
-      throw error;
-    }
+    const payload = { id, ...body };
+    return firstValueFrom(this.documentService.UpdateDocument(payload));
   }
 
   @Delete(':id')

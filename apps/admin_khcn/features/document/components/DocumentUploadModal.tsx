@@ -149,6 +149,8 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
       const media = await uploadFile(uploadedFile);
       await createDocument({
         ...values,
+        pageCount: Number(values.pageCount),
+        attachmentCount: Number(values.attachmentCount),
         fileId: media.id,
         isIncoming,
         signatureValid: signatureStatus === 'VALID',
@@ -348,6 +350,48 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Người ký <span className="text-destructive">*</span></FormLabel>
                       <FormControl><Input placeholder="Họ và tên người ký" className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="md:col-span-6">
+                  <FormField name="signerPosition" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Chức vụ người ký</FormLabel>
+                      <FormControl><Input placeholder="VD: Giám đốc, Phó Giám đốc..." className="bg-muted/10 border-muted-foreground/10" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div className="md:col-span-6">
+                  <FormField name="pageCount" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số trang <span className="text-destructive">*</span></FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          className="bg-muted/10 border-muted-foreground/10" 
+                          {...field} 
+                          onChange={e => field.onChange(parseInt(e.target.value) || 0)} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+                <div className="md:col-span-6">
+                  <FormField name="attachmentCount" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số lượng bản đính kèm</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="number" 
+                          className="bg-muted/10 border-muted-foreground/10" 
+                          {...field} 
+                          onChange={e => field.onChange(parseInt(e.target.value) || 0)} 
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
