@@ -1,28 +1,4 @@
 -- CreateTable
-CREATE TABLE `document_categories` (
-    `id` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `slug` VARCHAR(191) NOT NULL,
-    `parent_id` VARCHAR(191) NULL,
-    `lft` INTEGER NOT NULL DEFAULT 0,
-    `rgt` INTEGER NOT NULL DEFAULT 0,
-    `depth` INTEGER NOT NULL DEFAULT 0,
-    `status` BOOLEAN NOT NULL DEFAULT true,
-    `order_index` INTEGER NOT NULL DEFAULT 0,
-    `description` TEXT NULL,
-    `type` VARCHAR(191) NOT NULL,
-    `is_gov_standard` BOOLEAN NOT NULL DEFAULT false,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updated_at` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `document_categories_slug_key`(`slug`),
-    INDEX `document_categories_lft_rgt_idx`(`lft`, `rgt`),
-    INDEX `document_categories_parent_id_idx`(`parent_id`),
-    INDEX `document_categories_type_idx`(`type`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `consultations` (
     `id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
@@ -118,13 +94,4 @@ CREATE TABLE `minutes` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- AddForeignKey
-ALTER TABLE `document_categories` ADD CONSTRAINT `document_categories_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `document_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `consultation_responses` ADD CONSTRAINT `consultation_responses_consultation_id_fkey` FOREIGN KEY (`consultation_id`) REFERENCES `consultations`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `documents` ADD CONSTRAINT `documents_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `document_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `documents` ADD CONSTRAINT `documents_field_id_fkey` FOREIGN KEY (`field_id`) REFERENCES `document_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
