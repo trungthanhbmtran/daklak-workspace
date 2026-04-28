@@ -31,9 +31,6 @@ model Document {
   createdAt          DateTime  @default(now()) @map("created_at")
   updatedAt          DateTime  @updatedAt @map("updated_at")
 
-  // type               Category? @relation("DocumentType", fields: [typeId], references: [id])
-  // field              Category? @relation("DocumentField", fields: [fieldId], references: [id])
-
   @@index([documentNumber])
   @@index([typeId])
   @@index([fieldId])

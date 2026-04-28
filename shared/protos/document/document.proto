@@ -3,7 +3,6 @@ syntax = "proto3";
 package document;
 
 import "common/common.proto";
-import "document/category.proto";
 
 service DocumentService {
   rpc CreateDocument(CreateDocumentRequest) returns (DocumentResponse) {}
@@ -55,9 +54,6 @@ message Document {
   string transparencyCategory = 29;
   string createdAt = 30;
   string updatedAt = 31;
-  
-  category.Category type = 32;
-  category.Category field = 33;
 }
 
 message DocumentResponse {
