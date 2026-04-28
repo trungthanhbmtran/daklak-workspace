@@ -143,21 +143,55 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
   };
 
   const onSubmit = async (values: DocumentFormValues) => {
-    if (!uploadedFile) return alert("Vui lòng đính kèm file văn bản!");
+    if (!uploadedFile) {
+      toast.error("Vui lòng đính kèm file văn bản!");
+      return;
+    }
 
     try {
+      console.log("[DocumentUpload] Starting submission with values:", values);
       const media = await uploadFile(uploadedFile);
-      await createDocument({
-        ...values,
-        pageCount: Number(values.pageCount),
-        attachmentCount: Number(values.attachmentCount),
+
+      if (!media || !media.id) {
+        throw new Error("Không thể upload file hoặc không nhận được ID file.");
+      }
+
+      const payload: any = {
+        documentNumber: values.documentNumber,
+        notation: values.notation,
+        abstract: values.abstract,
+        typeId: values.typeId,
+        fieldId: values.fieldId,
+        issuerName: values.issuerName,
+        signerName: values.signerName,
+        signerPosition: values.signerPosition,
+        issueDate: values.issueDate,
+        arrivalDate: values.arrivalDate || null,
+        arrivalNumber: values.arrivalNumber,
+        recipients: values.recipients,
+        urgency: values.urgency,
+        securityLevel: values.securityLevel,
+        isPublic: values.isPublic,
+        isIncoming: isIncoming,
         fileId: media.id,
-        isIncoming,
         signatureValid: signatureStatus === 'VALID',
-      });
+        pageCount: Number(values.pageCount) || 1,
+        attachmentCount: Number(values.attachmentCount) || 0,
+        linkedDocumentId: values.linkedDocumentId || null,
+      };
+
+      if (values.isPublic) {
+        payload.fiscalYear = values.fiscalYear;
+        payload.transparencyCategory = values.transparencyCategory;
+      }
+
+      console.log("[DocumentUpload] Final payload to API:", payload);
+      await createDocument(payload);
+
       onClose();
-    } catch (error) {
-      console.error("Submit error:", error);
+    } catch (error: any) {
+      console.error("[DocumentUpload] Submit error:", error);
+      toast.error(error.message || "Đã có lỗi xảy ra khi lưu văn bản.");
     }
   };
 
@@ -469,7 +503,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                       <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn loại..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.types.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
-                        {categories.types.length === 0 && <SelectItem value="QUYET_DINH">Quyết định</SelectItem>}
+                        {categories.types.length === 0 && <SelectItem value="DISABLED" disabled>Không có dữ liệu</SelectItem>}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -481,7 +515,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                       <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn lĩnh vực..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.fields.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
-                        {categories.fields.length === 0 && <SelectItem value="KHCN">Khoa học & Công nghệ</SelectItem>}
+                        {categories.fields.length === 0 && <SelectItem value="DISABLED" disabled>Không có dữ liệu</SelectItem>}
                       </SelectContent>
                     </Select>
                   </FormItem>
