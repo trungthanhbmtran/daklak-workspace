@@ -37,14 +37,14 @@ const documentSchema = z.object({
   signerName: z.string().min(1, "Người ký không được để trống"),
   signerPosition: z.string().optional(),
   recipients: z.string().optional(),
-  urgency: z.enum(["NORMAL", "URGENT", "FLASH"]),
-  securityLevel: z.enum(["NORMAL", "CONFIDENTIAL", "SECRET", "TOP_SECRET"]),
+  urgency: z.string().default("NORMAL"),
+  securityLevel: z.string().default("NORMAL"),
   pageCount: z.number().min(1),
   attachmentCount: z.number().min(0),
   linkedDocumentId: z.string().optional(),
   isPublic: z.boolean().default(false),
   fiscalYear: z.number().optional(),
-  transparencyCategory: z.enum(["NONE", "ESTIMATE", "SETTLEMENT", "EXECUTION"]).default("NONE"),
+  transparencyCategory: z.string().optional().default("NONE"),
 });
 
 type DocumentFormValues = z.infer<typeof documentSchema>;
@@ -52,7 +52,19 @@ type DocumentFormValues = z.infer<typeof documentSchema>;
 export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { isOpen: boolean, onClose: () => void, isIncoming?: boolean }) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [categories, setCategories] = useState<{ types: any[], fields: any[] }>({ types: [], fields: [] });
+  const [categories, setCategories] = useState<{
+    types: any[],
+    fields: any[],
+    urgencies: any[],
+    securityLevels: any[],
+    reportTypes: any[]
+  }>({
+    types: [],
+    fields: [],
+    urgencies: [],
+    securityLevels: [],
+    reportTypes: []
+  });
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureStatus, setSignatureStatus] = useState<'VALID' | 'INVALID' | 'NONE' | null>(null);
@@ -89,18 +101,22 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     const loadCategories = async () => {
       try {
         // Fetch from shared system categories (/api/v1/admin/categories)
-        const typeRes: any = await apiClient.get("/categories", { params: { group: "DOCUMENT_TYPE" } });
-        const domainRes: any = await apiClient.get("/categories", { params: { group: "DOCUMENT_DOMAIN" } });
-        
-        // Ensure data extraction matches the gateway response format (mapped to frontend items)
-        const typeList = Array.isArray(typeRes) ? typeRes : (typeRes?.data || []);
-        const domainList = Array.isArray(domainRes) ? domainRes : (domainRes?.data || []);
-        
-        console.log("[DocumentUpload] Loaded shared categories:", { types: typeList.length, domains: domainList.length });
-        
+        const [typeRes, domainRes, urgencyRes, securityRes, reportRes]: any = await Promise.all([
+          apiClient.get("/categories", { params: { group: "DOCUMENT_TYPE" } }),
+          apiClient.get("/categories", { params: { group: "DOCUMENT_DOMAIN" } }),
+          apiClient.get("/categories", { params: { group: "URGENCY_LEVEL" } }),
+          apiClient.get("/categories", { params: { group: "SECURITY_LEVEL" } }),
+          apiClient.get("/categories", { params: { group: "TRANSPARENCY_CAT" } }).catch(() => ({ data: [] }))
+        ]);
+
+        const extractList = (res: any) => Array.isArray(res) ? res : (res?.data || []);
+
         setCategories({
-          types: typeList,
-          fields: domainList
+          types: extractList(typeRes),
+          fields: extractList(domainRes),
+          urgencies: extractList(urgencyRes),
+          securityLevels: extractList(securityRes),
+          reportTypes: extractList(reportRes)
         });
       } catch (error) {
         console.error("[DocumentUpload] Error loading shared categories:", error);
@@ -480,12 +496,17 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                         <FormItem>
                           <FormLabel className="text-[10px] font-bold uppercase">Phân loại báo cáo</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl><SelectTrigger className="bg-background border-primary/20 h-9"><SelectValue /></SelectTrigger></FormControl>
+                            <FormControl><SelectTrigger className="bg-background border-primary/20 h-9"><SelectValue placeholder="Chọn loại báo cáo..." /></SelectTrigger></FormControl>
                             <SelectContent>
-                              <SelectItem value="NONE">-- Chọn loại --</SelectItem>
-                              <SelectItem value="ESTIMATE">Dự toán thu - chi</SelectItem>
-                              <SelectItem value="SETTLEMENT">Quyết toán thu - chi</SelectItem>
-                              <SelectItem value="EXECUTION">Thực hiện ngân sách</SelectItem>
+                              {categories.reportTypes.length > 0 ? (
+                                categories.reportTypes.map(cat => <SelectItem key={cat.id} value={cat.code || cat.id}>{cat.name}</SelectItem>)
+                              ) : (
+                                <>
+                                  <SelectItem value="ESTIMATE">Dự toán thu - chi</SelectItem>
+                                  <SelectItem value="SETTLEMENT">Quyết toán thu - chi</SelectItem>
+                                  <SelectItem value="EXECUTION">Thực hiện ngân sách</SelectItem>
+                                </>
+                              )}
                             </SelectContent>
                           </Select>
                         </FormItem>
@@ -536,11 +557,21 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ khẩn</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn độ khẩn..." /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="NORMAL">Bình thường</SelectItem>
-                        <SelectItem value="URGENT" className="text-amber-600 font-bold">Khẩn</SelectItem>
-                        <SelectItem value="FLASH" className="text-destructive font-black">Hỏa tốc</SelectItem>
+                        {categories.urgencies.length > 0 ? (
+                          categories.urgencies.map(cat => (
+                            <SelectItem key={cat.id} value={cat.code || cat.id} className={cat.code === 'FLASH' ? 'text-destructive font-bold' : ''}>
+                              {cat.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <>
+                            <SelectItem value="NORMAL">Bình thường</SelectItem>
+                            <SelectItem value="URGENT" className="text-amber-600 font-bold">Khẩn</SelectItem>
+                            <SelectItem value="FLASH" className="text-destructive font-black">Hỏa tốc</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -549,12 +580,22 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Độ mật</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue /></SelectTrigger></FormControl>
+                      <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn độ mật..." /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="NORMAL">Bình thường</SelectItem>
-                        <SelectItem value="CONFIDENTIAL" className="text-blue-600 font-bold">Mật</SelectItem>
-                        <SelectItem value="SECRET" className="text-amber-700 font-bold">Tối mật</SelectItem>
-                        <SelectItem value="TOP_SECRET" className="text-destructive font-black">Tuyệt mật</SelectItem>
+                        {categories.securityLevels.length > 0 ? (
+                          categories.securityLevels.map(cat => (
+                            <SelectItem key={cat.id} value={cat.code || cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <>
+                            <SelectItem value="NORMAL">Bình thường</SelectItem>
+                            <SelectItem value="CONFIDENTIAL" className="text-blue-600 font-bold">Mật</SelectItem>
+                            <SelectItem value="SECRET" className="text-amber-700 font-bold">Tối mật</SelectItem>
+                            <SelectItem value="TOP_SECRET" className="text-destructive font-black">Tuyệt mật</SelectItem>
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                   </FormItem>
