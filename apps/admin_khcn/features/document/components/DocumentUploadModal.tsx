@@ -87,9 +87,9 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     const loadCategories = async () => {
       const typeRes = await getCategories("DOCUMENT_TYPE");
       const fieldRes = await getCategories("DOCUMENT_FIELD");
-      setCategories({ 
-        types: typeRes?.data || [], 
-        fields: fieldRes?.data || [] 
+      setCategories({
+        types: typeRes?.data || [],
+        fields: fieldRes?.data || []
       });
     };
     if (isOpen) loadCategories();
@@ -146,18 +146,25 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     if (!uploadedFile) return alert("Vui lòng đính kèm file văn bản!");
 
     try {
+      console.log("[DocumentUpload] Starting submission with values:", values);
       const media = await uploadFile(uploadedFile);
-      await createDocument({
+      console.log("[DocumentUpload] File uploaded successfully, media info:", media);
+
+      const payload = {
         ...values,
         pageCount: Number(values.pageCount),
         attachmentCount: Number(values.attachmentCount),
         fileId: media.id,
         isIncoming,
         signatureValid: signatureStatus === 'VALID',
-      });
+      };
+
+      console.log("[DocumentUpload] Sending final payload to createDocument:", payload);
+      await createDocument(payload);
+      console.log("[DocumentUpload] Document created successfully!");
       onClose();
     } catch (error) {
-      console.error("Submit error:", error);
+      console.error("[DocumentUpload] Submit error:", error);
     }
   };
 
@@ -369,11 +376,11 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số trang <span className="text-destructive">*</span></FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          className="bg-muted/10 border-muted-foreground/10" 
-                          {...field} 
-                          onChange={e => field.onChange(parseInt(e.target.value) || 0)} 
+                        <Input
+                          type="number"
+                          className="bg-muted/10 border-muted-foreground/10"
+                          {...field}
+                          onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -385,11 +392,11 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                     <FormItem>
                       <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Số lượng bản đính kèm</FormLabel>
                       <FormControl>
-                        <Input 
-                          type="number" 
-                          className="bg-muted/10 border-muted-foreground/10" 
-                          {...field} 
-                          onChange={e => field.onChange(parseInt(e.target.value) || 0)} 
+                        <Input
+                          type="number"
+                          className="bg-muted/10 border-muted-foreground/10"
+                          {...field}
+                          onChange={e => field.onChange(parseInt(e.target.value) || 0)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -408,44 +415,44 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                 </div>
 
                 <div className="md:col-span-12 bg-primary/5 p-4 rounded-xl border border-primary/10">
-                   <div className="flex items-center justify-between mb-4">
-                      <div className="space-y-0.5">
-                         <FormLabel className="text-sm font-bold text-primary uppercase">Công khai tài chính</FormLabel>
-                         <p className="text-[10px] text-muted-foreground">Văn bản sẽ hiển thị tại mục "Công khai ngân sách"</p>
-                      </div>
-                      <FormField name="isPublic" render={({ field }) => (
-                        <FormItem className="flex items-center space-x-2">
-                           <FormControl>
-                              <input type="checkbox" checked={field.value} onChange={field.onChange} className="w-5 h-5 accent-primary cursor-pointer" />
-                           </FormControl>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-sm font-bold text-primary uppercase">Công khai tài chính</FormLabel>
+                      <p className="text-[10px] text-muted-foreground">Văn bản sẽ hiển thị tại mục "Công khai ngân sách"</p>
+                    </div>
+                    <FormField name="isPublic" render={({ field }) => (
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <input type="checkbox" checked={field.value} onChange={field.onChange} className="w-5 h-5 accent-primary cursor-pointer" />
+                        </FormControl>
+                      </FormItem>
+                    )} />
+                  </div>
+
+                  {form.watch("isPublic") && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <FormField name="fiscalYear" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-bold uppercase">Năm tài chính</FormLabel>
+                          <FormControl><Input type="number" className="bg-background border-primary/20 h-9" {...field} onChange={e => field.onChange(parseInt(e.target.value))} /></FormControl>
                         </FormItem>
                       )} />
-                   </div>
-                   
-                   {form.watch("isPublic") && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
-                         <FormField name="fiscalYear" render={({ field }) => (
-                           <FormItem>
-                             <FormLabel className="text-[10px] font-bold uppercase">Năm tài chính</FormLabel>
-                             <FormControl><Input type="number" className="bg-background border-primary/20 h-9" {...field} onChange={e => field.onChange(parseInt(e.target.value))} /></FormControl>
-                           </FormItem>
-                         )} />
-                         <FormField name="transparencyCategory" render={({ field }) => (
-                           <FormItem>
-                             <FormLabel className="text-[10px] font-bold uppercase">Phân loại báo cáo</FormLabel>
-                             <Select onValueChange={field.onChange} value={field.value}>
-                               <FormControl><SelectTrigger className="bg-background border-primary/20 h-9"><SelectValue /></SelectTrigger></FormControl>
-                               <SelectContent>
-                                 <SelectItem value="NONE">-- Chọn loại --</SelectItem>
-                                 <SelectItem value="ESTIMATE">Dự toán thu - chi</SelectItem>
-                                 <SelectItem value="SETTLEMENT">Quyết toán thu - chi</SelectItem>
-                                 <SelectItem value="EXECUTION">Thực hiện ngân sách</SelectItem>
-                               </SelectContent>
-                             </Select>
-                           </FormItem>
-                         )} />
-                      </div>
-                   )}
+                      <FormField name="transparencyCategory" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-bold uppercase">Phân loại báo cáo</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl><SelectTrigger className="bg-background border-primary/20 h-9"><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="NONE">-- Chọn loại --</SelectItem>
+                              <SelectItem value="ESTIMATE">Dự toán thu - chi</SelectItem>
+                              <SelectItem value="SETTLEMENT">Quyết toán thu - chi</SelectItem>
+                              <SelectItem value="EXECUTION">Thực hiện ngân sách</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )} />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

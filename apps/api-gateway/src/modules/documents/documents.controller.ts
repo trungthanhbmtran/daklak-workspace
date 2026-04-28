@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit, Logger } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -9,6 +9,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class DocumentsController implements OnModuleInit {
+  private readonly logger = new Logger(DocumentsController.name);
   private documentService: any;
 
   constructor(
@@ -51,13 +52,29 @@ export class DocumentsController implements OnModuleInit {
 
   @Post()
   async createDocument(@Body() body: any) {
-    return firstValueFrom(this.documentService.CreateDocument(body));
+    this.logger.log(`[CreateDocument] Incoming payload: ${JSON.stringify(body)}`);
+    try {
+      const response = await firstValueFrom(this.documentService.CreateDocument(body));
+      this.logger.log(`[CreateDocument] Success: ${JSON.stringify(response)}`);
+      return response;
+    } catch (error) {
+      this.logger.error(`[CreateDocument] Error: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Put(':id')
   async updateDocument(@Param('id') id: string, @Body() body: any) {
     const payload = { id, ...body };
-    return firstValueFrom(this.documentService.UpdateDocument(payload));
+    this.logger.log(`[UpdateDocument] Incoming payload for ID ${id}: ${JSON.stringify(body)}`);
+    try {
+      const response = await firstValueFrom(this.documentService.UpdateDocument(payload));
+      this.logger.log(`[UpdateDocument] Success: ${JSON.stringify(response)}`);
+      return response;
+    } catch (error) {
+      this.logger.error(`[UpdateDocument] Error: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 
   @Delete(':id')
