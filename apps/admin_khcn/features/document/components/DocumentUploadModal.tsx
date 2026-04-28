@@ -85,12 +85,24 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
   useEffect(() => {
     const loadCategories = async () => {
-      const typeRes = await getCategories("DOCUMENT_TYPE");
-      const fieldRes = await getCategories("DOCUMENT_FIELD");
-      setCategories({
-        types: typeRes?.data || [],
-        fields: fieldRes?.data || []
-      });
+      try {
+        // Fetch from shared system categories (/api/v1/admin/categories)
+        const typeRes: any = await apiClient.get("/categories", { params: { group: "DOCUMENT_TYPE" } });
+        const domainRes: any = await apiClient.get("/categories", { params: { group: "DOCUMENT_DOMAIN" } });
+        
+        // Ensure data extraction matches the gateway response format (mapped to frontend items)
+        const typeList = Array.isArray(typeRes) ? typeRes : (typeRes?.data || []);
+        const domainList = Array.isArray(domainRes) ? domainRes : (domainRes?.data || []);
+        
+        console.log("[DocumentUpload] Loaded shared categories:", { types: typeList.length, domains: domainList.length });
+        
+        setCategories({
+          types: typeList,
+          fields: domainList
+        });
+      } catch (error) {
+        console.error("[DocumentUpload] Error loading shared categories:", error);
+      }
     };
     if (isOpen) loadCategories();
   }, [isOpen]);

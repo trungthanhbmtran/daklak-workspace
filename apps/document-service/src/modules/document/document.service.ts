@@ -14,10 +14,6 @@ export class DocumentService {
         arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
         processingDeadline: data.processingDeadline ? new Date(data.processingDeadline) : null,
       },
-      include: {
-        type: true,
-        field: true,
-      },
     });
     return { data: this.mapToProto(document) };
   }
@@ -25,10 +21,6 @@ export class DocumentService {
   async findOne(id: string) {
     const document = await this.prisma.document.findUnique({
       where: { id },
-      include: {
-        type: true,
-        field: true,
-      },
     });
     return this.mapToProto(document);
   }
@@ -69,9 +61,6 @@ export class DocumentService {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          type: true,
-          field: true,
         },
       }),
       this.prisma.document.count({ where }),
@@ -100,10 +89,6 @@ export class DocumentService {
     const document = await this.prisma.document.update({
       where: { id },
       data: updateData,
-      include: {
-        type: true,
-        field: true,
-      },
     });
     return { data: this.mapToProto(document) };
   }
