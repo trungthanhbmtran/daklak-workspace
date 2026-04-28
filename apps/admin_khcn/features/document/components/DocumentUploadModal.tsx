@@ -144,7 +144,6 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
 
   const onSubmit = async (values: DocumentFormValues) => {
     if (!uploadedFile) {
-      toast.error("Vui lòng đính kèm file văn bản!");
       return;
     }
 
@@ -191,7 +190,6 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
       onClose();
     } catch (error: any) {
       console.error("[DocumentUpload] Submit error:", error);
-      toast.error(error.message || "Đã có lỗi xảy ra khi lưu văn bản.");
     }
   };
 
