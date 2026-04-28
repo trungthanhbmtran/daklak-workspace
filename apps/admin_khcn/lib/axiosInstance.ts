@@ -20,13 +20,6 @@ apiClient.interceptors.response.use(
     return response.data;
   },
   async (error: AxiosError) => {
-    const fullURL = error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url;
-    console.error(`[AxiosError] ${error.config?.method?.toUpperCase()} ${fullURL}`, {
-      code: error.code,
-      message: error.message,
-      response: error.response?.status,
-    });
-
     if (!error.response) {
       toast.error("Không thể kết nối đến máy chủ. Vui lòng kiểm tra đường truyền.");
       return Promise.reject(error);

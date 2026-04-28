@@ -146,25 +146,18 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     if (!uploadedFile) return alert("Vui lòng đính kèm file văn bản!");
 
     try {
-      console.log("[DocumentUpload] Starting submission with values:", values);
       const media = await uploadFile(uploadedFile);
-      console.log("[DocumentUpload] File uploaded successfully, media info:", media);
-
-      const payload = {
+      await createDocument({
         ...values,
         pageCount: Number(values.pageCount),
         attachmentCount: Number(values.attachmentCount),
         fileId: media.id,
         isIncoming,
         signatureValid: signatureStatus === 'VALID',
-      };
-
-      console.log("[DocumentUpload] Sending final payload to createDocument:", payload);
-      await createDocument(payload);
-      console.log("[DocumentUpload] Document created successfully!");
+      });
       onClose();
     } catch (error) {
-      console.error("[DocumentUpload] Submit error:", error);
+      console.error("Submit error:", error);
     }
   };
 
