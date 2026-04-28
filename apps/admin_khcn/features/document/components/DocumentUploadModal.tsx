@@ -129,20 +129,41 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     setIsProcessing(true);
     setSignatureStatus(null);
 
+    // Simulated OCR & Digital Signature verification delay
     setTimeout(() => {
+      // 1. Digital Signature Status
       setSignatureStatus('VALID');
-      form.setValue("documentNumber", "125");
-      form.setValue("notation", "QĐ-SKHCN");
-      form.setValue("abstract", "Quyết định về việc ban hành quy chế bảo đảm an toàn thông tin mạng trong hoạt động của cơ quan nhà nước.");
+
+      // 2. Extract basic info from filename (simple heuristic)
+      const fileName = file.name.toUpperCase();
+      const numberMatch = fileName.match(/\d+/);
+      const extractedNumber = numberMatch ? numberMatch[0] : "125";
+
+      // 3. Set form values
+      form.setValue("documentNumber", extractedNumber);
+      form.setValue("notation", fileName.includes("QD") ? "QĐ-SKHCN" : "CV-SKHCN");
+      form.setValue("abstract", "Văn bản trích xuất tự động từ tệp: " + file.name + ". Nội dung về việc thực hiện nhiệm vụ chuyên môn và phối hợp công tác.");
       form.setValue("signerName", "Nguyễn Văn A");
       form.setValue("signerPosition", "Giám đốc Sở");
       form.setValue("issuerName", "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
-      form.setValue("pageCount", 5);
-      form.setValue("attachmentCount", 2);
+      form.setValue("pageCount", 1);
+      form.setValue("attachmentCount", 0);
       form.setValue("recipients", "Văn phòng UBND tỉnh; Các phòng chuyên môn; Lưu VT.");
 
+      // 4. Set Default Categories if available
+      if (categories.types.length > 0) {
+        // Try to match type from filename or just pick first
+        const matchedType = categories.types.find(t => fileName.includes(t.name.toUpperCase())) || categories.types[0];
+        form.setValue("typeId", matchedType.id);
+      }
+
+      if (categories.fields.length > 0) {
+        form.setValue("fieldId", categories.fields[0].id);
+      }
+
       setIsProcessing(false);
-    }, 2000);
+      toast.success("Đã trích xuất thông tin văn bản thành công!");
+    }, 2500);
   };
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
