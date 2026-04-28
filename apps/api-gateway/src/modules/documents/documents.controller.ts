@@ -51,6 +51,7 @@ export class DocumentsController implements OnModuleInit {
 
   @Post()
   async createDocument(@Body() body: any) {
+    console.log("body", body);
     return firstValueFrom(this.documentService.CreateDocument(body));
   }
 

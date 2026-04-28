@@ -6,6 +6,7 @@ export class DocumentService {
   constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
+    console.log("data", data);
     const document = await this.prisma.document.create({
       data: {
         ...data,
