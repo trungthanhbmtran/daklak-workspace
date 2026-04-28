@@ -19,7 +19,7 @@ async function bootstrap() {
       ],
       url: process.env.GRPC_URL ?? '0.0.0.0:50056',
       loader: {
-        keepCase: false,
+        keepCase: true,
         longs: String,
         enums: String,
         defaults: true,

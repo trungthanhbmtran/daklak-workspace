@@ -532,7 +532,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                 <FormField name="typeId" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-xs font-bold text-muted-foreground uppercase">Loại văn bản</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} >
                       <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn loại..." /></SelectTrigger></FormControl>
                       <SelectContent>
                         {categories.types.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
