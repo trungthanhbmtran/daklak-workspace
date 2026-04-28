@@ -6,13 +6,37 @@ export class DocumentService {
   constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
-    console.log("data", data);
+    console.log("[DocumentService] Creating document with data:", data);
     const document = await this.prisma.document.create({
       data: {
-        ...data,
+        documentNumber: data.documentNumber,
+        notation: data.notation,
+        abstract: data.abstract,
+        content: data.content,
+        typeId: data.typeId,
+        fieldId: data.fieldId,
+        issuingAuthorityId: data.issuingAuthorityId,
+        issuerName: data.issuerName,
+        signerId: data.signerId,
+        signerName: data.signerName,
+        signerPosition: data.signerPosition,
         issueDate: data.issueDate ? new Date(data.issueDate) : null,
         arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
+        arrivalNumber: data.arrivalNumber,
         processingDeadline: data.processingDeadline ? new Date(data.processingDeadline) : null,
+        recipients: data.recipients,
+        urgency: data.urgency || 'NORMAL',
+        securityLevel: data.securityLevel || 'NORMAL',
+        status: data.status || 'DRAFT',
+        isPublic: !!data.isPublic,
+        isIncoming: data.isIncoming !== undefined ? !!data.isIncoming : true,
+        fileId: data.fileId,
+        signatureValid: !!data.signatureValid,
+        pageCount: Number(data.pageCount) || 1,
+        attachmentCount: Number(data.attachmentCount) || 0,
+        linkedDocumentId: data.linkedDocumentId,
+        fiscalYear: data.fiscalYear ? Number(data.fiscalYear) : null,
+        transparencyCategory: data.transparencyCategory,
       },
     });
     return { data: this.mapToProto(document) };
@@ -61,7 +85,6 @@ export class DocumentService {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        },
       }),
       this.prisma.document.count({ where }),
     ]);
@@ -80,11 +103,24 @@ export class DocumentService {
   }
 
   async update(id: string, data: any) {
-    const updateData = { ...data };
-    delete updateData.id;
-    if (updateData.issueDate) updateData.issueDate = new Date(updateData.issueDate);
-    if (updateData.arrivalDate) updateData.arrivalDate = new Date(updateData.arrivalDate);
-    if (updateData.processingDeadline) updateData.processingDeadline = new Date(updateData.processingDeadline);
+    const updateData: any = {};
+    const allowedFields = [
+      'documentNumber', 'notation', 'abstract', 'content', 'typeId', 'fieldId',
+      'issuingAuthorityId', 'issuerName', 'signerId', 'signerName', 'signerPosition',
+      'arrivalNumber', 'recipients', 'urgency', 'securityLevel', 'status',
+      'isPublic', 'isIncoming', 'fileId', 'signatureValid', 'pageCount',
+      'attachmentCount', 'linkedDocumentId', 'fiscalYear', 'transparencyCategory'
+    ];
+
+    allowedFields.forEach(field => {
+      if (data[field] !== undefined) {
+        updateData[field] = data[field];
+      }
+    });
+
+    if (data.issueDate) updateData.issueDate = new Date(data.issueDate);
+    if (data.arrivalDate) updateData.arrivalDate = new Date(data.arrivalDate);
+    if (data.processingDeadline) updateData.processingDeadline = new Date(data.processingDeadline);
 
     const document = await this.prisma.document.update({
       where: { id },
@@ -116,7 +152,7 @@ export class DocumentService {
         where: {
           isIncoming: true,
           status: 'PROCESSING',
-          processingDeadline: { lt: now }
+          processingDeadline: { lt: now, not: null }
         }
       }),
       // outgoingTotal: Documents with isIncoming: false
@@ -142,12 +178,37 @@ export class DocumentService {
   private mapToProto(doc: any) {
     if (!doc) return null;
     return {
-      ...doc,
-      issueDate: doc.issueDate?.toISOString(),
-      arrivalDate: doc.arrivalDate?.toISOString(),
-      processingDeadline: doc.processingDeadline?.toISOString(),
-      createdAt: doc.createdAt.toISOString(),
-      updatedAt: doc.updatedAt.toISOString(),
+      id: doc.id,
+      documentNumber: doc.documentNumber || "",
+      notation: doc.notation || "",
+      abstract: doc.abstract || "",
+      content: doc.content || "",
+      typeId: doc.typeId || "",
+      fieldId: doc.fieldId || "",
+      issuingAuthorityId: doc.issuingAuthorityId || "",
+      issuerName: doc.issuerName || "",
+      signerId: doc.signerId || "",
+      signerName: doc.signerName || "",
+      signerPosition: doc.signerPosition || "",
+      issueDate: doc.issueDate?.toISOString() || "",
+      arrivalDate: doc.arrivalDate?.toISOString() || "",
+      arrivalNumber: doc.arrivalNumber || "",
+      processingDeadline: doc.processingDeadline?.toISOString() || "",
+      recipients: doc.recipients || "",
+      urgency: doc.urgency || "NORMAL",
+      securityLevel: doc.securityLevel || "NORMAL",
+      status: doc.status || "DRAFT",
+      isPublic: !!doc.isPublic,
+      isIncoming: !!doc.isIncoming,
+      fileId: doc.fileId || "",
+      signatureValid: !!doc.signatureValid,
+      pageCount: doc.pageCount || 1,
+      attachmentCount: doc.attachmentCount || 0,
+      linkedDocumentId: doc.linkedDocumentId || "",
+      fiscalYear: doc.fiscalYear || 0,
+      transparencyCategory: doc.transparencyCategory || "",
+      createdAt: doc.createdAt?.toISOString() || "",
+      updatedAt: doc.updatedAt?.toISOString() || "",
     };
   }
 }
