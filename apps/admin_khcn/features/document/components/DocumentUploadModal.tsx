@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useDocuments } from "../hooks/useDocuments";
+import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
