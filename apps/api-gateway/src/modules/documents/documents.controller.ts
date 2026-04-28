@@ -61,6 +61,11 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.UpdateDocument(payload));
   }
 
+  @Post('extract')
+  async extractMetadata(@Body() body: { fileId: string }) {
+    return firstValueFrom(this.documentService.ExtractMetadata(body));
+  }
+
   @Delete(':id')
   async deleteDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.DeleteDocument({ id }));

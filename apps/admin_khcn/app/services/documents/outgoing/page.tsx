@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { 
-  Search, Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe 
+import {
+  Search, Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,14 +16,14 @@ export default function OutgoingDocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const { useListDocuments, deleteDocument } = useDocuments();
-  
+
   // Debounce search
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data: documentsData, isLoading, error } = useListDocuments({ 
+  const { data: documentsData, isLoading, error } = useListDocuments({
     search: debouncedSearch,
     isIncoming: false,
   });
@@ -57,8 +57,8 @@ export default function OutgoingDocumentsPage() {
             Quản lý và phát hành các văn bản do Sở ban hành.
           </p>
         </div>
-        <Button 
-          onClick={() => setIsModalOpen(true)} 
+        <Button
+          onClick={() => setIsModalOpen(true)}
           className="rounded-xl shadow-xl shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 font-bold px-6 h-12 transition-all active:scale-95"
         >
           <Plus className="h-4 w-4 mr-2" /> Phát hành văn bản mới
@@ -69,8 +69,8 @@ export default function OutgoingDocumentsPage() {
         <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
           <div className="relative flex-1 min-w-[300px]">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm theo số ký hiệu, trích yếu, nơi nhận..." 
+            <Input
+              placeholder="Tìm theo số ký hiệu, trích yếu, nơi nhận..."
               className="pl-11 h-12 bg-muted/20 border-none rounded-2xl focus-visible:ring-emerald-500/20 font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -124,12 +124,12 @@ export default function OutgoingDocumentsPage() {
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                     <div className="flex flex-col gap-1.5">
-                        <div className="flex items-start gap-1.5 text-foreground font-bold">
-                           <Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                           <span className="line-clamp-2 leading-tight text-sm">{doc.recipients || 'Nội bộ'}</span>
-                        </div>
-                     </div>
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-start gap-1.5 text-foreground font-bold">
+                        <Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                        <span className="line-clamp-2 leading-tight text-sm">{doc.recipients || 'Nội bộ'}</span>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex flex-col gap-1">
@@ -159,9 +159,9 @@ export default function OutgoingDocumentsPage() {
         </CardContent>
       </Card>
 
-      <DocumentUploadModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <DocumentUploadModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         isIncoming={false}
       />
     </div>

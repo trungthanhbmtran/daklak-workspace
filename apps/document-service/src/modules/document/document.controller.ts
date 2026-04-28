@@ -35,4 +35,9 @@ export class DocumentController {
   getStatistics(data: any) {
     return this.documentService.getStatistics();
   }
+
+  @GrpcMethod('DocumentService', 'ExtractMetadata')
+  extractMetadata(data: { fileId: string }) {
+    return this.documentService.extractMetadata(data.fileId);
+  }
 }

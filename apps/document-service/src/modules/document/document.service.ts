@@ -211,4 +211,32 @@ export class DocumentService {
       updatedAt: doc.updatedAt?.toISOString() || "",
     };
   }
+
+  async extractMetadata(fileId: string) {
+    console.log("[DocumentService] Extracting metadata for file:", fileId);
+    
+    // In a real implementation, this would:
+    // 1. Get the file URL from media-service
+    // 2. Download the file
+    // 3. Run OCR (Tesseract, Google Vision, etc.)
+    // 4. Parse the text according to Decree 30/2020/ND-CP
+    
+    // For now, we simulate a high-quality extraction result following Decree 30 standards
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing
+    
+    return {
+      documentNumber: "159",
+      notation: "QĐ-SKHCN",
+      abstract: "Quyết định về việc ban hành Quy chế quản lý và sử dụng tài sản công tại Sở Khoa học và Công nghệ tỉnh Đắk Lắk",
+      typeId: "QUYET_DINH", // This should match a real ID in production
+      fieldId: "HANH_CHINH",
+      issuerName: "Sở Khoa học và Công nghệ tỉnh Đắk Lắk",
+      signerName: "Nguyễn Văn A",
+      signerPosition: "Giám đốc Sở",
+      issueDate: new Date().toISOString().split('T')[0],
+      recipients: "UBND tỉnh; Sở Tài chính; Các phòng đơn vị; Lưu VT.",
+      pageCount: 12,
+      signatureValid: true
+    };
+  }
 }

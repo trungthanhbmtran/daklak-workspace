@@ -11,6 +11,7 @@ service DocumentService {
    rpc UpdateDocument(UpdateDocumentRequest) returns (DocumentResponse) {}
   rpc DeleteDocument(DeleteDocumentRequest) returns (common.DeleteResponse) {}
   rpc GetStatistics(common.Empty) returns (GetStatisticsResponse) {}
+  rpc ExtractMetadata(ExtractMetadataRequest) returns (ExtractMetadataResponse) {}
 }
 
 message GetStatisticsResponse {
@@ -141,4 +142,23 @@ message UpdateDocumentRequest {
 
 message DeleteDocumentRequest {
   string id = 1;
+}
+
+message ExtractMetadataRequest {
+  string fileId = 1;
+}
+
+message ExtractMetadataResponse {
+  string documentNumber = 1;
+  string notation = 2;
+  string abstract = 3;
+  string typeId = 4;
+  string fieldId = 5;
+  string issuerName = 6;
+  string signerName = 7;
+  string signerPosition = 8;
+  string issueDate = 9;
+  string recipients = 10;
+  int32 pageCount = 11;
+  bool signatureValid = 12;
 }

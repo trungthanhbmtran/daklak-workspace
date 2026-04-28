@@ -169,6 +169,13 @@ export function useDocuments() {
     return response.data;
   };
 
+  const extractMetadataMutation = useMutation({
+    mutationFn: async (fileId: string) => {
+      const response: any = await apiClient.post(`${API_BASE}/extract`, { fileId });
+      return response.data;
+    },
+  });
+
   return {
     useCategories,
     createCategory: createCategoryMutation.mutateAsync,
@@ -182,11 +189,13 @@ export function useDocuments() {
     useListConsultations,
     useListMinutes,
     useDocumentStats,
+    extractMetadata: extractMetadataMutation.mutateAsync,
     createConsultation: createConsultationMutation.mutateAsync,
     createMinutes: createMinutesMutation.mutateAsync,
     getCategories, // legacy support
     isLoading:
       createDocumentMutation.isPending ||
+      extractMetadataMutation.isPending ||
       createConsultationMutation.isPending ||
       createMinutesMutation.isPending ||
       createCategoryMutation.isPending ||

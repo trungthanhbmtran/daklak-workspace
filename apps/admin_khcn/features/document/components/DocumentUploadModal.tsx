@@ -69,7 +69,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureStatus, setSignatureStatus] = useState<'VALID' | 'INVALID' | 'NONE' | null>(null);
   const { uploadFile, isUploading } = useFileUpload();
-  const { createDocument, getCategories, isLoading: isCreating } = useDocuments();
+  const { createDocument, extractMetadata, isLoading: isCreating } = useDocuments();
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema) as any,
@@ -125,45 +125,56 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     if (isOpen) loadCategories();
   }, [isOpen]);
 
-  const processFileMetadata = (file: File) => {
+  const processFileMetadata = async (file: File) => {
     setIsProcessing(true);
     setSignatureStatus(null);
 
-    // Simulated OCR & Digital Signature verification delay
-    setTimeout(() => {
-      // 1. Digital Signature Status
-      setSignatureStatus('VALID');
+    try {
+      // 1. Upload file to MinIO first to get fileId
+      const media = await uploadFile(file);
+      if (!media || !media.id) throw new Error("Upload thất bại");
 
-      // 2. Extract basic info from filename (simple heuristic)
-      const fileName = file.name.toUpperCase();
-      const numberMatch = fileName.match(/\d+/);
-      const extractedNumber = numberMatch ? numberMatch[0] : "125";
+      // 2. Call backend OCR & Decree 30 Extraction API
+      const metadata = await extractMetadata(media.id);
 
-      // 3. Set form values
-      form.setValue("documentNumber", extractedNumber);
-      form.setValue("notation", fileName.includes("QD") ? "QĐ-SKHCN" : "CV-SKHCN");
-      form.setValue("abstract", "Văn bản trích xuất tự động từ tệp: " + file.name + ". Nội dung về việc thực hiện nhiệm vụ chuyên môn và phối hợp công tác.");
-      form.setValue("signerName", "Nguyễn Văn A");
-      form.setValue("signerPosition", "Giám đốc Sở");
-      form.setValue("issuerName", "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
-      form.setValue("pageCount", 1);
-      form.setValue("attachmentCount", 0);
-      form.setValue("recipients", "Văn phòng UBND tỉnh; Các phòng chuyên môn; Lưu VT.");
+      // 3. Populate form with extracted data
+      if (metadata) {
+        setSignatureStatus(metadata.signatureValid ? 'VALID' : 'INVALID');
+        
+        form.setValue("documentNumber", metadata.documentNumber || "");
+        form.setValue("notation", metadata.notation || "");
+        form.setValue("abstract", metadata.abstract || "");
+        form.setValue("signerName", metadata.signerName || "");
+        form.setValue("signerPosition", metadata.signerPosition || "");
+        form.setValue("issuerName", metadata.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
+        form.setValue("pageCount", metadata.pageCount || 1);
+        form.setValue("recipients", metadata.recipients || "");
+        
+        if (metadata.issueDate) {
+          form.setValue("issueDate", metadata.issueDate);
+        }
 
-      // 4. Set Default Categories if available
-      if (categories.types.length > 0) {
-        // Try to match type from filename or just pick first
-        const matchedType = categories.types.find(t => fileName.includes(t.name.toUpperCase())) || categories.types[0];
-        form.setValue("typeId", matchedType.id);
+        // Auto-match categories if possible
+        if (metadata.typeId && categories.types.some(t => t.id === metadata.typeId)) {
+          form.setValue("typeId", metadata.typeId);
+        } else if (categories.types.length > 0) {
+          form.setValue("typeId", categories.types[0].id);
+        }
+
+        if (metadata.fieldId && categories.fields.some(f => f.id === metadata.fieldId)) {
+          form.setValue("fieldId", metadata.fieldId);
+        } else if (categories.fields.length > 0) {
+          form.setValue("fieldId", categories.fields[0].id);
+        }
+
+        toast.success("Trích xuất thông tin theo Nghị định 30 thành công!");
       }
-
-      if (categories.fields.length > 0) {
-        form.setValue("fieldId", categories.fields[0].id);
-      }
-
+    } catch (error) {
+      console.error("[DocumentUpload] OCR Error:", error);
+      toast.error("Không thể trích xuất thông tin tự động.");
+    } finally {
       setIsProcessing(false);
-      toast.success("Đã trích xuất thông tin văn bản thành công!");
-    }, 2500);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
