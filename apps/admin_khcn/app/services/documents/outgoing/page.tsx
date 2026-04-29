@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Search, Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe
 } from "lucide-react";
@@ -8,14 +8,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function OutgoingDocumentsPage() {
+  const [mounted, setMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
-  const { useListDocuments, deleteDocument } = useDocuments();
+
+  const { deleteDocument } = useDocuments();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Debounce search
   useEffect(() => {
@@ -23,12 +29,18 @@ export default function OutgoingDocumentsPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const { data: documentsData, isLoading, error } = useListDocuments({
+  const { data: response, isLoading, error } = useListDocuments({
     search: debouncedSearch,
     isIncoming: false,
   });
 
-  const documents = documentsData?.data || [];
+  const documents = useMemo(() => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (response.data && Array.isArray(response.data.data)) return response.data.data;
+    return [];
+  }, [response]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Bạn có chắc chắn muốn xóa văn bản này?")) {
@@ -42,6 +54,8 @@ export default function OutgoingDocumentsPage() {
     if (isNaN(date.getTime())) return "---";
     return date.toLocaleDateString('vi-VN');
   };
+
+  if (!mounted) return null;
 
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
@@ -98,57 +112,50 @@ export default function OutgoingDocumentsPage() {
               ) : error ? (
                 <tr><td colSpan={5} className="py-20 text-center text-rose-600 font-bold italic">Có lỗi xảy ra khi tải dữ liệu. Vui lòng kiểm tra lại API!</td></tr>
               ) : documents.length === 0 ? (
-                <tr>
-                  <td colSpan={5} className="py-24 text-center">
-                    <div className="h-16 w-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FileText className="h-8 w-8 text-muted-foreground/50" />
-                    </div>
-                    <h3 className="text-lg font-bold text-foreground">Sổ văn bản đang trống</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Chưa có văn bản nào được phát hành.</p>
-                  </td>
-                </tr>
-              ) : documents.map((doc: any) => (
-                <tr key={doc.id} className="hover:bg-emerald-500/[0.02] transition-all group cursor-pointer">
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="font-mono font-black text-emerald-600 text-sm tracking-tight">{doc.documentNumber}</span>
-                      <Badge variant="outline" className="w-fit bg-muted/50 text-muted-foreground border-none text-[9px] px-1.5 py-0 font-bold uppercase tracking-widest">{doc.type?.name || 'Văn bản'}</Badge>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <p className="font-bold text-foreground group-hover:text-emerald-600 transition-colors leading-relaxed line-clamp-2">{doc.abstract || doc.title}</p>
-                    <div className="flex items-center gap-3 mt-2.5">
-                      <Badge variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100 shadow-none text-[10px] font-bold flex items-center gap-1">
-                        <Globe className="h-3 w-3" /> Trục liên thông
-                      </Badge>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-start gap-1.5 text-foreground font-bold">
-                        <Building2 className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                        <span className="line-clamp-2 leading-tight text-sm">{doc.recipients || 'Nội bộ'}</span>
+                <tr><td colSpan={5} className="py-20 text-center text-muted-foreground font-medium italic">Không có văn bản nào được tìm thấy.</td></tr>
+              ) : (
+                documents.map((doc: any) => (
+                  <tr key={doc.id} className="hover:bg-emerald-500/[0.02] transition-all group cursor-pointer">
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="font-black text-foreground text-base tracking-tight">{doc.documentNumber || doc.notation}</span>
+                        <div className="flex items-center gap-2">
+                          <Badge variant="secondary" className="text-[10px] font-bold bg-muted/50 text-muted-foreground border-none">
+                            {doc.documentType?.name || "Văn bản"}
+                          </Badge>
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold text-foreground flex items-center gap-1.5">
-                        <User className="h-3.5 w-3.5 text-muted-foreground" /> {doc.signerName || '---'}
-                      </span>
-                      <span className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter flex items-center gap-1.5">
-                        <Calendar className="h-3.5 w-3.5" /> {formatDate(doc.issueDate || doc.createdAt)}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                      <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl shadow-sm hover:bg-emerald-600 hover:text-white transition-colors"><Eye className="h-4 w-4" /></Button>
-                      <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl shadow-sm hover:bg-rose-600 hover:text-white transition-colors" onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}><Trash2 className="h-4 w-4" /></Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-8 py-6 max-w-md">
+                      <p className="font-bold text-foreground/90 leading-snug line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                        {doc.abstract || doc.title}
+                      </p>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex items-center gap-2 text-muted-foreground font-medium">
+                        <Building2 className="h-3.5 w-3.5 text-emerald-500" />
+                        <span className="text-xs line-clamp-1">{doc.recipients || "---"}</span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                          <User className="h-3.5 w-3.5 text-muted-foreground" /> {doc.signerName || "---"}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground font-black uppercase tracking-tighter flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5" /> {formatDate(doc.issueDate || doc.createdAt)}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+                        <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl shadow-sm hover:bg-emerald-600 hover:text-white transition-colors"><Eye className="h-4 w-4" /></Button>
+                        <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl shadow-sm hover:bg-rose-600 hover:text-white transition-colors" onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}><Trash2 className="h-4 w-4" /></Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
           {documents.length > 0 && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import { 
   Inbox, Send, FileText, AlertTriangle, Clock, 
   CheckCircle2, TrendingUp, BarChart3, Activity, 
@@ -12,32 +13,43 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useDocumentStats, useListDocuments } from "@/features/document/hooks/useDocuments";
 import { useUser } from "@/hooks/useUser";
 
 export default function DocumentDashboardPage() {
-  const { useDocumentStats, useListDocuments } = useDocuments();
+  const [mounted, setMounted] = useState(false);
   const { user } = useUser();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const { data: stats, isLoading: statsLoading } = useDocumentStats();
   const { data: pendingTasksData, isLoading: tasksLoading } = useListDocuments({
     status: 'PROCESSING',
-    // signerId: user?.id, // Uncomment if backend supports filtering by current user
   });
 
-  const summaryStats = stats || {
+  const summaryStats = useMemo(() => stats || {
     incomingTotal: 0,
     incomingPending: 0,
     incomingLate: 0,
     outgoingTotal: 0,
     urgentTotal: 0,
-  };
+  }, [stats]);
 
-  const myPendingTasks = pendingTasksData?.data || [];
+  const myPendingTasks = useMemo(() => {
+    const data = pendingTasksData;
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    if (Array.isArray(data.data)) return data.data;
+    if (data.data && Array.isArray(data.data.data)) return data.data.data;
+    return [];
+  }, [pendingTasksData]);
+
+  if (!mounted) return null;
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
-      
       {/* 1. HEADER & ACTIONS */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -129,8 +141,6 @@ export default function DocumentDashboardPage() {
 
       {/* 3. KHU VỰC CHI TIẾT THEO LUỒNG */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* CỘT TRÁI: Danh sách việc cần làm của cá nhân (Chiếm 2/3) */}
         <div className="lg:col-span-2 space-y-6">
           <Card className="border shadow-sm">
             <CardHeader className="border-b bg-muted/20 pb-4">
@@ -148,45 +158,47 @@ export default function DocumentDashboardPage() {
             </CardHeader>
             <CardContent className="p-0">
               <div className="divide-y divide-border/50">
-                {myPendingTasks.map((task: any) => (
-                  <div key={task.id} className="p-5 hover:bg-muted/30 transition-colors bg-background flex flex-col sm:flex-row gap-4 justify-between sm:items-center">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-2">
-                        {(task.urgency === "URGENT" || task.urgency === "FLASH") && (
-                          <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-300 shadow-none text-[10px] px-1.5 py-0">
-                            {task.urgency === "FLASH" ? "HỎA TỐC" : "KHẨN"}
-                          </Badge>
-                        )}
-                        <span className="font-mono text-xs font-bold text-muted-foreground">{task.documentNumber || task.arrivalNumber || 'N/A'}</span>
-                      </div>
-                      <h4 className="font-bold text-foreground text-sm leading-snug line-clamp-2">
-                        {task.abstract}
-                      </h4>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                        <FileText className="h-3.5 w-3.5" /> Nguồn: {task.issuerName || 'Nội bộ'}
-                      </p>
-                    </div>
-
-                    <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 sm:min-w-[140px] p-3 sm:p-0 bg-muted/10 sm:bg-transparent rounded-lg border sm:border-0">
-                      <div className="text-left sm:text-right">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Hạn xử lý</p>
-                        <p className="text-sm font-bold text-amber-600 flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5" /> {task.processingDeadline ? new Date(task.processingDeadline).toLocaleDateString('vi-VN') : 'Không có'}
+                {myPendingTasks.length === 0 ? (
+                   <div className="p-10 text-center text-muted-foreground italic text-sm">Không có nhiệm vụ nào cần xử lý ngay.</div>
+                ) : (
+                  myPendingTasks.map((task: any) => (
+                    <div key={task.id} className="p-5 hover:bg-muted/30 transition-colors bg-background flex flex-col sm:flex-row gap-4 justify-between sm:items-center">
+                      <div className="space-y-2 flex-1">
+                        <div className="flex items-center gap-2">
+                          {(task.urgency === "URGENT" || task.urgency === "FLASH") && (
+                            <Badge variant="outline" className="bg-rose-100 text-rose-700 border-rose-300 shadow-none text-[10px] px-1.5 py-0">
+                              {task.urgency === "FLASH" ? "HỎA TỐC" : "KHẨN"}
+                            </Badge>
+                          )}
+                          <span className="font-mono text-xs font-bold text-muted-foreground">{task.documentNumber || task.arrivalNumber || 'N/A'}</span>
+                        </div>
+                        <h4 className="font-bold text-foreground text-sm leading-snug line-clamp-2">
+                          {task.abstract}
+                        </h4>
+                        <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                          <FileText className="h-3.5 w-3.5" /> Nguồn: {task.issuerName || 'Nội bộ'}
                         </p>
                       </div>
-                      
-                      {/* Nút Xử lý điều hướng sang Không gian xử lý PDF */}
-                      <Link href={`/services/documents/processing/${task.id}`} className="w-full sm:w-auto">
-                        <Button size="sm" className="h-8 text-xs w-full shadow-sm">
-                          Xử lý ngay <CornerUpRight className="h-3.5 w-3.5 ml-1.5" />
-                        </Button>
-                      </Link>
+
+                      <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 shrink-0 sm:min-w-[140px] p-3 sm:p-0 bg-muted/10 sm:bg-transparent rounded-lg border sm:border-0">
+                        <div className="text-left sm:text-right">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Hạn xử lý</p>
+                          <p className="text-sm font-bold text-amber-600 flex items-center gap-1.5">
+                            <Calendar className="h-3.5 w-3.5" /> {task.processingDeadline ? new Date(task.processingDeadline).toLocaleDateString('vi-VN') : 'Không có'}
+                          </p>
+                        </div>
+                        <Link href={`/admin/services/documents/processing/${task.id}`} className="w-full sm:w-auto">
+                          <Button size="sm" className="h-8 text-xs w-full shadow-sm">
+                            Xử lý ngay <CornerUpRight className="h-3.5 w-3.5 ml-1.5" />
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
               <div className="p-3 border-t bg-muted/10 text-center">
-                <Link href="/services/documents/processing">
+                <Link href="/admin/services/documents/processing">
                   <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary">
                     Xem tất cả văn bản chờ xử lý <ArrowRight className="h-3 w-3 ml-1" />
                   </Button>
@@ -195,9 +207,9 @@ export default function DocumentDashboardPage() {
             </CardContent>
           </Card>
 
-          {/* QUICK NAV: Các dịch vụ bổ sung */}
+          {/* QUICK NAV */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link href="/services/documents/consultations">
+            <Link href="/admin/services/documents/consultations">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
@@ -211,7 +223,7 @@ export default function DocumentDashboardPage() {
               </Card>
             </Link>
             
-            <Link href="/services/documents/transparency">
+            <Link href="/admin/services/documents/transparency">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -225,7 +237,7 @@ export default function DocumentDashboardPage() {
               </Card>
             </Link>
 
-            <Link href="/services/documents/minutes">
+            <Link href="/admin/services/documents/minutes">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -241,7 +253,7 @@ export default function DocumentDashboardPage() {
           </div>
         </div>
 
-        {/* CỘT PHẢI: Giám sát toàn hệ thống (Chiếm 1/3) */}
+        {/* CỘT PHẢI */}
         <div className="space-y-6">
           <Card className="border shadow-sm">
             <CardHeader className="bg-muted/10 border-b py-4">
@@ -250,29 +262,19 @@ export default function DocumentDashboardPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="p-5 space-y-5">
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-medium">
-                  <span className="text-foreground">Phòng Kế hoạch - Tài chính</span>
-                  <span className="text-emerald-600">95%</span>
+              {[
+                { name: 'Phòng Kế hoạch - Tài chính', val: 95, color: 'text-emerald-600' },
+                { name: 'Phòng Quản lý Khoa học', val: 82, color: 'text-blue-600' },
+                { name: 'Văn phòng Sở', val: 60, color: 'text-amber-600', sub: '(Cảnh báo trễ)' }
+              ].map((item, idx) => (
+                <div key={idx} className="space-y-2">
+                  <div className="flex justify-between text-xs font-medium">
+                    <span className="text-foreground">{item.name}</span>
+                    <span className={item.color}>{item.val}% {item.sub}</span>
+                  </div>
+                  <Progress value={item.val} className="h-2 bg-muted overflow-hidden" />
                 </div>
-                <Progress value={95} className="h-2 bg-muted overflow-hidden" />
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-medium">
-                  <span className="text-foreground">Phòng Quản lý Khoa học</span>
-                  <span className="text-blue-600">82%</span>
-                </div>
-                <Progress value={82} className="h-2 bg-muted overflow-hidden" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs font-medium">
-                  <span className="text-foreground">Văn phòng Sở</span>
-                  <span className="text-amber-600">60% (Cảnh báo trễ)</span>
-                </div>
-                <Progress value={60} className="h-2 bg-muted overflow-hidden" />
-              </div>
+              ))}
             </CardContent>
           </Card>
 
@@ -303,7 +305,7 @@ export default function DocumentDashboardPage() {
             </CardContent>
           </Card>
 
-          <Link href="/services/documents/categories">
+          <Link href="/admin/services/documents/categories">
              <Button variant="ghost" className="w-full text-xs font-bold text-muted-foreground hover:text-primary">
                 <Settings2 className="h-4 w-4 mr-2" /> Thiết lập Danh mục chung
              </Button>
