@@ -2,14 +2,13 @@
 
 import { useState, useMemo, useCallback, memo } from "react";
 import dynamic from "next/dynamic";
-import { Inbox, Plus, FileText, Calendar, Building2, User, MoreHorizontal, Download, Printer, Share2 } from "lucide-react";
+import { Inbox, Plus, FileText, Calendar, Building2, User, Search, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useListDocuments } from "@/features/document/hooks/useDocuments";
-import PageHeader from "@/components/shared/PageHeader";
-import SearchFilter from "@/components/shared/SearchFilter";
+import { useDocuments } from "@/features/document/hooks/useDocuments";
 
 // Lazy load heavy modals
 const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
@@ -101,11 +100,11 @@ export default function IncomingDocumentsPage() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
-  // Optimized API call with params
+  const { useListDocuments } = useDocuments();
   const { data: response, isLoading } = useListDocuments({
     isIncoming: true,
     searchTerm: searchTerm.length >= 2 ? searchTerm : undefined,
-    pageSize: 50 // Fetch more for better UX
+    pageSize: 50
   });
 
   const documents = response?.data || [];
@@ -115,31 +114,45 @@ export default function IncomingDocumentsPage() {
     setIsDetailOpen(true);
   }, []);
 
-  const headerActions = useMemo(() => (
-    <Button
-      onClick={() => setIsModalOpen(true)}
-      className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 transition-all active:scale-95 w-full md:w-auto"
-    >
-      <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản đến
-    </Button>
-  ), []);
-
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
-      <PageHeader 
-        title="Sổ Văn bản Đến"
-        description="Quản lý và theo dõi các văn bản tiếp nhận từ cơ quan bên ngoài."
-        icon={Inbox}
-        actions={headerActions}
-      />
+      {/* Header section back in one file */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-black tracking-tight text-foreground flex items-center gap-3">
+            <div className="p-2.5 bg-blue-500/10 rounded-2xl text-blue-600 shadow-sm">
+              <Inbox className="h-8 w-8" />
+            </div>
+            Sổ Văn bản Đến
+          </h2>
+          <p className="text-muted-foreground font-medium pl-14">
+            Quản lý và theo dõi các văn bản tiếp nhận từ cơ quan bên ngoài.
+          </p>
+        </div>
+        <Button
+          onClick={() => setIsModalOpen(true)}
+          className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 transition-all active:scale-95 w-full md:w-auto"
+        >
+          <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản đến
+        </Button>
+      </div>
 
       <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
-        <SearchFilter 
-          value={searchTerm}
-          onChange={setSearchTerm}
-          placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..."
-          onFilterClick={() => {}}
-        />
+        {/* Search section back in one file */}
+        <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
+          <div className="relative flex-1 min-w-[300px]">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..."
+              className="pl-11 h-12 bg-muted/20 border-none rounded-2xl focus-visible:ring-blue-500/20 font-medium"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10">
+            <Filter className="h-4 w-4 mr-2" /> Bộ lọc
+          </Button>
+        </div>
 
         <CardContent className="p-0 overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
@@ -170,11 +183,8 @@ export default function IncomingDocumentsPage() {
                 ))
               ) : documents.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-8 py-20 text-center">
-                    <div className="flex flex-col items-center gap-3 opacity-40">
-                      <FileText className="h-12 w-12" />
-                      <p className="font-bold text-lg">Chưa có văn bản nào</p>
-                    </div>
+                  <td colSpan={5} className="px-8 py-20 text-center text-muted-foreground font-medium">
+                    Không tìm thấy văn bản nào.
                   </td>
                 </tr>
               ) : (

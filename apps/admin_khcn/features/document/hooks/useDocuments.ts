@@ -3,113 +3,114 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import apiClient from "@/lib/axiosInstance";
-import { createCrudHooks } from "@/lib/query-factory";
 
 const API_BASE = '/documents';
 
-// 1. Core CRUD Hooks using Factory
-const documentCrud = createCrudHooks<any>(
-  'documents',
-  {
-    list: (params) => apiClient.get(API_BASE, { params }),
-    get: (id) => apiClient.get(`${API_BASE}/${id}`),
-    create: (data) => apiClient.post(API_BASE, data),
-    update: (id, data) => apiClient.put(`${API_BASE}/${id}`, data),
-    delete: (id) => apiClient.delete(`${API_BASE}/${id}`),
-  }
-);
-
-export const useListDocuments = documentCrud.useList;
-export const useGetDocument = documentCrud.useDetail;
-export const useCreateDocument = documentCrud.useCreate;
-export const useUpdateDocument = documentCrud.useUpdate;
-export const useDeleteDocument = documentCrud.useDelete;
-
-// 2. Categories Hooks
-export function useCategories(groupCode: string) {
-  return useQuery({
-    queryKey: ['document-categories', groupCode],
-    queryFn: async () => {
-      const response: any = await apiClient.get(`${API_BASE}/categories`, {
-        params: { groupCode }
-      });
-      return response.data;
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes cache for categories
-  });
-}
-
-export function useCategoryMutations() {
+export function useDocuments() {
   const queryClient = useQueryClient();
 
-  const createMutation = useMutation({
-    mutationFn: (data: any) => apiClient.post(`${API_BASE}/categories`, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories', variables.groupCode] });
-      toast.success('Danh mục đã được tạo!');
-    },
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, ...data }: any) => apiClient.put(`${API_BASE}/categories/${id}`, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories', variables.groupCode] });
-      toast.success('Cập nhật danh mục thành công!');
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiClient.delete(`${API_BASE}/categories/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
-      toast.success('Đã xóa danh mục!');
-    },
-  });
-
-  return {
-    createCategory: createMutation.mutateAsync,
-    updateCategory: updateMutation.mutateAsync,
-    deleteCategory: deleteMutation.mutateAsync,
-    isPending: createMutation.isPending || updateMutation.isPending || deleteMutation.isPending
+  // 1. Categories (Sử dụng API dùng chung hệ thống /api/v1/admin/categories)
+  const useCategories = (groupCode: string) => {
+    return useQuery({
+      queryKey: ['document-categories', groupCode],
+      queryFn: async () => {
+        const response: any = await apiClient.get(`/categories`, {
+          params: { group: groupCode }
+        });
+        const data = Array.isArray(response) ? response : (response?.data || []);
+        return data;
+      },
+      staleTime: 5 * 60 * 1000,
+    });
   };
-}
 
-// 3. Specialized Hooks
-export function useExtractMetadata() {
-  return useMutation({
+  // 2. Documents CRUD
+  const useListDocuments = (params: any) => {
+    return useQuery({
+      queryKey: ['documents', params],
+      queryFn: async () => {
+        const response: any = await apiClient.get(API_BASE, { params });
+        return response.data;
+      },
+    });
+  };
+
+  const useGetDocument = (id: string) => {
+    return useQuery({
+      queryKey: ['document', id],
+      queryFn: async () => {
+        if (!id) return null;
+        const response: any = await apiClient.get(`${API_BASE}/${id}`);
+        return response.data;
+      },
+      enabled: !!id,
+    });
+  };
+
+  const createDocumentMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response: any = await apiClient.post(API_BASE, data);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Văn bản đã được lưu!');
+    },
+  });
+
+  const updateDocumentMutation = useMutation({
+    mutationFn: async ({ id, ...data }: any) => {
+      const response: any = await apiClient.put(`${API_BASE}/${id}`, data);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Cập nhật văn bản thành công!');
+    },
+  });
+
+  const deleteDocumentMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response: any = await apiClient.delete(`${API_BASE}/${id}`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Đã xóa văn bản!');
+    },
+  });
+
+  // 3. Specialized
+  const extractMetadataMutation = useMutation({
     mutationFn: async (fileId: string) => {
       const response: any = await apiClient.post(`${API_BASE}/extract`, { fileId });
       return response.data;
     },
   });
-}
 
-export function useDocumentStats() {
-  return useQuery({
-    queryKey: ['document-stats'],
-    queryFn: async () => {
-      const response: any = await apiClient.get(`${API_BASE}/stats`);
-      return response.data;
-    },
-  });
-}
-
-// 4. Backward Compatibility Hook (Legacy wrapper)
-export function useDocuments() {
-  const listDocs = useListDocuments({});
-  const categoryMutations = useCategoryMutations();
-  const extractMetadata = useExtractMetadata();
+  const useDocumentStats = () => {
+    return useQuery({
+      queryKey: ['document-stats'],
+      queryFn: async () => {
+        const response: any = await apiClient.get(`${API_BASE}/stats`);
+        return response.data;
+      },
+    });
+  };
 
   return {
     useCategories,
     useListDocuments,
     useGetDocument,
     useDocumentStats,
-    extractMetadata: extractMetadata.mutateAsync,
-    ...categoryMutations,
-    createDocument: useCreateDocument().mutateAsync,
-    updateDocument: useUpdateDocument().mutateAsync,
-    deleteDocument: useDeleteDocument().mutateAsync,
-    isLoading: categoryMutations.isPending || extractMetadata.isPending
+    createDocument: createDocumentMutation.mutateAsync,
+    updateDocument: updateDocumentMutation.mutateAsync,
+    deleteDocument: deleteDocumentMutation.mutateAsync,
+    extractMetadata: extractMetadataMutation.mutateAsync,
+    isLoading:
+      createDocumentMutation.isPending ||
+      updateDocumentMutation.isPending ||
+      deleteDocumentMutation.isPending ||
+      extractMetadataMutation.isPending,
   };
 }
