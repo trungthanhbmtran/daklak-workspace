@@ -92,12 +92,10 @@ export class DocumentService {
     return {
       data: items.map(item => this.mapToProto(item)),
       meta: {
-        pagination: {
-          total,
-          page,
-          pageSize: limit,
-          totalPages: Math.ceil(total / limit),
-        },
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
       },
     };
   }
@@ -175,12 +173,13 @@ export class DocumentService {
     };
   }
 
-  private mapToResponse(doc: any) {
+  private mapToProto(doc: any) {
     return {
       id: doc.id,
       documentNumber: doc.documentNumber || "",
       notation: doc.notation || "",
       abstract: doc.abstract || "",
+      content: doc.content || "",
       typeId: doc.typeId || "",
       fieldId: doc.fieldId || "",
       issuingAuthorityId: doc.issuingAuthorityId || "",
@@ -199,6 +198,7 @@ export class DocumentService {
       isPublic: !!doc.isPublic,
       isIncoming: !!doc.isIncoming,
       fileId: doc.fileId || "",
+      fileUrl: "", // Sẽ được điền nếu cần
       signatureValid: !!doc.signatureValid,
       pageCount: doc.pageCount || 1,
       attachmentCount: doc.attachmentCount || 0,

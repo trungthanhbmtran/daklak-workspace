@@ -12,11 +12,6 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useDocuments } from "../hooks/useDocuments";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
-import * as Tesseract from 'tesseract.js';
-import * as pdfjsLib from 'pdfjs-dist';
-
-// Cấu hình worker cho pdf.js (sử dụng CDN để tránh lỗi build)
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -157,113 +152,46 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     setSignatureStatus(null);
 
     try {
-      // 1. Chạy OCR phía Frontend trước (Song song hoặc trước khi upload)
-      console.log("[FrontendOCR] Bắt đầu quét file:", file.name);
-      const ocrResult = await runFrontendOCR(file);
-
-      // 2. Điền thông tin từ OCR vào form ngay lập tức
-      if (ocrResult) {
-        form.setValue("documentNumber", ocrResult.documentNumber || "");
-        form.setValue("notation", ocrResult.notation || "");
-        form.setValue("abstract", ocrResult.abstract || "");
-        form.setValue("signerName", ocrResult.signerName || "");
-        form.setValue("issuerName", ocrResult.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
-
-        if (ocrResult.issueDate) {
-          form.setValue("issueDate", ocrResult.issueDate);
-        }
-
-        // Tự động khớp loại văn bản nếu nhận diện được keyword
-        const text = ocrResult.fullText?.toUpperCase() || "";
-        if (text.includes("QUYẾT ĐỊNH")) {
-          const type = categories.types.find(t => t.name.toUpperCase().includes("QUYẾT ĐỊNH"));
-          if (type) form.setValue("typeId", String(type.id));
-        } else if (text.includes("THÔNG BÁO")) {
-          const type = categories.types.find(t => t.name.toUpperCase().includes("THÔNG BÁO"));
-          if (type) form.setValue("typeId", String(type.id));
-        }
-      }
-
-      // 3. Upload file lên hệ thống (Backend sẽ bóc tách thêm Digital Signature nếu có)
+      // 1. Upload file to MinIO first to get fileId
       const media = await uploadFile(file);
-      if (media && media.id) {
-        // Có thể gọi thêm backend để verify chữ ký số ở đây nếu cần
-        setSignatureStatus('VALID'); // Tạm thời giả định
-      }
+      if (!media || !media.id) throw new Error("Upload thất bại");
 
-      toast.success("Trích xuất thông tin thành công!");
+      // 2. Call backend Extraction API
+      const metadata = await extractMetadata(media.id);
+
+      // 3. Populate form with extracted data
+      if (metadata) {
+        setSignatureStatus(metadata.signatureValid ? 'VALID' : 'INVALID');
+
+        form.setValue("documentNumber", metadata.documentNumber || "");
+        form.setValue("notation", metadata.notation || "");
+        form.setValue("abstract", metadata.abstract || "");
+        form.setValue("signerName", metadata.signerName || "");
+        form.setValue("signerPosition", metadata.signerPosition || "");
+        form.setValue("issuerName", metadata.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
+        form.setValue("pageCount", metadata.pageCount || 1);
+        form.setValue("recipients", metadata.recipients || "");
+
+        if (metadata.issueDate) {
+          form.setValue("issueDate", metadata.issueDate);
+        }
+
+        // Auto-match categories
+        if (metadata.typeId && categories.types.some(t => String(t.id) === String(metadata.typeId))) {
+          form.setValue("typeId", String(metadata.typeId));
+        }
+        if (metadata.fieldId && categories.fields.some(f => String(f.id) === String(metadata.fieldId))) {
+          form.setValue("fieldId", String(metadata.fieldId));
+        }
+
+        toast.success("Trích xuất thông tin thành công!");
+      }
     } catch (error) {
-      console.error("[DocumentUpload] OCR Error:", error);
+      console.error("[DocumentUpload] Extraction Error:", error);
       toast.error("Không thể trích xuất thông tin tự động.");
     } finally {
       setIsProcessing(false);
     }
-  };
-
-  const runFrontendOCR = async (file: File) => {
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      const page = await pdf.getPage(1); // Quét trang đầu tiên thường chứa đủ metadata
-
-      const viewport = page.getViewport({ scale: 2.0 }); // Scale 2.0 để ảnh rõ nét hơn cho OCR
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d');
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
-
-      if (!context) throw new Error("Canvas context not found");
-
-      await page.render({ canvasContext: context, viewport }).promise;
-      const imageData = canvas.toDataURL('image/png');
-
-      // Chạy Tesseract OCR (Tiếng Việt)
-      const worker = await Tesseract.createWorker('vie');
-      const { data: { text } } = await worker.recognize(imageData);
-      await worker.terminate();
-
-      console.log("[FrontendOCR] Text nhận diện được:", text);
-
-      // Parse thông tin theo Nghị định 30/2020/NĐ-CP
-      return parseDecree30(text);
-    } catch (err) {
-      console.error("Frontend OCR process failed:", err);
-      return null;
-    }
-  };
-
-  const parseDecree30 = (text: string) => {
-    const result: any = { fullText: text };
-
-    // Regex Số/Ký hiệu (Số: 123/QĐ-SKHCN)
-    const notationRegex = /(?:Số|Số:)\s*(\d+)\/([A-ZĐ0-9-]+)/i;
-    const notationMatch = text.match(notationRegex);
-    if (notationMatch) {
-      result.documentNumber = notationMatch[1];
-      result.notation = notationMatch[2];
-    }
-
-    // Regex Ngày tháng (Đắk Lắk, ngày ... tháng ... năm ...)
-    const dateRegex = /(?:ngày|Ngày)\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})/;
-    const dateMatch = text.match(dateRegex);
-    if (dateMatch) {
-      result.issueDate = `${dateMatch[3]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[1].padStart(2, '0')}`;
-    }
-
-    // Regex Trích yếu (V/v ...)
-    const abstractRegex = /(?:V\/v|v\/v)\s*([^\n\r]+)/;
-    const abstractMatch = text.match(abstractRegex);
-    if (abstractMatch) {
-      result.abstract = abstractMatch[1].trim();
-    }
-
-    // Người ký (Dòng cuối thường là tên)
-    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length > 0) {
-      result.signerName = lines[lines.length - 1];
-    }
-
-    return result;
   };
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
