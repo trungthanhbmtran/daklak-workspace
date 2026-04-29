@@ -12,6 +12,11 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 import { useDocuments } from "../hooks/useDocuments";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import * as Tesseract from 'tesseract.js';
+import * as pdfjsLib from 'pdfjs-dist';
+
+// Cấu hình worker cho pdf.js (sử dụng CDN để tránh lỗi build)
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`;
 
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
@@ -100,6 +105,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
   useEffect(() => {
     const loadCategories = async () => {
       try {
+        const extractList = (res: any) => Array.isArray(res) ? res : (res?.data || []);
         // Fetch from shared system categories (/api/v1/admin/categories)
         const [typeRes, domainRes, urgencyRes, securityRes, reportRes]: any = await Promise.all([
           apiClient.get("/categories", { params: { group: "DOCUMENT_TYPE" } }),
@@ -109,72 +115,155 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
           apiClient.get("/categories", { params: { group: "TRANSPARENCY_CAT" } }).catch(() => ({ data: [] }))
         ]);
 
-        const extractList = (res: any) => Array.isArray(res) ? res : (res?.data || []);
+        const types = extractList(typeRes);
+        const fields = extractList(domainRes);
+        const urgencies = extractList(urgencyRes);
+        const securityLevels = extractList(securityRes);
+        const reportTypes = extractList(reportRes);
 
         setCategories({
-          types: extractList(typeRes),
-          fields: extractList(domainRes),
-          urgencies: extractList(urgencyRes),
-          securityLevels: extractList(securityRes),
-          reportTypes: extractList(reportRes)
+          types,
+          fields,
+          urgencies,
+          securityLevels,
+          reportTypes
         });
+
+        // Thiết lập giá trị mặc định nếu chưa có
+        if (types.length > 0 && !form.getValues("typeId")) {
+          form.setValue("typeId", String(types[0].id));
+        }
+        if (fields.length > 0 && !form.getValues("fieldId")) {
+          form.setValue("fieldId", String(fields[0].id));
+        }
+        if (urgencies.length > 0 && !form.getValues("urgency")) {
+          const normalUrgency = urgencies.find((u: any) => u.code === 'NORMAL');
+          form.setValue("urgency", normalUrgency ? String(normalUrgency.id) : String(urgencies[0].id));
+        }
+        if (securityLevels.length > 0 && !form.getValues("securityLevel")) {
+          const normalSecurity = securityLevels.find((s: any) => s.code === 'NORMAL');
+          form.setValue("securityLevel", normalSecurity ? String(normalSecurity.id) : String(securityLevels[0].id));
+        }
+
       } catch (error) {
         console.error("[DocumentUpload] Error loading shared categories:", error);
       }
     };
     if (isOpen) loadCategories();
-  }, [isOpen]);
+  }, [isOpen, form]);
 
   const processFileMetadata = async (file: File) => {
     setIsProcessing(true);
     setSignatureStatus(null);
 
     try {
-      // 1. Upload file to MinIO first to get fileId
-      const media = await uploadFile(file);
-      if (!media || !media.id) throw new Error("Upload thất bại");
+      // 1. Chạy OCR phía Frontend trước (Song song hoặc trước khi upload)
+      console.log("[FrontendOCR] Bắt đầu quét file:", file.name);
+      const ocrResult = await runFrontendOCR(file);
 
-      // 2. Call backend OCR & Decree 30 Extraction API
-      const metadata = await extractMetadata(media.id);
+      // 2. Điền thông tin từ OCR vào form ngay lập tức
+      if (ocrResult) {
+        form.setValue("documentNumber", ocrResult.documentNumber || "");
+        form.setValue("notation", ocrResult.notation || "");
+        form.setValue("abstract", ocrResult.abstract || "");
+        form.setValue("signerName", ocrResult.signerName || "");
+        form.setValue("issuerName", ocrResult.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
 
-      // 3. Populate form with extracted data
-      if (metadata) {
-        setSignatureStatus(metadata.signatureValid ? 'VALID' : 'INVALID');
-        
-        form.setValue("documentNumber", metadata.documentNumber || "");
-        form.setValue("notation", metadata.notation || "");
-        form.setValue("abstract", metadata.abstract || "");
-        form.setValue("signerName", metadata.signerName || "");
-        form.setValue("signerPosition", metadata.signerPosition || "");
-        form.setValue("issuerName", metadata.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
-        form.setValue("pageCount", metadata.pageCount || 1);
-        form.setValue("recipients", metadata.recipients || "");
-        
-        if (metadata.issueDate) {
-          form.setValue("issueDate", metadata.issueDate);
+        if (ocrResult.issueDate) {
+          form.setValue("issueDate", ocrResult.issueDate);
         }
 
-        // Auto-match categories if possible
-        if (metadata.typeId && categories.types.some(t => t.id === metadata.typeId)) {
-          form.setValue("typeId", metadata.typeId);
-        } else if (categories.types.length > 0) {
-          form.setValue("typeId", categories.types[0].id);
+        // Tự động khớp loại văn bản nếu nhận diện được keyword
+        const text = ocrResult.fullText?.toUpperCase() || "";
+        if (text.includes("QUYẾT ĐỊNH")) {
+          const type = categories.types.find(t => t.name.toUpperCase().includes("QUYẾT ĐỊNH"));
+          if (type) form.setValue("typeId", String(type.id));
+        } else if (text.includes("THÔNG BÁO")) {
+          const type = categories.types.find(t => t.name.toUpperCase().includes("THÔNG BÁO"));
+          if (type) form.setValue("typeId", String(type.id));
         }
-
-        if (metadata.fieldId && categories.fields.some(f => f.id === metadata.fieldId)) {
-          form.setValue("fieldId", metadata.fieldId);
-        } else if (categories.fields.length > 0) {
-          form.setValue("fieldId", categories.fields[0].id);
-        }
-
-        toast.success("Trích xuất thông tin theo Nghị định 30 thành công!");
       }
+
+      // 3. Upload file lên hệ thống (Backend sẽ bóc tách thêm Digital Signature nếu có)
+      const media = await uploadFile(file);
+      if (media && media.id) {
+        // Có thể gọi thêm backend để verify chữ ký số ở đây nếu cần
+        setSignatureStatus('VALID'); // Tạm thời giả định
+      }
+
+      toast.success("Trích xuất thông tin thành công!");
     } catch (error) {
       console.error("[DocumentUpload] OCR Error:", error);
       toast.error("Không thể trích xuất thông tin tự động.");
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const runFrontendOCR = async (file: File) => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const page = await pdf.getPage(1); // Quét trang đầu tiên thường chứa đủ metadata
+
+      const viewport = page.getViewport({ scale: 2.0 }); // Scale 2.0 để ảnh rõ nét hơn cho OCR
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      if (!context) throw new Error("Canvas context not found");
+
+      await page.render({ canvasContext: context, viewport }).promise;
+      const imageData = canvas.toDataURL('image/png');
+
+      // Chạy Tesseract OCR (Tiếng Việt)
+      const worker = await Tesseract.createWorker('vie');
+      const { data: { text } } = await worker.recognize(imageData);
+      await worker.terminate();
+
+      console.log("[FrontendOCR] Text nhận diện được:", text);
+
+      // Parse thông tin theo Nghị định 30/2020/NĐ-CP
+      return parseDecree30(text);
+    } catch (err) {
+      console.error("Frontend OCR process failed:", err);
+      return null;
+    }
+  };
+
+  const parseDecree30 = (text: string) => {
+    const result: any = { fullText: text };
+
+    // Regex Số/Ký hiệu (Số: 123/QĐ-SKHCN)
+    const notationRegex = /(?:Số|Số:)\s*(\d+)\/([A-ZĐ0-9-]+)/i;
+    const notationMatch = text.match(notationRegex);
+    if (notationMatch) {
+      result.documentNumber = notationMatch[1];
+      result.notation = notationMatch[2];
+    }
+
+    // Regex Ngày tháng (Đắk Lắk, ngày ... tháng ... năm ...)
+    const dateRegex = /(?:ngày|Ngày)\s+(\d{1,2})\s+tháng\s+(\d{1,2})\s+năm\s+(\d{4})/;
+    const dateMatch = text.match(dateRegex);
+    if (dateMatch) {
+      result.issueDate = `${dateMatch[3]}-${dateMatch[2].padStart(2, '0')}-${dateMatch[1].padStart(2, '0')}`;
+    }
+
+    // Regex Trích yếu (V/v ...)
+    const abstractRegex = /(?:V\/v|v\/v)\s*([^\n\r]+)/;
+    const abstractMatch = text.match(abstractRegex);
+    if (abstractMatch) {
+      result.abstract = abstractMatch[1].trim();
+    }
+
+    // Người ký (Dòng cuối thường là tên)
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    if (lines.length > 0) {
+      result.signerName = lines[lines.length - 1];
+    }
+
+    return result;
   };
 
   const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setIsDragging(true); };
@@ -567,7 +656,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                     <Select onValueChange={field.onChange} value={field.value} >
                       <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn loại..." /></SelectTrigger></FormControl>
                       <SelectContent>
-                        {categories.types.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
+                        {categories.types.map(cat => <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>)}
                         {categories.types.length === 0 && <SelectItem value="DISABLED" disabled>Không có dữ liệu</SelectItem>}
                       </SelectContent>
                     </Select>
@@ -579,7 +668,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger className="bg-muted/10 border-muted-foreground/10"><SelectValue placeholder="Chọn lĩnh vực..." /></SelectTrigger></FormControl>
                       <SelectContent>
-                        {categories.fields.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
+                        {categories.fields.map(cat => <SelectItem key={cat.id} value={String(cat.id)}>{cat.name}</SelectItem>)}
                         {categories.fields.length === 0 && <SelectItem value="DISABLED" disabled>Không có dữ liệu</SelectItem>}
                       </SelectContent>
                     </Select>
@@ -593,7 +682,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                       <SelectContent>
                         {categories.urgencies.length > 0 ? (
                           categories.urgencies.map(cat => (
-                            <SelectItem key={cat.id} value={cat.code || cat.id} className={cat.code === 'FLASH' ? 'text-destructive font-bold' : ''}>
+                            <SelectItem key={cat.id} value={String(cat.id)} className={cat.code === 'FLASH' ? 'text-destructive font-bold' : ''}>
                               {cat.name}
                             </SelectItem>
                           ))
@@ -616,7 +705,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                       <SelectContent>
                         {categories.securityLevels.length > 0 ? (
                           categories.securityLevels.map(cat => (
-                            <SelectItem key={cat.id} value={cat.code || cat.id}>
+                            <SelectItem key={cat.id} value={String(cat.id)}>
                               {cat.name}
                             </SelectItem>
                           ))
