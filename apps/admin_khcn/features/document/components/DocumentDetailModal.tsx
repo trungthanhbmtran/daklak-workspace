@@ -11,7 +11,7 @@ import {
   Download, Printer, Share2, AlertCircle, Clock, Paperclip,
   CheckCircle2, X
 } from "lucide-react";
-import { useDocuments } from "../hooks/useDocuments";
+import { useGetDocument } from "@/features/document/hooks/useDocuments";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
@@ -22,7 +22,6 @@ interface DocumentDetailModalProps {
 }
 
 export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDetailModalProps) {
-  const { useGetDocument } = useDocuments();
   const { data: doc, isLoading } = useGetDocument(documentId || "");
 
   const formatDate = (dateString: string | null | undefined) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, memo } from "react";
+import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { Inbox, Plus, FileText, Calendar, Building2, User, Search, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -8,10 +8,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
 
-import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
-import { DocumentDetailModal } from "@/features/document/components/DocumentDetailModal";
+// Lazy load heavy modals
+const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
+  loading: () => <Skeleton className="h-[600px] w-full rounded-3xl" />,
+  ssr: false
+});
+
+const DocumentDetailModal = dynamic(() => import("@/features/document/components/DocumentDetailModal").then(mod => mod.DocumentDetailModal), {
+  ssr: false
+});
 
 // Memoized Table Row for performance
 const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) => void }) => {
@@ -98,7 +105,6 @@ export default function IncomingDocumentsPage() {
     setMounted(true);
   }, []);
 
-  const { useListDocuments } = useDocuments();
   const { data: response, isLoading } = useListDocuments({
     isIncoming: true,
     searchTerm: searchTerm.length >= 2 ? searchTerm : undefined,
