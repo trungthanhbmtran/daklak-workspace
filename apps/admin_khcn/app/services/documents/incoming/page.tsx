@@ -10,9 +10,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
+import { DocumentDetailModal } from "@/features/document/components/DocumentDetailModal";
 
 export default function IncomingDocumentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const { useListDocuments, deleteDocument } = useDocuments();
@@ -108,7 +111,11 @@ export default function IncomingDocumentsPage() {
                   </td>
                 </tr>
               ) : documents.map((doc: any) => (
-                <tr key={doc.id} className="hover:bg-blue-500/[0.02] transition-all group cursor-pointer">
+                <tr 
+                  key={doc.id} 
+                  className="hover:bg-blue-500/[0.02] transition-all group cursor-pointer"
+                  onClick={() => { setSelectedDocId(doc.id); setIsDetailOpen(true); }}
+                >
                   <td className="px-8 py-6">
                     <div className="flex flex-col gap-1.5">
                       <span className="font-mono font-black text-blue-600 text-sm tracking-tight">{doc.documentNumber}</span>
@@ -141,7 +148,14 @@ export default function IncomingDocumentsPage() {
                   </td>
                   <td className="px-8 py-6 text-right">
                     <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-                      <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl shadow-sm hover:bg-blue-600 hover:text-white transition-colors"><Eye className="h-4 w-4" /></Button>
+                      <Button 
+                        variant="secondary" 
+                        size="icon" 
+                        className="h-9 w-9 rounded-xl shadow-sm hover:bg-blue-600 hover:text-white transition-colors"
+                        onClick={(e) => { e.stopPropagation(); setSelectedDocId(doc.id); setIsDetailOpen(true); }}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       <Button variant="secondary" size="icon" className="h-9 w-9 rounded-xl shadow-sm hover:bg-rose-600 hover:text-white transition-colors" onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }}><Trash2 className="h-4 w-4" /></Button>
                     </div>
                   </td>
@@ -162,8 +176,12 @@ export default function IncomingDocumentsPage() {
         onClose={() => setIsModalOpen(false)}
         isIncoming={true}
       />
+
+      <DocumentDetailModal
+        isOpen={isDetailOpen}
+        onClose={() => { setIsDetailOpen(false); setSelectedDocId(null); }}
+        documentId={selectedDocId}
+      />
     </div>
   );
 }
-
-

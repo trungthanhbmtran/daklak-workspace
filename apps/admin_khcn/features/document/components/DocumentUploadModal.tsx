@@ -162,7 +162,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
       // 3. Phân tích tên file để lấy thông tin gợi ý (Smart Guess)
       const fileName = file.name.split('.').slice(0, -1).join('.'); // Bỏ đuôi file
       const guessedInfo: any = {};
-      
+
       // Thử bóc tách Số/Ký hiệu từ tên file (VD: 123-QD-SKHCN)
       const nameParts = fileName.split(/[-_ ]/);
       if (nameParts.length >= 2) {
@@ -192,7 +192,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
       };
 
       setSignatureStatus(metadata?.signatureValid ? 'VALID' : 'INVALID');
-      
+
       form.setValue("documentNumber", finalData.documentNumber);
       form.setValue("notation", finalData.notation);
       form.setValue("abstract", finalData.abstract);
