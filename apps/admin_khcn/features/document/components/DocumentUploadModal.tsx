@@ -159,33 +159,72 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
       // 2. Call backend Extraction API
       const metadata = await extractMetadata(media.id);
 
-      // 3. Populate form with extracted data
-      if (metadata) {
-        setSignatureStatus(metadata.signatureValid ? 'VALID' : 'INVALID');
-
-        form.setValue("documentNumber", metadata.documentNumber || "");
-        form.setValue("notation", metadata.notation || "");
-        form.setValue("abstract", metadata.abstract || "");
-        form.setValue("signerName", metadata.signerName || "");
-        form.setValue("signerPosition", metadata.signerPosition || "");
-        form.setValue("issuerName", metadata.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk");
-        form.setValue("pageCount", metadata.pageCount || 1);
-        form.setValue("recipients", metadata.recipients || "");
-
-        if (metadata.issueDate) {
-          form.setValue("issueDate", metadata.issueDate);
+      // 3. Phân tích tên file để lấy thông tin gợi ý (Smart Guess)
+      const fileName = file.name.split('.').slice(0, -1).join('.'); // Bỏ đuôi file
+      const guessedInfo: any = {};
+      
+      // Thử bóc tách Số/Ký hiệu từ tên file (VD: 123-QD-SKHCN)
+      const nameParts = fileName.split(/[-_ ]/);
+      if (nameParts.length >= 2) {
+        if (/^\d+$/.test(nameParts[0])) {
+          guessedInfo.documentNumber = nameParts[0];
+          guessedInfo.notation = nameParts.slice(1).join('-');
+        } else {
+          guessedInfo.notation = fileName;
         }
-
-        // Auto-match categories
-        if (metadata.typeId && categories.types.some(t => String(t.id) === String(metadata.typeId))) {
-          form.setValue("typeId", String(metadata.typeId));
-        }
-        if (metadata.fieldId && categories.fields.some(f => String(f.id) === String(metadata.fieldId))) {
-          form.setValue("fieldId", String(metadata.fieldId));
-        }
-
-        toast.success("Trích xuất thông tin thành công!");
+      } else {
+        guessedInfo.notation = fileName;
       }
+
+      // 4. Populate form with extracted or guessed data
+      const finalData = {
+        documentNumber: metadata?.documentNumber || guessedInfo.documentNumber || "",
+        notation: metadata?.notation || guessedInfo.notation || "",
+        abstract: metadata?.abstract || fileName, // Lấy tên file làm trích yếu nếu không bóc tách được
+        signerName: metadata?.signerName || "",
+        signerPosition: metadata?.signerPosition || "",
+        issuerName: metadata?.issuerName || "Sở Khoa học và Công nghệ tỉnh Đắk Lắk",
+        pageCount: metadata?.pageCount || 1,
+        recipients: metadata?.recipients || "",
+        issueDate: metadata?.issueDate || new Date().toISOString().split('T')[0],
+        typeId: metadata?.typeId || "",
+        fieldId: metadata?.fieldId || ""
+      };
+
+      setSignatureStatus(metadata?.signatureValid ? 'VALID' : 'INVALID');
+      
+      form.setValue("documentNumber", finalData.documentNumber);
+      form.setValue("notation", finalData.notation);
+      form.setValue("abstract", finalData.abstract);
+      form.setValue("signerName", finalData.signerName);
+      form.setValue("signerPosition", finalData.signerPosition);
+      form.setValue("issuerName", finalData.issuerName);
+      form.setValue("pageCount", finalData.pageCount);
+      form.setValue("recipients", finalData.recipients);
+      form.setValue("issueDate", finalData.issueDate);
+
+      // Tự động nhận diện loại văn bản từ ký hiệu
+      const upperNotation = finalData.notation.toUpperCase();
+      if (upperNotation.includes("QD") || upperNotation.includes("QĐ")) {
+        const type = categories.types.find(t => t.name.toUpperCase().includes("QUYẾT ĐỊNH"));
+        if (type) form.setValue("typeId", String(type.id));
+      } else if (upperNotation.includes("TB")) {
+        const type = categories.types.find(t => t.name.toUpperCase().includes("THÔNG BÁO"));
+        if (type) form.setValue("typeId", String(type.id));
+      } else if (upperNotation.includes("KH")) {
+        const type = categories.types.find(t => t.name.toUpperCase().includes("KẾ HOẠCH"));
+        if (type) form.setValue("typeId", String(type.id));
+      }
+
+      // Auto-match categories from backend result
+      if (metadata?.typeId && categories.types.some(t => String(t.id) === String(metadata.typeId))) {
+        form.setValue("typeId", String(metadata.typeId));
+      }
+      if (metadata?.fieldId && categories.fields.some(f => String(f.id) === String(metadata.fieldId))) {
+        form.setValue("fieldId", String(metadata.fieldId));
+      }
+
+      toast.success("Đã tải file và gợi ý thông tin văn bản!");
     } catch (error) {
       console.error("[DocumentUpload] Extraction Error:", error);
       toast.error("Không thể trích xuất thông tin tự động.");
