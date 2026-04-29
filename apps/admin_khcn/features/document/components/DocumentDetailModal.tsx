@@ -56,7 +56,7 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
   const handlePrint = () => {
     if (doc?.fileId) {
       toast.info("Đang chuẩn bị tệp tin để in...");
-      const fileUrl = `/api/media/download/${doc.fileId}`;
+      const fileUrl = `/api/v1/admin/media/download/${doc.fileId}`;
 
       // Tạo một iframe ẩn để nạp file PDF và in
       const iframe = document.createElement('iframe');
@@ -83,8 +83,8 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
       toast.error("Không có tệp tin để tải xuống");
       return;
     }
-    // Giả sử URL tải xuống được cấu trúc như sau
-    const downloadUrl = `/api/media/download/${doc.fileId}`;
+    // URL tải xuống chuẩn của hệ thống
+    const downloadUrl = `/api/v1/admin/media/download/${doc.fileId}`;
     window.open(downloadUrl, '_blank');
     toast.success("Đang bắt đầu tải xuống...");
   };
