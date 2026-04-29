@@ -214,16 +214,16 @@ export class DocumentService {
 
   async extractMetadata(fileId: string) {
     console.log("[DocumentService] Extracting metadata for file:", fileId);
-    
+
     // In a real implementation, this would:
     // 1. Get the file URL from media-service
     // 2. Download the file
     // 3. Run OCR (Tesseract, Google Vision, etc.)
     // 4. Parse the text according to Decree 30/2020/ND-CP
-    
+
     // For now, we simulate a high-quality extraction result following Decree 30 standards
     await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate processing
-    
+
     return {
       documentNumber: "159",
       notation: "QĐ-SKHCN",
