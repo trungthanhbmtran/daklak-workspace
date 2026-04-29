@@ -6,7 +6,18 @@ import apiClient from "@/lib/axiosInstance";
 
 const API_BASE = '/documents';
 
-// 1. Top-level Hooks (Đảm bảo định danh ổn định cho React)
+/**
+ * Hàm hỗ trợ bóc tách mảng dữ liệu từ phản hồi API
+ * Hỗ trợ các định dạng: [...] hoặc { data: [...] } hoặc { data: { data: [...] } }
+ */
+const extractDataArray = (res: any) => {
+  if (Array.isArray(res)) return res;
+  if (res?.data && Array.isArray(res.data)) return res.data;
+  if (res?.data?.data && Array.isArray(res.data.data)) return res.data.data;
+  return [];
+};
+
+// 1. Top-level Hooks
 export const useCategories = (groupCode: string) => {
   return useQuery({
     queryKey: ['document-categories', groupCode],
@@ -14,9 +25,7 @@ export const useCategories = (groupCode: string) => {
       const response: any = await apiClient.get(`/categories`, {
         params: { group: groupCode }
       });
-      // apiClient.interceptors.response đã bóc lớp data đầu tiên
-      const data = Array.isArray(response) ? response : (response?.data || []);
-      return data;
+      return extractDataArray(response);
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -27,8 +36,8 @@ export const useListDocuments = (params: any) => {
     queryKey: ['documents', params],
     queryFn: async () => {
       const response: any = await apiClient.get(API_BASE, { params });
-      // Nếu API trả về { data: [], meta: {} }
-      return response.data || response;
+      // Trả về toàn bộ response để Page có thể lấy được cả meta nếu cần
+      return response;
     },
   });
 };
@@ -39,7 +48,7 @@ export const useGetDocument = (id: string) => {
     queryFn: async () => {
       if (!id) return null;
       const response: any = await apiClient.get(`${API_BASE}/${id}`);
-      return response.data || response;
+      return response?.data || response;
     },
     enabled: !!id,
   });
@@ -50,12 +59,12 @@ export const useDocumentStats = () => {
     queryKey: ['document-stats'],
     queryFn: async () => {
       const response: any = await apiClient.get(`${API_BASE}/stats`);
-      return response.data || response;
+      return response?.data || response;
     },
   });
 };
 
-// 2. Main Hook Wrapper (Backward Compatibility)
+// 2. Main Hook Wrapper
 export function useDocuments() {
   const queryClient = useQueryClient();
 
@@ -86,7 +95,7 @@ export function useDocuments() {
   const extractMetadataMutation = useMutation({
     mutationFn: async (fileId: string) => {
       const response: any = await apiClient.post(`${API_BASE}/extract`, { fileId });
-      return response.data || response;
+      return response?.data || response;
     },
   });
 

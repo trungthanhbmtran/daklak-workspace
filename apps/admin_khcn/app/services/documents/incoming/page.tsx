@@ -111,8 +111,14 @@ export default function IncomingDocumentsPage() {
     pageSize: 50
   });
 
-  // response đã là mảng dữ liệu từ useListDocuments (do return response.data)
-  const documents = Array.isArray(response) ? response : [];
+  // Tìm mảng dữ liệu trong response (có thể là response trực tiếp, response.data, hoặc response.data.data)
+  const documents = useMemo(() => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (response.data && Array.isArray(response.data.data)) return response.data.data;
+    return [];
+  }, [response]);
 
   const handleOpenDetail = useCallback((id: string) => {
     setSelectedDocId(id);
