@@ -41,7 +41,7 @@ export function useCategories(groupCode: string) {
 
 export function useCategoryMutations() {
   const queryClient = useQueryClient();
-  
+
   const createMutation = useMutation({
     mutationFn: (data: any) => apiClient.post(`${API_BASE}/categories`, data),
     onSuccess: (_, variables) => {
@@ -99,7 +99,7 @@ export function useDocuments() {
   const listDocs = useListDocuments({});
   const categoryMutations = useCategoryMutations();
   const extractMetadata = useExtractMetadata();
-  
+
   return {
     useCategories,
     useListDocuments,
