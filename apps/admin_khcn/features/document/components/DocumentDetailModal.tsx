@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useDocuments } from "../hooks/useDocuments";
 import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 
 interface DocumentDetailModalProps {
   isOpen: boolean;
@@ -52,9 +53,30 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
     }
   };
 
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    if (!doc?.fileId) {
+      toast.error("Không có tệp tin để tải xuống");
+      return;
+    }
+    // Giả sử URL tải xuống được cấu trúc như sau
+    const downloadUrl = `/api/media/download/${doc.fileId}`;
+    window.open(downloadUrl, '_blank');
+    toast.success("Đang bắt đầu tải xuống...");
+  };
+
+  const handleShare = () => {
+    const url = window.location.href + `?docId=${documentId}`;
+    navigator.clipboard.writeText(url);
+    toast.success(" đã sao chép liên kết văn bản vào bộ nhớ tạm!");
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-3xl bg-background flex flex-col max-h-[90vh]">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden border-none shadow-2xl rounded-3xl bg-background flex flex-col max-h-[90vh] print-content">
         <DialogHeader className="p-8 bg-muted/20 border-b shrink-0">
           <div className="flex justify-between items-start gap-4">
             <div className="space-y-2">
@@ -163,11 +185,14 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
 
               {/* Tệp đính kèm */}
               {doc.fileId && (
-                <div className="space-y-4">
+                <div className="space-y-4 no-print">
                   <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                     <Paperclip className="h-4 w-4 text-blue-500" /> Tệp đính kèm
                   </h4>
-                  <div className="group p-4 rounded-2xl border bg-background hover:bg-muted/10 transition-all flex items-center justify-between cursor-pointer">
+                  <div 
+                    onClick={handleDownload}
+                    className="group p-4 rounded-2xl border bg-background hover:bg-muted/10 transition-all flex items-center justify-between cursor-pointer"
+                  >
                     <div className="flex items-center gap-4">
                       <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center">
                         <FileText className="h-5 w-5" />
@@ -207,12 +232,18 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
           )}
         </div>
 
-        <DialogFooter className="p-6 bg-muted/20 border-t shrink-0 flex items-center justify-between sm:justify-between gap-4">
+        <DialogFooter className="p-6 bg-muted/20 border-t shrink-0 flex items-center justify-between sm:justify-between gap-4 no-print">
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4">
+            <Button 
+              onClick={handlePrint}
+              variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4"
+            >
               <Printer className="h-4 w-4 mr-2" /> In văn bản
             </Button>
-            <Button variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4">
+            <Button 
+              onClick={handleShare}
+              variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4"
+            >
               <Share2 className="h-4 w-4 mr-2" /> Chia sẻ
             </Button>
           </div>
@@ -220,6 +251,33 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
              Đóng lại
           </Button>
         </DialogFooter>
+
+        <style jsx global>{`
+          @media print {
+            body * {
+              visibility: hidden;
+            }
+            .no-print {
+              display: none !important;
+            }
+            .print-content, .print-content * {
+              visibility: visible;
+            }
+            .print-content {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              margin: 0;
+              padding: 0;
+              box-shadow: none;
+              border: none;
+            }
+            .custom-scrollbar {
+              overflow: visible !important;
+            }
+          }
+        `}</style>
       </DialogContent>
     </Dialog>
   );
