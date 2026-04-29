@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import apiClient from "@/lib/axiosInstance";
@@ -98,7 +99,7 @@ export function useDocuments() {
     });
   };
 
-  return {
+  return useMemo(() => ({
     useCategories,
     useListDocuments,
     useGetDocument,
@@ -112,5 +113,10 @@ export function useDocuments() {
       updateDocumentMutation.isPending ||
       deleteDocumentMutation.isPending ||
       extractMetadataMutation.isPending,
-  };
+  }), [
+    createDocumentMutation.isPending,
+    updateDocumentMutation.isPending,
+    deleteDocumentMutation.isPending,
+    extractMetadataMutation.isPending
+  ]);
 }

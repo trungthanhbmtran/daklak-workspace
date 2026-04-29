@@ -10,15 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
 
-// Lazy load heavy modals
-const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
-  loading: () => <Skeleton className="h-[600px] w-full rounded-3xl" />,
-  ssr: false
-});
-
-const DocumentDetailModal = dynamic(() => import("@/features/document/components/DocumentDetailModal").then(mod => mod.DocumentDetailModal), {
-  ssr: false
-});
+import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
+import { DocumentDetailModal } from "@/features/document/components/DocumentDetailModal";
 
 // Memoized Table Row for performance
 const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) => void }) => {
@@ -95,10 +88,15 @@ const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) 
 DocumentRow.displayName = "DocumentRow";
 
 export default function IncomingDocumentsPage() {
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { useListDocuments } = useDocuments();
   const { data: response, isLoading } = useListDocuments({
@@ -107,7 +105,8 @@ export default function IncomingDocumentsPage() {
     pageSize: 50
   });
 
-  const documents = response?.data || [];
+  // response đã là mảng dữ liệu từ useListDocuments (do return response.data)
+  const documents = Array.isArray(response) ? response : [];
 
   const handleOpenDetail = useCallback((id: string) => {
     setSelectedDocId(id);

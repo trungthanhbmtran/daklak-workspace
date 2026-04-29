@@ -273,7 +273,7 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
           </Button>
         </DialogFooter>
 
-        <style jsx global>{`
+        <style dangerouslySetInnerHTML={{ __html: `
           @media print {
             body * {
               visibility: hidden;
@@ -298,7 +298,7 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
               overflow: visible !important;
             }
           }
-        `}</style>
+        ` }} />
       </DialogContent>
     </Dialog>
   );
