@@ -6,8 +6,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { 
-  FileText, Calendar, User, Building2, ShieldCheck, 
+import {
+  FileText, Calendar, User, Building2, ShieldCheck,
   Download, Printer, Share2, AlertCircle, Clock, Paperclip,
   CheckCircle2, X
 } from "lucide-react";
@@ -54,7 +54,28 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
   };
 
   const handlePrint = () => {
-    window.print();
+    if (doc?.fileId) {
+      toast.info("Đang chuẩn bị tệp tin để in...");
+      const fileUrl = `/api/media/download/${doc.fileId}`;
+
+      // Tạo một iframe ẩn để nạp file PDF và in
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = fileUrl;
+      document.body.appendChild(iframe);
+
+      iframe.onload = () => {
+        setTimeout(() => {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.print();
+            // Xóa iframe sau khi in xong (hoặc sau một khoảng thời gian)
+            setTimeout(() => document.body.removeChild(iframe), 1000);
+          }
+        }, 500);
+      };
+    } else {
+      window.print();
+    }
   };
 
   const handleDownload = () => {
@@ -86,9 +107,9 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
                 </div>
                 <span className="text-xs font-black uppercase tracking-widest text-muted-foreground">Chi tiết văn bản</span>
                 {doc?.isIncoming ? (
-                   <Badge variant="outline" className="text-[10px] font-bold border-blue-200 text-blue-600 bg-blue-50">VĂN BẢN ĐẾN</Badge>
+                  <Badge variant="outline" className="text-[10px] font-bold border-blue-200 text-blue-600 bg-blue-50">VĂN BẢN ĐẾN</Badge>
                 ) : (
-                   <Badge variant="outline" className="text-[10px] font-bold border-emerald-200 text-emerald-600 bg-emerald-50">VĂN BẢN ĐI</Badge>
+                  <Badge variant="outline" className="text-[10px] font-bold border-emerald-200 text-emerald-600 bg-emerald-50">VĂN BẢN ĐI</Badge>
                 )}
               </div>
               <DialogTitle className="text-2xl font-black leading-tight text-foreground line-clamp-2">
@@ -118,8 +139,8 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
             </div>
           ) : !doc ? (
             <div className="py-20 text-center space-y-4">
-               <AlertCircle className="h-12 w-12 text-rose-500 mx-auto" />
-               <p className="text-muted-foreground font-medium">Không tìm thấy thông tin văn bản này.</p>
+              <AlertCircle className="h-12 w-12 text-rose-500 mx-auto" />
+              <p className="text-muted-foreground font-medium">Không tìm thấy thông tin văn bản này.</p>
             </div>
           ) : (
             <div className="space-y-10">
@@ -175,12 +196,12 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
 
               {/* Chi tiết nội dung */}
               <div className="space-y-6">
-                 <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    <ShieldCheck className="h-4 w-4 text-emerald-500" /> Nội dung văn bản
-                 </h4>
-                 <div className="p-6 bg-muted/10 rounded-3xl border border-muted-foreground/10 leading-relaxed text-foreground/80 font-medium">
-                    {doc.content || doc.abstract || "Nội dung chưa được cập nhật."}
-                 </div>
+                <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" /> Nội dung văn bản
+                </h4>
+                <div className="p-6 bg-muted/10 rounded-3xl border border-muted-foreground/10 leading-relaxed text-foreground/80 font-medium">
+                  {doc.content || doc.abstract || "Nội dung chưa được cập nhật."}
+                </div>
               </div>
 
               {/* Tệp đính kèm */}
@@ -189,7 +210,7 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
                   <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
                     <Paperclip className="h-4 w-4 text-blue-500" /> Tệp đính kèm
                   </h4>
-                  <div 
+                  <div
                     onClick={handleDownload}
                     className="group p-4 rounded-2xl border bg-background hover:bg-muted/10 transition-all flex items-center justify-between cursor-pointer"
                   >
@@ -234,13 +255,13 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
 
         <DialogFooter className="p-6 bg-muted/20 border-t shrink-0 flex items-center justify-between sm:justify-between gap-4 no-print">
           <div className="flex items-center gap-2">
-            <Button 
+            <Button
               onClick={handlePrint}
               variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4"
             >
               <Printer className="h-4 w-4 mr-2" /> In văn bản
             </Button>
-            <Button 
+            <Button
               onClick={handleShare}
               variant="outline" size="sm" className="rounded-xl font-bold bg-background shadow-sm h-10 px-4"
             >
@@ -248,7 +269,7 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
             </Button>
           </div>
           <Button onClick={onClose} className="rounded-xl font-bold px-8 h-10 bg-foreground text-background hover:bg-foreground/90 shadow-xl transition-all active:scale-95">
-             Đóng lại
+            Đóng lại
           </Button>
         </DialogFooter>
 
