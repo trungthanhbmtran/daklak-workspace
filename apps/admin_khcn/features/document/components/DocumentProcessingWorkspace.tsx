@@ -14,14 +14,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useDocuments } from "@/features/document/hooks/useDocuments";
-
-// Dữ liệu mô phỏng luồng xử lý
-const workflowHistory = [
-  { id: 1, user: "Nguyễn Thị Thu (Văn thư)", action: "Vào sổ văn bản đến", time: "25/02/2026 08:30", note: "" },
-  { id: 2, user: "Trần Văn Lãnh (Giám đốc Sở)", action: "Phân xử lý", time: "25/02/2026 09:15", note: "Giao đồng chí Mạnh chủ trì, phối hợp với các phòng ban liên quan tham mưu phản hồi trước ngày 28/02." },
-  { id: 3, user: "Mạnh (Chuyên viên CNTT)", action: "Tiếp nhận xử lý", time: "25/02/2026 10:00", note: "" },
-];
+import { useDocuments, useDocumentLogs } from "@/features/document/hooks/useDocuments";
+import { toast } from "sonner";
 
 export default function DocumentProcessingWorkspace({ document }: { document?: any }) {
   const [comment, setComment] = useState("");
@@ -31,6 +25,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
   const [isSaving, setIsSaving] = useState(false);
 
   const { updateDocument } = useDocuments();
+  const { data: logs = [], isLoading: isLoadingLogs } = useDocumentLogs(document?.id);
 
   useEffect(() => {
     if (document) {
@@ -40,17 +35,25 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
     }
   }, [document]);
 
-  const handleSavePublicity = async () => {
+  const handleAction = async (status: string, actionLabel: string) => {
+    if (!comment && status !== 'PUBLISHED') {
+      toast.error("Vui lòng nhập ý kiến xử lý");
+      return;
+    }
+
     setIsSaving(true);
     try {
       await updateDocument({
         id: document.id,
+        status,
+        comment, // Sẽ được log Record phía backend
         isPublic,
         transparencyCategory: isPublic ? transCategory : null,
         fiscalYear: isPublic ? parseInt(fiscalYear) : null,
       });
+      setComment("");
     } catch (error) {
-      console.error("Save publicity error:", error);
+      console.error(`${actionLabel} error:`, error);
     } finally {
       setIsSaving(false);
     }
@@ -68,8 +71,8 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
     <div className="flex flex-col h-[calc(100vh-2rem)] bg-muted/5 gap-4 p-4 overflow-y-auto">
       {/* Top Action Bar */}
       <div className="flex items-center justify-between bg-background p-3 rounded-lg border shadow-sm shrink-0">
-        <div>
-          <h2 className="text-lg font-bold text-foreground">{document.documentNumber || document.arrivalNumber}: {document.abstract}</h2>
+        <div className="flex-1">
+          <h2 className="text-lg font-bold text-foreground truncate max-w-[800px]">{document.documentNumber || document.arrivalNumber}: {document.abstract}</h2>
           <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
             {(document.urgency === 'URGENT' || document.urgency === 'FLASH') && (
               <Badge variant="outline" className="bg-rose-50 text-rose-700 border-rose-200 shadow-none px-1.5 py-0 h-4 text-[10px]">
@@ -84,128 +87,117 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" /> In phiếu xử lý</Button>
-          <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" /> Tải tệp gốc</Button>
+          <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" /> In phiếu</Button>
+          <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" /> Tải về</Button>
         </div>
       </div>
 
       {/* Split Screen Layout */}
       <div className="flex flex-1 gap-4 min-h-0">
-        {/* CỘT TRÁI: Trình xem PDF (PDF Viewer Placeholder) */}
+        {/* CỘT TRÁI: Trình xem văn bản */}
         <div className="flex-1 bg-muted/20 border rounded-lg flex flex-col overflow-hidden relative shadow-inner">
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
-            <span>Trang 1 / 3</span>
-            <Separator orientation="vertical" className="h-4" />
             <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${(document.id || 'file').slice(0, 5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="w-full max-w-2xl h-full bg-white shadow-md border rounded p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
               <Stamp className="h-16 w-16 text-rose-500/20 mb-4 transform -rotate-12" />
-              <p>Khu vực hiển thị nội dung tệp PDF văn bản gốc</p>
-              <p className="text-xs mt-2">Hỗ trợ cuộn, phóng to, thu nhỏ và kéo thả chữ ký số</p>
+              <p>Trình xem văn bản (PDF Viewer)</p>
+              <p className="text-xs mt-2 italic">Hệ thống đang tích hợp bộ ký số trực tiếp trên văn bản</p>
             </div>
           </div>
         </div>
 
-        {/* CỘT PHẢI: Thao tác & Lịch sử luân chuyển */}
-        <div className="w-[400px] flex flex-col gap-4 shrink-0">
+        {/* CỘT PHẢI: Thao tác & Lịch sử */}
+        <div className="w-[420px] flex flex-col gap-4 shrink-0">
 
-          {/* Card Thao tác (Hành động của user hiện tại) */}
-          <Card className="border shadow-sm shrink-0">
-            <CardHeader className="p-4 border-b bg-muted/10">
+          {/* Card Thao tác Tổng hợp */}
+          <Card className="border shadow-md shrink-0 border-primary/10">
+            <CardHeader className="p-4 border-b bg-primary/5">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <FileSignature className="h-4 w-4 text-primary" /> Xử lý văn bản
+                <FileSignature className="h-4 w-4 text-primary" /> Xử lý & Công khai
               </CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase text-muted-foreground">Ý kiến xử lý / Bút phê:</label>
+                <label className="text-[11px] font-bold uppercase text-muted-foreground flex justify-between">
+                  Ý kiến xử lý / Bút phê:
+                  <span className="text-[10px] lowercase font-normal italic">Bắt buộc khi chuyển xử lý</span>
+                </label>
                 <Textarea
                   placeholder="Nhập nội dung trình Lãnh đạo hoặc ghi chú luân chuyển..."
-                  className="h-24 resize-none text-sm"
+                  className="h-24 resize-none text-sm border-primary/10 focus-visible:ring-primary/20"
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <Button className="w-full shadow-sm bg-blue-600 hover:bg-blue-700">
-                  <CornerUpRight className="h-4 w-4 mr-2" /> Chuyển xử lý
-                </Button>
-                <Button variant="outline" className="w-full text-emerald-700 border-emerald-200 hover:bg-emerald-50">
-                  <CheckCheck className="h-4 w-4 mr-2" /> Kết thúc / Lưu hồ sơ
-                </Button>
-                <Button variant="outline" className="w-full text-foreground border-border hover:bg-muted col-span-2 mt-1">
-                  <FileSignature className="h-4 w-4 mr-2" /> Ký số & Trình duyệt (VGCA)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
 
-          {/* Card Công khai (Publicity Settings) */}
-          <Card className="border shadow-sm shrink-0">
-            <CardHeader className="p-4 border-b bg-muted/10">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Globe2 className="h-4 w-4 text-emerald-600" /> Cấu hình Công khai
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-4 space-y-4">
-              <div className="flex items-center justify-between">
-                 <div className="flex items-center gap-2">
-                   {isPublic ? <Globe2 className="h-4 w-4 text-emerald-600" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
-                   <span className="text-sm font-medium">{isPublic ? 'Đang công khai' : 'Đang lưu nội bộ'}</span>
-                 </div>
-                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
-              </div>
-              
-              {isPublic && (
-                <div className="space-y-4 pt-4 border-t border-dashed">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-bold uppercase text-muted-foreground">Phạm vi công khai:</label>
-                    <Select value={transCategory} onValueChange={setTransCategory}>
-                      <SelectTrigger className="h-9 text-xs">
-                        <SelectValue placeholder="Chọn loại công khai" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="GENERAL">Công khai chung (Trục VDX)</SelectItem>
-                        <SelectItem value="ESTIMATE">Dự toán ngân sách</SelectItem>
-                        <SelectItem value="SETTLEMENT">Quyết toán ngân sách</SelectItem>
-                        <SelectItem value="EXECUTION">Thực hiện dự toán</SelectItem>
-                        <SelectItem value="CONSULTATION">Lấy ý kiến nhân dân</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  
-                  {transCategory !== 'GENERAL' && (
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-bold uppercase text-muted-foreground">Năm tài chính:</label>
+              {/* Publication Settings Integrated */}
+              <div className="p-3 rounded-lg border bg-emerald-50/30 border-emerald-100 space-y-3">
+                <div className="flex items-center justify-between">
+                   <div className="flex items-center gap-2">
+                     {isPublic ? <Globe2 className="h-4 w-4 text-emerald-600" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
+                     <span className="text-xs font-bold text-emerald-800 uppercase tracking-tight">{isPublic ? 'Công khai văn bản' : 'Lưu hành nội bộ'}</span>
+                   </div>
+                   <Switch checked={isPublic} onCheckedChange={setIsPublic} className="data-[state=checked]:bg-emerald-600" />
+                </div>
+                
+                {isPublic && (
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-100">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-emerald-700">LOẠI CÔNG KHAI:</label>
+                      <Select value={transCategory} onValueChange={setTransCategory}>
+                        <SelectTrigger className="h-8 text-[11px] bg-background">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="GENERAL">Chung</SelectItem>
+                          <SelectItem value="ESTIMATE">Dự toán</SelectItem>
+                          <SelectItem value="SETTLEMENT">Quyết toán</SelectItem>
+                          <SelectItem value="EXECUTION">Thực hiện</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-emerald-700">NĂM:</label>
                       <Select value={fiscalYear} onValueChange={setFiscalYear}>
-                        <SelectTrigger className="h-9 text-xs">
-                          <SelectValue placeholder="Chọn năm" />
+                        <SelectTrigger className="h-8 text-[11px] bg-background">
+                          <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="2026">2026</SelectItem>
                           <SelectItem value="2025">2025</SelectItem>
-                          <SelectItem value="2024">2024</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
-                  )}
-                </div>
-              )}
-              
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="w-full text-xs font-bold"
-                onClick={handleSavePublicity}
-                disabled={isSaving}
-              >
-                {isSaving ? 'Đang lưu...' : 'Lưu cấu hình công khai'}
-              </Button>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <Button 
+                  className="w-full shadow-sm bg-blue-600 hover:bg-blue-700 h-9 text-xs"
+                  onClick={() => handleAction('PROCESSING', 'Chuyển xử lý')}
+                  disabled={isSaving}
+                >
+                  <CornerUpRight className="h-3.5 w-3.5 mr-2" /> Chuyển xử lý
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full text-emerald-700 border-emerald-200 hover:bg-emerald-50 h-9 text-xs font-bold"
+                  onClick={() => handleAction('PUBLISHED', 'Kết thúc')}
+                  disabled={isSaving}
+                >
+                  <CheckCheck className="h-3.5 w-3.5 mr-2" /> Kết thúc hồ sơ
+                </Button>
+                <Button variant="outline" className="w-full text-foreground border-border hover:bg-muted col-span-2 h-9 text-xs">
+                  <FileSignature className="h-3.5 w-3.5 mr-2" /> Ký số & Trình duyệt (VGCA)
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          {/* Card Lịch sử (Workflow Timeline) */}
+          {/* Card Lịch sử (Real Timeline) */}
           <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
             <CardHeader className="p-4 border-b bg-muted/10 shrink-0">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
@@ -213,28 +205,34 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
               </CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1 p-4">
-              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-                {workflowHistory.map((step, index) => (
-                  <div key={step.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-6 h-6 rounded-full border-2 border-background bg-primary text-primary-foreground shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 absolute left-2 md:left-1/2 z-10">
-                      <CheckCheck className="h-3 w-3" />
-                    </div>
-                    <div className="w-[calc(100%-3rem)] md:w-[calc(50%-1.5rem)] ml-10 md:ml-0 p-3 rounded-lg border bg-background shadow-sm text-sm">
-                      <div className="flex justify-between items-start mb-1">
-                        <span className="font-bold text-primary text-xs">{step.user}</span>
+              {isLoadingLogs ? (
+                <div className="flex justify-center p-4 text-xs text-muted-foreground animate-pulse">Đang tải lịch sử...</div>
+              ) : logs.length === 0 ? (
+                <div className="text-center p-8 text-xs text-muted-foreground italic">Chưa có lịch sử xử lý</div>
+              ) : (
+                <div className="space-y-6 relative before:absolute before:inset-0 before:ml-4 before:-translate-x-px before:h-full before:w-0.5 before:bg-border">
+                  {logs.map((log: any) => (
+                    <div key={log.id} className="relative flex items-start gap-4">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full border-2 border-background bg-primary/10 text-primary shadow-sm shrink-0 z-10">
+                        <CheckCheck className="h-4 w-4" />
                       </div>
-                      <span className="font-medium text-foreground block mb-1">{step.action}</span>
-                      {step.note && (
-                        <div className="mt-2 p-2 bg-amber-50/50 border border-amber-100 rounded text-xs text-foreground italic flex gap-2">
-                          <MessageSquare className="h-3 w-3 shrink-0 mt-0.5 text-amber-600" />
-                          <span>"{step.note}"</span>
+                      <div className="flex-1 p-3 rounded-lg border bg-background shadow-sm text-[13px]">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-bold text-primary text-xs">{log.userName || "Hệ thống"}</span>
+                          <span className="text-[10px] text-muted-foreground">{new Date(log.createdAt).toLocaleString('vi-VN')}</span>
                         </div>
-                      )}
-                      <span className="text-[10px] text-muted-foreground mt-2 block">{step.time}</span>
+                        <span className="font-medium text-foreground block mb-1">{log.action}</span>
+                        {log.note && (
+                          <div className="mt-2 p-2 bg-amber-50/50 border border-amber-100 rounded text-xs text-foreground italic flex gap-2">
+                            <MessageSquare className="h-3 w-3 shrink-0 mt-0.5 text-amber-600" />
+                            <span>"{log.note}"</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </ScrollArea>
           </Card>
         </div>

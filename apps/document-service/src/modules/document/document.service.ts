@@ -39,6 +39,10 @@ export class DocumentService {
         transparencyCategory: data.transparencyCategory,
       },
     });
+
+    // Tự động log khi tạo văn bản
+    await this.logRecord(document.id, document.isIncoming ? "VÀO SỔ VĂN BẢN ĐẾN" : "PHÁT HÀNH VĂN BẢN ĐI", "Hệ thống tự động ghi nhận khi tạo mới.");
+
     return { data: this.mapToProto(document) };
   }
 
@@ -124,6 +128,18 @@ export class DocumentService {
       where: { id },
       data: updateData,
     });
+
+    // Log hành động cập nhật nếu có kèm theo ý kiến xử lý (comment) hoặc thay đổi trạng thái
+    if (data.comment || data.status) {
+      await this.logRecord(
+        id, 
+        data.status === 'PUBLISHED' ? "KẾT THÚC / LƯU HỒ SƠ" : "XỬ LÝ VĂN BẢN", 
+        data.comment || "Cập nhật thông tin văn bản.",
+        data.userId,
+        data.userName
+      );
+    }
+
     return { data: this.mapToProto(document) };
   }
 
@@ -173,6 +189,26 @@ export class DocumentService {
     };
   }
 
+  async getLogs(documentId: string) {
+    const logs = await this.prisma.documentLog.findMany({
+      where: { documentId },
+      orderBy: { createdAt: 'desc' },
+    });
+    return { data: logs };
+  }
+
+  async logRecord(documentId: string, action: string, note?: string, userId?: string, userName?: string) {
+    return this.prisma.documentLog.create({
+      data: {
+        documentId,
+        action,
+        note,
+        userId,
+        userName,
+      },
+    });
+  }
+
   private mapToProto(doc: any) {
     return {
       id: doc.id,
@@ -207,6 +243,8 @@ export class DocumentService {
       transparencyCategory: doc.transparencyCategory || "",
       createdAt: doc.createdAt?.toISOString() || "",
       updatedAt: doc.updatedAt?.toISOString() || "",
+      typeName: doc.documentType?.name || "",
+      fieldName: doc.field?.name || "",
     };
   }
 

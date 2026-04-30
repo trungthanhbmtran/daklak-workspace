@@ -21,7 +21,8 @@ export default function TransparencyPage() {
   const [fiscalYear, setFiscalYear] = useState("2026");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { useListDocuments } = useDocuments();
+  const { useDocumentStats, useListDocuments } = useDocuments();
+  const { data: stats } = useDocumentStats();
   const { data: reportsData, isLoading } = useListDocuments({
     isPublic: 'true',
     search: searchTerm,
@@ -35,6 +36,11 @@ export default function TransparencyPage() {
     if (reportsData.data && Array.isArray(reportsData.data.data)) return reportsData.data.data;
     return [];
   }, [reportsData]);
+
+  // Giả định stats trả về object { incomingTotal, incomingPending, incomingLate, outgoingTotal, urgentTotal }
+  // Cho trang công khai, ta có thể tạm dùng outgoingTotal như tổng số văn bản đi/báo cáo
+  const totalReports = (stats?.outgoingTotal || 0) + (stats?.incomingTotal || 0);
+  const publicCount = reports.length;
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -69,7 +75,7 @@ export default function TransparencyPage() {
             </div>
             <div>
               <p className="text-xs font-bold text-blue-800 uppercase tracking-wider">Tổng số báo cáo</p>
-              <p className="text-2xl font-black text-blue-900">42</p>
+              <p className="text-2xl font-black text-blue-900">{totalReports || 0}</p>
             </div>
           </CardContent>
         </Card>
@@ -80,9 +86,9 @@ export default function TransparencyPage() {
             </div>
             <div>
               <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Đã công khai</p>
-              <p className="text-2xl font-black text-emerald-900">38</p>
+              <p className="text-2xl font-black text-emerald-900">{publicCount || 0}</p>
             </div>
-          </CardContent>
+          </div>
         </Card>
         <Card className="border-none shadow-sm bg-amber-50/50">
           <CardContent className="p-4 flex items-center gap-4">
@@ -90,8 +96,8 @@ export default function TransparencyPage() {
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Chờ đăng tải (2026)</p>
-              <p className="text-2xl font-black text-amber-900">04</p>
+              <p className="text-xs font-bold text-amber-800 uppercase tracking-wider">Hạn báo cáo</p>
+              <p className="text-2xl font-black text-amber-900">Q1/2026</p>
             </div>
           </CardContent>
         </Card>

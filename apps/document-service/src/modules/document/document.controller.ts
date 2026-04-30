@@ -45,5 +45,11 @@ export class DocumentController {
   syncOnline(data: any) {
     return this.documentService.syncOnline();
   }
+
+  @GrpcMethod('DocumentService', 'GetLogs')
+  getLogs(data: { documentId: string }) {
+    return this.documentService.getLogs(data.documentId);
+  }
 }
+
 

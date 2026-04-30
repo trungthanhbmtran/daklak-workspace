@@ -233,15 +233,15 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-muted/5 rounded-3xl">
                 <div>
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Loại văn bản</p>
-                  <p className="text-xs font-bold mt-1">Nghị định</p>
+                  <p className="text-xs font-bold mt-1">{doc.typeName || doc.typeId || '---'}</p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Lĩnh vực</p>
+                  <p className="text-xs font-bold mt-1">{doc.fieldName || doc.fieldId || '---'}</p>
                 </div>
                 <div>
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Số trang</p>
                   <p className="text-xs font-bold mt-1">{doc.pageCount || 1} trang</p>
-                </div>
-                <div>
-                  <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Số bản lưu</p>
-                  <p className="text-xs font-bold mt-1">{doc.attachmentCount || 0} bản</p>
                 </div>
                 <div>
                   <p className="text-[9px] font-black text-muted-foreground uppercase tracking-widest">Năm ngân sách</p>

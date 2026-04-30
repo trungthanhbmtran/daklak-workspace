@@ -37,3 +37,17 @@ model Document {
   @@index([status])
   @@map("documents")
 }
+
+model DocumentLog {
+  id          String   @id @default(uuid())
+  documentId  String   @map("document_id")
+  userId      String?  @map("user_id")
+  userName    String?  @map("user_name")
+  action      String   // VÀO SỔ, PHÂN XỬ LÝ, TIẾP NHẬN, CHUYỂN XỬ LÝ, KẾT THÚC
+  note        String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([documentId])
+  @@map("document_logs")
+}
+

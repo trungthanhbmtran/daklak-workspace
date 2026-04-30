@@ -13,6 +13,25 @@ service DocumentService {
   rpc GetStatistics(common.Empty) returns (GetStatisticsResponse) {}
   rpc ExtractMetadata(ExtractMetadataRequest) returns (ExtractMetadataResponse) {}
   rpc SyncOnline(common.Empty) returns (SyncOnlineResponse) {}
+  rpc GetLogs(GetLogsRequest) returns (GetLogsResponse) {}
+}
+
+message GetLogsRequest {
+  string documentId = 1;
+}
+
+message DocumentLog {
+  string id = 1;
+  string documentId = 2;
+  string userId = 3;
+  string userName = 4;
+  string action = 5;
+  string note = 6;
+  string createdAt = 7;
+}
+
+message GetLogsResponse {
+  repeated DocumentLog data = 1;
 }
 
 message SyncOnlineResponse {
@@ -61,6 +80,8 @@ message Document {
   string transparencyCategory = 29;
   string createdAt = 30;
   string updatedAt = 31;
+  string typeName = 32;
+  string fieldName = 33;
 }
 
 message DocumentResponse {

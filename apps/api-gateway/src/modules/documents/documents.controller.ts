@@ -71,6 +71,11 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.SyncOnline({}));
   }
 
+  @Get(':id/logs')
+  async getDocumentLogs(@Param('id') id: string) {
+    return firstValueFrom(this.documentService.GetLogs({ documentId: id }));
+  }
+
   @Delete(':id')
   async deleteDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.DeleteDocument({ id }));

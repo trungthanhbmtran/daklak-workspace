@@ -86,6 +86,18 @@ export const useDocumentStats = () => {
   });
 };
 
+export const useDocumentLogs = (id: string) => {
+  return useQuery({
+    queryKey: ['document-logs', id],
+    queryFn: async () => {
+      if (!id) return [];
+      const response: any = await apiClient.get(`${API_BASE}/${id}/logs`);
+      return extractDataArray(response);
+    },
+    enabled: !!id,
+  });
+};
+
 // 2. Main Hook Wrapper
 export function useDocuments() {
   const queryClient = useQueryClient();
@@ -108,8 +120,10 @@ export function useDocuments() {
 
   const updateDocumentMutation = useMutation({
     mutationFn: async ({ id, ...data }: any) => apiClient.put(`${API_BASE}/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
+      queryClient.invalidateQueries({ queryKey: ['document', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['document-logs', variables.id] });
       toast.success('Cập nhật văn bản thành công!');
     },
   });
@@ -144,6 +158,7 @@ export function useDocuments() {
     useListMinutes,
     useGetDocument,
     useDocumentStats,
+    useDocumentLogs,
     createDocument: createDocumentMutation.mutateAsync,
     createConsultation: createConsultationMutation.mutateAsync,
     updateDocument: updateDocumentMutation.mutateAsync,
