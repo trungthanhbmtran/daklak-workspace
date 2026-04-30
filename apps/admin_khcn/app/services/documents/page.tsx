@@ -64,7 +64,7 @@ export default function DocumentDashboardPage() {
           <Button variant="outline" className="bg-background shadow-sm">
             <BarChart3 className="h-4 w-4 mr-2" /> Báo cáo thống kê
           </Button>
-          <Link href="/admin/services/documents/incoming">
+          <Link href="/services/documents/incoming">
             <Button className="shadow-sm">
               Vào sổ văn bản ngay <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
@@ -187,7 +187,7 @@ export default function DocumentDashboardPage() {
                             <Calendar className="h-3.5 w-3.5" /> {task.processingDeadline ? new Date(task.processingDeadline).toLocaleDateString('vi-VN') : 'Không có'}
                           </p>
                         </div>
-                        <Link href={`/admin/services/documents/processing/${task.id}`} className="w-full sm:w-auto">
+                        <Link href={`/services/documents/processing/${task.id}`} className="w-full sm:w-auto">
                           <Button size="sm" className="h-8 text-xs w-full shadow-sm">
                             Xử lý ngay <CornerUpRight className="h-3.5 w-3.5 ml-1.5" />
                           </Button>
@@ -198,7 +198,7 @@ export default function DocumentDashboardPage() {
                 )}
               </div>
               <div className="p-3 border-t bg-muted/10 text-center">
-                <Link href="/admin/services/documents/processing">
+                <Link href="/services/documents/processing">
                   <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary">
                     Xem tất cả văn bản chờ xử lý <ArrowRight className="h-3 w-3 ml-1" />
                   </Button>
@@ -209,7 +209,7 @@ export default function DocumentDashboardPage() {
 
           {/* QUICK NAV */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Link href="/admin/services/documents/consultations">
+            <Link href="/services/documents/consultations">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center group-hover:bg-orange-600 group-hover:text-white transition-colors">
@@ -223,7 +223,7 @@ export default function DocumentDashboardPage() {
               </Card>
             </Link>
             
-            <Link href="/admin/services/documents/transparency">
+            <Link href="/services/documents/transparency">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
@@ -237,7 +237,7 @@ export default function DocumentDashboardPage() {
               </Card>
             </Link>
 
-            <Link href="/admin/services/documents/minutes">
+            <Link href="/services/documents/minutes">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -305,7 +305,7 @@ export default function DocumentDashboardPage() {
             </CardContent>
           </Card>
 
-          <Link href="/admin/services/documents/categories">
+          <Link href="/services/documents/categories">
              <Button variant="ghost" className="w-full text-xs font-bold text-muted-foreground hover:text-primary">
                 <Settings2 className="h-4 w-4 mr-2" /> Thiết lập Danh mục chung
              </Button>

@@ -39,7 +39,7 @@ const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) 
           <span className="font-black text-foreground text-base tracking-tight">{doc.documentNumber}</span>
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="text-[10px] font-bold bg-muted/50 text-muted-foreground border-none">
-              {doc.documentType?.name || "Văn bản"}
+              {doc.typeName || doc.documentType?.name || "Văn bản"}
             </Badge>
             {doc.urgency === 'FLASH' && <Badge className="bg-rose-500 text-white border-none text-[10px] font-black">HỎA TỐC</Badge>}
           </div>

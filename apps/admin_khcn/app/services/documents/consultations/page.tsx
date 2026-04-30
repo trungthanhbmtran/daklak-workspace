@@ -64,7 +64,7 @@ export default function ConsultationsPage() {
             </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto">
-               <Link href="/admin/services/documents/consultations/manage" className="flex-1 md:flex-none">
+               <Link href="/services/documents/consultations/manage" className="flex-1 md:flex-none">
                   <Button variant="outline" className="w-full rounded-xl border-muted-foreground/20 hover:bg-muted/50 font-bold">
                      <BarChart3 className="h-4 w-4 mr-2 text-primary" />
                      Báo cáo tổng hợp
@@ -236,7 +236,7 @@ export default function ConsultationsPage() {
                         </div>
 
                         <div className="space-y-3">
-                           <Link href={`/admin/services/documents/consultations/${con.id}`} className="block">
+                           <Link href={`/services/documents/consultations/${con.id}`} className="block">
                               <Button className="w-full h-14 rounded-2xl bg-foreground text-background hover:bg-foreground/90 font-black shadow-xl shadow-foreground/10 text-lg group/more">
                                  Chi tiết <ArrowRight className="h-5 w-5 ml-3 group-hover/more:translate-x-1 transition-transform" />
                               </Button>

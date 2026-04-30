@@ -53,6 +53,9 @@ export class DocumentService {
     const document = await this.prisma.document.findUnique({
       where: { id },
     });
+    if (!document) {
+      throw new Error(`Document with ID ${id} not found`);
+    }
     return this.mapToProto(document);
   }
 

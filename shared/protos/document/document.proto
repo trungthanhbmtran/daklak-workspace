@@ -165,6 +165,7 @@ message UpdateDocumentRequest {
   optional string recipients = 17;
   optional int32 fiscalYear = 19;
   optional string transparencyCategory = 20;
+  optional string comment = 30;
 }
 
 message DeleteDocumentRequest {

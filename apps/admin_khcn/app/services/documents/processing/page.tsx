@@ -110,7 +110,7 @@ export default function ProcessingDocumentsPage() {
                     <div className="flex flex-col gap-1.5">
                       <span className="font-mono font-black text-primary text-sm tracking-tight">{doc.documentNumber || 'DỰ THẢO'}</span>
                       <Badge variant="outline" className="w-fit bg-muted/50 text-muted-foreground border-none text-[9px] px-1.5 py-0 font-black uppercase tracking-widest">
-                        {doc.type?.name || 'Văn bản'}
+                        {doc.typeName || doc.type?.name || 'Văn bản'}
                       </Badge>
                     </div>
                   </td>
@@ -159,7 +159,7 @@ export default function ProcessingDocumentsPage() {
                   </td>
 
                   <td className="px-8 py-6 text-right">
-                    <Link href={`/admin/services/documents/processing/${doc.id}`}>
+                    <Link href={`/services/documents/processing/${doc.id}`}>
                       <Button variant="secondary" size="icon" className="h-10 w-10 rounded-2xl shadow-sm hover:bg-primary hover:text-white transition-all transform group-hover:scale-110 active:scale-95">
                         <ChevronRight className="h-5 w-5" />
                       </Button>
