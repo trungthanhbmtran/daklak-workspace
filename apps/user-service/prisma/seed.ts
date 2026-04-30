@@ -406,11 +406,12 @@ async function main() {
     { code: 'DOC_MENU_OUTGOING', name: 'Văn bản đi', route: 'outgoing', icon: 'document-attach-outline', order: 2, res: 'DOC_OUTGOING' },
     { code: 'DOC_MENU_PROCESSING', name: 'Xử lý văn bản', route: 'processing', icon: 'document-text-outline', order: 3, res: 'DOC_PROCESSING' },
     { code: 'DOC_MENU_PUBLISH', name: 'Phát hành', route: 'publish', icon: 'globe-outline', order: 4, res: 'DOC_PUBLISH' },
-    { code: 'DOC_MENU_TRANSPARENCY', name: 'Công khai', route: 'transparency', icon: 'folder-outline', order: 5, res: 'DOC_TRANSPARENCY' },
-    { code: 'DOC_MENU_CONSULTATION', name: 'Xin ý kiến', route: 'consultations', icon: 'people-outline', order: 6, res: 'DOC_CONSULTATION' },
-    { code: 'DOC_MENU_FEEDBACKS', name: 'Duyệt Góp ý Công chúng', route: 'consultations/public-feedbacks', icon: 'megaphone-outline', order: 7, res: 'DOC_CONSULTATION' },
-    { code: 'DOC_MENU_MINUTES', name: 'Biên bản cuộc họp', route: 'minutes', icon: 'list-outline', order: 8, res: 'DOC_MINUTES' },
-    { code: 'DOC_MENU_CATEGORIES', name: 'Danh mục dùng chung', route: 'categories', icon: 'settings-outline', order: 9, res: 'DOC_CATEGORIES' },
+    { code: 'DOC_MENU_TRANSPARENCY', name: 'Công khai văn bản', route: 'transparency', icon: 'folder-outline', order: 5, res: 'DOC_TRANSPARENCY' },
+    { code: 'DOC_MENU_FINANCE', name: 'Công khai Tài chính', route: 'transparency/finance', icon: 'cash-outline', order: 6, res: 'DOC_TRANSPARENCY' },
+    { code: 'DOC_MENU_CONSULTATION', name: 'Lấy ý kiến dự thảo', route: 'consultations', icon: 'people-outline', order: 7, res: 'DOC_CONSULTATION' },
+    { code: 'DOC_MENU_FEEDBACKS', name: 'Duyệt Góp ý Công chúng', route: 'consultations/public-feedbacks', icon: 'megaphone-outline', order: 8, res: 'DOC_CONSULTATION' },
+    { code: 'DOC_MENU_MINUTES', name: 'Biên bản cuộc họp', route: 'minutes', icon: 'list-outline', order: 9, res: 'DOC_MINUTES' },
+    { code: 'DOC_MENU_CATEGORIES', name: 'Danh mục dùng chung', route: 'categories', icon: 'settings-outline', order: 10, res: 'DOC_CATEGORIES' },
   ];
 
   for (const { res, ...m } of docMenus) {
