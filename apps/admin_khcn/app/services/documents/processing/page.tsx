@@ -1,6 +1,6 @@
 'use client'
-import { useDocuments } from "@/features/document/hooks/useDocuments";
-import { useState } from 'react'
+import { useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useState, useMemo } from 'react'
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,13 +14,18 @@ export default function ProcessingDocumentsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("PROCESSING");
 
-  const { useListDocuments } = useDocuments();
   const { data: documentsData, isLoading } = useListDocuments({
     status: statusFilter === 'ALL' ? undefined : statusFilter,
     search: searchTerm,
   });
 
-  const docs = documentsData?.data || [];
+  const docs = useMemo(() => {
+    if (!documentsData) return [];
+    if (Array.isArray(documentsData)) return documentsData;
+    if (Array.isArray(documentsData.data)) return documentsData.data;
+    if (documentsData.data && Array.isArray(documentsData.data.data)) return documentsData.data.data;
+    return [];
+  }, [documentsData]);
 
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
@@ -154,7 +159,7 @@ export default function ProcessingDocumentsPage() {
                   </td>
 
                   <td className="px-8 py-6 text-right">
-                    <Link href={`/services/documents/processing/${doc.id}`}>
+                    <Link href={`/admin/services/documents/processing/${doc.id}`}>
                       <Button variant="secondary" size="icon" className="h-10 w-10 rounded-2xl shadow-sm hover:bg-primary hover:text-white transition-all transform group-hover:scale-110 active:scale-95">
                         <ChevronRight className="h-5 w-5" />
                       </Button>

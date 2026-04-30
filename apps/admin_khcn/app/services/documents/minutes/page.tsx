@@ -83,9 +83,9 @@ export default function MinutesPage() {
                         <tr key={m.id} className="hover:bg-primary/[0.02] transition-all group cursor-pointer">
                            <td className="px-6 py-6">
                               <div className="flex flex-col gap-1">
-                                 <span className="font-bold text-foreground">{new Date(m.startTime).toLocaleDateString('vi-VN')}</span>
+                                 <span className="font-bold text-foreground">{m.startTime ? new Date(m.startTime).toLocaleDateString('vi-VN') : '---'}</span>
                                  <span className="text-[10px] text-muted-foreground flex items-center gap-1 uppercase">
-                                    <Clock className="h-3 w-3" /> {new Date(m.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                                    <Clock className="h-3 w-3" /> {m.startTime ? new Date(m.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '---'}
                                  </span>
                                  <span className="text-[10px] text-primary/70 flex items-center gap-1 mt-1 font-medium italic">
                                     <MapPin className="h-3 w-3" /> {m.location || 'Chưa xác định'}
@@ -103,15 +103,15 @@ export default function MinutesPage() {
                            <td className="px-6 py-6">
                               <div className="flex flex-col gap-1.5">
                                  <div className="flex items-center gap-2 text-xs font-medium text-foreground">
-                                    <Users className="h-3.5 w-3.5 text-muted-foreground" /> {m.participants?.split(',').length || 0} thành viên
+                                    <Users className="h-3.5 w-3.5 text-muted-foreground" /> {typeof m.participants === 'string' ? m.participants.split(',').length : 0} thành viên
                                  </div>
                                  <div className="flex -space-x-2">
-                                    {m.participants?.split(',').slice(0, 3).map((p: string, i: number) => (
+                                    {typeof m.participants === 'string' && m.participants.split(',').slice(0, 3).map((p: string, i: number) => (
                                        <div key={i} className="w-7 h-7 rounded-full bg-primary/20 border-2 border-background flex items-center justify-center text-[10px] font-bold text-primary uppercase">
-                                          {p.trim().charAt(0)}
+                                          {p.trim().charAt(0) || 'U'}
                                        </div>
                                     ))}
-                                    {m.participants?.split(',').length > 3 && (
+                                    {typeof m.participants === 'string' && m.participants.split(',').length > 3 && (
                                        <div className="w-7 h-7 rounded-full bg-muted border-2 border-background flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                                           +{m.participants.split(',').length - 3}
                                        </div>

@@ -62,7 +62,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
             <span>Trang 1 / 3</span>
             <Separator orientation="vertical" className="h-4" />
-            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${document.id.slice(0, 5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
+            <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${(document.id || 'file').slice(0, 5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
             {/* Thực tế sẽ nhúng <iframe src="pdf_url"> hoặc react-pdf vào đây */}

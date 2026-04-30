@@ -125,6 +125,8 @@ export default function IncomingDocumentsPage() {
     setIsDetailOpen(true);
   }, []);
 
+  if (!mounted) return null;
+
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
       {/* Header section back in one file */}
