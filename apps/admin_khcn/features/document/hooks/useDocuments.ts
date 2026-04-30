@@ -98,6 +98,21 @@ export const useDocumentLogs = (id: string) => {
   });
 };
 
+export const usePublicComments = (consultationId?: string, status?: string) => {
+  return useQuery({
+    queryKey: ['public-comments', consultationId, status],
+    queryFn: async () => {
+      const url = consultationId 
+        ? `${API_BASE}/consultations/${consultationId}/public-comments`
+        : `${API_BASE}/consultations/public-comments`;
+      const response: any = await apiClient.get(url, {
+        params: { status }
+      });
+      return extractDataArray(response);
+    },
+  });
+};
+
 // 2. Main Hook Wrapper
 export function useDocuments() {
   const queryClient = useQueryClient();
@@ -151,6 +166,15 @@ export function useDocuments() {
     },
   });
 
+  const moderateCommentMutation = useMutation({
+    mutationFn: async ({ id, status }: { id: string, status: string }) => 
+      apiClient.put(`${API_BASE}/consultations/public-comments/${id}/moderate`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['public-comments'] });
+      toast.success('Đã cập nhật trạng thái kiểm duyệt!');
+    },
+  });
+
   return {
     useCategories,
     useListDocuments,
@@ -159,19 +183,22 @@ export function useDocuments() {
     useGetDocument,
     useDocumentStats,
     useDocumentLogs,
+    usePublicComments,
     createDocument: createDocumentMutation.mutateAsync,
     createConsultation: createConsultationMutation.mutateAsync,
     updateDocument: updateDocumentMutation.mutateAsync,
     deleteDocument: deleteDocumentMutation.mutateAsync,
     extractMetadata: extractMetadataMutation.mutateAsync,
     syncOnline: syncOnlineMutation.mutateAsync,
+    moderateComment: moderateCommentMutation.mutateAsync,
     isLoading:
       createDocumentMutation.isPending ||
       createConsultationMutation.isPending ||
       updateDocumentMutation.isPending ||
       deleteDocumentMutation.isPending ||
       extractMetadataMutation.isPending ||
-      syncOnlineMutation.isPending,
+      syncOnlineMutation.isPending ||
+      moderateCommentMutation.isPending,
   };
 }
 

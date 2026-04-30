@@ -12,8 +12,27 @@ model Consultation {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   responses       ConsultationResponse[]
+  publicComments  PublicComment[]
 
   @@map("consultations")
+}
+
+model PublicComment {
+  id              String   @id @default(uuid())
+  consultationId  String   @map("consultation_id")
+  fullName        String   @map("full_name")
+  email           String?
+  phoneNumber     String?  @map("phone_number")
+  content         String   @db.Text
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  moderatedBy     String?  @map("moderated_by")
+  moderatedAt     DateTime? @map("moderated_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  consultation    Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@map("public_comments")
 }
 
 model ConsultationResponse {

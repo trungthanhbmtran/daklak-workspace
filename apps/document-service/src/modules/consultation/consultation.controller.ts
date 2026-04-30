@@ -25,4 +25,19 @@ export class ConsultationController {
   submitResponse(data: any) {
     return this.consultationService.submitResponse(data);
   }
+
+  @GrpcMethod('ConsultationService', 'SubmitPublicComment')
+  submitPublicComment(data: any) {
+    return this.consultationService.submitPublicComment(data);
+  }
+
+  @GrpcMethod('ConsultationService', 'ListPublicComments')
+  listPublicComments(data: any) {
+    return this.consultationService.listPublicComments(data);
+  }
+
+  @GrpcMethod('ConsultationService', 'ModerateComment')
+  moderateComment(data: any) {
+    return this.consultationService.moderateComment(data);
+  }
 }

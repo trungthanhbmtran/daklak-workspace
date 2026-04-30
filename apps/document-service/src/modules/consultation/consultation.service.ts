@@ -100,6 +100,58 @@ export class ConsultationService {
     return { success: true };
   }
 
+  // Public Comments Logic
+  async submitPublicComment(data: any) {
+    const comment = await this.prisma.publicComment.create({
+      data: {
+        consultationId: data.consultationId,
+        fullName: data.fullName,
+        email: data.email,
+        phoneNumber: data.phoneNumber,
+        content: data.content,
+        status: 'PENDING'
+      }
+    });
+    return this.mapPublicCommentToProto(comment);
+  }
+
+  async listPublicComments(query: { consultationId?: string, status?: string }) {
+    const where: any = {};
+    if (query.consultationId) where.consultationId = query.consultationId;
+    if (query.status && query.status !== 'ALL') where.status = query.status;
+
+    const comments = await this.prisma.publicComment.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      include: { consultation: { select: { title: true } } }
+    });
+
+    return { data: comments.map(c => ({
+      ...this.mapPublicCommentToProto(c),
+      draftTitle: c.consultation?.title || "N/A"
+    })) };
+  }
+
+  async moderateComment(data: { id: string, status: string, userId: string }) {
+    const comment = await this.prisma.publicComment.update({
+      where: { id: data.id },
+      data: {
+        status: data.status,
+        moderatedBy: data.userId,
+        moderatedAt: new Date()
+      }
+    });
+    return this.mapPublicCommentToProto(comment);
+  }
+
+  private mapPublicCommentToProto(c: any) {
+    return {
+      ...c,
+      moderatedAt: c.moderatedAt?.toISOString() || "",
+      createdAt: c.createdAt.toISOString(),
+    };
+  }
+
   private mapToProto(item: any) {
     if (!item) return null;
     return {
