@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Search, Filter, Eye, Download, Calendar,
   Building2, PieChart, ShieldCheck, FileText,
@@ -28,7 +28,13 @@ export default function TransparencyPage() {
     fiscalYear: fiscalYear,
   });
 
-  const reports = reportsData?.data || [];
+  const reports = useMemo(() => {
+    if (!reportsData) return [];
+    if (Array.isArray(reportsData)) return reportsData;
+    if (Array.isArray(reportsData.data)) return reportsData.data;
+    if (reportsData.data && Array.isArray(reportsData.data.data)) return reportsData.data.data;
+    return [];
+  }, [reportsData]);
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -165,15 +171,15 @@ export default function TransparencyPage() {
                   </td>
                   <td className="px-6 py-5">
                     <Badge className={`shadow-none font-bold text-[10px] ${report.transparencyCategory === 'ESTIMATE' ? 'bg-blue-100 text-blue-700' :
-                        report.transparencyCategory === 'SETTLEMENT' ? 'bg-emerald-100 text-emerald-700' :
-                          'bg-slate-100 text-slate-700'
+                      report.transparencyCategory === 'SETTLEMENT' ? 'bg-emerald-100 text-emerald-700' :
+                        'bg-slate-100 text-slate-700'
                       }`}>
                       {report.transparencyCategory === 'ESTIMATE' ? 'Dự toán' : report.transparencyCategory === 'SETTLEMENT' ? 'Quyết toán' : 'Thực hiện'}
                     </Badge>
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-foreground font-medium">{new Date(report.createdAt).toLocaleDateString('vi-VN')}</span>
+                      <span className="text-foreground font-medium">{report.createdAt ? new Date(report.createdAt).toLocaleDateString('vi-VN') : '---'}</span>
                       {report.status === 'DRAFT' && <span className="text-[10px] text-amber-600 font-bold uppercase tracking-tighter">Đang soạn thảo</span>}
                     </div>
                   </td>

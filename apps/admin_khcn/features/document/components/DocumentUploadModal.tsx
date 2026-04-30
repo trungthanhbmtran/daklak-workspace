@@ -100,7 +100,12 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const extractList = (res: any) => Array.isArray(res) ? res : (res?.data || []);
+        const extractList = (res: any) => {
+          const data = res?.data || res;
+          if (Array.isArray(data)) return data;
+          if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
+          return [];
+        };
         // Fetch from shared system categories (/api/v1/admin/categories)
         const [typeRes, domainRes, urgencyRes, securityRes, reportRes]: any = await Promise.all([
           apiClient.get("/categories", { params: { group: "DOCUMENT_TYPE" } }),
@@ -206,13 +211,13 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
       // Tự động nhận diện loại văn bản từ ký hiệu
       const upperNotation = finalData.notation.toUpperCase();
       if (upperNotation.includes("QD") || upperNotation.includes("QĐ")) {
-        const type = categories.types.find(t => t.name.toUpperCase().includes("QUYẾT ĐỊNH"));
+        const type = categories.types.find(t => (t.name || "").toUpperCase().includes("QUYẾT ĐỊNH"));
         if (type) form.setValue("typeId", String(type.id));
       } else if (upperNotation.includes("TB")) {
-        const type = categories.types.find(t => t.name.toUpperCase().includes("THÔNG BÁO"));
+        const type = categories.types.find(t => (t.name || "").toUpperCase().includes("THÔNG BÁO"));
         if (type) form.setValue("typeId", String(type.id));
       } else if (upperNotation.includes("KH")) {
-        const type = categories.types.find(t => t.name.toUpperCase().includes("KẾ HOẠCH"));
+        const type = categories.types.find(t => (t.name || "").toUpperCase().includes("KẾ HOẠCH"));
         if (type) form.setValue("typeId", String(type.id));
       }
 
