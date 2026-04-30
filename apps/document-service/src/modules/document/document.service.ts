@@ -227,4 +227,36 @@ export class DocumentService {
       signatureValid: false
     };
   }
+
+  async syncOnline() {
+    console.log("[DocumentService] Syncing documents from Trục VDX/LGSP...");
+    // Giả lập việc nhận được 2 văn bản mới từ nguồn online
+    const mockExternalDocs = [
+      {
+        documentNumber: `VDX-${Date.now() % 10000}-01`,
+        abstract: "Về việc triển khai kế hoạch chuyển đổi số năm 2026",
+        issuerName: "Bộ Khoa học và Công nghệ",
+        issueDate: new Date().toISOString(),
+        isIncoming: true,
+        status: "PROCESSING",
+        urgency: "NORMAL",
+      },
+      {
+        documentNumber: `VDX-${Date.now() % 10000}-02`,
+        abstract: "Hướng dẫn thực hiện Nghị định 61/NĐ-CP về công khai tài chính",
+        issuerName: "Sở Tài chính tỉnh Đắk Lắk",
+        issueDate: new Date().toISOString(),
+        isIncoming: true,
+        status: "PROCESSING",
+        urgency: "FLASH",
+      }
+    ];
+
+    for (const doc of mockExternalDocs) {
+      await this.create(doc);
+    }
+
+    return { success: true, count: mockExternalDocs.length };
+  }
 }
+

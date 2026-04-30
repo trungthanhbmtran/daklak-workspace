@@ -12,6 +12,12 @@ service DocumentService {
   rpc DeleteDocument(DeleteDocumentRequest) returns (common.DeleteResponse) {}
   rpc GetStatistics(common.Empty) returns (GetStatisticsResponse) {}
   rpc ExtractMetadata(ExtractMetadataRequest) returns (ExtractMetadataResponse) {}
+  rpc SyncOnline(common.Empty) returns (SyncOnlineResponse) {}
+}
+
+message SyncOnlineResponse {
+  bool success = 1;
+  int32 count = 2;
 }
 
 message GetStatisticsResponse {

@@ -129,6 +129,14 @@ export function useDocuments() {
     },
   });
 
+  const syncOnlineMutation = useMutation({
+    mutationFn: async () => apiClient.post(`${API_BASE}/sync`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['documents'] });
+      toast.success('Đã đồng bộ văn bản từ trục liên thông!');
+    },
+  });
+
   return {
     useCategories,
     useListDocuments,
@@ -141,11 +149,14 @@ export function useDocuments() {
     updateDocument: updateDocumentMutation.mutateAsync,
     deleteDocument: deleteDocumentMutation.mutateAsync,
     extractMetadata: extractMetadataMutation.mutateAsync,
+    syncOnline: syncOnlineMutation.mutateAsync,
     isLoading:
       createDocumentMutation.isPending ||
       createConsultationMutation.isPending ||
       updateDocumentMutation.isPending ||
       deleteDocumentMutation.isPending ||
-      extractMetadataMutation.isPending,
+      extractMetadataMutation.isPending ||
+      syncOnlineMutation.isPending,
   };
 }
+

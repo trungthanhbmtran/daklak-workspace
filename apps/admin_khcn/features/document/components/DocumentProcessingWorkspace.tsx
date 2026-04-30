@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   FileSignature, CornerUpRight, MessageSquare, History,
-  CheckCheck, XCircle, FileText, Download, Printer, Stamp
+  CheckCheck, XCircle, FileText, Download, Printer, Stamp,
+  Globe2, Lock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDocuments } from "@/features/document/hooks/useDocuments";
 
 // Dữ liệu mô phỏng luồng xử lý
 const workflowHistory = [
@@ -21,6 +25,36 @@ const workflowHistory = [
 
 export default function DocumentProcessingWorkspace({ document }: { document?: any }) {
   const [comment, setComment] = useState("");
+  const [isPublic, setIsPublic] = useState(false);
+  const [transCategory, setTransCategory] = useState("GENERAL");
+  const [fiscalYear, setFiscalYear] = useState("2026");
+  const [isSaving, setIsSaving] = useState(false);
+
+  const { updateDocument } = useDocuments();
+
+  useEffect(() => {
+    if (document) {
+      setIsPublic(!!document.isPublic);
+      setTransCategory(document.transparencyCategory || "GENERAL");
+      setFiscalYear(document.fiscalYear?.toString() || "2026");
+    }
+  }, [document]);
+
+  const handleSavePublicity = async () => {
+    setIsSaving(true);
+    try {
+      await updateDocument({
+        id: document.id,
+        isPublic,
+        transparencyCategory: isPublic ? transCategory : null,
+        fiscalYear: isPublic ? parseInt(fiscalYear) : null,
+      });
+    } catch (error) {
+      console.error("Save publicity error:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (!document) {
     return (
@@ -31,7 +65,7 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-2rem)] bg-muted/5 gap-4 p-4">
+    <div className="flex flex-col h-[calc(100vh-2rem)] bg-muted/5 gap-4 p-4 overflow-y-auto">
       {/* Top Action Bar */}
       <div className="flex items-center justify-between bg-background p-3 rounded-lg border shadow-sm shrink-0">
         <div>
@@ -65,7 +99,6 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
             <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${(document.id || 'file').slice(0, 5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
           </div>
           <div className="flex-1 flex items-center justify-center p-8">
-            {/* Thực tế sẽ nhúng <iframe src="pdf_url"> hoặc react-pdf vào đây */}
             <div className="w-full max-w-2xl h-full bg-white shadow-md border rounded p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
               <Stamp className="h-16 w-16 text-rose-500/20 mb-4 transform -rotate-12" />
               <p>Khu vực hiển thị nội dung tệp PDF văn bản gốc</p>
@@ -108,6 +141,70 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
             </CardContent>
           </Card>
 
+          {/* Card Công khai (Publicity Settings) */}
+          <Card className="border shadow-sm shrink-0">
+            <CardHeader className="p-4 border-b bg-muted/10">
+              <CardTitle className="text-sm font-bold flex items-center gap-2">
+                <Globe2 className="h-4 w-4 text-emerald-600" /> Cấu hình Công khai
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 space-y-4">
+              <div className="flex items-center justify-between">
+                 <div className="flex items-center gap-2">
+                   {isPublic ? <Globe2 className="h-4 w-4 text-emerald-600" /> : <Lock className="h-4 w-4 text-muted-foreground" />}
+                   <span className="text-sm font-medium">{isPublic ? 'Đang công khai' : 'Đang lưu nội bộ'}</span>
+                 </div>
+                 <Switch checked={isPublic} onCheckedChange={setIsPublic} />
+              </div>
+              
+              {isPublic && (
+                <div className="space-y-4 pt-4 border-t border-dashed">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-bold uppercase text-muted-foreground">Phạm vi công khai:</label>
+                    <Select value={transCategory} onValueChange={setTransCategory}>
+                      <SelectTrigger className="h-9 text-xs">
+                        <SelectValue placeholder="Chọn loại công khai" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="GENERAL">Công khai chung (Trục VDX)</SelectItem>
+                        <SelectItem value="ESTIMATE">Dự toán ngân sách</SelectItem>
+                        <SelectItem value="SETTLEMENT">Quyết toán ngân sách</SelectItem>
+                        <SelectItem value="EXECUTION">Thực hiện dự toán</SelectItem>
+                        <SelectItem value="CONSULTATION">Lấy ý kiến nhân dân</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  {transCategory !== 'GENERAL' && (
+                    <div className="space-y-1.5">
+                      <label className="text-[11px] font-bold uppercase text-muted-foreground">Năm tài chính:</label>
+                      <Select value={fiscalYear} onValueChange={setFiscalYear}>
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue placeholder="Chọn năm" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2026">2026</SelectItem>
+                          <SelectItem value="2025">2025</SelectItem>
+                          <SelectItem value="2024">2024</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full text-xs font-bold"
+                onClick={handleSavePublicity}
+                disabled={isSaving}
+              >
+                {isSaving ? 'Đang lưu...' : 'Lưu cấu hình công khai'}
+              </Button>
+            </CardContent>
+          </Card>
+
           {/* Card Lịch sử (Workflow Timeline) */}
           <Card className="border shadow-sm flex-1 flex flex-col overflow-hidden">
             <CardHeader className="p-4 border-b bg-muted/10 shrink-0">
@@ -116,7 +213,6 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
               </CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1 p-4">
-              {/* Lịch sử tạm thời vẫn để mock hoặc lấy từ một quan hệ khác nếu có */}
               <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
                 {workflowHistory.map((step, index) => (
                   <div key={step.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">

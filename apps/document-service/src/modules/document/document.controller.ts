@@ -40,4 +40,10 @@ export class DocumentController {
   extractMetadata(data: { fileId: string }) {
     return this.documentService.extractMetadata(data.fileId);
   }
+
+  @GrpcMethod('DocumentService', 'SyncOnline')
+  syncOnline(data: any) {
+    return this.documentService.syncOnline();
+  }
 }
+

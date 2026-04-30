@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { 
   Search, Plus, Filter, Download, FileText, 
   PieChart, Building2, Calendar, CheckCircle2, 
@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
+import { useListDocuments } from "@/features/document/hooks/useDocuments";
+
 // Chuẩn hóa Danh mục theo Thông tư 61/2017/TT-BTC
 const CATEGORY_CONFIG: Record<string, { label: string, color: string }> = {
   ESTIMATE: { label: "Dự toán NSNN", color: "bg-blue-100 text-blue-700 border-blue-200" },
@@ -23,52 +25,25 @@ const CATEGORY_CONFIG: Record<string, { label: string, color: string }> = {
   FUNDS: { label: "Các quỹ tài chính", color: "bg-purple-100 text-purple-700 border-purple-200" },
 };
 
-// Mock Data chuẩn form mẫu Nhà nước
-const mockFinancialReports = [
-  {
-    id: "f1",
-    title: "Quyết định công khai dự toán thu - chi ngân sách nhà nước năm 2026",
-    documentNumber: "15/QĐ-SKHCN",
-    year: "2026",
-    category: "ESTIMATE",
-    publishedAt: "10/01/2026",
-    status: "PUBLISHED",
-    files: [
-      { type: "PDF", name: "Quyet_dinh_du_toan_2026_signed.pdf", size: "1.2 MB" },
-      { type: "EXCEL", name: "Phu_luc_Bieu_mau_01_04.xlsx", size: "450 KB" }
-    ]
-  },
-  {
-    id: "f2",
-    title: "Báo cáo tình hình thực hiện dự toán ngân sách quý I năm 2026",
-    documentNumber: "42/BC-SKHCN",
-    year: "2026",
-    category: "EXECUTION",
-    publishedAt: "15/04/2026",
-    status: "DRAFT", // Đang chờ duyệt
-    files: [
-      { type: "PDF", name: "Bao_cao_thuc_hien_Q1.pdf", size: "800 KB" }
-    ]
-  },
-  {
-    id: "f3",
-    title: "Quyết định công khai quyết toán thu, chi ngân sách nhà nước năm 2025",
-    documentNumber: "128/QĐ-SKHCN",
-    year: "2025",
-    category: "SETTLEMENT",
-    publishedAt: "25/02/2026", // Thường quyết toán năm trước sẽ công khai vào đầu năm sau
-    status: "PUBLISHED",
-    files: [
-      { type: "PDF", name: "Quyet_toan_NSNN_2025_signed.pdf", size: "2.1 MB" },
-      { type: "EXCEL", name: "Bieu_mau_quyet_toan_01_06.xlsx", size: "850 KB" }
-    ]
-  }
-];
-
 export default function FinancialTransparencyPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [yearFilter, setYearFilter] = useState("2026");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+
+  const { data: response, isLoading } = useListDocuments({
+    isPublic: true,
+    fiscalYear: yearFilter,
+    transparencyCategory: categoryFilter === 'ALL' ? undefined : categoryFilter,
+    search: searchTerm,
+  });
+
+  const reports = useMemo(() => {
+    if (!response) return [];
+    if (Array.isArray(response)) return response;
+    if (Array.isArray(response.data)) return response.data;
+    if (response.data && Array.isArray(response.data.data)) return response.data.data;
+    return [];
+  }, [response]);
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -95,8 +70,8 @@ export default function FinancialTransparencyPage() {
             <CardContent className="p-4 flex items-center gap-4">
               <div className="p-3 bg-blue-100 text-blue-700 rounded-full"><TrendingUp className="h-5 w-5" /></div>
               <div>
-                <p className="text-sm font-semibold text-muted-foreground">Tổng hồ sơ năm 2026</p>
-                <h3 className="text-2xl font-black text-foreground mt-0.5">12</h3>
+                <p className="text-sm font-semibold text-muted-foreground">Tổng hồ sơ năm {yearFilter}</p>
+                <h3 className="text-2xl font-black text-foreground mt-0.5">{reports.length}</h3>
               </div>
             </CardContent>
           </Card>
@@ -105,7 +80,9 @@ export default function FinancialTransparencyPage() {
               <div className="p-3 bg-emerald-100 text-emerald-700 rounded-full"><CheckCircle2 className="h-5 w-5" /></div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Đã hiển thị trên Cổng TTĐT</p>
-                <h3 className="text-2xl font-black text-emerald-600 mt-0.5">10</h3>
+                <h3 className="text-2xl font-black text-emerald-600 mt-0.5">
+                  {reports.filter((r: any) => r.status === 'PUBLISHED').length}
+                </h3>
               </div>
             </CardContent>
           </Card>
@@ -114,7 +91,9 @@ export default function FinancialTransparencyPage() {
               <div className="p-3 bg-amber-100 text-amber-700 rounded-full"><Clock className="h-5 w-5" /></div>
               <div>
                 <p className="text-sm font-semibold text-muted-foreground">Đang chờ phê duyệt</p>
-                <h3 className="text-2xl font-black text-amber-600 mt-0.5">02</h3>
+                <h3 className="text-2xl font-black text-amber-600 mt-0.5">
+                   {reports.filter((r: any) => r.status !== 'PUBLISHED').length}
+                </h3>
               </div>
             </CardContent>
           </Card>
@@ -177,11 +156,15 @@ export default function FinancialTransparencyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50 bg-background">
-              {mockFinancialReports.map((report) => (
+              {isLoading ? (
+                <tr><td colSpan={6} className="py-20 text-center text-muted-foreground">Đang tải dữ liệu...</td></tr>
+              ) : reports.length === 0 ? (
+                <tr><td colSpan={6} className="py-20 text-center text-muted-foreground">Không tìm thấy báo cáo nào phù hợp.</td></tr>
+              ) : reports.map((report: any) => (
                 <tr key={report.id} className="hover:bg-muted/20 transition-colors group">
                   <td className="px-5 py-4">
                     <p className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors cursor-pointer mb-1">
-                      {report.title}
+                      {report.abstract}
                     </p>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] font-mono font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
@@ -191,45 +174,42 @@ export default function FinancialTransparencyPage() {
                   </td>
                   
                   <td className="px-5 py-4">
-                    <Badge variant="outline" className={`font-medium text-[11px] shadow-none ${CATEGORY_CONFIG[report.category]?.color}`}>
-                      {CATEGORY_CONFIG[report.category]?.label}
+                    <Badge variant="outline" className={`font-medium text-[11px] shadow-none ${CATEGORY_CONFIG[report.transparencyCategory || '']?.color || 'bg-slate-100 text-slate-700'}`}>
+                      {CATEGORY_CONFIG[report.transparencyCategory || '']?.label || 'Chưa phân loại'}
                     </Badge>
                   </td>
 
                   <td className="px-5 py-4 text-center">
                     <span className="font-mono font-bold text-foreground text-sm">
-                      {report.year}
+                      {report.fiscalYear || '---'}
                     </span>
                   </td>
                   
                   <td className="px-5 py-4 text-muted-foreground font-medium">
                     <div className="flex items-center gap-1.5 text-[13px]">
-                      <Calendar className="h-3.5 w-3.5" /> {report.publishedAt}
+                      <Calendar className="h-3.5 w-3.5" /> {report.issueDate ? new Date(report.issueDate).toLocaleDateString('vi-VN') : '---'}
                     </div>
                   </td>
                   
                   <td className="px-5 py-4">
                     <TooltipProvider>
                       <div className="flex flex-col gap-1.5">
-                        {report.files.map((file, idx) => (
-                          <Tooltip key={idx}>
+                        {report.fileId && (
+                          <Tooltip>
                             <TooltipTrigger asChild>
-                              <div className="flex items-center gap-2 cursor-pointer group/file w-fit">
-                                {file.type === "PDF" ? (
-                                  <div className="p-1 bg-rose-100 text-rose-700 rounded"><FileText className="h-3.5 w-3.5" /></div>
-                                ) : (
-                                  <div className="p-1 bg-emerald-100 text-emerald-700 rounded"><FileSpreadsheet className="h-3.5 w-3.5" /></div>
-                                )}
+                              <a href={`/api/v1/media/download/${report.fileId}`} target="_blank" className="flex items-center gap-2 cursor-pointer group/file w-fit">
+                                <div className="p-1 bg-rose-100 text-rose-700 rounded"><FileText className="h-3.5 w-3.5" /></div>
                                 <span className="text-xs font-medium text-foreground group-hover/file:text-primary line-clamp-1 max-w-[130px]">
-                                  {file.name}
+                                  Tệp đính kèm.pdf
                                 </span>
-                              </div>
+                              </a>
                             </TooltipTrigger>
                             <TooltipContent side="top" className="text-xs">
-                              {file.name} ({file.size}) - Bấm để tải xuống
+                              Bấm để tải xuống
                             </TooltipContent>
                           </Tooltip>
-                        ))}
+                        )}
+                        {!report.fileId && <span className="text-xs text-muted-foreground italic">Không có tệp</span>}
                       </div>
                     </TooltipProvider>
                   </td>
@@ -254,3 +234,4 @@ export default function FinancialTransparencyPage() {
     </div>
   );
 }
+

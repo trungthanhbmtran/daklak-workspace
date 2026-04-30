@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Inbox, Plus, FileText, Calendar, Building2, User, Search, Filter } from "lucide-react";
+import { Inbox, Plus, FileText, Calendar, Building2, User, Search, Filter, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) 
             <Badge variant="secondary" className="text-[10px] font-bold bg-muted/50 text-muted-foreground border-none">
               {doc.documentType?.name || "Văn bản"}
             </Badge>
-            {doc.isUrgent && <Badge className="bg-rose-500 text-white border-none text-[10px] font-black">HỎA TỐC</Badge>}
+            {doc.urgency === 'FLASH' && <Badge className="bg-rose-500 text-white border-none text-[10px] font-black">HỎA TỐC</Badge>}
           </div>
         </div>
       </td>
@@ -53,7 +53,7 @@ const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) 
           <div className="flex items-center gap-4 text-[11px] text-muted-foreground font-medium">
             <div className="flex items-center gap-1">
               <Building2 className="h-3 w-3 text-blue-500" />
-              {doc.issuingAgency || "Nội bộ"}
+              {doc.issuerName || doc.issuingAgency || "Nội bộ"}
             </div>
           </div>
         </div>
@@ -62,7 +62,7 @@ const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-foreground font-bold">
             <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-            {formatDate(doc.documentDate)}
+            {formatDate(doc.issueDate || doc.documentDate)}
           </div>
           <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Ngày văn bản</span>
         </div>
@@ -71,9 +71,9 @@ const DocumentRow = memo(({ doc, onDetail }: { doc: any; onDetail: (id: string) 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-1.5 text-foreground font-bold">
             <User className="h-3.5 w-3.5 text-muted-foreground" />
-            {doc.receiverName || "Chưa bàn giao"}
+            {doc.signerName || doc.receiverName || "Chưa bàn giao"}
           </div>
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Người xử lý</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">Người ký/xử lý</span>
         </div>
       </td>
       <td className="px-8 py-6 text-right">
@@ -100,6 +100,9 @@ export default function IncomingDocumentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  const { syncOnline } = useDocuments();
 
   useEffect(() => {
     setMounted(true);
@@ -107,7 +110,7 @@ export default function IncomingDocumentsPage() {
 
   const { data: response, isLoading } = useListDocuments({
     isIncoming: true,
-    searchTerm: searchTerm.length >= 2 ? searchTerm : undefined,
+    search: searchTerm.length >= 2 ? searchTerm : undefined,
     pageSize: 50
   });
 
@@ -124,6 +127,17 @@ export default function IncomingDocumentsPage() {
     setSelectedDocId(id);
     setIsDetailOpen(true);
   }, []);
+
+  const handleSync = async () => {
+    setIsSyncing(true);
+    try {
+      await syncOnline();
+    } catch (error) {
+      console.error("Sync error:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   if (!mounted) return null;
 
@@ -142,13 +156,26 @@ export default function IncomingDocumentsPage() {
             Quản lý và theo dõi các văn bản tiếp nhận từ cơ quan bên ngoài.
           </p>
         </div>
-        <Button
-          onClick={() => setIsModalOpen(true)}
-          className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 transition-all active:scale-95 w-full md:w-auto"
-        >
-          <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản đến
-        </Button>
+        
+        <div className="flex flex-wrap gap-3 w-full md:w-auto">
+          <Button
+            variant="outline"
+            onClick={handleSync}
+            disabled={isSyncing}
+            className="rounded-xl border-blue-200 text-blue-600 font-bold px-6 h-12 hover:bg-blue-50 transition-all active:scale-95"
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
+            {isSyncing ? 'Đang đồng bộ...' : 'Đồng bộ Trục VDX/LGSP'}
+          </Button>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            className="rounded-xl shadow-xl shadow-blue-500/20 bg-blue-600 hover:bg-blue-700 font-bold px-6 h-12 transition-all active:scale-95"
+          >
+            <Plus className="h-4 w-4 mr-2" /> Vào sổ văn bản đến
+          </Button>
+        </div>
       </div>
+
 
       <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
         {/* Search section back in one file */}
