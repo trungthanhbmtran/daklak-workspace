@@ -52,8 +52,10 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   Consultation: 'Consultation',
+  PublicComment: 'PublicComment',
   ConsultationResponse: 'ConsultationResponse',
   Document: 'Document',
+  DocumentLog: 'DocumentLog',
   Minutes: 'Minutes'
 } as const
 
@@ -88,6 +90,23 @@ export const ConsultationScalarFieldEnum = {
 } as const
 
 export type ConsultationScalarFieldEnum = (typeof ConsultationScalarFieldEnum)[keyof typeof ConsultationScalarFieldEnum]
+
+
+export const PublicCommentScalarFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  fullName: 'fullName',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  content: 'content',
+  status: 'status',
+  moderatedBy: 'moderatedBy',
+  moderatedAt: 'moderatedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PublicCommentScalarFieldEnum = (typeof PublicCommentScalarFieldEnum)[keyof typeof PublicCommentScalarFieldEnum]
 
 
 export const ConsultationResponseScalarFieldEnum = {
@@ -144,6 +163,19 @@ export const DocumentScalarFieldEnum = {
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
+export const DocumentLogScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  userName: 'userName',
+  action: 'action',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentLogScalarFieldEnum = (typeof DocumentLogScalarFieldEnum)[keyof typeof DocumentLogScalarFieldEnum]
+
+
 export const MinutesScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -193,6 +225,20 @@ export const ConsultationOrderByRelevanceFieldEnum = {
 export type ConsultationOrderByRelevanceFieldEnum = (typeof ConsultationOrderByRelevanceFieldEnum)[keyof typeof ConsultationOrderByRelevanceFieldEnum]
 
 
+export const PublicCommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  fullName: 'fullName',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  content: 'content',
+  status: 'status',
+  moderatedBy: 'moderatedBy'
+} as const
+
+export type PublicCommentOrderByRelevanceFieldEnum = (typeof PublicCommentOrderByRelevanceFieldEnum)[keyof typeof PublicCommentOrderByRelevanceFieldEnum]
+
+
 export const ConsultationResponseOrderByRelevanceFieldEnum = {
   id: 'id',
   consultationId: 'consultationId',
@@ -231,6 +277,18 @@ export const DocumentOrderByRelevanceFieldEnum = {
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
+
+
+export const DocumentLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  userName: 'userName',
+  action: 'action',
+  note: 'note'
+} as const
+
+export type DocumentLogOrderByRelevanceFieldEnum = (typeof DocumentLogOrderByRelevanceFieldEnum)[keyof typeof DocumentLogOrderByRelevanceFieldEnum]
 
 
 export const MinutesOrderByRelevanceFieldEnum = {

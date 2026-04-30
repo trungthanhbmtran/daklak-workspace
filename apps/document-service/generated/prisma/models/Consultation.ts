@@ -231,6 +231,7 @@ export type ConsultationWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Consultation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Consultation"> | Date | string
   responses?: Prisma.ConsultationResponseListRelationFilter
+  publicComments?: Prisma.PublicCommentListRelationFilter
 }
 
 export type ConsultationOrderByWithRelationInput = {
@@ -246,6 +247,7 @@ export type ConsultationOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   responses?: Prisma.ConsultationResponseOrderByRelationAggregateInput
+  publicComments?: Prisma.PublicCommentOrderByRelationAggregateInput
   _relevance?: Prisma.ConsultationOrderByRelevanceInput
 }
 
@@ -265,6 +267,7 @@ export type ConsultationWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Consultation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Consultation"> | Date | string
   responses?: Prisma.ConsultationResponseListRelationFilter
+  publicComments?: Prisma.PublicCommentListRelationFilter
 }, "id">
 
 export type ConsultationOrderByWithAggregationInput = {
@@ -314,6 +317,7 @@ export type ConsultationCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   responses?: Prisma.ConsultationResponseCreateNestedManyWithoutConsultationInput
+  publicComments?: Prisma.PublicCommentCreateNestedManyWithoutConsultationInput
 }
 
 export type ConsultationUncheckedCreateInput = {
@@ -329,6 +333,7 @@ export type ConsultationUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   responses?: Prisma.ConsultationResponseUncheckedCreateNestedManyWithoutConsultationInput
+  publicComments?: Prisma.PublicCommentUncheckedCreateNestedManyWithoutConsultationInput
 }
 
 export type ConsultationUpdateInput = {
@@ -344,6 +349,7 @@ export type ConsultationUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.ConsultationResponseUpdateManyWithoutConsultationNestedInput
+  publicComments?: Prisma.PublicCommentUpdateManyWithoutConsultationNestedInput
 }
 
 export type ConsultationUncheckedUpdateInput = {
@@ -359,6 +365,7 @@ export type ConsultationUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   responses?: Prisma.ConsultationResponseUncheckedUpdateManyWithoutConsultationNestedInput
+  publicComments?: Prisma.PublicCommentUncheckedUpdateManyWithoutConsultationNestedInput
 }
 
 export type ConsultationCreateManyInput = {
@@ -472,6 +479,20 @@ export type BoolFieldUpdateOperationsInput = {
   set?: boolean
 }
 
+export type ConsultationCreateNestedOneWithoutPublicCommentsInput = {
+  create?: Prisma.XOR<Prisma.ConsultationCreateWithoutPublicCommentsInput, Prisma.ConsultationUncheckedCreateWithoutPublicCommentsInput>
+  connectOrCreate?: Prisma.ConsultationCreateOrConnectWithoutPublicCommentsInput
+  connect?: Prisma.ConsultationWhereUniqueInput
+}
+
+export type ConsultationUpdateOneRequiredWithoutPublicCommentsNestedInput = {
+  create?: Prisma.XOR<Prisma.ConsultationCreateWithoutPublicCommentsInput, Prisma.ConsultationUncheckedCreateWithoutPublicCommentsInput>
+  connectOrCreate?: Prisma.ConsultationCreateOrConnectWithoutPublicCommentsInput
+  upsert?: Prisma.ConsultationUpsertWithoutPublicCommentsInput
+  connect?: Prisma.ConsultationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ConsultationUpdateToOneWithWhereWithoutPublicCommentsInput, Prisma.ConsultationUpdateWithoutPublicCommentsInput>, Prisma.ConsultationUncheckedUpdateWithoutPublicCommentsInput>
+}
+
 export type ConsultationCreateNestedOneWithoutResponsesInput = {
   create?: Prisma.XOR<Prisma.ConsultationCreateWithoutResponsesInput, Prisma.ConsultationUncheckedCreateWithoutResponsesInput>
   connectOrCreate?: Prisma.ConsultationCreateOrConnectWithoutResponsesInput
@@ -486,6 +507,82 @@ export type ConsultationUpdateOneRequiredWithoutResponsesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ConsultationUpdateToOneWithWhereWithoutResponsesInput, Prisma.ConsultationUpdateWithoutResponsesInput>, Prisma.ConsultationUncheckedUpdateWithoutResponsesInput>
 }
 
+export type ConsultationCreateWithoutPublicCommentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  documentId?: string | null
+  deadline: Date | string
+  status?: string
+  issuerId?: string | null
+  issuerName?: string | null
+  isUrgent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  responses?: Prisma.ConsultationResponseCreateNestedManyWithoutConsultationInput
+}
+
+export type ConsultationUncheckedCreateWithoutPublicCommentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  documentId?: string | null
+  deadline: Date | string
+  status?: string
+  issuerId?: string | null
+  issuerName?: string | null
+  isUrgent?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  responses?: Prisma.ConsultationResponseUncheckedCreateNestedManyWithoutConsultationInput
+}
+
+export type ConsultationCreateOrConnectWithoutPublicCommentsInput = {
+  where: Prisma.ConsultationWhereUniqueInput
+  create: Prisma.XOR<Prisma.ConsultationCreateWithoutPublicCommentsInput, Prisma.ConsultationUncheckedCreateWithoutPublicCommentsInput>
+}
+
+export type ConsultationUpsertWithoutPublicCommentsInput = {
+  update: Prisma.XOR<Prisma.ConsultationUpdateWithoutPublicCommentsInput, Prisma.ConsultationUncheckedUpdateWithoutPublicCommentsInput>
+  create: Prisma.XOR<Prisma.ConsultationCreateWithoutPublicCommentsInput, Prisma.ConsultationUncheckedCreateWithoutPublicCommentsInput>
+  where?: Prisma.ConsultationWhereInput
+}
+
+export type ConsultationUpdateToOneWithWhereWithoutPublicCommentsInput = {
+  where?: Prisma.ConsultationWhereInput
+  data: Prisma.XOR<Prisma.ConsultationUpdateWithoutPublicCommentsInput, Prisma.ConsultationUncheckedUpdateWithoutPublicCommentsInput>
+}
+
+export type ConsultationUpdateWithoutPublicCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isUrgent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  responses?: Prisma.ConsultationResponseUpdateManyWithoutConsultationNestedInput
+}
+
+export type ConsultationUncheckedUpdateWithoutPublicCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuerName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isUrgent?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  responses?: Prisma.ConsultationResponseUncheckedUpdateManyWithoutConsultationNestedInput
+}
+
 export type ConsultationCreateWithoutResponsesInput = {
   id?: string
   title: string
@@ -498,6 +595,7 @@ export type ConsultationCreateWithoutResponsesInput = {
   isUrgent?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  publicComments?: Prisma.PublicCommentCreateNestedManyWithoutConsultationInput
 }
 
 export type ConsultationUncheckedCreateWithoutResponsesInput = {
@@ -512,6 +610,7 @@ export type ConsultationUncheckedCreateWithoutResponsesInput = {
   isUrgent?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  publicComments?: Prisma.PublicCommentUncheckedCreateNestedManyWithoutConsultationInput
 }
 
 export type ConsultationCreateOrConnectWithoutResponsesInput = {
@@ -542,6 +641,7 @@ export type ConsultationUpdateWithoutResponsesInput = {
   isUrgent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  publicComments?: Prisma.PublicCommentUpdateManyWithoutConsultationNestedInput
 }
 
 export type ConsultationUncheckedUpdateWithoutResponsesInput = {
@@ -556,6 +656,7 @@ export type ConsultationUncheckedUpdateWithoutResponsesInput = {
   isUrgent?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  publicComments?: Prisma.PublicCommentUncheckedUpdateManyWithoutConsultationNestedInput
 }
 
 
@@ -565,10 +666,12 @@ export type ConsultationUncheckedUpdateWithoutResponsesInput = {
 
 export type ConsultationCountOutputType = {
   responses: number
+  publicComments: number
 }
 
 export type ConsultationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   responses?: boolean | ConsultationCountOutputTypeCountResponsesArgs
+  publicComments?: boolean | ConsultationCountOutputTypeCountPublicCommentsArgs
 }
 
 /**
@@ -588,6 +691,13 @@ export type ConsultationCountOutputTypeCountResponsesArgs<ExtArgs extends runtim
   where?: Prisma.ConsultationResponseWhereInput
 }
 
+/**
+ * ConsultationCountOutputType without action
+ */
+export type ConsultationCountOutputTypeCountPublicCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PublicCommentWhereInput
+}
+
 
 export type ConsultationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -602,6 +712,7 @@ export type ConsultationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdAt?: boolean
   updatedAt?: boolean
   responses?: boolean | Prisma.Consultation$responsesArgs<ExtArgs>
+  publicComments?: boolean | Prisma.Consultation$publicCommentsArgs<ExtArgs>
   _count?: boolean | Prisma.ConsultationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["consultation"]>
 
@@ -624,6 +735,7 @@ export type ConsultationSelectScalar = {
 export type ConsultationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "documentId" | "deadline" | "status" | "issuerId" | "issuerName" | "isUrgent" | "createdAt" | "updatedAt", ExtArgs["result"]["consultation"]>
 export type ConsultationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   responses?: boolean | Prisma.Consultation$responsesArgs<ExtArgs>
+  publicComments?: boolean | Prisma.Consultation$publicCommentsArgs<ExtArgs>
   _count?: boolean | Prisma.ConsultationCountOutputTypeDefaultArgs<ExtArgs>
 }
 
@@ -631,6 +743,7 @@ export type $ConsultationPayload<ExtArgs extends runtime.Types.Extensions.Intern
   name: "Consultation"
   objects: {
     responses: Prisma.$ConsultationResponsePayload<ExtArgs>[]
+    publicComments: Prisma.$PublicCommentPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -985,6 +1098,7 @@ readonly fields: ConsultationFieldRefs;
 export interface Prisma__ConsultationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   responses<T extends Prisma.Consultation$responsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Consultation$responsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConsultationResponsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  publicComments<T extends Prisma.Consultation$publicCommentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Consultation$publicCommentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PublicCommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1394,6 +1508,30 @@ export type Consultation$responsesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.ConsultationResponseScalarFieldEnum | Prisma.ConsultationResponseScalarFieldEnum[]
+}
+
+/**
+ * Consultation.publicComments
+ */
+export type Consultation$publicCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PublicComment
+   */
+  select?: Prisma.PublicCommentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PublicComment
+   */
+  omit?: Prisma.PublicCommentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PublicCommentInclude<ExtArgs> | null
+  where?: Prisma.PublicCommentWhereInput
+  orderBy?: Prisma.PublicCommentOrderByWithRelationInput | Prisma.PublicCommentOrderByWithRelationInput[]
+  cursor?: Prisma.PublicCommentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PublicCommentScalarFieldEnum | Prisma.PublicCommentScalarFieldEnum[]
 }
 
 /**

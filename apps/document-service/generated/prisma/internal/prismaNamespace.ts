@@ -385,8 +385,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   Consultation: 'Consultation',
+  PublicComment: 'PublicComment',
   ConsultationResponse: 'ConsultationResponse',
   Document: 'Document',
+  DocumentLog: 'DocumentLog',
   Minutes: 'Minutes'
 } as const
 
@@ -403,7 +405,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "consultation" | "consultationResponse" | "document" | "minutes"
+    modelProps: "consultation" | "publicComment" | "consultationResponse" | "document" | "documentLog" | "minutes"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -470,6 +472,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ConsultationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ConsultationCountAggregateOutputType> | number
+        }
+      }
+    }
+    PublicComment: {
+      payload: Prisma.$PublicCommentPayload<ExtArgs>
+      fields: Prisma.PublicCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PublicCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PublicCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.PublicCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PublicCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>
+        }
+        findMany: {
+          args: Prisma.PublicCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>[]
+        }
+        create: {
+          args: Prisma.PublicCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>
+        }
+        createMany: {
+          args: Prisma.PublicCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PublicCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>
+        }
+        update: {
+          args: Prisma.PublicCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.PublicCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PublicCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PublicCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PublicCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.PublicCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePublicComment>
+        }
+        groupBy: {
+          args: Prisma.PublicCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PublicCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PublicCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PublicCommentCountAggregateOutputType> | number
         }
       }
     }
@@ -605,6 +673,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DocumentLog: {
+      payload: Prisma.$DocumentLogPayload<ExtArgs>
+      fields: Prisma.DocumentLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.DocumentLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>
+        }
+        update: {
+          args: Prisma.DocumentLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.DocumentLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentLogPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentLog>
+        }
+        groupBy: {
+          args: Prisma.DocumentLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentLogCountAggregateOutputType> | number
+        }
+      }
+    }
     Minutes: {
       payload: Prisma.$MinutesPayload<ExtArgs>
       fields: Prisma.MinutesFieldRefs
@@ -727,6 +861,23 @@ export const ConsultationScalarFieldEnum = {
 export type ConsultationScalarFieldEnum = (typeof ConsultationScalarFieldEnum)[keyof typeof ConsultationScalarFieldEnum]
 
 
+export const PublicCommentScalarFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  fullName: 'fullName',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  content: 'content',
+  status: 'status',
+  moderatedBy: 'moderatedBy',
+  moderatedAt: 'moderatedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PublicCommentScalarFieldEnum = (typeof PublicCommentScalarFieldEnum)[keyof typeof PublicCommentScalarFieldEnum]
+
+
 export const ConsultationResponseScalarFieldEnum = {
   id: 'id',
   consultationId: 'consultationId',
@@ -781,6 +932,19 @@ export const DocumentScalarFieldEnum = {
 export type DocumentScalarFieldEnum = (typeof DocumentScalarFieldEnum)[keyof typeof DocumentScalarFieldEnum]
 
 
+export const DocumentLogScalarFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  userName: 'userName',
+  action: 'action',
+  note: 'note',
+  createdAt: 'createdAt'
+} as const
+
+export type DocumentLogScalarFieldEnum = (typeof DocumentLogScalarFieldEnum)[keyof typeof DocumentLogScalarFieldEnum]
+
+
 export const MinutesScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -830,6 +994,20 @@ export const ConsultationOrderByRelevanceFieldEnum = {
 export type ConsultationOrderByRelevanceFieldEnum = (typeof ConsultationOrderByRelevanceFieldEnum)[keyof typeof ConsultationOrderByRelevanceFieldEnum]
 
 
+export const PublicCommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  consultationId: 'consultationId',
+  fullName: 'fullName',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  content: 'content',
+  status: 'status',
+  moderatedBy: 'moderatedBy'
+} as const
+
+export type PublicCommentOrderByRelevanceFieldEnum = (typeof PublicCommentOrderByRelevanceFieldEnum)[keyof typeof PublicCommentOrderByRelevanceFieldEnum]
+
+
 export const ConsultationResponseOrderByRelevanceFieldEnum = {
   id: 'id',
   consultationId: 'consultationId',
@@ -868,6 +1046,18 @@ export const DocumentOrderByRelevanceFieldEnum = {
 } as const
 
 export type DocumentOrderByRelevanceFieldEnum = (typeof DocumentOrderByRelevanceFieldEnum)[keyof typeof DocumentOrderByRelevanceFieldEnum]
+
+
+export const DocumentLogOrderByRelevanceFieldEnum = {
+  id: 'id',
+  documentId: 'documentId',
+  userId: 'userId',
+  userName: 'userName',
+  action: 'action',
+  note: 'note'
+} as const
+
+export type DocumentLogOrderByRelevanceFieldEnum = (typeof DocumentLogOrderByRelevanceFieldEnum)[keyof typeof DocumentLogOrderByRelevanceFieldEnum]
 
 
 export const MinutesOrderByRelevanceFieldEnum = {
@@ -1037,8 +1227,10 @@ export type PrismaClientOptions = ({
 }
 export type GlobalOmitConfig = {
   consultation?: Prisma.ConsultationOmit
+  publicComment?: Prisma.PublicCommentOmit
   consultationResponse?: Prisma.ConsultationResponseOmit
   document?: Prisma.DocumentOmit
+  documentLog?: Prisma.DocumentLogOmit
   minutes?: Prisma.MinutesOmit
 }
 

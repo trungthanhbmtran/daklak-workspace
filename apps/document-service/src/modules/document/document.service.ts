@@ -9,39 +9,42 @@ export class DocumentService {
     console.log("[DocumentService] Creating document with data:", data);
     const document = await this.prisma.document.create({
       data: {
-        documentNumber: data.documentNumber,
-        notation: data.notation,
-        abstract: data.abstract,
-        content: data.content,
-        typeId: data.typeId,
-        fieldId: data.fieldId,
-        issuingAuthorityId: data.issuingAuthorityId,
-        issuerName: data.issuerName,
-        signerId: data.signerId,
-        signerName: data.signerName,
-        signerPosition: data.signerPosition,
-        issueDate: data.issueDate ? new Date(data.issueDate) : null,
+        documentNumber: data.documentNumber || `SN-${Date.now()}`,
+        notation: data.notation || "VP",
+        abstract: data.abstract || "Văn bản không có trích yếu",
+        content: data.content || "",
+        typeId: data.typeId || "CONG_VAN",
+        fieldId: data.fieldId || "HANH_CHINH",
+        issuingAuthorityId: data.issuingAuthorityId || "",
+        issuerName: data.issuerName || "Sở Khoa học và Công nghệ",
+        signerId: data.signerId || "",
+        signerName: data.signerName || "",
+        signerPosition: data.signerPosition || "",
+        issueDate: data.issueDate ? new Date(data.issueDate) : new Date(),
         arrivalDate: data.arrivalDate ? new Date(data.arrivalDate) : null,
-        arrivalNumber: data.arrivalNumber,
+        arrivalNumber: data.arrivalNumber || "",
         processingDeadline: data.processingDeadline ? new Date(data.processingDeadline) : null,
-        recipients: data.recipients,
-        urgency: data.urgency || 'NORMAL',
-        securityLevel: data.securityLevel || 'NORMAL',
-        status: data.status || 'DRAFT',
+        recipients: data.recipients || "",
+        urgency: data.urgency || "NORMAL",
+        securityLevel: data.securityLevel || "NORMAL",
+        status: data.status || "PROCESSING",
         isPublic: !!data.isPublic,
         isIncoming: data.isIncoming !== undefined ? !!data.isIncoming : true,
-        fileId: data.fileId,
+        fileId: data.fileId || "",
         signatureValid: !!data.signatureValid,
         pageCount: Number(data.pageCount) || 1,
         attachmentCount: Number(data.attachmentCount) || 0,
-        linkedDocumentId: data.linkedDocumentId,
-        fiscalYear: data.fiscalYear ? Number(data.fiscalYear) : null,
-        transparencyCategory: data.transparencyCategory,
+        linkedDocumentId: data.linkedDocumentId || null,
+        fiscalYear: data.fiscalYear || new Date().getFullYear(),
+        transparencyCategory: data.transparencyCategory || "NONE",
       },
     });
 
-    // Tự động log khi tạo văn bản
-    await this.logRecord(document.id, document.isIncoming ? "VÀO SỔ VĂN BẢN ĐẾN" : "PHÁT HÀNH VĂN BẢN ĐI", "Hệ thống tự động ghi nhận khi tạo mới.");
+    await this.logRecord(
+      document.id, 
+      document.isIncoming ? "VÀO SỔ VĂN BẢN ĐẾN" : "PHÁT HÀNH VĂN BẢN ĐI", 
+      "Hệ thống tự động ghi nhận khi tạo mới."
+    );
 
     return { data: this.mapToProto(document) };
   }
@@ -194,7 +197,16 @@ export class DocumentService {
       where: { documentId },
       orderBy: { createdAt: 'desc' },
     });
-    return { data: logs };
+    
+    return { 
+      data: logs.map(log => ({
+        ...log,
+        createdAt: log.createdAt?.toISOString() || new Date().toISOString(),
+        userId: log.userId || "",
+        userName: log.userName || "",
+        note: log.note || ""
+      })) 
+    };
   }
 
   async logRecord(documentId: string, action: string, note?: string, userId?: string, userName?: string) {
@@ -210,6 +222,8 @@ export class DocumentService {
   }
 
   private mapToProto(doc: any) {
+    if (!doc) return null;
+    
     return {
       id: doc.id,
       documentNumber: doc.documentNumber || "",
@@ -223,10 +237,10 @@ export class DocumentService {
       signerId: doc.signerId || "",
       signerName: doc.signerName || "",
       signerPosition: doc.signerPosition || "",
-      issueDate: doc.issueDate?.toISOString() || "",
-      arrivalDate: doc.arrivalDate?.toISOString() || "",
+      issueDate: doc.issueDate instanceof Date ? doc.issueDate.toISOString() : (doc.issueDate || ""),
+      arrivalDate: doc.arrivalDate instanceof Date ? doc.arrivalDate.toISOString() : (doc.arrivalDate || ""),
       arrivalNumber: doc.arrivalNumber || "",
-      processingDeadline: doc.processingDeadline?.toISOString() || "",
+      processingDeadline: doc.processingDeadline instanceof Date ? doc.processingDeadline.toISOString() : (doc.processingDeadline || ""),
       recipients: doc.recipients || "",
       urgency: doc.urgency || "NORMAL",
       securityLevel: doc.securityLevel || "NORMAL",
@@ -234,17 +248,17 @@ export class DocumentService {
       isPublic: !!doc.isPublic,
       isIncoming: !!doc.isIncoming,
       fileId: doc.fileId || "",
-      fileUrl: "", // Sẽ được điền nếu cần
+      fileUrl: "",
       signatureValid: !!doc.signatureValid,
       pageCount: doc.pageCount || 1,
       attachmentCount: doc.attachmentCount || 0,
       linkedDocumentId: doc.linkedDocumentId || "",
       fiscalYear: doc.fiscalYear || 0,
       transparencyCategory: doc.transparencyCategory || "",
-      createdAt: doc.createdAt?.toISOString() || "",
-      updatedAt: doc.updatedAt?.toISOString() || "",
-      typeName: doc.documentType?.name || "",
-      fieldName: doc.field?.name || "",
+      createdAt: doc.createdAt instanceof Date ? doc.createdAt.toISOString() : (doc.createdAt || ""),
+      updatedAt: doc.updatedAt instanceof Date ? doc.updatedAt.toISOString() : (doc.updatedAt || ""),
+      typeName: doc.typeName || "", // Assuming these are pre-populated or handled elsewhere
+      fieldName: doc.fieldName || "",
     };
   }
 
@@ -272,6 +286,7 @@ export class DocumentService {
     const mockExternalDocs = [
       {
         documentNumber: `VDX-${Date.now() % 10000}-01`,
+        notation: "VDX/TƯ",
         abstract: "Về việc triển khai kế hoạch chuyển đổi số năm 2026",
         issuerName: "Bộ Khoa học và Công nghệ",
         issueDate: new Date().toISOString(),
@@ -281,6 +296,7 @@ export class DocumentService {
       },
       {
         documentNumber: `VDX-${Date.now() % 10000}-02`,
+        notation: "VDX/STC",
         abstract: "Hướng dẫn thực hiện Nghị định 61/NĐ-CP về công khai tài chính",
         issuerName: "Sở Tài chính tỉnh Đắk Lắk",
         issueDate: new Date().toISOString(),

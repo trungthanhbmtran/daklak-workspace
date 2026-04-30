@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type Consultation = Prisma.ConsultationModel
 /**
+ * Model PublicComment
+ * 
+ */
+export type PublicComment = Prisma.PublicCommentModel
+/**
  * Model ConsultationResponse
  * 
  */
@@ -32,6 +37,11 @@ export type ConsultationResponse = Prisma.ConsultationResponseModel
  * 
  */
 export type Document = Prisma.DocumentModel
+/**
+ * Model DocumentLog
+ * 
+ */
+export type DocumentLog = Prisma.DocumentLogModel
 /**
  * Model Minutes
  * 

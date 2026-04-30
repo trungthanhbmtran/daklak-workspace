@@ -498,10 +498,6 @@ export type ConsultationResponseUncheckedUpdateManyWithoutConsultationNestedInpu
   deleteMany?: Prisma.ConsultationResponseScalarWhereInput | Prisma.ConsultationResponseScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type ConsultationResponseCreateWithoutConsultationInput = {
   id?: string
   unitId: string
