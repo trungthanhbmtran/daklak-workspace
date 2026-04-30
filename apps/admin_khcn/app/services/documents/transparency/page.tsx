@@ -88,7 +88,7 @@ export default function TransparencyPage() {
               <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">Đã công khai</p>
               <p className="text-2xl font-black text-emerald-900">{publicCount || 0}</p>
             </div>
-          </div>
+          </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-amber-50/50">
           <CardContent className="p-4 flex items-center gap-4">
