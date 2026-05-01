@@ -59,6 +59,37 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
     }
   };
 
+  const handlePrint = () => {
+    if (document?.fileId) {
+      toast.info("Đang chuẩn bị tệp tin để in...");
+      const fileUrl = `/api/v1/admin/media/download/${document.fileId}`;
+      const iframe = window.document.createElement('iframe');
+      iframe.style.display = 'none';
+      iframe.src = fileUrl;
+      window.document.body.appendChild(iframe);
+      iframe.onload = () => {
+        setTimeout(() => {
+          if (iframe.contentWindow) {
+            iframe.contentWindow.print();
+            setTimeout(() => window.document.body.removeChild(iframe), 1000);
+          }
+        }, 500);
+      };
+    } else {
+      window.print();
+    }
+  };
+
+  const handleDownload = () => {
+    if (!document?.fileId) {
+      toast.error("Không có tệp tin để tải xuống");
+      return;
+    }
+    const downloadUrl = `/api/v1/admin/media/download/${document.fileId}`;
+    window.open(downloadUrl, '_blank');
+    toast.success("Đang bắt đầu tải xuống...");
+  };
+
   if (!document) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground italic">
@@ -87,8 +118,8 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm"><Printer className="h-4 w-4 mr-2" /> In phiếu</Button>
-          <Button variant="outline" size="sm"><Download className="h-4 w-4 mr-2" /> Tải về</Button>
+          <Button variant="outline" size="sm" onClick={handlePrint}><Printer className="h-4 w-4 mr-2" /> In phiếu</Button>
+          <Button variant="outline" size="sm" onClick={handleDownload}><Download className="h-4 w-4 mr-2" /> Tải về</Button>
         </div>
       </div>
 
@@ -99,12 +130,20 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
           <div className="bg-background border-b p-2 flex justify-center items-center gap-4 text-sm text-muted-foreground shrink-0">
             <span className="flex items-center gap-1"><FileText className="h-4 w-4" /> {document.fileId ? `Tai_lieu_${(document.id || 'file').slice(0, 5)}.pdf` : 'Chưa có tệp đính kèm'}</span>
           </div>
-          <div className="flex-1 flex items-center justify-center p-8">
-            <div className="w-full max-w-2xl h-full bg-white shadow-md border rounded p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
-              <Stamp className="h-16 w-16 text-rose-500/20 mb-4 transform -rotate-12" />
-              <p>Trình xem văn bản (PDF Viewer)</p>
-              <p className="text-xs mt-2 italic">Hệ thống đang tích hợp bộ ký số trực tiếp trên văn bản</p>
-            </div>
+          <div className="flex-1 flex items-center justify-center">
+            {document.fileId ? (
+               <iframe
+                 src={`/api/v1/admin/media/download/${document.fileId}#toolbar=0`}
+                 className="w-full h-full border-none bg-white"
+                 title="Document Viewer"
+               />
+            ) : (
+              <div className="w-full max-w-2xl h-full bg-white shadow-md border rounded p-12 text-center text-muted-foreground flex flex-col items-center justify-center">
+                <Stamp className="h-16 w-16 text-rose-500/20 mb-4 transform -rotate-12" />
+                <p>Trình xem văn bản (PDF Viewer)</p>
+                <p className="text-xs mt-2 italic text-rose-400">Không tìm thấy tệp đính kèm của văn bản này</p>
+              </div>
+            )}
           </div>
         </div>
 

@@ -251,7 +251,7 @@ export class DocumentService {
       isPublic: !!doc.isPublic,
       isIncoming: !!doc.isIncoming,
       fileId: doc.fileId || "",
-      fileUrl: "",
+      fileUrl: doc.fileId ? `/api/v1/admin/media/download/${doc.fileId}` : "",
       signatureValid: !!doc.signatureValid,
       pageCount: doc.pageCount || 1,
       attachmentCount: doc.attachmentCount || 0,

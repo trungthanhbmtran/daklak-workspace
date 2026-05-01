@@ -193,13 +193,30 @@ export function DocumentDetailModal({ isOpen, onClose, documentId }: DocumentDet
 
               <Separator className="bg-muted-foreground/10" />
 
-              {/* Chi tiết nội dung */}
-              <div className="space-y-6">
-                <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                  <ShieldCheck className="h-4 w-4 text-emerald-500" /> Nội dung văn bản
-                </h4>
-                <div className="p-6 bg-muted/10 rounded-3xl border border-muted-foreground/10 leading-relaxed text-foreground/80 font-medium">
-                  {doc.content || doc.abstract || "Nội dung chưa được cập nhật."}
+              {/* Nội dung và Xem trước tệp */}
+              <div className="space-y-8">
+                {doc.fileId && (
+                  <div className="space-y-4">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-rose-500" /> Xem trước văn bản
+                    </h4>
+                    <div className="w-full aspect-[1/1.4] bg-muted/20 rounded-3xl overflow-hidden border shadow-inner relative">
+                      <iframe
+                        src={`/api/v1/admin/media/download/${doc.fileId}#toolbar=0`}
+                        className="w-full h-full border-none bg-white"
+                        title="Document Preview"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-muted-foreground flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-500" /> Trích yếu nội dung
+                  </h4>
+                  <div className="p-6 bg-muted/10 rounded-3xl border border-muted-foreground/10 leading-relaxed text-foreground/80 font-medium">
+                    {doc.content || doc.abstract || "Nội dung chưa được cập nhật."}
+                  </div>
                 </div>
               </div>
 
