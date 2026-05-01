@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 
 // Lazy load heavy modals
 const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
@@ -114,13 +114,9 @@ export default function IncomingDocumentsPage() {
     pageSize: 50
   });
 
-  // Tìm mảng dữ liệu trong response (có thể là response trực tiếp, response.data, hoặc response.data.data)
+  // Tìm mảng dữ liệu trong response (sử dụng hàm chuẩn hóa extractDataArray)
   const documents = useMemo(() => {
-    if (!response) return [];
-    if (Array.isArray(response)) return response;
-    if (Array.isArray(response.data)) return response.data;
-    if (response.data && Array.isArray(response.data.data)) return response.data.data;
-    return [];
+    return extractDataArray(response);
   }, [response]);
 
   const handleOpenDetail = useCallback((id: string) => {

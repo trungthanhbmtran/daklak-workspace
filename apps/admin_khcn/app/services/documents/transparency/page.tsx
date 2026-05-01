@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function TransparencyPage() {
@@ -35,10 +35,7 @@ export default function TransparencyPage() {
   });
 
   const reports = useMemo(() => {
-    if (!reportsData) return [];
-    const raw = reportsData.data || reportsData;
-    const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
-    return list.filter((r: any) => r && typeof r === 'object');
+    return extractDataArray(reportsData);
   }, [reportsData]);
 
   const formatDate = (dateStr?: string) => {

@@ -8,14 +8,14 @@ const API_BASE = '/documents';
 
 /**
  * Hàm hỗ trợ bóc tách mảng dữ liệu từ phản hồi API
- * Hỗ trợ các định dạng: [...] hoặc { data: [...] } hoặc { data: { data: [...] } }
+ * Chuẩn hóa theo cấu trúc { success, data, meta }
  */
-const extractDataArray = (res: any) => {
+export const extractDataArray = (res: any) => {
   if (!res) return [];
+  // Nếu là mảng trực tiếp (trường hợp hiếm)
   if (Array.isArray(res)) return res;
-  if (res?.data && Array.isArray(res.data)) return res.data;
-  if (res?.data?.data && Array.isArray(res.data.data)) return res.data.data;
-  if (res?.items && Array.isArray(res.items)) return res.items;
+  // Trường hợp chuẩn: res.data là mảng
+  if (Array.isArray(res?.data)) return res.data;
   return [];
 };
 
@@ -60,7 +60,7 @@ export const useGetConsultation = (id: string) => {
     queryFn: async () => {
       if (!id) return null;
       const response: any = await apiClient.get(`${API_BASE}/consultations/${id}`);
-      return response?.data || response;
+      return response?.data;
     },
     enabled: !!id,
   });
@@ -94,7 +94,7 @@ export const useGetDocument = (id: string) => {
     queryFn: async () => {
       if (!id) return null;
       const response: any = await apiClient.get(`${API_BASE}/${id}`);
-      return response?.data || response;
+      return response?.data;
     },
     enabled: !!id,
   });
@@ -105,7 +105,7 @@ export const useDocumentStats = () => {
     queryKey: ['document-stats'],
     queryFn: async () => {
       const response: any = await apiClient.get(`${API_BASE}/stats`);
-      return response?.data || response;
+      return response?.data;
     },
   });
 };
@@ -126,7 +126,7 @@ export const usePublicComments = (consultationId?: string, status?: string) => {
   return useQuery({
     queryKey: ['public-comments', consultationId, status],
     queryFn: async () => {
-      const url = consultationId 
+      const url = consultationId
         ? `${API_BASE}/consultations/${consultationId}/public-comments`
         : `${API_BASE}/consultations/public-comments`;
       const response: any = await apiClient.get(url, {
@@ -178,7 +178,7 @@ export function useDocuments() {
   const extractMetadataMutation = useMutation({
     mutationFn: async (fileId: string) => {
       const response: any = await apiClient.post(`${API_BASE}/extract`, { fileId });
-      return response?.data || response;
+      return response?.data;
     },
   });
 
@@ -191,7 +191,7 @@ export function useDocuments() {
   });
 
   const moderateCommentMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: string }) => 
+    mutationFn: async ({ id, status }: { id: string, status: string }) =>
       apiClient.put(`${API_BASE}/consultations/public-comments/${id}/moderate`, { status }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['public-comments'] });

@@ -1,5 +1,5 @@
 'use client'
-import { useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 import { useState, useMemo } from 'react'
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -20,11 +20,9 @@ export default function ProcessingDocumentsPage() {
   });
 
   const docs = useMemo(() => {
-    if (!documentsData) return [];
-    if (Array.isArray(documentsData)) return documentsData;
-    if (Array.isArray(documentsData.data)) return documentsData.data;
-    if (documentsData.data && Array.isArray(documentsData.data.data)) return documentsData.data.data;
-    return [];
+    // Import extractDataArray from useDocuments if not already, 
+    // but here we can just use it if we import it.
+    return extractDataArray(documentsData);
   }, [documentsData]);
 
   return (

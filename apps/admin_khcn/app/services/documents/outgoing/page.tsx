@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function OutgoingDocumentsPage() {
@@ -35,11 +35,7 @@ export default function OutgoingDocumentsPage() {
   });
 
   const documents = useMemo(() => {
-    if (!response) return [];
-    if (Array.isArray(response)) return response;
-    if (Array.isArray(response.data)) return response.data;
-    if (response.data && Array.isArray(response.data.data)) return response.data.data;
-    return [];
+    return extractDataArray(response);
   }, [response]);
 
   const handleDelete = async (id: string) => {

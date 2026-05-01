@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
 
 export default function ConsultationsPage() {
@@ -42,9 +42,7 @@ export default function ConsultationsPage() {
    }, []);
 
    const consultations = useMemo(() => {
-      if (!data) return [];
-      const raw = data.data || data;
-      return Array.isArray(raw) ? raw : [];
+      return extractDataArray(data);
    }, [data]);
 
    const formatDate = (date?: string) => {

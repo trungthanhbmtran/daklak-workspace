@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MinutesForm } from "@/features/document/components/MinutesForm";
 
-import { useDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 
 export default function MinutesPage() {
    const [view, setView] = useState<'LIST' | 'CREATE'>('LIST');
@@ -19,7 +19,7 @@ export default function MinutesPage() {
       search: searchTerm,
    });
 
-   const minutes = minutesData?.data || [];
+   const minutes = extractDataArray(minutesData);
 
    if (view === 'CREATE') {
       return (

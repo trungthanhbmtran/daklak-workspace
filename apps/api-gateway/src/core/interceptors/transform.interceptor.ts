@@ -5,11 +5,19 @@ import { map } from 'rxjs/operators';
 export class TransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
-      map(data => ({
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      })),
+      map(response => {
+        if (response && typeof response === 'object' && 'data' in response) {
+          return {
+            success: true,
+            ...response,
+          };
+        }
+        return {
+          success: true,
+          data: response,
+          meta: null,
+        };
+      }),
     );
   }
 }

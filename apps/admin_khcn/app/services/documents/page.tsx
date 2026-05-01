@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-import { useDocuments, useDocumentStats, useListDocuments } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useDocumentStats, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 import { useUser } from "@/hooks/useUser";
 
 export default function DocumentDashboardPage() {
@@ -41,10 +41,7 @@ export default function DocumentDashboardPage() {
   }, [stats]);
 
   const myPendingTasks = useMemo(() => {
-    if (!pendingTasksData) return [];
-    const raw = pendingTasksData.data || pendingTasksData;
-    const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
-    return list.filter((t: any) => t && typeof t === 'object');
+    return extractDataArray(pendingTasksData);
   }, [pendingTasksData]);
 
   const formatDate = (dateStr?: string) => {
