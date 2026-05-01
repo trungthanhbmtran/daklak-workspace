@@ -41,6 +41,14 @@ export class WorkflowEngineService implements OnModuleInit {
 
     if (!workflow) throw new Error("Workflow not found");
 
+    // Defensive check for definition
+    const definition = (workflow.definition as any) || {};
+    const nodes = definition.nodes || [];
+
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+      throw new Error("Workflow definition is empty or invalid (no nodes found)");
+    }
+
     const instance = await this.prisma.workflowInstance.create({
       data: {
         workflowId,
@@ -51,11 +59,11 @@ export class WorkflowEngineService implements OnModuleInit {
     });
 
     // Find start node
-    const definition = workflow.definition as any;
-    const startNode = definition.nodes.find((n: any) => n.type === "start");
+    const startNode = nodes.find((n: any) => n.type === "start");
 
     if (!startNode) {
-      await this.updateStatus(instance.id, WorkflowStatus.FAILED, "No start node found");
+      await this.updateStatus(instance.id, WorkflowStatus.FAILED, "No start node found in definition");
+      // Still return the instance so caller knows it failed but was created
       return instance;
     }
 
@@ -104,8 +112,9 @@ export class WorkflowEngineService implements OnModuleInit {
     }
 
     // PBAC Validation
-    const definition = (instance.workflow.definition as any);
-    const node = definition.nodes.find((n: any) => n.id === nodeId);
+    const definition = (instance.workflow.definition as any) || {};
+    const nodes = definition.nodes || [];
+    const node = nodes.find((n: any) => n.id === nodeId);
     const requiredRole = node?.data?.role;
 
     if (requiredRole && !userRoles.includes(requiredRole)) {
@@ -142,8 +151,9 @@ export class WorkflowEngineService implements OnModuleInit {
 
       if (!instance) return;
 
-      const definition = instance.workflow.definition as any;
-      const node = definition.nodes.find((n: any) => n.id === nodeId);
+      const definition = (instance.workflow.definition as any) || {};
+      const nodes = definition.nodes || [];
+      const node = nodes.find((n: any) => n.id === nodeId);
 
       if (!node) {
         await this.updateStatus(instanceId, WorkflowStatus.FAILED, `Node ${nodeId} not found`);
@@ -211,8 +221,8 @@ export class WorkflowEngineService implements OnModuleInit {
 
     if (!instance) return;
 
-    const definition = instance.workflow.definition as any;
-    const edges = definition.edges.filter((e: any) => e.source === currentNodeId);
+    const definition = (instance.workflow.definition as any) || {};
+    const edges = (definition.edges || []).filter((e: any) => e.source === currentNodeId);
 
     if (edges.length === 0) {
       await this.updateStatus(instanceId, WorkflowStatus.COMPLETED);
