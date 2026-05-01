@@ -54,6 +54,30 @@ export const useListConsultations = (params?: any) => {
   });
 };
 
+export const useGetConsultation = (id: string) => {
+  return useQuery({
+    queryKey: ['consultation', id],
+    queryFn: async () => {
+      if (!id) return null;
+      const response: any = await apiClient.get(`${API_BASE}/consultations/${id}`);
+      return response?.data || response;
+    },
+    enabled: !!id,
+  });
+};
+
+export const useListResponses = (id: string) => {
+  return useQuery({
+    queryKey: ['consultation-responses', id],
+    queryFn: async () => {
+      if (!id) return [];
+      const response: any = await apiClient.get(`${API_BASE}/consultations/${id}/responses`);
+      return response?.data || [];
+    },
+    enabled: !!id,
+  });
+};
+
 export const useListMinutes = (params?: any) => {
   return useQuery({
     queryKey: ['document-minutes', params],
@@ -181,6 +205,8 @@ export function useDocuments() {
     useListConsultations,
     useListMinutes,
     useGetDocument,
+    useGetConsultation,
+    useListResponses,
     useDocumentStats,
     useDocumentLogs,
     usePublicComments,

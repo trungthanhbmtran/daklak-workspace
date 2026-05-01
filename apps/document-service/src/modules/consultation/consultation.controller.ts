@@ -26,6 +26,11 @@ export class ConsultationController {
     return this.consultationService.submitResponse(data);
   }
 
+  @GrpcMethod('ConsultationService', 'ListResponses')
+  listResponses(data: { consultationId: string }) {
+    return this.consultationService.listResponses(data.consultationId);
+  }
+
   @GrpcMethod('ConsultationService', 'SubmitPublicComment')
   submitPublicComment(data: any) {
     return this.consultationService.submitPublicComment(data);

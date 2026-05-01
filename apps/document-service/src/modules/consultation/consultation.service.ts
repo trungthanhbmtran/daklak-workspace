@@ -29,10 +29,21 @@ export class ConsultationService {
     const consultation = await this.prisma.consultation.findUnique({
       where: { id },
       include: {
-        responses: true,
+        _count: {
+          select: { responses: true }
+        },
+        responses: {
+          where: { status: 'RESPONDED' },
+          select: { id: true }
+        }
       },
     });
-    return this.mapToProto(consultation);
+    if (!consultation) return null;
+    return {
+      ...this.mapToProto(consultation),
+      totalResponses: consultation.responses.length,
+      totalUnits: consultation._count.responses,
+    };
   }
 
   async findAll(query: any) {
@@ -98,6 +109,21 @@ export class ConsultationService {
       },
     });
     return { success: true };
+  }
+
+  async listResponses(consultationId: string) {
+    const responses = await this.prisma.consultationResponse.findMany({
+      where: { consultationId },
+      orderBy: { respondedAt: 'desc' },
+    });
+    return { data: responses.map(r => this.mapResponseToProto(r)) };
+  }
+
+  private mapResponseToProto(r: any) {
+    return {
+      ...r,
+      respondedAt: r.respondedAt?.toISOString() || "",
+    };
   }
 
   // Public Comments Logic

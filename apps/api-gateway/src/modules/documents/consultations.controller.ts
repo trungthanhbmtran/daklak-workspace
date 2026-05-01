@@ -51,6 +51,11 @@ export class ConsultationsController implements OnModuleInit {
     return firstValueFrom(this.consultationService.SubmitResponse(payload));
   }
 
+  @Get(':id/responses')
+  async listResponses(@Param('id') consultationId: string) {
+    return firstValueFrom(this.consultationService.ListResponses({ consultationId }));
+  }
+
   @Get(':id/public-comments')
   async listPublicComments(@Param('id') consultationId: string, @Query('status') status: string) {
     return firstValueFrom(this.consultationService.ListPublicComments({ consultationId, status }));

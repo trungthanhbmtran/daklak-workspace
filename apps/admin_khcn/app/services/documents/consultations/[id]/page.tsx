@@ -18,11 +18,12 @@ import { PublicCommentModeration } from "@/features/document/components/PublicCo
 export default function ConsultationDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = React.use(params);
   const consultationId = resolvedParams.id;
-  const { useListConsultations } = useDocuments();
+  const { useGetConsultation } = useDocuments();
   
-  // Lấy chi tiết bằng cách tìm trong danh sách (hoặc fetch đơn lẻ nếu có hook)
-  const { data: consultationsData, isLoading } = useListConsultations();
-  const consultation = consultationsData?.data?.find((c: any) => c.id === consultationId);
+  // Lấy chi tiết bằng cách gọi API GetConsultation trực tiếp
+  const { data: consultation, isLoading } = useGetConsultation(consultationId);
+  const { useListResponses } = useDocuments();
+  const { data: responses, isLoading: isLoadingResponses } = useListResponses(consultationId);
 
   if (isLoading) return <div className="p-10 text-center text-muted-foreground animate-pulse">Đang tải thông tin chi tiết...</div>;
   
@@ -30,7 +31,7 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
     <div className="p-10 text-center space-y-4">
       <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
       <h2 className="text-xl font-bold">Không tìm thấy đợt lấy ý kiến</h2>
-      <Link href="/admin/services/documents/consultations">
+      <Link href="/services/documents/consultations">
         <Button variant="outline"><ChevronLeft className="h-4 w-4 mr-2" /> Quay lại danh sách</Button>
       </Link>
     </div>
@@ -40,10 +41,10 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
-      {/* HEADER */}
+      {/* HEADER ... (unchanged in UI) */}
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
         <div className="space-y-1">
-          <Link href="/admin/services/documents/consultations" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline mb-2">
+          <Link href="/services/documents/consultations" className="text-xs font-bold text-primary flex items-center gap-1 hover:underline mb-2">
             <ChevronLeft className="h-3 w-3" /> DANH SÁCH LẤY Ý KIẾN
           </Link>
           <h2 className="text-2xl font-black text-foreground leading-tight">
@@ -71,7 +72,7 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
           <Tabs defaultValue="moderation" className="w-full">
             <TabsList className="bg-muted/50 p-1 rounded-xl h-11 mb-4">
               <TabsTrigger value="moderation" className="rounded-lg font-bold px-6">Kiểm duyệt công chúng</TabsTrigger>
-              <TabsTrigger value="internal" className="rounded-lg font-bold px-6">Phản hồi đơn vị ({consultation.totalResponses})</TabsTrigger>
+              <TabsTrigger value="internal" className="rounded-lg font-bold px-6">Phản hồi đơn vị ({responses?.length || 0})</TabsTrigger>
               <TabsTrigger value="info" className="rounded-lg font-bold px-6">Thông tin chung</TabsTrigger>
             </TabsList>
             
@@ -87,9 +88,41 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                   <div className="p-12 text-center text-muted-foreground italic text-sm">
-                      Đang đồng bộ dữ liệu phản hồi từ các đơn vị...
-                   </div>
+                  {isLoadingResponses ? (
+                    <div className="p-12 text-center text-muted-foreground animate-pulse">Đang tải phản hồi...</div>
+                  ) : responses?.length === 0 ? (
+                    <div className="p-12 text-center text-muted-foreground italic text-sm">
+                      Chưa có đơn vị nào phản hồi.
+                    </div>
+                  ) : (
+                    <div className="divide-y">
+                      {responses.map((res: any) => (
+                        <div key={res.id} className="p-5 hover:bg-muted/5 transition-colors">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <p className="font-bold text-foreground">{res.unitName || `Đơn vị ID: ${res.unitId}`}</p>
+                              {res.respondedAt && (
+                                <p className="text-[10px] text-muted-foreground">Phản hồi lúc: {new Date(res.respondedAt).toLocaleString('vi-VN')}</p>
+                              )}
+                            </div>
+                            <Badge className={res.status === 'RESPONDED' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}>
+                              {res.status === 'RESPONDED' ? 'Đã phản hồi' : 'Đang chờ'}
+                            </Badge>
+                          </div>
+                          {res.content && (
+                            <div className="bg-muted/30 p-3 rounded-lg text-sm italic text-muted-foreground border mt-2">
+                              "{res.content}"
+                            </div>
+                          )}
+                          {res.fileId && (
+                            <Button variant="link" size="sm" className="h-auto p-0 mt-2 text-primary font-bold">
+                              <Download className="h-3 w-3 mr-1" /> Tải tệp đính kèm
+                            </Button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
