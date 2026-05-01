@@ -3,6 +3,8 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { WorkflowService } from './workflow.service';
 
+const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
+
 @Module({
   imports: [
     ClientsModule.register([
@@ -11,8 +13,15 @@ import { WorkflowService } from './workflow.service';
         transport: Transport.GRPC,
         options: {
           package: 'workflow',
-          protoPath: join(process.cwd(), '..', '..', 'shared', 'protos', 'workflow', 'workflow.proto'),
+          protoPath: join(protoRoot, 'workflow', 'workflow.proto'),
           url: process.env.WORKFLOW_SERVICE_URL || 'localhost:50060',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [protoRoot],
+          },
         },
       },
     ]),
@@ -20,4 +29,4 @@ import { WorkflowService } from './workflow.service';
   providers: [WorkflowService],
   exports: [WorkflowService],
 })
-export class WorkflowModule {}
+export class WorkflowModule { }
