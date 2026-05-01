@@ -16,13 +16,14 @@ export class WorkflowGrpcController {
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
   async createWorkflow(data: any) {
     try {
-      return await this.prisma.workflow.create({
+      const workflow = await this.prisma.workflow.create({
         data: {
           name: data.name,
           description: data.description,
           definition: data.definition || { nodes: [], edges: [] },
         },
       });
+      return this.mapWorkflow(workflow);
     } catch (e) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -31,7 +32,7 @@ export class WorkflowGrpcController {
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
   async updateWorkflow(data: any) {
     try {
-      return await this.prisma.workflow.update({
+      const workflow = await this.prisma.workflow.update({
         where: { id: data.id },
         data: {
           name: data.name,
@@ -39,6 +40,7 @@ export class WorkflowGrpcController {
           definition: data.definition,
         },
       });
+      return this.mapWorkflow(workflow);
     } catch (e) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -50,20 +52,25 @@ export class WorkflowGrpcController {
     if (!workflow) {
       throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Workflow not found' });
     }
-    return workflow;
+    return this.mapWorkflow(workflow);
   }
 
   @GrpcMethod('WorkflowService', 'ListWorkflows')
   async listWorkflows(data: { skip?: number; take?: number }) {
     const skip = data.skip || 0;
     const take = data.take || 10;
-    const [items, total] = await Promise.all([
-      this.prisma.workflow.findMany({ skip, take, orderBy: { createdAt: 'desc' } }),
+    const [workflows, total] = await Promise.all([
+      this.prisma.workflow.findMany({
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' }
+      }),
       this.prisma.workflow.count(),
     ]);
+
     return {
-      data: items,
-      meta: { total, skip, take },
+      items: workflows.map(w => this.mapWorkflow(w)),
+      total,
     };
   }
 
@@ -73,16 +80,57 @@ export class WorkflowGrpcController {
     return { success: true };
   }
 
+  // --- Helpers ---
+
+  private mapWorkflow(w: any) {
+    return {
+      id: w.id,
+      name: w.name,
+      description: w.description || '',
+      definition: w.definition || { nodes: [], edges: [] },
+      created_at: w.createdAt?.toISOString() || new Date().toISOString(),
+      updated_at: w.updatedAt?.toISOString() || new Date().toISOString(),
+    };
+  }
+
+  private mapInstance(inst: any) {
+    return {
+      id: inst.id,
+      workflow_id: inst.workflowId,
+      status: inst.status,
+      current_node_id: inst.currentNodeId || '',
+      context: inst.context || {},
+      created_at: inst.createdAt?.toISOString() || new Date().toISOString(),
+      updated_at: inst.updatedAt?.toISOString() || new Date().toISOString(),
+      workflow_name: inst.workflow?.name || inst.workflowName || '',
+      logs: (inst.logs || []).map(l => this.mapLog(l)),
+    };
+  }
+
+  private mapLog(l: any) {
+    return {
+      id: l.id,
+      node_id: l.nodeId || '',
+      node_type: l.nodeType || '',
+      node_label: l.nodeLabel || '',
+      action: l.action || '',
+      data: l.data || {},
+      error: l.error || '',
+      created_at: l.createdAt?.toISOString() || new Date().toISOString(),
+    };
+  }
+
   // --- Execution Engine ---
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
   async startWorkflow(data: any) {
     try {
-      return await this.engine.startWorkflow(
+      const result = await this.engine.startWorkflow(
         data.workflowId || data.workflow_id,
         data.initialContext || data.initial_context || {},
         data.initiatorId || data.initiator_id,
       );
+      return this.mapInstance(result);
     } catch (e) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -99,7 +147,7 @@ export class WorkflowGrpcController {
       if (!instance) {
         return { id: '', status: 'NOT_FOUND' };
       }
-      return instance;
+      return this.mapInstance(instance);
     } catch (e) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -108,12 +156,13 @@ export class WorkflowGrpcController {
   @GrpcMethod('WorkflowService', 'ResumeWorkflow')
   async resumeWorkflow(data: any) {
     try {
-      return await this.engine.resumeWorkflow(
+      const result = await this.engine.resumeWorkflow(
         data.instanceId || data.instance_id,
         data.nodeId || data.node_id,
         data.actionData || data.action_data || {},
         data.userRoles || data.user_roles || [],
       );
+      return this.mapInstance(result);
     } catch (e) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
@@ -128,10 +177,7 @@ export class WorkflowGrpcController {
     if (!instance) {
       throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
     }
-    return {
-      ...instance,
-      workflowName: instance.workflow.name,
-    };
+    return this.mapInstance(instance);
   }
 
   @GrpcMethod('WorkflowService', 'GetLogs')
@@ -140,6 +186,6 @@ export class WorkflowGrpcController {
       where: { instanceId: data.instanceId || data.instance_id },
       orderBy: { createdAt: 'desc' },
     });
-    return { data: logs };
+    return { logs: logs.map(l => this.mapLog(l)) };
   }
 }

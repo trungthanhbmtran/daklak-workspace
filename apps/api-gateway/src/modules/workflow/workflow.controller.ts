@@ -40,16 +40,7 @@ export class WorkflowController implements OnModuleInit {
   async list(@Query() query: any) {
     const skip = parseInt(query.skip) || 0;
     const take = parseInt(query.take) || 20;
-    const response = await firstValueFrom(this.workflowService.ListWorkflows({ skip, take })) as any;
-
-    return {
-      data: response.items || [],
-      meta: {
-        total: response.total || 0,
-        skip,
-        take,
-      }
-    };
+    return firstValueFrom(this.workflowService.ListWorkflows({ skip, take }));
   }
 
   @Get(':id')
