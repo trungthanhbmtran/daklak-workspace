@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  Search, Plus, Filter, MessageSquareShare, 
-  Clock, CheckCircle2, Eye, AlertCircle, FileEdit, 
+import {
+  Search, Plus, Filter, MessageSquareShare,
+  Clock, CheckCircle2, Eye, AlertCircle, FileEdit,
   Building2, ChevronRight
 } from "lucide-react";
 import Link from "next/link"; // Dùng để navigate vào trang chi tiết
@@ -17,6 +17,7 @@ import { Progress } from "@/components/ui/progress";
 
 // Import Modal Khởi tạo luồng (Giả định bạn đã lưu component này ở thư mục features)
 import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
+import { useDocuments } from "@/features/document/hooks/useDocuments";
 
 export default function ConsultationManagePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +34,7 @@ export default function ConsultationManagePage() {
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
-      
+
       {/* 1. HEADER */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -54,14 +55,14 @@ export default function ConsultationManagePage() {
         <div className="p-4 border-b bg-background flex flex-wrap gap-3 items-center rounded-t-xl">
           <div className="relative flex-1 min-w-[280px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm theo tên dự thảo..." 
-              className="pl-9 h-10 bg-muted/20" 
+            <Input
+              placeholder="Tìm theo tên dự thảo..."
+              className="pl-9 h-10 bg-muted/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          
+
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px] font-medium h-10">
               <SelectValue placeholder="Trạng thái" />
@@ -99,7 +100,7 @@ export default function ConsultationManagePage() {
               <tbody className="divide-y divide-border/50 bg-background">
                 {consultations.map((item: any) => {
                   const progressPercent = item.totalUnits > 0 ? Math.round((item.totalResponses / item.totalUnits) * 100) : 0;
-                  
+
                   return (
                     <tr key={item.id} className="hover:bg-muted/20 transition-colors group">
                       <td className="px-5 py-4">
@@ -110,7 +111,7 @@ export default function ConsultationManagePage() {
                           <FileEdit className="h-3 w-3" /> Ngày phát hành: {new Date(item.createdAt).toLocaleDateString('vi-VN')}
                         </span>
                       </td>
-                      
+
                       <td className="px-5 py-4">
                         <div className="flex flex-col gap-1">
                           <span className="font-mono font-medium text-[13px]">{new Date(item.deadline).toLocaleDateString('vi-VN')}</span>
@@ -130,22 +131,22 @@ export default function ConsultationManagePage() {
                             </span>
                             <span className="font-bold text-primary">{progressPercent}%</span>
                           </div>
-                          <Progress 
-                            value={progressPercent} 
+                          <Progress
+                            value={progressPercent}
                             className="h-2"
                           />
                         </div>
                       </td>
-                      
+
                       <td className="px-5 py-4 text-center">
                         {item.status === "OPEN" ? (
-                           <Badge className="bg-blue-100 hover:bg-blue-200 text-blue-700 shadow-none border-blue-200">
-                             <Clock className="h-3 w-3 mr-1" /> Đang lấy ý kiến
-                           </Badge>
+                          <Badge className="bg-blue-100 hover:bg-blue-200 text-blue-700 shadow-none border-blue-200">
+                            <Clock className="h-3 w-3 mr-1" /> Đang lấy ý kiến
+                          </Badge>
                         ) : (
-                           <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 shadow-none">
-                             <CheckCircle2 className="h-3 w-3 mr-1" /> Đã kết thúc
-                           </Badge>
+                          <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-300 shadow-none">
+                            <CheckCircle2 className="h-3 w-3 mr-1" /> Đã kết thúc
+                          </Badge>
                         )}
                       </td>
 
@@ -166,9 +167,9 @@ export default function ConsultationManagePage() {
       </Card>
 
       {/* Gọi Modal Khởi tạo luồng lấy ý kiến */}
-      <ConsultationCreateModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+      <ConsultationCreateModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
       />
     </div>
   );
