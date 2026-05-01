@@ -178,9 +178,14 @@ export default function TransparencyPage() {
                   <td className="px-6 py-5">
                     <Badge className={`shadow-none font-bold text-[10px] ${report.transparencyCategory === 'ESTIMATE' ? 'bg-blue-100 text-blue-700' :
                       report.transparencyCategory === 'SETTLEMENT' ? 'bg-emerald-100 text-emerald-700' :
+                      report.transparencyCategory === 'EXECUTION' ? 'bg-amber-100 text-amber-700' :
+                      report.transparencyCategory === 'GENERAL' ? 'bg-indigo-100 text-indigo-700' :
                         'bg-slate-100 text-slate-700'
                       }`}>
-                      {report.transparencyCategory === 'ESTIMATE' ? 'Dự toán' : report.transparencyCategory === 'SETTLEMENT' ? 'Quyết toán' : 'Thực hiện'}
+                      {report.transparencyCategory === 'ESTIMATE' ? 'Dự toán' : 
+                       report.transparencyCategory === 'SETTLEMENT' ? 'Quyết toán' : 
+                       report.transparencyCategory === 'EXECUTION' ? 'Thực hiện' :
+                       report.transparencyCategory === 'GENERAL' ? 'Thông tin chung' : 'Khác'}
                     </Badge>
                   </td>
                   <td className="px-6 py-5">

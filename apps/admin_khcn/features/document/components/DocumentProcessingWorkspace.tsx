@@ -182,33 +182,43 @@ export default function DocumentProcessingWorkspace({ document }: { document?: a
                 </div>
                 
                 {isPublic && (
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-emerald-100">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-emerald-700">LOẠI CÔNG KHAI:</label>
-                      <Select value={transCategory} onValueChange={setTransCategory}>
-                        <SelectTrigger className="h-8 text-[11px] bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="GENERAL">Chung</SelectItem>
-                          <SelectItem value="ESTIMATE">Dự toán</SelectItem>
-                          <SelectItem value="SETTLEMENT">Quyết toán</SelectItem>
-                          <SelectItem value="EXECUTION">Thực hiện</SelectItem>
-                        </SelectContent>
-                      </Select>
+                  <div className="space-y-2 pt-2 border-t border-emerald-100">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-emerald-700">LOẠI CÔNG KHAI:</label>
+                        <Select value={transCategory} onValueChange={setTransCategory}>
+                          <SelectTrigger className="h-8 text-[11px] bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="GENERAL">Chung</SelectItem>
+                            <SelectItem value="ESTIMATE">Dự toán</SelectItem>
+                            <SelectItem value="SETTLEMENT">Quyết toán</SelectItem>
+                            <SelectItem value="EXECUTION">Thực hiện</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-bold text-emerald-700">NĂM:</label>
+                        <Select value={fiscalYear} onValueChange={setFiscalYear}>
+                          <SelectTrigger className="h-8 text-[11px] bg-background">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="2026">2026</SelectItem>
+                            <SelectItem value="2025">2025</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-bold text-emerald-700">NĂM:</label>
-                      <Select value={fiscalYear} onValueChange={setFiscalYear}>
-                        <SelectTrigger className="h-8 text-[11px] bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="2026">2026</SelectItem>
-                          <SelectItem value="2025">2025</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full h-7 text-[10px] font-bold text-emerald-700 hover:bg-emerald-100/50 border border-emerald-100 border-dashed"
+                      onClick={() => handleAction(document.status, 'Cập nhật công khai')}
+                      disabled={isSaving}
+                    >
+                      CẬP NHẬT THIẾT LẬP CÔNG KHAI
+                    </Button>
                   </div>
                 )}
               </div>
