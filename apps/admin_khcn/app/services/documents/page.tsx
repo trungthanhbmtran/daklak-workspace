@@ -29,24 +29,42 @@ export default function DocumentDashboardPage() {
     status: 'PROCESSING',
   });
 
-  const summaryStats = useMemo(() => stats || {
-    incomingTotal: 0,
-    incomingPending: 0,
-    incomingLate: 0,
-    outgoingTotal: 0,
-    urgentTotal: 0,
+  const summaryStats = useMemo(() => {
+    const s = stats || {};
+    return {
+      incomingTotal: s.incomingTotal || 0,
+      incomingPending: s.incomingPending || 0,
+      incomingLate: s.incomingLate || 0,
+      outgoingTotal: s.outgoingTotal || 0,
+      urgentTotal: s.urgentTotal || 0,
+    };
   }, [stats]);
 
   const myPendingTasks = useMemo(() => {
-    const data = pendingTasksData;
-    if (!data) return [];
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.data)) return data.data;
-    if (data.data && Array.isArray(data.data.data)) return data.data.data;
-    return [];
+    if (!pendingTasksData) return [];
+    const raw = pendingTasksData.data || pendingTasksData;
+    const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+    return list.filter((t: any) => t && typeof t === 'object');
   }, [pendingTasksData]);
 
-  if (!mounted) return null;
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "Không có";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "Không có";
+      return date.toLocaleDateString('vi-VN');
+    } catch (e) {
+      return "Không có";
+    }
+  };
+
+  if (!mounted) {
+    return (
+      <div className="p-6 space-y-6 bg-muted/5 min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -184,7 +202,7 @@ export default function DocumentDashboardPage() {
                         <div className="text-left sm:text-right">
                           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-0.5">Hạn xử lý</p>
                           <p className="text-sm font-bold text-amber-600 flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5" /> {task.processingDeadline ? new Date(task.processingDeadline).toLocaleDateString('vi-VN') : 'Không có'}
+                            <Calendar className="h-3.5 w-3.5" /> {formatDate(task.processingDeadline)}
                           </p>
                         </div>
                         <Link href={`/services/documents/processing/${task.id}`} className="w-full sm:w-auto">

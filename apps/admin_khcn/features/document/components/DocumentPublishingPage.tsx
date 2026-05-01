@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 
 export default function DocumentPublishingPage() {
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   
@@ -26,7 +27,12 @@ export default function DocumentPublishingPage() {
   const [transCategory, setTransCategory] = useState("EXECUTION");
   const [fiscalYear, setFiscalYear] = useState("2026");
   const [effectiveStatus, setEffectiveStatus] = useState("VALID");
-  const [effectiveDate, setEffectiveDate] = useState(new Date().toISOString().split('T')[0]);
+  const [effectiveDate, setEffectiveDate] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+    setEffectiveDate(new Date().toISOString().split('T')[0]);
+  }, []);
 
   const { useListDocuments, updateDocument, isLoading: isUpdating } = useDocuments();
   
@@ -38,8 +44,9 @@ export default function DocumentPublishingPage() {
 
   const docs = useMemo(() => {
     if (!searchResults) return [];
-    const raw = (searchResults as any)?.data?.data ?? (searchResults as any)?.data ?? searchResults;
-    return Array.isArray(raw) ? raw : [];
+    const raw = searchResults.data || searchResults;
+    const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+    return list.filter((d: any) => d && typeof d === 'object');
   }, [searchResults]);
 
   // Sync state when a document is selected
@@ -52,6 +59,25 @@ export default function DocumentPublishingPage() {
       setEffectiveDate(selectedDoc.issueDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
     }
   }, [selectedDoc]);
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "---";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "---";
+      return date.toLocaleDateString('vi-VN');
+    } catch (e) {
+      return "---";
+    }
+  };
+
+  if (!mounted) {
+    return (
+      <div className="p-6 space-y-6 bg-muted/5 min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const handlePublish = async () => {
     if (!selectedDoc) {
@@ -144,7 +170,7 @@ export default function DocumentPublishingPage() {
                               <p className="text-xs text-foreground font-medium line-clamp-1 mt-0.5">{doc.abstract}</p>
                               <div className="flex items-center gap-3 mt-1">
                                 <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Building2 className="h-3 w-3" /> {doc.issuerName}</span>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> {new Date(doc.issueDate).toLocaleDateString('vi-VN')}</span>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(doc.issueDate)}</span>
                               </div>
                             </div>
                             <ArrowRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />

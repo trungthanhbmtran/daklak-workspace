@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Search, Filter, Eye, Download, Calendar,
   Building2, PieChart, ShieldCheck, FileText,
@@ -17,9 +17,14 @@ import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export default function TransparencyPage() {
+  const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [fiscalYear, setFiscalYear] = useState("2026");
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const { useDocumentStats, useListDocuments } = useDocuments();
   const { data: stats } = useDocumentStats();
@@ -31,16 +36,34 @@ export default function TransparencyPage() {
 
   const reports = useMemo(() => {
     if (!reportsData) return [];
-    if (Array.isArray(reportsData)) return reportsData;
-    if (Array.isArray(reportsData.data)) return reportsData.data;
-    if (reportsData.data && Array.isArray(reportsData.data.data)) return reportsData.data.data;
-    return [];
+    const raw = reportsData.data || reportsData;
+    const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+    return list.filter((r: any) => r && typeof r === 'object');
   }, [reportsData]);
+
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return "---";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return "---";
+      return date.toLocaleDateString('vi-VN');
+    } catch (e) {
+      return "---";
+    }
+  };
 
   // Giả định stats trả về object { incomingTotal, incomingPending, incomingLate, outgoingTotal, urgentTotal }
   // Cho trang công khai, ta có thể tạm dùng outgoingTotal như tổng số văn bản đi/báo cáo
   const totalReports = (stats?.outgoingTotal || 0) + (stats?.incomingTotal || 0);
   const publicCount = reports.length;
+
+  if (!mounted) {
+    return (
+      <div className="p-6 space-y-6 bg-muted/5 min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">
@@ -190,7 +213,7 @@ export default function TransparencyPage() {
                   </td>
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-foreground font-medium">{report.createdAt ? new Date(report.createdAt).toLocaleDateString('vi-VN') : '---'}</span>
+                      <span className="text-foreground font-medium">{formatDate(report.createdAt)}</span>
                       {report.status === 'DRAFT' && <span className="text-[10px] text-amber-600 font-bold uppercase tracking-tighter">Đang soạn thảo</span>}
                     </div>
                   </td>
