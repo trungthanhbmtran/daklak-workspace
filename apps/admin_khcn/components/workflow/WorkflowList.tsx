@@ -75,7 +75,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   );
 
   return (
-    <div className="p-6 space-y-6 bg-background min-h-screen">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Quản lý Quy trình</h1>

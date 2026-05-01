@@ -199,6 +199,38 @@ export function useDocuments() {
     },
   });
 
+  const createCategoryMutation = useMutation({
+    mutationFn: async (data: any) => apiClient.post(`${API_BASE}/categories`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
+      toast.success('Đã tạo danh mục mới!');
+    },
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: async ({ id, ...data }: any) => apiClient.put(`${API_BASE}/categories/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
+      toast.success('Đã cập nhật danh mục!');
+    },
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: async (id: string) => apiClient.delete(`${API_BASE}/categories/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
+      toast.success('Đã xóa danh mục!');
+    },
+  });
+
+  const createMinutesMutation = useMutation({
+    mutationFn: async (data: any) => apiClient.post(`${API_BASE}/minutes`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['document-minutes'] });
+      toast.success('Đã lưu biên bản cuộc họp!');
+    },
+  });
+
   return {
     useCategories,
     useListDocuments,
@@ -217,6 +249,10 @@ export function useDocuments() {
     extractMetadata: extractMetadataMutation.mutateAsync,
     syncOnline: syncOnlineMutation.mutateAsync,
     moderateComment: moderateCommentMutation.mutateAsync,
+    createCategory: createCategoryMutation.mutateAsync,
+    updateCategory: updateCategoryMutation.mutateAsync,
+    deleteCategory: deleteCategoryMutation.mutateAsync,
+    createMinutes: createMinutesMutation.mutateAsync,
     isLoading:
       createDocumentMutation.isPending ||
       createConsultationMutation.isPending ||
@@ -224,7 +260,11 @@ export function useDocuments() {
       deleteDocumentMutation.isPending ||
       extractMetadataMutation.isPending ||
       syncOnlineMutation.isPending ||
-      moderateCommentMutation.isPending,
+      moderateCommentMutation.isPending ||
+      createCategoryMutation.isPending ||
+      updateCategoryMutation.isPending ||
+      deleteCategoryMutation.isPending ||
+      createMinutesMutation.isPending,
   };
 }
 

@@ -9,7 +9,7 @@ export class WorkflowGrpcController {
   constructor(
     private readonly engine: WorkflowEngineService,
     private readonly prisma: PrismaService,
-  ) {}
+  ) { }
 
   // --- CRUD Operations ---
 

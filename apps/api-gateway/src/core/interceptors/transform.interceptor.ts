@@ -6,26 +6,53 @@ export class TransformInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler) {
     return next.handle().pipe(
       map(response => {
-        // Nếu đã có cấu trúc data hoặc success từ microservice, chỉ cần bổ sung các field thiếu
-        if (
-          response &&
-          typeof response === 'object' &&
-          !Array.isArray(response) &&
-          ('data' in response || 'success' in response || 'meta' in response)
-        ) {
+        // Nếu response null hoặc undefined
+        if (response === null || response === undefined) {
           return {
             success: true,
             data: null,
             meta: null,
+            timestamp: new Date().toISOString(),
+          };
+        }
+
+        // Trường hợp response đã có cấu trúc chuẩn { success, data, meta }
+        if (
+          typeof response === 'object' &&
+          !Array.isArray(response) &&
+          ('success' in response || 'data' in response || 'meta' in response)
+        ) {
+          return {
+            success: response.success ?? true,
+            data: response.data ?? null,
+            meta: response.meta ?? null,
             ...response,
             timestamp: new Date().toISOString(),
           };
         }
 
-        // Trường hợp mảng hoặc object đơn lẻ (chưa bọc), bọc vào data
+        // Trường hợp response trả về dạng { items, total } (phổ biến từ gRPC list)
+        if (
+          typeof response === 'object' &&
+          !Array.isArray(response) &&
+          'items' in response &&
+          'total' in response
+        ) {
+          return {
+            success: true,
+            data: response.items,
+            meta: {
+              total: response.total,
+              ...(response.meta || {}),
+            },
+            timestamp: new Date().toISOString(),
+          };
+        }
+
+        // Trường hợp mảng hoặc object đơn lẻ, bọc vào data
         return {
           success: true,
-          data: response ?? null,
+          data: response,
           meta: null,
           timestamp: new Date().toISOString(),
         };

@@ -22,7 +22,7 @@ export default function PublicFeedbacksPage() {
   const { data: comments, isLoading } = usePublicComments(undefined, filterStatus);
   const { moderateComment, isLoading: isActionLoading } = useDocuments();
 
-  const handleModerate = async (id: string, status: 'APPROVED' | 'REJECTED') => {
+  const handleModerate = async (id: string, status: 'APPROVED' | 'REJECTED' | 'PENDING') => {
     try {
       await moderateComment({ id, status });
     } catch (error) {
