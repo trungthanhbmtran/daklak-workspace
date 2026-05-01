@@ -363,7 +363,12 @@ export class UsersService {
       orderBy: { id: 'asc' },
     });
     return {
-      items: users.map((u) => this.toUserResponse(u)),
+      data: users.map((u) => this.toUserResponse(u)),
+      meta: {
+        total: await this.prisma.user.count(),
+        skip,
+        take,
+      },
     };
   }
 

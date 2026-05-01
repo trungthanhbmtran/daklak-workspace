@@ -61,7 +61,10 @@ export class WorkflowGrpcController {
       this.prisma.workflow.findMany({ skip, take, orderBy: { createdAt: 'desc' } }),
       this.prisma.workflow.count(),
     ]);
-    return { items, total };
+    return {
+      data: items,
+      meta: { total, skip, take },
+    };
   }
 
   @GrpcMethod('WorkflowService', 'DeleteWorkflow')
@@ -120,6 +123,6 @@ export class WorkflowGrpcController {
       where: { instanceId: data.instanceId || data.instance_id },
       orderBy: { createdAt: 'desc' },
     });
-    return { logs };
+    return { data: logs };
   }
 }

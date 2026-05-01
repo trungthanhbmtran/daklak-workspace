@@ -30,45 +30,21 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
 }
 
 /**
- * Lấy mảng data từ response gateway.
- * Gateway: TransformInterceptor → body = { success: true, data: <controller result>, timestamp }.
- * Controller HRM trả về { success, message, data: [...], meta } từ gRPC.
- * → res = { success: true, data: { success, message, data: array, meta }, timestamp } (axios đã trả response.data).
+ * Lấy mảng data từ response gateway chuẩn hóa { success, data, meta }.
  */
-function unwrapData(res: unknown): unknown[] {
-  if (res == null) return [];
-  const o = res as Record<string, unknown>;
-  // Trường hợp 1: res.data là mảng (một số proxy trả thẳng)
-  const first = o.data;
-  if (Array.isArray(first)) return first;
-  // Trường hợp 2: res.data là object có .data (chuẩn gateway + hrm)
-  if (first && typeof first === "object") {
-    const inner = first as Record<string, unknown>;
-    const arr = inner.data ?? inner.items ?? inner.list;
-    if (Array.isArray(arr)) return arr;
-  }
-  // Trường hợp 3: res.result.data (một số format khác)
-  const result = o.result as Record<string, unknown> | undefined;
-  if (result && typeof result === "object") {
-    const arr = (result as Record<string, unknown>).data ?? (result as Record<string, unknown>).items;
-    if (Array.isArray(arr)) return arr;
-  }
+function unwrapData(res: any): any[] {
+  if (!res) return [];
+  // Nếu microservice trả { data: [...], meta }, gateway sẽ giữ nguyên bọc ngoài success: true
+  // Axios trả res = { success: true, data: [...], meta }
+  if (Array.isArray(res.data)) return res.data;
+  // Fallback nếu data là object chứa data (trường hợp hiếm)
+  if (res.data?.data && Array.isArray(res.data.data)) return res.data.data;
   return [];
 }
 
-/** Lấy meta từ response gateway (cùng cấu trúc với unwrapData). */
-function unwrapMeta(res: unknown): HrmEmployeesListResponse["meta"] {
-  if (res == null) return undefined;
-  const o = res as Record<string, unknown>;
-  const first = o.data;
-  if (first && typeof first === "object") {
-    const inner = first as Record<string, unknown>;
-    const meta = inner.meta;
-    if (meta && typeof meta === "object") return meta as HrmEmployeesListResponse["meta"];
-  }
-  const result = o.result as Record<string, unknown> | undefined;
-  if (result?.meta && typeof result.meta === "object") return result.meta as HrmEmployeesListResponse["meta"];
-  return undefined;
+/** Lấy meta từ response gateway chuẩn hóa. */
+function unwrapMeta(res: any): HrmEmployeesListResponse["meta"] {
+  return res?.meta || res?.data?.meta;
 }
 
 export const hrmApi = {
@@ -106,10 +82,8 @@ export const hrmApi = {
    * Chi tiết một nhân viên (GET /hrm/employees/:id).
    */
   getOne(id: number): Promise<HrmEmployee | null> {
-    return apiClient.get(`${HRM_EMPLOYEES_PATH}/${id}`).then((res: unknown) => {
-      const outer = res as { data?: unknown };
-      const inner = outer?.data;
-      const d = inner && typeof inner === "object" && "data" in (inner as object) ? (inner as { data?: unknown }).data : inner;
+    return apiClient.get(`${HRM_EMPLOYEES_PATH}/${id}`).then((res: any) => {
+      const d = res?.data;
       if (!d || typeof d !== "object") return null;
       return parseEmployeeRow(d as Record<string, unknown>);
     });
@@ -118,30 +92,12 @@ export const hrmApi = {
   /**
    * Tạo nhân viên mới (POST /hrm/employees).
    */
-  create(payload: {
-    firstname: string;
-    lastname: string;
-    employeeCode?: string;
-    email?: string;
-    phone?: string;
-    identityCard?: string;
-    departmentId: number;
-    jobTitleId: number;
-    startDate?: string;
-    gender?: string;
-    birthday?: string;
-    address?: string;
-    avatar?: string;
-    status?: string;
-  }): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
-    return apiClient.post(HRM_EMPLOYEES_PATH, payload).then((res: unknown) => {
-      const outer = res as { data?: unknown };
-      const inner = outer?.data;
-      const data = inner && typeof inner === "object" && "data" in (inner as object) ? (inner as { data?: unknown }).data : inner;
+  create(payload: any): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
+    return apiClient.post(HRM_EMPLOYEES_PATH, payload).then((res: any) => {
       return {
-        success: true,
-        message: (inner as { message?: string })?.message,
-        data: data && typeof data === "object" ? parseEmployeeRow(data as Record<string, unknown>) : undefined,
+        success: res?.success ?? true,
+        message: res?.message,
+        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
       };
     });
   },

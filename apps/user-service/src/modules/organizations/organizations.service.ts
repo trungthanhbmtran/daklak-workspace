@@ -146,7 +146,7 @@ export class OrganizationsService {
       orderBy: { hierarchyPath: 'asc' },
       include: { type: true, unitDomains: { include: { domain: true } } },
     });
-    return buildTree(units, null);
+    return { data: buildTree(units, null) };
   }
 
   // Lấy cây con của 1 đơn vị (Dùng Materialized Path)
@@ -166,7 +166,7 @@ export class OrganizationsService {
       include: { type: true, unitDomains: { include: { domain: true } } },
     });
 
-    return buildTree(units, root.parentId);
+    return { data: buildTree(units, root.parentId) };
   }
 
   // --- 2. QUẢN LÝ ĐỊNH BIÊN (STAFFING) ---
@@ -188,7 +188,7 @@ export class OrganizationsService {
 
   // Xem báo cáo thừa thiếu nhân sự (kèm phân công từng vị trí / từng phó)
   async getStaffingReport(unitId: number) {
-    return this.prisma.organizationStaffing.findMany({
+    const items = await this.prisma.organizationStaffing.findMany({
       where: { unitId },
       include: {
         jobTitle: {
@@ -208,6 +208,7 @@ export class OrganizationsService {
         },
       },
     });
+    return { data: items };
   }
 
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
@@ -217,25 +218,30 @@ export class OrganizationsService {
       geographicArea: true,
       monitoredUnits: { include: { unit: true } },
     };
+    let items;
     if (unitId == null) {
-      return this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' }, include });
+      items = await this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' }, include });
+    } else {
+      const unit = await this.prisma.organizationUnit.findUnique({
+        where: { id: unitId },
+        select: { typeId: true },
+      });
+      if (!unit) items = [];
+      else {
+        const typeId = unit.typeId;
+        items = await this.prisma.jobTitle.findMany({
+          orderBy: { code: 'asc' },
+          include,
+          where: {
+            OR: [
+              { applicableUnitTemplates: { none: {} } },
+              { applicableUnitTemplates: { some: { unitTypeId: typeId } } },
+            ],
+          },
+        });
+      }
     }
-    const unit = await this.prisma.organizationUnit.findUnique({
-      where: { id: unitId },
-      select: { typeId: true },
-    });
-    if (!unit) return [];
-    const typeId = unit.typeId;
-    return this.prisma.jobTitle.findMany({
-      orderBy: { code: 'asc' },
-      include,
-      where: {
-        OR: [
-          { applicableUnitTemplates: { none: {} } },
-          { applicableUnitTemplates: { some: { unitTypeId: typeId } } },
-        ],
-      },
-    });
+    return { data: items };
   }
 
   // Cập nhật chức danh: lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý
@@ -326,8 +332,9 @@ export class OrganizationsService {
 
   // --- 3. QUẢN LÝ LOẠI ĐƠN VỊ ---
   async listUnitTypes() {
-    return this.prisma.unitType.findMany({
+    const items = await this.prisma.unitType.findMany({
       orderBy: { level: 'asc' },
     });
+    return { data: items };
   }
 }

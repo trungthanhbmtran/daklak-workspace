@@ -43,9 +43,7 @@ export const organizationApi = {
     apiClient
       .get("/organizations/tree")
       .then((r: any) => {
-        if (Array.isArray(r)) return r.map(normalizeUnitNode);
-        const raw = r?.data?.nodes ?? r?.nodes ?? (Array.isArray(r?.data) ? r.data : null);
-        const list = Array.isArray(raw) ? raw : [];
+        const list = Array.isArray(r?.data) ? r.data : [];
         return list.map(normalizeUnitNode);
       }),
 
@@ -72,7 +70,7 @@ export const organizationApi = {
     apiClient
       .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
       .then((r: any) => ({
-        items: (Array.isArray(r?.items) ? r.items : r?.data?.items ?? []).map(normalizeJobTitleItem),
+        items: (Array.isArray(r?.data) ? r.data : []).map(normalizeJobTitleItem),
       })),
 
   /** Cập nhật chức danh: lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý */
@@ -91,7 +89,7 @@ export const organizationApi = {
     apiClient
       .get(`/organizations/${unitId}/staffing-report`)
       .then((r: any) =>
-        (Array.isArray(r?.items) ? r.items : r?.data?.items ?? []).map(normalizeStaffingReportItem)
+        (Array.isArray(r?.data) ? r.data : []).map(normalizeStaffingReportItem)
       ),
 
   /** Phân công từng vị trí (từng phó): lưu lĩnh vực, nhiệm vụ, khu vực riêng cho slot */

@@ -43,19 +43,18 @@ function normalizeUserDetail(raw: Record<string, unknown>): UserDetail {
   };
 }
 
-/** Gateway TransformInterceptor bọc response: { success, data, timestamp }. Axios trả response.data → res = { data: controllerResult }. */
-function unwrapData<T>(res: unknown): T {
-  const o = res as { data?: T };
-  return (o?.data ?? res) as T;
+/** Gateway TransformInterceptor bọc response: { success, data, meta }. */
+function unwrapData<T>(res: any): T {
+  return (res?.data ?? res) as T;
 }
 
 export const userApi = {
   list: async (): Promise<UserItem[]> => {
     try {
       const res = await apiClient.get("/users");
-      const data = unwrapData<unknown>(res);
-      const arr = Array.isArray(data) ? data : (data as { items?: unknown[] })?.items ?? (data as { data?: unknown[] })?.data ?? [];
-      return (Array.isArray(arr) ? arr : []).map((r) => normalizeUser(r as Record<string, unknown>));
+      const data = unwrapData<any>(res);
+      const arr = Array.isArray(data) ? data : (data?.data ?? []);
+      return arr.map((r: any) => normalizeUser(r as Record<string, unknown>));
     } catch (err: unknown) {
       const status = (err as { response?: { status?: number } })?.response?.status;
       if (status === 406) return [];

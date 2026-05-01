@@ -7,15 +7,19 @@ import { Post, Category, Banner, PostStatus } from "./types";
  * Helper để bóc tách dữ liệu từ Gateway response.
  * Gateway format: { success: true, data: { data: [...], meta: {...} }, timestamp }
  */
+/**
+ * Helper để bóc tách dữ liệu từ Gateway response chuẩn hóa.
+ */
 function unwrapData<T>(res: any): T {
-  if (res?.data && typeof res.data === "object" && "data" in res.data) {
-    return res.data.data as T;
-  }
+  // Chuẩn hóa: Gateway trả về { success: true, data: T, meta: ... }
+  // Axios trả về res = { success: true, data: T, meta: ... }
+  // Nếu T là mảng, res.data chính là mảng đó.
+  // Nếu T là object đơn lẻ, res.data chính là object đó.
   return (res?.data ?? res) as T;
 }
 
 function unwrapMeta(res: any): any {
-  return res?.data?.meta || res?.meta;
+  return res?.meta;
 }
 
 export const postsApi = {

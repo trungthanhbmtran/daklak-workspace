@@ -10,8 +10,8 @@ export interface NotificationItem {
 }
 
 export async function getNotifications(): Promise<NotificationItem[]> {
-  const res = await apiClient.get<unknown>("/notifications");
-  const data = Array.isArray(res) ? res : (res as { data?: unknown[] })?.data ?? [];
+  const res: any = await apiClient.get("/notifications");
+  const data = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
   return (data as NotificationItem[]).map((n) => ({
     id: n.id,
     userId: n.userId,

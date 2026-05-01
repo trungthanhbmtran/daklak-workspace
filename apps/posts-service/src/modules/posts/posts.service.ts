@@ -110,7 +110,15 @@ export class PostsService {
       this.prisma.post.count({ where }),
     ]);
 
-    return { items, total };
+    return {
+      data: items,
+      meta: {
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async update(id: string, data: any) {
