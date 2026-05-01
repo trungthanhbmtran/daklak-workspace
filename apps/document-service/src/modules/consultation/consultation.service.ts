@@ -121,7 +121,14 @@ export class ConsultationService {
 
   private mapResponseToProto(r: any) {
     return {
-      ...r,
+      id: r.id,
+      consultationId: r.consultationId,
+      unitId: r.unitId,
+      unitName: r.unitName ?? "",
+      userId: r.userId ?? "",
+      content: r.content ?? "",
+      fileId: r.fileId ?? "",
+      status: r.status,
       respondedAt: r.respondedAt?.toISOString() || "",
     };
   }
@@ -172,7 +179,14 @@ export class ConsultationService {
 
   private mapPublicCommentToProto(c: any) {
     return {
-      ...c,
+      id: c.id,
+      consultationId: c.consultationId,
+      fullName: c.fullName,
+      email: c.email ?? "",
+      phoneNumber: c.phoneNumber ?? "",
+      content: c.content,
+      status: c.status,
+      moderatedBy: c.moderatedBy ?? "",
       moderatedAt: c.moderatedAt?.toISOString() || "",
       createdAt: c.createdAt.toISOString(),
     };
@@ -181,8 +195,15 @@ export class ConsultationService {
   private mapToProto(item: any) {
     if (!item) return null;
     return {
-      ...item,
+      id: item.id,
+      title: item.title,
+      description: item.description ?? "",
+      documentId: item.documentId ?? "",
       deadline: item.deadline.toISOString(),
+      status: item.status,
+      issuerId: item.issuerId ?? "",
+      issuerName: item.issuerName ?? "",
+      isUrgent: !!item.isUrgent,
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
     };
