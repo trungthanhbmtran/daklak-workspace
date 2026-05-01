@@ -5,7 +5,7 @@ import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
 
   @GrpcMethod('PostService', 'CreatePost')
   async createPost(data: any) {
@@ -27,18 +27,7 @@ export class PostsController {
 
   @GrpcMethod('PostService', 'ListPosts')
   async listPosts(query: any) {
-    const { items, total } = await this.postsService.findAll(query);
-    return {
-      data: items || [],
-      meta: {
-        pagination: {
-          total: total || 0,
-          page: Number(query.page) || 1,
-          pageSize: Number(query.limit) || 10,
-          totalPages: Math.ceil((total || 0) / (Number(query.limit) || 10)),
-        },
-      }
-    };
+    return await this.postsService.findAll(query);
   }
 
   @GrpcMethod('PostService', 'UpdatePost')
@@ -113,7 +102,7 @@ export class PostsController {
   @GrpcMethod('PostService', 'GetPostHistory')
   async getPostHistory(data: { id: string }) {
     const items = await this.postsService.getHistory(data.id);
-    return { items };
+    return { data: items };
   }
 }
 
