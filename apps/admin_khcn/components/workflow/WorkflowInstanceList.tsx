@@ -123,7 +123,7 @@ const WorkflowInstanceList = () => {
                       </Badge>
                     </td>
                     <td className="px-4 py-4 text-xs text-muted-foreground">
-                      {format(new Date(instance.createdAt), "HH:mm dd/MM/yyyy", { locale: vi })}
+                      {instance.createdAt ? format(new Date(instance.createdAt), "HH:mm dd/MM/yyyy", { locale: vi }) : "N/A"}
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import WorkflowEditor from "@/components/workflow/WorkflowEditor";
 import WorkflowList from "@/components/workflow/WorkflowList";
 import WorkflowInstanceList from "@/components/workflow/WorkflowInstanceList";
@@ -9,6 +10,7 @@ import { Layers, Activity, ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function WorkflowPage() {
+  const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [activeTab, setActiveTab] = useState("definitions");
@@ -32,7 +34,7 @@ export default function WorkflowPage() {
       <div className="container mx-auto py-8 px-4 max-w-7xl">
         <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => window.location.href = '/hub'}>
+                <Button variant="ghost" size="icon" className="rounded-xl" onClick={() => router.push('/hub')}>
                     <ChevronLeft className="h-5 w-5" />
                 </Button>
                 <div>

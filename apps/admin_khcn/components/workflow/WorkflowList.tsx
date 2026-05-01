@@ -45,7 +45,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
     setIsLoading(true);
     try {
       const res = await workflowApi.list();
-      setWorkflows(res.data);
+      setWorkflows(Array.isArray(res?.data) ? res.data : []);
     } catch (error) {
       console.error("Failed to load workflows:", error);
       toast.error("Không thể tải danh sách quy trình");
@@ -177,7 +177,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
                 <div className="flex flex-col gap-1">
                     <div className="flex items-center text-[10px] text-muted-foreground font-medium uppercase tracking-tighter">
                         <Calendar className="mr-1 h-3 w-3" />
-                        {format(new Date(workflow.createdAt), "dd MMM yyyy", { locale: vi })}
+                        {workflow.createdAt ? format(new Date(workflow.createdAt), "dd MMM yyyy", { locale: vi }) : "N/A"}
                     </div>
                     <div className="text-[10px] font-mono text-muted-foreground/60 uppercase">
                         v{workflow.version}.0
