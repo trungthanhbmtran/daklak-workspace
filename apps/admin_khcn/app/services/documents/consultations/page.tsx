@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
    Search, Filter, Plus, Clock,
    MessageSquareShare, CheckCircle2,
@@ -24,6 +24,7 @@ import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
 
 export default function ConsultationsPage() {
+   const [mounted, setMounted] = useState(false);
    const [isModalOpen, setIsModalOpen] = useState(false);
    const [searchTerm, setSearchTerm] = useState("");
    const [statusFilter, setStatusFilter] = useState("OPEN");
@@ -35,16 +36,37 @@ export default function ConsultationsPage() {
       search: searchTerm,
    });
 
-   const consultations = useMemo(() => data?.data || [], [data]);
+   // EFFECT: Hydration guard
+   useEffect(() => {
+      setMounted(true);
+   }, []);
+
+   const consultations = useMemo(() => {
+      if (!data) return [];
+      const raw = data.data || data;
+      return Array.isArray(raw) ? raw : [];
+   }, [data]);
 
    const formatDate = (date?: string) => {
       if (!date) return "--";
-      return new Date(date).toLocaleDateString("vi-VN", {
-         day: '2-digit',
-         month: '2-digit',
-         year: 'numeric'
-      });
+      try {
+         return new Date(date).toLocaleDateString("vi-VN", {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+         });
+      } catch (e) {
+         return "--";
+      }
    };
+
+   if (!mounted) {
+      return (
+         <div className="p-6 space-y-8 bg-muted/5 min-h-screen flex items-center justify-center">
+            <div className="h-12 w-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+         </div>
+      );
+   }
 
    return (
       <div className="p-6 space-y-8 bg-muted/5 min-h-screen">
@@ -135,8 +157,12 @@ export default function ConsultationsPage() {
                   <p className="text-muted-foreground mt-2 font-medium">Vui lòng thử lại với bộ lọc khác hoặc tạo mới đợt lấy ý kiến.</p>
                </Card>
             ) : consultations.map((con: any) => {
-               const progress = con.totalUnits > 0 ? Math.round((con.totalResponses / con.totalUnits) * 100) : 0;
-               const isUrgent = con.isUrgent;
+               const totalUnits = Number(con.totalUnits) || 0;
+               const totalResponses = Number(con.totalResponses) || 0;
+               const progress = totalUnits > 0 
+                  ? Math.min(100, Math.round((totalResponses / totalUnits) * 100)) 
+                  : 0;
+               const isUrgent = !!con.isUrgent;
 
                return (
                   <Card key={con.id} className="border-none shadow-2xl shadow-foreground/5 overflow-hidden group hover:shadow-primary/10 transition-all duration-500 rounded-3xl bg-background flex flex-col md:flex-row">
