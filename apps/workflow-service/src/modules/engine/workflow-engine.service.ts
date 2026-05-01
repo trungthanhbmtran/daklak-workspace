@@ -24,7 +24,7 @@ export class WorkflowEngineService implements OnModuleInit {
     private readonly prisma: PrismaService,
     @Inject('USERS_SERVICE') private readonly usersClient: ClientGrpc,
     @Inject('HRM_SERVICE') private readonly hrmClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.userService = this.usersClient.getService<any>('UserService');
@@ -115,12 +115,12 @@ export class WorkflowEngineService implements OnModuleInit {
 
     // Update context with user action data
     const newContext = { ... (instance.context as any), ...actionData };
-    
+
     await this.prisma.workflowInstance.update({
       where: { id: instanceId },
-      data: { 
+      data: {
         context: newContext,
-        status: WorkflowStatus.RUNNING 
+        status: WorkflowStatus.RUNNING
       },
     });
 
@@ -225,13 +225,13 @@ export class WorkflowEngineService implements OnModuleInit {
     // Simple heuristic: if result is boolean (from condition), maybe choice logic?
     // In our simplified UI, we'll assume the first edge is 'true' or 'default'
     // To be more robust, we'd check edge properties like 'label === "True"'
-    
+
     if (typeof result === "boolean") {
-        const labeledEdge = edges.find((e: any) => 
-            (result && e.label?.toLowerCase() === "true") || 
-            (!result && e.label?.toLowerCase() === "false")
-        );
-        if (labeledEdge) nextNodeId = labeledEdge.target;
+      const labeledEdge = edges.find((e: any) =>
+        (result && e.label?.toLowerCase() === "true") ||
+        (!result && e.label?.toLowerCase() === "false")
+      );
+      if (labeledEdge) nextNodeId = labeledEdge.target;
     }
 
     this.executeNode(instanceId, nextNodeId);
