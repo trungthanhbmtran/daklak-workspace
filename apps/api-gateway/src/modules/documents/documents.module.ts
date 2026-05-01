@@ -14,6 +14,6 @@ import { PublicConsultationsController } from './public-consultations.controller
     registerGrpcService(MICROSERVICES.MINUTES),
     registerGrpcService(MICROSERVICES.CONSULTATION),
   ],
-  controllers: [DocumentCategoryController, DocumentsController, MinutesController, ConsultationsController, PublicConsultationsController],
+  controllers: [DocumentCategoryController, MinutesController, ConsultationsController, PublicConsultationsController, DocumentsController],
 })
 export class DocumentsModule { }
