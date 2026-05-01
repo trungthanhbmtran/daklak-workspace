@@ -41,8 +41,8 @@ export class DocumentService {
     });
 
     await this.logRecord(
-      document.id, 
-      document.isIncoming ? "VÀO SỔ VĂN BẢN ĐẾN" : "PHÁT HÀNH VĂN BẢN ĐI", 
+      document.id,
+      document.isIncoming ? "VÀO SỔ VĂN BẢN ĐẾN" : "PHÁT HÀNH VĂN BẢN ĐI",
       "Hệ thống tự động ghi nhận khi tạo mới."
     );
 
@@ -138,8 +138,8 @@ export class DocumentService {
     // Log hành động cập nhật nếu có kèm theo ý kiến xử lý (comment) hoặc thay đổi trạng thái
     if (data.comment || data.status) {
       await this.logRecord(
-        id, 
-        data.status === 'PUBLISHED' ? "KẾT THÚC / LƯU HỒ SƠ" : "XỬ LÝ VĂN BẢN", 
+        id,
+        data.status === 'PUBLISHED' ? "KẾT THÚC / LƯU HỒ SƠ" : "XỬ LÝ VĂN BẢN",
         data.comment || "Cập nhật thông tin văn bản.",
         data.userId,
         data.userName
@@ -200,15 +200,15 @@ export class DocumentService {
       where: { documentId },
       orderBy: { createdAt: 'desc' },
     });
-    
-    return { 
+
+    return {
       data: logs.map(log => ({
         ...log,
         createdAt: log.createdAt?.toISOString() || new Date().toISOString(),
         userId: log.userId || "",
         userName: log.userName || "",
         note: log.note || ""
-      })) 
+      }))
     };
   }
 
@@ -226,7 +226,7 @@ export class DocumentService {
 
   private mapToProto(doc: any) {
     if (!doc) return null;
-    
+
     return {
       id: doc.id,
       documentNumber: doc.documentNumber || "",
