@@ -38,63 +38,72 @@ export interface UpdateUnitPayload {
   scope?: string;
 }
 
+function unwrapData<T>(res: any): T {
+  // Axios interceptor returns response.data which is { success, data, meta }
+  return (res?.data ?? res) as T;
+}
+
 export const organizationApi = {
   getTree: (): Promise<OrganizationUnitNode[]> =>
     apiClient
       .get("/organizations/tree")
       .then((r: any) => {
-        const list = Array.isArray(r?.data) ? r.data : [];
+        const list = Array.isArray(unwrapData<any[]>(r)) ? unwrapData<any[]>(r) : [];
         return list.map(normalizeUnitNode);
       }),
 
   getOne: (id: number) =>
-    apiClient.get(`/organizations/${id}`),
+    apiClient.get(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
   createUnit: (payload: CreateUnitPayload) =>
-    apiClient.post("/organizations", payload),
+    apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),
 
   updateUnit: (id: number, payload: UpdateUnitPayload) =>
-    apiClient.put(`/organizations/${id}`, payload),
+    apiClient.put(`/organizations/${id}`, payload).then(r => unwrapData<any>(r)),
 
   deleteUnit: (id: number) =>
-    apiClient.delete(`/organizations/${id}`),
+    apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
   getUnitTypes: () =>
-    apiClient.get("/organizations/unit-types"),
+    apiClient.get("/organizations/unit-types").then(r => unwrapData<any[]>(r)),
 
   getDomains: () =>
-    apiClient.get("/categories", { params: { group: "DOMAIN" } }),
+    apiClient.get("/categories", { params: { group: "DOMAIN" } }).then(r => unwrapData<any[]>(r)),
 
   /** Danh sách chức danh (unitId: chỉ chức danh áp dụng cho loại đơn vị đó, VD Sở không có Chủ tịch) */
   getJobTitles: (unitId?: number): Promise<{ items: JobTitleItem[] }> =>
     apiClient
       .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
-      .then((r: any) => ({
-        items: (Array.isArray(r?.data) ? r.data : []).map(normalizeJobTitleItem),
-      })),
+      .then((r: any) => {
+        const data = unwrapData<any[]>(r);
+        return {
+          items: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem),
+        };
+      }),
 
   /** Cập nhật chức danh: lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý */
   updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
-    apiClient.put(`/organizations/job-titles/${id}`, payload),
+    apiClient.put(`/organizations/job-titles/${id}`, payload).then(r => unwrapData<any>(r)),
 
   getGeoAreas: () =>
-    apiClient.get("/categories", { params: { group: "GEO_AREA" } }),
+    apiClient.get("/categories", { params: { group: "GEO_AREA" } }).then(r => unwrapData<any[]>(r)),
 
   /** Thiết lập định biên: đơn vị + chức danh + số lượng */
   setStaffing: (payload: SetStaffingPayload) =>
-    apiClient.post("/organizations/staffing", payload),
+    apiClient.post("/organizations/staffing", payload).then(r => unwrapData<any>(r)),
 
   /** Báo cáo định biên của đơn vị (chức danh + số lượng + hiện có + slots từng vị trí) */
   getStaffingReport: (unitId: number): Promise<StaffingReportItem[]> =>
     apiClient
       .get(`/organizations/${unitId}/staffing-report`)
-      .then((r: any) =>
-        (Array.isArray(r?.data) ? r.data : []).map(normalizeStaffingReportItem)
-      ),
+      .then((r: any) => {
+        const data = unwrapData<any[]>(r);
+        return (Array.isArray(data) ? data : []).map(normalizeStaffingReportItem);
+      }),
 
   /** Phân công từng vị trí (từng phó): lưu lĩnh vực, nhiệm vụ, khu vực riêng cho slot */
   setStaffingSlot: (payload: SetStaffingSlotPayload) =>
-    apiClient.post("/organizations/staffing-slots", payload),
+    apiClient.post("/organizations/staffing-slots", payload).then(r => unwrapData<any>(r)),
 };
 
 function normalizeJobTitleItem(j: any): JobTitleItem {

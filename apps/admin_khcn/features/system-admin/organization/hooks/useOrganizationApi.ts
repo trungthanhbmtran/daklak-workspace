@@ -18,10 +18,6 @@ function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
   ]);
 }
 
-function parseCategoryList(res: unknown): { id: number; name: string }[] {
-  return Array.isArray(res) ? res : (res as { data?: { id: number; name: string }[] })?.data ?? [];
-}
-
 export function useOrganizationApi() {
   const queryClient = useQueryClient();
 
@@ -36,16 +32,14 @@ export function useOrganizationApi() {
 
   const { data: unitTypes = [], isLoading: isLoadingTypes } = useQuery({
     queryKey: categoryQueryKeys.unitTypes(),
-    queryFn: async () =>
-      parseCategoryList(await organizationApi.getUnitTypes()),
+    queryFn: () => organizationApi.getUnitTypes(),
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
   });
 
   const { data: domains = [], isLoading: isLoadingDomains } = useQuery({
     queryKey: categoryQueryKeys.domains(),
-    queryFn: async () =>
-      parseCategoryList(await organizationApi.getDomains()),
+    queryFn: () => organizationApi.getDomains(),
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
   });
