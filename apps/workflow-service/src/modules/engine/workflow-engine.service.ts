@@ -66,6 +66,23 @@ export class WorkflowEngineService implements OnModuleInit {
   }
 
   /**
+   * Trigger a workflow by event name
+   */
+  async triggerWorkflow(trigger: string, initialContext: any = {}, initiatorId?: string) {
+    const workflow = await this.prisma.workflow.findFirst({
+      where: { trigger, active: true },
+      orderBy: { version: 'desc' },
+    });
+
+    if (!workflow) {
+      this.logger.debug(`No active workflow found for trigger: ${trigger}`);
+      return null;
+    }
+
+    return this.startWorkflow(workflow.id, initialContext, initiatorId);
+  }
+
+  /**
    * Resume a workflow from a waiting state (User Task)
    */
   /**

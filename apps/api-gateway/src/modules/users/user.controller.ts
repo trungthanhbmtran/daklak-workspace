@@ -25,11 +25,7 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách user' })
   @ApiResponse({ status: 200, description: 'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)' })
   async list() {
-    const res = await firstValueFrom(this.userService.ListUsers({}));
-    const items = Array.isArray((res as { items?: unknown[] })?.items)
-      ? (res as { items: unknown[] }).items
-      : [];
-    return items;
+    return firstValueFrom(this.userService.ListUsers({}));
   }
 
   @Get(':id')

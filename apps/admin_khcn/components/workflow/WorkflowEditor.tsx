@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   ReactFlow,
   addEdge,
@@ -25,28 +25,65 @@ import PropertiesPanel from "./PropertiesPanel";
 import Topbar from "./Topbar";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { cn } from "@/lib/utils";
-import apiClient from "@/lib/axiosInstance";
+import { workflowApi } from "@/features/workflow/api";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const initialNodes: Node[] = [
   {
     id: "node_1",
     type: "start",
     position: { x: 100, y: 100 },
-    data: { label: "Start" },
+    data: { label: "Bắt đầu" },
   },
 ];
 
-const Flow = () => {
+interface WorkflowEditorProps {
+  id?: string;
+  onBack: () => void;
+}
+
+const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [workflowId, setWorkflowId] = useState<string | null>(null);
+  const [workflowId, setWorkflowId] = useState<string | null>(id || null);
+  const [workflowName, setWorkflowName] = useState("Quy trình mới");
+  const [workflowDesc, setWorkflowDesc] = useState("Mô tả quy trình...");
+  const [workflowTrigger, setWorkflowTrigger] = useState("MANUAL");
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!id);
   
   const { apps: availableServices } = useHubServices();
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, setViewport } = useReactFlow();
+
+  useEffect(() => {
+    if (id) {
+      loadWorkflow(id);
+    }
+  }, [id]);
+
+  const loadWorkflow = async (workflowId: string) => {
+    setIsLoading(true);
+    try {
+      const data = await workflowApi.getOne(workflowId);
+      if (data) {
+        setWorkflowName(data.name);
+        setWorkflowDesc(data.description || "");
+        setWorkflowTrigger(data.trigger || "MANUAL");
+        if (data.definition) {
+          setNodes(data.definition.nodes || initialNodes);
+          setEdges(data.definition.edges || []);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to load workflow:", error);
+      toast.error("Không thể tải quy trình");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -113,49 +150,65 @@ const Flow = () => {
   const onSave = useCallback(async () => {
     setIsSaving(true);
     const workflowData = {
-      name: "Quy trình mới", // TODO: Thêm input tên quy trình
-      description: "Được tạo từ Workflow Builder",
+      name: workflowName,
+      description: workflowDesc,
+      trigger: workflowTrigger,
       definition: { nodes, edges },
     };
 
     try {
-      let response: any;
       if (workflowId) {
-        response = await apiClient.put(`/admin/workflow/${workflowId}`, workflowData);
+        await workflowApi.update(workflowId, workflowData);
         toast.success("Đã cập nhật quy trình!");
       } else {
-        response = await apiClient.post("/admin/workflow", workflowData);
+        const response = await workflowApi.create(workflowData);
         setWorkflowId(response.id);
         toast.success("Đã lưu quy trình mới!");
       }
     } catch (error) {
       console.error("Save error:", error);
+      toast.error("Lỗi khi lưu quy trình");
     } finally {
       setIsSaving(false);
     }
-  }, [nodes, edges, workflowId]);
+  }, [nodes, edges, workflowId, workflowName, workflowDesc]);
 
   const onPublish = useCallback(async () => {
     if (!workflowId) {
-      toast.error("Vui lòng lưu bản nháp trước khi xuất bản!");
+      toast.error("Vui lòng lưu bản nháp trước khi chạy thử!");
       return;
     }
     
     try {
-      await apiClient.post(`/admin/workflow/${workflowId}/start`, { 
-        initialContext: { startedAt: new Date().toISOString() } 
-      });
-      toast.success("Đã xuất bản và chạy thử nghiệm quy trình!");
+      await workflowApi.start(workflowId, { startedAt: new Date().toISOString() });
+      toast.success("Đã kích hoạt và chạy thử nghiệm quy trình!");
     } catch (error) {
       console.error("Publish error:", error);
+      toast.error("Lỗi khi kích hoạt quy trình");
     }
   }, [workflowId]);
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || null;
 
+  if (isLoading) {
+    return (
+        <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
+            <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+            <p className="text-muted-foreground animate-pulse">Đang tải cấu hình quy trình...</p>
+        </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-background">
-      <Topbar onSave={onSave} onPublish={onPublish} />
+      <Topbar 
+        onSave={onSave} 
+        onPublish={onPublish} 
+        onBack={onBack}
+        workflowName={workflowName}
+        setWorkflowName={setWorkflowName}
+        isSaving={isSaving}
+      />
       
       <div className="flex flex-1 overflow-hidden relative" ref={reactFlowWrapper}>
         <NodePalette />
@@ -195,7 +248,7 @@ const Flow = () => {
             <Panel position="top-left" className="bg-background/80 backdrop-blur-sm border border-border/40 p-2 rounded-lg shadow-sm">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest px-1">
                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                   Editor Online
+                   {workflowId ? `Editing: ${workflowId.slice(0, 8)}` : "New Workflow"}
                 </div>
             </Panel>
           </ReactFlow>
@@ -207,15 +260,19 @@ const Flow = () => {
           onUpdate={onUpdateNodeData}
           onDelete={onDeleteNode}
           onClose={() => setSelectedNodeId(null)}
+          workflowDesc={workflowDesc}
+          setWorkflowDesc={setWorkflowDesc}
+          workflowTrigger={workflowTrigger}
+          setWorkflowTrigger={setWorkflowTrigger}
         />
       </div>
     </div>
   );
 };
 
-const WorkflowEditor = () => (
+const WorkflowEditor = (props: WorkflowEditorProps) => (
   <ReactFlowProvider>
-    <Flow />
+    <Flow {...props} />
   </ReactFlowProvider>
 );
 

@@ -27,7 +27,7 @@ export class OrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
@@ -62,8 +62,7 @@ export class OrganizationsController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách loại đơn vị (UBND, Sở, Phòng...)' })
   @ApiResponse({ status: 200, description: 'Danh sách loại đơn vị' })
   async getUnitTypes() {
-    const res = await firstValueFrom(this.orgService.ListUnitTypes({}));
-    return (res as any)?.items ?? [];
+    return firstValueFrom(this.orgService.ListUnitTypes({}));
   }
 
   @Get('tree')

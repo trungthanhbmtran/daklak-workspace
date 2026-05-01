@@ -88,6 +88,23 @@ export class WorkflowGrpcController {
     }
   }
 
+  @GrpcMethod('WorkflowService', 'TriggerWorkflow')
+  async triggerWorkflow(data: any) {
+    try {
+      const instance = await this.engine.triggerWorkflow(
+        data.trigger,
+        data.initialContext || data.initial_context || {},
+        data.initiatorId || data.initiator_id,
+      );
+      if (!instance) {
+        return { id: '', status: 'NOT_FOUND' };
+      }
+      return instance;
+    } catch (e) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
   @GrpcMethod('WorkflowService', 'ResumeWorkflow')
   async resumeWorkflow(data: any) {
     try {

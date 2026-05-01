@@ -13,6 +13,7 @@ service WorkflowService {
 
   // Execution Engine
   rpc StartWorkflow (StartWorkflowRequest) returns (WorkflowInstanceResponse);
+  rpc TriggerWorkflow (TriggerWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc ResumeWorkflow (ResumeWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
@@ -64,6 +65,12 @@ message WorkflowResponse {
 
 message StartWorkflowRequest {
   string workflow_id = 1;
+  google.protobuf.Struct initial_context = 2;
+  string initiator_id = 3;
+}
+
+message TriggerWorkflowRequest {
+  string trigger = 1;
   google.protobuf.Struct initial_context = 2;
   string initiator_id = 3;
 }

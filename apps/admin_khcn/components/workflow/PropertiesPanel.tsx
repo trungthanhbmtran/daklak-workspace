@@ -6,10 +6,13 @@ import {
   Trash2, 
   Info,
   Type,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  Activity
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 interface PropertiesPanelProps {
   selectedNode: Node | null;
@@ -17,6 +20,10 @@ interface PropertiesPanelProps {
   onUpdate: (id: string, data: any) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
+  workflowDesc: string;
+  setWorkflowDesc: (desc: string) => void;
+  workflowTrigger: string;
+  setWorkflowTrigger: (trigger: string) => void;
 }
 
 export const PropertiesPanel = ({ 
@@ -24,27 +31,77 @@ export const PropertiesPanel = ({
   availableServices = [],
   onUpdate, 
   onDelete, 
-  onClose 
+  onClose,
+  workflowDesc,
+  setWorkflowDesc,
+  workflowTrigger,
+  setWorkflowTrigger
 }: PropertiesPanelProps) => {
-  if (!selectedNode) return null;
 
-  const { id, type } = selectedNode;
-  const data = (selectedNode.data || {}) as any;
+  const data = selectedNode ? (selectedNode.data || {}) as any : {};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    if (!selectedNode) return;
     const { name, value } = e.target;
-    onUpdate(id, { ...data, [name]: value });
+    onUpdate(selectedNode.id, { ...data, [name]: value });
   };
 
   const renderFields = () => {
+    if (!selectedNode) {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
+                        <Activity className="h-3.5 w-3.5" /> Kích hoạt tự động (Trigger)
+                    </label>
+                    <select
+                        value={workflowTrigger || ""}
+                        onChange={(e) => setWorkflowTrigger(e.target.value)}
+                        className="w-full bg-muted/30 border border-border/40 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                    >
+                        <option value="">Chọn sự kiện kích hoạt...</option>
+                        <option value="MANUAL">Kích hoạt thủ công</option>
+                        <option value="POST_SUBMIT">Khi gửi duyệt bài viết (Posts)</option>
+                        <option value="DOC_RECEIVED">Khi nhận văn bản mới (Documents)</option>
+                        <option value="USER_CREATED">Khi tạo tài khoản mới (Users)</option>
+                    </select>
+                    <p className="text-[10px] text-muted-foreground mt-2 italic">
+                        Quy trình sẽ tự động bắt đầu khi sự kiện này xảy ra.
+                    </p>
+                </div>
+                <div>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
+                        <FileText className="h-3.5 w-3.5" /> Mô tả quy trình
+                    </label>
+                    <Textarea
+                        value={workflowDesc}
+                        onChange={(e) => setWorkflowDesc(e.target.value)}
+                        placeholder="Nhập mô tả cho quy trình này..."
+                        className="min-h-[150px] rounded-xl bg-muted/30 border-border/40 focus-visible:ring-primary/20 resize-none text-sm"
+                    />
+                </div>
+                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                    <h4 className="text-xs font-bold text-primary uppercase mb-2">Hướng dẫn nhanh</h4>
+                    <ul className="text-[11px] text-muted-foreground space-y-2 list-disc pl-4">
+                        <li>Kéo thả các node từ thanh công cụ bên trái.</li>
+                        <li>Kết nối các node để tạo luồng xử lý.</li>
+                        <li>Nhấp vào một node để cấu hình chi tiết.</li>
+                        <li>Đừng quên lưu bản nháp thường xuyên.</li>
+                    </ul>
+                </div>
+            </div>
+        );
+    }
+
+    const { type } = selectedNode;
+
     switch (type) {
       case "user_task":
         return (
-          <>
-            <div className="space-y-4">
+          <div className="space-y-4">
                <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Assignee Role
+                  Vai trò xử lý (PBAC)
                 </label>
                 <select
                   name="role"
@@ -52,35 +109,33 @@ export const PropertiesPanel = ({
                   onChange={handleChange}
                   className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 >
-                  <option value="">Select a role...</option>
-                  <option value="Admin">Administrator</option>
-                  <option value="Manager">Department Manager</option>
-                  <option value="Staff">Specialist Staff</option>
-                  <option value="External">External Expert</option>
+                  <option value="">Chọn vai trò...</option>
+                  <option value="ADMIN">Administrator</option>
+                  <option value="MANAGER">Quản lý phòng ban</option>
+                  <option value="STAFF">Nhân viên nghiệp vụ</option>
+                  <option value="EXPERT">Chuyên gia phản biện</option>
                 </select>
               </div>
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Task Description
+                  Yêu cầu xử lý
                 </label>
                 <textarea
                   name="description"
                   value={data.description || ""}
                   onChange={handleChange}
                   className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                  placeholder="Describe the user task..."
+                  placeholder="Mô tả công việc cần thực hiện ở bước này..."
                 />
               </div>
-            </div>
-          </>
+          </div>
         );
       case "condition":
         return (
-          <>
-            <div className="space-y-4">
+          <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Logic Expression
+                  Biểu thức logic (fx)
                 </label>
                 <div className="relative group">
                   <div className="absolute left-3 top-3 text-muted-foreground group-focus-within:text-primary transition-colors">
@@ -99,37 +154,18 @@ export const PropertiesPanel = ({
                 <div className="flex gap-2">
                   <Info className="h-4 w-4 text-amber-600 shrink-0" />
                   <p className="text-[11px] text-amber-800 leading-normal">
-                    Conditions determine the workflow path. True values follow the primary connection.
+                    Nếu kết quả là <b>true</b>, quy trình đi theo nhánh "True". Nếu <b>false</b>, đi theo nhánh "False".
                   </p>
                 </div>
               </div>
-            </div>
-          </>
+          </div>
         );
       case "service_task":
         return (
-          <>
-            <div className="space-y-4">
+          <div className="space-y-4">
               <div>
                 <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Action Type
-                </label>
-                <select
-                  name="action"
-                  value={data.action || ""}
-                  onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                >
-                  <option value="">Select action...</option>
-                  <option value="Send Email">Send Notification Email</option>
-                  <option value="HTTP Request">Call API Endoint</option>
-                  <option value="Update Record">Database Sync</option>
-                  <option value="Generate Doc">Create PDF Report</option>
-                </select>
-              </div>
-               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Target Service
+                  Dịch vụ mục tiêu
                 </label>
                 <select
                   name="service"
@@ -137,23 +173,45 @@ export const PropertiesPanel = ({
                   onChange={handleChange}
                   className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 >
-                  <option value="">Select target service...</option>
-                  {availableServices.map((app) => (
-                    <option key={app.id} value={app.title}>
-                      {app.title}
-                    </option>
-                  ))}
-                  <option value="External Service">External API</option>
+                  <option value="">Chọn microservice...</option>
+                  <option value="user-service">User Service</option>
+                  <option value="hrm-service">HRM Service</option>
+                  <option value="notification-service">Notification Service</option>
                 </select>
               </div>
-            </div>
-          </>
+               <div>
+                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                  Hành động
+                </label>
+                <select
+                  name="action"
+                  value={data.action || ""}
+                  onChange={handleChange}
+                  className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                >
+                  <option value="">Chọn hành động...</option>
+                  {data.service === 'user-service' && (
+                    <>
+                        <option value="findOne">Tìm kiếm người dùng</option>
+                        <option value="setUserActive">Kích hoạt tài khoản</option>
+                    </>
+                  )}
+                  {data.service === 'hrm-service' && (
+                    <>
+                        <option value="getEmployee">Lấy thông tin nhân sự</option>
+                        <option value="updateContract">Cập nhật hợp đồng</option>
+                    </>
+                  )}
+                  <option value="notify">Gửi thông báo hệ thống</option>
+                </select>
+              </div>
+          </div>
         );
       default:
         return (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Settings2 className="h-10 w-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground">This node type has no configurable properties.</p>
+            <p className="text-sm text-muted-foreground">Node này không có thuộc tính cấu hình.</p>
           </div>
         );
     }
@@ -161,50 +219,56 @@ export const PropertiesPanel = ({
 
   return (
     <aside className={cn(
-      "w-80 border-l border-border bg-card flex flex-col transition-all overflow-hidden",
-      selectedNode ? "translate-x-0" : "translate-x-full"
+      "w-80 border-l border-border bg-card flex flex-col transition-all overflow-hidden shadow-2xl",
+      (selectedNode || !selectedNode) ? "translate-x-0" : "translate-x-full"
     )}>
-      <div className="flex items-center justify-between p-4 border-b border-border/60">
+      <div className="flex items-center justify-between p-4 border-b border-border/60 bg-muted/10">
         <div className="flex items-center gap-2">
-          <Settings2 className="h-4 w-4 text-primary" />
+          {selectedNode ? <Settings2 className="h-4 w-4 text-primary" /> : <Activity className="h-4 w-4 text-primary" />}
           <h3 className="text-sm font-bold truncate max-w-[140px]">
-             {(data as any).label || type} properties
+             {selectedNode ? `${data.label || selectedNode.type}` : "Cấu hình quy trình"}
           </h3>
         </div>
-        <button onClick={onClose} className="p-1 rounded-md hover:bg-muted transition-colors">
-          <X className="h-4 w-4 text-muted-foreground" />
-        </button>
+        {selectedNode && (
+            <button onClick={onClose} className="p-1 rounded-md hover:bg-muted transition-colors">
+                <X className="h-4 w-4 text-muted-foreground" />
+            </button>
+        )}
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
-         <div className="mb-6 pb-6 border-b border-border/40">
-           <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">
-             Node Identification
-           </label>
-           <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/60">
-             <div className="text-[10px] font-mono font-bold bg-background px-2 py-0.5 rounded border border-border/80">
-               ID-#{id.slice(-4)}
+      <div className="flex-1 overflow-y-auto p-5">
+         {selectedNode && (
+             <div className="mb-6 pb-6 border-b border-border/40">
+               <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">
+                 Thông tin Node
+               </label>
+               <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/60">
+                 <div className="text-[10px] font-mono font-bold bg-background px-2 py-0.5 rounded border border-border/80 shadow-sm">
+                   #{selectedNode.id.slice(-6)}
+                 </div>
+                 <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                   {selectedNode.type}
+                 </div>
+               </div>
              </div>
-             <div className="text-[10px] uppercase font-bold text-muted-foreground/60">
-               {type}
-             </div>
-           </div>
-         </div>
+         )}
 
         {renderFields()}
       </div>
 
-      <div className="p-4 border-t border-border/60 bg-muted/10 flex items-center justify-between gap-3">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100"
-          onClick={() => onDelete(id)}
-        >
-          <Trash2 className="h-3.5 w-3.5 mr-2" />
-          Delete Node
-        </Button>
-      </div>
+      {selectedNode && (
+          <div className="p-4 border-t border-border/60 bg-muted/5 flex items-center justify-between gap-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 rounded-xl"
+              onClick={() => onDelete(selectedNode.id)}
+            >
+              <Trash2 className="h-3.5 w-3.5 mr-2" />
+              Xóa bước này
+            </Button>
+          </div>
+      )}
     </aside>
   );
 };

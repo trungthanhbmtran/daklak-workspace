@@ -1,4 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Inject, OnModuleInit } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { PrismaService } from '@/database/prisma.service';
 import { AuditService } from '../audit/audit.service';
 
@@ -14,11 +16,18 @@ export enum PostStatus {
 }
 
 @Injectable()
-export class WorkflowService {
+export class WorkflowService implements OnModuleInit {
+  private dynamicWorkflowService: any;
+
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
+    @Inject('WORKFLOW_SERVICE') private client: ClientGrpc,
   ) { }
+
+  onModuleInit() {
+    this.dynamicWorkflowService = this.client.getService<any>('WorkflowService');
+  }
 
   async canTransition(postId: string, action: string, actorRole: string): Promise<boolean> {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
@@ -109,6 +118,26 @@ export class WorkflowService {
       entityId: postId,
       metadata: { oldStatus, newStatus, note },
     });
+
+    // Trigger Dynamic Workflow on SUBMIT
+    if (action === 'SUBMIT') {
+      try {
+        await firstValueFrom(this.dynamicWorkflowService.TriggerWorkflow({
+          trigger: 'POST_SUBMIT',
+          initialContext: { 
+            postId, 
+            title: updatedPost.title, 
+            authorId: updatedPost.authorId,
+            status: newStatus 
+          },
+          initiatorId: actorId,
+        }));
+      } catch (e) {
+        // We don't want to block the post submission if the workflow service is down, 
+        // but we should log it.
+        console.error('Failed to trigger dynamic workflow:', e.message);
+      }
+    }
 
     return updatedPost;
   }
