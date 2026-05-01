@@ -4,6 +4,7 @@ CREATE TABLE `workflows` (
     `name` VARCHAR(191) NOT NULL,
     `description` TEXT NULL,
     `definition` JSON NOT NULL,
+    `trigger` VARCHAR(191) NULL,
     `active` BOOLEAN NOT NULL DEFAULT true,
     `version` INTEGER NOT NULL DEFAULT 1,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
