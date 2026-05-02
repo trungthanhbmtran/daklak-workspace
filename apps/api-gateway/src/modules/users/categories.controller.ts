@@ -47,12 +47,13 @@ export class CategoriesController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách tất cả các nhóm danh mục' })
   @ApiResponse({ status: 200, description: 'Danh sách các nhóm' })
   async getGroups() {
+    console.log('[CategoriesController] Requesting GetAllGroups from user-service...');
     try {
       const res: any = await firstValueFrom(this.categoryService.GetAllGroups({}));
+      console.log('[CategoriesController] GetAllGroups response:', res);
       return { success: true, data: res.groups || [] };
     } catch (error) {
       console.error('[CategoriesController] Error calling GetAllGroups:', error.message);
-      // Trả về mảng rỗng thay vì crash nếu chưa kịp build/restart các service khác
       return { success: false, data: [], message: 'Chưa thể kết nối tới dịch vụ danh mục hoặc phương thức chưa được hỗ trợ' };
     }
   }
