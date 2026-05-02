@@ -4,39 +4,34 @@ import { GROUP_KEYS } from "./constants";
 
 export const categoryApi = {
   fetchAll: async (): Promise<CategoryItem[]> => {
-    // 1. Lấy danh sách groups từ server trước
-    let groups: { code: string; name: string }[] = [];
     try {
-      groups = await categoryApi.fetchGroups();
-    } catch (err) {
-      console.error("Failed to fetch groups, fallback to empty list", err);
-      groups = [];
-    }
+      // 1. Lấy danh sách groups từ server
+      const groups = await categoryApi.fetchGroups();
+      if (!groups || groups.length === 0) return [];
 
-    if (groups.length === 0) return [];
-
-    // 2. Lấy data cho từng group
-    const results = await Promise.allSettled(
-      groups.map(async (group) => {
-        try {
-          const res: any = await apiClient.get("/categories", { params: { group } });
-          const list = Array.isArray(res) ? res : (res?.data && Array.isArray(res.data) ? res.data : []);
+      // 2. Lấy data cho từng group song song
+      const results = await Promise.allSettled(
+        groups.map(async (g) => {
+          const res: any = await apiClient.get("/categories", { params: { group: g.code } });
+          // Bóc tách data an toàn dựa trên cấu trúc chuẩn của Gateway { success, data }
+          const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
 
           return list.map((item: any) => ({
             ...item,
-            group: item.group || group,
+            group: item.group || g.code,
+            sort: item.sort ?? item.order ?? 0, // Đảm bảo luôn có sort
+            active: item.active ?? (item.isActive ? 1 : 0), // Đảm bảo luôn có active
           }));
-        } catch (error) {
-          console.error(`Error fetching category group ${group}:`, error);
-          return [];
-        }
-      })
-    );
+        })
+      );
 
-    return results
-      .filter((r): r is PromiseFulfilledResult<CategoryItem[]> => r.status === 'fulfilled')
-      .map(r => r.value)
-      .flat();
+      return results
+        .filter((r): r is PromiseFulfilledResult<CategoryItem[]> => r.status === 'fulfilled')
+        .flatMap(r => r.value);
+    } catch (err) {
+      console.error("[categoryApi] fetchAll error:", err);
+      return [];
+    }
   },
 
   create: async (payload: CategoryPayload) => {
