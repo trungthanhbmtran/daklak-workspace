@@ -28,39 +28,64 @@ export class WorkflowGrpcController {
     private readonly prisma: PrismaService,
   ) { }
 
+  private ensureValidDefinition(def: any): WorkflowDefinition {
+    if (!def) return { nodes: [], edges: [] };
+    
+    // Nếu gRPC gửi Struct rỗng hoặc không đúng định dạng
+    const nodes = def.nodes || [];
+    const edges = def.edges || [];
+    
+    return {
+      nodes: Array.isArray(nodes) ? nodes : [],
+      edges: Array.isArray(edges) ? edges : [],
+    };
+  }
+
   // --- CRUD Operations ---
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
-  async createWorkflow(data: { name: string; description?: string; definition?: WorkflowDefinition; trigger?: string }) {
+  async createWorkflow(data: { name: string; description?: string; definition?: any; trigger?: string }) {
     try {
+      console.log('[WorkflowService] Creating workflow:', data.name);
+      const definition = this.ensureValidDefinition(data.definition);
+      
       const workflow = await this.prisma.workflow.create({
         data: {
           name: data.name,
           description: data.description,
-          definition: (data.definition as any) || { nodes: [], edges: [] },
+          definition: definition as any,
           trigger: data.trigger || 'MANUAL',
         },
       });
       return this.mapWorkflow(workflow);
     } catch (e) {
+      console.error('[WorkflowService] Create error:', e);
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
   }
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(data: { id: string; name?: string; description?: string; definition?: WorkflowDefinition; trigger?: string }) {
+  async updateWorkflow(data: { id: string; name?: string; description?: string; definition?: any; trigger?: string }) {
     try {
+      console.log('[WorkflowService] Updating workflow:', data.id);
+      
+      const updateData: any = {
+        name: data.name,
+        description: data.description,
+        trigger: data.trigger,
+      };
+
+      if (data.definition) {
+        updateData.definition = this.ensureValidDefinition(data.definition);
+      }
+
       const workflow = await this.prisma.workflow.update({
         where: { id: data.id },
-        data: {
-          name: data.name,
-          description: data.description,
-          definition: (data.definition as any),
-          trigger: data.trigger,
-        },
+        data: updateData,
       });
       return this.mapWorkflow(workflow);
     } catch (e) {
+      console.error('[WorkflowService] Update error:', e);
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }
   }

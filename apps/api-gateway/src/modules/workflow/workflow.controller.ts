@@ -41,14 +41,27 @@ export class WorkflowController implements OnModuleInit {
   @Post()
   @ApiOperation({ summary: 'Tạo quy trình mới/phiên bản mới' })
   async create(@Body() body: any) {
-    const result = await firstValueFrom(this.workflowService.CreateWorkflow(body)) as any;
+    const payload = {
+      name: body.name,
+      description: body.description,
+      definition: body.definition,
+      trigger: body.trigger,
+    };
+    const result = await firstValueFrom(this.workflowService.CreateWorkflow(payload)) as any;
     return { data: result };
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật định nghĩa quy trình' })
   async update(@Param('id') id: string, @Body() body: any) {
-    const result = await firstValueFrom(this.workflowService.UpdateWorkflow({ ...body, id })) as any;
+    const payload = {
+      id,
+      name: body.name,
+      description: body.description,
+      definition: body.definition,
+      trigger: body.trigger,
+    };
+    const result = await firstValueFrom(this.workflowService.UpdateWorkflow(payload)) as any;
     return { data: result };
   }
 
