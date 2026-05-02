@@ -51,11 +51,19 @@ export class WorkflowEngineService implements OnModuleInit {
     if (!workflow) throw new Error("Workflow not found");
 
     // Defensive check for definition
-    const definition = (workflow.definition as any) || {};
-    const nodes = definition.nodes || [];
+    let definition: any = workflow.definition;
+    if (typeof definition === 'string') {
+      try {
+        definition = JSON.parse(definition);
+      } catch (e) {
+        definition = {};
+      }
+    }
+    
+    const nodes = (definition?.nodes || []) as any[];
 
     if (!Array.isArray(nodes) || nodes.length === 0) {
-      throw new Error("Workflow definition is empty or invalid (no nodes found)");
+      throw new Error(`Workflow "${workflow.name}" definition is empty or invalid (no nodes found)`);
     }
 
     const instance = await this.prisma.workflowInstance.create({
@@ -121,8 +129,15 @@ export class WorkflowEngineService implements OnModuleInit {
     }
 
     // PBAC Validation
-    const definition = (instance.workflow.definition as any) || {};
-    const nodes = definition.nodes || [];
+    let definition: any = instance.workflow.definition;
+    if (typeof definition === 'string') {
+      try {
+        definition = JSON.parse(definition);
+      } catch (e) {
+        definition = {};
+      }
+    }
+    const nodes = (definition?.nodes || []) as any[];
     const node = nodes.find((n: any) => n.id === nodeId);
     const requiredRole = node?.data?.role;
 
@@ -160,8 +175,15 @@ export class WorkflowEngineService implements OnModuleInit {
 
       if (!instance) return;
 
-      const definition = (instance.workflow.definition as any) || {};
-      const nodes = definition.nodes || [];
+      let definition: any = instance.workflow.definition;
+      if (typeof definition === 'string') {
+        try {
+          definition = JSON.parse(definition);
+        } catch (e) {
+          definition = {};
+        }
+      }
+      const nodes = (definition?.nodes || []) as any[];
       const node = nodes.find((n: any) => n.id === nodeId);
 
       if (!node) {

@@ -4,6 +4,23 @@ import { status as GrpcStatus } from '@grpc/grpc-js';
 import { WorkflowEngineService } from './workflow-engine.service';
 import { PrismaService } from '@/database/prisma.service';
 
+export interface WorkflowDefinition {
+  nodes: any[];
+  edges: any[];
+}
+
+export interface WorkflowItem {
+  id: string;
+  name: string;
+  description: string;
+  definition: WorkflowDefinition;
+  trigger: string;
+  active: boolean;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 @Controller()
 export class WorkflowGrpcController {
   constructor(
@@ -14,13 +31,13 @@ export class WorkflowGrpcController {
   // --- CRUD Operations ---
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
-  async createWorkflow(data: any) {
+  async createWorkflow(data: { name: string; description?: string; definition?: WorkflowDefinition; trigger?: string }) {
     try {
       const workflow = await this.prisma.workflow.create({
         data: {
           name: data.name,
           description: data.description,
-          definition: data.definition || { nodes: [], edges: [] },
+          definition: (data.definition as any) || { nodes: [], edges: [] },
           trigger: data.trigger || 'MANUAL',
         },
       });
@@ -31,14 +48,14 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(data: any) {
+  async updateWorkflow(data: { id: string; name?: string; description?: string; definition?: WorkflowDefinition; trigger?: string }) {
     try {
       const workflow = await this.prisma.workflow.update({
         where: { id: data.id },
         data: {
           name: data.name,
           description: data.description,
-          definition: data.definition,
+          definition: (data.definition as any),
           trigger: data.trigger,
         },
       });
@@ -84,12 +101,12 @@ export class WorkflowGrpcController {
 
   // --- Helpers ---
 
-  private mapWorkflow(w: any) {
+  private mapWorkflow(w: any): WorkflowItem {
     return {
       id: w.id,
       name: w.name,
       description: w.description || '',
-      definition: w.definition || { nodes: [], edges: [] },
+      definition: (w.definition as unknown as WorkflowDefinition) || { nodes: [], edges: [] },
       trigger: w.trigger || 'MANUAL',
       active: !!w.active,
       version: w.version || 1,
@@ -108,7 +125,7 @@ export class WorkflowGrpcController {
       createdAt: inst.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: inst.updatedAt?.toISOString() || new Date().toISOString(),
       workflowName: inst.workflow?.name || inst.workflowName || '',
-      logs: (inst.logs || []).map(l => this.mapLog(l)),
+      logs: (inst.logs || []).map((l: any) => this.mapLog(l)),
     };
   }
 
@@ -128,12 +145,12 @@ export class WorkflowGrpcController {
   // --- Execution Engine ---
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
-  async startWorkflow(data: any) {
+  async startWorkflow(data: { workflowId: string; initialContext?: any; initiatorId?: string }) {
     try {
       const result = await this.engine.startWorkflow(
-        data.workflowId || data.workflow_id,
-        data.initialContext || data.initial_context || {},
-        data.initiatorId || data.initiator_id,
+        data.workflowId,
+        data.initialContext || {},
+        data.initiatorId,
       );
       return this.mapInstance(result);
     } catch (e) {
@@ -142,12 +159,12 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'TriggerWorkflow')
-  async triggerWorkflow(data: any) {
+  async triggerWorkflow(data: { trigger: string; initialContext?: any; initiatorId?: string }) {
     try {
       const instance = await this.engine.triggerWorkflow(
         data.trigger,
-        data.initialContext || data.initial_context || {},
-        data.initiatorId || data.initiator_id,
+        data.initialContext || {},
+        data.initiatorId,
       );
       if (!instance) {
         return { id: '', status: 'NOT_FOUND' };
@@ -159,13 +176,13 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'ResumeWorkflow')
-  async resumeWorkflow(data: any) {
+  async resumeWorkflow(data: { instanceId: string; nodeId: string; actionData?: any; userRoles?: string[] }) {
     try {
       const result = await this.engine.resumeWorkflow(
-        data.instanceId || data.instance_id,
-        data.nodeId || data.node_id,
-        data.actionData || data.action_data || {},
-        data.userRoles || data.user_roles || [],
+        data.instanceId,
+        data.nodeId,
+        data.actionData || {},
+        data.userRoles || [],
       );
       return this.mapInstance(result);
     } catch (e) {
@@ -186,9 +203,9 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'GetLogs')
-  async getLogs(data: { instanceId: string; instance_id?: string }) {
+  async getLogs(data: { instanceId: string }) {
     const logs = await this.prisma.executionLog.findMany({
-      where: { instanceId: data.instanceId || data.instance_id },
+      where: { instanceId: data.instanceId },
       orderBy: { createdAt: 'desc' },
     });
     return { logs: logs.map(l => this.mapLog(l)) };
