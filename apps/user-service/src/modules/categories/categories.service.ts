@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // Lấy danh mục theo nhóm (trả về tất cả để Admin quản lý, kể cả tạm ẩn)
   async getByGroup(group: string) {
@@ -15,10 +15,10 @@ export class CategoriesService {
 
   async getAllGroups() {
     const groups = await this.prisma.categoryGroup.findMany({
-      where: { is_active: true },
+      where: { isActive: true },
       orderBy: { order: 'asc' },
     });
-    
+
     // Nếu bảng CategoryGroup trống (chưa seed), trả về danh sách group code từ Category như cũ làm fallback
     if (groups.length === 0) {
       const distinctGroups = await this.prisma.category.findMany({
