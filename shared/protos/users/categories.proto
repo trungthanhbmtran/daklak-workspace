@@ -3,6 +3,7 @@ syntax = "proto3";
 package category;
 
 service CategoryService {
+  rpc GetAllCategories (EmptyRequest) returns (GetByGroupResponse);
   rpc GetByGroup (GetByGroupRequest) returns (GetByGroupResponse);
   rpc GetAllGroups (EmptyRequest) returns (GetAllGroupsResponse);
   rpc Create (CreateCategoryRequest) returns (CategoryResponse);
@@ -31,9 +32,9 @@ message CategoryItem {
   string code = 3;
   string name = 4;
   string description = 5;
-  int32 order = 6;
+  int32 sort = 6;
   bool is_system = 7;
-  bool is_active = 8;
+  int32 active = 8;
 }
 
 message GetByGroupResponse {

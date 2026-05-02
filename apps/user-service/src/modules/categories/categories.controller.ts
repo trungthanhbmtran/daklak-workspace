@@ -10,9 +10,9 @@ function toItem(c: any) {
     code: c.code,
     name: c.name,
     description: c.description ?? '',
-    order: c.order,
-    isSystem: c.isSystem ?? false,
-    isActive: c.isActive ?? true,
+    sort: c.order,
+    is_system: c.isSystem ?? false,
+    active: c.isActive ? 1 : 0,
   };
 }
 
@@ -20,10 +20,16 @@ function toItem(c: any) {
 export class CategoriesController {
   constructor(private readonly catService: CategoriesService) { }
 
+  @GrpcMethod('CategoryService', 'GetAllCategories')
+  async getAllCategories(_data: any) {
+    const list = await this.catService.getAll();
+    return { data: list.map(toItem) };
+  }
+
   @GrpcMethod('CategoryService', 'GetByGroup')
   async getByGroup(data: { group: string }) {
     const list = await this.catService.getByGroup(data.group || '');
-    return { data: list.map((c: any) => toItem(c)) };
+    return { data: list.map(toItem) };
   }
 
   @GrpcMethod('CategoryService', 'GetAllGroups')

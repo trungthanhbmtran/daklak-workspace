@@ -5,6 +5,16 @@ import { PrismaService } from '../../database/prisma.service';
 export class CategoriesService {
   constructor(private prisma: PrismaService) { }
 
+  // Lấy tất cả danh mục của tất cả các nhóm
+  async getAll() {
+    return this.prisma.category.findMany({
+      orderBy: [
+        { group: 'asc' },
+        { order: 'asc' },
+      ],
+    });
+  }
+
   // Lấy danh mục theo nhóm (trả về tất cả để Admin quản lý, kể cả tạm ẩn)
   async getByGroup(group: string) {
     return this.prisma.category.findMany({
@@ -14,21 +24,35 @@ export class CategoriesService {
   }
 
   async getAllGroups() {
-    const groups = await this.prisma.categoryGroup.findMany({
+    // 1. Lấy tất cả các nhóm đã được định nghĩa tên (CategoryGroup)
+    const definedGroups = await this.prisma.categoryGroup.findMany({
       where: { isActive: true },
-      orderBy: { order: 'asc' },
     });
 
-    // Nếu bảng CategoryGroup trống (chưa seed), trả về danh sách group code từ Category như cũ làm fallback
-    if (groups.length === 0) {
-      const distinctGroups = await this.prisma.category.findMany({
-        select: { group: true },
-        distinct: ['group'],
-      });
-      return distinctGroups.map((g) => ({ code: g.group, name: g.group }));
-    }
+    // 2. Lấy tất cả các mã nhóm thực tế đang có trong bảng dữ liệu (Category)
+    const actualGroups = await this.prisma.category.findMany({
+      select: { group: true },
+      distinct: ['group'],
+    });
 
-    return groups.map((g) => ({ code: g.code, name: g.name }));
+    // 3. Hợp nhất mã nhóm từ cả 2 nguồn để không bỏ sót bất kỳ nhóm nào
+    const allCodes = Array.from(new Set([
+      ...definedGroups.map(g => g.code),
+      ...actualGroups.map(g => g.group)
+    ]));
+
+    // 4. Map lại thành đối tượng { code, name } và kèm theo thứ tự sắp xếp
+    const result = allCodes.map(code => {
+      const defined = definedGroups.find(dg => dg.code === code);
+      return {
+        code,
+        name: defined?.name || code, // Nếu chưa có tên hiển thị thì dùng mã code
+        order: defined?.order ?? 999,
+      };
+    });
+
+    // 5. Sắp xếp theo thứ tự đã định nghĩa (order)
+    return result.sort((a, b) => a.order - b.order);
   }
 
   // Tạo mới (Dành cho Admin cấu hình)

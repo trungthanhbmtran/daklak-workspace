@@ -59,13 +59,16 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh mục theo nhóm (UNIT_TYPE, GENDER, DOC_TYPE...)' })
-  @ApiQuery({ name: 'group', required: true, description: 'Mã nhóm danh mục' })
+  @ApiOperation({ summary: 'Lấy danh mục theo nhóm hoặc tất cả nếu không truyền group' })
+  @ApiQuery({ name: 'group', required: false, description: 'Mã nhóm danh mục (để trống để lấy tất cả)' })
   @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
-  async getByGroup(@Query('group') group: string) {
+  async getByGroup(@Query('group') group?: string) {
+    if (!group) {
+      const result = await firstValueFrom(this.categoryService.GetAllCategories({}));
+      return { success: true, data: (result as any)?.data || [] };
+    }
     const result = await firstValueFrom(this.categoryService.GetByGroup({ group: group || '' }));
-    const data = (result as { data?: any[] })?.data ?? [];
-    return { success: true, data: data.map(toFrontendItem) };
+    return { success: true, data: (result as any)?.data || [] };
   }
 
   @Post()
