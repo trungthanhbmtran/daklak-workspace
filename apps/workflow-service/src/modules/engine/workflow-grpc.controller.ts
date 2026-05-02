@@ -85,39 +85,29 @@ export class WorkflowGrpcController {
   // --- Helpers ---
 
   private mapWorkflow(w: any) {
-    // Ensure definition is a clean object for gRPC Struct mapping
-    let definition = w.definition;
-    if (definition && typeof definition === 'object') {
-      try {
-        definition = JSON.parse(JSON.stringify(definition));
-      } catch (e) {
-        definition = { nodes: [], edges: [] };
-      }
-    }
-
     return {
       id: w.id,
       name: w.name,
       description: w.description || '',
-      definition: definition || { nodes: [], edges: [] },
+      definition: w.definition || { nodes: [], edges: [] },
       trigger: w.trigger || 'MANUAL',
       active: !!w.active,
       version: w.version || 1,
-      created_at: w.createdAt?.toISOString() || new Date().toISOString(),
-      updated_at: w.updatedAt?.toISOString() || new Date().toISOString(),
+      createdAt: w.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: w.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 
   private mapInstance(inst: any) {
     return {
       id: inst.id,
-      workflow_id: inst.workflowId,
+      workflowId: inst.workflowId,
       status: inst.status,
-      current_node_id: inst.currentNodeId || '',
+      currentNodeId: inst.currentNodeId || '',
       context: inst.context || {},
-      created_at: inst.createdAt?.toISOString() || new Date().toISOString(),
-      updated_at: inst.updatedAt?.toISOString() || new Date().toISOString(),
-      workflow_name: inst.workflow?.name || inst.workflowName || '',
+      createdAt: inst.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: inst.updatedAt?.toISOString() || new Date().toISOString(),
+      workflowName: inst.workflow?.name || inst.workflowName || '',
       logs: (inst.logs || []).map(l => this.mapLog(l)),
     };
   }
@@ -125,13 +115,13 @@ export class WorkflowGrpcController {
   private mapLog(l: any) {
     return {
       id: l.id,
-      node_id: l.nodeId || '',
-      node_type: l.nodeType || '',
-      node_label: l.nodeLabel || '',
+      nodeId: l.nodeId || '',
+      nodeType: l.nodeType || '',
+      nodeLabel: l.nodeLabel || '',
       action: l.action || '',
       data: l.data || {},
       error: l.error || '',
-      created_at: l.createdAt?.toISOString() || new Date().toISOString(),
+      createdAt: l.createdAt?.toISOString() || new Date().toISOString(),
     };
   }
 

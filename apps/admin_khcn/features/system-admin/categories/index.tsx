@@ -16,7 +16,7 @@ export function CategoryClient() {
   const { data: queryData, isLoading: isLoadingData, isError } = useGetCategories();
   const { data: groups, isLoading: isLoadingGroups } = useGetCategoryGroups();
 
-  console.log('groups', groups);
+  // console.log('groups', groups);
 
   const deleteMutation = useDeleteCategory();
   const ui = useCategoryUI(queryData, groups);

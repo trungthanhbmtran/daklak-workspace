@@ -64,27 +64,27 @@ message WorkflowResponse {
   string trigger = 5;
   bool active = 6;
   int32 version = 7;
-  string created_at = 8;
-  string updated_at = 9;
+  string createdAt = 8;
+  string updatedAt = 9;
 }
 
 message StartWorkflowRequest {
-  string workflow_id = 1;
-  google.protobuf.Struct initial_context = 2;
-  string initiator_id = 3;
+  string workflowId = 1;
+  google.protobuf.Struct initialContext = 2;
+  string initiatorId = 3;
 }
 
 message TriggerWorkflowRequest {
   string trigger = 1;
-  google.protobuf.Struct initial_context = 2;
-  string initiator_id = 3;
+  google.protobuf.Struct initialContext = 2;
+  string initiatorId = 3;
 }
 
 message ResumeWorkflowRequest {
-  string instance_id = 1;
-  string node_id = 2;
-  google.protobuf.Struct action_data = 3;
-  repeated string user_roles = 4;
+  string instanceId = 1;
+  string nodeId = 2;
+  google.protobuf.Struct actionData = 3;
+  repeated string userRoles = 4;
 }
 
 message GetInstanceRequest {
@@ -92,18 +92,18 @@ message GetInstanceRequest {
 }
 
 message GetLogsRequest {
-  string instance_id = 1;
+  string instanceId = 1;
 }
 
 message WorkflowInstanceResponse {
   string id = 1;
-  string workflow_id = 2;
+  string workflowId = 2;
   string status = 3;
-  string current_node_id = 4;
+  string currentNodeId = 4;
   google.protobuf.Struct context = 5;
-  string created_at = 6;
-  string updated_at = 7;
-  string workflow_name = 8;
+  string createdAt = 6;
+  string updatedAt = 7;
+  string workflowName = 8;
   repeated ExecutionLog logs = 9;
 }
 
@@ -113,11 +113,11 @@ message GetLogsResponse {
 
 message ExecutionLog {
   string id = 1;
-  string node_id = 2;
-  string node_type = 3;
-  string node_label = 4;
+  string nodeId = 2;
+  string nodeType = 3;
+  string nodeLabel = 4;
   string action = 5;
   google.protobuf.Struct data = 6;
   string error = 7;
-  string created_at = 8;
+  string createdAt = 8;
 }

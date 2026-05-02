@@ -5,10 +5,10 @@ import { GROUP_KEYS } from "./constants";
 export const categoryApi = {
   fetchAll: async (): Promise<CategoryItem[]> => {
     try {
-      console.log("[categoryApi] fetchAll using optimized single endpoint...");
+      // console.log("[categoryApi] fetchAll using optimized single endpoint...");
       // Gọi API lấy tất cả danh mục (không truyền group)
       const res: any = await apiClient.get("/categories");
-      
+
       // Trả về trực tiếp mảng đã được chuẩn hóa từ Gateway
       return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
     } catch (error) {
