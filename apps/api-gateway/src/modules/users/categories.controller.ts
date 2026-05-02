@@ -37,18 +37,24 @@ export class CategoriesController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.categoryService = this.client.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
   }
-  
+
   @Get('groups')
   @ApiOperation({ summary: 'Lấy danh sách tất cả các nhóm danh mục' })
   @ApiResponse({ status: 200, description: 'Danh sách các nhóm' })
   async getGroups() {
-    const res = await firstValueFrom(this.categoryService.GetAllGroups({}));
-    return { success: true, data: res.groups || [] };
+    try {
+      const res = await firstValueFrom(this.categoryService.GetAllGroups({}));
+      return { success: true, data: res.groups || [] };
+    } catch (error) {
+      console.error('[CategoriesController] Error calling GetAllGroups:', error.message);
+      // Trả về mảng rỗng thay vì crash nếu chưa kịp build/restart các service khác
+      return { success: false, data: [], message: 'Chưa thể kết nối tới dịch vụ danh mục hoặc phương thức chưa được hỗ trợ' };
+    }
   }
 
   @Get()

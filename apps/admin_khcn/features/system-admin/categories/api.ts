@@ -4,12 +4,24 @@ import { GROUP_KEYS } from "./constants";
 
 export const categoryApi = {
   fetchAll: async (): Promise<CategoryItem[]> => {
-    // Sử dụng allSettled để nếu một nhóm lỗi thì các nhóm khác vẫn chạy
+    // 1. Lấy danh sách groups từ server trước
+    let groups = GROUP_KEYS;
+    if (!groups || groups.length === 0) {
+      try {
+        groups = await categoryApi.fetchGroups();
+      } catch (err) {
+        console.error("Failed to fetch groups, fallback to empty list", err);
+        groups = [];
+      }
+    }
+
+    if (groups.length === 0) return [];
+
+    // 2. Lấy data cho từng group
     const results = await Promise.allSettled(
-      GROUP_KEYS.map(async (group) => {
+      groups.map(async (group) => {
         try {
           const res: any = await apiClient.get("/categories", { params: { group } });
-          // Bóc tách data: res có thể là array hoặc { data: [] } (do gateway interceptor)
           const list = Array.isArray(res) ? res : (res?.data && Array.isArray(res.data) ? res.data : []);
           
           return list.map((item: any) => ({
