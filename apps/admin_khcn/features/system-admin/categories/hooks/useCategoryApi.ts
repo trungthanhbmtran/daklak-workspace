@@ -12,6 +12,14 @@ export function useGetCategories() {
   });
 }
 
+export function useGetCategoryGroups() {
+  return useQuery({
+    queryKey: [CATEGORY_KEYS.all, "groups"],
+    queryFn: categoryApi.fetchGroups,
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
 export function useCreateCategory() {
   const queryClient = useQueryClient();
   return useMutation({

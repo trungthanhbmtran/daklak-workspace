@@ -78,13 +78,11 @@ function UnitRow({
         ref={setRef}
         role="button"
         tabIndex={0}
-        className={`group flex items-start justify-between min-w-0 py-2 pr-2 rounded-md cursor-pointer transition-colors ${
-          isDragging ? "opacity-50" : ""
-        } ${isOver ? "ring-2 ring-primary/50 bg-primary/5" : ""} ${
-          isSelected
+        className={`group flex items-start justify-between min-w-0 py-2 pr-2 rounded-md cursor-pointer transition-colors ${isDragging ? "opacity-50" : ""
+          } ${isOver ? "ring-2 ring-primary/50 bg-primary/5" : ""} ${isSelected
             ? "bg-primary/10 border border-primary/20"
             : "hover:bg-muted text-foreground border border-transparent"
-        }`}
+          }`}
         style={{ paddingLeft: `${4 + level * 20}px` }}
         onClick={() => onSelect(unit.id)}
         onKeyDown={(e) => {
@@ -144,9 +142,8 @@ function UnitRow({
             <div className="flex items-center">
               <Badge
                 variant="secondary"
-                className={`inline-flex h-4 px-1 text-[10px] uppercase font-mono tracking-wider shrink-0 ${
-                  isSelected ? "bg-primary/20 text-primary" : "bg-muted-foreground/10 text-muted-foreground"
-                }`}
+                className={`inline-flex h-4 px-1 text-[10px] uppercase font-mono tracking-wider shrink-0 ${isSelected ? "bg-primary/20 text-primary" : "bg-muted-foreground/10 text-muted-foreground"
+                  }`}
               >
                 {unit.code}
               </Badge>
@@ -271,12 +268,12 @@ export function OrganizationSidebar() {
 
   const visibleIds = searchTerm.trim()
     ? new Set(
-        flatUnits.filter(
-          (u) =>
-            u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            u.code.toLowerCase().includes(searchTerm.toLowerCase())
-        ).map((u) => u.id)
-      )
+      flatUnits.filter(
+        (u) =>
+          u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          u.code.toLowerCase().includes(searchTerm.toLowerCase())
+      ).map((u) => u.id)
+    )
     : null;
 
   const filtered = visibleIds ? flatUnits.filter((u) => visibleIds.has(u.id)) : flatUnits;
@@ -382,9 +379,8 @@ function RootDropZone() {
   return (
     <div
       ref={setNodeRef}
-      className={`mb-2 py-2 px-3 rounded-lg border border-dashed text-center text-xs text-muted-foreground transition-colors ${
-        isOver ? "border-primary bg-primary/10 text-primary" : "border-muted-foreground/30"
-      }`}
+      className={`mb-2 py-2 px-3 rounded-lg border border-dashed text-center text-xs text-muted-foreground transition-colors ${isOver ? "border-primary bg-primary/10 text-primary" : "border-muted-foreground/30"
+        }`}
     >
       Thả đơn vị vào đây để đưa lên cấp gốc
     </div>

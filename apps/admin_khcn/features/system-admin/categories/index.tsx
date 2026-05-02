@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import { useGetCategories, useDeleteCategory } from "./hooks/useCategoryApi";
+import { useGetCategories, useDeleteCategory, useGetCategoryGroups } from "./hooks/useCategoryApi";
 import { useCategoryUI } from "./hooks/useCategoryUI";
 import { GROUP_LABELS } from "./constants";
 import { CategorySidebar } from "./components/CategorySidebar";
@@ -13,18 +13,13 @@ import { CategoryTable } from "./components/CategoryTable";
 import { CreateCategoryModal, EditCategoryModal } from "./components/CategoryModals";
 
 export function CategoryClient() {
-  const { data: queryData, isLoading, isError } = useGetCategories();
-  
-  // Đảm bảo data luôn là array để tránh crash useCategoryUI
-  const serverData = useMemo(() => {
-    if (!queryData) return [];
-    if (Array.isArray(queryData)) return queryData;
-    return [];
-  }, [queryData]);
+  const { data: queryData, isLoading: isLoadingData, isError } = useGetCategories();
+  const { data: groups, isLoading: isLoadingGroups } = useGetCategoryGroups();
 
   const deleteMutation = useDeleteCategory();
-  const ui = useCategoryUI(serverData);
+  const ui = useCategoryUI(queryData, groups);
 
+  const isLoading = isLoadingData || isLoadingGroups;
   const handleDelete = (item: any) => {
     if (confirm(`Bạn có chắc muốn xóa "${item.name}"?`)) {
       deleteMutation.mutate(item.id);

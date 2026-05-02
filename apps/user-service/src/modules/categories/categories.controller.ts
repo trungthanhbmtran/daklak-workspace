@@ -26,6 +26,12 @@ export class CategoriesController {
     return { data: list.map((c: any) => toItem(c)) };
   }
 
+  @GrpcMethod('CategoryService', 'GetAllGroups')
+  async getAllGroups() {
+    const groups = await this.catService.getAllGroups();
+    return { groups };
+  }
+
   @GrpcMethod('CategoryService', 'Create')
   async create(data: { group: string; code: string; name: string; description?: string; order?: number }) {
     const category = await this.catService.create({

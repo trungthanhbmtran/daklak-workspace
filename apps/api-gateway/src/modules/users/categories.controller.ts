@@ -42,6 +42,14 @@ export class CategoriesController implements OnModuleInit {
   onModuleInit() {
     this.categoryService = this.client.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
   }
+  
+  @Get('groups')
+  @ApiOperation({ summary: 'Lấy danh sách tất cả các nhóm danh mục' })
+  @ApiResponse({ status: 200, description: 'Danh sách các nhóm' })
+  async getGroups() {
+    const res = await firstValueFrom(this.categoryService.GetAllGroups({}));
+    return { success: true, data: res.groups || [] };
+  }
 
   @Get()
   @ApiOperation({ summary: 'Lấy danh mục theo nhóm (UNIT_TYPE, GENDER, DOC_TYPE...)' })

@@ -4,9 +4,16 @@ package category;
 
 service CategoryService {
   rpc GetByGroup (GetByGroupRequest) returns (GetByGroupResponse);
+  rpc GetAllGroups (EmptyRequest) returns (GetAllGroupsResponse);
   rpc Create (CreateCategoryRequest) returns (CategoryResponse);
   rpc Update (UpdateCategoryRequest) returns (CategoryResponse);
   rpc Delete (DeleteCategoryRequest) returns (DeleteCategoryResponse);
+}
+
+message EmptyRequest {}
+
+message GetAllGroupsResponse {
+  repeated string groups = 1;
 }
 
 message GetByGroupRequest {

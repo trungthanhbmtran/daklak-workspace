@@ -40,4 +40,8 @@ export const categoryApi = {
   delete: async (id: number) => {
     return apiClient.delete(`/categories/${id}`);
   },
+  
+  fetchGroups: async (): Promise<string[]> => {
+    return apiClient.get("/categories/groups").then((res: any) => res?.data || []);
+  },
 };

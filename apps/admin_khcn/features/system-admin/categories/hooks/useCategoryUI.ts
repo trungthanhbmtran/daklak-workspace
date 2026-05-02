@@ -1,8 +1,8 @@
 import { useState, useMemo } from "react";
 import { CategoryItem } from "../types";
-import { GROUP_KEYS, GROUP_LABELS } from "../constants";
+import { GROUP_LABELS } from "../constants";
 
-export function useCategoryUI(serverData: CategoryItem[] = []) {
+export function useCategoryUI(serverData: CategoryItem[] = [], groups: string[] = []) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchGroupTerm, setSearchGroupTerm] = useState("");
   const [activeGroup, setActiveGroup] = useState<string>("UNIT_TYPE");
@@ -12,8 +12,10 @@ export function useCategoryUI(serverData: CategoryItem[] = []) {
   const [editingItem, setEditingItem] = useState<CategoryItem | null>(null);
 
   const uniqueGroups = useMemo(() => {
-    return GROUP_KEYS.length > 0 ? GROUP_KEYS : Array.from(new Set(serverData.map((item) => item.group)));
-  }, [serverData]);
+    // Hoàn toàn lấy từ Server (groups), nếu chưa tải xong thì có thể fallback tạm từ serverData
+    if (groups && groups.length > 0) return groups;
+    return Array.from(new Set(serverData.map((item) => item.group)));
+  }, [serverData, groups]);
 
   const filteredGroupKeys = useMemo(() => {
     return uniqueGroups.filter((groupCode) => {
@@ -25,8 +27,8 @@ export function useCategoryUI(serverData: CategoryItem[] = []) {
   const filteredData = useMemo(() => {
     return serverData.filter((item) => {
       const matchesGroup = item.group === activeGroup;
-      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            item.code.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.code.toLowerCase().includes(searchTerm.toLowerCase());
       return matchesGroup && matchesSearch;
     });
   }, [serverData, activeGroup, searchTerm]);

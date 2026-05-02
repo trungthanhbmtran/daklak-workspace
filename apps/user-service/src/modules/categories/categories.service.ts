@@ -13,6 +13,14 @@ export class CategoriesService {
     });
   }
 
+  async getAllGroups() {
+    const groups = await this.prisma.category.findMany({
+      select: { group: true },
+      distinct: ['group'],
+    });
+    return groups.map((g) => g.group);
+  }
+
   // Tạo mới (Dành cho Admin cấu hình)
   async create(data: { group: string; code: string; name: string; description?: string; order?: number }) {
     return this.prisma.category.create({
