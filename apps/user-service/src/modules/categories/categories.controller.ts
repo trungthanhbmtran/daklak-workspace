@@ -28,10 +28,8 @@ export class CategoriesController {
 
   @GrpcMethod('CategoryService', 'GetAllGroups')
   async getAllGroups(_data: any) {
-    console.log('[CategoriesController] gRPC GetAllGroups called');
     const groups = await this.catService.getAllGroups();
-    console.log('[CategoriesController] Returning groups:', groups);
-    return { data: groups };
+    return { groups };
   }
 
   @GrpcMethod('CategoryService', 'Create')
