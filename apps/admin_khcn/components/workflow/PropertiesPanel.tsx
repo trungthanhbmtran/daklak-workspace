@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 interface PropertiesPanelProps {
   selectedNode: Node | null;
   availableServices?: any[];
+  availableTriggers?: any[];
   onUpdate: (id: string, data: any) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
@@ -29,6 +30,7 @@ interface PropertiesPanelProps {
 export const PropertiesPanel = ({
   selectedNode,
   availableServices = [],
+  availableTriggers = [],
   onUpdate,
   onDelete,
   onClose,
@@ -60,10 +62,18 @@ export const PropertiesPanel = ({
               className="w-full bg-muted/30 border border-border/40 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
             >
               <option value="">Chọn sự kiện kích hoạt...</option>
-              <option value="MANUAL">Kích hoạt thủ công</option>
-              <option value="POST_SUBMIT">Khi gửi duyệt bài viết (Posts)</option>
-              <option value="DOC_RECEIVED">Khi nhận văn bản mới (Documents)</option>
-              <option value="USER_CREATED">Khi tạo tài khoản mới (Users)</option>
+              {availableTriggers.length > 0 ? (
+                availableTriggers.map((t: any) => (
+                  <option key={t.code} value={t.code}>{t.name}</option>
+                ))
+              ) : (
+                <>
+                  <option value="MANUAL">Kích hoạt thủ công</option>
+                  <option value="POST_SUBMIT">Khi gửi duyệt bài viết (Posts)</option>
+                  <option value="DOC_RECEIVED">Khi nhận văn bản mới (Documents)</option>
+                  <option value="USER_CREATED">Khi tạo tài khoản mới (Users)</option>
+                </>
+              )}
             </select>
             <p className="text-[10px] text-muted-foreground mt-2 italic">
               Quy trình sẽ tự động bắt đầu khi sự kiện này xảy ra.
@@ -174,11 +184,11 @@ export const PropertiesPanel = ({
                 className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               >
                 <option value="">Chọn microservice...</option>
-                <option value="user-service">User Service</option>
-                <option value="hrm-service">HRM Service</option>
-                <option value="posts-service">Posts Service</option>
-                <option value="document-service">Document Service</option>
-                <option value="notification-service">Notification Service</option>
+                {availableServices.map((svc: any) => (
+                  <option key={svc.code || svc.id} value={svc.code || svc.id}>
+                    {svc.name || svc.title}
+                  </option>
+                ))}
               </select>
             </div>
             <div>

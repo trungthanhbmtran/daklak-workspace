@@ -31,6 +31,22 @@ const protoRoot =
         },
       },
       {
+        name: 'CATEGORIES_SERVICE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'category',
+          protoPath: join(protoRoot, 'users', 'categories.proto'),
+          url: process.env.USERS_GRPC_URL || 'localhost:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [protoRoot],
+          },
+        },
+      },
+      {
         name: 'HRM_SERVICE',
         transport: Transport.GRPC,
         options: {

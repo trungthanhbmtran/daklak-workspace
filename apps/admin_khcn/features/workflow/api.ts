@@ -71,4 +71,10 @@ export const workflowApi = {
 
   getLogs: (instanceId: string) =>
     apiClient.get(`/workflow/instances/${instanceId}/logs`).then((res: any) => unwrapData<any[]>(res)),
+
+  getServices: () =>
+    apiClient.get('/workflow/services').then((res: any) => unwrapData<any[]>(res)),
+
+  getTriggers: () =>
+    apiClient.get('/workflow/triggers').then((res: any) => unwrapData<any[]>(res)),
 };

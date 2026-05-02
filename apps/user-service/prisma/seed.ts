@@ -108,6 +108,7 @@ async function main() {
     { group: 'MICROSERVICE', code: 'HRM_SERVICE', name: 'Dịch vụ Nhân sự', order: 2 },
     { group: 'MICROSERVICE', code: 'DOCUMENT_SERVICE', name: 'Dịch vụ Văn bản', order: 3 },
     { group: 'MICROSERVICE', code: 'POST_SERVICE', name: 'Dịch vụ Nội dung', order: 4 },
+    { group: 'MICROSERVICE', code: 'WORKFLOW_SERVICE', name: 'Dịch vụ Quy trình', order: 5 },
 
     // --- GEOGRAPHIC DATA ---
     { group: 'PROVINCE', code: '47', name: 'Tỉnh Đắk Lắk', order: 1 },
@@ -217,6 +218,17 @@ async function main() {
 
     { group: 'DEPARTMENT', code: 'VAN_PHONG', name: 'Văn phòng Sở', order: 1 },
     { group: 'DEPARTMENT', code: 'PHONG_KE_HOACH', name: 'Phòng Kế hoạch - Tài chính', order: 2 },
+
+    // --- WORKFLOW ---
+    { group: 'WORKFLOW_TRIGGER', code: 'MANUAL', name: 'Kích hoạt thủ công', order: 1 },
+    { group: 'WORKFLOW_TRIGGER', code: 'POST_SUBMIT', name: 'Khi gửi duyệt bài viết', order: 2 },
+    { group: 'WORKFLOW_TRIGGER', code: 'DOC_RECEIVED', name: 'Khi nhận văn bản mới', order: 3 },
+    { group: 'WORKFLOW_TRIGGER', code: 'USER_CREATED', name: 'Khi tạo tài khoản mới', order: 4 },
+
+    { group: 'WORKFLOW_ACTION', code: 'APPROVE', name: 'Phê duyệt', order: 1 },
+    { group: 'WORKFLOW_ACTION', code: 'REJECT', name: 'Từ chối', order: 2 },
+    { group: 'WORKFLOW_ACTION', code: 'PUBLISH', name: 'Xuất bản', order: 3 },
+    { group: 'WORKFLOW_ACTION', code: 'REQUEST_INFO', name: 'Yêu cầu bổ sung', order: 4 },
   ];
 
   console.log(`📦 Seeding ${categoriesData.length} categories...`);

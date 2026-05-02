@@ -10,13 +10,30 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @ApiBearerAuth('JWT-auth')
 export class WorkflowController implements OnModuleInit {
   private workflowService: any;
+  private categoryService: any;
 
   constructor(
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
   ) { }
 
   onModuleInit() {
     this.workflowService = this.client.getService(MICROSERVICES.WORKFLOW.SERVICE);
+    this.categoryService = this.catClient.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
+  }
+ 
+  @Get('services')
+  @ApiOperation({ summary: 'Lấy danh sách các microservice khả dụng cho workflow' })
+  async getMicroservices() {
+    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: 'MICROSERVICE' })) as any;
+    return { data: result.data || [] };
+  }
+ 
+  @Get('triggers')
+  @ApiOperation({ summary: 'Lấy danh sách các trigger khả dụng' })
+  async getTriggers() {
+    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: 'WORKFLOW_TRIGGER' })) as any;
+    return { data: result.data || [] };
   }
 
   // --- Workflow Definitions ---

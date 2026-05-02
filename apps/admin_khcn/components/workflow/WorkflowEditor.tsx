@@ -57,6 +57,25 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   
   const { apps: availableServices } = useHubServices();
   const { screenToFlowPosition, setViewport } = useReactFlow();
+  
+  const [dynamicServices, setDynamicServices] = useState<any[]>([]);
+  const [dynamicTriggers, setDynamicTriggers] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchDynamics = async () => {
+      try {
+        const [svcs, trigs] = await Promise.all([
+          workflowApi.getServices(),
+          workflowApi.getTriggers(),
+        ]);
+        setDynamicServices(svcs);
+        setDynamicTriggers(trigs);
+      } catch (e) {
+        console.error("Failed to fetch dynamic workflow data", e);
+      }
+    };
+    fetchDynamics();
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -312,7 +331,8 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
         <PropertiesPanel 
           selectedNode={selectedNode}
-          availableServices={availableServices}
+          availableServices={dynamicServices.length > 0 ? dynamicServices : availableServices}
+          availableTriggers={dynamicTriggers}
           onUpdate={onUpdateNodeData}
           onDelete={onDeleteNode}
           onClose={() => setSelectedNodeId(null)}

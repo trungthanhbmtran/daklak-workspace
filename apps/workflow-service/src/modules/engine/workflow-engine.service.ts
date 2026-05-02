@@ -18,6 +18,7 @@ export class WorkflowEngineService implements OnModuleInit {
   private readonly parser = new Parser();
 
   private userService: any;
+  private categoryService: any;
   private employeeHandlers: any;
   private postService: any;
   private documentService: any;
@@ -25,6 +26,7 @@ export class WorkflowEngineService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     @Inject('USERS_SERVICE') private readonly usersClient: ClientGrpc,
+    @Inject('CATEGORIES_SERVICE') private readonly categoriesClient: ClientGrpc,
     @Inject('HRM_SERVICE') private readonly hrmClient: ClientGrpc,
     @Inject('POSTS_SERVICE') private readonly postsClient: ClientGrpc,
     @Inject('DOCUMENT_SERVICE') private readonly documentClient: ClientGrpc,
@@ -32,6 +34,7 @@ export class WorkflowEngineService implements OnModuleInit {
 
   onModuleInit() {
     this.userService = this.usersClient.getService<any>('UserService');
+    this.categoryService = this.categoriesClient.getService<any>('CategoryService');
     this.employeeHandlers = this.hrmClient.getService<any>('EmployeeHandlers');
     this.postService = this.postsClient.getService<any>('PostService');
     this.documentService = this.documentClient.getService<any>('DocumentService');
