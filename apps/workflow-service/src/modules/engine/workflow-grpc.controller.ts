@@ -21,6 +21,7 @@ export class WorkflowGrpcController {
           name: data.name,
           description: data.description,
           definition: data.definition || { nodes: [], edges: [] },
+          trigger: data.trigger || 'MANUAL',
         },
       });
       return this.mapWorkflow(workflow);
@@ -38,6 +39,7 @@ export class WorkflowGrpcController {
           name: data.name,
           description: data.description,
           definition: data.definition,
+          trigger: data.trigger,
         },
       });
       return this.mapWorkflow(workflow);
@@ -98,6 +100,9 @@ export class WorkflowGrpcController {
       name: w.name,
       description: w.description || '',
       definition: definition || { nodes: [], edges: [] },
+      trigger: w.trigger || 'MANUAL',
+      active: !!w.active,
+      version: w.version || 1,
       created_at: w.createdAt?.toISOString() || new Date().toISOString(),
       updated_at: w.updatedAt?.toISOString() || new Date().toISOString(),
     };

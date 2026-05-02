@@ -23,6 +23,7 @@ message CreateWorkflowRequest {
   string name = 1;
   string description = 2;
   google.protobuf.Struct definition = 3;
+  string trigger = 4;
 }
 
 message UpdateWorkflowRequest {
@@ -30,6 +31,7 @@ message UpdateWorkflowRequest {
   string name = 2;
   string description = 3;
   google.protobuf.Struct definition = 4;
+  string trigger = 5;
 }
 
 message FindOneWorkflowRequest {
@@ -59,8 +61,11 @@ message WorkflowResponse {
   string name = 2;
   string description = 3;
   google.protobuf.Struct definition = 4;
-  string created_at = 5;
-  string updated_at = 6;
+  string trigger = 5;
+  bool active = 6;
+  int32 version = 7;
+  string created_at = 8;
+  string updated_at = 9;
 }
 
 message StartWorkflowRequest {
