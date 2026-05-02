@@ -22,19 +22,21 @@ async function main() {
       active: true,
       definition: {
         nodes: [
-          { id: 'start', type: 'start', data: { label: 'Bắt đầu' } },
+          { id: 'start', type: 'start', position: { x: 250, y: 0 }, data: { label: 'Bắt đầu' } },
           { 
             id: 'mark-review', 
             type: 'service_task', 
+            position: { x: 250, y: 100 },
             data: { 
               label: 'Chuyển trạng thái Đang duyệt',
-              service: 'post',
-              action: 'ReviewPost'
+              service: 'posts-service',
+              action: 'reviewPost'
             } 
           },
           { 
             id: 'manager-approve', 
             type: 'user_task', 
+            position: { x: 250, y: 200 },
             data: { 
               label: 'Lãnh đạo phê duyệt',
               role: 'manager' 
@@ -43,6 +45,7 @@ async function main() {
           { 
             id: 'check-decision', 
             type: 'condition', 
+            position: { x: 250, y: 300 },
             data: { 
               label: 'Kiểm tra quyết định',
               expression: 'decision == "APPROVE"'
@@ -51,31 +54,34 @@ async function main() {
           { 
             id: 'execute-approve', 
             type: 'service_task', 
+            position: { x: 100, y: 400 },
             data: { 
               label: 'Cập nhật Đã duyệt',
-              service: 'post',
-              action: 'ApprovePost'
+              service: 'posts-service',
+              action: 'approvePost'
             } 
           },
           { 
             id: 'execute-publish', 
             type: 'service_task', 
+            position: { x: 100, y: 500 },
             data: { 
               label: 'Xuất bản bài viết',
-              service: 'post',
-              action: 'PublishPost'
+              service: 'posts-service',
+              action: 'publishPost'
             } 
           },
           { 
             id: 'execute-reject', 
             type: 'service_task', 
+            position: { x: 400, y: 400 },
             data: { 
               label: 'Từ chối bài viết',
-              service: 'post',
-              action: 'RejectPost'
+              service: 'posts-service',
+              action: 'rejectPost'
             } 
           },
-          { id: 'end', type: 'end', data: { label: 'Kết thúc' } }
+          { id: 'end', type: 'end', position: { x: 250, y: 600 }, data: { label: 'Kết thúc' } }
         ],
         edges: [
           { source: 'start', target: 'mark-review' },
@@ -103,16 +109,17 @@ async function main() {
       active: true,
       definition: {
         nodes: [
-          { id: 'start', type: 'start', data: { label: 'Bắt đầu' } },
+          { id: 'start', type: 'start', position: { x: 250, y: 0 }, data: { label: 'Bắt đầu' } },
           { 
             id: 'process-doc', 
             type: 'user_task', 
+            position: { x: 250, y: 150 },
             data: { 
               label: 'Phân công xử lý',
               role: 'admin' 
             } 
           },
-          { id: 'end', type: 'end', data: { label: 'Kết thúc' } }
+          { id: 'end', type: 'end', position: { x: 250, y: 300 }, data: { label: 'Kết thúc' } }
         ],
         edges: [
           { source: 'start', target: 'process-doc' },

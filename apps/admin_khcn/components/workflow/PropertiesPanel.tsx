@@ -176,6 +176,8 @@ export const PropertiesPanel = ({
                   <option value="">Chọn microservice...</option>
                   <option value="user-service">User Service</option>
                   <option value="hrm-service">HRM Service</option>
+                  <option value="posts-service">Posts Service</option>
+                  <option value="document-service">Document Service</option>
                   <option value="notification-service">Notification Service</option>
                 </select>
               </div>
@@ -200,6 +202,22 @@ export const PropertiesPanel = ({
                     <>
                         <option value="getEmployee">Lấy thông tin nhân sự</option>
                         <option value="updateContract">Cập nhật hợp đồng</option>
+                    </>
+                  )}
+                  {data.service === 'posts-service' && (
+                    <>
+                        <option value="submitPost">Gửi duyệt bài viết</option>
+                        <option value="reviewPost">Đang duyệt bài viết</option>
+                        <option value="approvePost">Phê duyệt bài viết</option>
+                        <option value="rejectPost">Từ chối bài viết</option>
+                        <option value="publishPost">Xuất bản bài viết</option>
+                    </>
+                  )}
+                  {data.service === 'document-service' && (
+                    <>
+                        <option value="receiveDocument">Tiếp nhận văn bản</option>
+                        <option value="processDocument">Xử lý văn bản</option>
+                        <option value="finalizeDocument">Hoàn tất văn bản</option>
                     </>
                   )}
                   <option value="notify">Gửi thông báo hệ thống</option>

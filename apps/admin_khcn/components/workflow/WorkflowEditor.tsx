@@ -72,9 +72,27 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         setWorkflowName(data.name);
         setWorkflowDesc(data.description || "");
         setWorkflowTrigger(data.trigger || "MANUAL");
-        if (data.definition) {
-          setNodes(data.definition.nodes || initialNodes);
-          setEdges(data.definition.edges || []);
+        
+        // Handle definition which might be stringified JSON or already an object
+        let definition = data.definition;
+        if (typeof definition === "string") {
+          try {
+            definition = JSON.parse(definition);
+          } catch (e) {
+            console.error("Failed to parse definition string:", e);
+            definition = { nodes: [], edges: [] };
+          }
+        }
+
+        if (definition) {
+          const loadedNodes = (definition.nodes || []).map((node: any) => ({
+            ...node,
+            // Ensure position exists for ReactFlow
+            position: node.position || { x: Math.random() * 400, y: Math.random() * 400 },
+          }));
+          
+          setNodes(loadedNodes.length > 0 ? loadedNodes : initialNodes);
+          setEdges(definition.edges || []);
         }
       }
     } catch (error) {

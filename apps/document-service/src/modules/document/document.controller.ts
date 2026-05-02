@@ -50,6 +50,24 @@ export class DocumentController {
   getLogs(data: { documentId: string }) {
     return this.documentService.getLogs(data.documentId);
   }
+
+  @GrpcMethod('DocumentService', 'ReceiveDocument')
+  async receiveDocument(data: { id: string, actorId?: string, actorName?: string }) {
+    const result = await this.documentService.receiveDocument(data.id, data.actorId, data.actorName);
+    return { data: result };
+  }
+
+  @GrpcMethod('DocumentService', 'ProcessDocument')
+  async processDocument(data: { id: string, actorId: string, actorName: string, note?: string }) {
+    const result = await this.documentService.processDocument(data.id, data.actorId, data.actorName, data.note);
+    return { data: result };
+  }
+
+  @GrpcMethod('DocumentService', 'FinalizeDocument')
+  async finalizeDocument(data: { id: string, actorId: string, actorName: string, note?: string }) {
+    const result = await this.documentService.finalizeDocument(data.id, data.actorId, data.actorName, data.note);
+    return { data: result };
+  }
 }
 
 

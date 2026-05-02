@@ -14,6 +14,17 @@ service DocumentService {
   rpc ExtractMetadata(ExtractMetadataRequest) returns (ExtractMetadataResponse) {}
   rpc SyncOnline(common.Empty) returns (SyncOnlineResponse) {}
   rpc GetLogs(GetLogsRequest) returns (GetLogsResponse) {}
+  
+  // Workflow methods
+  rpc ReceiveDocument(WorkflowRequest) returns (DocumentResponse) {}
+  rpc ProcessDocument(WorkflowRequest) returns (DocumentResponse) {}
+  rpc FinalizeDocument(WorkflowRequest) returns (DocumentResponse) {}
+}
+
+message WorkflowRequest {
+  string id = 1;
+  string actorId = 2;
+  optional string note = 3;
 }
 
 message GetLogsRequest {

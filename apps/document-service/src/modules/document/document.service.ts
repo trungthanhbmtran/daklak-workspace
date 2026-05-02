@@ -149,6 +149,21 @@ export class DocumentService {
     return { data: this.mapToProto(document) };
   }
 
+  async receiveDocument(id: string, actorId?: string, actorName?: string) {
+    const document = await this.workflowService.receiveDocument(id, actorId, actorName);
+    return this.mapToProto(document);
+  }
+
+  async processDocument(id: string, actorId: string, actorName: string, note?: string) {
+    const document = await this.workflowService.processDocument(id, actorId, actorName, note);
+    return this.mapToProto(document);
+  }
+
+  async finalizeDocument(id: string, actorId: string, actorName: string, note?: string) {
+    const document = await this.workflowService.finalizeDocument(id, actorId, actorName, note);
+    return this.mapToProto(document);
+  }
+
   async remove(id: string) {
     await this.prisma.document.delete({ where: { id } });
     return { success: true };
