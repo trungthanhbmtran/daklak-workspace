@@ -18,7 +18,7 @@ function toItem(c: any) {
 
 @Controller()
 export class CategoriesController {
-  constructor(private readonly catService: CategoriesService) {}
+  constructor(private readonly catService: CategoriesService) { }
 
   @GrpcMethod('CategoryService', 'GetByGroup')
   async getByGroup(data: { group: string }) {
@@ -27,9 +27,11 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'GetAllGroups')
-  async getAllGroups() {
+  async getAllGroups(_data: any) {
+    console.log('[CategoriesController] gRPC GetAllGroups called');
     const groups = await this.catService.getAllGroups();
-    return { groups };
+    console.log('[CategoriesController] Returning groups:', groups);
+    return { data: groups };
   }
 
   @GrpcMethod('CategoryService', 'Create')
