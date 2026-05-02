@@ -6,7 +6,8 @@ import { WorkflowController } from './workflow.controller';
 @Module({
   imports: [
     registerGrpcService(MICROSERVICES.WORKFLOW),
+    registerGrpcService(MICROSERVICES.SYS_CATEGORY),
   ],
   controllers: [WorkflowController],
 })
-export class WorkflowModule {}
+export class WorkflowModule { }
