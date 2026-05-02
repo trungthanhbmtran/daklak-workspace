@@ -48,7 +48,7 @@ export class CategoriesController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Danh sách các nhóm' })
   async getGroups() {
     try {
-      const res = await firstValueFrom(this.categoryService.GetAllGroups({}));
+      const res: any = await firstValueFrom(this.categoryService.GetAllGroups({}));
       return { success: true, data: res.groups || [] };
     } catch (error) {
       console.error('[CategoriesController] Error calling GetAllGroups:', error.message);
