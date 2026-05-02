@@ -29,116 +29,115 @@ export class WorkflowService implements OnModuleInit {
     this.dynamicWorkflowService = this.client.getService<any>('WorkflowService');
   }
 
-  async canTransition(postId: string, action: string, actorRole: string): Promise<boolean> {
-    const post = await this.prisma.post.findUnique({ where: { id: postId } });
-    if (!post) throw new BadRequestException('Post not found');
+  // --- Atomic Business Actions ---
 
-    const status = post.status as PostStatus;
-
-    // Transition Rules
-    switch (action) {
-      case 'SUBMIT':
-        return [PostStatus.DRAFT, PostStatus.REJECTED].includes(status);
-      case 'REVIEW':
-        return status === PostStatus.SUBMITTED;
-      case 'APPROVE':
-      case 'REJECT':
-        return status === PostStatus.UNDER_REVIEW;
-      case 'PUBLISH':
-        return [PostStatus.APPROVED, PostStatus.UNPUBLISHED].includes(status);
-      case 'UNPUBLISH':
-        return status === PostStatus.PUBLISHED;
-      case 'ARCHIVE':
-        return status !== PostStatus.ARCHIVED;
-      default:
-        return false;
-    }
+  async submit(postId: string, actorId: string, note?: string) {
+    const post = await this.updateStatus(postId, PostStatus.SUBMITTED);
+    await this.logAudit(postId, actorId, 'SUBMIT', { note });
+    await this.triggerDynamicWorkflow(post, actorId);
+    return post;
   }
 
-  async transition(postId: string, action: string, actorId: string, note?: string) {
+  async review(postId: string, actorId: string, note?: string) {
     const post = await this.prisma.post.findUnique({ where: { id: postId } });
     if (!post) throw new BadRequestException('Post not found');
-
     const oldStatus = post.status;
-    let newStatus: PostStatus;
+    const updatedPost = await this.updateStatus(postId, PostStatus.UNDER_REVIEW);
+    await this.logModeration(postId, actorId, oldStatus, PostStatus.UNDER_REVIEW, 'REVIEW', note);
+    await this.logAudit(postId, actorId, 'REVIEW', { note });
+    return updatedPost;
+  }
 
-    switch (action) {
-      case 'SUBMIT':
-        newStatus = PostStatus.SUBMITTED;
-        break;
-      case 'REVIEW':
-        newStatus = PostStatus.UNDER_REVIEW;
-        break;
-      case 'APPROVE':
-        newStatus = PostStatus.APPROVED;
-        break;
-      case 'REJECT':
-        newStatus = PostStatus.REJECTED;
-        break;
-      case 'PUBLISH':
-        newStatus = PostStatus.PUBLISHED;
-        break;
-      case 'UNPUBLISH':
-        newStatus = PostStatus.UNPUBLISHED;
-        break;
-      case 'ARCHIVE':
-        newStatus = PostStatus.ARCHIVED;
-        break;
-      default:
-        throw new BadRequestException('Invalid workflow action');
-    }
+  async approve(postId: string, actorId: string, note?: string) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+    const oldStatus = post.status;
+    const updatedPost = await this.updateStatus(postId, PostStatus.APPROVED);
+    await this.logModeration(postId, actorId, oldStatus, PostStatus.APPROVED, 'APPROVE', note);
+    await this.logAudit(postId, actorId, 'APPROVE', { note });
+    return updatedPost;
+  }
 
+  async reject(postId: string, actorId: string, note?: string) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+    const oldStatus = post.status;
+    const updatedPost = await this.updateStatus(postId, PostStatus.REJECTED);
+    await this.logModeration(postId, actorId, oldStatus, PostStatus.REJECTED, 'REJECT', note);
+    await this.logAudit(postId, actorId, 'REJECT', { note });
+    return updatedPost;
+  }
+
+  async publish(postId: string, actorId: string, note?: string) {
     const updatedPost = await this.prisma.post.update({
       where: { id: postId },
       data: {
-        status: newStatus,
-        publishedAt: action === 'PUBLISH' ? new Date() : undefined,
+        status: PostStatus.PUBLISHED,
+        publishedAt: new Date(),
       },
     });
+    await this.logAudit(postId, actorId, 'PUBLISH', { note });
+    return updatedPost;
+  }
 
-    // Log Moderation if it's an approval/rejection
-    if (['APPROVE', 'REJECT', 'REVIEW'].includes(action)) {
-      await this.prisma.moderationLog.create({
-        data: {
-          postId,
-          reviewerId: actorId,
-          oldStatus,
-          newStatus,
-          decision: action,
-          note,
-        },
-      });
-    }
+  async unpublish(postId: string, actorId: string, note?: string) {
+    const updatedPost = await this.updateStatus(postId, PostStatus.UNPUBLISHED);
+    await this.logAudit(postId, actorId, 'UNPUBLISH', { note });
+    return updatedPost;
+  }
 
-    // Log Audit
-    await this.auditService.log({
+  async archive(postId: string, actorId: string, note?: string) {
+    const updatedPost = await this.updateStatus(postId, PostStatus.ARCHIVED);
+    await this.logAudit(postId, actorId, 'ARCHIVE', { note });
+    return updatedPost;
+  }
+
+  // --- Internal Helpers ---
+
+  private async updateStatus(postId: string, status: PostStatus) {
+    return this.prisma.post.update({
+      where: { id: postId },
+      data: { status },
+    });
+  }
+
+  private async logModeration(postId: string, reviewerId: string, oldStatus: string, newStatus: PostStatus, decision: string, note?: string) {
+    return this.prisma.moderationLog.create({
+      data: {
+        postId,
+        reviewerId,
+        oldStatus,
+        newStatus,
+        decision,
+        note,
+      },
+    });
+  }
+
+  private async logAudit(postId: string, actorId: string, action: string, metadata?: any) {
+    return this.auditService.log({
       postId,
       actorId,
       action: `${action}_POST`,
       entityId: postId,
-      metadata: { oldStatus, newStatus, note },
+      metadata,
     });
+  }
 
-    // Trigger Dynamic Workflow on SUBMIT
-    if (action === 'SUBMIT') {
-      try {
-        await firstValueFrom(this.dynamicWorkflowService.TriggerWorkflow({
-          trigger: 'POST_SUBMIT',
-          initialContext: { 
-            postId, 
-            title: updatedPost.title, 
-            authorId: updatedPost.authorId,
-            status: newStatus 
-          },
-          initiatorId: actorId,
-        }));
-      } catch (e) {
-        // We don't want to block the post submission if the workflow service is down, 
-        // but we should log it.
-        console.error('Failed to trigger dynamic workflow:', e.message);
-      }
+  private async triggerDynamicWorkflow(post: any, actorId: string) {
+    try {
+      await firstValueFrom(this.dynamicWorkflowService.TriggerWorkflow({
+        trigger: 'POST_SUBMIT',
+        initialContext: {
+          postId: post.id,
+          title: post.title,
+          authorId: post.authorId,
+          status: post.status
+        },
+        initiatorId: actorId,
+      }));
+    } catch (e) {
+      console.error('Failed to trigger dynamic workflow:', e.message);
     }
-
-    return updatedPost;
   }
 }

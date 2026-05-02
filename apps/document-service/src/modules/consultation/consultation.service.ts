@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { WorkflowService } from '../workflow/workflow.service';
 
 @Injectable()
 export class ConsultationService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private workflowService: WorkflowService,
+  ) {}
 
   async create(data: any) {
     const { targetUnitIds, ...rest } = data;
@@ -96,18 +100,7 @@ export class ConsultationService {
   }
 
   async submitResponse(data: { consultationId: string, unitId: string, content: string, fileId?: string }) {
-    const response = await this.prisma.consultationResponse.updateMany({
-      where: {
-        consultationId: data.consultationId,
-        unitId: data.unitId,
-      },
-      data: {
-        content: data.content,
-        fileId: data.fileId,
-        status: 'RESPONDED',
-        respondedAt: new Date(),
-      },
-    });
+    await this.workflowService.submitConsultationResponse(data.consultationId, data.unitId, data.content, data.fileId);
     return { success: true };
   }
 

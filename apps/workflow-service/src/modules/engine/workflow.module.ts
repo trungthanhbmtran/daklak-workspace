@@ -46,6 +46,38 @@ const protoRoot =
           },
         },
       },
+      {
+        name: 'POSTS_SERVICE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'post',
+          protoPath: join(protoRoot, 'posts', 'post.proto'),
+          url: process.env.POSTS_GRPC_URL || 'localhost:50055',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [protoRoot],
+          },
+        },
+      },
+      {
+        name: 'DOCUMENT_SERVICE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'document',
+          protoPath: join(protoRoot, 'document', 'document.proto'),
+          url: process.env.DOCUMENT_GRPC_URL || 'localhost:50056',
+          loader: {
+            keepCase: true,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [protoRoot],
+          },
+        },
+      },
     ]),
   ],
   controllers: [WorkflowController, WorkflowGrpcController],

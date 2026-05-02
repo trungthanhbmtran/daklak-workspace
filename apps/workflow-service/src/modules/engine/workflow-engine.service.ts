@@ -19,16 +19,22 @@ export class WorkflowEngineService implements OnModuleInit {
 
   private userService: any;
   private employeeHandlers: any;
+  private postService: any;
+  private documentService: any;
 
   constructor(
     private readonly prisma: PrismaService,
     @Inject('USERS_SERVICE') private readonly usersClient: ClientGrpc,
     @Inject('HRM_SERVICE') private readonly hrmClient: ClientGrpc,
+    @Inject('POSTS_SERVICE') private readonly postsClient: ClientGrpc,
+    @Inject('DOCUMENT_SERVICE') private readonly documentClient: ClientGrpc,
   ) { }
 
   onModuleInit() {
     this.userService = this.usersClient.getService<any>('UserService');
     this.employeeHandlers = this.hrmClient.getService<any>('EmployeeHandlers');
+    this.postService = this.postsClient.getService<any>('PostService');
+    this.documentService = this.documentClient.getService<any>('DocumentService');
   }
 
   /**
@@ -282,6 +288,26 @@ export class WorkflowEngineService implements OnModuleInit {
             response = await firstValueFrom(this.employeeHandlers[action](context));
           } else {
             throw new Error(`Action ${action} not found on EmployeeHandlers`);
+          }
+          break;
+
+        case 'post':
+        case 'posts':
+        case 'posts-service':
+          if (this.postService && typeof this.postService[action] === 'function') {
+            response = await firstValueFrom(this.postService[action](context));
+          } else {
+            throw new Error(`Action ${action} not found on PostService`);
+          }
+          break;
+
+        case 'document':
+        case 'documents':
+        case 'document-service':
+          if (this.documentService && typeof this.documentService[action] === 'function') {
+            response = await firstValueFrom(this.documentService[action](context));
+          } else {
+            throw new Error(`Action ${action} not found on DocumentService`);
           }
           break;
 

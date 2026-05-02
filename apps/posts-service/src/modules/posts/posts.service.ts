@@ -190,31 +190,31 @@ export class PostsService {
 
   // Workflow wrappers
   async submit(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'SUBMIT', actorId, note);
+    return this.workflowService.submit(id, actorId, note);
   }
 
   async review(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'REVIEW', actorId, note);
+    return this.workflowService.review(id, actorId, note);
   }
 
   async approve(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'APPROVE', actorId, note);
+    return this.workflowService.approve(id, actorId, note);
   }
 
   async reject(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'REJECT', actorId, note);
+    return this.workflowService.reject(id, actorId, note);
   }
 
   async publish(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'PUBLISH', actorId, note);
+    return this.workflowService.publish(id, actorId, note);
   }
 
   async unpublish(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'UNPUBLISH', actorId, note);
+    return this.workflowService.unpublish(id, actorId, note);
   }
 
   async archive(id: string, actorId: string, note?: string) {
-    return this.workflowService.transition(id, 'ARCHIVE', actorId, note);
+    return this.workflowService.archive(id, actorId, note);
   }
 
   async getHistory(id: string) {

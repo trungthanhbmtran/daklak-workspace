@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { WorkflowService } from '../workflow/workflow.service';
 
 @Injectable()
 export class DocumentService {
-  constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private workflowService: WorkflowService,
+  ) { }
 
   async create(data: any) {
     console.log("[DocumentService] Creating document with data:", data);
@@ -40,11 +44,7 @@ export class DocumentService {
       },
     });
 
-    await this.logRecord(
-      document.id,
-      document.isIncoming ? "VÀO SỔ VĂN BẢN ĐẾN" : "PHÁT HÀNH VĂN BẢN ĐI",
-      "Hệ thống tự động ghi nhận khi tạo mới."
-    );
+    await this.workflowService.receiveDocument(document.id, data.userId, data.userName);
 
     return { data: this.mapToProto(document) };
   }
