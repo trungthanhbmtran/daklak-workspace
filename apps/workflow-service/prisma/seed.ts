@@ -84,14 +84,14 @@ async function main() {
           { id: 'end', type: 'end', position: { x: 250, y: 600 }, data: { label: 'Kết thúc' } }
         ],
         edges: [
-          { source: 'start', target: 'mark-review' },
-          { source: 'mark-review', target: 'manager-approve' },
-          { source: 'manager-approve', target: 'check-decision' },
-          { source: 'check-decision', target: 'execute-approve', label: 'True' },
-          { source: 'check-decision', target: 'execute-reject', label: 'False' },
-          { source: 'execute-approve', target: 'execute-publish' },
-          { source: 'execute-publish', target: 'end' },
-          { source: 'execute-reject', target: 'end' }
+          { id: 'e1', source: 'start', target: 'mark-review' },
+          { id: 'e2', source: 'mark-review', target: 'manager-approve' },
+          { id: 'e3', source: 'manager-approve', target: 'check-decision' },
+          { id: 'e4', source: 'check-decision', target: 'execute-approve', label: 'True' },
+          { id: 'e5', source: 'check-decision', target: 'execute-reject', label: 'False' },
+          { id: 'e6', source: 'execute-approve', target: 'execute-publish' },
+          { id: 'e7', source: 'execute-publish', target: 'end' },
+          { id: 'e8', source: 'execute-reject', target: 'end' }
         ]
       }
     }
@@ -122,8 +122,8 @@ async function main() {
           { id: 'end', type: 'end', position: { x: 250, y: 300 }, data: { label: 'Kết thúc' } }
         ],
         edges: [
-          { source: 'start', target: 'process-doc' },
-          { source: 'process-doc', target: 'end' }
+          { id: 'e-doc-1', source: 'start', target: 'process-doc' },
+          { id: 'e-doc-2', source: 'process-doc', target: 'end' }
         ]
       }
     }

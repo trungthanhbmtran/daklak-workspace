@@ -83,11 +83,21 @@ export class WorkflowGrpcController {
   // --- Helpers ---
 
   private mapWorkflow(w: any) {
+    // Ensure definition is a clean object for gRPC Struct mapping
+    let definition = w.definition;
+    if (definition && typeof definition === 'object') {
+      try {
+        definition = JSON.parse(JSON.stringify(definition));
+      } catch (e) {
+        definition = { nodes: [], edges: [] };
+      }
+    }
+
     return {
       id: w.id,
       name: w.name,
       description: w.description || '',
-      definition: w.definition || { nodes: [], edges: [] },
+      definition: definition || { nodes: [], edges: [] },
       created_at: w.createdAt?.toISOString() || new Date().toISOString(),
       updated_at: w.updatedAt?.toISOString() || new Date().toISOString(),
     };

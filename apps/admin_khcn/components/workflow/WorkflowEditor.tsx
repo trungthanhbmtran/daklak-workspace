@@ -64,10 +64,29 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
     }
   }, [id]);
 
+  const onInit = useCallback((instance: any) => {
+    console.log("ReactFlow initialized");
+    instance.fitView();
+  }, []);
+
+  // Explicitly fit view when nodes change
+  useEffect(() => {
+    if (nodes.length > 1 && !isLoading) {
+      // Small timeout to ensure the DOM has updated
+      setTimeout(() => {
+        // We can't call fitView directly here easily without the instance, 
+        // but fitView prop on ReactFlow should handle it if the prop changes.
+      }, 100);
+    }
+  }, [nodes.length, isLoading]);
+
   const loadWorkflow = async (workflowId: string) => {
     setIsLoading(true);
     try {
+      console.log(`Loading workflow: ${workflowId}`);
       const data = await workflowApi.getOne(workflowId);
+      console.log("Loaded data:", data);
+      
       if (data) {
         setWorkflowName(data.name);
         setWorkflowDesc(data.description || "");
@@ -75,6 +94,12 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         
         // Handle definition which might be stringified JSON or already an object
         let definition = data.definition;
+        
+        // Handle cases where the definition might be wrapped or named differently
+        if (!definition && (data as any).workflowDefinition) {
+          definition = (data as any).workflowDefinition;
+        }
+
         if (typeof definition === "string") {
           try {
             definition = JSON.parse(definition);
@@ -85,14 +110,26 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         }
 
         if (definition) {
+          console.log("Definition found:", definition);
           const loadedNodes = (definition.nodes || []).map((node: any) => ({
             ...node,
             // Ensure position exists for ReactFlow
             position: node.position || { x: Math.random() * 400, y: Math.random() * 400 },
           }));
           
+          console.log(`Setting ${loadedNodes.length} nodes`);
           setNodes(loadedNodes.length > 0 ? loadedNodes : initialNodes);
-          setEdges(definition.edges || []);
+          
+          const loadedEdges = (definition.edges || []).map((edge: any, index: number) => ({
+            ...edge,
+            id: edge.id || `edge-${edge.source}-${edge.target}-${index}`,
+          }));
+          
+          console.log(`Setting ${loadedEdges.length} edges`);
+          setEdges(loadedEdges);
+        } else {
+          console.warn("No definition found in workflow data");
+          setNodes(initialNodes);
         }
       }
     } catch (error) {
@@ -228,10 +265,10 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
         isSaving={isSaving}
       />
       
-      <div className="flex flex-1 overflow-hidden relative" ref={reactFlowWrapper}>
+      <div className="flex flex-1 overflow-hidden relative min-h-0" ref={reactFlowWrapper}>
         <NodePalette />
         
-        <div className="flex-1 relative bg-muted/20">
+        <div className="flex-1 relative bg-muted/20 min-h-[500px]">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -243,6 +280,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
             onNodeClick={onNodeClick}
             onPaneClick={onPaneClick}
             nodeTypes={nodeTypes}
+            onInit={onInit}
             fitView
             className="transition-opacity duration-300"
           >

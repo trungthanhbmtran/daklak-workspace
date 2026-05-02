@@ -1,9 +1,9 @@
 import React from "react";
 import { Node } from "@xyflow/react";
-import { 
-  X, 
-  Settings2, 
-  Trash2, 
+import {
+  X,
+  Settings2,
+  Trash2,
   Info,
   Type,
   ChevronRight,
@@ -26,11 +26,11 @@ interface PropertiesPanelProps {
   setWorkflowTrigger: (trigger: string) => void;
 }
 
-export const PropertiesPanel = ({ 
-  selectedNode, 
+export const PropertiesPanel = ({
+  selectedNode,
   availableServices = [],
-  onUpdate, 
-  onDelete, 
+  onUpdate,
+  onDelete,
   onClose,
   workflowDesc,
   setWorkflowDesc,
@@ -48,49 +48,49 @@ export const PropertiesPanel = ({
 
   const renderFields = () => {
     if (!selectedNode) {
-        return (
-            <div className="space-y-6">
-                <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
-                        <Activity className="h-3.5 w-3.5" /> Kích hoạt tự động (Trigger)
-                    </label>
-                    <select
-                        value={workflowTrigger || ""}
-                        onChange={(e) => setWorkflowTrigger(e.target.value)}
-                        className="w-full bg-muted/30 border border-border/40 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    >
-                        <option value="">Chọn sự kiện kích hoạt...</option>
-                        <option value="MANUAL">Kích hoạt thủ công</option>
-                        <option value="POST_SUBMIT">Khi gửi duyệt bài viết (Posts)</option>
-                        <option value="DOC_RECEIVED">Khi nhận văn bản mới (Documents)</option>
-                        <option value="USER_CREATED">Khi tạo tài khoản mới (Users)</option>
-                    </select>
-                    <p className="text-[10px] text-muted-foreground mt-2 italic">
-                        Quy trình sẽ tự động bắt đầu khi sự kiện này xảy ra.
-                    </p>
-                </div>
-                <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
-                        <FileText className="h-3.5 w-3.5" /> Mô tả quy trình
-                    </label>
-                    <Textarea
-                        value={workflowDesc}
-                        onChange={(e) => setWorkflowDesc(e.target.value)}
-                        placeholder="Nhập mô tả cho quy trình này..."
-                        className="min-h-[150px] rounded-xl bg-muted/30 border-border/40 focus-visible:ring-primary/20 resize-none text-sm"
-                    />
-                </div>
-                <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
-                    <h4 className="text-xs font-bold text-primary uppercase mb-2">Hướng dẫn nhanh</h4>
-                    <ul className="text-[11px] text-muted-foreground space-y-2 list-disc pl-4">
-                        <li>Kéo thả các node từ thanh công cụ bên trái.</li>
-                        <li>Kết nối các node để tạo luồng xử lý.</li>
-                        <li>Nhấp vào một node để cấu hình chi tiết.</li>
-                        <li>Đừng quên lưu bản nháp thường xuyên.</li>
-                    </ul>
-                </div>
-            </div>
-        );
+      return (
+        <div className="space-y-6">
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
+              <Activity className="h-3.5 w-3.5" /> Kích hoạt tự động (Trigger)
+            </label>
+            <select
+              value={workflowTrigger || ""}
+              onChange={(e) => setWorkflowTrigger(e.target.value)}
+              className="w-full bg-muted/30 border border-border/40 rounded-xl p-2.5 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+            >
+              <option value="">Chọn sự kiện kích hoạt...</option>
+              <option value="MANUAL">Kích hoạt thủ công</option>
+              <option value="POST_SUBMIT">Khi gửi duyệt bài viết (Posts)</option>
+              <option value="DOC_RECEIVED">Khi nhận văn bản mới (Documents)</option>
+              <option value="USER_CREATED">Khi tạo tài khoản mới (Users)</option>
+            </select>
+            <p className="text-[10px] text-muted-foreground mt-2 italic">
+              Quy trình sẽ tự động bắt đầu khi sự kiện này xảy ra.
+            </p>
+          </div>
+          <div>
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
+              <FileText className="h-3.5 w-3.5" /> Mô tả quy trình
+            </label>
+            <Textarea
+              value={workflowDesc}
+              onChange={(e) => setWorkflowDesc(e.target.value)}
+              placeholder="Nhập mô tả cho quy trình này..."
+              className="min-h-[150px] rounded-xl bg-muted/30 border-border/40 focus-visible:ring-primary/20 resize-none text-sm"
+            />
+          </div>
+          <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
+            <h4 className="text-xs font-bold text-primary uppercase mb-2">Hướng dẫn nhanh</h4>
+            <ul className="text-[11px] text-muted-foreground space-y-2 list-disc pl-4">
+              <li>Kéo thả các node từ thanh công cụ bên trái.</li>
+              <li>Kết nối các node để tạo luồng xử lý.</li>
+              <li>Nhấp vào một node để cấu hình chi tiết.</li>
+              <li>Đừng quên lưu bản nháp thường xuyên.</li>
+            </ul>
+          </div>
+        </div>
+      );
     }
 
     const { type } = selectedNode;
@@ -99,130 +99,130 @@ export const PropertiesPanel = ({
       case "user_task":
         return (
           <div className="space-y-4">
-               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Vai trò xử lý (PBAC)
-                </label>
-                <select
-                  name="role"
-                  value={data.role || ""}
-                  onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                >
-                  <option value="">Chọn vai trò...</option>
-                  <option value="ADMIN">Administrator</option>
-                  <option value="MANAGER">Quản lý phòng ban</option>
-                  <option value="STAFF">Nhân viên nghiệp vụ</option>
-                  <option value="EXPERT">Chuyên gia phản biện</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Yêu cầu xử lý
-                </label>
-                <textarea
-                  name="description"
-                  value={data.description || ""}
-                  onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
-                  placeholder="Mô tả công việc cần thực hiện ở bước này..."
-                />
-              </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Vai trò xử lý (PBAC)
+              </label>
+              <select
+                name="role"
+                value={data.role || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <option value="">Chọn vai trò...</option>
+                <option value="ADMIN">Administrator</option>
+                <option value="MANAGER">Quản lý phòng ban</option>
+                <option value="STAFF">Nhân viên nghiệp vụ</option>
+                <option value="EXPERT">Chuyên gia phản biện</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Yêu cầu xử lý
+              </label>
+              <textarea
+                name="description"
+                value={data.description || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                placeholder="Mô tả công việc cần thực hiện ở bước này..."
+              />
+            </div>
           </div>
         );
       case "condition":
         return (
           <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Biểu thức logic (fx)
-                </label>
-                <div className="relative group">
-                  <div className="absolute left-3 top-3 text-muted-foreground group-focus-within:text-primary transition-colors">
-                     <span className="font-mono text-xs font-bold">fx</span>
-                  </div>
-                  <input
-                    name="expression"
-                    value={data.expression || ""}
-                    onChange={handleChange}
-                    className="w-full bg-background border border-border rounded-lg p-2.5 pl-10 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                    placeholder="e.g. status === 'approved'"
-                  />
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Biểu thức logic (fx)
+              </label>
+              <div className="relative group">
+                <div className="absolute left-3 top-3 text-muted-foreground group-focus-within:text-primary transition-colors">
+                  <span className="font-mono text-xs font-bold">fx</span>
                 </div>
+                <input
+                  name="expression"
+                  value={data.expression || ""}
+                  onChange={handleChange}
+                  className="w-full bg-background border border-border rounded-lg p-2.5 pl-10 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                  placeholder="e.g. status === 'approved'"
+                />
               </div>
-              <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
-                <div className="flex gap-2">
-                  <Info className="h-4 w-4 text-amber-600 shrink-0" />
-                  <p className="text-[11px] text-amber-800 leading-normal">
-                    Nếu kết quả là <b>true</b>, quy trình đi theo nhánh "True". Nếu <b>false</b>, đi theo nhánh "False".
-                  </p>
-                </div>
+            </div>
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex gap-2">
+                <Info className="h-4 w-4 text-amber-600 shrink-0" />
+                <p className="text-[11px] text-amber-800 leading-normal">
+                  Nếu kết quả là <b>true</b>, quy trình đi theo nhánh "True". Nếu <b>false</b>, đi theo nhánh "False".
+                </p>
               </div>
+            </div>
           </div>
         );
       case "service_task":
         return (
           <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Dịch vụ mục tiêu
-                </label>
-                <select
-                  name="service"
-                  value={data.service || ""}
-                  onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                >
-                  <option value="">Chọn microservice...</option>
-                  <option value="user-service">User Service</option>
-                  <option value="hrm-service">HRM Service</option>
-                  <option value="posts-service">Posts Service</option>
-                  <option value="document-service">Document Service</option>
-                  <option value="notification-service">Notification Service</option>
-                </select>
-              </div>
-               <div>
-                <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
-                  Hành động
-                </label>
-                <select
-                  name="action"
-                  value={data.action || ""}
-                  onChange={handleChange}
-                  className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
-                >
-                  <option value="">Chọn hành động...</option>
-                  {data.service === 'user-service' && (
-                    <>
-                        <option value="findOne">Tìm kiếm người dùng</option>
-                        <option value="setUserActive">Kích hoạt tài khoản</option>
-                    </>
-                  )}
-                  {data.service === 'hrm-service' && (
-                    <>
-                        <option value="getEmployee">Lấy thông tin nhân sự</option>
-                        <option value="updateContract">Cập nhật hợp đồng</option>
-                    </>
-                  )}
-                  {data.service === 'posts-service' && (
-                    <>
-                        <option value="submitPost">Gửi duyệt bài viết</option>
-                        <option value="reviewPost">Đang duyệt bài viết</option>
-                        <option value="approvePost">Phê duyệt bài viết</option>
-                        <option value="rejectPost">Từ chối bài viết</option>
-                        <option value="publishPost">Xuất bản bài viết</option>
-                    </>
-                  )}
-                  {data.service === 'document-service' && (
-                    <>
-                        <option value="receiveDocument">Tiếp nhận văn bản</option>
-                        <option value="processDocument">Xử lý văn bản</option>
-                        <option value="finalizeDocument">Hoàn tất văn bản</option>
-                    </>
-                  )}
-                  <option value="notify">Gửi thông báo hệ thống</option>
-                </select>
-              </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Dịch vụ mục tiêu
+              </label>
+              <select
+                name="service"
+                value={data.service || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <option value="">Chọn microservice...</option>
+                <option value="user-service">User Service</option>
+                <option value="hrm-service">HRM Service</option>
+                <option value="posts-service">Posts Service</option>
+                <option value="document-service">Document Service</option>
+                <option value="notification-service">Notification Service</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Hành động
+              </label>
+              <select
+                name="action"
+                value={data.action || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <option value="">Chọn hành động...</option>
+                {data.service === 'user-service' && (
+                  <>
+                    <option value="findOne">Tìm kiếm người dùng</option>
+                    <option value="setUserActive">Kích hoạt tài khoản</option>
+                  </>
+                )}
+                {data.service === 'hrm-service' && (
+                  <>
+                    <option value="getEmployee">Lấy thông tin nhân sự</option>
+                    <option value="updateContract">Cập nhật hợp đồng</option>
+                  </>
+                )}
+                {data.service === 'posts-service' && (
+                  <>
+                    <option value="submitPost">Gửi duyệt bài viết</option>
+                    <option value="reviewPost">Đang duyệt bài viết</option>
+                    <option value="approvePost">Phê duyệt bài viết</option>
+                    <option value="rejectPost">Từ chối bài viết</option>
+                    <option value="publishPost">Xuất bản bài viết</option>
+                  </>
+                )}
+                {data.service === 'document-service' && (
+                  <>
+                    <option value="receiveDocument">Tiếp nhận văn bản</option>
+                    <option value="processDocument">Xử lý văn bản</option>
+                    <option value="finalizeDocument">Hoàn tất văn bản</option>
+                  </>
+                )}
+                <option value="notify">Gửi thông báo hệ thống</option>
+              </select>
+            </div>
           </div>
         );
       default:
@@ -244,48 +244,48 @@ export const PropertiesPanel = ({
         <div className="flex items-center gap-2">
           {selectedNode ? <Settings2 className="h-4 w-4 text-primary" /> : <Activity className="h-4 w-4 text-primary" />}
           <h3 className="text-sm font-bold truncate max-w-[140px]">
-             {selectedNode ? `${data.label || selectedNode.type}` : "Cấu hình quy trình"}
+            {selectedNode ? `${data.label || selectedNode.type}` : "Cấu hình quy trình"}
           </h3>
         </div>
         {selectedNode && (
-            <button onClick={onClose} className="p-1 rounded-md hover:bg-muted transition-colors">
-                <X className="h-4 w-4 text-muted-foreground" />
-            </button>
+          <button onClick={onClose} className="p-1 rounded-md hover:bg-muted transition-colors">
+            <X className="h-4 w-4 text-muted-foreground" />
+          </button>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto p-5">
-         {selectedNode && (
-             <div className="mb-6 pb-6 border-b border-border/40">
-               <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">
-                 Thông tin Node
-               </label>
-               <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/60">
-                 <div className="text-[10px] font-mono font-bold bg-background px-2 py-0.5 rounded border border-border/80 shadow-sm">
-                   #{selectedNode.id.slice(-6)}
-                 </div>
-                 <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
-                   {selectedNode.type}
-                 </div>
-               </div>
-             </div>
-         )}
+        {selectedNode && (
+          <div className="mb-6 pb-6 border-b border-border/40">
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2 block">
+              Thông tin Node
+            </label>
+            <div className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border border-border/60">
+              <div className="text-[10px] font-mono font-bold bg-background px-2 py-0.5 rounded border border-border/80 shadow-sm">
+                #{selectedNode.id.slice(-6)}
+              </div>
+              <div className="text-[10px] uppercase font-bold text-muted-foreground/60 tracking-wider">
+                {selectedNode.type}
+              </div>
+            </div>
+          </div>
+        )}
 
         {renderFields()}
       </div>
 
       {selectedNode && (
-          <div className="p-4 border-t border-border/60 bg-muted/5 flex items-center justify-between gap-3">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 rounded-xl"
-              onClick={() => onDelete(selectedNode.id)}
-            >
-              <Trash2 className="h-3.5 w-3.5 mr-2" />
-              Xóa bước này
-            </Button>
-          </div>
+        <div className="p-4 border-t border-border/60 bg-muted/5 flex items-center justify-between gap-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-100 rounded-xl"
+            onClick={() => onDelete(selectedNode.id)}
+          >
+            <Trash2 className="h-3.5 w-3.5 mr-2" />
+            Xóa bước này
+          </Button>
+        </div>
       )}
     </aside>
   );
