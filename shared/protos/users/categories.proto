@@ -12,8 +12,13 @@ service CategoryService {
 
 message EmptyRequest {}
 
+message Group {
+  string code = 1;
+  string name = 2;
+}
+
 message GetAllGroupsResponse {
-  repeated string groups = 1;
+  repeated Group groups = 1;
 }
 
 message GetByGroupRequest {

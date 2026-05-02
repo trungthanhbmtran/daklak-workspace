@@ -240,6 +240,50 @@ async function main() {
     });
   }
   console.log('✅ Categories seeded');
+ 
+  // ==========================================================
+  // 3.2 CATEGORY GROUPS (For friendly names)
+  // ==========================================================
+  const groupLabels = [
+    { code: 'STATUS', name: 'Trạng thái hệ thống' },
+    { code: 'ACTION_LOG', name: 'Nhật ký hoạt động' },
+    { code: 'MICROSERVICE', name: 'Dịch vụ hệ thống' },
+    { code: 'PROVINCE', name: 'Danh mục Tỉnh/Thành' },
+    { code: 'DISTRICT', name: 'Danh mục Quận/Huyện' },
+    { code: 'WARD', name: 'Danh mục Phường/Xã' },
+    { code: 'GEO_AREA', name: 'Khu vực địa lý' },
+    { code: 'DOCUMENT_TYPE', name: 'Loại văn bản' },
+    { code: 'URGENCY_LEVEL', name: 'Độ khẩn' },
+    { code: 'SECURITY_LEVEL', name: 'Độ mật' },
+    { code: 'DOCUMENT_DOMAIN', name: 'Lĩnh vực văn bản' },
+    { code: 'STORAGE_PERIOD', name: 'Thời hạn bảo quản' },
+    { code: 'GENDER', name: 'Giới tính' },
+    { code: 'ETHNICITY', name: 'Dân tộc' },
+    { code: 'RELIGION', name: 'Tôn giáo' },
+    { code: 'IDENTITY_TYPE', name: 'Giấy tờ định danh' },
+    { code: 'POSITION', name: 'Chức vụ' },
+    { code: 'CIVIL_SERVANT_RANK', name: 'Ngạch công chức' },
+    { code: 'ACADEMIC_RANK', name: 'Học hàm/Học vị' },
+    { code: 'POLITICAL_THEORY', name: 'Lý luận chính trị' },
+    { code: 'STATE_MANAGEMENT', name: 'Quản lý nhà nước' },
+    { code: 'IT_SKILL', name: 'Trình độ tin học' },
+    { code: 'LANGUAGE_SKILL', name: 'Trình độ ngoại ngữ' },
+    { code: 'DOMAIN', name: 'Lĩnh vực nghiệp vụ' },
+    { code: 'CONTENT_TYPE', name: 'Loại nội dung' },
+    { code: 'DEPARTMENT', name: 'Phòng ban' },
+    { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
+    { code: 'WORKFLOW_ACTION', name: 'Hành động quy trình' },
+  ];
+
+  console.log('📦 Seeding Category Groups...');
+  for (const g of groupLabels) {
+    await prisma.categoryGroup.upsert({
+      where: { code: g.code },
+      update: { name: g.name },
+      create: g,
+    });
+  }
+  console.log('✅ Category Groups seeded');
 
   // ==========================================================
   // 3.1 UNIT TYPES (New Model)

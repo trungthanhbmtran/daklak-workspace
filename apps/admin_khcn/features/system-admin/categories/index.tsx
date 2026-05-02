@@ -34,7 +34,7 @@ export function CategoryClient() {
         isLoading={isLoading}
         searchGroupTerm={ui.state.searchGroupTerm}
         setSearchGroupTerm={ui.setters.setSearchGroupTerm}
-        filteredGroupKeys={ui.derived.filteredGroupKeys}
+        filteredGroups={ui.derived.filteredGroups}
         activeGroup={ui.state.activeGroup}
         uniqueGroups={ui.derived.uniqueGroups}
         onSelectGroup={(group) => { ui.setters.setActiveGroup(group); ui.setters.setSearchTerm(""); }}
@@ -43,7 +43,7 @@ export function CategoryClient() {
       <div className="flex-1 w-full space-y-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="hidden sm:block">
-            <h3 className="text-lg font-semibold text-foreground">{GROUP_LABELS[ui.state.activeGroup] || ui.state.activeGroup}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{groups?.find(g => g.code === ui.state.activeGroup)?.name || ui.state.activeGroup}</h3>
             <p className="text-sm text-muted-foreground">Quản lý các giá trị thuộc nhóm này</p>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">

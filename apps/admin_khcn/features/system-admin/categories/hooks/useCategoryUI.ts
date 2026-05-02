@@ -1,8 +1,7 @@
 import { useState, useMemo } from "react";
-import { CategoryItem } from "../types";
-import { GROUP_LABELS } from "../constants";
+import type { CategoryItem } from "../types";
 
-export function useCategoryUI(serverData: CategoryItem[] = [], groups: string[] = []) {
+export function useCategoryUI(serverData: CategoryItem[] = [], groups: { code: string; name: string }[] = []) {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchGroupTerm, setSearchGroupTerm] = useState("");
   const [activeGroup, setActiveGroup] = useState<string>("UNIT_TYPE");
@@ -14,13 +13,14 @@ export function useCategoryUI(serverData: CategoryItem[] = [], groups: string[] 
   const uniqueGroups = useMemo(() => {
     // Hoàn toàn lấy từ Server (groups), nếu chưa tải xong thì có thể fallback tạm từ serverData
     if (groups && groups.length > 0) return groups;
-    return Array.from(new Set(serverData.map((item) => item.group)));
+    const codes = Array.from(new Set(serverData.map((item) => item.group)));
+    return codes.map(c => ({ code: c, name: c }));
   }, [serverData, groups]);
 
-  const filteredGroupKeys = useMemo(() => {
-    return uniqueGroups.filter((groupCode) => {
-      const label = GROUP_LABELS[groupCode] || groupCode;
-      return label.toLowerCase().includes(searchGroupTerm.toLowerCase());
+  const filteredGroups = useMemo(() => {
+    return uniqueGroups.filter((group) => {
+      return group.name.toLowerCase().includes(searchGroupTerm.toLowerCase()) ||
+        group.code.toLowerCase().includes(searchGroupTerm.toLowerCase());
     });
   }, [uniqueGroups, searchGroupTerm]);
 
@@ -36,6 +36,6 @@ export function useCategoryUI(serverData: CategoryItem[] = [], groups: string[] 
   return {
     state: { searchTerm, searchGroupTerm, activeGroup, isCreateOpen, editingItem },
     setters: { setSearchTerm, setSearchGroupTerm, setActiveGroup, setIsCreateOpen, setEditingItem },
-    derived: { uniqueGroups, filteredGroupKeys, filteredData }
+    derived: { uniqueGroups, filteredGroups, filteredData }
   };
 }

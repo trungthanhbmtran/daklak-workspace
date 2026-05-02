@@ -14,11 +14,21 @@ export class CategoriesService {
   }
 
   async getAllGroups() {
-    const groups = await this.prisma.category.findMany({
-      select: { group: true },
-      distinct: ['group'],
+    const groups = await this.prisma.categoryGroup.findMany({
+      where: { is_active: true },
+      orderBy: { order: 'asc' },
     });
-    return groups.map((g) => g.group);
+    
+    // Nếu bảng CategoryGroup trống (chưa seed), trả về danh sách group code từ Category như cũ làm fallback
+    if (groups.length === 0) {
+      const distinctGroups = await this.prisma.category.findMany({
+        select: { group: true },
+        distinct: ['group'],
+      });
+      return distinctGroups.map((g) => ({ code: g.group, name: g.group }));
+    }
+
+    return groups.map((g) => ({ code: g.code, name: g.name }));
   }
 
   // Tạo mới (Dành cho Admin cấu hình)

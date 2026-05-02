@@ -3,19 +3,18 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { GROUP_LABELS } from "../constants";
 
 interface SidebarProps {
   isLoading: boolean;
   searchGroupTerm: string;
   setSearchGroupTerm: (val: string) => void;
-  filteredGroupKeys: string[];
+  filteredGroups: { code: string; name: string }[];
   activeGroup: string;
   onSelectGroup: (group: string) => void;
-  uniqueGroups: string[];
+  uniqueGroups: { code: string; name: string }[];
 }
 
-export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm, filteredGroupKeys, activeGroup, onSelectGroup, uniqueGroups }: SidebarProps) {
+export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm, filteredGroups, activeGroup, onSelectGroup, uniqueGroups }: SidebarProps) {
   return (
     <>
       <Card className="hidden md:flex w-72 shrink-0 flex-col p-3 border-border/50 shadow-sm sticky top-20 h-[calc(100vh-8rem)]">
@@ -34,18 +33,18 @@ export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm
         <div className="flex-1 overflow-y-auto pr-1 space-y-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40">
           {isLoading ? (
             <div className="flex items-center justify-center py-4 text-muted-foreground"><Loader2 className="h-5 w-5 animate-spin mr-2" /> Đang tải...</div>
-          ) : filteredGroupKeys.length > 0 ? (
-            filteredGroupKeys.map((groupCode) => {
-              const isActive = activeGroup === groupCode;
+          ) : filteredGroups.length > 0 ? (
+            filteredGroups.map((group) => {
+              const isActive = activeGroup === group.code;
               return (
                 <Button
-                  key={groupCode}
+                  key={group.code}
                   variant={isActive ? "secondary" : "ghost"}
                   className={`w-full justify-start font-normal transition-colors h-9 px-3 ${isActive ? "bg-primary/10 text-primary font-medium" : "hover:bg-muted"}`}
-                  onClick={() => onSelectGroup(groupCode)}
+                  onClick={() => onSelectGroup(group.code)}
                 >
                   <FolderGit2 className={`mr-2 h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-                  <span className="truncate">{GROUP_LABELS[groupCode] || groupCode}</span>
+                  <span className="truncate">{group.name}</span>
                 </Button>
               );
             })
@@ -60,8 +59,8 @@ export function CategorySidebar({ isLoading, searchGroupTerm, setSearchGroupTerm
         <Select value={activeGroup} onValueChange={onSelectGroup}>
           <SelectTrigger className="w-full bg-background h-11"><SelectValue placeholder="Chọn nhóm danh mục" /></SelectTrigger>
           <SelectContent>
-            {uniqueGroups.map((groupCode) => (
-              <SelectItem key={groupCode} value={groupCode}>{GROUP_LABELS[groupCode] || groupCode}</SelectItem>
+            {uniqueGroups.map((group) => (
+              <SelectItem key={group.code} value={group.code}>{group.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>

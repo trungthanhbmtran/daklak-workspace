@@ -20,3 +20,14 @@ model Category {
   @@index([group])        
   @@map("sys_categories")
 }
+
+model CategoryGroup {
+  code        String   @id
+  name        String
+  description String?
+  order       Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+
+  @@map("sys_category_groups")
+}

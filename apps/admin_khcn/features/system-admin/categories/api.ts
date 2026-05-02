@@ -5,14 +5,12 @@ import { GROUP_KEYS } from "./constants";
 export const categoryApi = {
   fetchAll: async (): Promise<CategoryItem[]> => {
     // 1. Lấy danh sách groups từ server trước
-    let groups = GROUP_KEYS;
-    if (!groups || groups.length === 0) {
-      try {
-        groups = await categoryApi.fetchGroups();
-      } catch (err) {
-        console.error("Failed to fetch groups, fallback to empty list", err);
-        groups = [];
-      }
+    let groups: { code: string; name: string }[] = [];
+    try {
+      groups = await categoryApi.fetchGroups();
+    } catch (err) {
+      console.error("Failed to fetch groups, fallback to empty list", err);
+      groups = [];
     }
 
     if (groups.length === 0) return [];
@@ -53,7 +51,7 @@ export const categoryApi = {
     return apiClient.delete(`/categories/${id}`);
   },
 
-  fetchGroups: async (): Promise<string[]> => {
+  fetchGroups: async (): Promise<{ code: string; name: string }[]> => {
     try {
       const res: any = await apiClient.get("/categories/groups");
       console.log("[categoryApi] fetchGroups raw response:", res);
