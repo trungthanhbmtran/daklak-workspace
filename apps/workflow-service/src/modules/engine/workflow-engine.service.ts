@@ -79,9 +79,9 @@ export class WorkflowEngineService implements OnModuleInit {
     const startNode = nodes.find((n: any) => n.type === "start");
 
     if (!startNode) {
-      await this.updateStatus(instance.id, WorkflowStatus.FAILED, "No start node found in definition");
-      // Still return the instance so caller knows it failed but was created
-      return instance;
+      const errorMsg = `No start node found in workflow "${workflow.name}" definition. Found ${nodes.length} nodes but none of type "start".`;
+      await this.updateStatus(instance.id, WorkflowStatus.FAILED, errorMsg);
+      throw new Error(errorMsg);
     }
 
     // Begin recursive execution

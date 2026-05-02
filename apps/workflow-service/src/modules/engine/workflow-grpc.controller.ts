@@ -28,23 +28,28 @@ export class WorkflowGrpcController {
     private readonly prisma: PrismaService,
   ) { }
 
-  private ensureValidDefinition(def: any): WorkflowDefinition {
+  private ensureValidDefinition(def: any): any {
     if (!def) return { nodes: [], edges: [] };
     
-    // Nếu gRPC gửi Struct rỗng hoặc không đúng định dạng
-    const nodes = def.nodes || [];
-    const edges = def.edges || [];
+    let result = def;
+    if (typeof def === 'string') {
+      try {
+        result = JSON.parse(def);
+      } catch (e) {
+        return { nodes: [], edges: [] };
+      }
+    }
     
     return {
-      nodes: Array.isArray(nodes) ? nodes : [],
-      edges: Array.isArray(edges) ? edges : [],
+      nodes: Array.isArray(result.nodes) ? result.nodes : [],
+      edges: Array.isArray(result.edges) ? result.edges : [],
     };
   }
 
   // --- CRUD Operations ---
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
-  async createWorkflow(data: { name: string; description?: string; definition?: any; trigger?: string }) {
+  async createWorkflow(data: { name: string; description?: string; definition?: string; trigger?: string }) {
     try {
       console.log('[WorkflowService] Creating workflow:', data.name);
       const definition = this.ensureValidDefinition(data.definition);
@@ -53,7 +58,7 @@ export class WorkflowGrpcController {
         data: {
           name: data.name,
           description: data.description,
-          definition: definition as any,
+          definition: definition,
           trigger: data.trigger || 'MANUAL',
         },
       });
@@ -65,7 +70,7 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(data: { id: string; name?: string; description?: string; definition?: any; trigger?: string }) {
+  async updateWorkflow(data: { id: string; name?: string; description?: string; definition?: string; trigger?: string }) {
     try {
       console.log('[WorkflowService] Updating workflow:', data.id);
       
@@ -126,12 +131,12 @@ export class WorkflowGrpcController {
 
   // --- Helpers ---
 
-  private mapWorkflow(w: any): WorkflowItem {
+  private mapWorkflow(w: any): any {
     return {
       id: w.id,
       name: w.name,
       description: w.description || '',
-      definition: (w.definition as unknown as WorkflowDefinition) || { nodes: [], edges: [] },
+      definition: JSON.stringify(w.definition || { nodes: [], edges: [] }),
       trigger: w.trigger || 'MANUAL',
       active: !!w.active,
       version: w.version || 1,

@@ -44,10 +44,13 @@ export class WorkflowController implements OnModuleInit {
     const payload = {
       name: body.name,
       description: body.description,
-      definition: body.definition,
+      definition: JSON.stringify(body.definition || { nodes: [], edges: [] }),
       trigger: body.trigger,
     };
     const result = await firstValueFrom(this.workflowService.CreateWorkflow(payload)) as any;
+    if (result && typeof result.definition === 'string') {
+      try { result.definition = JSON.parse(result.definition); } catch (e) { }
+    }
     return { data: result };
   }
 
@@ -58,10 +61,13 @@ export class WorkflowController implements OnModuleInit {
       id,
       name: body.name,
       description: body.description,
-      definition: body.definition,
+      definition: JSON.stringify(body.definition),
       trigger: body.trigger,
     };
     const result = await firstValueFrom(this.workflowService.UpdateWorkflow(payload)) as any;
+    if (result && typeof result.definition === 'string') {
+      try { result.definition = JSON.parse(result.definition); } catch (e) { }
+    }
     return { data: result };
   }
 
@@ -71,8 +77,14 @@ export class WorkflowController implements OnModuleInit {
     const skip = parseInt(query.skip) || 0;
     const take = parseInt(query.take) || 20;
     const result = await firstValueFrom(this.workflowService.ListWorkflows({ skip, take })) as any;
+    const items = (result.items || []).map((item: any) => {
+      if (typeof item.definition === 'string') {
+        try { item.definition = JSON.parse(item.definition); } catch (e) { }
+      }
+      return item;
+    });
     return {
-      data: result.items || [],
+      data: items,
       meta: { total: result.total || 0 }
     };
   }
@@ -81,6 +93,9 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Chi tiết quy trình' })
   async findOne(@Param('id') id: string) {
     const result = await firstValueFrom(this.workflowService.FindOneWorkflow({ id })) as any;
+    if (result && typeof result.definition === 'string') {
+      try { result.definition = JSON.parse(result.definition); } catch (e) { }
+    }
     return { data: result };
   }
 

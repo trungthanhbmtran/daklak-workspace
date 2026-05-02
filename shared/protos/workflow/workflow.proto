@@ -22,7 +22,7 @@ service WorkflowService {
 message CreateWorkflowRequest {
   string name = 1;
   string description = 2;
-  google.protobuf.Struct definition = 3;
+  string definition = 3;
   string trigger = 4;
 }
 
@@ -30,7 +30,7 @@ message UpdateWorkflowRequest {
   string id = 1;
   string name = 2;
   string description = 3;
-  google.protobuf.Struct definition = 4;
+  string definition = 4;
   string trigger = 5;
 }
 
@@ -60,7 +60,7 @@ message WorkflowResponse {
   string id = 1;
   string name = 2;
   string description = 3;
-  google.protobuf.Struct definition = 4;
+  string definition = 4;
   string trigger = 5;
   bool active = 6;
   int32 version = 7;
