@@ -23,7 +23,7 @@ export const categoryApi = {
         try {
           const res: any = await apiClient.get("/categories", { params: { group } });
           const list = Array.isArray(res) ? res : (res?.data && Array.isArray(res.data) ? res.data : []);
-          
+
           return list.map((item: any) => ({
             ...item,
             group: item.group || group,
@@ -34,7 +34,7 @@ export const categoryApi = {
         }
       })
     );
-    
+
     return results
       .filter((r): r is PromiseFulfilledResult<CategoryItem[]> => r.status === 'fulfilled')
       .map(r => r.value)
@@ -52,7 +52,7 @@ export const categoryApi = {
   delete: async (id: number) => {
     return apiClient.delete(`/categories/${id}`);
   },
-  
+
   fetchGroups: async (): Promise<string[]> => {
     return apiClient.get("/categories/groups").then((res: any) => res?.data || []);
   },
