@@ -50,7 +50,7 @@ export class CategoriesController implements OnModuleInit {
   async getByGroup(@Query('group') group: string) {
     const result = await firstValueFrom(this.categoryService.GetByGroup({ group: group || '' }));
     const data = (result as { data?: any[] })?.data ?? [];
-    return data.map(toFrontendItem);
+    return { success: true, data: data.map(toFrontendItem) };
   }
 
   @Post()
@@ -67,7 +67,7 @@ export class CategoriesController implements OnModuleInit {
       description: body.description,
       order: body.order,
     }));
-    return toFrontendItem(res as any);
+    return { success: true, data: toFrontendItem(res as any) };
   }
 
   @Put(':id')
@@ -86,7 +86,7 @@ export class CategoriesController implements OnModuleInit {
       isActive: body.active !== undefined ? !!body.active : undefined,
     };
     const res = await firstValueFrom(this.categoryService.Update(payload));
-    return toFrontendItem(res as any);
+    return { success: true, data: toFrontendItem(res as any) };
   }
 
   @Delete(':id')
