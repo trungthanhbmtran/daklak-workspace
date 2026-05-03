@@ -57,6 +57,7 @@ message Post {
   string contentJson = 19;
   bool isTranslated = 23;
   int32 currentVersion = 24;
+  bool isCommentAllowed = 25;
 }
 
 message WorkflowRequest {
@@ -104,6 +105,7 @@ message CreatePostRequest {
   bool isNotification = 9;
   string thumbnail = 10;
   string status = 11;
+  bool isCommentAllowed = 12;
 }
 
 // ====================== Get ======================
@@ -169,6 +171,7 @@ message UpdatePostRequest {
   string categoryId = 8;
   repeated string tagIds = 9;
   bool isNotification = 10;
+  bool isCommentAllowed = 11;
 }
 
 // ====================== Delete ======================

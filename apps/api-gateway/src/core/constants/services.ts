@@ -145,4 +145,18 @@ export const MICROSERVICES = {
     URL: getMediaUrl(),
     SERVICE: 'MediaService',
   },
+  PORTAL_MENU: {
+    PACKAGE: 'portal_menu',
+    SYMBOL: 'PORTAL_MENU_PACKAGE',
+    PROTO: 'posts/portal_menu.proto',
+    URL: getPostUrl(),
+    SERVICE: 'PortalMenuService',
+  },
+  INTERACTION: {
+    PACKAGE: 'interaction',
+    SYMBOL: 'INTERACTION_PACKAGE',
+    PROTO: 'posts/interaction.proto',
+    URL: getPostUrl(),
+    SERVICE: 'InteractionService',
+  },
 };

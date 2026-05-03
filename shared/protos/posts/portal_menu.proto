@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package portal_menu;
+
+import "common/common.proto";
+
+service PortalMenuService {
+  rpc CreatePortalMenu(CreatePortalMenuRequest) returns (PortalMenu) {}
+  rpc GetPortalMenu(GetPortalMenuRequest) returns (PortalMenu) {}
+  rpc ListPortalMenus(ListPortalMenusRequest) returns (ListPortalMenusResponse) {}
+  rpc UpdatePortalMenu(UpdatePortalMenuRequest) returns (PortalMenu) {}
+  rpc DeletePortalMenu(DeletePortalMenuRequest) returns (common.DeleteResponse) {}
+}
+
+message PortalMenu {
+  string id = 1;
+  string name = 2;
+  string description = 3;
+  string icon = 4;
+  string link = 5;
+  int32 order = 6;
+  string parentId = 7;
+  bool isActive = 8;
+  string target = 9;
+  string type = 10;
+  string referenceId = 11;
+  string createdAt = 12;
+  string updatedAt = 13;
+  repeated PortalMenu children = 14;
+}
+
+message CreatePortalMenuRequest {
+  string name = 1;
+  string description = 2;
+  string icon = 3;
+  string link = 4;
+  int32 order = 5;
+  string parentId = 6;
+  bool isActive = 7;
+  string target = 8;
+  string type = 9;
+  string referenceId = 10;
+}
+
+message GetPortalMenuRequest {
+  string id = 1;
+}
+
+message ListPortalMenusRequest {
+  bool onlyActive = 1;
+  string parentId = 2;
+}
+
+message ListPortalMenusResponse {
+  repeated PortalMenu data = 1;
+}
+
+message UpdatePortalMenuRequest {
+  string id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional string icon = 4;
+  optional string link = 5;
+  optional int32 order = 6;
+  optional string parentId = 7;
+  optional bool isActive = 8;
+  optional string target = 9;
+  optional string type = 10;
+  optional string referenceId = 11;
+}
+
+message DeletePortalMenuRequest {
+  string id = 1;
+}

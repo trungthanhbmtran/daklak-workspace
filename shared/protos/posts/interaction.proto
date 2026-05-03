@@ -1,0 +1,164 @@
+syntax = "proto3";
+
+package interaction;
+
+import "common/common.proto";
+
+service InteractionService {
+  // Comments
+  rpc CreateComment(CreateCommentRequest) returns (Comment) {}
+  rpc ListComments(ListCommentsRequest) returns (ListCommentsResponse) {}
+  rpc UpdateCommentStatus(UpdateCommentStatusRequest) returns (Comment) {}
+  rpc DeleteComment(DeleteCommentRequest) returns (common.DeleteResponse) {}
+
+  // Citizen Questions (Hỏi đáp)
+  rpc CreateQuestion(CreateQuestionRequest) returns (Question) {}
+  rpc ListQuestions(ListQuestionsRequest) returns (ListQuestionsResponse) {}
+  rpc AnswerQuestion(AnswerQuestionRequest) returns (Question) {}
+  rpc GetQuestion(GetQuestionRequest) returns (Question) {}
+
+  // Citizen Feedback (Góp ý)
+  rpc CreateFeedback(CreateFeedbackRequest) returns (Feedback) {}
+  rpc ListFeedbacks(ListFeedbacksRequest) returns (ListFeedbacksResponse) {}
+  rpc UpdateFeedbackStatus(UpdateFeedbackStatusRequest) returns (Feedback) {}
+}
+
+// --- Comments ---
+message Comment {
+  string id = 1;
+  string content = 2;
+  string status = 3;
+  string authorId = 4;
+  string authorName = 5;
+  string authorEmail = 6;
+  string authorIp = 7;
+  string postId = 8;
+  string parentId = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+  repeated Comment replies = 12;
+}
+
+message CreateCommentRequest {
+  string content = 1;
+  string postId = 2;
+  optional string parentId = 3;
+  optional string authorId = 4;
+  optional string authorName = 5;
+  optional string authorEmail = 6;
+  string authorIp = 7;
+}
+
+message ListCommentsRequest {
+  string postId = 1;
+  optional string status = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message ListCommentsResponse {
+  repeated Comment data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateCommentStatusRequest {
+  string id = 1;
+  string status = 2;
+}
+
+message DeleteCommentRequest {
+  string id = 1;
+}
+
+// --- Questions ---
+message Question {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string askedByName = 4;
+  string askedByEmail = 5;
+  string askedByPhone = 6;
+  string address = 7;
+  string status = 8;
+  string answerContent = 9;
+  string answeredAt = 10;
+  string answeredById = 11;
+  bool isPublic = 12;
+  string categoryId = 13;
+  string createdAt = 14;
+  string updatedAt = 15;
+}
+
+message CreateQuestionRequest {
+  string title = 1;
+  string content = 2;
+  string askedByName = 3;
+  optional string askedByEmail = 4;
+  optional string askedByPhone = 5;
+  optional string address = 6;
+  optional string categoryId = 7;
+}
+
+message ListQuestionsRequest {
+  optional string status = 1;
+  optional bool onlyPublic = 2;
+  int32 page = 3;
+  int32 limit = 4;
+  optional string categoryId = 5;
+}
+
+message ListQuestionsResponse {
+  repeated Question data = 1;
+  common.Meta meta = 2;
+}
+
+message AnswerQuestionRequest {
+  string id = 1;
+  string answerContent = 2;
+  string answeredById = 3;
+  bool isPublic = 4;
+}
+
+message GetQuestionRequest {
+  string id = 1;
+}
+
+// --- Feedback ---
+message Feedback {
+  string id = 1;
+  string title = 2;
+  string content = 3;
+  string feedbackType = 4;
+  string referenceId = 5;
+  string senderName = 6;
+  string senderEmail = 7;
+  string status = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}
+
+message CreateFeedbackRequest {
+  string title = 1;
+  string content = 2;
+  string feedbackType = 3;
+  optional string referenceId = 4;
+  string senderName = 5;
+  optional string senderEmail = 6;
+}
+
+message ListFeedbacksRequest {
+  optional string feedbackType = 1;
+  optional string status = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
+
+message ListFeedbacksResponse {
+  repeated Feedback data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateFeedbackStatusRequest {
+  string id = 1;
+  string status = 2;
+}

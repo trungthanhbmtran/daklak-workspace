@@ -1,7 +1,7 @@
 // features/posts/api.ts
 
 import apiClient from "@/lib/axiosInstance";
-import { Post, Category, Banner, PostStatus } from "./types";
+import { Post, Category, Banner, PostStatus, PortalMenu, Comment, CitizenQuestion, CitizenFeedback } from "./types";
 
 /**
  * Helper để bóc tách dữ liệu từ Gateway response.
@@ -78,4 +78,45 @@ export const postsApi = {
     apiClient.put(`/banners/${id}`, data).then((res) => unwrapData<Banner>(res)),
   deleteBanner: (id: string) =>
     apiClient.delete(`/banners/${id}`).then((res) => unwrapData<any>(res)),
+
+  // Portal Menus
+  getPortalMenus: (params?: any) =>
+    apiClient.get("/admin/portal-menus", { params }).then((res) => unwrapData<PortalMenu[]>(res)),
+  createPortalMenu: (data: any) =>
+    apiClient.post("/admin/portal-menus", data).then((res) => unwrapData<PortalMenu>(res)),
+  updatePortalMenu: (id: string, data: any) =>
+    apiClient.put(`/admin/portal-menus/${id}`, data).then((res) => unwrapData<PortalMenu>(res)),
+  deletePortalMenu: (id: string) =>
+    apiClient.delete(`/admin/portal-menus/${id}`).then((res) => unwrapData<any>(res)),
+
+  // Interactions - Comments
+  getComments: (params: any) =>
+    apiClient.get("/admin/interactions/comments", { params }).then((res) => ({
+      data: unwrapData<Comment[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  updateCommentStatus: (id: string, status: string) =>
+    apiClient.put(`/admin/interactions/comments/${id}/status`, { status }).then((res) => unwrapData<Comment>(res)),
+  deleteComment: (id: string) =>
+    apiClient.delete(`/admin/interactions/comments/${id}`).then((res) => unwrapData<any>(res)),
+
+  // Interactions - Questions
+  getQuestions: (params: any) =>
+    apiClient.get("/admin/interactions/questions", { params }).then((res) => ({
+      data: unwrapData<CitizenQuestion[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  answerQuestion: (id: string, data: any) =>
+    apiClient.post(`/admin/interactions/questions/${id}/answer`, data).then((res) => unwrapData<CitizenQuestion>(res)),
+  getQuestion: (id: string) =>
+    apiClient.get(`/admin/interactions/questions/${id}`).then((res) => unwrapData<CitizenQuestion>(res)),
+
+  // Interactions - Feedbacks
+  getFeedbacks: (params: any) =>
+    apiClient.get("/admin/interactions/feedbacks", { params }).then((res) => ({
+      data: unwrapData<CitizenFeedback[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  updateFeedbackStatus: (id: string, status: string) =>
+    apiClient.put(`/admin/interactions/feedbacks/${id}/status`, { status }).then((res) => unwrapData<CitizenFeedback>(res)),
 };

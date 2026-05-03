@@ -195,7 +195,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             <p className="font-semibold text-foreground text-[14px] line-clamp-2 leading-snug group-hover:text-primary transition-colors cursor-pointer" onClick={() => onNavigateToEdit(post.id)}>
                               {post.title}
                             </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-mono">ID: {post.id.substring(0, 8)}...</p>
+                            <p className="text-[11px] text-muted-foreground mt-1 font-mono">ID: {post.id?.substring(0, 8)}...</p>
                           </div>
                         </div>
                       </td>
@@ -228,9 +228,17 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-medium text-foreground text-xs">{post.authorId.substring(0, 8)}</p>
+                        <p className="font-medium text-foreground text-xs">{post.authorId?.substring(0, 8) || 'Unknown'}</p>
                         <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {post.publishedAt ? format(new Date(post.publishedAt), 'dd/MM/yyyy', { locale: vi }) : (post.createdAt ? format(new Date(post.createdAt), 'dd/MM/yyyy', { locale: vi }) : '—')}
+                          {(() => {
+                            try {
+                              const dateStr = post.publishedAt || post.createdAt;
+                              if (!dateStr) return "—";
+                              return format(new Date(dateStr), 'dd/MM/yyyy', { locale: vi });
+                            } catch (e) {
+                              return "—";
+                            }
+                          })()}
                         </p>
                       </td>
                       <td className="px-5 py-4 text-right">

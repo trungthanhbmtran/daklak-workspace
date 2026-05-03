@@ -49,9 +49,10 @@ export interface Post {
   category?: Category;
   status: PostStatus;
   thumbnail?: string;
-  authorId: string;
+  authorId?: string;
   currentVersion: number;
   reviewerId?: string;
+  isCommentAllowed?: boolean;
   moderationNote?: string;
   autoModerationStatus?: string;
   autoModerationNote?: string;
@@ -84,6 +85,69 @@ export interface Banner {
   metaDescription?: string;
   startAt?: string;
   endAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PortalMenu {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  link?: string;
+  order: number;
+  parentId?: string | null;
+  isActive: boolean;
+  target: string;
+  type: 'URL' | 'CATEGORY' | 'POST' | 'STATIC_PAGE';
+  referenceId?: string;
+  createdAt: string;
+  updatedAt: string;
+  children?: PortalMenu[];
+}
+
+export interface Comment {
+  id: string;
+  content: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'SPAM';
+  authorId?: string;
+  authorName?: string;
+  authorEmail?: string;
+  authorIp?: string;
+  postId: string;
+  parentId?: string;
+  createdAt: string;
+  updatedAt: string;
+  replies?: Comment[];
+}
+
+export interface CitizenQuestion {
+  id: string;
+  title: string;
+  content: string;
+  askedByName: string;
+  askedByEmail?: string;
+  askedByPhone?: string;
+  address?: string;
+  status: 'PENDING' | 'PROCESSING' | 'ANSWERED' | 'REJECTED';
+  answerContent?: string;
+  answeredAt?: string;
+  answeredById?: string;
+  isPublic: boolean;
+  categoryId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CitizenFeedback {
+  id: string;
+  title: string;
+  content: string;
+  feedbackType: 'GENERAL' | 'DRAFT_DOC' | 'SERVICE';
+  referenceId?: string;
+  senderName: string;
+  senderEmail?: string;
+  status: 'NEW' | 'READ' | 'PROCESSED';
   createdAt: string;
   updatedAt: string;
 }

@@ -5,6 +5,8 @@ import { PostsController } from './posts.controller';
 import { PostsCategoryController } from './posts-category.controller';
 import { PostsTagController } from './posts-tag.controller';
 import { PostsBannerController } from './posts-banner.controller';
+import { PortalMenuController } from './portal-menu.controller';
+import { InteractionsController } from './interactions.controller';
 
 @Module({
   imports: [
@@ -12,12 +14,16 @@ import { PostsBannerController } from './posts-banner.controller';
     registerGrpcService(MICROSERVICES.POSTS_CATEGORY),
     registerGrpcService(MICROSERVICES.POSTS_TAG),
     registerGrpcService(MICROSERVICES.BANNER),
+    registerGrpcService(MICROSERVICES.PORTAL_MENU),
+    registerGrpcService(MICROSERVICES.INTERACTION),
   ],
   controllers: [
     PostsCategoryController,
     PostsTagController,
     PostsBannerController,
     PostsController,
+    PortalMenuController,
+    InteractionsController,
   ],
 })
 export class PostsModule { }
