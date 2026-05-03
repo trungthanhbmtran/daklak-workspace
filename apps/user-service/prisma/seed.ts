@@ -53,6 +53,8 @@ async function main() {
     { code: 'POST', name: 'Quản lý Bài viết' },
     { code: 'POST_CATEGORY', name: 'Quản lý Chuyên mục' },
     { code: 'BANNER', name: 'Quản lý Banner & Quảng cáo' },
+    { code: 'PORTAL_MENU', name: 'Quản lý Portal Menu' },
+    { code: 'CITIZEN_INTERACTION', name: 'Tương tác công dân' },
 
     // Workflow
     { code: 'WORKFLOW', name: 'Quy trình nghiệp vụ' },
@@ -496,9 +498,10 @@ async function main() {
   // 4. Content Module
   const postMenus = [
     { code: 'CONTENT_MENU_POSTS', name: 'Danh sách bài viết', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
-    { code: 'CONTENT_MENU_MODERATION', name: 'Kiểm duyệt bài viết', route: '', icon: 'shield-checkmark-outline', order: 2, res: 'POST' },
-    { code: 'CONTENT_MENU_CATEGORIES', name: 'Chuyên mục', route: 'categories', icon: 'list-outline', order: 3, res: 'POST_CATEGORY' },
-    { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 4, res: 'BANNER' },
+    { code: 'CONTENT_MENU_CATEGORIES', name: 'Chuyên mục', route: 'categories', icon: 'list-outline', order: 2, res: 'POST_CATEGORY' },
+    { code: 'CONTENT_MENU_PORTAL', name: 'Cấu hình Portal Menu', route: 'portal-menu', icon: 'menu-outline', order: 3, res: 'PORTAL_MENU' },
+    { code: 'CONTENT_MENU_INTERACTIONS', name: 'Tương tác công dân', route: 'interactions', icon: 'chatbubbles-outline', order: 4, res: 'CITIZEN_INTERACTION' },
+    { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 5, res: 'BANNER' },
   ];
 
   for (const { res, ...m } of postMenus) {
@@ -508,6 +511,25 @@ async function main() {
       create: { ...m, parentId: serviceNodes['CONTENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'CONTENT_SERVICE' },
     });
     await linkMenuPBAC(node.id, res, 'READ');
+  }
+
+  // Sub-menus for Interactions
+  const interactionParent = await prisma.menu.findUnique({ where: { code: 'CONTENT_MENU_INTERACTIONS' } });
+  if (interactionParent) {
+    const interactionSubMenus = [
+      { code: 'CONTENT_MENU_COMMENTS', name: 'Kiểm duyệt bình luận', route: 'interactions/comments', icon: 'chatbox-outline', order: 1, res: 'CITIZEN_INTERACTION' },
+      { code: 'CONTENT_MENU_QUESTIONS', name: 'Hỏi đáp công dân', route: 'interactions/questions', icon: 'help-circle-outline', order: 2, res: 'CITIZEN_INTERACTION' },
+      { code: 'CONTENT_MENU_FEEDBACKS', name: 'Góp ý dự thảo', route: 'interactions/feedbacks', icon: 'create-outline', order: 3, res: 'CITIZEN_INTERACTION' },
+    ];
+
+    for (const { res, ...m } of interactionSubMenus) {
+      const node = await prisma.menu.upsert({
+        where: { code: m.code },
+        update: { parentId: interactionParent.id, order: m.order, route: m.route, icon: m.icon },
+        create: { ...m, parentId: interactionParent.id, application: 'ADMIN_PORTAL', service: 'CONTENT_SERVICE' },
+      });
+      await linkMenuPBAC(node.id, res, 'READ');
+    }
   }
 
   // ==========================================================
