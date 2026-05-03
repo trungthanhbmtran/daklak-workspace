@@ -9,6 +9,8 @@ import { UsersService } from './users.service';
 import * as redisStore from 'cache-manager-redis-store';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
+const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
+
 @Module({
   imports: [
     JwtModule.registerAsync({
@@ -45,14 +47,14 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         transport: Transport.GRPC,
         options: {
           package: 'workflow',
-          protoPath: join(process.cwd(), '..', '..', 'shared', 'protos', 'workflow', 'workflow.proto'),
+          protoPath: join(protoRoot, 'workflow', 'workflow.proto'),
           url: process.env.WORKFLOW_SERVICE_URL || 'localhost:50060',
           loader: {
             keepCase: false,
             longs: String,
             enums: String,
             defaults: true,
-            includeDirs: [join(process.cwd(), '..', '..', 'shared', 'protos')],
+            includeDirs: [protoRoot],
           },
         },
       },
