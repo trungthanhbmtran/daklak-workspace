@@ -52,7 +52,15 @@ export type PostMinAggregateOutputType = {
   viewCount: number | null
   isTranslated: boolean | null
   isDeleted: boolean | null
+  authorName: string | null
+  source: string | null
+  language: string | null
+  seoTitle: string | null
+  seoDescription: string | null
+  seoKeywords: string | null
+  allowComment: boolean | null
   publishedAt: Date | null
+  expiredAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -75,7 +83,15 @@ export type PostMaxAggregateOutputType = {
   viewCount: number | null
   isTranslated: boolean | null
   isDeleted: boolean | null
+  authorName: string | null
+  source: string | null
+  language: string | null
+  seoTitle: string | null
+  seoDescription: string | null
+  seoKeywords: string | null
+  allowComment: boolean | null
   publishedAt: Date | null
+  expiredAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -98,7 +114,15 @@ export type PostCountAggregateOutputType = {
   viewCount: number
   isTranslated: number
   isDeleted: number
+  authorName: number
+  source: number
+  language: number
+  seoTitle: number
+  seoDescription: number
+  seoKeywords: number
+  allowComment: number
   publishedAt: number
+  expiredAt: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -133,7 +157,15 @@ export type PostMinAggregateInputType = {
   viewCount?: true
   isTranslated?: true
   isDeleted?: true
+  authorName?: true
+  source?: true
+  language?: true
+  seoTitle?: true
+  seoDescription?: true
+  seoKeywords?: true
+  allowComment?: true
   publishedAt?: true
+  expiredAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -156,7 +188,15 @@ export type PostMaxAggregateInputType = {
   viewCount?: true
   isTranslated?: true
   isDeleted?: true
+  authorName?: true
+  source?: true
+  language?: true
+  seoTitle?: true
+  seoDescription?: true
+  seoKeywords?: true
+  allowComment?: true
   publishedAt?: true
+  expiredAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -179,7 +219,15 @@ export type PostCountAggregateInputType = {
   viewCount?: true
   isTranslated?: true
   isDeleted?: true
+  authorName?: true
+  source?: true
+  language?: true
+  seoTitle?: true
+  seoDescription?: true
+  seoKeywords?: true
+  allowComment?: true
   publishedAt?: true
+  expiredAt?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -289,7 +337,15 @@ export type PostGroupByOutputType = {
   viewCount: number
   isTranslated: boolean
   isDeleted: boolean
+  authorName: string | null
+  source: string | null
+  language: string
+  seoTitle: string | null
+  seoDescription: string | null
+  seoKeywords: string | null
+  allowComment: boolean
   publishedAt: Date | null
+  expiredAt: Date | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -335,7 +391,15 @@ export type PostWhereInput = {
   viewCount?: Prisma.IntFilter<"Post"> | number
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
+  authorName?: Prisma.StringNullableFilter<"Post"> | string | null
+  source?: Prisma.StringNullableFilter<"Post"> | string | null
+  language?: Prisma.StringFilter<"Post"> | string
+  seoTitle?: Prisma.StringNullableFilter<"Post"> | string | null
+  seoDescription?: Prisma.StringNullableFilter<"Post"> | string | null
+  seoKeywords?: Prisma.StringNullableFilter<"Post"> | string | null
+  allowComment?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  expiredAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
@@ -363,7 +427,15 @@ export type PostOrderByWithRelationInput = {
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  authorName?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  language?: Prisma.SortOrder
+  seoTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  seoDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  seoKeywords?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowComment?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -395,7 +467,15 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   viewCount?: Prisma.IntFilter<"Post"> | number
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
+  authorName?: Prisma.StringNullableFilter<"Post"> | string | null
+  source?: Prisma.StringNullableFilter<"Post"> | string | null
+  language?: Prisma.StringFilter<"Post"> | string
+  seoTitle?: Prisma.StringNullableFilter<"Post"> | string | null
+  seoDescription?: Prisma.StringNullableFilter<"Post"> | string | null
+  seoKeywords?: Prisma.StringNullableFilter<"Post"> | string | null
+  allowComment?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  expiredAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
@@ -423,7 +503,15 @@ export type PostOrderByWithAggregationInput = {
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  authorName?: Prisma.SortOrderInput | Prisma.SortOrder
+  source?: Prisma.SortOrderInput | Prisma.SortOrder
+  language?: Prisma.SortOrder
+  seoTitle?: Prisma.SortOrderInput | Prisma.SortOrder
+  seoDescription?: Prisma.SortOrderInput | Prisma.SortOrder
+  seoKeywords?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowComment?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  expiredAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -454,7 +542,15 @@ export type PostScalarWhereWithAggregatesInput = {
   viewCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   isTranslated?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  authorName?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  source?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  language?: Prisma.StringWithAggregatesFilter<"Post"> | string
+  seoTitle?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  seoDescription?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  seoKeywords?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  allowComment?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
+  expiredAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
@@ -477,7 +573,15 @@ export type PostCreateInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -504,7 +608,15 @@ export type PostUncheckedCreateInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -531,7 +643,15 @@ export type PostUpdateInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -558,7 +678,15 @@ export type PostUncheckedUpdateInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -585,7 +713,15 @@ export type PostCreateManyInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -608,7 +744,15 @@ export type PostUpdateManyMutationInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -630,7 +774,15 @@ export type PostUncheckedUpdateManyInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -669,7 +821,15 @@ export type PostCountOrderByAggregateInput = {
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  authorName?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  language?: Prisma.SortOrder
+  seoTitle?: Prisma.SortOrder
+  seoDescription?: Prisma.SortOrder
+  seoKeywords?: Prisma.SortOrder
+  allowComment?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
+  expiredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -697,7 +857,15 @@ export type PostMaxOrderByAggregateInput = {
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  authorName?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  language?: Prisma.SortOrder
+  seoTitle?: Prisma.SortOrder
+  seoDescription?: Prisma.SortOrder
+  seoKeywords?: Prisma.SortOrder
+  allowComment?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
+  expiredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -720,7 +888,15 @@ export type PostMinOrderByAggregateInput = {
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  authorName?: Prisma.SortOrder
+  source?: Prisma.SortOrder
+  language?: Prisma.SortOrder
+  seoTitle?: Prisma.SortOrder
+  seoDescription?: Prisma.SortOrder
+  seoKeywords?: Prisma.SortOrder
+  allowComment?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
+  expiredAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -882,7 +1058,15 @@ export type PostCreateWithoutCategoryInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -908,7 +1092,15 @@ export type PostUncheckedCreateWithoutCategoryInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -963,7 +1155,15 @@ export type PostScalarWhereInput = {
   viewCount?: Prisma.IntFilter<"Post"> | number
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
+  authorName?: Prisma.StringNullableFilter<"Post"> | string | null
+  source?: Prisma.StringNullableFilter<"Post"> | string | null
+  language?: Prisma.StringFilter<"Post"> | string
+  seoTitle?: Prisma.StringNullableFilter<"Post"> | string | null
+  seoDescription?: Prisma.StringNullableFilter<"Post"> | string | null
+  seoKeywords?: Prisma.StringNullableFilter<"Post"> | string | null
+  allowComment?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
+  expiredAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
@@ -986,7 +1186,15 @@ export type PostCreateWithoutTagsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1012,7 +1220,15 @@ export type PostUncheckedCreateWithoutTagsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1059,7 +1275,15 @@ export type PostCreateWithoutVersionsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1085,7 +1309,15 @@ export type PostUncheckedCreateWithoutVersionsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1127,7 +1359,15 @@ export type PostUpdateWithoutVersionsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1153,7 +1393,15 @@ export type PostUncheckedUpdateWithoutVersionsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1179,7 +1427,15 @@ export type PostCreateWithoutModerationLogsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1205,7 +1461,15 @@ export type PostUncheckedCreateWithoutModerationLogsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1247,7 +1511,15 @@ export type PostUpdateWithoutModerationLogsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1273,7 +1545,15 @@ export type PostUncheckedUpdateWithoutModerationLogsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1299,7 +1579,15 @@ export type PostCreateWithoutAuditLogsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1325,7 +1613,15 @@ export type PostUncheckedCreateWithoutAuditLogsInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1367,7 +1663,15 @@ export type PostUpdateWithoutAuditLogsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1393,7 +1697,15 @@ export type PostUncheckedUpdateWithoutAuditLogsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1419,7 +1731,15 @@ export type PostCreateManyCategoryInput = {
   viewCount?: number
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: string | null
+  source?: string | null
+  language?: string
+  seoTitle?: string | null
+  seoDescription?: string | null
+  seoKeywords?: string | null
+  allowComment?: boolean
   publishedAt?: Date | string | null
+  expiredAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1441,7 +1761,15 @@ export type PostUpdateWithoutCategoryInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1467,7 +1795,15 @@ export type PostUncheckedUpdateWithoutCategoryInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1493,7 +1829,15 @@ export type PostUncheckedUpdateManyWithoutCategoryInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1515,7 +1859,15 @@ export type PostUpdateWithoutTagsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1541,7 +1893,15 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1567,7 +1927,15 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  language?: Prisma.StringFieldUpdateOperationsInput | string
+  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowComment?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  expiredAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1648,7 +2016,15 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   viewCount?: boolean
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: boolean
+  source?: boolean
+  language?: boolean
+  seoTitle?: boolean
+  seoDescription?: boolean
+  seoKeywords?: boolean
+  allowComment?: boolean
   publishedAt?: boolean
+  expiredAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1679,14 +2055,22 @@ export type PostSelectScalar = {
   viewCount?: boolean
   isTranslated?: boolean
   isDeleted?: boolean
+  authorName?: boolean
+  source?: boolean
+  language?: boolean
+  seoTitle?: boolean
+  seoDescription?: boolean
+  seoKeywords?: boolean
+  allowComment?: boolean
   publishedAt?: boolean
+  expiredAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
   categoryId?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentJson" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isDeleted" | "publishedAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentJson" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isDeleted" | "authorName" | "source" | "language" | "seoTitle" | "seoDescription" | "seoKeywords" | "allowComment" | "publishedAt" | "expiredAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
@@ -1721,7 +2105,15 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     viewCount: number
     isTranslated: boolean
     isDeleted: boolean
+    authorName: string | null
+    source: string | null
+    language: string
+    seoTitle: string | null
+    seoDescription: string | null
+    seoKeywords: string | null
+    allowComment: boolean
     publishedAt: Date | null
+    expiredAt: Date | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -2115,7 +2507,15 @@ export interface PostFieldRefs {
   readonly viewCount: Prisma.FieldRef<"Post", 'Int'>
   readonly isTranslated: Prisma.FieldRef<"Post", 'Boolean'>
   readonly isDeleted: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly authorName: Prisma.FieldRef<"Post", 'String'>
+  readonly source: Prisma.FieldRef<"Post", 'String'>
+  readonly language: Prisma.FieldRef<"Post", 'String'>
+  readonly seoTitle: Prisma.FieldRef<"Post", 'String'>
+  readonly seoDescription: Prisma.FieldRef<"Post", 'String'>
+  readonly seoKeywords: Prisma.FieldRef<"Post", 'String'>
+  readonly allowComment: Prisma.FieldRef<"Post", 'Boolean'>
   readonly publishedAt: Prisma.FieldRef<"Post", 'DateTime'>
+  readonly expiredAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Post", 'DateTime'>
