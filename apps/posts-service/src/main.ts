@@ -11,6 +11,7 @@ const protoPath = [
   join(postsDir, 'category.proto'),
   join(postsDir, 'tag.proto'),
   join(postsDir, 'banner.proto'),
+  join(postsDir, 'portal_menu.proto'),
 ];
 
 async function bootstrap() {
@@ -19,7 +20,7 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['post', 'category', 'tag', 'banner'],
+        package: ['post', 'category', 'tag', 'banner', 'portal_menu'],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50055',
         loader: {

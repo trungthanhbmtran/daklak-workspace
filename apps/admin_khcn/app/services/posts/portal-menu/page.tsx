@@ -55,7 +55,7 @@ export default function PortalMenuPage() {
         link: module.path,
         type: "URL",
         order: menus.length + 1,
-        position: "HORIZONTAL",
+        position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any,
         isActive: true,
         target: "_self"
       });
@@ -71,12 +71,12 @@ export default function PortalMenuPage() {
   useEffect(() => {
     fetchMenus();
     fetchCategories();
-  }, []);
+  }, [activeTab]);
 
   const fetchMenus = async () => {
     setLoading(true);
     try {
-      const data = await postsApi.getPortalMenus();
+      const data = await postsApi.getPortalMenus({ position: activeTab });
       setMenus(data || []);
     } catch {
       toast.error("Không thể tải danh sách menu");
@@ -173,7 +173,8 @@ export default function PortalMenuPage() {
         link: `/chuyen-muc/${rootCategory.slug}`,
         isActive: true,
         order: menus.length + 1,
-        target: "_self"
+        target: "_self",
+        position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
 
       // Step 2: Recursively import children if any
@@ -202,7 +203,8 @@ export default function PortalMenuPage() {
         link: `${parentPath}/${child.slug}`,
         isActive: true,
         order: i + 1,
-        target: "_self"
+        target: "_self",
+        position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
 
       if (child.children && child.children.length > 0) {
@@ -228,12 +230,12 @@ export default function PortalMenuPage() {
         link: pathMap[group.id] || "/van-ban",
         isActive: true,
         order: menus.length + 1,
-        target: "_self"
+        target: "_self",
+        position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
 
       // Step 2: Fetch categories for this document group
-      const response: any = await apiClient.get(`/categories`, { params: { group: group.id } });
-      const docCategories = response?.data || [];
+      const { data: docCategories } = await postsApi.getCategories({ group: group.id });
 
       // Step 3: Create menu items for each category
       for (let i = 0; i < docCategories.length; i++) {
@@ -245,7 +247,8 @@ export default function PortalMenuPage() {
           link: `${pathMap[group.id] || "/van-ban"}?category=${cat.code}`,
           isActive: true,
           order: i + 1,
-          target: "_self"
+          target: "_self",
+          position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
         });
       }
 
@@ -276,7 +279,8 @@ export default function PortalMenuPage() {
           link: page.link,
           isActive: true,
           order: page.order,
-          target: "_self"
+          target: "_self",
+          position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
         });
       }
       toast.success("Đã thêm các trang mặc định");
@@ -342,7 +346,7 @@ export default function PortalMenuPage() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 w-full">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <div className="space-y-1">
           <div className="flex items-center gap-2">

@@ -27,6 +27,7 @@ message PortalMenu {
   string createdAt = 12;
   string updatedAt = 13;
   repeated PortalMenu children = 14;
+  string position = 15;
 }
 
 message CreatePortalMenuRequest {
@@ -40,6 +41,7 @@ message CreatePortalMenuRequest {
   string target = 8;
   string type = 9;
   string referenceId = 10;
+  string position = 11;
 }
 
 message GetPortalMenuRequest {
@@ -49,6 +51,7 @@ message GetPortalMenuRequest {
 message ListPortalMenusRequest {
   bool onlyActive = 1;
   string parentId = 2;
+  string position = 3;
 }
 
 message ListPortalMenusResponse {
@@ -67,6 +70,7 @@ message UpdatePortalMenuRequest {
   optional string target = 9;
   optional string type = 10;
   optional string referenceId = 11;
+  optional string position = 12;
 }
 
 message DeletePortalMenuRequest {

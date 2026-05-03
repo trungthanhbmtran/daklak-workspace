@@ -18,6 +18,7 @@ export class PortalMenuService {
         target: data.target || '_self',
         type: data.type || 'URL',
         referenceId: data.referenceId,
+        position: data.position || 'HORIZONTAL',
       },
     });
   }
@@ -29,16 +30,25 @@ export class PortalMenuService {
     });
   }
 
-  async findAll(onlyActive = false) {
+  async findAll(onlyActive = false, position?: string) {
+    const where: any = { parentId: null };
+    if (onlyActive) where.isActive = true;
+    if (position && position !== 'ALL') where.position = position;
+
     return this.prisma.portalMenu.findMany({
-      where: onlyActive ? { isActive: true, parentId: null } : { parentId: null },
+      where,
       orderBy: { order: 'asc' },
       include: { 
         children: { 
           orderBy: { order: 'asc' },
           include: {
             children: {
-              orderBy: { order: 'asc' }
+              orderBy: { order: 'asc' },
+              include: {
+                children: {
+                  orderBy: { order: 'asc' }
+                }
+              }
             }
           }
         } 
