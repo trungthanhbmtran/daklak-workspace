@@ -1,9 +1,38 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, OnModuleInit, Inject, Logger } from '@nestjs/common';
+import { ClientGrpc } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
-export class WorkflowService {
-  constructor(private prisma: PrismaService) { }
+export class WorkflowService implements OnModuleInit {
+  private readonly logger = new Logger(WorkflowService.name);
+  private engine: any;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject('WORKFLOW_SERVICE') private client: ClientGrpc,
+  ) { }
+
+  onModuleInit() {
+    this.engine = this.client.getService<any>('WorkflowService');
+  }
+
+  /**
+   * Kích hoạt quy trình động qua gRPC Workflow Engine
+   */
+  async triggerDynamicWorkflow(trigger: string, context: any) {
+    if (!this.engine) {
+      this.logger.warn('Workflow Engine service not initialized');
+      return;
+    }
+    try {
+      this.logger.log(`Triggering workflow: ${trigger}`);
+      const result = await firstValueFrom(this.engine.TriggerWorkflow({ trigger, initialContext: context }));
+      return result;
+    } catch (e) {
+      this.logger.error(`Failed to trigger workflow ${trigger}: ${e.message}`);
+    }
+  }
 
   // --- Atomic Document Actions ---
 
@@ -14,6 +43,16 @@ export class WorkflowService {
     });
 
     await this.logDocumentAction(id, 'VÀO SỔ VĂN BẢN', 'Hệ thống tự động ghi nhận khi tiếp nhận.', actorId, actorName);
+
+    // Kích hoạt quy trình động (nếu có định nghĩa)
+    await this.triggerDynamicWorkflow('DOC_RECEIVED', {
+      documentId: document.id,
+      documentNumber: document.documentNumber,
+      abstract: document.abstract,
+      initiatorId: actorId || 'system',
+      initiatorName: actorName || 'System',
+    });
+
     return document;
   }
 

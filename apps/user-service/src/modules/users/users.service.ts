@@ -1,13 +1,14 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { RpcException } from '@nestjs/microservices';
+import { RpcException, ClientGrpc } from '@nestjs/microservices';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 const GRPC = { INVALID_ARGUMENT: 3, NOT_FOUND: 5, UNAUTHENTICATED: 16 } as const;
 
@@ -15,14 +16,31 @@ const REFRESH_TOKEN_PREFIX = 'refresh:';
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 ngày
 
 @Injectable()
-export class UsersService {
+export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+  private workflowEngine: any;
+
   constructor(
     private prisma: PrismaService,
     private config: ConfigService,
     private jwt: JwtService,
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
+    @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
   ) {}
+
+  onModuleInit() {
+    this.workflowEngine = this.workflowClient.getService<any>('WorkflowService');
+  }
+
+  private async triggerWorkflow(trigger: string, context: any) {
+    if (!this.workflowEngine) return;
+    try {
+      await firstValueFrom(this.workflowEngine.TriggerWorkflow({ trigger, initialContext: context }));
+    } catch (e) {
+      this.logger.error(`Failed to trigger workflow ${trigger}: ${e.message}`);
+    }
+  }
 
   // Bổ nhiệm nhân sự (Assign Job Position)
   async assignPosition(dto: { userId: number; unitId: number; jobTitleId: number; isPrimary: boolean }) {
@@ -149,6 +167,15 @@ export class UsersService {
     } catch (err) {
       console.warn('Gửi thông báo email thất bại (RabbitMQ/notification service có thể chưa chạy):', (err as Error)?.message ?? err);
     }
+
+    // Kích hoạt quy trình động
+    await this.triggerWorkflow('USER_CREATED', {
+      userId: user.id,
+      email: user.email,
+      username: user.username,
+      fullName: user.fullName,
+      initiatorId: data.createdByUserId?.toString() || 'system',
+    });
 
     return this.toUserResponse(user);
   }

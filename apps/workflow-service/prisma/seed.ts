@@ -20,6 +20,7 @@ async function main() {
       description: 'Quy trình tự động điều phối bài viết từ khi nộp đến khi xuất bản.',
       trigger: 'POST_SUBMIT',
       active: true,
+      version: 1,
       definition: {
         nodes: [
           { id: 'start', type: 'start', position: { x: 250, y: 0 }, data: { label: 'Bắt đầu' } },
@@ -39,7 +40,7 @@ async function main() {
             position: { x: 250, y: 200 },
             data: { 
               label: 'Lãnh đạo phê duyệt',
-              role: 'manager' 
+              role: 'MANAGER' 
             } 
           },
           { 
@@ -97,33 +98,100 @@ async function main() {
     }
   });
 
-  // 2. Document Routing Workflow
+  // 2. Document Routing Workflow (Standard 2)
   await prisma.workflow.upsert({
     where: { id: 'doc-routing-001' },
     update: {},
     create: {
       id: 'doc-routing-001',
-      name: 'Quy trình Xử lý Văn bản',
-      description: 'Quy trình tự động điều phối văn bản đến các phòng ban.',
+      name: 'Quy trình Xử lý Văn bản (Chuẩn 2)',
+      description: 'Quy trình tự động điều phối và xử lý văn bản đến các đơn vị.',
       trigger: 'DOC_RECEIVED',
       active: true,
+      version: 1,
       definition: {
         nodes: [
-          { id: 'start', type: 'start', position: { x: 250, y: 0 }, data: { label: 'Bắt đầu' } },
+          { id: 'start', type: 'start', position: { x: 300, y: 0 }, data: { label: 'Bắt đầu' } },
           { 
-            id: 'process-doc', 
+            id: 'svc-receive', 
+            type: 'service_task', 
+            position: { x: 300, y: 100 },
+            data: { 
+              label: 'Vào sổ văn bản',
+              service: 'document-service',
+              action: 'receiveDocument'
+            } 
+          },
+          { 
+            id: 'user-assign', 
+            type: 'user_task', 
+            position: { x: 300, y: 200 },
+            data: { 
+              label: 'Lãnh đạo phân công',
+              role: 'MANAGER' 
+            } 
+          },
+          { 
+            id: 'check-approval', 
+            type: 'condition', 
+            position: { x: 300, y: 300 },
+            data: { 
+              label: 'Kiểm tra phê duyệt',
+              expression: 'decision == "APPROVE"'
+            } 
+          },
+          { 
+            id: 'svc-finalize', 
+            type: 'service_task', 
+            position: { x: 150, y: 400 },
+            data: { 
+              label: 'Hoàn tất văn bản',
+              service: 'document-service',
+              action: 'finalizeDocument'
+            } 
+          },
+          { id: 'end', type: 'end', position: { x: 300, y: 550 }, data: { label: 'Kết thúc' } }
+        ],
+        edges: [
+          { id: 'ed-1', source: 'start', target: 'svc-receive' },
+          { id: 'ed-2', source: 'svc-receive', target: 'user-assign' },
+          { id: 'ed-3', source: 'user-assign', target: 'check-approval' },
+          { id: 'ed-4', source: 'check-approval', target: 'svc-finalize', label: 'True' },
+          { id: 'ed-5', source: 'svc-finalize', target: 'end' },
+          { id: 'ed-6', source: 'check-approval', target: 'end', label: 'False' }
+        ]
+      }
+    }
+  });
+
+  // 3. User Onboarding Workflow
+  await prisma.workflow.upsert({
+    where: { id: 'user-onboarding-001' },
+    update: {},
+    create: {
+      id: 'user-onboarding-001',
+      name: 'Quy trình Tiếp nhận Nhân sự',
+      description: 'Quy trình tự động thiết lập quyền và hồ sơ cho nhân sự mới.',
+      trigger: 'USER_CREATED',
+      active: true,
+      version: 1,
+      definition: {
+        nodes: [
+          { id: 'start', type: 'start', position: { x: 250, y: 0 }, data: { label: 'Nhân sự mới' } },
+          { 
+            id: 'user-setup', 
             type: 'user_task', 
             position: { x: 250, y: 150 },
             data: { 
-              label: 'Phân công xử lý',
-              role: 'admin' 
+              label: 'Quản trị thiết lập quyền',
+              role: 'ADMIN' 
             } 
           },
-          { id: 'end', type: 'end', position: { x: 250, y: 300 }, data: { label: 'Kết thúc' } }
+          { id: 'end', type: 'end', position: { x: 250, y: 300 }, data: { label: 'Sẵn sàng' } }
         ],
         edges: [
-          { id: 'e-doc-1', source: 'start', target: 'process-doc' },
-          { id: 'e-doc-2', source: 'process-doc', target: 'end' }
+          { id: 'eu-1', source: 'start', target: 'user-setup' },
+          { id: 'eu-2', source: 'user-setup', target: 'end' }
         ]
       }
     }

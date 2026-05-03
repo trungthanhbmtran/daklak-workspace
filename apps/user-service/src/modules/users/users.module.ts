@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { join } from 'path';
 import { CacheModule } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
@@ -36,6 +37,22 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
           queue: process.env.NOTIFICATION_QUEUE || 'notifications', // Cùng queue với notification_service
           queueOptions: {
             durable: false, // Queue tạm thời hay bền vững
+          },
+        },
+      },
+      {
+        name: 'WORKFLOW_SERVICE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'workflow',
+          protoPath: join(process.cwd(), '..', '..', 'shared', 'protos', 'workflow', 'workflow.proto'),
+          url: process.env.WORKFLOW_SERVICE_URL || 'localhost:50060',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [join(process.cwd(), '..', '..', 'shared', 'protos')],
           },
         },
       },
