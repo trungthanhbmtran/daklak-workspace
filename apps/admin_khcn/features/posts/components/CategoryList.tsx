@@ -3,7 +3,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Plus, Search, Edit2, Trash2, Folder,
-  MoreHorizontal, ChevronRight, Loader2, Image as ImageIcon, FileText, Download
+  MoreHorizontal, ChevronRight, Loader2, Image as ImageIcon, FileText, Download, CheckCircle2
 } from "lucide-react";
 import { useState } from "react";
 
@@ -136,9 +136,21 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold text-slate-700">
-                      <div className="flex items-center gap-2">
-                        {cat.name}
-                        {cat.parentId && <Badge variant="outline" className="text-[10px] py-0">Con</Badge>}
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          {cat.name}
+                          {cat.parentId && <Badge variant="outline" className="text-[9px] px-1 py-0 h-4 uppercase font-bold text-slate-400">Sub</Badge>}
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                           <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4 bg-slate-50 text-slate-500 border-slate-200">
+                              {cat.position || 'SIDEBAR'}
+                           </Badge>
+                           {cat.isGovStandard && (
+                             <Badge variant="secondary" className="text-[9px] px-1.5 py-0 h-4 bg-blue-50 text-blue-700 border-blue-100 flex items-center gap-0.5">
+                                <CheckCircle2 className="h-2 w-2" /> 42/2022
+                             </Badge>
+                           )}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-xs text-slate-500">{cat.slug}</TableCell>

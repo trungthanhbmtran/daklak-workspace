@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle, Globe, X, Send } from "lucide-react";
+import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle, Globe, X, Send, User, Calendar } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -228,10 +228,13 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                         </div>
                       </td>
                       <td className="px-5 py-4">
-                        <p className="font-medium text-foreground text-xs">{post.authorId.substring(0, 8)}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">
-                          {post.publishedAt ? format(new Date(post.publishedAt), 'dd/MM/yyyy', { locale: vi }) : (post.createdAt ? format(new Date(post.createdAt), 'dd/MM/yyyy', { locale: vi }) : '—')}
+                        <p className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                          <User className="h-3 w-3 text-slate-400" /> {post.authorName || `User ${post.authorId.substring(0, 4)}`}
                         </p>
+                        <div className="flex items-center gap-1.5 mt-1.5 text-[10px] text-muted-foreground font-medium">
+                          <Calendar className="h-3 w-3" />
+                          {post.publishedAt ? format(new Date(post.publishedAt), 'dd/MM/yyyy HH:mm', { locale: vi }) : (post.createdAt ? format(new Date(post.createdAt), 'dd/MM/yyyy HH:mm', { locale: vi }) : '—')}
+                        </div>
                       </td>
                       <td className="px-5 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">

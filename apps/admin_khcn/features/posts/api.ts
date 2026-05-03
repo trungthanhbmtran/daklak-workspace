@@ -78,4 +78,19 @@ export const postsApi = {
     apiClient.put(`/banners/${id}`, data).then((res) => unwrapData<Banner>(res)),
   deleteBanner: (id: string) =>
     apiClient.delete(`/banners/${id}`).then((res) => unwrapData<any>(res)),
+
+  // Portal Menus
+  getPortalMenus: (params?: any) =>
+    apiClient.get("/posts/portal-menus", { params }).then((res) => ({
+      data: unwrapData<any[]>(res),
+      meta: unwrapMeta(res),
+    })),
+  getPortalMenu: (id: string) =>
+    apiClient.get(`/posts/portal-menus/${id}`).then((res) => unwrapData<any>(res)),
+  createPortalMenu: (data: any) =>
+    apiClient.post("/posts/portal-menus", data).then((res) => unwrapData<any>(res)),
+  updatePortalMenu: (id: string, data: any) =>
+    apiClient.put(`/posts/portal-menus/${id}`, data).then((res) => unwrapData<any>(res)),
+  deletePortalMenu: (id: string) =>
+    apiClient.delete(`/posts/portal-menus/${id}`).then((res) => unwrapData<any>(res)),
 };
