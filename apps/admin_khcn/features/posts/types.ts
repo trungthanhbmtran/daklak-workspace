@@ -101,6 +101,7 @@ export interface PortalMenu {
   target: string;
   type: 'URL' | 'CATEGORY' | 'POST' | 'STATIC_PAGE';
   referenceId?: string;
+  position: 'HORIZONTAL' | 'VERTICAL' | 'FOOTER';
   createdAt: string;
   updatedAt: string;
   children?: PortalMenu[];

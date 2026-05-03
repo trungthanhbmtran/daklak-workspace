@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { postsApi } from "@/features/posts/api";
 import { PortalMenu, Category } from "@/features/posts/types";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, Edit, Trash2, Layers, FileText, ExternalLink, 
-  ChevronRight, Zap, Globe, Layout, Settings2, 
-  ArrowRight, Loader2, Sparkles, FolderTree, BookOpen
+import {
+  Plus, Edit, Trash2, Layers, FileText, ExternalLink,
+  ChevronRight, Zap, Globe, Layout, Settings2,
+  ArrowRight, Loader2, Sparkles, FolderTree, BookOpen, ShieldCheck
 } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -37,7 +37,36 @@ export default function PortalMenuPage() {
     { id: "FINANCE", name: "Công khai tài chính" },
     { id: "CONSULTATION", name: "Lấy ý kiến dự thảo" }
   ]);
+  const [complianceModules] = useState([
+    { id: "OPEN_DATA", name: "Dữ liệu mở", path: "/cong-khai/du-lieu-mo" },
+    { id: "BIDDING", name: "Đấu thầu, mua sắm công", path: "/cong-khai/dau-thau" },
+    { id: "STRATEGY", name: "Chiến lược, quy hoạch", path: "/cong-khai/quy-hoach" },
+    { id: "SATISFACTION", name: "Khảo sát sự hài lòng", path: "/dich-vu-cong/khao-sat" },
+    { id: "SITEMAP", name: "Sơ đồ trang (Sitemap)", path: "/sitemap" },
+    { id: "ENGLISH", name: "Phiên bản tiếng Anh", path: "/en" }
+  ]);
   const [isImporting, setIsImporting] = useState(false);
+
+  const handleImportCompliance = async (module: typeof complianceModules[0]) => {
+    setIsImporting(true);
+    try {
+      await postsApi.createPortalMenu({
+        name: module.name,
+        link: module.path,
+        type: "URL",
+        order: menus.length + 1,
+        position: "HORIZONTAL",
+        isActive: true,
+        target: "_self"
+      });
+      toast.success(`Đã thêm mục tuân thủ: ${module.name}`);
+      fetchMenus();
+    } catch {
+      toast.error("Không thể thêm mục tuân thủ");
+    } finally {
+      setIsImporting(false);
+    }
+  };
 
   useEffect(() => {
     fetchMenus();
@@ -65,6 +94,13 @@ export default function PortalMenuPage() {
     }
   };
 
+  const [activeTab, setActiveTab] = useState<string>("ALL");
+
+  const filteredMenus = menus.filter(m => {
+    if (activeTab === "ALL") return true;
+    return m.position === activeTab;
+  });
+
   const handleOpenDialog = (menu?: PortalMenu) => {
     if (menu) {
       setEditingMenu({ ...menu });
@@ -76,6 +112,7 @@ export default function PortalMenuPage() {
         isActive: true,
         order: menus.length + 1,
         parentId: null,
+        position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any,
       });
     }
     setIsDialogOpen(true);
@@ -255,7 +292,7 @@ export default function PortalMenuPage() {
   // Render Table Rows Recursively for hierarchy
   const renderMenuRows = (items: PortalMenu[], depth = 0): React.ReactNode => {
     return items.map((menu: PortalMenu) => (
-      <React.Fragment key={menu.id}>
+      <Fragment key={menu.id}>
         <TableRow className={depth > 0 ? "bg-slate-50/30" : ""}>
           <TableCell className="font-medium">
             <div className="flex items-center" style={{ paddingLeft: `${depth * 24}px` }}>
@@ -263,6 +300,11 @@ export default function PortalMenuPage() {
               {menu.icon && <span className="mr-2 text-blue-500">{menu.icon}</span>}
               <span className={!menu.isActive ? "text-slate-400" : ""}>{menu.name}</span>
             </div>
+          </TableCell>
+          <TableCell>
+            <Badge variant="secondary" className="text-[10px] uppercase font-bold py-0 h-5">
+              {menu.position === 'HORIZONTAL' ? 'Ngang' : menu.position === 'VERTICAL' ? 'Dọc' : 'Chân trang'}
+            </Badge>
           </TableCell>
           <TableCell>
             <Badge variant="outline" className="flex items-center w-fit gap-1 uppercase text-[10px] font-bold">
@@ -295,7 +337,7 @@ export default function PortalMenuPage() {
           </TableCell>
         </TableRow>
         {menu.children && menu.children.length > 0 && renderMenuRows(menu.children, depth + 1)}
-      </React.Fragment>
+      </Fragment>
     ));
   };
 
@@ -312,8 +354,8 @@ export default function PortalMenuPage() {
           <p className="text-sm text-muted-foreground">Thiết lập sơ đồ điều hướng cho cổng thông tin công cộng (Người dân)</p>
         </div>
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setIsQuickSetupOpen(true)}
             className="border-blue-200 text-blue-600 hover:bg-blue-50"
           >
@@ -326,10 +368,22 @@ export default function PortalMenuPage() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
+        <Tabs defaultValue="ALL" value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="px-4 py-2 border-b bg-slate-50/50 flex items-center justify-between">
+            <TabsList className="bg-transparent border-0 p-0 h-auto gap-4">
+              <TabsTrigger value="ALL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Tất cả</TabsTrigger>
+              <TabsTrigger value="HORIZONTAL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Ngang</TabsTrigger>
+              <TabsTrigger value="VERTICAL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Dọc</TabsTrigger>
+              <TabsTrigger value="FOOTER" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Chân trang</TabsTrigger>
+            </TabsList>
+            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100">{filteredMenus.length} mục</Badge>
+          </div>
+        </Tabs>
         <Table>
           <TableHeader className="bg-slate-50/80 backdrop-blur-sm sticky top-0 z-10">
             <TableRow>
               <TableHead className="w-[30%]">Tên hiển thị</TableHead>
+              <TableHead>Vị trí</TableHead>
               <TableHead>Loại liên kết</TableHead>
               <TableHead>Đường dẫn / Tham chiếu</TableHead>
               <TableHead className="text-center">Thứ tự</TableHead>
@@ -340,23 +394,23 @@ export default function PortalMenuPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center">
+                <TableCell colSpan={7} className="h-32 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
                     <span className="text-muted-foreground animate-pulse">Đang tải dữ liệu...</span>
                   </div>
                 </TableCell>
               </TableRow>
-            ) : menus.length === 0 ? (
+            ) : filteredMenus.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground italic bg-slate-50/30">
+                <TableCell colSpan={7} className="h-32 text-center text-muted-foreground italic bg-slate-50/30">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Sparkles className="w-8 h-8 text-slate-300" />
-                    <span>Chưa có menu nào. Nhấn "Thêm Menu mới" hoặc "Thiết lập nhanh" để bắt đầu.</span>
+                    <span>Không tìm thấy menu nào ở vị trí này.</span>
                   </div>
                 </TableCell>
               </TableRow>
-            ) : renderMenuRows(menus)}
+            ) : renderMenuRows(filteredMenus)}
           </TableBody>
         </Table>
       </div>
@@ -376,12 +430,15 @@ export default function PortalMenuPage() {
 
           <div className="p-6">
             <Tabs defaultValue="categories" className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsList className="grid w-full grid-cols-4 mb-6">
                 <TabsTrigger value="categories" className="flex items-center gap-2">
                   <FolderTree className="w-4 h-4" /> Chuyên mục
                 </TabsTrigger>
                 <TabsTrigger value="documents" className="flex items-center gap-2">
                   <BookOpen className="w-4 h-4" /> Văn bản
+                </TabsTrigger>
+                <TabsTrigger value="compliance" className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> Tuân thủ
                 </TabsTrigger>
                 <TabsTrigger value="pages" className="flex items-center gap-2">
                   <Layout className="w-4 h-4" /> Trang hệ thống
@@ -405,10 +462,10 @@ export default function PortalMenuPage() {
                           <p className="text-[10px] text-slate-500">{cat.children?.length || 0} chuyên mục con</p>
                         </div>
                       </div>
-                      <Button 
-                        size="sm" 
-                        variant="ghost" 
-                        className="text-blue-600" 
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-blue-600"
                         onClick={() => importCategoryTree(cat)}
                         disabled={isImporting}
                       >
@@ -431,13 +488,41 @@ export default function PortalMenuPage() {
                         <FileText className="w-5 h-5" />
                       </div>
                       <p className="font-bold text-slate-800">{group.name}</p>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="w-full bg-slate-100 hover:bg-blue-600 hover:text-white text-slate-700"
                         onClick={() => importDocumentGroup(group)}
                         disabled={isImporting}
                       >
                         {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : "Thiết lập Menu"}
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </TabsContent>
+
+              <TabsContent value="compliance" className="space-y-4">
+                <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4 text-sm text-emerald-800 flex gap-3 mb-4">
+                  <ShieldCheck className="w-5 h-5 flex-shrink-0" />
+                  <p>Các module bắt buộc theo Nghị định 42/2022 và Thông tư 22/2023 của Bộ TT&TT về Cổng thông tin điện tử cơ quan nhà nước.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {complianceModules.map(module => (
+                    <div key={module.id} className="flex items-center justify-between p-3 rounded-lg border hover:border-emerald-300 hover:bg-emerald-50 transition-all group">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-emerald-100 text-emerald-600 rounded">
+                          <Plus className="w-3 h-3" />
+                        </div>
+                        <span className="text-xs font-semibold">{module.name}</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 text-emerald-600 px-2"
+                        onClick={() => handleImportCompliance(module)}
+                        disabled={isImporting}
+                      >
+                        {isImporting ? <Loader2 className="w-3 h-3 animate-spin" /> : "Thêm"}
                       </Button>
                     </div>
                   ))}
@@ -452,8 +537,8 @@ export default function PortalMenuPage() {
                   <p className="font-bold">Khởi tạo nhanh các trang cơ bản</p>
                   <p className="text-sm text-muted-foreground">Trang chủ, Tin tức, Tra cứu văn bản, Liên hệ...</p>
                 </div>
-                <Button 
-                  onClick={addDefaultPages} 
+                <Button
+                  onClick={addDefaultPages}
                   className="bg-blue-600 px-8"
                   disabled={isImporting}
                 >
@@ -499,6 +584,20 @@ export default function PortalMenuPage() {
                     <SelectItem value="CATEGORY">Liên kết Chuyên mục</SelectItem>
                     <SelectItem value="POST">Liên kết Bài viết</SelectItem>
                     <SelectItem value="STATIC_PAGE">Trang tĩnh hệ thống</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="position" className="text-right font-bold">Vị trí</Label>
+                <Select value={editingMenu.position} onValueChange={v => setEditingMenu({ ...editingMenu, position: v as any })}>
+                  <SelectTrigger className="col-span-3 rounded-lg">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="HORIZONTAL">Menu Ngang (Top Nav)</SelectItem>
+                    <SelectItem value="VERTICAL">Menu Dọc (Sidebar)</SelectItem>
+                    <SelectItem value="FOOTER">Menu Chân trang (Footer)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -17,6 +17,8 @@ model PortalMenu {
   type        String   @default("URL") // URL, CATEGORY, POST, STATIC_PAGE
   referenceId String?  @map("reference_id") // ID of Category or Post
   
+  position    String   @default("HORIZONTAL") // HORIZONTAL, VERTICAL, FOOTER
+  
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
