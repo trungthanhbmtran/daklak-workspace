@@ -30,7 +30,7 @@ export default function PortalMenuPage() {
     try {
       const data = await postsApi.getPortalMenus();
       setMenus(data || []);
-    } catch (error) {
+    } catch {
       toast.error("Không thể tải danh sách menu");
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export default function PortalMenuPage() {
       }
       setIsDialogOpen(false);
       fetchMenus();
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi lưu dữ liệu");
     }
   };
@@ -80,7 +80,7 @@ export default function PortalMenuPage() {
       await postsApi.deletePortalMenu(id);
       toast.success("Đã xóa menu");
       fetchMenus();
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi xóa menu");
     }
   };
@@ -90,7 +90,7 @@ export default function PortalMenuPage() {
       await postsApi.updatePortalMenu(id, { isActive: !currentStatus });
       toast.success("Đã cập nhật trạng thái");
       fetchMenus();
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi cập nhật trạng thái");
     }
   };
@@ -173,7 +173,7 @@ export default function PortalMenuPage() {
             ) : menus.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={6} className="h-24 text-center text-muted-foreground italic">
-                  Chưa có menu nào. Nhấn "Thêm Menu mới" để bắt đầu.
+                  Chưa có menu nào. Nhấn &quot;Thêm Menu mới&quot; để bắt đầu.
                 </TableCell>
               </TableRow>
             ) : renderMenuRows(menus)}
@@ -198,7 +198,7 @@ export default function PortalMenuPage() {
 
               <div className="grid grid-cols-4 items-center gap-4">
                 <Label htmlFor="type" className="text-right">Loại liên kết</Label>
-                <Select value={editingMenu.type} onValueChange={v => setEditingMenu({ ...editingMenu, type: v as any })}>
+                <Select value={editingMenu.type} onValueChange={v => setEditingMenu({ ...editingMenu, type: v as PortalMenu['type'] })}>
                   <SelectTrigger className="col-span-3">
                     <SelectValue />
                   </SelectTrigger>

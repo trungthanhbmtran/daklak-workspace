@@ -14,7 +14,7 @@ import { vi } from "date-fns/locale";
 
 // types are imported from ../types
 
-const STATUS_CONFIG: Record<PostStatus, { label: string; color: string; icon: any }> = {
+const STATUS_CONFIG: Record<PostStatus, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
   DRAFT: { label: "Bản nháp", color: "bg-slate-100 text-slate-700 border-slate-200", icon: FileText },
   SUBMITTED: { label: "Chờ duyệt", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
   UNDER_REVIEW: { label: "Đang thẩm định", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Search },
@@ -154,7 +154,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                     <div className="flex flex-col items-center gap-2 text-destructive">
                       <AlertCircle className="h-8 w-8" />
                       <p className="font-medium">Không thể tải dữ liệu</p>
-                      <p className="text-xs">{(error as any)?.message || "Vui lòng thử lại sau"}</p>
+                      <p className="text-xs">{(error as Error)?.message || "Vui lòng thử lại sau"}</p>
                     </div>
                   </td>
                 </tr>
@@ -176,17 +176,17 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                         <div className="flex items-start gap-3">
                           <div className="h-12 w-16 bg-muted rounded border overflow-hidden flex items-center justify-center shrink-0">
                             {post.thumbnail ? (
-                              <img
-                                src={`/api/v1/admin/media/download/${post.thumbnail}`}
-                                alt=""
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  const target = e.target as HTMLImageElement;
-                                  if (!target.src.includes('/api/v1/media/download/')) {
-                                    target.src = `/api/v1/media/download/${post.thumbnail}`;
-                                  }
-                                }}
-                              />
+                                <img
+                                  src={`/api/v1/admin/media/download/${post.thumbnail}`}
+                                  alt=""
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    if (!target.src.includes('/api/v1/media/download/')) {
+                                      target.src = `/api/v1/media/download/${post.thumbnail}`;
+                                    }
+                                  }}
+                                />
                             ) : (
                               <ImageIcon className="h-5 w-5 text-muted-foreground/40" />
                             )}

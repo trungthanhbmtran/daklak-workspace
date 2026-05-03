@@ -19,7 +19,7 @@ export default function FeedbacksPage() {
     try {
       const { data } = await postsApi.getFeedbacks({ page: 1, limit: 20 });
       setFeedbacks(data);
-    } catch (error) {
+    } catch {
       toast.error("Không thể tải danh sách góp ý");
     } finally {
       setLoading(false);
@@ -31,7 +31,7 @@ export default function FeedbacksPage() {
       await postsApi.updateFeedbackStatus(id, status);
       toast.success("Đã cập nhật trạng thái góp ý");
       fetchFeedbacks();
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi cập nhật trạng thái");
     }
   };

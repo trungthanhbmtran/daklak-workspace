@@ -17,7 +17,7 @@ export default function QuestionsPage() {
     try {
       const { data } = await postsApi.getQuestions({ page: 1, limit: 20 });
       setQuestions(data);
-    } catch (error) {
+    } catch {
       toast.error("Không thể tải danh sách câu hỏi");
     } finally {
       setLoading(false);

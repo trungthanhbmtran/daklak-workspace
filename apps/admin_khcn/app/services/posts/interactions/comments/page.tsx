@@ -20,7 +20,7 @@ export default function CommentsModerationPage() {
       // Mặc định lấy các bình luận đang chờ duyệt (PENDING)
       const { data } = await postsApi.getComments({ status: 'PENDING', page: 1, limit: 50 });
       setComments(data);
-    } catch (error) {
+    } catch {
       toast.error("Không thể tải danh sách bình luận");
     } finally {
       setLoading(false);
@@ -32,7 +32,7 @@ export default function CommentsModerationPage() {
       await postsApi.updateCommentStatus(id, status);
       toast.success(`Đã chuyển trạng thái sang ${status}`);
       setComments(prev => prev.filter(c => c.id !== id));
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi cập nhật trạng thái");
     }
   };
@@ -43,7 +43,7 @@ export default function CommentsModerationPage() {
       await postsApi.deleteComment(id);
       toast.success("Đã xóa bình luận");
       setComments(prev => prev.filter(c => c.id !== id));
-    } catch (error) {
+    } catch {
       toast.error("Lỗi khi xóa bình luận");
     }
   };
@@ -75,7 +75,7 @@ export default function CommentsModerationPage() {
                   <div className="text-xs text-gray-500">{c.authorEmail || c.authorIp}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm text-gray-800 italic">"{c.content}"</div>
+                  <div className="text-sm text-gray-800 italic">&quot;{c.content}&quot;</div>
                   <div className="text-xs text-blue-500 mt-1">Post ID: {c.postId}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
