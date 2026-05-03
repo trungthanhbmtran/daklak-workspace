@@ -22,6 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import apiClient from "@/lib/axiosInstance";
 
 export default function PortalMenuPage() {
+  const [activeTab, setActiveTab] = useState<string>("ALL");
   const [menus, setMenus] = useState<PortalMenu[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -94,7 +95,6 @@ export default function PortalMenuPage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState<string>("ALL");
 
   const filteredMenus = menus.filter(m => {
     if (activeTab === "ALL") return true;
@@ -244,7 +244,7 @@ export default function PortalMenuPage() {
           name: cat.name,
           type: "URL",
           parentId: groupMenu.id,
-          link: `${pathMap[group.id] || "/van-ban"}?category=${cat.code}`,
+          link: `${pathMap[group.id] || "/van-ban"}?category=${cat.slug}`,
           isActive: true,
           order: i + 1,
           target: "_self",
