@@ -4,7 +4,7 @@ import { buildTree } from '@/common/utils/tree.util';
 
 @Injectable()
 export class PortalMenuService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
     return this.prisma.portalMenu.create({
