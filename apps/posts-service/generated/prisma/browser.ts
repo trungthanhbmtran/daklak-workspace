@@ -28,11 +28,6 @@ export type Banner = Prisma.BannerModel
  */
 export type Category = Prisma.CategoryModel
 /**
- * Model PortalMenu
- * 
- */
-export type PortalMenu = Prisma.PortalMenuModel
-/**
  * Model Post
  * 
  */

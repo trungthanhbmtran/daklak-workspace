@@ -37,7 +37,6 @@ CREATE TABLE `posts_categories` (
     `link_type` VARCHAR(191) NULL DEFAULT 'standard',
     `custom_url` VARCHAR(191) NULL,
     `target` VARCHAR(191) NULL DEFAULT '_self',
-    `position` VARCHAR(191) NOT NULL DEFAULT 'SIDEBAR',
     `order_index` INTEGER NOT NULL DEFAULT 0,
     `description` TEXT NULL,
     `meta_title` VARCHAR(191) NULL,
@@ -49,28 +48,6 @@ CREATE TABLE `posts_categories` (
     UNIQUE INDEX `posts_categories_slug_key`(`slug`),
     INDEX `posts_categories_lft_rgt_idx`(`lft`, `rgt`),
     INDEX `posts_categories_parent_id_idx`(`parent_id`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `portal_menus` (
-    `id` VARCHAR(191) NOT NULL,
-    `name` VARCHAR(191) NOT NULL,
-    `slug` VARCHAR(191) NOT NULL,
-    `path` VARCHAR(191) NULL,
-    `icon` VARCHAR(191) NULL,
-    `target` VARCHAR(191) NOT NULL DEFAULT '_self',
-    `parent_id` VARCHAR(191) NULL,
-    `linkType` VARCHAR(191) NOT NULL DEFAULT 'INTERNAL',
-    `position` VARCHAR(191) NOT NULL DEFAULT 'HEADER',
-    `order_index` INTEGER NOT NULL DEFAULT 0,
-    `status` BOOLEAN NOT NULL DEFAULT true,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updated_at` DATETIME(3) NOT NULL,
-
-    UNIQUE INDEX `portal_menus_slug_key`(`slug`),
-    INDEX `portal_menus_parent_id_idx`(`parent_id`),
-    INDEX `portal_menus_position_idx`(`position`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -91,15 +68,7 @@ CREATE TABLE `posts` (
     `view_count` INTEGER NOT NULL DEFAULT 0,
     `is_translated` BOOLEAN NOT NULL DEFAULT false,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
-    `author_name` VARCHAR(191) NULL,
-    `source` VARCHAR(191) NULL,
-    `language` VARCHAR(191) NOT NULL DEFAULT 'vi',
-    `seo_title` VARCHAR(191) NULL,
-    `seo_description` TEXT NULL,
-    `seo_keywords` VARCHAR(191) NULL,
-    `allow_comment` BOOLEAN NOT NULL DEFAULT true,
     `published_at` DATETIME(3) NULL,
-    `expired_at` DATETIME(3) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
     `deleted_at` DATETIME(3) NULL,
@@ -135,12 +104,6 @@ CREATE TABLE `posts_versions` (
     `content_json` LONGTEXT NULL,
     `editor_id` VARCHAR(191) NOT NULL,
     `change_note` TEXT NULL,
-    `author_name` VARCHAR(191) NULL,
-    `source` VARCHAR(191) NULL,
-    `language` VARCHAR(191) NULL,
-    `seo_title` VARCHAR(191) NULL,
-    `seo_description` TEXT NULL,
-    `seo_keywords` VARCHAR(191) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `posts_versions_post_id_idx`(`post_id`),
@@ -194,9 +157,6 @@ CREATE TABLE `_PostToTag` (
 
 -- AddForeignKey
 ALTER TABLE `posts_categories` ADD CONSTRAINT `posts_categories_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `posts_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `portal_menus` ADD CONSTRAINT `portal_menus_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `portal_menus`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `posts` ADD CONSTRAINT `posts_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `posts_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

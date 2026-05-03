@@ -386,7 +386,6 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Banner: 'Banner',
   Category: 'Category',
-  PortalMenu: 'PortalMenu',
   Post: 'Post',
   Tag: 'Tag',
   PostVersion: 'PostVersion',
@@ -407,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "banner" | "category" | "portalMenu" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog"
+    modelProps: "banner" | "category" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -540,72 +539,6 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CategoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CategoryCountAggregateOutputType> | number
-        }
-      }
-    }
-    PortalMenu: {
-      payload: Prisma.$PortalMenuPayload<ExtArgs>
-      fields: Prisma.PortalMenuFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.PortalMenuFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.PortalMenuFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
-        }
-        findFirst: {
-          args: Prisma.PortalMenuFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.PortalMenuFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
-        }
-        findMany: {
-          args: Prisma.PortalMenuFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>[]
-        }
-        create: {
-          args: Prisma.PortalMenuCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
-        }
-        createMany: {
-          args: Prisma.PortalMenuCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        delete: {
-          args: Prisma.PortalMenuDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
-        }
-        update: {
-          args: Prisma.PortalMenuUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
-        }
-        deleteMany: {
-          args: Prisma.PortalMenuDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.PortalMenuUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        upsert: {
-          args: Prisma.PortalMenuUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
-        }
-        aggregate: {
-          args: Prisma.PortalMenuAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregatePortalMenu>
-        }
-        groupBy: {
-          args: Prisma.PortalMenuGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PortalMenuGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.PortalMenuCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.PortalMenuCountAggregateOutputType> | number
         }
       }
     }
@@ -1015,7 +948,6 @@ export const CategoryScalarFieldEnum = {
   linkType: 'linkType',
   customUrl: 'customUrl',
   target: 'target',
-  position: 'position',
   orderIndex: 'orderIndex',
   description: 'description',
   metaTitle: 'metaTitle',
@@ -1026,25 +958,6 @@ export const CategoryScalarFieldEnum = {
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
-
-
-export const PortalMenuScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  path: 'path',
-  icon: 'icon',
-  target: 'target',
-  parentId: 'parentId',
-  linkType: 'linkType',
-  position: 'position',
-  orderIndex: 'orderIndex',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type PortalMenuScalarFieldEnum = (typeof PortalMenuScalarFieldEnum)[keyof typeof PortalMenuScalarFieldEnum]
 
 
 export const PostScalarFieldEnum = {
@@ -1063,15 +976,7 @@ export const PostScalarFieldEnum = {
   viewCount: 'viewCount',
   isTranslated: 'isTranslated',
   isDeleted: 'isDeleted',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords',
-  allowComment: 'allowComment',
   publishedAt: 'publishedAt',
-  expiredAt: 'expiredAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
@@ -1100,12 +1005,6 @@ export const PostVersionScalarFieldEnum = {
   contentJson: 'contentJson',
   editorId: 'editorId',
   changeNote: 'changeNote',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords',
   createdAt: 'createdAt'
 } as const
 
@@ -1185,28 +1084,12 @@ export const CategoryOrderByRelevanceFieldEnum = {
   linkType: 'linkType',
   customUrl: 'customUrl',
   target: 'target',
-  position: 'position',
   description: 'description',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription'
 } as const
 
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
-
-
-export const PortalMenuOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  path: 'path',
-  icon: 'icon',
-  target: 'target',
-  parentId: 'parentId',
-  linkType: 'linkType',
-  position: 'position'
-} as const
-
-export type PortalMenuOrderByRelevanceFieldEnum = (typeof PortalMenuOrderByRelevanceFieldEnum)[keyof typeof PortalMenuOrderByRelevanceFieldEnum]
 
 
 export const PostOrderByRelevanceFieldEnum = {
@@ -1219,12 +1102,6 @@ export const PostOrderByRelevanceFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords',
   categoryId: 'categoryId'
 } as const
 
@@ -1248,13 +1125,7 @@ export const PostVersionOrderByRelevanceFieldEnum = {
   content: 'content',
   contentJson: 'contentJson',
   editorId: 'editorId',
-  changeNote: 'changeNote',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords'
+  changeNote: 'changeNote'
 } as const
 
 export type PostVersionOrderByRelevanceFieldEnum = (typeof PostVersionOrderByRelevanceFieldEnum)[keyof typeof PostVersionOrderByRelevanceFieldEnum]
@@ -1425,7 +1296,6 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   banner?: Prisma.BannerOmit
   category?: Prisma.CategoryOmit
-  portalMenu?: Prisma.PortalMenuOmit
   post?: Prisma.PostOmit
   tag?: Prisma.TagOmit
   postVersion?: Prisma.PostVersionOmit

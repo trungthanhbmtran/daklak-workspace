@@ -53,7 +53,6 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Banner: 'Banner',
   Category: 'Category',
-  PortalMenu: 'PortalMenu',
   Post: 'Post',
   Tag: 'Tag',
   PostVersion: 'PostVersion',
@@ -114,7 +113,6 @@ export const CategoryScalarFieldEnum = {
   linkType: 'linkType',
   customUrl: 'customUrl',
   target: 'target',
-  position: 'position',
   orderIndex: 'orderIndex',
   description: 'description',
   metaTitle: 'metaTitle',
@@ -125,25 +123,6 @@ export const CategoryScalarFieldEnum = {
 } as const
 
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
-
-
-export const PortalMenuScalarFieldEnum = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  path: 'path',
-  icon: 'icon',
-  target: 'target',
-  parentId: 'parentId',
-  linkType: 'linkType',
-  position: 'position',
-  orderIndex: 'orderIndex',
-  status: 'status',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-} as const
-
-export type PortalMenuScalarFieldEnum = (typeof PortalMenuScalarFieldEnum)[keyof typeof PortalMenuScalarFieldEnum]
 
 
 export const PostScalarFieldEnum = {
@@ -162,15 +141,7 @@ export const PostScalarFieldEnum = {
   viewCount: 'viewCount',
   isTranslated: 'isTranslated',
   isDeleted: 'isDeleted',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords',
-  allowComment: 'allowComment',
   publishedAt: 'publishedAt',
-  expiredAt: 'expiredAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt',
@@ -199,12 +170,6 @@ export const PostVersionScalarFieldEnum = {
   contentJson: 'contentJson',
   editorId: 'editorId',
   changeNote: 'changeNote',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords',
   createdAt: 'createdAt'
 } as const
 
@@ -284,28 +249,12 @@ export const CategoryOrderByRelevanceFieldEnum = {
   linkType: 'linkType',
   customUrl: 'customUrl',
   target: 'target',
-  position: 'position',
   description: 'description',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription'
 } as const
 
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
-
-
-export const PortalMenuOrderByRelevanceFieldEnum = {
-  id: 'id',
-  name: 'name',
-  slug: 'slug',
-  path: 'path',
-  icon: 'icon',
-  target: 'target',
-  parentId: 'parentId',
-  linkType: 'linkType',
-  position: 'position'
-} as const
-
-export type PortalMenuOrderByRelevanceFieldEnum = (typeof PortalMenuOrderByRelevanceFieldEnum)[keyof typeof PortalMenuOrderByRelevanceFieldEnum]
 
 
 export const PostOrderByRelevanceFieldEnum = {
@@ -318,12 +267,6 @@ export const PostOrderByRelevanceFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords',
   categoryId: 'categoryId'
 } as const
 
@@ -347,13 +290,7 @@ export const PostVersionOrderByRelevanceFieldEnum = {
   content: 'content',
   contentJson: 'contentJson',
   editorId: 'editorId',
-  changeNote: 'changeNote',
-  authorName: 'authorName',
-  source: 'source',
-  language: 'language',
-  seoTitle: 'seoTitle',
-  seoDescription: 'seoDescription',
-  seoKeywords: 'seoKeywords'
+  changeNote: 'changeNote'
 } as const
 
 export type PostVersionOrderByRelevanceFieldEnum = (typeof PostVersionOrderByRelevanceFieldEnum)[keyof typeof PostVersionOrderByRelevanceFieldEnum]

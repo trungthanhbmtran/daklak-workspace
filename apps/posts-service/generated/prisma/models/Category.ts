@@ -54,7 +54,6 @@ export type CategoryMinAggregateOutputType = {
   linkType: string | null
   customUrl: string | null
   target: string | null
-  position: string | null
   orderIndex: number | null
   description: string | null
   metaTitle: string | null
@@ -78,7 +77,6 @@ export type CategoryMaxAggregateOutputType = {
   linkType: string | null
   customUrl: string | null
   target: string | null
-  position: string | null
   orderIndex: number | null
   description: string | null
   metaTitle: string | null
@@ -102,7 +100,6 @@ export type CategoryCountAggregateOutputType = {
   linkType: number
   customUrl: number
   target: number
-  position: number
   orderIndex: number
   description: number
   metaTitle: number
@@ -142,7 +139,6 @@ export type CategoryMinAggregateInputType = {
   linkType?: true
   customUrl?: true
   target?: true
-  position?: true
   orderIndex?: true
   description?: true
   metaTitle?: true
@@ -166,7 +162,6 @@ export type CategoryMaxAggregateInputType = {
   linkType?: true
   customUrl?: true
   target?: true
-  position?: true
   orderIndex?: true
   description?: true
   metaTitle?: true
@@ -190,7 +185,6 @@ export type CategoryCountAggregateInputType = {
   linkType?: true
   customUrl?: true
   target?: true
-  position?: true
   orderIndex?: true
   description?: true
   metaTitle?: true
@@ -301,7 +295,6 @@ export type CategoryGroupByOutputType = {
   linkType: string | null
   customUrl: string | null
   target: string | null
-  position: string
   orderIndex: number
   description: string | null
   metaTitle: string | null
@@ -348,7 +341,6 @@ export type CategoryWhereInput = {
   linkType?: Prisma.StringNullableFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableFilter<"Category"> | string | null
   target?: Prisma.StringNullableFilter<"Category"> | string | null
-  position?: Prisma.StringFilter<"Category"> | string
   orderIndex?: Prisma.IntFilter<"Category"> | number
   description?: Prisma.StringNullableFilter<"Category"> | string | null
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
@@ -375,7 +367,6 @@ export type CategoryOrderByWithRelationInput = {
   linkType?: Prisma.SortOrderInput | Prisma.SortOrder
   customUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   target?: Prisma.SortOrderInput | Prisma.SortOrder
-  position?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   metaTitle?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -406,7 +397,6 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   linkType?: Prisma.StringNullableFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableFilter<"Category"> | string | null
   target?: Prisma.StringNullableFilter<"Category"> | string | null
-  position?: Prisma.StringFilter<"Category"> | string
   orderIndex?: Prisma.IntFilter<"Category"> | number
   description?: Prisma.StringNullableFilter<"Category"> | string | null
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
@@ -433,7 +423,6 @@ export type CategoryOrderByWithAggregationInput = {
   linkType?: Prisma.SortOrderInput | Prisma.SortOrder
   customUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   target?: Prisma.SortOrderInput | Prisma.SortOrder
-  position?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   metaTitle?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -465,7 +454,6 @@ export type CategoryScalarWhereWithAggregatesInput = {
   linkType?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   target?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
-  position?: Prisma.StringWithAggregatesFilter<"Category"> | string
   orderIndex?: Prisma.IntWithAggregatesFilter<"Category"> | number
   description?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   metaTitle?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
@@ -488,7 +476,6 @@ export type CategoryCreateInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -515,7 +502,6 @@ export type CategoryUncheckedCreateInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -540,7 +526,6 @@ export type CategoryUpdateInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -567,7 +552,6 @@ export type CategoryUncheckedUpdateInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -593,7 +577,6 @@ export type CategoryCreateManyInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -616,7 +599,6 @@ export type CategoryUpdateManyMutationInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -640,7 +622,6 @@ export type CategoryUncheckedUpdateManyInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -685,7 +666,6 @@ export type CategoryCountOrderByAggregateInput = {
   linkType?: Prisma.SortOrder
   customUrl?: Prisma.SortOrder
   target?: Prisma.SortOrder
-  position?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
@@ -716,7 +696,6 @@ export type CategoryMaxOrderByAggregateInput = {
   linkType?: Prisma.SortOrder
   customUrl?: Prisma.SortOrder
   target?: Prisma.SortOrder
-  position?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
@@ -740,7 +719,6 @@ export type CategoryMinOrderByAggregateInput = {
   linkType?: Prisma.SortOrder
   customUrl?: Prisma.SortOrder
   target?: Prisma.SortOrder
-  position?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
@@ -844,7 +822,6 @@ export type CategoryCreateWithoutChildrenInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -870,7 +847,6 @@ export type CategoryUncheckedCreateWithoutChildrenInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -899,7 +875,6 @@ export type CategoryCreateWithoutParentInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -924,7 +899,6 @@ export type CategoryUncheckedCreateWithoutParentInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -970,7 +944,6 @@ export type CategoryUpdateWithoutChildrenInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -996,7 +969,6 @@ export type CategoryUncheckedUpdateWithoutChildrenInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1040,7 +1012,6 @@ export type CategoryScalarWhereInput = {
   linkType?: Prisma.StringNullableFilter<"Category"> | string | null
   customUrl?: Prisma.StringNullableFilter<"Category"> | string | null
   target?: Prisma.StringNullableFilter<"Category"> | string | null
-  position?: Prisma.StringFilter<"Category"> | string
   orderIndex?: Prisma.IntFilter<"Category"> | number
   description?: Prisma.StringNullableFilter<"Category"> | string | null
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
@@ -1063,7 +1034,6 @@ export type CategoryCreateWithoutPostsInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -1089,7 +1059,6 @@ export type CategoryUncheckedCreateWithoutPostsInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -1129,7 +1098,6 @@ export type CategoryUpdateWithoutPostsInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1155,7 +1123,6 @@ export type CategoryUncheckedUpdateWithoutPostsInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1179,7 +1146,6 @@ export type CategoryCreateManyParentInput = {
   linkType?: string | null
   customUrl?: string | null
   target?: string | null
-  position?: string
   orderIndex?: number
   description?: string | null
   metaTitle?: string | null
@@ -1202,7 +1168,6 @@ export type CategoryUpdateWithoutParentInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1227,7 +1192,6 @@ export type CategoryUncheckedUpdateWithoutParentInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1252,7 +1216,6 @@ export type CategoryUncheckedUpdateManyWithoutParentInput = {
   linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  position?: Prisma.StringFieldUpdateOperationsInput | string
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1316,7 +1279,6 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   linkType?: boolean
   customUrl?: boolean
   target?: boolean
-  position?: boolean
   orderIndex?: boolean
   description?: boolean
   metaTitle?: boolean
@@ -1346,7 +1308,6 @@ export type CategorySelectScalar = {
   linkType?: boolean
   customUrl?: boolean
   target?: boolean
-  position?: boolean
   orderIndex?: boolean
   description?: boolean
   metaTitle?: boolean
@@ -1356,7 +1317,7 @@ export type CategorySelectScalar = {
   updatedAt?: boolean
 }
 
-export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "lft" | "rgt" | "depth" | "status" | "thumbnail" | "attachmentId" | "linkType" | "customUrl" | "target" | "position" | "orderIndex" | "description" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "lft" | "rgt" | "depth" | "status" | "thumbnail" | "attachmentId" | "linkType" | "customUrl" | "target" | "orderIndex" | "description" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.Category$parentArgs<ExtArgs>
   children?: boolean | Prisma.Category$childrenArgs<ExtArgs>
@@ -1385,7 +1346,6 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     linkType: string | null
     customUrl: string | null
     target: string | null
-    position: string
     orderIndex: number
     description: string | null
     metaTitle: string | null
@@ -1778,7 +1738,6 @@ export interface CategoryFieldRefs {
   readonly linkType: Prisma.FieldRef<"Category", 'String'>
   readonly customUrl: Prisma.FieldRef<"Category", 'String'>
   readonly target: Prisma.FieldRef<"Category", 'String'>
-  readonly position: Prisma.FieldRef<"Category", 'String'>
   readonly orderIndex: Prisma.FieldRef<"Category", 'Int'>
   readonly description: Prisma.FieldRef<"Category", 'String'>
   readonly metaTitle: Prisma.FieldRef<"Category", 'String'>

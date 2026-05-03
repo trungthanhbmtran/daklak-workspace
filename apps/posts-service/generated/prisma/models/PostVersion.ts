@@ -44,12 +44,6 @@ export type PostVersionMinAggregateOutputType = {
   contentJson: string | null
   editorId: string | null
   changeNote: string | null
-  authorName: string | null
-  source: string | null
-  language: string | null
-  seoTitle: string | null
-  seoDescription: string | null
-  seoKeywords: string | null
   createdAt: Date | null
 }
 
@@ -63,12 +57,6 @@ export type PostVersionMaxAggregateOutputType = {
   contentJson: string | null
   editorId: string | null
   changeNote: string | null
-  authorName: string | null
-  source: string | null
-  language: string | null
-  seoTitle: string | null
-  seoDescription: string | null
-  seoKeywords: string | null
   createdAt: Date | null
 }
 
@@ -82,12 +70,6 @@ export type PostVersionCountAggregateOutputType = {
   contentJson: number
   editorId: number
   changeNote: number
-  authorName: number
-  source: number
-  language: number
-  seoTitle: number
-  seoDescription: number
-  seoKeywords: number
   createdAt: number
   _all: number
 }
@@ -111,12 +93,6 @@ export type PostVersionMinAggregateInputType = {
   contentJson?: true
   editorId?: true
   changeNote?: true
-  authorName?: true
-  source?: true
-  language?: true
-  seoTitle?: true
-  seoDescription?: true
-  seoKeywords?: true
   createdAt?: true
 }
 
@@ -130,12 +106,6 @@ export type PostVersionMaxAggregateInputType = {
   contentJson?: true
   editorId?: true
   changeNote?: true
-  authorName?: true
-  source?: true
-  language?: true
-  seoTitle?: true
-  seoDescription?: true
-  seoKeywords?: true
   createdAt?: true
 }
 
@@ -149,12 +119,6 @@ export type PostVersionCountAggregateInputType = {
   contentJson?: true
   editorId?: true
   changeNote?: true
-  authorName?: true
-  source?: true
-  language?: true
-  seoTitle?: true
-  seoDescription?: true
-  seoKeywords?: true
   createdAt?: true
   _all?: true
 }
@@ -255,12 +219,6 @@ export type PostVersionGroupByOutputType = {
   contentJson: string | null
   editorId: string
   changeNote: string | null
-  authorName: string | null
-  source: string | null
-  language: string | null
-  seoTitle: string | null
-  seoDescription: string | null
-  seoKeywords: string | null
   createdAt: Date
   _count: PostVersionCountAggregateOutputType | null
   _avg: PostVersionAvgAggregateOutputType | null
@@ -297,12 +255,6 @@ export type PostVersionWhereInput = {
   contentJson?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  authorName?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  source?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  language?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoTitle?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoDescription?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoKeywords?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostVersion"> | Date | string
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
 }
@@ -317,12 +269,6 @@ export type PostVersionOrderByWithRelationInput = {
   contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrderInput | Prisma.SortOrder
-  authorName?: Prisma.SortOrderInput | Prisma.SortOrder
-  source?: Prisma.SortOrderInput | Prisma.SortOrder
-  language?: Prisma.SortOrderInput | Prisma.SortOrder
-  seoTitle?: Prisma.SortOrderInput | Prisma.SortOrder
-  seoDescription?: Prisma.SortOrderInput | Prisma.SortOrder
-  seoKeywords?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   post?: Prisma.PostOrderByWithRelationInput
   _relevance?: Prisma.PostVersionOrderByRelevanceInput
@@ -341,12 +287,6 @@ export type PostVersionWhereUniqueInput = Prisma.AtLeast<{
   contentJson?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  authorName?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  source?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  language?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoTitle?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoDescription?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoKeywords?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostVersion"> | Date | string
   post?: Prisma.XOR<Prisma.PostScalarRelationFilter, Prisma.PostWhereInput>
 }, "id">
@@ -361,12 +301,6 @@ export type PostVersionOrderByWithAggregationInput = {
   contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrderInput | Prisma.SortOrder
-  authorName?: Prisma.SortOrderInput | Prisma.SortOrder
-  source?: Prisma.SortOrderInput | Prisma.SortOrder
-  language?: Prisma.SortOrderInput | Prisma.SortOrder
-  seoTitle?: Prisma.SortOrderInput | Prisma.SortOrder
-  seoDescription?: Prisma.SortOrderInput | Prisma.SortOrder
-  seoKeywords?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.PostVersionCountOrderByAggregateInput
   _avg?: Prisma.PostVersionAvgOrderByAggregateInput
@@ -388,12 +322,6 @@ export type PostVersionScalarWhereWithAggregatesInput = {
   contentJson?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringWithAggregatesFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  authorName?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  source?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  language?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  seoTitle?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  seoDescription?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  seoKeywords?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PostVersion"> | Date | string
 }
 
@@ -406,12 +334,6 @@ export type PostVersionCreateInput = {
   contentJson?: string | null
   editorId: string
   changeNote?: string | null
-  authorName?: string | null
-  source?: string | null
-  language?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-  seoKeywords?: string | null
   createdAt?: Date | string
   post: Prisma.PostCreateNestedOneWithoutVersionsInput
 }
@@ -426,12 +348,6 @@ export type PostVersionUncheckedCreateInput = {
   contentJson?: string | null
   editorId: string
   changeNote?: string | null
-  authorName?: string | null
-  source?: string | null
-  language?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-  seoKeywords?: string | null
   createdAt?: Date | string
 }
 
@@ -444,12 +360,6 @@ export type PostVersionUpdateInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   post?: Prisma.PostUpdateOneRequiredWithoutVersionsNestedInput
 }
@@ -464,12 +374,6 @@ export type PostVersionUncheckedUpdateInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -483,12 +387,6 @@ export type PostVersionCreateManyInput = {
   contentJson?: string | null
   editorId: string
   changeNote?: string | null
-  authorName?: string | null
-  source?: string | null
-  language?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-  seoKeywords?: string | null
   createdAt?: Date | string
 }
 
@@ -501,12 +399,6 @@ export type PostVersionUpdateManyMutationInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -520,12 +412,6 @@ export type PostVersionUncheckedUpdateManyInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -555,12 +441,6 @@ export type PostVersionCountOrderByAggregateInput = {
   contentJson?: Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrder
-  authorName?: Prisma.SortOrder
-  source?: Prisma.SortOrder
-  language?: Prisma.SortOrder
-  seoTitle?: Prisma.SortOrder
-  seoDescription?: Prisma.SortOrder
-  seoKeywords?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -578,12 +458,6 @@ export type PostVersionMaxOrderByAggregateInput = {
   contentJson?: Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrder
-  authorName?: Prisma.SortOrder
-  source?: Prisma.SortOrder
-  language?: Prisma.SortOrder
-  seoTitle?: Prisma.SortOrder
-  seoDescription?: Prisma.SortOrder
-  seoKeywords?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -597,12 +471,6 @@ export type PostVersionMinOrderByAggregateInput = {
   contentJson?: Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrder
-  authorName?: Prisma.SortOrder
-  source?: Prisma.SortOrder
-  language?: Prisma.SortOrder
-  seoTitle?: Prisma.SortOrder
-  seoDescription?: Prisma.SortOrder
-  seoKeywords?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -661,12 +529,6 @@ export type PostVersionCreateWithoutPostInput = {
   contentJson?: string | null
   editorId: string
   changeNote?: string | null
-  authorName?: string | null
-  source?: string | null
-  language?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-  seoKeywords?: string | null
   createdAt?: Date | string
 }
 
@@ -679,12 +541,6 @@ export type PostVersionUncheckedCreateWithoutPostInput = {
   contentJson?: string | null
   editorId: string
   changeNote?: string | null
-  authorName?: string | null
-  source?: string | null
-  language?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-  seoKeywords?: string | null
   createdAt?: Date | string
 }
 
@@ -727,12 +583,6 @@ export type PostVersionScalarWhereInput = {
   contentJson?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  authorName?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  source?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  language?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoTitle?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoDescription?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  seoKeywords?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostVersion"> | Date | string
 }
 
@@ -745,12 +595,6 @@ export type PostVersionCreateManyPostInput = {
   contentJson?: string | null
   editorId: string
   changeNote?: string | null
-  authorName?: string | null
-  source?: string | null
-  language?: string | null
-  seoTitle?: string | null
-  seoDescription?: string | null
-  seoKeywords?: string | null
   createdAt?: Date | string
 }
 
@@ -763,12 +607,6 @@ export type PostVersionUpdateWithoutPostInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -781,12 +619,6 @@ export type PostVersionUncheckedUpdateWithoutPostInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -799,12 +631,6 @@ export type PostVersionUncheckedUpdateManyWithoutPostInput = {
   contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  authorName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  seoKeywords?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -820,12 +646,6 @@ export type PostVersionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   contentJson?: boolean
   editorId?: boolean
   changeNote?: boolean
-  authorName?: boolean
-  source?: boolean
-  language?: boolean
-  seoTitle?: boolean
-  seoDescription?: boolean
-  seoKeywords?: boolean
   createdAt?: boolean
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["postVersion"]>
@@ -842,16 +662,10 @@ export type PostVersionSelectScalar = {
   contentJson?: boolean
   editorId?: boolean
   changeNote?: boolean
-  authorName?: boolean
-  source?: boolean
-  language?: boolean
-  seoTitle?: boolean
-  seoDescription?: boolean
-  seoKeywords?: boolean
   createdAt?: boolean
 }
 
-export type PostVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "version" | "title" | "description" | "content" | "contentJson" | "editorId" | "changeNote" | "authorName" | "source" | "language" | "seoTitle" | "seoDescription" | "seoKeywords" | "createdAt", ExtArgs["result"]["postVersion"]>
+export type PostVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "version" | "title" | "description" | "content" | "contentJson" | "editorId" | "changeNote" | "createdAt", ExtArgs["result"]["postVersion"]>
 export type PostVersionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }
@@ -871,12 +685,6 @@ export type $PostVersionPayload<ExtArgs extends runtime.Types.Extensions.Interna
     contentJson: string | null
     editorId: string
     changeNote: string | null
-    authorName: string | null
-    source: string | null
-    language: string | null
-    seoTitle: string | null
-    seoDescription: string | null
-    seoKeywords: string | null
     createdAt: Date
   }, ExtArgs["result"]["postVersion"]>
   composites: {}
@@ -1257,12 +1065,6 @@ export interface PostVersionFieldRefs {
   readonly contentJson: Prisma.FieldRef<"PostVersion", 'String'>
   readonly editorId: Prisma.FieldRef<"PostVersion", 'String'>
   readonly changeNote: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly authorName: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly source: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly language: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly seoTitle: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly seoDescription: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly seoKeywords: Prisma.FieldRef<"PostVersion", 'String'>
   readonly createdAt: Prisma.FieldRef<"PostVersion", 'DateTime'>
 }
     

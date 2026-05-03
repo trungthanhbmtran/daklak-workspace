@@ -10,7 +10,6 @@
  */
 export type * from './models/Banner'
 export type * from './models/Category'
-export type * from './models/PortalMenu'
 export type * from './models/Post'
 export type * from './models/Tag'
 export type * from './models/PostVersion'
