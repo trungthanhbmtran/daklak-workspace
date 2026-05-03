@@ -45,6 +45,8 @@ docker exec -it daklak-workspace-user-service-1 npx prisma db seed
 docker exec -it daklak-workspace-hrm-service-1 npx prisma db seed
 docker exec -it daklak-workspace-workflow-service-1 npx prisma db seed
 docker exec -it daklak-workspace-media-service-1 npx prisma db seed
+docker exec -it daklak-workspace-posts-service-1 npx prisma db seed
+
 ```
 
 ## 4. Thông tin Tài khoản & Kết nối
