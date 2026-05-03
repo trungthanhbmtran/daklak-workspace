@@ -5,7 +5,7 @@ import { MenusService } from './menus.service';
 
 @Controller()
 export class MenusController {
-  constructor(private readonly menusService: MenusService) {}
+  constructor(private readonly menusService: MenusService) { }
 
   private normalizePermissionIds(raw: number[] | number | undefined): number[] {
     if (raw == null) return [];
@@ -94,7 +94,7 @@ export class MenusController {
   }
 
   @GrpcMethod('MenuService', 'Update')
-  async update(data: { id: number; [k: string]: any }) {
+  async update(data: { id: number;[k: string]: any }) {
     try {
       const { id, ...rest } = data;
       const rawParentId = rest.parentId ?? rest.parent_id;

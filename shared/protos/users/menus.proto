@@ -26,8 +26,8 @@ message MenuNode {
   string service = 7;
   string application = 8;
   string target = 9;
-  int32 parent_id = 10;
   bool is_active = 11;
+  string position = 13;
   repeated MenuNode children = 12;
 }
 
@@ -62,6 +62,7 @@ message MenuItemFlat {
   int32 parent_id = 10;
   repeated int32 required_permission_ids = 11;
   bool is_active = 12;
+  string position = 13;
 }
 
 message CreateMenuRequest {
@@ -76,6 +77,7 @@ message CreateMenuRequest {
   int32 parent_id = 9;
   repeated int32 required_permission_ids = 10;
   bool is_active = 11;
+  string position = 12;
 }
 
 message UpdateMenuRequest {
@@ -91,6 +93,7 @@ message UpdateMenuRequest {
   int32 parent_id = 10;
   repeated int32 required_permission_ids = 11;
   bool is_active = 12;
+  string position = 13;
 }
 
 message CreateMenuResponse {

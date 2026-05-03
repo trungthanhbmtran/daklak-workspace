@@ -7,6 +7,7 @@ import { TagsModule } from './modules/tags/tags.module';
 import { BannersModule } from './modules/banners/banners.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { PortalMenuModule } from './modules/portal-menu/portal-menu.module';
 
 
 @Module({
@@ -21,7 +22,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     CategoriesModule,
     TagsModule,
     BannersModule,
-
+    PortalMenuModule,
   ],
 })
 export class AppModule {}

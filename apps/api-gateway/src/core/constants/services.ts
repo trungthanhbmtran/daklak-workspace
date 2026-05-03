@@ -138,6 +138,13 @@ export const MICROSERVICES = {
     URL: getPostUrl(),
     SERVICE: 'BannerService',
   },
+  PORTAL_MENU: {
+    PACKAGE: 'portal_menu',
+    SYMBOL: 'PORTAL_MENU_PACKAGE',
+    PROTO: 'posts/portal_menu.proto',
+    URL: getPostUrl(),
+    SERVICE: 'PortalMenuService',
+  },
   MEDIA: {
     PACKAGE: 'media',
     SYMBOL: 'MEDIA_PACKAGE',

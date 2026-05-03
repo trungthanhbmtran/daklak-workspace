@@ -22,7 +22,7 @@ export type UpdateMenuDto = Partial<CreateMenuDto>;
 
 @Injectable()
 export class MenusService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getAll(application = 'ADMIN_PORTAL') {
     const list = await this.prisma.menu.findMany({

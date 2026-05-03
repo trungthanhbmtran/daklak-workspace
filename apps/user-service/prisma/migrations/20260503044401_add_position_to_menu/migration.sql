@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `sys_menus` ADD COLUMN `position` VARCHAR(191) NOT NULL DEFAULT 'SIDEBAR';
