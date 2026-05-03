@@ -9,14 +9,6 @@ model PostVersion {
   editorId      String   @map("editor_id")
   changeNote    String?  @db.Text @map("change_note")
   
-  // CMS Fields (Copied from Post for history)
-  authorName    String?  @map("author_name")
-  source        String?
-  language      String?
-  seoTitle      String?  @map("seo_title")
-  seoDescription String? @db.Text @map("seo_description")
-  seoKeywords   String?  @map("seo_keywords")
-  
   createdAt     DateTime @default(now()) @map("created_at")
 
   post          Post     @relation(fields: [postId], references: [id], onDelete: Cascade)

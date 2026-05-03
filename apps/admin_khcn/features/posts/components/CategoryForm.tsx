@@ -15,7 +15,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import {
   Form,
   FormControl,
@@ -44,8 +43,6 @@ const categorySchema = z.object({
   thumbnail: z.string().optional(),
   attachmentId: z.string().optional(),
   orderIndex: z.number().default(0),
-  position: z.enum(["HEADER", "SIDEBAR", "BOTH", "FOOTER"]).default("SIDEBAR"),
-  isGovStandard: z.boolean().default(false),
   linkType: z.enum(["internal", "external"]).default("internal"),
   customUrl: z.string().optional(),
 });
@@ -67,9 +64,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     resolver: zodResolver(categorySchema) as any,
     defaultValues: {
       name: "", slug: "", description: "", parentId: null,
-      thumbnail: "", attachmentId: "", orderIndex: 0, 
-      position: "SIDEBAR", isGovStandard: false,
-      linkType: "internal", customUrl: ""
+      thumbnail: "", attachmentId: "", orderIndex: 0, linkType: "internal", customUrl: ""
     },
   });
 
@@ -344,38 +339,6 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     <FormLabel className="font-semibold">Thứ tự hiển thị</FormLabel>
                     <FormControl><Input type="number" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} /></FormControl>
                     <FormDescription>Số nhỏ hơn sẽ hiển thị trước.</FormDescription>
-                  </FormItem>
-                )} />
-
-                <FormField name="position" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold">Vị trí hiển thị trên Portal</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue placeholder="Chọn vị trí" /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="HEADER">Menu ngang (Header)</SelectItem>
-                        <SelectItem value="SIDEBAR">Menu dọc (Sidebar)</SelectItem>
-                        <SelectItem value="BOTH">Cả hai (Header & Sidebar)</SelectItem>
-                        <SelectItem value="FOOTER">Chân trang (Footer)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
-
-                <FormField name="isGovStandard" render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-slate-50/50">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-sm font-semibold">Chuyên mục chuẩn 42</FormLabel>
-                      <FormDescription className="text-xs">
-                        Đánh dấu đây là chuyên mục bắt buộc theo Nghị định 42.
-                      </FormDescription>
-                    </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
                   </FormItem>
                 )} />
               </CardContent>

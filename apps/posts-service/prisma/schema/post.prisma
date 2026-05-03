@@ -19,17 +19,7 @@ model Post {
   isTranslated          Boolean  @default(false) @map("is_translated")
   isDeleted             Boolean  @default(false) @map("is_deleted")
   
-  // Decree 42 & CMS Fields
-  authorName            String?  @map("author_name")
-  source                String?
-  language              String   @default("vi")
-  seoTitle              String?  @map("seo_title")
-  seoDescription        String?  @db.Text @map("seo_description")
-  seoKeywords           String?  @map("seo_keywords")
-  allowComment          Boolean  @default(true) @map("allow_comment")
-  
   publishedAt           DateTime? @map("published_at")
-  expiredAt             DateTime? @map("expired_at")
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
   deletedAt             DateTime? @map("deleted_at")

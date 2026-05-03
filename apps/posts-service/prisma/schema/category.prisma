@@ -12,7 +12,6 @@ model Category {
   linkType        String?  @default("standard") @map("link_type") // standard | static | external
   customUrl       String?  @map("custom_url")
   target          String?  @default("_self") // _self | _blank
-  position        String   @default("SIDEBAR") @map("position") // HEADER | SIDEBAR | BOTH | FOOTER
   orderIndex      Int      @default(0) @map("order_index")
   description     String?  @db.Text
   metaTitle       String?  @map("meta_title")

@@ -1,13 +1,13 @@
 // features/posts/types.ts
 
-export type PostStatus = 
-  | 'DRAFT' 
-  | 'SUBMITTED' 
-  | 'UNDER_REVIEW' 
-  | 'REJECTED' 
-  | 'APPROVED' 
-  | 'PUBLISHED' 
-  | 'UNPUBLISHED' 
+export type PostStatus =
+  | 'DRAFT'
+  | 'SUBMITTED'
+  | 'UNDER_REVIEW'
+  | 'REJECTED'
+  | 'APPROVED'
+  | 'PUBLISHED'
+  | 'UNPUBLISHED'
   | 'ARCHIVED';
 
 
@@ -29,7 +29,6 @@ export interface Category {
   target?: string;
   metaTitle?: string;
   metaDescription?: string;
-  position?: 'HEADER' | 'SIDEBAR' | 'BOTH' | 'FOOTER';
   isGovStandard?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -61,16 +60,6 @@ export interface Post {
   tags?: string[];
   language?: string;
   isTranslated?: boolean;
-  
-  // Decree 42 Fields
-  authorName?: string;
-  source?: string;
-  seoTitle?: string;
-  seoDescription?: string;
-  seoKeywords?: string;
-  allowComment?: boolean;
-  expiredAt?: string;
-
   publishedAt?: string;
   createdAt: string;
   updatedAt: string;

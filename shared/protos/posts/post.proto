@@ -57,16 +57,6 @@ message Post {
   string contentJson = 19;
   bool isTranslated = 23;
   int32 currentVersion = 24;
-  
-  // Decree 42 Fields
-  string authorName = 25;
-  string source = 26;
-  string language = 27;
-  string seoTitle = 28;
-  string seoDescription = 29;
-  string seoKeywords = 30;
-  bool allowComment = 31;
-  string expiredAt = 32;
 }
 
 message WorkflowRequest {
@@ -114,14 +104,6 @@ message CreatePostRequest {
   bool isNotification = 9;
   string thumbnail = 10;
   string status = 11;
-  string authorName = 12;
-  string source = 13;
-  string language = 14;
-  string seoTitle = 15;
-  string seoDescription = 16;
-  string seoKeywords = 17;
-  bool allowComment = 18;
-  string expiredAt = 19;
 }
 
 // ====================== Get ======================
@@ -160,10 +142,6 @@ message DataListPost {
   repeated tag.Tag tags = 13;
   string categoryId = 14;
   category.Category category = 15;
-  string authorName = 16;
-  string source = 17;
-  string language = 18;
-  string publishedAt = 19;
 }
 
 message ListPostsResponse {
@@ -191,14 +169,6 @@ message UpdatePostRequest {
   string categoryId = 8;
   repeated string tagIds = 9;
   bool isNotification = 10;
-  string authorName = 11;
-  string source = 12;
-  string language = 13;
-  string seoTitle = 14;
-  string seoDescription = 15;
-  string seoKeywords = 16;
-  bool allowComment = 17;
-  string expiredAt = 18;
 }
 
 // ====================== Delete ======================

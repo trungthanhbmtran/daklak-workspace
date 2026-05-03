@@ -9,7 +9,6 @@ model Menu {
   iconColor            String?     @map("icon_color")
   service              String?     @map("service_code")
   application          String      @default("ADMIN_PORTAL")
-  position             String      @default("SIDEBAR") // HEADER | SIDEBAR | HUB_CARD
   target               String      @default("SELF")
   parentId             Int?        @map("parent_id")
   parent               Menu?       @relation("MenuHierarchy", fields: [parentId], references: [id])
