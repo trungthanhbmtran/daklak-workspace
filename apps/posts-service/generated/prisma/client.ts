@@ -50,6 +50,26 @@ export type Banner = Prisma.BannerModel
  */
 export type Category = Prisma.CategoryModel
 /**
+ * Model Comment
+ * 
+ */
+export type Comment = Prisma.CommentModel
+/**
+ * Model CitizenQuestion
+ * 
+ */
+export type CitizenQuestion = Prisma.CitizenQuestionModel
+/**
+ * Model CitizenFeedback
+ * 
+ */
+export type CitizenFeedback = Prisma.CitizenFeedbackModel
+/**
+ * Model PortalMenu
+ * 
+ */
+export type PortalMenu = Prisma.PortalMenuModel
+/**
  * Model Post
  * 
  */

@@ -51,6 +51,7 @@ export type PostMinAggregateOutputType = {
   isNotification: boolean | null
   viewCount: number | null
   isTranslated: boolean | null
+  isCommentAllowed: boolean | null
   isDeleted: boolean | null
   publishedAt: Date | null
   createdAt: Date | null
@@ -74,6 +75,7 @@ export type PostMaxAggregateOutputType = {
   isNotification: boolean | null
   viewCount: number | null
   isTranslated: boolean | null
+  isCommentAllowed: boolean | null
   isDeleted: boolean | null
   publishedAt: Date | null
   createdAt: Date | null
@@ -97,6 +99,7 @@ export type PostCountAggregateOutputType = {
   isNotification: number
   viewCount: number
   isTranslated: number
+  isCommentAllowed: number
   isDeleted: number
   publishedAt: number
   createdAt: number
@@ -132,6 +135,7 @@ export type PostMinAggregateInputType = {
   isNotification?: true
   viewCount?: true
   isTranslated?: true
+  isCommentAllowed?: true
   isDeleted?: true
   publishedAt?: true
   createdAt?: true
@@ -155,6 +159,7 @@ export type PostMaxAggregateInputType = {
   isNotification?: true
   viewCount?: true
   isTranslated?: true
+  isCommentAllowed?: true
   isDeleted?: true
   publishedAt?: true
   createdAt?: true
@@ -178,6 +183,7 @@ export type PostCountAggregateInputType = {
   isNotification?: true
   viewCount?: true
   isTranslated?: true
+  isCommentAllowed?: true
   isDeleted?: true
   publishedAt?: true
   createdAt?: true
@@ -288,6 +294,7 @@ export type PostGroupByOutputType = {
   isNotification: boolean
   viewCount: number
   isTranslated: boolean
+  isCommentAllowed: boolean
   isDeleted: boolean
   publishedAt: Date | null
   createdAt: Date
@@ -334,6 +341,7 @@ export type PostWhereInput = {
   isNotification?: Prisma.BoolFilter<"Post"> | boolean
   viewCount?: Prisma.IntFilter<"Post"> | number
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
+  isCommentAllowed?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -343,6 +351,7 @@ export type PostWhereInput = {
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   tags?: Prisma.TagListRelationFilter
   versions?: Prisma.PostVersionListRelationFilter
+  comments?: Prisma.CommentListRelationFilter
   moderationLogs?: Prisma.ModerationLogListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
 }
@@ -362,6 +371,7 @@ export type PostOrderByWithRelationInput = {
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -371,6 +381,7 @@ export type PostOrderByWithRelationInput = {
   category?: Prisma.CategoryOrderByWithRelationInput
   tags?: Prisma.TagOrderByRelationAggregateInput
   versions?: Prisma.PostVersionOrderByRelationAggregateInput
+  comments?: Prisma.CommentOrderByRelationAggregateInput
   moderationLogs?: Prisma.ModerationLogOrderByRelationAggregateInput
   auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput
   _relevance?: Prisma.PostOrderByRelevanceInput
@@ -394,6 +405,7 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   isNotification?: Prisma.BoolFilter<"Post"> | boolean
   viewCount?: Prisma.IntFilter<"Post"> | number
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
+  isCommentAllowed?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -403,6 +415,7 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   category?: Prisma.XOR<Prisma.CategoryNullableScalarRelationFilter, Prisma.CategoryWhereInput> | null
   tags?: Prisma.TagListRelationFilter
   versions?: Prisma.PostVersionListRelationFilter
+  comments?: Prisma.CommentListRelationFilter
   moderationLogs?: Prisma.ModerationLogListRelationFilter
   auditLogs?: Prisma.AuditLogListRelationFilter
 }, "id" | "slug">
@@ -422,6 +435,7 @@ export type PostOrderByWithAggregationInput = {
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -453,6 +467,7 @@ export type PostScalarWhereWithAggregatesInput = {
   isNotification?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   viewCount?: Prisma.IntWithAggregatesFilter<"Post"> | number
   isTranslated?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  isCommentAllowed?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
@@ -476,6 +491,7 @@ export type PostCreateInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -484,6 +500,7 @@ export type PostCreateInput = {
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
@@ -503,6 +520,7 @@ export type PostUncheckedCreateInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -511,6 +529,7 @@ export type PostUncheckedCreateInput = {
   categoryId?: string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
@@ -530,6 +549,7 @@ export type PostUpdateInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -538,6 +558,7 @@ export type PostUpdateInput = {
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
@@ -557,6 +578,7 @@ export type PostUncheckedUpdateInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -565,6 +587,7 @@ export type PostUncheckedUpdateInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
@@ -584,6 +607,7 @@ export type PostCreateManyInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -607,6 +631,7 @@ export type PostUpdateManyMutationInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -629,6 +654,7 @@ export type PostUncheckedUpdateManyInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -645,6 +671,11 @@ export type PostListRelationFilter = {
 
 export type PostOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type PostScalarRelationFilter = {
+  is?: Prisma.PostWhereInput
+  isNot?: Prisma.PostWhereInput
 }
 
 export type PostOrderByRelevanceInput = {
@@ -668,6 +699,7 @@ export type PostCountOrderByAggregateInput = {
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -696,6 +728,7 @@ export type PostMaxOrderByAggregateInput = {
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -719,6 +752,7 @@ export type PostMinOrderByAggregateInput = {
   isNotification?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
   isTranslated?: Prisma.SortOrder
+  isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -730,11 +764,6 @@ export type PostMinOrderByAggregateInput = {
 export type PostSumOrderByAggregateInput = {
   currentVersion?: Prisma.SortOrder
   viewCount?: Prisma.SortOrder
-}
-
-export type PostScalarRelationFilter = {
-  is?: Prisma.PostWhereInput
-  isNot?: Prisma.PostWhereInput
 }
 
 export type PostNullableScalarRelationFilter = {
@@ -782,6 +811,20 @@ export type PostUncheckedUpdateManyWithoutCategoryNestedInput = {
   update?: Prisma.PostUpdateWithWhereUniqueWithoutCategoryInput | Prisma.PostUpdateWithWhereUniqueWithoutCategoryInput[]
   updateMany?: Prisma.PostUpdateManyWithWhereWithoutCategoryInput | Prisma.PostUpdateManyWithWhereWithoutCategoryInput[]
   deleteMany?: Prisma.PostScalarWhereInput | Prisma.PostScalarWhereInput[]
+}
+
+export type PostCreateNestedOneWithoutCommentsInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutCommentsInput, Prisma.PostUncheckedCreateWithoutCommentsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutCommentsInput
+  connect?: Prisma.PostWhereUniqueInput
+}
+
+export type PostUpdateOneRequiredWithoutCommentsNestedInput = {
+  create?: Prisma.XOR<Prisma.PostCreateWithoutCommentsInput, Prisma.PostUncheckedCreateWithoutCommentsInput>
+  connectOrCreate?: Prisma.PostCreateOrConnectWithoutCommentsInput
+  upsert?: Prisma.PostUpsertWithoutCommentsInput
+  connect?: Prisma.PostWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PostUpdateToOneWithWhereWithoutCommentsInput, Prisma.PostUpdateWithoutCommentsInput>, Prisma.PostUncheckedUpdateWithoutCommentsInput>
 }
 
 export type PostCreateNestedManyWithoutTagsInput = {
@@ -881,6 +924,7 @@ export type PostCreateWithoutCategoryInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -888,6 +932,7 @@ export type PostCreateWithoutCategoryInput = {
   deletedAt?: Date | string | null
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
@@ -907,6 +952,7 @@ export type PostUncheckedCreateWithoutCategoryInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -914,6 +960,7 @@ export type PostUncheckedCreateWithoutCategoryInput = {
   deletedAt?: Date | string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
@@ -962,12 +1009,141 @@ export type PostScalarWhereInput = {
   isNotification?: Prisma.BoolFilter<"Post"> | boolean
   viewCount?: Prisma.IntFilter<"Post"> | number
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
+  isCommentAllowed?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   categoryId?: Prisma.StringNullableFilter<"Post"> | string | null
+}
+
+export type PostCreateWithoutCommentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isCommentAllowed?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
+  tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
+}
+
+export type PostUncheckedCreateWithoutCommentsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  content?: string | null
+  contentJson?: string | null
+  slug: string
+  thumbnail?: string | null
+  authorId: string
+  status?: string
+  currentVersion?: number
+  isFeatured?: boolean
+  isNotification?: boolean
+  viewCount?: number
+  isTranslated?: boolean
+  isCommentAllowed?: boolean
+  isDeleted?: boolean
+  publishedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  categoryId?: string | null
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
+}
+
+export type PostCreateOrConnectWithoutCommentsInput = {
+  where: Prisma.PostWhereUniqueInput
+  create: Prisma.XOR<Prisma.PostCreateWithoutCommentsInput, Prisma.PostUncheckedCreateWithoutCommentsInput>
+}
+
+export type PostUpsertWithoutCommentsInput = {
+  update: Prisma.XOR<Prisma.PostUpdateWithoutCommentsInput, Prisma.PostUncheckedUpdateWithoutCommentsInput>
+  create: Prisma.XOR<Prisma.PostCreateWithoutCommentsInput, Prisma.PostUncheckedCreateWithoutCommentsInput>
+  where?: Prisma.PostWhereInput
+}
+
+export type PostUpdateToOneWithWhereWithoutCommentsInput = {
+  where?: Prisma.PostWhereInput
+  data: Prisma.XOR<Prisma.PostUpdateWithoutCommentsInput, Prisma.PostUncheckedUpdateWithoutCommentsInput>
+}
+
+export type PostUpdateWithoutCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
+  tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
+}
+
+export type PostUncheckedUpdateWithoutCommentsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  thumbnail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  authorId?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  currentVersion?: Prisma.IntFieldUpdateOperationsInput | number
+  isFeatured?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  viewCount?: Prisma.IntFieldUpdateOperationsInput | number
+  isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
 
 export type PostCreateWithoutTagsInput = {
@@ -985,6 +1161,7 @@ export type PostCreateWithoutTagsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -992,6 +1169,7 @@ export type PostCreateWithoutTagsInput = {
   deletedAt?: Date | string | null
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
   versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
@@ -1011,6 +1189,7 @@ export type PostUncheckedCreateWithoutTagsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1018,6 +1197,7 @@ export type PostUncheckedCreateWithoutTagsInput = {
   deletedAt?: Date | string | null
   categoryId?: string | null
   versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
@@ -1058,6 +1238,7 @@ export type PostCreateWithoutVersionsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1065,6 +1246,7 @@ export type PostCreateWithoutVersionsInput = {
   deletedAt?: Date | string | null
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
@@ -1084,6 +1266,7 @@ export type PostUncheckedCreateWithoutVersionsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1091,6 +1274,7 @@ export type PostUncheckedCreateWithoutVersionsInput = {
   deletedAt?: Date | string | null
   categoryId?: string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
@@ -1126,6 +1310,7 @@ export type PostUpdateWithoutVersionsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1133,6 +1318,7 @@ export type PostUpdateWithoutVersionsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
@@ -1152,6 +1338,7 @@ export type PostUncheckedUpdateWithoutVersionsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1159,6 +1346,7 @@ export type PostUncheckedUpdateWithoutVersionsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
@@ -1178,6 +1366,7 @@ export type PostCreateWithoutModerationLogsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1186,6 +1375,7 @@ export type PostCreateWithoutModerationLogsInput = {
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutPostInput
 }
 
@@ -1204,6 +1394,7 @@ export type PostUncheckedCreateWithoutModerationLogsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1212,6 +1403,7 @@ export type PostUncheckedCreateWithoutModerationLogsInput = {
   categoryId?: string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutPostInput
 }
 
@@ -1246,6 +1438,7 @@ export type PostUpdateWithoutModerationLogsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1254,6 +1447,7 @@ export type PostUpdateWithoutModerationLogsInput = {
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
 
@@ -1272,6 +1466,7 @@ export type PostUncheckedUpdateWithoutModerationLogsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1280,6 +1475,7 @@ export type PostUncheckedUpdateWithoutModerationLogsInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
 
@@ -1298,6 +1494,7 @@ export type PostCreateWithoutAuditLogsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1306,6 +1503,7 @@ export type PostCreateWithoutAuditLogsInput = {
   category?: Prisma.CategoryCreateNestedOneWithoutPostsInput
   tags?: Prisma.TagCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogCreateNestedManyWithoutPostInput
 }
 
@@ -1324,6 +1522,7 @@ export type PostUncheckedCreateWithoutAuditLogsInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1332,6 +1531,7 @@ export type PostUncheckedCreateWithoutAuditLogsInput = {
   categoryId?: string | null
   tags?: Prisma.TagUncheckedCreateNestedManyWithoutPostsInput
   versions?: Prisma.PostVersionUncheckedCreateNestedManyWithoutPostInput
+  comments?: Prisma.CommentUncheckedCreateNestedManyWithoutPostInput
   moderationLogs?: Prisma.ModerationLogUncheckedCreateNestedManyWithoutPostInput
 }
 
@@ -1366,6 +1566,7 @@ export type PostUpdateWithoutAuditLogsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1374,6 +1575,7 @@ export type PostUpdateWithoutAuditLogsInput = {
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
 }
 
@@ -1392,6 +1594,7 @@ export type PostUncheckedUpdateWithoutAuditLogsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1400,6 +1603,7 @@ export type PostUncheckedUpdateWithoutAuditLogsInput = {
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
 }
 
@@ -1418,6 +1622,7 @@ export type PostCreateManyCategoryInput = {
   isNotification?: boolean
   viewCount?: number
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: Date | string | null
   createdAt?: Date | string
@@ -1440,6 +1645,7 @@ export type PostUpdateWithoutCategoryInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1447,6 +1653,7 @@ export type PostUpdateWithoutCategoryInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.TagUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
@@ -1466,6 +1673,7 @@ export type PostUncheckedUpdateWithoutCategoryInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1473,6 +1681,7 @@ export type PostUncheckedUpdateWithoutCategoryInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tags?: Prisma.TagUncheckedUpdateManyWithoutPostsNestedInput
   versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
@@ -1492,6 +1701,7 @@ export type PostUncheckedUpdateManyWithoutCategoryInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1514,6 +1724,7 @@ export type PostUpdateWithoutTagsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1521,6 +1732,7 @@ export type PostUpdateWithoutTagsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   category?: Prisma.CategoryUpdateOneWithoutPostsNestedInput
   versions?: Prisma.PostVersionUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUpdateManyWithoutPostNestedInput
 }
@@ -1540,6 +1752,7 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1547,6 +1760,7 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   categoryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   versions?: Prisma.PostVersionUncheckedUpdateManyWithoutPostNestedInput
+  comments?: Prisma.CommentUncheckedUpdateManyWithoutPostNestedInput
   moderationLogs?: Prisma.ModerationLogUncheckedUpdateManyWithoutPostNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutPostNestedInput
 }
@@ -1566,6 +1780,7 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
   isNotification?: Prisma.BoolFieldUpdateOperationsInput | boolean
   viewCount?: Prisma.IntFieldUpdateOperationsInput | number
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1582,6 +1797,7 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
 export type PostCountOutputType = {
   tags: number
   versions: number
+  comments: number
   moderationLogs: number
   auditLogs: number
 }
@@ -1589,6 +1805,7 @@ export type PostCountOutputType = {
 export type PostCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tags?: boolean | PostCountOutputTypeCountTagsArgs
   versions?: boolean | PostCountOutputTypeCountVersionsArgs
+  comments?: boolean | PostCountOutputTypeCountCommentsArgs
   moderationLogs?: boolean | PostCountOutputTypeCountModerationLogsArgs
   auditLogs?: boolean | PostCountOutputTypeCountAuditLogsArgs
 }
@@ -1615,6 +1832,13 @@ export type PostCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Exten
  */
 export type PostCountOutputTypeCountVersionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.PostVersionWhereInput
+}
+
+/**
+ * PostCountOutputType without action
+ */
+export type PostCountOutputTypeCountCommentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CommentWhereInput
 }
 
 /**
@@ -1647,6 +1871,7 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   isNotification?: boolean
   viewCount?: boolean
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: boolean
   createdAt?: boolean
@@ -1656,6 +1881,7 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
   versions?: boolean | Prisma.Post$versionsArgs<ExtArgs>
+  comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   moderationLogs?: boolean | Prisma.Post$moderationLogsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Post$auditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
@@ -1678,6 +1904,7 @@ export type PostSelectScalar = {
   isNotification?: boolean
   viewCount?: boolean
   isTranslated?: boolean
+  isCommentAllowed?: boolean
   isDeleted?: boolean
   publishedAt?: boolean
   createdAt?: boolean
@@ -1686,11 +1913,12 @@ export type PostSelectScalar = {
   categoryId?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentJson" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isDeleted" | "publishedAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentJson" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isCommentAllowed" | "isDeleted" | "publishedAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
   versions?: boolean | Prisma.Post$versionsArgs<ExtArgs>
+  comments?: boolean | Prisma.Post$commentsArgs<ExtArgs>
   moderationLogs?: boolean | Prisma.Post$moderationLogsArgs<ExtArgs>
   auditLogs?: boolean | Prisma.Post$auditLogsArgs<ExtArgs>
   _count?: boolean | Prisma.PostCountOutputTypeDefaultArgs<ExtArgs>
@@ -1702,6 +1930,7 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     category: Prisma.$CategoryPayload<ExtArgs> | null
     tags: Prisma.$TagPayload<ExtArgs>[]
     versions: Prisma.$PostVersionPayload<ExtArgs>[]
+    comments: Prisma.$CommentPayload<ExtArgs>[]
     moderationLogs: Prisma.$ModerationLogPayload<ExtArgs>[]
     auditLogs: Prisma.$AuditLogPayload<ExtArgs>[]
   }
@@ -1720,6 +1949,7 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     isNotification: boolean
     viewCount: number
     isTranslated: boolean
+    isCommentAllowed: boolean
     isDeleted: boolean
     publishedAt: Date | null
     createdAt: Date
@@ -2069,6 +2299,7 @@ export interface Prisma__PostClient<T, Null = never, ExtArgs extends runtime.Typ
   category<T extends Prisma.Post$categoryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$categoryArgs<ExtArgs>>): Prisma.Prisma__CategoryClient<runtime.Types.Result.GetResult<Prisma.$CategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   tags<T extends Prisma.Post$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   versions<T extends Prisma.Post$versionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$versionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PostVersionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  comments<T extends Prisma.Post$commentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$commentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CommentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   moderationLogs<T extends Prisma.Post$moderationLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$moderationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ModerationLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditLogs<T extends Prisma.Post$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Post$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -2114,6 +2345,7 @@ export interface PostFieldRefs {
   readonly isNotification: Prisma.FieldRef<"Post", 'Boolean'>
   readonly viewCount: Prisma.FieldRef<"Post", 'Int'>
   readonly isTranslated: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly isCommentAllowed: Prisma.FieldRef<"Post", 'Boolean'>
   readonly isDeleted: Prisma.FieldRef<"Post", 'Boolean'>
   readonly publishedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
@@ -2532,6 +2764,30 @@ export type Post$versionsArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.PostVersionScalarFieldEnum | Prisma.PostVersionScalarFieldEnum[]
+}
+
+/**
+ * Post.comments
+ */
+export type Post$commentsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Comment
+   */
+  select?: Prisma.CommentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Comment
+   */
+  omit?: Prisma.CommentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CommentInclude<ExtArgs> | null
+  where?: Prisma.CommentWhereInput
+  orderBy?: Prisma.CommentOrderByWithRelationInput | Prisma.CommentOrderByWithRelationInput[]
+  cursor?: Prisma.CommentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CommentScalarFieldEnum | Prisma.CommentScalarFieldEnum[]
 }
 
 /**

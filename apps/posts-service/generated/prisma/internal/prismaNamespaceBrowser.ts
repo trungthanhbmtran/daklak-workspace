@@ -53,6 +53,10 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Banner: 'Banner',
   Category: 'Category',
+  Comment: 'Comment',
+  CitizenQuestion: 'CitizenQuestion',
+  CitizenFeedback: 'CitizenFeedback',
+  PortalMenu: 'PortalMenu',
   Post: 'Post',
   Tag: 'Tag',
   PostVersion: 'PostVersion',
@@ -125,6 +129,79 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const CommentScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  status: 'status',
+  authorId: 'authorId',
+  authorName: 'authorName',
+  authorEmail: 'authorEmail',
+  authorIp: 'authorIp',
+  postId: 'postId',
+  parentId: 'parentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
+
+
+export const CitizenQuestionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  askedByName: 'askedByName',
+  askedByEmail: 'askedByEmail',
+  askedByPhone: 'askedByPhone',
+  address: 'address',
+  status: 'status',
+  answerContent: 'answerContent',
+  answeredAt: 'answeredAt',
+  answeredById: 'answeredById',
+  isPublic: 'isPublic',
+  categoryId: 'categoryId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CitizenQuestionScalarFieldEnum = (typeof CitizenQuestionScalarFieldEnum)[keyof typeof CitizenQuestionScalarFieldEnum]
+
+
+export const CitizenFeedbackScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  feedbackType: 'feedbackType',
+  referenceId: 'referenceId',
+  senderName: 'senderName',
+  senderEmail: 'senderEmail',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CitizenFeedbackScalarFieldEnum = (typeof CitizenFeedbackScalarFieldEnum)[keyof typeof CitizenFeedbackScalarFieldEnum]
+
+
+export const PortalMenuScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  link: 'link',
+  order: 'order',
+  parentId: 'parentId',
+  isActive: 'isActive',
+  target: 'target',
+  type: 'type',
+  referenceId: 'referenceId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortalMenuScalarFieldEnum = (typeof PortalMenuScalarFieldEnum)[keyof typeof PortalMenuScalarFieldEnum]
+
+
 export const PostScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -140,6 +217,7 @@ export const PostScalarFieldEnum = {
   isNotification: 'isNotification',
   viewCount: 'viewCount',
   isTranslated: 'isTranslated',
+  isCommentAllowed: 'isCommentAllowed',
   isDeleted: 'isDeleted',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
@@ -255,6 +333,67 @@ export const CategoryOrderByRelevanceFieldEnum = {
 } as const
 
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
+
+
+export const CommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  content: 'content',
+  status: 'status',
+  authorId: 'authorId',
+  authorName: 'authorName',
+  authorEmail: 'authorEmail',
+  authorIp: 'authorIp',
+  postId: 'postId',
+  parentId: 'parentId'
+} as const
+
+export type CommentOrderByRelevanceFieldEnum = (typeof CommentOrderByRelevanceFieldEnum)[keyof typeof CommentOrderByRelevanceFieldEnum]
+
+
+export const CitizenQuestionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  askedByName: 'askedByName',
+  askedByEmail: 'askedByEmail',
+  askedByPhone: 'askedByPhone',
+  address: 'address',
+  status: 'status',
+  answerContent: 'answerContent',
+  answeredById: 'answeredById',
+  categoryId: 'categoryId'
+} as const
+
+export type CitizenQuestionOrderByRelevanceFieldEnum = (typeof CitizenQuestionOrderByRelevanceFieldEnum)[keyof typeof CitizenQuestionOrderByRelevanceFieldEnum]
+
+
+export const CitizenFeedbackOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  feedbackType: 'feedbackType',
+  referenceId: 'referenceId',
+  senderName: 'senderName',
+  senderEmail: 'senderEmail',
+  status: 'status'
+} as const
+
+export type CitizenFeedbackOrderByRelevanceFieldEnum = (typeof CitizenFeedbackOrderByRelevanceFieldEnum)[keyof typeof CitizenFeedbackOrderByRelevanceFieldEnum]
+
+
+export const PortalMenuOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  link: 'link',
+  parentId: 'parentId',
+  target: 'target',
+  type: 'type',
+  referenceId: 'referenceId'
+} as const
+
+export type PortalMenuOrderByRelevanceFieldEnum = (typeof PortalMenuOrderByRelevanceFieldEnum)[keyof typeof PortalMenuOrderByRelevanceFieldEnum]
 
 
 export const PostOrderByRelevanceFieldEnum = {

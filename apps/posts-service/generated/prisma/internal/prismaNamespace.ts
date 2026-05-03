@@ -386,6 +386,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Banner: 'Banner',
   Category: 'Category',
+  Comment: 'Comment',
+  CitizenQuestion: 'CitizenQuestion',
+  CitizenFeedback: 'CitizenFeedback',
+  PortalMenu: 'PortalMenu',
   Post: 'Post',
   Tag: 'Tag',
   PostVersion: 'PostVersion',
@@ -406,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "banner" | "category" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog"
+    modelProps: "banner" | "category" | "comment" | "citizenQuestion" | "citizenFeedback" | "portalMenu" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -539,6 +543,270 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CategoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    Comment: {
+      payload: Prisma.$CommentPayload<ExtArgs>
+      fields: Prisma.CommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>
+        }
+        findFirst: {
+          args: Prisma.CommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>
+        }
+        findMany: {
+          args: Prisma.CommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>[]
+        }
+        create: {
+          args: Prisma.CommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>
+        }
+        createMany: {
+          args: Prisma.CommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.CommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>
+        }
+        update: {
+          args: Prisma.CommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.CommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.CommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CommentPayload>
+        }
+        aggregate: {
+          args: Prisma.CommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateComment>
+        }
+        groupBy: {
+          args: Prisma.CommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CommentCountAggregateOutputType> | number
+        }
+      }
+    }
+    CitizenQuestion: {
+      payload: Prisma.$CitizenQuestionPayload<ExtArgs>
+      fields: Prisma.CitizenQuestionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CitizenQuestionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CitizenQuestionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>
+        }
+        findFirst: {
+          args: Prisma.CitizenQuestionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CitizenQuestionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>
+        }
+        findMany: {
+          args: Prisma.CitizenQuestionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>[]
+        }
+        create: {
+          args: Prisma.CitizenQuestionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>
+        }
+        createMany: {
+          args: Prisma.CitizenQuestionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.CitizenQuestionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>
+        }
+        update: {
+          args: Prisma.CitizenQuestionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>
+        }
+        deleteMany: {
+          args: Prisma.CitizenQuestionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CitizenQuestionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.CitizenQuestionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenQuestionPayload>
+        }
+        aggregate: {
+          args: Prisma.CitizenQuestionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCitizenQuestion>
+        }
+        groupBy: {
+          args: Prisma.CitizenQuestionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CitizenQuestionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CitizenQuestionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CitizenQuestionCountAggregateOutputType> | number
+        }
+      }
+    }
+    CitizenFeedback: {
+      payload: Prisma.$CitizenFeedbackPayload<ExtArgs>
+      fields: Prisma.CitizenFeedbackFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CitizenFeedbackFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CitizenFeedbackFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>
+        }
+        findFirst: {
+          args: Prisma.CitizenFeedbackFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CitizenFeedbackFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>
+        }
+        findMany: {
+          args: Prisma.CitizenFeedbackFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>[]
+        }
+        create: {
+          args: Prisma.CitizenFeedbackCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>
+        }
+        createMany: {
+          args: Prisma.CitizenFeedbackCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.CitizenFeedbackDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>
+        }
+        update: {
+          args: Prisma.CitizenFeedbackUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>
+        }
+        deleteMany: {
+          args: Prisma.CitizenFeedbackDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CitizenFeedbackUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.CitizenFeedbackUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CitizenFeedbackPayload>
+        }
+        aggregate: {
+          args: Prisma.CitizenFeedbackAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCitizenFeedback>
+        }
+        groupBy: {
+          args: Prisma.CitizenFeedbackGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CitizenFeedbackGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CitizenFeedbackCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CitizenFeedbackCountAggregateOutputType> | number
+        }
+      }
+    }
+    PortalMenu: {
+      payload: Prisma.$PortalMenuPayload<ExtArgs>
+      fields: Prisma.PortalMenuFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PortalMenuFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PortalMenuFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
+        }
+        findFirst: {
+          args: Prisma.PortalMenuFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PortalMenuFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
+        }
+        findMany: {
+          args: Prisma.PortalMenuFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>[]
+        }
+        create: {
+          args: Prisma.PortalMenuCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
+        }
+        createMany: {
+          args: Prisma.PortalMenuCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PortalMenuDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
+        }
+        update: {
+          args: Prisma.PortalMenuUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
+        }
+        deleteMany: {
+          args: Prisma.PortalMenuDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PortalMenuUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PortalMenuUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalMenuPayload>
+        }
+        aggregate: {
+          args: Prisma.PortalMenuAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePortalMenu>
+        }
+        groupBy: {
+          args: Prisma.PortalMenuGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PortalMenuGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PortalMenuCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PortalMenuCountAggregateOutputType> | number
         }
       }
     }
@@ -960,6 +1228,79 @@ export const CategoryScalarFieldEnum = {
 export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
 
 
+export const CommentScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  status: 'status',
+  authorId: 'authorId',
+  authorName: 'authorName',
+  authorEmail: 'authorEmail',
+  authorIp: 'authorIp',
+  postId: 'postId',
+  parentId: 'parentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CommentScalarFieldEnum = (typeof CommentScalarFieldEnum)[keyof typeof CommentScalarFieldEnum]
+
+
+export const CitizenQuestionScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  askedByName: 'askedByName',
+  askedByEmail: 'askedByEmail',
+  askedByPhone: 'askedByPhone',
+  address: 'address',
+  status: 'status',
+  answerContent: 'answerContent',
+  answeredAt: 'answeredAt',
+  answeredById: 'answeredById',
+  isPublic: 'isPublic',
+  categoryId: 'categoryId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CitizenQuestionScalarFieldEnum = (typeof CitizenQuestionScalarFieldEnum)[keyof typeof CitizenQuestionScalarFieldEnum]
+
+
+export const CitizenFeedbackScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  feedbackType: 'feedbackType',
+  referenceId: 'referenceId',
+  senderName: 'senderName',
+  senderEmail: 'senderEmail',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CitizenFeedbackScalarFieldEnum = (typeof CitizenFeedbackScalarFieldEnum)[keyof typeof CitizenFeedbackScalarFieldEnum]
+
+
+export const PortalMenuScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  link: 'link',
+  order: 'order',
+  parentId: 'parentId',
+  isActive: 'isActive',
+  target: 'target',
+  type: 'type',
+  referenceId: 'referenceId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortalMenuScalarFieldEnum = (typeof PortalMenuScalarFieldEnum)[keyof typeof PortalMenuScalarFieldEnum]
+
+
 export const PostScalarFieldEnum = {
   id: 'id',
   title: 'title',
@@ -975,6 +1316,7 @@ export const PostScalarFieldEnum = {
   isNotification: 'isNotification',
   viewCount: 'viewCount',
   isTranslated: 'isTranslated',
+  isCommentAllowed: 'isCommentAllowed',
   isDeleted: 'isDeleted',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
@@ -1090,6 +1432,67 @@ export const CategoryOrderByRelevanceFieldEnum = {
 } as const
 
 export type CategoryOrderByRelevanceFieldEnum = (typeof CategoryOrderByRelevanceFieldEnum)[keyof typeof CategoryOrderByRelevanceFieldEnum]
+
+
+export const CommentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  content: 'content',
+  status: 'status',
+  authorId: 'authorId',
+  authorName: 'authorName',
+  authorEmail: 'authorEmail',
+  authorIp: 'authorIp',
+  postId: 'postId',
+  parentId: 'parentId'
+} as const
+
+export type CommentOrderByRelevanceFieldEnum = (typeof CommentOrderByRelevanceFieldEnum)[keyof typeof CommentOrderByRelevanceFieldEnum]
+
+
+export const CitizenQuestionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  askedByName: 'askedByName',
+  askedByEmail: 'askedByEmail',
+  askedByPhone: 'askedByPhone',
+  address: 'address',
+  status: 'status',
+  answerContent: 'answerContent',
+  answeredById: 'answeredById',
+  categoryId: 'categoryId'
+} as const
+
+export type CitizenQuestionOrderByRelevanceFieldEnum = (typeof CitizenQuestionOrderByRelevanceFieldEnum)[keyof typeof CitizenQuestionOrderByRelevanceFieldEnum]
+
+
+export const CitizenFeedbackOrderByRelevanceFieldEnum = {
+  id: 'id',
+  title: 'title',
+  content: 'content',
+  feedbackType: 'feedbackType',
+  referenceId: 'referenceId',
+  senderName: 'senderName',
+  senderEmail: 'senderEmail',
+  status: 'status'
+} as const
+
+export type CitizenFeedbackOrderByRelevanceFieldEnum = (typeof CitizenFeedbackOrderByRelevanceFieldEnum)[keyof typeof CitizenFeedbackOrderByRelevanceFieldEnum]
+
+
+export const PortalMenuOrderByRelevanceFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  icon: 'icon',
+  link: 'link',
+  parentId: 'parentId',
+  target: 'target',
+  type: 'type',
+  referenceId: 'referenceId'
+} as const
+
+export type PortalMenuOrderByRelevanceFieldEnum = (typeof PortalMenuOrderByRelevanceFieldEnum)[keyof typeof PortalMenuOrderByRelevanceFieldEnum]
 
 
 export const PostOrderByRelevanceFieldEnum = {
@@ -1296,6 +1699,10 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   banner?: Prisma.BannerOmit
   category?: Prisma.CategoryOmit
+  comment?: Prisma.CommentOmit
+  citizenQuestion?: Prisma.CitizenQuestionOmit
+  citizenFeedback?: Prisma.CitizenFeedbackOmit
+  portalMenu?: Prisma.PortalMenuOmit
   post?: Prisma.PostOmit
   tag?: Prisma.TagOmit
   postVersion?: Prisma.PostVersionOmit

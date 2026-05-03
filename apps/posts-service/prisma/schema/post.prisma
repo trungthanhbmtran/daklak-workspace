@@ -17,6 +17,7 @@ model Post {
   viewCount             Int      @default(0) @map("view_count")
   
   isTranslated          Boolean  @default(false) @map("is_translated")
+  isCommentAllowed      Boolean  @default(true) @map("is_comment_allowed")
   isDeleted             Boolean  @default(false) @map("is_deleted")
   
   publishedAt           DateTime? @map("published_at")
@@ -30,6 +31,7 @@ model Post {
   
   tags                  Tag[]     @relation("PostToTag")
   versions              PostVersion[]
+  comments              Comment[]
   moderationLogs        ModerationLog[]
   auditLogs             AuditLog[]
 

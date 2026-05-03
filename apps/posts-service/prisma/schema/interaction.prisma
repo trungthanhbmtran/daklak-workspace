@@ -1,0 +1,68 @@
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  status    String   @default("PENDING") // PENDING | APPROVED | REJECTED | SPAM
+  
+  authorId  String?  @map("author_id")
+  authorName String? @map("author_name")
+  authorEmail String? @map("author_email")
+  authorIp   String? @map("author_ip")
+
+  postId    String   @map("post_id")
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  parentId  String?  @map("parent_id")
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("CommentReplies")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([postId])
+  @@index([status])
+  @@map("post_comments")
+}
+
+model CitizenQuestion {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  
+  askedByName  String   @map("asked_by_name")
+  askedByEmail String?  @map("asked_by_email")
+  askedByPhone String?  @map("asked_by_phone")
+  address      String?
+  
+  status       String   @default("PENDING") // PENDING | PROCESSING | ANSWERED | REJECTED
+  
+  answerContent String? @db.Text @map("answer_content")
+  answeredAt    DateTime? @map("answered_at")
+  answeredById  String? @map("answered_by_id")
+  
+  isPublic     Boolean  @default(false) @map("is_public")
+  categoryId   String?  @map("category_id") // Reference to a Category in posts-service
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("citizen_questions")
+}
+
+model CitizenFeedback {
+  id          String   @id @default(uuid())
+  title       String
+  content     String   @db.Text
+  
+  feedbackType String   @default("GENERAL") // GENERAL | DRAFT_DOC | SERVICE
+  referenceId  String?  @map("reference_id") // ID of the draft document (Post) if applicable
+  
+  senderName   String   @map("sender_name")
+  senderEmail  String?  @map("sender_email")
+  
+  status       String   @default("NEW") // NEW | READ | PROCESSED
+  
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("citizen_feedbacks")
+}

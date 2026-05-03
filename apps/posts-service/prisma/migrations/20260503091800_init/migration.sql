@@ -52,6 +52,81 @@ CREATE TABLE `posts_categories` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `post_comments` (
+    `id` VARCHAR(191) NOT NULL,
+    `content` TEXT NOT NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'PENDING',
+    `author_id` VARCHAR(191) NULL,
+    `author_name` VARCHAR(191) NULL,
+    `author_email` VARCHAR(191) NULL,
+    `author_ip` VARCHAR(191) NULL,
+    `post_id` VARCHAR(191) NOT NULL,
+    `parent_id` VARCHAR(191) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `post_comments_post_id_idx`(`post_id`),
+    INDEX `post_comments_status_idx`(`status`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `citizen_questions` (
+    `id` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `content` TEXT NOT NULL,
+    `asked_by_name` VARCHAR(191) NOT NULL,
+    `asked_by_email` VARCHAR(191) NULL,
+    `asked_by_phone` VARCHAR(191) NULL,
+    `address` VARCHAR(191) NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'PENDING',
+    `answer_content` TEXT NULL,
+    `answered_at` DATETIME(3) NULL,
+    `answered_by_id` VARCHAR(191) NULL,
+    `is_public` BOOLEAN NOT NULL DEFAULT false,
+    `category_id` VARCHAR(191) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `citizen_feedbacks` (
+    `id` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `content` TEXT NOT NULL,
+    `feedbackType` VARCHAR(191) NOT NULL DEFAULT 'GENERAL',
+    `reference_id` VARCHAR(191) NULL,
+    `sender_name` VARCHAR(191) NOT NULL,
+    `sender_email` VARCHAR(191) NULL,
+    `status` VARCHAR(191) NOT NULL DEFAULT 'NEW',
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `portal_menus` (
+    `id` VARCHAR(191) NOT NULL,
+    `name` VARCHAR(191) NOT NULL,
+    `description` TEXT NULL,
+    `icon` VARCHAR(191) NULL,
+    `link` VARCHAR(191) NULL,
+    `order` INTEGER NOT NULL DEFAULT 0,
+    `parent_id` VARCHAR(191) NULL,
+    `is_active` BOOLEAN NOT NULL DEFAULT true,
+    `target` VARCHAR(191) NOT NULL DEFAULT '_self',
+    `type` VARCHAR(191) NOT NULL DEFAULT 'URL',
+    `reference_id` VARCHAR(191) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `posts` (
     `id` VARCHAR(191) NOT NULL,
     `title` VARCHAR(191) NOT NULL,
@@ -67,6 +142,7 @@ CREATE TABLE `posts` (
     `is_notification` BOOLEAN NOT NULL DEFAULT false,
     `view_count` INTEGER NOT NULL DEFAULT 0,
     `is_translated` BOOLEAN NOT NULL DEFAULT false,
+    `is_comment_allowed` BOOLEAN NOT NULL DEFAULT true,
     `is_deleted` BOOLEAN NOT NULL DEFAULT false,
     `published_at` DATETIME(3) NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -157,6 +233,15 @@ CREATE TABLE `_PostToTag` (
 
 -- AddForeignKey
 ALTER TABLE `posts_categories` ADD CONSTRAINT `posts_categories_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `posts_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `post_comments` ADD CONSTRAINT `post_comments_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `post_comments` ADD CONSTRAINT `post_comments_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `post_comments`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `portal_menus` ADD CONSTRAINT `portal_menus_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `portal_menus`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `posts` ADD CONSTRAINT `posts_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `posts_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

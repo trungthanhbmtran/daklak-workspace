@@ -1,0 +1,24 @@
+model PortalMenu {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  icon        String?
+  link        String?
+  
+  order       Int      @default(0)
+  parentId    String?  @map("parent_id")
+  parent      PortalMenu? @relation("PortalMenuHierarchy", fields: [parentId], references: [id])
+  children    PortalMenu[] @relation("PortalMenuHierarchy")
+
+  isActive    Boolean  @default(true) @map("is_active")
+  target      String   @default("_self") // _self, _blank
+  
+  // To link with posts or categories
+  type        String   @default("URL") // URL, CATEGORY, POST, STATIC_PAGE
+  referenceId String?  @map("reference_id") // ID of Category or Post
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("portal_menus")
+}
