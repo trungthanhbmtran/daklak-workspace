@@ -61,42 +61,42 @@ export const postsApi = {
 
   // Portal Menus
   getPortalMenus: (params?: any) =>
-    apiClient.get("/admin/portal-menus", { params }).then((res: any) => res.data),
+    apiClient.get("/portal-menus", { params }).then((res: any) => res.data),
   createPortalMenu: (data: any) =>
-    apiClient.post("/admin/portal-menus", data).then((res: any) => res.data),
+    apiClient.post("/portal-menus", data).then((res: any) => res.data),
   updatePortalMenu: (id: string, data: any) =>
-    apiClient.put(`/admin/portal-menus/${id}`, data).then((res: any) => res.data),
+    apiClient.put(`/portal-menus/${id}`, data).then((res: any) => res.data),
   deletePortalMenu: (id: string) =>
-    apiClient.delete(`/admin/portal-menus/${id}`).then((res: any) => res.data),
+    apiClient.delete(`/portal-menus/${id}`).then((res: any) => res.data),
 
   // Interactions - Comments
   getComments: (params: any) =>
-    apiClient.get("/admin/interactions/comments", { params }).then((res: any) => ({
+    apiClient.get("/interactions/comments", { params }).then((res: any) => ({
       data: res.data,
       meta: res.meta,
     })),
   updateCommentStatus: (id: string, status: string) =>
-    apiClient.put(`/admin/interactions/comments/${id}/status`, { status }).then((res: any) => res.data),
+    apiClient.put(`/interactions/comments/${id}/status`, { status }).then((res: any) => res.data),
   deleteComment: (id: string) =>
-    apiClient.delete(`/admin/interactions/comments/${id}`).then((res: any) => res.data),
+    apiClient.delete(`/interactions/comments/${id}`).then((res: any) => res.data),
 
   // Interactions - Questions
   getQuestions: (params: any) =>
-    apiClient.get("/admin/interactions/questions", { params }).then((res: any) => ({
+    apiClient.get("/interactions/questions", { params }).then((res: any) => ({
       data: res.data,
       meta: res.meta,
     })),
   answerQuestion: (id: string, data: any) =>
-    apiClient.post(`/admin/interactions/questions/${id}/answer`, data).then((res: any) => res.data),
+    apiClient.post(`/interactions/questions/${id}/answer`, data).then((res: any) => res.data),
   getQuestion: (id: string) =>
-    apiClient.get(`/admin/interactions/questions/${id}`).then((res: any) => res.data),
+    apiClient.get(`/interactions/questions/${id}`).then((res: any) => res.data),
 
   // Interactions - Feedbacks
   getFeedbacks: (params: any) =>
-    apiClient.get("/admin/interactions/feedbacks", { params }).then((res: any) => ({
+    apiClient.get("/interactions/feedbacks", { params }).then((res: any) => ({
       data: res.data,
       meta: res.meta,
     })),
   updateFeedbackStatus: (id: string, status: string) =>
-    apiClient.put(`/admin/interactions/feedbacks/${id}/status`, { status }).then((res: any) => res.data),
+    apiClient.put(`/interactions/feedbacks/${id}/status`, { status }).then((res: any) => res.data),
 };
