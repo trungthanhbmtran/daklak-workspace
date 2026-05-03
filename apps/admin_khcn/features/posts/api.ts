@@ -1,122 +1,102 @@
 // features/posts/api.ts
 
 import apiClient from "@/lib/axiosInstance";
-import { Post, Category, Banner, PostStatus, PortalMenu, Comment, CitizenQuestion, CitizenFeedback } from "./types";
-
-/**
- * Helper để bóc tách dữ liệu từ Gateway response.
- * Gateway format: { success: true, data: { data: [...], meta: {...} }, timestamp }
- */
-/**
- * Helper để bóc tách dữ liệu từ Gateway response chuẩn hóa.
- */
-function unwrapData<T>(res: any): T {
-  // Chuẩn hóa: Gateway trả về { success: true, data: T, meta: ... }
-  // Axios trả về res = { success: true, data: T, meta: ... }
-  // Nếu T là mảng, res.data chính là mảng đó.
-  // Nếu T là object đơn lẻ, res.data chính là object đó.
-  return (res?.data ?? res) as T;
-}
-
-function unwrapMeta(res: any): any {
-  return res?.meta;
-}
+import { Post, Category, Banner, PortalMenu, Comment, CitizenQuestion, CitizenFeedback } from "./types";
 
 export const postsApi = {
   // Posts
   getPosts: (params: any) =>
-    apiClient.get("/posts", { params }).then((res) => ({
-      data: unwrapData<Post[]>(res),
-      meta: unwrapMeta(res),
+    apiClient.get("/posts", { params }).then((res: any) => ({
+      data: res.data,
+      meta: res.meta,
     })),
-  getPost: (id: string) => apiClient.get(`/posts/${id}`).then((res) => unwrapData<Post>(res)),
-  createPost: (data: any) => apiClient.post("/posts", data).then((res) => unwrapData<Post>(res)),
+  getPost: (id: string) => apiClient.get(`/posts/${id}`).then((res: any) => res.data),
+  createPost: (data: any) => apiClient.post("/posts", data).then((res: any) => res.data),
   updatePost: (id: string, data: any) =>
-    apiClient.put(`/posts/${id}`, data).then((res) => unwrapData<Post>(res)),
-  deletePost: (id: string) => apiClient.delete(`/posts/${id}`).then((res) => unwrapData<any>(res)),
+    apiClient.put(`/posts/${id}`, data).then((res: any) => res.data),
+  deletePost: (id: string) => apiClient.delete(`/posts/${id}`).then((res: any) => res.data),
   reviewPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/review`, data).then((res) => unwrapData<any>(res)),
+    apiClient.post(`/posts/${id}/review`, data).then((res: any) => res.data),
   submitPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/submit`, data).then((res) => unwrapData<any>(res)),
+    apiClient.post(`/posts/${id}/submit`, data).then((res: any) => res.data),
   approvePost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/approve`, data).then((res) => unwrapData<any>(res)),
+    apiClient.post(`/posts/${id}/approve`, data).then((res: any) => res.data),
   rejectPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/reject`, data).then((res) => unwrapData<any>(res)),
+    apiClient.post(`/posts/${id}/reject`, data).then((res: any) => res.data),
   publishPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/publish`, data).then((res) => unwrapData<any>(res)),
+    apiClient.post(`/posts/${id}/publish`, data).then((res: any) => res.data),
   unpublishPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/unpublish`, data).then((res) => unwrapData<any>(res)),
+    apiClient.post(`/posts/${id}/unpublish`, data).then((res: any) => res.data),
   getPostHistory: (id: string) =>
-    apiClient.get(`/posts/${id}/history`).then((res) => unwrapData<any[]>(res)),
-
+    apiClient.get(`/posts/${id}/history`).then((res: any) => res.data),
 
   // Categories
   getCategories: (params?: any) =>
-    apiClient.get("/posts/categories", { params }).then((res) => ({
-      data: unwrapData<Category[]>(res),
-      meta: unwrapMeta(res),
+    apiClient.get("/posts/categories", { params }).then((res: any) => ({
+      data: res.data,
+      meta: res.meta,
     })),
   getCategory: (id: string) =>
-    apiClient.get(`/posts/categories/${id}`).then((res) => unwrapData<Category>(res)),
+    apiClient.get(`/posts/categories/${id}`).then((res: any) => res.data),
   createCategory: (data: any) =>
-    apiClient.post("/posts/categories", data).then((res) => unwrapData<Category>(res)),
+    apiClient.post("/posts/categories", data).then((res: any) => res.data),
   updateCategory: (id: string, data: any) =>
-    apiClient.put(`/posts/categories/${id}`, data).then((res) => unwrapData<Category>(res)),
+    apiClient.put(`/posts/categories/${id}`, data).then((res: any) => res.data),
   deleteCategory: (id: string) =>
-    apiClient.delete(`/posts/categories/${id}`).then((res) => unwrapData<any>(res)),
+    apiClient.delete(`/posts/categories/${id}`).then((res: any) => res.data),
 
   // Banners
   getBanners: (params?: any) =>
-    apiClient.get("/banners", { params }).then((res) => ({
-      data: unwrapData<Banner[]>(res),
-      meta: unwrapMeta(res),
+    apiClient.get("/banners", { params }).then((res: any) => ({
+      data: res.data,
+      meta: res.meta,
     })),
-  getBanner: (id: string) => apiClient.get(`/banners/${id}`).then((res) => unwrapData<Banner>(res)),
+  getBanner: (id: string) => apiClient.get(`/banners/${id}`).then((res: any) => res.data),
   createBanner: (data: any) =>
-    apiClient.post("/banners", data).then((res) => unwrapData<Banner>(res)),
+    apiClient.post("/banners", data).then((res: any) => res.data),
   updateBanner: (id: string, data: any) =>
-    apiClient.put(`/banners/${id}`, data).then((res) => unwrapData<Banner>(res)),
+    apiClient.put(`/banners/${id}`, data).then((res: any) => res.data),
   deleteBanner: (id: string) =>
-    apiClient.delete(`/banners/${id}`).then((res) => unwrapData<any>(res)),
+    apiClient.delete(`/banners/${id}`).then((res: any) => res.data),
 
   // Portal Menus
   getPortalMenus: (params?: any) =>
-    apiClient.get("/admin/portal-menus", { params }).then((res) => unwrapData<PortalMenu[]>(res)),
+    apiClient.get("/admin/portal-menus", { params }).then((res: any) => res.data),
   createPortalMenu: (data: any) =>
-    apiClient.post("/admin/portal-menus", data).then((res) => unwrapData<PortalMenu>(res)),
+    apiClient.post("/admin/portal-menus", data).then((res: any) => res.data),
   updatePortalMenu: (id: string, data: any) =>
-    apiClient.put(`/admin/portal-menus/${id}`, data).then((res) => unwrapData<PortalMenu>(res)),
+    apiClient.put(`/admin/portal-menus/${id}`, data).then((res: any) => res.data),
   deletePortalMenu: (id: string) =>
-    apiClient.delete(`/admin/portal-menus/${id}`).then((res) => unwrapData<any>(res)),
+    apiClient.delete(`/admin/portal-menus/${id}`).then((res: any) => res.data),
 
   // Interactions - Comments
   getComments: (params: any) =>
-    apiClient.get("/admin/interactions/comments", { params }).then((res) => ({
-      data: unwrapData<Comment[]>(res),
-      meta: unwrapMeta(res),
+    apiClient.get("/admin/interactions/comments", { params }).then((res: any) => ({
+      data: res.data,
+      meta: res.meta,
     })),
   updateCommentStatus: (id: string, status: string) =>
-    apiClient.put(`/admin/interactions/comments/${id}/status`, { status }).then((res) => unwrapData<Comment>(res)),
+    apiClient.put(`/admin/interactions/comments/${id}/status`, { status }).then((res: any) => res.data),
   deleteComment: (id: string) =>
-    apiClient.delete(`/admin/interactions/comments/${id}`).then((res) => unwrapData<any>(res)),
+    apiClient.delete(`/admin/interactions/comments/${id}`).then((res: any) => res.data),
 
   // Interactions - Questions
   getQuestions: (params: any) =>
-    apiClient.get("/admin/interactions/questions", { params }).then((res) => ({
-      data: unwrapData<CitizenQuestion[]>(res),
-      meta: unwrapMeta(res),
+    apiClient.get("/admin/interactions/questions", { params }).then((res: any) => ({
+      data: res.data,
+      meta: res.meta,
     })),
   answerQuestion: (id: string, data: any) =>
-    apiClient.post(`/admin/interactions/questions/${id}/answer`, data).then((res) => unwrapData<CitizenQuestion>(res)),
+    apiClient.post(`/admin/interactions/questions/${id}/answer`, data).then((res: any) => res.data),
   getQuestion: (id: string) =>
-    apiClient.get(`/admin/interactions/questions/${id}`).then((res) => unwrapData<CitizenQuestion>(res)),
+    apiClient.get(`/admin/interactions/questions/${id}`).then((res: any) => res.data),
 
   // Interactions - Feedbacks
   getFeedbacks: (params: any) =>
-    apiClient.get("/admin/interactions/feedbacks", { params }).then((res) => ({
-      data: unwrapData<CitizenFeedback[]>(res),
-      meta: unwrapMeta(res),
+    apiClient.get("/admin/interactions/feedbacks", { params }).then((res: any) => ({
+      data: res.data,
+      meta: res.meta,
     })),
   updateFeedbackStatus: (id: string, status: string) =>
-    apiClient.put(`/admin/interactions/feedbacks/${id}/status`, { status }).then((res) => unwrapData<CitizenFeedback>(res)),
+    apiClient.put(`/admin/interactions/feedbacks/${id}/status`, { status }).then((res: any) => res.data),
 };
