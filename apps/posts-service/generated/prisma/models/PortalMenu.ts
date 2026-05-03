@@ -46,6 +46,7 @@ export type PortalMenuMinAggregateOutputType = {
   target: string | null
   type: string | null
   referenceId: string | null
+  position: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,6 +63,7 @@ export type PortalMenuMaxAggregateOutputType = {
   target: string | null
   type: string | null
   referenceId: string | null
+  position: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -78,6 +80,7 @@ export type PortalMenuCountAggregateOutputType = {
   target: number
   type: number
   referenceId: number
+  position: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -104,6 +107,7 @@ export type PortalMenuMinAggregateInputType = {
   target?: true
   type?: true
   referenceId?: true
+  position?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -120,6 +124,7 @@ export type PortalMenuMaxAggregateInputType = {
   target?: true
   type?: true
   referenceId?: true
+  position?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -136,6 +141,7 @@ export type PortalMenuCountAggregateInputType = {
   target?: true
   type?: true
   referenceId?: true
+  position?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -239,6 +245,7 @@ export type PortalMenuGroupByOutputType = {
   target: string
   type: string
   referenceId: string | null
+  position: string
   createdAt: Date
   updatedAt: Date
   _count: PortalMenuCountAggregateOutputType | null
@@ -278,6 +285,7 @@ export type PortalMenuWhereInput = {
   target?: Prisma.StringFilter<"PortalMenu"> | string
   type?: Prisma.StringFilter<"PortalMenu"> | string
   referenceId?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
+  position?: Prisma.StringFilter<"PortalMenu"> | string
   createdAt?: Prisma.DateTimeFilter<"PortalMenu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PortalMenu"> | Date | string
   parent?: Prisma.XOR<Prisma.PortalMenuNullableScalarRelationFilter, Prisma.PortalMenuWhereInput> | null
@@ -296,6 +304,7 @@ export type PortalMenuOrderByWithRelationInput = {
   target?: Prisma.SortOrder
   type?: Prisma.SortOrder
   referenceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   parent?: Prisma.PortalMenuOrderByWithRelationInput
@@ -318,6 +327,7 @@ export type PortalMenuWhereUniqueInput = Prisma.AtLeast<{
   target?: Prisma.StringFilter<"PortalMenu"> | string
   type?: Prisma.StringFilter<"PortalMenu"> | string
   referenceId?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
+  position?: Prisma.StringFilter<"PortalMenu"> | string
   createdAt?: Prisma.DateTimeFilter<"PortalMenu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PortalMenu"> | Date | string
   parent?: Prisma.XOR<Prisma.PortalMenuNullableScalarRelationFilter, Prisma.PortalMenuWhereInput> | null
@@ -336,6 +346,7 @@ export type PortalMenuOrderByWithAggregationInput = {
   target?: Prisma.SortOrder
   type?: Prisma.SortOrder
   referenceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  position?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.PortalMenuCountOrderByAggregateInput
@@ -360,6 +371,7 @@ export type PortalMenuScalarWhereWithAggregatesInput = {
   target?: Prisma.StringWithAggregatesFilter<"PortalMenu"> | string
   type?: Prisma.StringWithAggregatesFilter<"PortalMenu"> | string
   referenceId?: Prisma.StringNullableWithAggregatesFilter<"PortalMenu"> | string | null
+  position?: Prisma.StringWithAggregatesFilter<"PortalMenu"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PortalMenu"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"PortalMenu"> | Date | string
 }
@@ -375,6 +387,7 @@ export type PortalMenuCreateInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   parent?: Prisma.PortalMenuCreateNestedOneWithoutChildrenInput
@@ -393,6 +406,7 @@ export type PortalMenuUncheckedCreateInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.PortalMenuUncheckedCreateNestedManyWithoutParentInput
@@ -409,6 +423,7 @@ export type PortalMenuUpdateInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parent?: Prisma.PortalMenuUpdateOneWithoutChildrenNestedInput
@@ -427,6 +442,7 @@ export type PortalMenuUncheckedUpdateInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.PortalMenuUncheckedUpdateManyWithoutParentNestedInput
@@ -444,6 +460,7 @@ export type PortalMenuCreateManyInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -459,6 +476,7 @@ export type PortalMenuUpdateManyMutationInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -475,6 +493,7 @@ export type PortalMenuUncheckedUpdateManyInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -512,6 +531,7 @@ export type PortalMenuCountOrderByAggregateInput = {
   target?: Prisma.SortOrder
   type?: Prisma.SortOrder
   referenceId?: Prisma.SortOrder
+  position?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -532,6 +552,7 @@ export type PortalMenuMaxOrderByAggregateInput = {
   target?: Prisma.SortOrder
   type?: Prisma.SortOrder
   referenceId?: Prisma.SortOrder
+  position?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -548,6 +569,7 @@ export type PortalMenuMinOrderByAggregateInput = {
   target?: Prisma.SortOrder
   type?: Prisma.SortOrder
   referenceId?: Prisma.SortOrder
+  position?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -625,6 +647,7 @@ export type PortalMenuCreateWithoutChildrenInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   parent?: Prisma.PortalMenuCreateNestedOneWithoutChildrenInput
@@ -642,6 +665,7 @@ export type PortalMenuUncheckedCreateWithoutChildrenInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -662,6 +686,7 @@ export type PortalMenuCreateWithoutParentInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.PortalMenuCreateNestedManyWithoutParentInput
@@ -678,6 +703,7 @@ export type PortalMenuUncheckedCreateWithoutParentInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   children?: Prisma.PortalMenuUncheckedCreateNestedManyWithoutParentInput
@@ -715,6 +741,7 @@ export type PortalMenuUpdateWithoutChildrenInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   parent?: Prisma.PortalMenuUpdateOneWithoutChildrenNestedInput
@@ -732,6 +759,7 @@ export type PortalMenuUncheckedUpdateWithoutChildrenInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -767,6 +795,7 @@ export type PortalMenuScalarWhereInput = {
   target?: Prisma.StringFilter<"PortalMenu"> | string
   type?: Prisma.StringFilter<"PortalMenu"> | string
   referenceId?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
+  position?: Prisma.StringFilter<"PortalMenu"> | string
   createdAt?: Prisma.DateTimeFilter<"PortalMenu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PortalMenu"> | Date | string
 }
@@ -782,6 +811,7 @@ export type PortalMenuCreateManyParentInput = {
   target?: string
   type?: string
   referenceId?: string | null
+  position?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -797,6 +827,7 @@ export type PortalMenuUpdateWithoutParentInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.PortalMenuUpdateManyWithoutParentNestedInput
@@ -813,6 +844,7 @@ export type PortalMenuUncheckedUpdateWithoutParentInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   children?: Prisma.PortalMenuUncheckedUpdateManyWithoutParentNestedInput
@@ -829,6 +861,7 @@ export type PortalMenuUncheckedUpdateManyWithoutParentInput = {
   target?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.StringFieldUpdateOperationsInput | string
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  position?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -876,6 +909,7 @@ export type PortalMenuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   target?: boolean
   type?: boolean
   referenceId?: boolean
+  position?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   parent?: boolean | Prisma.PortalMenu$parentArgs<ExtArgs>
@@ -897,11 +931,12 @@ export type PortalMenuSelectScalar = {
   target?: boolean
   type?: boolean
   referenceId?: boolean
+  position?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type PortalMenuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "icon" | "link" | "order" | "parentId" | "isActive" | "target" | "type" | "referenceId" | "createdAt" | "updatedAt", ExtArgs["result"]["portalMenu"]>
+export type PortalMenuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "icon" | "link" | "order" | "parentId" | "isActive" | "target" | "type" | "referenceId" | "position" | "createdAt" | "updatedAt", ExtArgs["result"]["portalMenu"]>
 export type PortalMenuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.PortalMenu$parentArgs<ExtArgs>
   children?: boolean | Prisma.PortalMenu$childrenArgs<ExtArgs>
@@ -926,6 +961,7 @@ export type $PortalMenuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     target: string
     type: string
     referenceId: string | null
+    position: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["portalMenu"]>
@@ -1310,6 +1346,7 @@ export interface PortalMenuFieldRefs {
   readonly target: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly type: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly referenceId: Prisma.FieldRef<"PortalMenu", 'String'>
+  readonly position: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly createdAt: Prisma.FieldRef<"PortalMenu", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"PortalMenu", 'DateTime'>
 }

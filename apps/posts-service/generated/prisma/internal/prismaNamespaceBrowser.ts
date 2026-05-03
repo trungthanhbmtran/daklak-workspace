@@ -195,6 +195,7 @@ export const PortalMenuScalarFieldEnum = {
   target: 'target',
   type: 'type',
   referenceId: 'referenceId',
+  position: 'position',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -390,7 +391,8 @@ export const PortalMenuOrderByRelevanceFieldEnum = {
   parentId: 'parentId',
   target: 'target',
   type: 'type',
-  referenceId: 'referenceId'
+  referenceId: 'referenceId',
+  position: 'position'
 } as const
 
 export type PortalMenuOrderByRelevanceFieldEnum = (typeof PortalMenuOrderByRelevanceFieldEnum)[keyof typeof PortalMenuOrderByRelevanceFieldEnum]

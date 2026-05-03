@@ -120,6 +120,7 @@ CREATE TABLE `portal_menus` (
     `target` VARCHAR(191) NOT NULL DEFAULT '_self',
     `type` VARCHAR(191) NOT NULL DEFAULT 'URL',
     `reference_id` VARCHAR(191) NULL,
+    `position` VARCHAR(191) NOT NULL DEFAULT 'HORIZONTAL',
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
 
