@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Fragment } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { postsApi } from "@/features/posts/api";
 import { PortalMenu, Category } from "@/features/posts/types";
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,7 @@ export default function PortalMenuPage() {
     setLoading(true);
     try {
       const data = await postsApi.getPortalMenus({ position: activeTab });
-      setMenus(data || []);
+      setMenus(Array.isArray(data) ? data : []);
     } catch {
       toast.error("Không thể tải danh sách menu");
     } finally {
@@ -88,7 +88,7 @@ export default function PortalMenuPage() {
   const fetchCategories = async () => {
     try {
       const { data } = await postsApi.getCategories();
-      setCategories(data || []);
+      setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching categories:", error);
     }
@@ -294,7 +294,8 @@ export default function PortalMenuPage() {
   };
 
   // Render Table Rows Recursively for hierarchy
-  const renderMenuRows = (items: PortalMenu[], depth = 0): React.ReactNode => {
+  const renderMenuRows = (items: PortalMenu[] | undefined | null, depth = 0): React.ReactNode => {
+    if (!items || !Array.isArray(items)) return null;
     return items.map((menu: PortalMenu) => (
       <Fragment key={menu.id}>
         <TableRow className={depth > 0 ? "bg-slate-50/30" : ""}>
