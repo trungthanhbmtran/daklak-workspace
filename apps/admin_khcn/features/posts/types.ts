@@ -60,6 +60,7 @@ export interface Post {
   isFeatured: boolean;
   isNotification: boolean;
   tags?: string[];
+  translations?: Record<string, { title?: string; description?: string; content?: string; contentJson?: any }>;
   language?: string;
   isTranslated?: boolean;
   publishedAt?: string;

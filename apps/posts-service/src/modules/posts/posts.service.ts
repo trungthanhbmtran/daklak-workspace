@@ -17,9 +17,19 @@ export class PostsService {
       .replace(/ /g, '-')
       .replace(/[^\w-]+/g, '');
 
+    let parsedTranslations = {};
+    if (rest.translations) {
+      try {
+        parsedTranslations = typeof rest.translations === 'string' ? JSON.parse(rest.translations) : rest.translations;
+      } catch (e) {
+        console.error('Error parsing translations in post create:', e);
+      }
+    }
+
     const post = await this.prisma.post.create({
       data: {
         ...rest,
+        translations: parsedTranslations,
         slug,
         status: PostStatus.DRAFT,
         tags: {
@@ -41,6 +51,7 @@ export class PostsService {
         description: post.description,
         content: post.content,
         contentJson: post.contentJson,
+        translations: post.translations || {},
         editorId: post.authorId,
         changeNote: 'Initial creation',
       },
@@ -129,6 +140,14 @@ export class PostsService {
 
     const nextVersion = post.currentVersion + 1;
 
+    if (rest.translations && typeof rest.translations === 'string') {
+      try {
+        rest.translations = JSON.parse(rest.translations);
+      } catch (e) {
+        console.error('Error parsing translations in post update:', e);
+      }
+    }
+
     const updatedPost = await this.prisma.post.update({
       where: { id },
       data: {
@@ -153,6 +172,7 @@ export class PostsService {
         description: updatedPost.description,
         content: updatedPost.content,
         contentJson: updatedPost.contentJson,
+        translations: updatedPost.translations || {},
         editorId: actorId || updatedPost.authorId,
         changeNote: changeNote || 'Updated content',
       },

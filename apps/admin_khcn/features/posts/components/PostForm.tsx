@@ -20,10 +20,12 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { categoryApi } from "@/features/system-admin/categories/api";
 
 import { useImageUpload } from "../hooks/useImageUpload";
 import { postsApi } from "../api";
-import { Category } from "../types";
+import { Category, Post } from "../types";
 import dynamic from "next/dynamic";
 
 const LexicalEditorDynamic = dynamic(
@@ -61,8 +63,13 @@ const postSchema = z.object({
   tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
   isNotification: z.boolean().default(false),
+  translations: z.record(z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    content: z.string().optional(),
+    contentJson: z.any().optional(),
+  })).default({}),
 });
-
 
 type PostFormValues = z.infer<typeof postSchema>;
 
@@ -74,20 +81,41 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const isEdit = !!editId;
 
   const form = useForm<PostFormValues>({
-    resolver: zodResolver(postSchema) as any,
+    resolver: zodResolver(postSchema),
     defaultValues: {
-      title: "", slug: "", description: "", content: "",
-      categoryId: "", status: "DRAFT", thumbnail: "",
-      tags: [], isFeatured: false, isNotification: false,
+      title: "",
+      slug: "",
+      description: "",
+      content: "",
+      categoryId: "",
+      status: "DRAFT",
+      thumbnail: "",
+      tags: [],
+      isFeatured: false,
+      isNotification: false,
+      translations: {},
     },
   });
 
-  // Chức năng tự tạo slug khi gõ tiêu đề
+  const [languages, setLanguages] = useState<any[]>([]);
+  const [activeLangTab, setActiveLangTab] = useState<string>("vi");
+
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const all = await categoryApi.fetchAll();
+        const langs = all.filter((c: any) => c.group === 'LANGUAGE' && c.active === 1);
+        setLanguages(langs);
+      } catch (error) {
+        console.error("Error fetching languages:", error);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>, onChangeOriginal: (...event: any[]) => void) => {
     const newTitle = e.target.value;
-    onChangeOriginal(newTitle); // Cập nhật giá trị Title cho hook form
-
-    // Nếu người dùng chưa tự sửa slug thủ công thì mới tự động cập nhật slug theo tiêu đề
+    onChangeOriginal(newTitle);
     if (!form.formState.dirtyFields.slug) {
       form.setValue("slug", convertToSlug(newTitle), { shouldValidate: true });
     }
@@ -101,7 +129,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     },
   });
 
-  const { data: postData, isLoading: isFetching } = useQuery({
+  const { data: postData, isLoading: isFetching } = useQuery<Post>({
     queryKey: ["post", editId],
     queryFn: async () => await postsApi.getPost(editId!),
     enabled: isEdit,
@@ -109,17 +137,27 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
   useEffect(() => {
     if (postData) {
+      let parsedTranslations = postData.translations || {};
+      if (typeof parsedTranslations === 'string') {
+        try {
+          parsedTranslations = JSON.parse(parsedTranslations);
+        } catch (e) {
+          parsedTranslations = {};
+        }
+      }
+
       form.reset({
         title: postData.title,
         slug: postData.slug,
         description: postData.description || "",
         content: postData.content,
         categoryId: postData.categoryId || "",
-        status: postData.status,
+        status: postData.status as any,
         thumbnail: postData.thumbnail || "",
         tags: Array.isArray(postData.tags) ? postData.tags : [],
         isFeatured: postData.isFeatured || false,
         isNotification: postData.isNotification || false,
+        translations: parsedTranslations as any,
       });
     }
   }, [postData, form]);
@@ -130,7 +168,13 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   });
 
   const mutation = useMutation({
-    mutationFn: (v: PostFormValues) => isEdit ? postsApi.updatePost(editId!, v) : postsApi.createPost(v),
+    mutationFn: (v: PostFormValues) => {
+      const payload = {
+        ...v,
+        translations: JSON.stringify(v.translations || {})
+      };
+      return isEdit && editId ? postsApi.updatePost(editId, payload) : postsApi.createPost(payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
       onBack();
@@ -145,13 +189,15 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     }
   };
 
+  const onSubmit = (values: PostFormValues) => {
+    mutation.mutate(values);
+  };
+
   if (isFetching) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto h-8 w-8" /></div>;
 
   return (
     <Form {...form}>
-      <div className="max-w-[1400px] mx-auto space-y-6 pb-20">
-
-        {/* HEADER BAR */}
+      <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1400px] mx-auto space-y-6 pb-20">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sticky top-0 z-30 bg-background/80 backdrop-blur-md py-4 border-b">
           <div className="flex items-center gap-4">
             <Button type="button" variant="outline" size="icon" onClick={onBack} className="rounded-full shadow-sm">
@@ -163,38 +209,47 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" disabled={mutation.isPending} onClick={() => {
-              form.setValue("status", "DRAFT");
-              form.handleSubmit(((v: any) => mutation.mutate(v)) as any)();
-            }}>
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={mutation.isPending}
+              onClick={() => {
+                form.setValue("status", "DRAFT");
+                form.handleSubmit(onSubmit)();
+              }}
+            >
               Lưu nháp
             </Button>
 
             {(!isEdit || form.watch("status") === "DRAFT" || form.watch("status") === "REJECTED") && (
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20" disabled={mutation.isPending} onClick={() => {
-                form.setValue("status", "SUBMITTED");
-                form.handleSubmit(((v: any) => mutation.mutate(v)) as any)();
-              }}>
+              <Button
+                type="button"
+                className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20"
+                disabled={mutation.isPending}
+                onClick={() => {
+                  form.setValue("status", "SUBMITTED");
+                  form.handleSubmit(onSubmit)();
+                }}
+              >
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
                 {isEdit ? "Gửi lại phê duyệt" : "Gửi phê duyệt"}
               </Button>
             )}
 
             {isEdit && (form.watch("status") !== "DRAFT" && form.watch("status") !== "REJECTED") && (
-              <Button className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[140px] shadow-lg shadow-emerald-500/20" disabled={mutation.isPending} onClick={() => {
-                form.handleSubmit(((v: any) => mutation.mutate(v)) as any)();
-              }}>
+              <Button
+                type="submit"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white min-w-[140px] shadow-lg shadow-emerald-500/20"
+                disabled={mutation.isPending}
+              >
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Lưu thay đổi
               </Button>
             )}
           </div>
-
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-
-          {/* LEFT: CONTENT CARD */}
           <div className="lg:col-span-8 space-y-6">
             <Card className="shadow-sm border-none bg-card">
               <CardHeader className="pb-4">
@@ -203,7 +258,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-6 pt-0 space-y-6">
-                {/* AUTOMATED MODERATION ALERT */}
                 {postData?.autoModerationStatus && (
                   <div className={`p-4 rounded-xl border flex items-start gap-4 mb-2 ${postData.autoModerationStatus === 'SAFE'
                     ? 'bg-green-50 border-green-100 text-green-800'
@@ -221,77 +275,138 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   </div>
                 )}
 
-                {/* TIÊU ĐỀ */}
-                <FormField name="title" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold">Tiêu đề chính <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="VD: Bí quyết học lập trình hiệu quả..."
-                        className="text-lg py-6 focus-visible:ring-blue-500 bg-slate-50/50"
-                        {...field}
-                        onChange={(e) => handleTitleChange(e, field.onChange)}
+                <Tabs value={activeLangTab} onValueChange={setActiveLangTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 mb-6">
+                    <TabsTrigger value="vi" className="flex items-center gap-2">
+                      <Globe className="h-3.5 w-3.5" /> Tiếng Việt
+                    </TabsTrigger>
+                    {languages.filter(l => l.code !== 'vi').map(lang => (
+                      <TabsTrigger key={lang.code} value={lang.code} className="flex items-center gap-2">
+                        <Globe className="h-3.5 w-3.5" /> {lang.name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  <TabsContent value="vi" className="space-y-6">
+                    <FormField name="title" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-semibold">Tiêu đề chính <span className="text-destructive">*</span></FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="VD: Bí quyết học lập trình hiệu quả..."
+                            className="text-lg py-6 focus-visible:ring-blue-500 bg-slate-50/50"
+                            {...field}
+                            onChange={(e) => handleTitleChange(e, field.onChange)}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <FormField name="categoryId" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold">Chuyên mục</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl><SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              {categories?.map((cat: Category) => <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <FormField name="slug" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <span className="absolute left-3 top-2.5 text-slate-400 text-sm font-mono">/</span>
+                              <Input className="font-mono text-sm bg-muted/30 pl-6" {...field} />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    </div>
+
+                    <FormField name="description" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="font-semibold">Tóm tắt ngắn (Description)</FormLabel>
+                        <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
+                        <FormDescription className="text-[11px]">Sẽ hiển thị trên kết quả tìm kiếm Google và danh sách bài viết.</FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )} />
+
+                    <div className="pt-4 border-t space-y-4">
+                      <Label className="font-semibold text-base block">Nội dung chi tiết (TIẾNG VIỆT)</Label>
+                      <Controller
+                        control={form.control}
+                        name="content"
+                        render={({ field }) => <LexicalEditorDynamic value={field.value} onChange={field.onChange} />}
                       />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                      {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
+                    </div>
+                  </TabsContent>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* CATEGORY */}
-                  <FormField name="categoryId" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold">Chuyên mục</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          {categories?.map((cat: Category) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-
-                  {/* SLUG */}
-                  <FormField name="slug" render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
-                      <FormControl>
-                        <div className="relative">
-                          <span className="absolute left-3 top-2.5 text-slate-400 text-sm font-mono">/</span>
-                          <Input className="font-mono text-sm bg-muted/30 pl-6" {...field} />
+                  {languages.filter(l => l.code !== 'vi').map(lang => (
+                    <TabsContent key={lang.code} value={lang.code} className="space-y-6 animate-in fade-in-50 duration-300">
+                      <div className="p-4 rounded-xl bg-blue-50/30 border border-blue-100/50 mb-6 flex items-center gap-3">
+                        <div className="bg-blue-100 p-2 rounded-lg">
+                          <Globe className="h-4 w-4 text-blue-600" />
                         </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )} />
-                </div>
+                        <div>
+                          <p className="text-sm font-bold text-blue-900">Phiên bản dịch: {lang.name}</p>
+                          <p className="text-xs text-blue-700/70 italic text-[11px]">Nhập nội dung tương ứng cho ngôn ngữ này</p>
+                        </div>
+                      </div>
 
-                <FormField name="description" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold">Tóm tắt ngắn (Description)</FormLabel>
-                    <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
-                    <FormDescription className="text-[11px]">Sẽ hiển thị trên kết quả tìm kiếm Google và danh sách bài viết.</FormDescription>
-                  </FormItem>
-                )} />
+                      <FormField name={`translations.${lang.code}.title`} render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold text-blue-700">Tiêu đề ({lang.name})</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
+                              className="text-lg py-6 focus-visible:ring-blue-500 border-blue-100 bg-blue-50/10"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
 
-                <div className="pt-4 border-t space-y-4">
-                  <Label className="font-semibold text-base block">Nội dung chi tiết</Label>
-                  <Controller
-                    control={form.control}
-                    name="content"
-                    render={({ field }) => <LexicalEditorDynamic value={field.value} onChange={field.onChange} />}
-                  />
-                  {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
-                </div>
+                      <FormField name={`translations.${lang.code}.description`} render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold text-blue-700">Tóm tắt ({lang.name})</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder={`Mô tả bằng ${lang.name}...`}
+                              className="min-h-[80px] resize-none border-blue-100 bg-blue-50/10"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+
+                      <div className="pt-4 border-t border-blue-100/50 space-y-4">
+                        <Label className="font-semibold text-base block text-blue-700">Nội dung chi tiết ({lang.code.toUpperCase()})</Label>
+                        <Controller
+                          control={form.control}
+                          name={`translations.${lang.code}.content`}
+                          render={({ field }) => <LexicalEditorDynamic value={field.value || ""} onChange={field.onChange} />}
+                        />
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
               </CardContent>
             </Card>
           </div>
 
-          {/* RIGHT: SIDEBAR */}
           <div className="lg:col-span-4 space-y-6">
-
-            {/* THUMBNAIL CARD */}
             <Card className="shadow-sm overflow-hidden">
               <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><ImagePlus className="h-4 w-4 text-blue-600" /> Ảnh bài viết</CardTitle>
@@ -320,7 +435,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               </CardContent>
             </Card>
 
-            {/* PUBLISH CONFIG CARD */}
             <Card className="shadow-sm">
               <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Globe className="h-4 w-4 text-blue-600" /> Cấu hình hiển thị</CardTitle>
@@ -340,7 +454,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         <SelectItem value="REJECTED" className="text-rose-600">Bị từ chối</SelectItem>
                         <SelectItem value="UNPUBLISHED" className="text-slate-600">Đã gỡ bài</SelectItem>
                         <SelectItem value="ARCHIVED" className="text-slate-400">Lưu trữ</SelectItem>
-
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -372,7 +485,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               </CardContent>
             </Card>
 
-            {/* TAGS CARD */}
             <Card className="shadow-sm">
               <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
                 <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2"><Tag className="h-4 w-4 text-blue-600" /> Nhãn gắn (Tags)</CardTitle>
@@ -401,7 +513,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
           </div>
         </div>
 
-        {/* MODAL FULL IMAGE */}
         {showFullImage && (previewUrl || form.getValues("thumbnail")) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
@@ -410,7 +521,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
             </div>
           </div>
         )}
-      </div>
+      </form>
     </Form>
   );
 }

@@ -1310,6 +1310,7 @@ export const PostScalarFieldEnum = {
   description: 'description',
   content: 'content',
   contentJson: 'contentJson',
+  translations: 'translations',
   slug: 'slug',
   thumbnail: 'thumbnail',
   authorId: 'authorId',
@@ -1348,6 +1349,7 @@ export const PostVersionScalarFieldEnum = {
   description: 'description',
   content: 'content',
   contentJson: 'contentJson',
+  translations: 'translations',
   editorId: 'editorId',
   changeNote: 'changeNote',
   createdAt: 'createdAt'

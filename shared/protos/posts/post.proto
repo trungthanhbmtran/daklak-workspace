@@ -58,6 +58,7 @@ message Post {
   bool isTranslated = 23;
   int32 currentVersion = 24;
   bool isCommentAllowed = 25;
+  string translations = 26;
 }
 
 message WorkflowRequest {
@@ -106,6 +107,7 @@ message CreatePostRequest {
   string thumbnail = 10;
   string status = 11;
   bool isCommentAllowed = 12;
+  string translations = 13;
 }
 
 // ====================== Get ======================
@@ -144,6 +146,7 @@ message DataListPost {
   repeated tag.Tag tags = 13;
   string categoryId = 14;
   category.Category category = 15;
+  string translations = 16;
 }
 
 message ListPostsResponse {
@@ -172,6 +175,7 @@ message UpdatePostRequest {
   repeated string tagIds = 9;
   bool isNotification = 10;
   bool isCommentAllowed = 11;
+  string translations = 12;
 }
 
 // ====================== Delete ======================

@@ -6,6 +6,7 @@ model PostVersion {
   description   String?  @db.Text
   content       String?  @db.LongText
   contentJson   String?  @db.LongText @map("content_json")
+  translations  Json?    @default("{}")
   editorId      String   @map("editor_id")
   changeNote    String?  @db.Text @map("change_note")
   
