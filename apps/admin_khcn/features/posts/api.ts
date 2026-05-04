@@ -108,4 +108,8 @@ export const postsApi = {
   createTag: (data: any) =>
     apiClient.post("/posts/tags", data).then((res: any) => res.data),
 
+  // Translation
+  translate: (text: string, targetLang: string) =>
+    apiClient.post("/translate", { text, targetLang }).then((res: any) => res.data),
+
 };

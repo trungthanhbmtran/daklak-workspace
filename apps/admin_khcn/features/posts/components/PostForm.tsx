@@ -7,8 +7,9 @@ import * as z from "zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
-  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText, AlertCircle, CheckCircle2
+  Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText, AlertCircle, CheckCircle2, Sparkles
 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -96,6 +97,36 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
       translations: {},
     },
   });
+
+  const [isTranslating, setIsTranslating] = useState<Record<string, boolean>>({});
+
+  const handleAutoTranslate = async (langCode: string) => {
+    const title = form.getValues("title");
+    const description = form.getValues("description");
+
+    if (!title) {
+      toast.error("Vui lòng nhập tiêu đề tiếng Việt trước khi dịch");
+      return;
+    }
+
+    setIsTranslating(prev => ({ ...prev, [langCode]: true }));
+    try {
+      const resTitle = await postsApi.translate(title, langCode);
+      form.setValue(`translations.${langCode}.title`, resTitle.translated_text, { shouldDirty: true });
+
+      if (description) {
+        const resDesc = await postsApi.translate(description, langCode);
+        form.setValue(`translations.${langCode}.description`, resDesc.translated_text, { shouldDirty: true });
+      }
+
+      toast.success(`Đã dịch xong sang ${languages.find(l => l.code === langCode)?.name}`);
+    } catch (error) {
+      console.error("Translation error:", error);
+      toast.error("Lỗi khi dịch tự động");
+    } finally {
+      setIsTranslating(prev => ({ ...prev, [langCode]: false }));
+    }
+  };
 
   const [languages, setLanguages] = useState<any[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
@@ -353,14 +384,31 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
                   {languages.filter(l => l.code !== 'vi').map(lang => (
                     <TabsContent key={lang.code} value={lang.code} className="space-y-6 animate-in fade-in-50 duration-300">
-                      <div className="p-4 rounded-xl bg-blue-50/30 border border-blue-100/50 mb-6 flex items-center gap-3">
-                        <div className="bg-blue-100 p-2 rounded-lg">
-                          <Globe className="h-4 w-4 text-blue-600" />
+                      <div className="p-4 rounded-xl bg-blue-50/30 border border-blue-100/50 mb-6 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="bg-blue-100 p-2 rounded-lg">
+                            <Globe className="h-4 w-4 text-blue-600" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-blue-900">Phiên bản dịch: {lang.name}</p>
+                            <p className="text-xs text-blue-700/70 italic text-[11px]">Nhập nội dung tương ứng cho ngôn ngữ này</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="text-sm font-bold text-blue-900">Phiên bản dịch: {lang.name}</p>
-                          <p className="text-xs text-blue-700/70 italic text-[11px]">Nhập nội dung tương ứng cho ngôn ngữ này</p>
-                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="bg-white hover:bg-blue-50 text-blue-600 border-blue-200 gap-2 shadow-sm"
+                          onClick={() => handleAutoTranslate(lang.code)}
+                          disabled={isTranslating[lang.code]}
+                        >
+                          {isTranslating[lang.code] ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-3.5 w-3.5" />
+                          )}
+                          Dịch tự động (AI)
+                        </Button>
                       </div>
 
                       <FormField name={`translations.${lang.code}.title`} render={({ field }) => (

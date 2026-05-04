@@ -9,6 +9,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AppController } from './modules/app/app.controller';
 import { MediaModule } from './modules/media/media.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
+import { TranslateModule } from './modules/translate/translate.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,7 +23,8 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
     DocumentsModule,
     PostsModule,
     MediaModule,
-    WorkflowModule
+    WorkflowModule,
+    TranslateModule
   ],
   controllers: [AppController],
   providers: [],
