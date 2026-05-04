@@ -27,6 +27,7 @@ export default function PortalMenuPage() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isQuickSetupOpen, setIsQuickSetupOpen] = useState(false);
   const [editingMenu, setEditingMenu] = useState<Partial<PortalMenu> | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
 
   // States for Quick Setup
   const [categories, setCategories] = useState<Category[]>([]);
@@ -35,7 +36,14 @@ export default function PortalMenuPage() {
   const [systemPages, setSystemPages] = useState<any[]>([]);
   const [isImporting, setIsImporting] = useState(false);
 
-  const handleImportCompliance = async (module: typeof complianceModules[0]) => {
+  const toggleExpand = (id: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
+  const handleImportCompliance = async (module: any) => {
     setIsImporting(true);
     try {
       await postsApi.createPortalMenu({
@@ -175,7 +183,6 @@ export default function PortalMenuPage() {
   const importCategoryTree = async (rootCategory: Category) => {
     setIsImporting(true);
     try {
-      // Step 1: Create the parent menu for this category
       const rootMenu = await postsApi.createPortalMenu({
         name: rootCategory.name,
         type: "CATEGORY",
@@ -187,7 +194,6 @@ export default function PortalMenuPage() {
         position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
 
-      // Step 2: Recursively import children if any
       if (rootCategory.children && rootCategory.children.length > 0) {
         await importChildren(rootCategory.children, rootMenu.id, `/chuyen-muc/${rootCategory.slug}`);
       }
@@ -226,7 +232,6 @@ export default function PortalMenuPage() {
   const importDocumentGroup = async (group: { id: string, name: string }) => {
     setIsImporting(true);
     try {
-      // Step 1: Create a menu item for the group
       const pathMap: Record<string, string> = {
         'INCOMING': '/van-ban/den',
         'OUTGOING': '/van-ban/di',
@@ -244,10 +249,8 @@ export default function PortalMenuPage() {
         position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
 
-      // Step 2: Fetch categories for this document group
       const { data: docCategories } = await postsApi.getCategories({ group: group.id });
 
-      // Step 3: Create menu items for each category
       for (let i = 0; i < docCategories.length; i++) {
         const cat = docCategories[i];
         await postsApi.createPortalMenu({
@@ -303,54 +306,115 @@ export default function PortalMenuPage() {
   // Render Table Rows Recursively for hierarchy
   const renderMenuRows = (items: PortalMenu[] | undefined | null, depth = 0): React.ReactNode => {
     if (!items || !Array.isArray(items)) return null;
-    return items.map((menu: PortalMenu) => (
-      <Fragment key={menu.id}>
-        <TableRow className={depth > 0 ? "bg-slate-50/30" : ""}>
-          <TableCell className="font-medium">
-            <div className="flex items-center" style={{ paddingLeft: `${depth * 24}px` }}>
-              {depth > 0 && <ChevronRight className="w-4 h-4 text-slate-400 mr-2" />}
-              {menu.icon && <span className="mr-2 text-blue-500">{menu.icon}</span>}
-              <span className={!menu.isActive ? "text-slate-400" : ""}>{menu.name}</span>
-            </div>
-          </TableCell>
-          <TableCell>
-            <Badge variant="secondary" className="text-[10px] uppercase font-bold py-0 h-5">
-              {menu.position === 'HORIZONTAL' ? 'Ngang' : menu.position === 'VERTICAL' ? 'Dọc' : 'Chân trang'}
-            </Badge>
-          </TableCell>
-          <TableCell>
-            <Badge variant="outline" className="flex items-center w-fit gap-1 uppercase text-[10px] font-bold">
-              {menu.type === 'CATEGORY' && <Layers className="w-3 h-3" />}
-              {menu.type === 'POST' && <FileText className="w-3 h-3" />}
-              {menu.type === 'URL' && <ExternalLink className="w-3 h-3" />}
-              {menu.type === 'STATIC_PAGE' && <Layout className="w-3 h-3" />}
-              {menu.type}
-            </Badge>
-          </TableCell>
-          <TableCell className="max-w-[200px] truncate text-slate-500 text-xs font-mono">
-            {menu.link || "—"}
-          </TableCell>
-          <TableCell className="text-center font-bold text-blue-600">{menu.order}</TableCell>
-          <TableCell>
-            <Switch
-              checked={menu.isActive}
-              onCheckedChange={() => toggleActive(menu.id, menu.isActive)}
-            />
-          </TableCell>
-          <TableCell className="text-right">
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenDialog(menu)}>
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(menu.id)}>
-                <Trash2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </TableCell>
-        </TableRow>
-        {menu.children && menu.children.length > 0 && renderMenuRows(menu.children, depth + 1)}
-      </Fragment>
-    ));
+    return items.map((menu: PortalMenu) => {
+      const hasChildren = menu.children && menu.children.length > 0;
+      const isExpanded = !!expandedItems[menu.id];
+
+      return (
+        <Fragment key={menu.id}>
+          <TableRow className={`${depth > 0 ? "bg-slate-50/30" : ""} hover:bg-slate-50 transition-colors`}>
+            <TableCell className="font-medium p-0">
+              <div className="flex items-center min-h-[52px]" style={{ paddingLeft: `${depth * 28 + 12}px` }}>
+                <div className="flex items-center gap-2 flex-1">
+                  {hasChildren ? (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 p-0 hover:bg-blue-100 text-blue-600 transition-transform duration-200"
+                      onClick={() => toggleExpand(menu.id)}
+                      style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  ) : (
+                    <div className="w-6" /> // Spacer for alignment
+                  )}
+                  
+                  {depth > 0 && <div className="w-4 h-[2px] bg-slate-200 -ml-2 mr-1" />}
+                  
+                  <div className={`p-1.5 rounded ${!menu.isActive ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
+                    {menu.type === 'CATEGORY' && <Layers className="w-3.5 h-3.5" />}
+                    {menu.type === 'POST' && <FileText className="w-3.5 h-3.5" />}
+                    {menu.type === 'URL' && <ExternalLink className="w-3.5 h-3.5" />}
+                    {menu.type === 'STATIC_PAGE' && <Layout className="w-3.5 h-3.5" />}
+                  </div>
+                  
+                  <div className="flex flex-col">
+                    <span className={`text-sm ${!menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"}`}>
+                      {menu.name}
+                    </span>
+                    {menu.description && (
+                      <span className="text-[10px] text-slate-400 truncate max-w-[200px]">
+                        {menu.description}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </TableCell>
+            <TableCell>
+              <Badge variant="secondary" className={`text-[10px] uppercase font-bold py-0 h-5 ${
+                menu.position === 'HORIZONTAL' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                menu.position === 'VERTICAL' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                'bg-slate-100 text-slate-600 border-slate-200'
+              }`}>
+                {menu.position === 'HORIZONTAL' ? 'Ngang' : menu.position === 'VERTICAL' ? 'Dọc' : 'Chân trang'}
+              </Badge>
+            </TableCell>
+            <TableCell>
+              <Badge variant="outline" className="flex items-center w-fit gap-1 uppercase text-[9px] font-bold px-1.5 h-5 bg-white shadow-sm">
+                {menu.type}
+              </Badge>
+            </TableCell>
+            <TableCell className="max-w-[180px]">
+              <div className="flex items-center gap-1.5 text-slate-500 group">
+                <span className="text-[11px] font-mono truncate bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100 group-hover:border-blue-200 group-hover:bg-blue-50 transition-colors">
+                  {menu.link || "—"}
+                </span>
+              </div>
+            </TableCell>
+            <TableCell className="text-center">
+              <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-[11px] font-bold text-slate-600 border border-slate-200">
+                {menu.order}
+              </span>
+            </TableCell>
+            <TableCell>
+              <Switch
+                checked={menu.isActive}
+                className="data-[state=checked]:bg-blue-600 scale-90"
+                onCheckedChange={() => toggleActive(menu.id, menu.isActive)}
+              />
+            </TableCell>
+            <TableCell className="text-right">
+              <div className="flex justify-end gap-1">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600" 
+                  onClick={() => handleOpenDialog(menu)}
+                  title="Chỉnh sửa"
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50" 
+                  onClick={() => handleDelete(menu.id)}
+                  title="Xóa"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </TableCell>
+          </TableRow>
+          
+          {hasChildren && isExpanded && (
+            renderMenuRows(menu.children, depth + 1)
+          )}
+        </Fragment>
+      );
+    });
   };
 
   return (
@@ -388,7 +452,7 @@ export default function PortalMenuPage() {
               <TabsTrigger value="VERTICAL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Dọc</TabsTrigger>
               <TabsTrigger value="FOOTER" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Chân trang</TabsTrigger>
             </TabsList>
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100">{filteredMenus.length} mục</Badge>
+            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100">{menus.length} mục</Badge>
           </div>
         </Tabs>
         <Table>
@@ -413,7 +477,7 @@ export default function PortalMenuPage() {
                   </div>
                 </TableCell>
               </TableRow>
-            ) : filteredMenus.length === 0 ? (
+            ) : menus.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="h-32 text-center text-muted-foreground italic bg-slate-50/30">
                   <div className="flex flex-col items-center justify-center gap-2">
