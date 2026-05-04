@@ -150,67 +150,66 @@ async function main() {
   console.log('📦 Seeding Portal Menus...');
   const portalMenus = [
     // --- HORIZONTAL MENU (MAIN NAV) ---
-    { name: 'Trang chủ', link: '/', order: 1, type: 'URL', position: 'HORIZONTAL' },
+    { name: 'Trang chủ', nameEn: 'Home', link: '/', order: 1, type: 'URL', position: 'HORIZONTAL' },
     {
-      name: 'Giới thiệu', link: '/chuyen-muc/gioi-thieu', order: 2, type: 'CATEGORY', position: 'HORIZONTAL',
+      name: 'Giới thiệu', nameEn: 'About Us', link: '/chuyen-muc/gioi-thieu', order: 2, type: 'CATEGORY', position: 'HORIZONTAL',
       children: [
-        { name: 'Sơ đồ tổ chức', link: '/chuyen-muc/so-do-to-chuc', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Chức năng nhiệm vụ', link: '/chuyen-muc/chuc-nang-nhiem-vu', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Lãnh đạo cơ quan', link: '/chuyen-muc/lanh-dao-co-quan', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Thông tin tiếp công dân', link: '/chuyen-muc/tiep-cong-dan', order: 4, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Sơ đồ tổ chức', nameEn: 'Organizational Chart', link: '/chuyen-muc/so-do-to-chuc', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Chức năng nhiệm vụ', nameEn: 'Functions & Duties', link: '/chuyen-muc/chuc-nang-nhiem-vu', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Lãnh đạo cơ quan', nameEn: 'Agency Leadership', link: '/chuyen-muc/lanh-dao-co-quan', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Thông tin tiếp công dân', nameEn: 'Citizen Reception', link: '/chuyen-muc/tiep-cong-dan', order: 4, type: 'CATEGORY', position: 'HORIZONTAL' },
       ]
     },
     {
-      name: 'Tin tức & Sự kiện', link: '/chuyen-muc/tin-tuc', order: 3, type: 'CATEGORY', position: 'HORIZONTAL',
+      name: 'Tin tức & Sự kiện', nameEn: 'News & Events', link: '/chuyen-muc/tin-tuc', order: 3, type: 'CATEGORY', position: 'HORIZONTAL',
       children: [
-        { name: 'Tin nổi bật', link: '/chuyen-muc/tin-noi-bat', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Hoạt động lãnh đạo', link: '/chuyen-muc/hoat-dong-lanh-dao', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Thông báo', link: '/chuyen-muc/thong-bao', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Điểm tin báo chí', link: '/chuyen-muc/diem-tin', order: 4, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Tin nổi bật', nameEn: 'Featured News', link: '/chuyen-muc/tin-noi-bat', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Hoạt động lãnh đạo', nameEn: 'Leadership Activities', link: '/chuyen-muc/hoat-dong-lanh-dao', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Thông báo', nameEn: 'Notifications', link: '/chuyen-muc/thong-bao', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Điểm tin báo chí', nameEn: 'Press Clippings', link: '/chuyen-muc/diem-tin', order: 4, type: 'CATEGORY', position: 'HORIZONTAL' },
       ]
     },
     {
-      name: 'Chỉ đạo & Điều hành', link: '/chuyen-muc/chi-dao', order: 4, type: 'CATEGORY', position: 'HORIZONTAL',
+      name: 'Chỉ đạo & Điều hành', nameEn: 'Leadership & Management', link: '/chuyen-muc/chi-dao', order: 4, type: 'CATEGORY', position: 'HORIZONTAL',
       children: [
-        { name: 'Văn bản quy phạm', link: '/chuyen-muc/van-ban-quy-pham', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Văn bản chỉ đạo, điều hành', link: '/chuyen-muc/van-ban-chi-dao', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Chương trình, kế hoạch công tác', link: '/chuyen-muc/ke-hoach-cong-tac', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Văn bản quy phạm', nameEn: 'Legal Documents', link: '/chuyen-muc/van-ban-quy-pham', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Văn bản chỉ đạo, điều hành', nameEn: 'Management Documents', link: '/chuyen-muc/van-ban-chi-dao', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Chương trình, kế hoạch công tác', nameEn: 'Work Programs & Plans', link: '/chuyen-muc/ke-hoach-cong-tac', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
       ]
     },
     {
-      name: 'Công khai & Minh bạch', link: '/chuyen-muc/cong-khai', order: 5, type: 'CATEGORY', position: 'HORIZONTAL',
+      name: 'Công khai & Minh bạch', nameEn: 'Transparency & Accountability', link: '/chuyen-muc/cong-khai', order: 5, type: 'CATEGORY', position: 'HORIZONTAL',
       children: [
-        { name: 'Dự án đầu tư', link: '/chuyen-muc/du-an-dau-tu', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Đấu thầu, mua sắm công', link: '/chuyen-muc/dau-thau', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Công khai ngân sách', link: '/chuyen-muc/ngan-sach', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
-        { name: 'Dữ liệu mở', link: '/chuyen-muc/du-lieu-mo', order: 4, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Dự án đầu tư', nameEn: 'Investment Projects', link: '/chuyen-muc/du-an-dau-tu', order: 1, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Đấu thầu, mua sắm công', nameEn: 'Bidding & Procurement', link: '/chuyen-muc/dau-thau', order: 2, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Công khai ngân sách', nameEn: 'Budget Transparency', link: '/chuyen-muc/ngan-sach', order: 3, type: 'CATEGORY', position: 'HORIZONTAL' },
+        { name: 'Dữ liệu mở', nameEn: 'Open Data', link: '/chuyen-muc/du-lieu-mo', order: 4, type: 'CATEGORY', position: 'HORIZONTAL' },
       ]
     },
     {
-      name: 'Dịch vụ công', link: '/dich-vu-cong', order: 6, type: 'URL', position: 'HORIZONTAL',
+      name: 'Dịch vụ công', nameEn: 'Public Services', link: '/dich-vu-cong', order: 6, type: 'URL', position: 'HORIZONTAL',
       children: [
-        { name: 'Tra cứu thủ tục hành chính', link: '/dich-vu-cong/thu-tuc', order: 1, type: 'URL', position: 'HORIZONTAL' },
-        { name: 'Tra cứu kết quả giải quyết hồ sơ', link: '/dich-vu-cong/tra-cuu-ho-so', order: 2, type: 'URL', position: 'HORIZONTAL' },
-        { name: 'Dịch vụ công trực tuyến', link: 'https://dichvucong.daklak.gov.vn', order: 3, type: 'URL', target: '_blank', position: 'HORIZONTAL' },
-        { name: 'Khảo sát mức độ hài lòng', link: '/dich-vu-cong/khao-sat', order: 4, type: 'URL', position: 'HORIZONTAL' },
+        { name: 'Tra cứu thủ tục hành chính', nameEn: 'Search Admin Procedures', link: '/dich-vu-cong/thu-tuc', order: 1, type: 'URL', position: 'HORIZONTAL' },
+        { name: 'Tra cứu kết quả giải quyết hồ sơ', nameEn: 'Search Record Results', link: '/dich-vu-cong/tra-cuu-ho-so', order: 2, type: 'URL', position: 'HORIZONTAL' },
+        { name: 'Dịch vụ công trực tuyến', nameEn: 'Online Public Services', link: 'https://dichvucong.daklak.gov.vn', order: 3, type: 'URL', target: '_blank', position: 'HORIZONTAL' },
+        { name: 'Khảo sát mức độ hài lòng', nameEn: 'Satisfaction Survey', link: '/dich-vu-cong/khao-sat', order: 4, type: 'URL', position: 'HORIZONTAL' },
       ]
     },
-
     // --- VERTICAL MENU (SIDEBAR / QUICK LINKS) ---
     {
-      name: 'Liên kết nhanh', link: '#', order: 1, type: 'URL', position: 'VERTICAL',
+      name: 'Liên kết nhanh', nameEn: 'Quick Links', link: '#', order: 1, type: 'URL', position: 'VERTICAL',
       children: [
-        { name: 'Tra cứu hồ sơ', link: '/tra-cuu', order: 1, type: 'URL', position: 'VERTICAL' },
-        { name: 'Đăng ký trực tuyến', link: '/dang-ky', order: 2, type: 'URL', position: 'VERTICAL' },
-        { name: 'Hỏi đáp trực tuyến', link: '/hoi-dap', order: 3, type: 'URL', position: 'VERTICAL' },
+        { name: 'Tra cứu hồ sơ', nameEn: 'Search Application', link: '/tra-cuu', order: 1, type: 'URL', position: 'VERTICAL' },
+        { name: 'Đăng ký trực tuyến', nameEn: 'Online Registration', link: '/dang-ky', order: 2, type: 'URL', position: 'VERTICAL' },
+        { name: 'Hỏi đáp trực tuyến', nameEn: 'Online Q&A', link: '/hoi-dap', order: 3, type: 'URL', position: 'VERTICAL' },
       ]
     },
     {
-      name: 'Công cụ tiện ích', link: '#', order: 2, type: 'URL', position: 'VERTICAL',
+      name: 'Công cụ tiện ích', nameEn: 'Utilities', link: '#', order: 2, type: 'URL', position: 'VERTICAL',
       children: [
-        { name: 'Sơ đồ trang (Sitemap)', link: '/sitemap', order: 1, type: 'URL', position: 'VERTICAL' },
-        { name: 'Phiên bản tiếng Anh', link: '/en', order: 2, type: 'URL', position: 'VERTICAL' },
-        { name: 'Hỗ trợ người khuyết tật', link: '/accessibility', order: 3, type: 'URL', position: 'VERTICAL' },
+        { name: 'Sơ đồ trang (Sitemap)', nameEn: 'Sitemap', link: '/sitemap', order: 1, type: 'URL', position: 'VERTICAL' },
+        { name: 'Phiên bản tiếng Anh', nameEn: 'English Version', link: '/en', order: 2, type: 'URL', position: 'VERTICAL' },
+        { name: 'Hỗ trợ người khuyết tật', nameEn: 'Accessibility Support', link: '/accessibility', order: 3, type: 'URL', position: 'VERTICAL' },
       ]
     }
   ];
@@ -226,6 +225,7 @@ async function main() {
         menu = await (prisma as any).portalMenu.update({
           where: { id: existing.id },
           data: {
+            nameEn: item.nameEn,
             link: item.link,
             order: item.order,
             type: item.type,
@@ -237,6 +237,7 @@ async function main() {
         menu = await (prisma as any).portalMenu.create({
           data: {
             name: item.name,
+            nameEn: item.nameEn,
             link: item.link,
             order: item.order,
             type: item.type,
