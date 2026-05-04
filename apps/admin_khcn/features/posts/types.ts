@@ -76,6 +76,7 @@ export interface Banner {
   name: string;
   slug: string;
   description?: string;
+  translations?: Record<string, { name?: string; description?: string }>;
   imageUrl: string;
   linkType: BannerLinkType;
   customUrl?: string;

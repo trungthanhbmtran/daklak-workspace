@@ -195,7 +195,15 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             <p className="font-semibold text-foreground text-[14px] line-clamp-2 leading-snug group-hover:text-primary transition-colors cursor-pointer" onClick={() => onNavigateToEdit(post.id)}>
                               {post.title}
                             </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-mono">ID: {post.id?.substring(0, 8)}...</p>
+                            <p className="text-[11px] text-muted-foreground mt-1 font-mono flex items-center gap-2">
+                              ID: {post.id?.substring(0, 8)}...
+                              {post.translations && Object.keys(post.translations).length > 0 && (
+                                <span className="flex items-center gap-1 bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-sans font-bold uppercase text-[9px]">
+                                  <Globe className="h-2.5 w-2.5" />
+                                  {Object.keys(post.translations).join(", ")}
+                                </span>
+                              )}
+                            </p>
                           </div>
                         </div>
                       </td>

@@ -108,7 +108,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   const fetchLanguages = async () => {
     try {
       const all = await categoryApi.fetchAll();
-      const langs = all.filter(c => c.group === 'LANGUAGE' && c.active);
+      const langs = all.filter(c => c.group === 'LANGUAGE' && c.active === 1);
       setLanguages(langs);
     } catch (error) {
       console.error("Error fetching languages:", error);

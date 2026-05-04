@@ -25,6 +25,10 @@ export const bannerSchema = z.object({
   status: z.boolean().default(true),
   startAt: z.string().optional(),
   endAt: z.string().optional(),
+  translations: z.record(z.string(), z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+  })).optional(),
 }).superRefine((data, ctx) => {
   if (data.linkType === "external" && (!data.customUrl || data.customUrl.trim() === "")) {
     ctx.addIssue({

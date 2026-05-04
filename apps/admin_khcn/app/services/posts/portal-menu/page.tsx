@@ -78,7 +78,7 @@ export default function PortalMenuPage() {
   const fetchLanguages = async () => {
     try {
       const allCategories = await categoryApi.fetchAll();
-      const langs = allCategories.filter(c => c.group === 'LANGUAGE' && c.active);
+      const langs = allCategories.filter(c => c.group === 'LANGUAGE' && c.active === 1);
       setLanguages(langs);
       if (langs.length > 0 && !langs.find(l => l.code === 'vi')) {
         setActiveLangTab(langs[0].code);
@@ -168,7 +168,7 @@ export default function PortalMenuPage() {
   };
 
   const updateTranslation = (langCode: string, field: 'name' | 'description', value: string) => {
-    const newTranslations = { ...(editingMenu.translations || {}) };
+    const newTranslations = { ...(editingMenu?.translations || {}) };
     if (!newTranslations[langCode]) newTranslations[langCode] = {};
     newTranslations[langCode][field] = value;
     setEditingMenu({ ...editingMenu, translations: newTranslations });

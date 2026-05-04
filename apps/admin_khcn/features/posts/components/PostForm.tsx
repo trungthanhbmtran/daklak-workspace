@@ -63,7 +63,7 @@ const postSchema = z.object({
   tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
   isNotification: z.boolean().default(false),
-  translations: z.record(z.object({
+  translations: z.record(z.string(), z.object({
     title: z.string().optional(),
     description: z.string().optional(),
     content: z.string().optional(),
@@ -81,7 +81,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const isEdit = !!editId;
 
   const form = useForm<PostFormValues>({
-    resolver: zodResolver(postSchema),
+    resolver: zodResolver(postSchema) as any,
     defaultValues: {
       title: "",
       slug: "",
@@ -157,7 +157,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         tags: Array.isArray(postData.tags) ? postData.tags : [],
         isFeatured: postData.isFeatured || false,
         isNotification: postData.isNotification || false,
-        translations: parsedTranslations as any,
+        translations: (parsedTranslations || {}) as Record<string, any>,
       });
     }
   }, [postData, form]);
@@ -215,7 +215,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               disabled={mutation.isPending}
               onClick={() => {
                 form.setValue("status", "DRAFT");
-                form.handleSubmit(onSubmit)();
+                void form.handleSubmit(onSubmit)();
               }}
             >
               Lưu nháp
@@ -228,7 +228,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 disabled={mutation.isPending}
                 onClick={() => {
                   form.setValue("status", "SUBMITTED");
-                  form.handleSubmit(onSubmit)();
+                  void form.handleSubmit(onSubmit)();
                 }}
               >
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Send className="mr-2 h-4 w-4" />}
@@ -243,7 +243,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                Lưu thay đổi
+                Lưu bài viết
               </Button>
             )}
           </div>
@@ -310,7 +310,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl><SelectTrigger className="bg-slate-50/50"><SelectValue placeholder="Chọn chuyên mục" /></SelectTrigger></FormControl>
                             <SelectContent>
-                              {categories?.map((cat: Category) => <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>)}
+                              {categories?.map((cat: Category) => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -345,7 +345,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       <Controller
                         control={form.control}
                         name="content"
-                        render={({ field }) => <LexicalEditorDynamic value={field.value} onChange={field.onChange} />}
+                        render={({ field }) => <LexicalEditorDynamic key="vi" value={field.value || ""} onChange={field.onChange} />}
                       />
                       {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
                     </div>
@@ -396,7 +396,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         <Controller
                           control={form.control}
                           name={`translations.${lang.code}.content`}
-                          render={({ field }) => <LexicalEditorDynamic value={field.value || ""} onChange={field.onChange} />}
+                          render={({ field }) => <LexicalEditorDynamic key={lang.code} value={field.value || ""} onChange={field.onChange} />}
                         />
                       </div>
                     </TabsContent>
@@ -417,7 +417,11 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   <div className="aspect-video border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20"><Loader2 className="animate-spin text-blue-500" /></div>
                 ) : (previewUrl || form.getValues("thumbnail")) ? (
                   <div className="relative group rounded-xl overflow-hidden border shadow-inner">
-                    <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} className="w-full aspect-video object-cover" alt="Thumbnail" />
+                    <img
+                      src={previewUrl || (form.getValues("thumbnail") ? `/api/v1/admin/media/download/${form.getValues("thumbnail")}` : '')}
+                      className="w-full aspect-video object-cover"
+                      alt="Thumbnail"
+                    />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-[2px]">
                       <Button type="button" variant="secondary" size="icon" onClick={() => setShowFullImage(true)}><Maximize2 className="h-4 w-4" /></Button>
                       <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}><UploadCloud className="h-4 w-4 mr-2" /> Đổi ảnh</Button>
@@ -516,7 +520,11 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         {showFullImage && (previewUrl || form.getValues("thumbnail")) && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
-              <img src={previewUrl || `/api/v1/admin/media/download/${form.getValues("thumbnail")}`} className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20" alt="Full" />
+              <img
+                src={previewUrl || (form.getValues("thumbnail") ? `/api/v1/admin/media/download/${form.getValues("thumbnail")}` : '')}
+                className="w-full h-auto max-h-[85vh] object-contain rounded-lg border border-white/20"
+                alt="Full"
+              />
               <Button type="button" variant="ghost" size="icon" className="absolute -top-12 right-0 text-white hover:bg-white/10" onClick={() => setShowFullImage(false)}><X className="h-8 w-8" /></Button>
             </div>
           </div>
