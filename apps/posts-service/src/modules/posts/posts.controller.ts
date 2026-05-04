@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod, RpcException } from '@nestjs/microservices';
+import { GrpcMethod, MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { PostsService } from './posts.service';
 import { status } from '@grpc/grpc-js';
 
@@ -118,6 +118,34 @@ export class PostsController {
   async getPostHistory(data: { id: string }) {
     const items = await this.postsService.getHistory(data.id);
     return { data: items };
+  }
+
+  @MessagePattern('translation_response')
+  async handleTranslationResponse(@Payload() payload: any) {
+    try {
+      // NestJS RMQ sends the message inside a 'data' field if sent via ClientProxy
+      // But if sent from Python, it might be the root or inside 'data'
+      const data = payload.data || payload;
+      const { postId, targetLang, translatedText, field } = data;
+
+      if (!postId || !targetLang || !translatedText) {
+        console.warn(`[PostsController] Invalid translation response data:`, data);
+        return;
+      }
+
+      console.log(`[PostsController] Processing translation for post ${postId}, lang ${targetLang}`);
+      
+      const updateData: any = {};
+      if (field) {
+        updateData[field] = translatedText;
+      } else {
+        updateData.content = translatedText;
+      }
+
+      await this.postsService.updateTranslation(postId, targetLang, updateData);
+    } catch (error) {
+      console.error(`[PostsController] Error handling translation response:`, error);
+    }
   }
 }
 

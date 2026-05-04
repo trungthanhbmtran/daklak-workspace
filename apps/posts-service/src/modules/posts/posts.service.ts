@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { WorkflowService, PostStatus } from '../workflow/workflow.service';
+import { ClientProxy } from '@nestjs/microservices';
 
 @Injectable()
 export class PostsService {
@@ -9,7 +10,28 @@ export class PostsService {
     private prisma: PrismaService,
     private auditService: AuditService,
     private workflowService: WorkflowService,
+    @Inject('TRANSLATE_MQ_CLIENT') private mqClient: ClientProxy,
   ) { }
+
+  private async triggerTranslation(post: any) {
+    if (!post.content) return;
+
+    // Danh sách ngôn ngữ đích cần dịch sang (ngoại trừ tiếng Việt)
+    // Trong thực tế, có thể cấu hình cái này trong env hoặc DB riêng
+    const targetLanguages = ['en', 'zh', 'ja', 'lo'];
+
+    for (const langCode of targetLanguages) {
+      // Đẩy vào queue translation_request
+      this.mqClient.emit('translation_request', {
+        postId: post.id,
+        content: post.content,
+        targetLang: langCode,
+        title: post.title,
+        description: post.description,
+      });
+      console.log(`[PostsService] Pushed translation request for post ${post.id} to ${langCode}`);
+    }
+  }
 
   async create(data: any) {
     const { tagIds, ...rest } = data;
@@ -64,6 +86,8 @@ export class PostsService {
       entityId: post.id,
       metadata: { title: post.title },
     });
+
+    await this.triggerTranslation(post);
 
     return post;
   }
@@ -186,6 +210,8 @@ export class PostsService {
       metadata: { version: nextVersion, changeNote },
     });
 
+    await this.triggerTranslation(updatedPost);
+
     return updatedPost;
   }
 
@@ -241,6 +267,22 @@ export class PostsService {
     return this.prisma.postVersion.findMany({
       where: { postId: id },
       orderBy: { version: 'desc' },
+    });
+  }
+
+  async updateTranslation(postId: string, langCode: string, data: { title?: string, description?: string, content?: string }) {
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) return;
+
+    const translations = (post.translations || {}) as any;
+    translations[langCode] = {
+      ...(translations[langCode] || {}),
+      ...data
+    };
+
+    return this.prisma.post.update({
+      where: { id: postId },
+      data: { translations }
     });
   }
 }

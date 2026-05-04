@@ -2,7 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
+import { Logger } from '@nestjs/common';
 
+const logger = new Logger('Main');
 const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
 
 const postsDir = join(protoRoot, 'posts');
@@ -15,9 +17,13 @@ const protoPath = [
 ];
 
 async function bootstrap() {
-  const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    AppModule,
-    {
+  try {
+    // 1. Tạo app dưới dạng Hybrid
+    const app = await NestFactory.create(AppModule);
+    app.enableShutdownHooks();
+
+    // 2. Kết nối gRPC
+    app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.GRPC,
       options: {
         package: ['post', 'category', 'tag', 'banner', 'portal_menu'],
@@ -31,11 +37,35 @@ async function bootstrap() {
           includeDirs: [protoRoot],
         },
       },
-    },
-  );
-  app.enableShutdownHooks();
+    });
 
-  await app.listen();
-  console.log('Post Service (gRPC) listening on', process.env.GRPC_URL ?? '0.0.0.0:50055');
+    // 3. Kết nối RabbitMQ
+    const rabbitUrl = process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672';
+    app.connectMicroservice<MicroserviceOptions>({
+      transport: Transport.RMQ,
+      options: {
+        urls: [rabbitUrl],
+        queue: 'translation_response',
+        queueOptions: {
+          durable: false,
+        },
+      },
+    });
+
+    // 4. Khởi chạy microservices
+    await app.startAllMicroservices();
+    
+    // 5. Lắng nghe trên một port để duy trì ứng dụng (Hybrid App)
+    const port = process.env.PORT || 3005; // Dùng port 3005 để tránh xung đột
+    await app.listen(port);
+
+    logger.log(`🚀 Post Service is running:`);
+    logger.log(`- gRPC: ${process.env.GRPC_URL ?? '0.0.0.0:50055'}`);
+    logger.log(`- RabbitMQ: connected to ${rabbitUrl}`);
+    logger.log(`- HTTP (Internal): ${port}`);
+  } catch (error) {
+    logger.error('❌ Error during bootstrap:', error);
+    process.exit(1);
+  }
 }
 bootstrap();
