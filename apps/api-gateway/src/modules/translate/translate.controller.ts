@@ -6,7 +6,7 @@ import {
   OnModuleInit,
   UseGuards,
 } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
+import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
