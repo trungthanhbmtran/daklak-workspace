@@ -186,7 +186,9 @@ export type CitizenFeedbackScalarFieldEnum = (typeof CitizenFeedbackScalarFieldE
 export const PortalMenuScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  nameEn: 'nameEn',
   description: 'description',
+  descriptionEn: 'descriptionEn',
   icon: 'icon',
   link: 'link',
   order: 'order',
@@ -385,7 +387,9 @@ export type CitizenFeedbackOrderByRelevanceFieldEnum = (typeof CitizenFeedbackOr
 export const PortalMenuOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
+  nameEn: 'nameEn',
   description: 'description',
+  descriptionEn: 'descriptionEn',
   icon: 'icon',
   link: 'link',
   parentId: 'parentId',
