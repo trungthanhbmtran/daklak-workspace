@@ -89,6 +89,20 @@ services:
     environment:
       - DATABASE_URL=mysql://root:mypassword@mysql:3306/admin_document
 
+  translate-service:
+    build:
+      context: .
+      dockerfile: apps/translate_service/Dockerfile
+    container_name: translate-service
+    restart: always
+    depends_on:
+      - mysql
+      - rabbitmq
+    ports:
+      - "50053:50053"
+    env_file:
+      - apps/translate_service/.env
+
 volumes:
   mysql_data:
   minio_data:
