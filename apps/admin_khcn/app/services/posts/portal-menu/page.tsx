@@ -180,9 +180,41 @@ export default function PortalMenuPage() {
 
   // --- Quick Setup Logic ---
 
-  const importCategoryTree = async (rootCategory: Category) => {
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const toggleCategorySelection = (id: string) => {
+    setSelectedCategories(prev => 
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
+  const importSelectedCategories = async () => {
+    if (selectedCategories.length === 0) {
+      toast.error("Vui lòng chọn ít nhất một chuyên mục");
+      return;
+    }
+    
     setIsImporting(true);
     try {
+      const rootCats = categories.filter(c => selectedCategories.includes(c.id));
+      for (const cat of rootCats) {
+        await importCategoryTree(cat, false); 
+      }
+      toast.success(`Đã nhập xong ${selectedCategories.length} cây danh mục`);
+      setIsQuickSetupOpen(false);
+      setSelectedCategories([]);
+      fetchMenus();
+    } catch (error) {
+      toast.error("Lỗi khi nhập danh mục hàng loạt");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const importCategoryTree = async (rootCategory: Category, finalize = true) => {
+    if (finalize) setIsImporting(true);
+    try {
+      // Step 1: Create the parent menu for this category
       const rootMenu = await postsApi.createPortalMenu({
         name: rootCategory.name,
         type: "CATEGORY",
@@ -194,17 +226,21 @@ export default function PortalMenuPage() {
         position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
 
+      // Step 2: Recursively import children if any
       if (rootCategory.children && rootCategory.children.length > 0) {
         await importChildren(rootCategory.children, rootMenu.id, `/chuyen-muc/${rootCategory.slug}`);
       }
 
-      toast.success(`Đã nhập xong cây danh mục "${rootCategory.name}"`);
-      setIsQuickSetupOpen(false);
-      fetchMenus();
+      if (finalize) {
+        toast.success(`Đã nhập xong cây danh mục "${rootCategory.name}"`);
+        setIsQuickSetupOpen(false);
+        fetchMenus();
+      }
     } catch (error) {
-      toast.error("Lỗi khi nhập danh mục");
+      if (finalize) toast.error("Lỗi khi nhập danh mục");
+      throw error;
     } finally {
-      setIsImporting(false);
+      if (finalize) setIsImporting(false);
     }
   };
 
@@ -522,15 +558,45 @@ export default function PortalMenuPage() {
               </TabsList>
 
               <TabsContent value="categories" className="space-y-4 max-h-[350px] overflow-y-auto pr-2">
-                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800 flex gap-3 mb-4">
-                  <Sparkles className="w-5 h-5 flex-shrink-0" />
-                  <p>Chọn một chuyên mục gốc. Hệ thống sẽ tự động tạo menu cho chuyên mục đó và toàn bộ các chuyên mục con bên trong.</p>
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-800 flex gap-3 mb-4 items-center justify-between">
+                  <div className="flex gap-3">
+                    <Sparkles className="w-5 h-5 flex-shrink-0" />
+                    <p>Chọn một hoặc nhiều chuyên mục. Hệ thống sẽ tự động tạo menu cho chuyên mục đó và toàn bộ các chuyên mục con.</p>
+                  </div>
+                  {selectedCategories.length > 0 && (
+                    <Button 
+                      size="sm" 
+                      className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm whitespace-nowrap"
+                      onClick={importSelectedCategories}
+                      disabled={isImporting}
+                    >
+                      {isImporting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-4 h-4 mr-2" />}
+                      Nhập {selectedCategories.length} mục
+                    </Button>
+                  )}
                 </div>
                 <div className="grid gap-2">
                   {categories.filter(c => !c.parentId).map(cat => (
-                    <div key={cat.id} className="flex items-center justify-between p-3 rounded-lg border hover:border-blue-300 hover:bg-blue-50 transition-all group">
+                    <div 
+                      key={cat.id} 
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all group cursor-pointer ${
+                        selectedCategories.includes(cat.id) 
+                        ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                        : 'hover:border-blue-300 hover:bg-slate-50'
+                      }`}
+                      onClick={() => toggleCategorySelection(cat.id)}
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-slate-100 rounded group-hover:bg-blue-100 group-hover:text-blue-600">
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
+                          selectedCategories.includes(cat.id) 
+                          ? 'bg-blue-600 border-blue-600 text-white' 
+                          : 'border-slate-300 bg-white'
+                        }`}>
+                          {selectedCategories.includes(cat.id) && <Plus className="w-3.5 h-3.5" />}
+                        </div>
+                        <div className={`p-2 rounded transition-colors ${
+                          selectedCategories.includes(cat.id) ? 'bg-blue-100 text-blue-600' : 'bg-slate-100'
+                        }`}>
                           <Layers className="w-4 h-4" />
                         </div>
                         <div>
@@ -541,11 +607,14 @@ export default function PortalMenuPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-blue-600"
-                        onClick={() => importCategoryTree(cat)}
+                        className={`${selectedCategories.includes(cat.id) ? 'text-blue-700' : 'text-blue-600'}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          importCategoryTree(cat);
+                        }}
                         disabled={isImporting}
                       >
-                        {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4 mr-2" /> Nhập</>}
+                        {isImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <><ArrowRight className="w-4 h-4 mr-2" /> Nhập lẻ</>}
                       </Button>
                     </div>
                   ))}
