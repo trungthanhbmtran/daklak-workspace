@@ -35,7 +35,6 @@ export default function PortalMenuPage() {
   const [complianceModules, setComplianceModules] = useState<any[]>([]);
   const [systemPages, setSystemPages] = useState<any[]>([]);
   const [isImporting, setIsImporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
 
   const handleImportCompliance = async (module: typeof complianceModules[0]) => {
     setIsImporting(true);
