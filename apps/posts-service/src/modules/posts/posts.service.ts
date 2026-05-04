@@ -17,8 +17,8 @@ export class PostsService {
     if (!post.content) return;
 
     // Danh sách ngôn ngữ đích cần dịch sang (ngoại trừ tiếng Việt)
-    // Trong thực tế, có thể cấu hình cái này trong env hoặc DB riêng
-    const targetLanguages = ['en', 'zh', 'ja', 'lo'];
+    // Theo yêu cầu mới: chỉ dịch sang tiếng Anh
+    const targetLanguages = ['en'];
 
     for (const langCode of targetLanguages) {
       // Đẩy vào queue translation_request
