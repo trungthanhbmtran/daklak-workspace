@@ -19,7 +19,6 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import apiClient from "@/lib/axiosInstance";
 
 export default function PortalMenuPage() {
   const [activeTab, setActiveTab] = useState<string>("ALL");
@@ -65,12 +64,23 @@ export default function PortalMenuPage() {
 
   const fetchQuickSetupData = async () => {
     try {
-      const { docGroups, complianceModules, defaultPages } = await postsApi.getQuickSetupData();
-      setDocGroups(docGroups || []);
-      setComplianceModules(complianceModules || []);
-      setSystemPages(defaultPages || []);
+      console.log("Fetching quick setup data...");
+      const result = await postsApi.getQuickSetupData();
+      console.log("Quick setup data received:", result);
+      
+      if (!result) {
+        console.warn("Quick setup data is empty");
+        return;
+      }
+
+      const { docGroups, complianceModules, defaultPages } = result;
+      
+      setDocGroups(Array.isArray(docGroups) ? docGroups : []);
+      setComplianceModules(Array.isArray(complianceModules) ? complianceModules : []);
+      setSystemPages(Array.isArray(defaultPages) ? defaultPages : []);
     } catch (error) {
       console.error("Error fetching quick setup data:", error);
+      toast.error("Không thể tải dữ liệu thiết lập từ hệ thống");
     }
   };
 

@@ -4,7 +4,7 @@ import { CategoriesService } from './categories.service';
 
 function sanitizeCategory(cat: any): any {
   if (!cat) return null;
-  return {
+  const sanitized: any = {
     id: cat.id || '',
     name: cat.name || '',
     slug: cat.slug || '',
@@ -21,11 +21,21 @@ function sanitizeCategory(cat: any): any {
     status: cat.status === true || cat.status === 1,
     isGovStandard: cat.isGovStandard === true || cat.isGovStandard === 1,
     attachmentId: cat.attachmentId || '',
-    children: Array.isArray(cat.children)
-      ? cat.children.filter((c: any) => !!c).map(sanitizeCategory)
-      : [],
-    postsCount: Number((cat as any)._count?.posts || cat.postsCount || 0),
+    createdAt: cat.createdAt ? (typeof cat.createdAt === 'string' ? cat.createdAt : cat.createdAt.toISOString()) : '',
+    updatedAt: cat.updatedAt ? (typeof cat.updatedAt === 'string' ? cat.updatedAt : cat.updatedAt.toISOString()) : '',
   };
+
+  // Only include children if it's an array and filter out any null/undefined
+  if (Array.isArray(cat.children)) {
+    sanitized.children = cat.children
+      .filter((c: any) => !!c)
+      .map((c: any) => sanitizeCategory(c))
+      .filter((c: any) => !!c);
+  } else {
+    sanitized.children = [];
+  }
+
+  return sanitized;
 }
 
 @Controller()

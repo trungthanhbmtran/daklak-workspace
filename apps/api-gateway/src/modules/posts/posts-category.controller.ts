@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Inject,
+  Query,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -34,8 +35,8 @@ export class PostsCategoryController {
   }
 
   @Get()
-  async findAll() {
-    return firstValueFrom(this.categoryService.listCategories({}));
+  async findAll(@Query() query: any) {
+    return firstValueFrom(this.categoryService.listCategories(query));
   }
 
   @Get(':id')
