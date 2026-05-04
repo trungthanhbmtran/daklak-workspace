@@ -1218,6 +1218,7 @@ export const CategoryScalarFieldEnum = {
   target: 'target',
   orderIndex: 'orderIndex',
   description: 'description',
+  translations: 'translations',
   metaTitle: 'metaTitle',
   metaDescription: 'metaDescription',
   isGovStandard: 'isGovStandard',
@@ -1285,9 +1286,8 @@ export type CitizenFeedbackScalarFieldEnum = (typeof CitizenFeedbackScalarFieldE
 export const PortalMenuScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  nameEn: 'nameEn',
   description: 'description',
-  descriptionEn: 'descriptionEn',
+  translations: 'translations',
   icon: 'icon',
   link: 'link',
   order: 'order',
@@ -1394,6 +1394,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
@@ -1417,6 +1425,23 @@ export const BannerOrderByRelevanceFieldEnum = {
 } as const
 
 export type BannerOrderByRelevanceFieldEnum = (typeof BannerOrderByRelevanceFieldEnum)[keyof typeof BannerOrderByRelevanceFieldEnum]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
 export const CategoryOrderByRelevanceFieldEnum = {
@@ -1486,9 +1511,7 @@ export type CitizenFeedbackOrderByRelevanceFieldEnum = (typeof CitizenFeedbackOr
 export const PortalMenuOrderByRelevanceFieldEnum = {
   id: 'id',
   name: 'name',
-  nameEn: 'nameEn',
   description: 'description',
-  descriptionEn: 'descriptionEn',
   icon: 'icon',
   link: 'link',
   parentId: 'parentId',
@@ -1599,6 +1622,20 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 

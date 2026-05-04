@@ -102,6 +102,7 @@ export type CategoryCountAggregateOutputType = {
   target: number
   orderIndex: number
   description: number
+  translations: number
   metaTitle: number
   metaDescription: number
   isGovStandard: number
@@ -187,6 +188,7 @@ export type CategoryCountAggregateInputType = {
   target?: true
   orderIndex?: true
   description?: true
+  translations?: true
   metaTitle?: true
   metaDescription?: true
   isGovStandard?: true
@@ -297,6 +299,7 @@ export type CategoryGroupByOutputType = {
   target: string | null
   orderIndex: number
   description: string | null
+  translations: runtime.JsonValue | null
   metaTitle: string | null
   metaDescription: string | null
   isGovStandard: boolean
@@ -343,6 +346,7 @@ export type CategoryWhereInput = {
   target?: Prisma.StringNullableFilter<"Category"> | string | null
   orderIndex?: Prisma.IntFilter<"Category"> | number
   description?: Prisma.StringNullableFilter<"Category"> | string | null
+  translations?: Prisma.JsonNullableFilter<"Category">
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableFilter<"Category"> | string | null
   isGovStandard?: Prisma.BoolFilter<"Category"> | boolean
@@ -369,6 +373,7 @@ export type CategoryOrderByWithRelationInput = {
   target?: Prisma.SortOrderInput | Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  translations?: Prisma.SortOrderInput | Prisma.SortOrder
   metaTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   metaDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   isGovStandard?: Prisma.SortOrder
@@ -399,6 +404,7 @@ export type CategoryWhereUniqueInput = Prisma.AtLeast<{
   target?: Prisma.StringNullableFilter<"Category"> | string | null
   orderIndex?: Prisma.IntFilter<"Category"> | number
   description?: Prisma.StringNullableFilter<"Category"> | string | null
+  translations?: Prisma.JsonNullableFilter<"Category">
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableFilter<"Category"> | string | null
   isGovStandard?: Prisma.BoolFilter<"Category"> | boolean
@@ -425,6 +431,7 @@ export type CategoryOrderByWithAggregationInput = {
   target?: Prisma.SortOrderInput | Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  translations?: Prisma.SortOrderInput | Prisma.SortOrder
   metaTitle?: Prisma.SortOrderInput | Prisma.SortOrder
   metaDescription?: Prisma.SortOrderInput | Prisma.SortOrder
   isGovStandard?: Prisma.SortOrder
@@ -456,6 +463,7 @@ export type CategoryScalarWhereWithAggregatesInput = {
   target?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   orderIndex?: Prisma.IntWithAggregatesFilter<"Category"> | number
   description?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
+  translations?: Prisma.JsonNullableWithAggregatesFilter<"Category">
   metaTitle?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableWithAggregatesFilter<"Category"> | string | null
   isGovStandard?: Prisma.BoolWithAggregatesFilter<"Category"> | boolean
@@ -478,6 +486,7 @@ export type CategoryCreateInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -504,6 +513,7 @@ export type CategoryUncheckedCreateInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -528,6 +538,7 @@ export type CategoryUpdateInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -554,6 +565,7 @@ export type CategoryUncheckedUpdateInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -579,6 +591,7 @@ export type CategoryCreateManyInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -601,6 +614,7 @@ export type CategoryUpdateManyMutationInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -624,6 +638,7 @@ export type CategoryUncheckedUpdateManyInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -668,6 +683,7 @@ export type CategoryCountOrderByAggregateInput = {
   target?: Prisma.SortOrder
   orderIndex?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  translations?: Prisma.SortOrder
   metaTitle?: Prisma.SortOrder
   metaDescription?: Prisma.SortOrder
   isGovStandard?: Prisma.SortOrder
@@ -824,6 +840,7 @@ export type CategoryCreateWithoutChildrenInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -849,6 +866,7 @@ export type CategoryUncheckedCreateWithoutChildrenInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -877,6 +895,7 @@ export type CategoryCreateWithoutParentInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -901,6 +920,7 @@ export type CategoryUncheckedCreateWithoutParentInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -946,6 +966,7 @@ export type CategoryUpdateWithoutChildrenInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -971,6 +992,7 @@ export type CategoryUncheckedUpdateWithoutChildrenInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1014,6 +1036,7 @@ export type CategoryScalarWhereInput = {
   target?: Prisma.StringNullableFilter<"Category"> | string | null
   orderIndex?: Prisma.IntFilter<"Category"> | number
   description?: Prisma.StringNullableFilter<"Category"> | string | null
+  translations?: Prisma.JsonNullableFilter<"Category">
   metaTitle?: Prisma.StringNullableFilter<"Category"> | string | null
   metaDescription?: Prisma.StringNullableFilter<"Category"> | string | null
   isGovStandard?: Prisma.BoolFilter<"Category"> | boolean
@@ -1036,6 +1059,7 @@ export type CategoryCreateWithoutPostsInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -1061,6 +1085,7 @@ export type CategoryUncheckedCreateWithoutPostsInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -1100,6 +1125,7 @@ export type CategoryUpdateWithoutPostsInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1125,6 +1151,7 @@ export type CategoryUncheckedUpdateWithoutPostsInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1148,6 +1175,7 @@ export type CategoryCreateManyParentInput = {
   target?: string | null
   orderIndex?: number
   description?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: string | null
   metaDescription?: string | null
   isGovStandard?: boolean
@@ -1170,6 +1198,7 @@ export type CategoryUpdateWithoutParentInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1194,6 +1223,7 @@ export type CategoryUncheckedUpdateWithoutParentInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1218,6 +1248,7 @@ export type CategoryUncheckedUpdateManyWithoutParentInput = {
   target?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderIndex?: Prisma.IntFieldUpdateOperationsInput | number
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   metaTitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metaDescription?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isGovStandard?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1281,6 +1312,7 @@ export type CategorySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   target?: boolean
   orderIndex?: boolean
   description?: boolean
+  translations?: boolean
   metaTitle?: boolean
   metaDescription?: boolean
   isGovStandard?: boolean
@@ -1310,6 +1342,7 @@ export type CategorySelectScalar = {
   target?: boolean
   orderIndex?: boolean
   description?: boolean
+  translations?: boolean
   metaTitle?: boolean
   metaDescription?: boolean
   isGovStandard?: boolean
@@ -1317,7 +1350,7 @@ export type CategorySelectScalar = {
   updatedAt?: boolean
 }
 
-export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "lft" | "rgt" | "depth" | "status" | "thumbnail" | "attachmentId" | "linkType" | "customUrl" | "target" | "orderIndex" | "description" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
+export type CategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "parentId" | "lft" | "rgt" | "depth" | "status" | "thumbnail" | "attachmentId" | "linkType" | "customUrl" | "target" | "orderIndex" | "description" | "translations" | "metaTitle" | "metaDescription" | "isGovStandard" | "createdAt" | "updatedAt", ExtArgs["result"]["category"]>
 export type CategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.Category$parentArgs<ExtArgs>
   children?: boolean | Prisma.Category$childrenArgs<ExtArgs>
@@ -1348,6 +1381,7 @@ export type $CategoryPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     target: string | null
     orderIndex: number
     description: string | null
+    translations: runtime.JsonValue | null
     metaTitle: string | null
     metaDescription: string | null
     isGovStandard: boolean
@@ -1740,6 +1774,7 @@ export interface CategoryFieldRefs {
   readonly target: Prisma.FieldRef<"Category", 'String'>
   readonly orderIndex: Prisma.FieldRef<"Category", 'Int'>
   readonly description: Prisma.FieldRef<"Category", 'String'>
+  readonly translations: Prisma.FieldRef<"Category", 'Json'>
   readonly metaTitle: Prisma.FieldRef<"Category", 'String'>
   readonly metaDescription: Prisma.FieldRef<"Category", 'String'>
   readonly isGovStandard: Prisma.FieldRef<"Category", 'Boolean'>

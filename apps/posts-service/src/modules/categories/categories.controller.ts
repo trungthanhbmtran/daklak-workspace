@@ -41,6 +41,7 @@ function sanitizeCategory(cat: any): any {
     status: cat.status === true || cat.status === 1,
     isGovStandard: cat.isGovStandard === true || cat.isGovStandard === 1,
     attachmentId: cat.attachmentId || '',
+    translations: cat.translations ? JSON.stringify(cat.translations) : '{}',
     createdAt: cat.createdAt ? (typeof cat.createdAt === 'string' ? cat.createdAt : cat.createdAt.toISOString()) : '',
     updatedAt: cat.updatedAt ? (typeof cat.updatedAt === 'string' ? cat.updatedAt : cat.updatedAt.toISOString()) : '',
   };

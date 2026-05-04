@@ -81,9 +81,8 @@ export class PortalMenuController {
     return {
       id: menu.id || '',
       name: menu.name || '',
-      nameEn: menu.nameEn || '',
       description: menu.description || '',
-      descriptionEn: menu.descriptionEn || '',
+      translations: menu.translations ? JSON.stringify(menu.translations) : '{}',
       icon: menu.icon || '',
       link: menu.link || '',
       order: Number(menu.order) || 0,

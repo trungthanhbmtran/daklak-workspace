@@ -6,13 +6,21 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: any) {
-    const { parentId, ...rest } = data;
+    const { parentId, translations, ...rest } = data;
     
-    // Simplified logic for nested sets for now
-    // In a real scenario, we would calculate lft, rgt, depth
+    let parsedTranslations = {};
+    if (translations) {
+      try {
+        parsedTranslations = typeof translations === 'string' ? JSON.parse(translations) : translations;
+      } catch (e) {
+        console.error('Error parsing translations in category create:', e);
+      }
+    }
+
     return this.prisma.category.create({
       data: {
         ...rest,
+        translations: parsedTranslations,
         parentId: parentId || null,
         lft: 0,
         rgt: 0,
@@ -35,9 +43,18 @@ export class CategoriesService {
   }
 
   async update(id: string, data: any) {
+    const updateData = { ...data };
+    if (updateData.translations && typeof updateData.translations === 'string') {
+      try {
+        updateData.translations = JSON.parse(updateData.translations);
+      } catch (e) {
+        console.error('Error parsing translations in category update:', e);
+        delete updateData.translations;
+      }
+    }
     return this.prisma.category.update({
       where: { id },
-      data,
+      data: updateData,
     });
   }
 

@@ -37,9 +37,7 @@ export type PortalMenuSumAggregateOutputType = {
 export type PortalMenuMinAggregateOutputType = {
   id: string | null
   name: string | null
-  nameEn: string | null
   description: string | null
-  descriptionEn: string | null
   icon: string | null
   link: string | null
   order: number | null
@@ -56,9 +54,7 @@ export type PortalMenuMinAggregateOutputType = {
 export type PortalMenuMaxAggregateOutputType = {
   id: string | null
   name: string | null
-  nameEn: string | null
   description: string | null
-  descriptionEn: string | null
   icon: string | null
   link: string | null
   order: number | null
@@ -75,9 +71,8 @@ export type PortalMenuMaxAggregateOutputType = {
 export type PortalMenuCountAggregateOutputType = {
   id: number
   name: number
-  nameEn: number
   description: number
-  descriptionEn: number
+  translations: number
   icon: number
   link: number
   order: number
@@ -104,9 +99,7 @@ export type PortalMenuSumAggregateInputType = {
 export type PortalMenuMinAggregateInputType = {
   id?: true
   name?: true
-  nameEn?: true
   description?: true
-  descriptionEn?: true
   icon?: true
   link?: true
   order?: true
@@ -123,9 +116,7 @@ export type PortalMenuMinAggregateInputType = {
 export type PortalMenuMaxAggregateInputType = {
   id?: true
   name?: true
-  nameEn?: true
   description?: true
-  descriptionEn?: true
   icon?: true
   link?: true
   order?: true
@@ -142,9 +133,8 @@ export type PortalMenuMaxAggregateInputType = {
 export type PortalMenuCountAggregateInputType = {
   id?: true
   name?: true
-  nameEn?: true
   description?: true
-  descriptionEn?: true
+  translations?: true
   icon?: true
   link?: true
   order?: true
@@ -248,9 +238,8 @@ export type PortalMenuGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type PortalMenuGroupByOutputType = {
   id: string
   name: string
-  nameEn: string | null
   description: string | null
-  descriptionEn: string | null
+  translations: runtime.JsonValue | null
   icon: string | null
   link: string | null
   order: number
@@ -290,9 +279,8 @@ export type PortalMenuWhereInput = {
   NOT?: Prisma.PortalMenuWhereInput | Prisma.PortalMenuWhereInput[]
   id?: Prisma.StringFilter<"PortalMenu"> | string
   name?: Prisma.StringFilter<"PortalMenu"> | string
-  nameEn?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   description?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
-  descriptionEn?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
+  translations?: Prisma.JsonNullableFilter<"PortalMenu">
   icon?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   link?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   order?: Prisma.IntFilter<"PortalMenu"> | number
@@ -311,9 +299,8 @@ export type PortalMenuWhereInput = {
 export type PortalMenuOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  nameEn?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  descriptionEn?: Prisma.SortOrderInput | Prisma.SortOrder
+  translations?: Prisma.SortOrderInput | Prisma.SortOrder
   icon?: Prisma.SortOrderInput | Prisma.SortOrder
   link?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
@@ -336,9 +323,8 @@ export type PortalMenuWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PortalMenuWhereInput[]
   NOT?: Prisma.PortalMenuWhereInput | Prisma.PortalMenuWhereInput[]
   name?: Prisma.StringFilter<"PortalMenu"> | string
-  nameEn?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   description?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
-  descriptionEn?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
+  translations?: Prisma.JsonNullableFilter<"PortalMenu">
   icon?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   link?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   order?: Prisma.IntFilter<"PortalMenu"> | number
@@ -357,9 +343,8 @@ export type PortalMenuWhereUniqueInput = Prisma.AtLeast<{
 export type PortalMenuOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  nameEn?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
-  descriptionEn?: Prisma.SortOrderInput | Prisma.SortOrder
+  translations?: Prisma.SortOrderInput | Prisma.SortOrder
   icon?: Prisma.SortOrderInput | Prisma.SortOrder
   link?: Prisma.SortOrderInput | Prisma.SortOrder
   order?: Prisma.SortOrder
@@ -384,9 +369,8 @@ export type PortalMenuScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PortalMenuScalarWhereWithAggregatesInput | Prisma.PortalMenuScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"PortalMenu"> | string
   name?: Prisma.StringWithAggregatesFilter<"PortalMenu"> | string
-  nameEn?: Prisma.StringNullableWithAggregatesFilter<"PortalMenu"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"PortalMenu"> | string | null
-  descriptionEn?: Prisma.StringNullableWithAggregatesFilter<"PortalMenu"> | string | null
+  translations?: Prisma.JsonNullableWithAggregatesFilter<"PortalMenu">
   icon?: Prisma.StringNullableWithAggregatesFilter<"PortalMenu"> | string | null
   link?: Prisma.StringNullableWithAggregatesFilter<"PortalMenu"> | string | null
   order?: Prisma.IntWithAggregatesFilter<"PortalMenu"> | number
@@ -403,9 +387,8 @@ export type PortalMenuScalarWhereWithAggregatesInput = {
 export type PortalMenuCreateInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -423,9 +406,8 @@ export type PortalMenuCreateInput = {
 export type PortalMenuUncheckedCreateInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -443,9 +425,8 @@ export type PortalMenuUncheckedCreateInput = {
 export type PortalMenuUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -463,9 +444,8 @@ export type PortalMenuUpdateInput = {
 export type PortalMenuUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -483,9 +463,8 @@ export type PortalMenuUncheckedUpdateInput = {
 export type PortalMenuCreateManyInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -502,9 +481,8 @@ export type PortalMenuCreateManyInput = {
 export type PortalMenuUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -520,9 +498,8 @@ export type PortalMenuUpdateManyMutationInput = {
 export type PortalMenuUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -560,9 +537,8 @@ export type PortalMenuOrderByRelevanceInput = {
 export type PortalMenuCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  nameEn?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  descriptionEn?: Prisma.SortOrder
+  translations?: Prisma.SortOrder
   icon?: Prisma.SortOrder
   link?: Prisma.SortOrder
   order?: Prisma.SortOrder
@@ -583,9 +559,7 @@ export type PortalMenuAvgOrderByAggregateInput = {
 export type PortalMenuMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  nameEn?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  descriptionEn?: Prisma.SortOrder
   icon?: Prisma.SortOrder
   link?: Prisma.SortOrder
   order?: Prisma.SortOrder
@@ -602,9 +576,7 @@ export type PortalMenuMaxOrderByAggregateInput = {
 export type PortalMenuMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  nameEn?: Prisma.SortOrder
   description?: Prisma.SortOrder
-  descriptionEn?: Prisma.SortOrder
   icon?: Prisma.SortOrder
   link?: Prisma.SortOrder
   order?: Prisma.SortOrder
@@ -683,9 +655,8 @@ export type PortalMenuUncheckedUpdateManyWithoutParentNestedInput = {
 export type PortalMenuCreateWithoutChildrenInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -702,9 +673,8 @@ export type PortalMenuCreateWithoutChildrenInput = {
 export type PortalMenuUncheckedCreateWithoutChildrenInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -726,9 +696,8 @@ export type PortalMenuCreateOrConnectWithoutChildrenInput = {
 export type PortalMenuCreateWithoutParentInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -745,9 +714,8 @@ export type PortalMenuCreateWithoutParentInput = {
 export type PortalMenuUncheckedCreateWithoutParentInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -785,9 +753,8 @@ export type PortalMenuUpdateToOneWithWhereWithoutChildrenInput = {
 export type PortalMenuUpdateWithoutChildrenInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -804,9 +771,8 @@ export type PortalMenuUpdateWithoutChildrenInput = {
 export type PortalMenuUncheckedUpdateWithoutChildrenInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -842,9 +808,8 @@ export type PortalMenuScalarWhereInput = {
   NOT?: Prisma.PortalMenuScalarWhereInput | Prisma.PortalMenuScalarWhereInput[]
   id?: Prisma.StringFilter<"PortalMenu"> | string
   name?: Prisma.StringFilter<"PortalMenu"> | string
-  nameEn?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   description?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
-  descriptionEn?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
+  translations?: Prisma.JsonNullableFilter<"PortalMenu">
   icon?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   link?: Prisma.StringNullableFilter<"PortalMenu"> | string | null
   order?: Prisma.IntFilter<"PortalMenu"> | number
@@ -861,9 +826,8 @@ export type PortalMenuScalarWhereInput = {
 export type PortalMenuCreateManyParentInput = {
   id?: string
   name: string
-  nameEn?: string | null
   description?: string | null
-  descriptionEn?: string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: string | null
   link?: string | null
   order?: number
@@ -879,9 +843,8 @@ export type PortalMenuCreateManyParentInput = {
 export type PortalMenuUpdateWithoutParentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -898,9 +861,8 @@ export type PortalMenuUpdateWithoutParentInput = {
 export type PortalMenuUncheckedUpdateWithoutParentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -917,9 +879,8 @@ export type PortalMenuUncheckedUpdateWithoutParentInput = {
 export type PortalMenuUncheckedUpdateManyWithoutParentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  nameEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  descriptionEn?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  translations?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   link?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   order?: Prisma.IntFieldUpdateOperationsInput | number
@@ -966,9 +927,8 @@ export type PortalMenuCountOutputTypeCountChildrenArgs<ExtArgs extends runtime.T
 export type PortalMenuSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  nameEn?: boolean
   description?: boolean
-  descriptionEn?: boolean
+  translations?: boolean
   icon?: boolean
   link?: boolean
   order?: boolean
@@ -990,9 +950,8 @@ export type PortalMenuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type PortalMenuSelectScalar = {
   id?: boolean
   name?: boolean
-  nameEn?: boolean
   description?: boolean
-  descriptionEn?: boolean
+  translations?: boolean
   icon?: boolean
   link?: boolean
   order?: boolean
@@ -1006,7 +965,7 @@ export type PortalMenuSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PortalMenuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "nameEn" | "description" | "descriptionEn" | "icon" | "link" | "order" | "parentId" | "isActive" | "target" | "type" | "referenceId" | "position" | "createdAt" | "updatedAt", ExtArgs["result"]["portalMenu"]>
+export type PortalMenuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "translations" | "icon" | "link" | "order" | "parentId" | "isActive" | "target" | "type" | "referenceId" | "position" | "createdAt" | "updatedAt", ExtArgs["result"]["portalMenu"]>
 export type PortalMenuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   parent?: boolean | Prisma.PortalMenu$parentArgs<ExtArgs>
   children?: boolean | Prisma.PortalMenu$childrenArgs<ExtArgs>
@@ -1022,9 +981,8 @@ export type $PortalMenuPayload<ExtArgs extends runtime.Types.Extensions.Internal
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
-    nameEn: string | null
     description: string | null
-    descriptionEn: string | null
+    translations: runtime.JsonValue | null
     icon: string | null
     link: string | null
     order: number
@@ -1409,9 +1367,8 @@ export interface Prisma__PortalMenuClient<T, Null = never, ExtArgs extends runti
 export interface PortalMenuFieldRefs {
   readonly id: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly name: Prisma.FieldRef<"PortalMenu", 'String'>
-  readonly nameEn: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly description: Prisma.FieldRef<"PortalMenu", 'String'>
-  readonly descriptionEn: Prisma.FieldRef<"PortalMenu", 'String'>
+  readonly translations: Prisma.FieldRef<"PortalMenu", 'Json'>
   readonly icon: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly link: Prisma.FieldRef<"PortalMenu", 'String'>
   readonly order: Prisma.FieldRef<"PortalMenu", 'Int'>

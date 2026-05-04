@@ -14,6 +14,7 @@ model Category {
   target          String?  @default("_self") // _self | _blank
   orderIndex      Int      @default(0) @map("order_index")
   description     String?  @db.Text
+  translations    Json?    @default("{}")
   metaTitle       String?  @map("meta_title")
   metaDescription String?  @map("meta_description") @db.Text
   isGovStandard   Boolean  @default(false) @map("is_gov_standard")

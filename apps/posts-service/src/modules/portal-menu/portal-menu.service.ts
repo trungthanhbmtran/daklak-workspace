@@ -6,12 +6,20 @@ export class PortalMenuService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: any) {
+    let translations = {};
+    if (data.translations) {
+      try {
+        translations = typeof data.translations === 'string' ? JSON.parse(data.translations) : data.translations;
+      } catch (e) {
+        console.error('Error parsing translations:', e);
+      }
+    }
+
     return this.prisma.portalMenu.create({
       data: {
         name: data.name,
-        nameEn: data.nameEn,
         description: data.description,
-        descriptionEn: data.descriptionEn,
+        translations: translations,
         icon: data.icon,
         link: data.link,
         order: data.order || 0,
@@ -59,11 +67,19 @@ export class PortalMenuService {
   }
 
   async update(id: string, data: any) {
+    const updateData = { ...data };
+    if (updateData.translations && typeof updateData.translations === 'string') {
+      try {
+        updateData.translations = JSON.parse(updateData.translations);
+      } catch (e) {
+        console.error('Error parsing translations in update:', e);
+        delete updateData.translations;
+      }
+    }
+    
     return this.prisma.portalMenu.update({
       where: { id },
-      data: {
-        ...data,
-      },
+      data: updateData,
     });
   }
 
