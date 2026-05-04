@@ -61,7 +61,9 @@ export class PortalMenuController {
       return {
         id: '',
         name: '',
+        nameEn: '',
         description: '',
+        descriptionEn: '',
         icon: '',
         link: '',
         order: 0,
@@ -79,7 +81,9 @@ export class PortalMenuController {
     return {
       id: menu.id || '',
       name: menu.name || '',
+      nameEn: menu.nameEn || '',
       description: menu.description || '',
+      descriptionEn: menu.descriptionEn || '',
       icon: menu.icon || '',
       link: menu.link || '',
       order: Number(menu.order) || 0,

@@ -92,7 +92,9 @@ export interface Banner {
 export interface PortalMenu {
   id: string;
   name: string;
+  nameEn?: string;
   description?: string;
+  descriptionEn?: string;
   icon?: string;
   link?: string;
   order: number;

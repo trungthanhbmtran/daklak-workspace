@@ -713,12 +713,36 @@ export default function PortalMenuPage() {
 
           {editingMenu && (
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right font-bold">Tên Menu</Label>
-                <Input id="name" className="col-span-3 rounded-lg" value={editingMenu.name || ""} onChange={e => setEditingMenu({ ...editingMenu, name: e.target.value })} />
-              </div>
+              <Tabs defaultValue="vi" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-4">
+                  <TabsTrigger value="vi">Tiếng Việt</TabsTrigger>
+                  <TabsTrigger value="en">English</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="vi" className="space-y-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right font-bold">Tên Menu</Label>
+                    <Input id="name" className="col-span-3 rounded-lg" value={editingMenu.name || ""} onChange={e => setEditingMenu({ ...editingMenu, name: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="description" className="text-right">Mô tả</Label>
+                    <Textarea id="description" className="col-span-3 rounded-lg resize-none" rows={2} value={editingMenu.description || ""} onChange={e => setEditingMenu({ ...editingMenu, description: e.target.value })} />
+                  </div>
+                </TabsContent>
 
-              <div className="grid grid-cols-4 items-center gap-4">
+                <TabsContent value="en" className="space-y-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="nameEn" className="text-right font-bold text-blue-600">Name (EN)</Label>
+                    <Input id="nameEn" className="col-span-3 rounded-lg border-blue-100" placeholder="English name..." value={editingMenu.nameEn || ""} onChange={e => setEditingMenu({ ...editingMenu, nameEn: e.target.value })} />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="descriptionEn" className="text-right text-blue-600">Description</Label>
+                    <Textarea id="descriptionEn" className="col-span-3 rounded-lg resize-none border-blue-100" rows={2} placeholder="English description..." value={editingMenu.descriptionEn || ""} onChange={e => setEditingMenu({ ...editingMenu, descriptionEn: e.target.value })} />
+                  </div>
+                </TabsContent>
+              </Tabs>
+
+              <div className="grid grid-cols-4 items-center gap-4 border-t pt-4">
                 <Label htmlFor="type" className="text-right font-bold">Loại liên kết</Label>
                 <Select value={editingMenu.type} onValueChange={v => setEditingMenu({ ...editingMenu, type: v as PortalMenu['type'] })}>
                   <SelectTrigger className="col-span-3 rounded-lg">

@@ -9,7 +9,9 @@ export class PortalMenuService {
     return this.prisma.portalMenu.create({
       data: {
         name: data.name,
+        nameEn: data.nameEn,
         description: data.description,
+        descriptionEn: data.descriptionEn,
         icon: data.icon,
         link: data.link,
         order: data.order || 0,

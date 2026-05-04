@@ -1,7 +1,9 @@
 model PortalMenu {
   id          String   @id @default(uuid())
   name        String
+  nameEn      String?  @map("name_en")
   description String?  @db.Text
+  descriptionEn String? @db.Text @map("description_en")
   icon        String?
   link        String?
   
