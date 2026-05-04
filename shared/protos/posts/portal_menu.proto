@@ -10,6 +10,7 @@ service PortalMenuService {
   rpc ListPortalMenus(ListPortalMenusRequest) returns (ListPortalMenusResponse) {}
   rpc UpdatePortalMenu(UpdatePortalMenuRequest) returns (PortalMenu) {}
   rpc DeletePortalMenu(DeletePortalMenuRequest) returns (common.DeleteResponse) {}
+  rpc GetQuickSetupData(GetQuickSetupDataRequest) returns (QuickSetupDataResponse) {}
 }
 
 message PortalMenu {
@@ -75,4 +76,20 @@ message UpdatePortalMenuRequest {
 
 message DeletePortalMenuRequest {
   string id = 1;
+}
+
+message GetQuickSetupDataRequest {}
+
+message QuickSetupDataResponse {
+  repeated QuickSetupItem docGroups = 1;
+  repeated QuickSetupItem complianceModules = 2;
+  repeated QuickSetupItem defaultPages = 3;
+}
+
+message QuickSetupItem {
+  string id = 1;
+  string name = 2;
+  string path = 3;
+  string icon = 4;
+  int32 order = 5;
 }

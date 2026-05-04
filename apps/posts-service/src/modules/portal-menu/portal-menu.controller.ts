@@ -36,6 +36,11 @@ export class PortalMenuController {
     return this.service.delete(data.id);
   }
 
+  @GrpcMethod('PortalMenuService', 'GetQuickSetupData')
+  async getQuickSetupData() {
+    return this.service.getQuickSetupData();
+  }
+
   private mapToProto(menu: any) {
     if (!menu) return null;
     return {

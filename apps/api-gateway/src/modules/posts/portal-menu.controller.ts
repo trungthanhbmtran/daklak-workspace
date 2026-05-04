@@ -56,4 +56,9 @@ export class PortalMenuController {
   async remove(@Param('id') id: string) {
     return firstValueFrom(this.portalMenuService.deletePortalMenu({ id }));
   }
+
+  @Get('quick-setup')
+  async getQuickSetupData() {
+    return firstValueFrom(this.portalMenuService.getQuickSetupData({}));
+  }
 }

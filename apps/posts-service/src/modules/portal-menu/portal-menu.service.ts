@@ -69,4 +69,30 @@ export class PortalMenuService {
     await this.prisma.portalMenu.delete({ where: { id } });
     return { success: true };
   }
+
+  async getQuickSetupData() {
+    return {
+      docGroups: [
+        { id: "INCOMING", name: "Văn bản đến", path: "/van-ban/den", icon: "FileText", order: 1 },
+        { id: "OUTGOING", name: "Văn bản đi", path: "/van-ban/di", icon: "FileText", order: 2 },
+        { id: "INTERNAL", name: "Văn bản nội bộ", path: "/van-ban/noi-bo", icon: "FileText", order: 3 },
+        { id: "FINANCE", name: "Công khai tài chính", path: "/van-ban/tai-chinh", icon: "FileText", order: 4 },
+        { id: "CONSULTATION", name: "Lấy ý kiến dự thảo", path: "/lay-y-kien", icon: "FileText", order: 5 }
+      ],
+      complianceModules: [
+        { id: "OPEN_DATA", name: "Dữ liệu mở", path: "/cong-khai/du-lieu-mo", icon: "Globe", order: 1 },
+        { id: "BIDDING", name: "Đấu thầu, mua sắm công", path: "/cong-khai/dau-thau", icon: "Globe", order: 2 },
+        { id: "STRATEGY", name: "Chiến lược, quy hoạch", path: "/cong-khai/quy-hoach", icon: "Globe", order: 3 },
+        { id: "SATISFACTION", name: "Khảo sát sự hài lòng", path: "/dich-vu-cong/khao-sat", icon: "Globe", order: 4 },
+        { id: "SITEMAP", name: "Sơ đồ trang (Sitemap)", path: "/sitemap", icon: "Globe", order: 5 },
+        { id: "ENGLISH", name: "Phiên bản tiếng Anh", path: "/en", icon: "Globe", order: 6 }
+      ],
+      defaultPages: [
+        { id: "HOME", name: "Trang chủ", path: "/", icon: "Home", order: 1 },
+        { id: "NEWS", name: "Tin tức & Sự kiện", path: "/tin-tuc", icon: "Newspaper", order: 2 },
+        { id: "DOCS", name: "Văn bản quy phạm", path: "/van-ban", icon: "FileText", order: 3 },
+        { id: "CONTACT", name: "Liên hệ", path: "/lien-he", icon: "Phone", order: 10 }
+      ]
+    };
+  }
 }

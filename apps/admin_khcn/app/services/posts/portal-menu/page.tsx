@@ -31,21 +31,10 @@ export default function PortalMenuPage() {
 
   // States for Quick Setup
   const [categories, setCategories] = useState<Category[]>([]);
-  const [docGroups] = useState([
-    { id: "INCOMING", name: "Văn bản đến" },
-    { id: "OUTGOING", name: "Văn bản đi" },
-    { id: "INTERNAL", name: "Văn bản nội bộ" },
-    { id: "FINANCE", name: "Công khai tài chính" },
-    { id: "CONSULTATION", name: "Lấy ý kiến dự thảo" }
-  ]);
-  const [complianceModules] = useState([
-    { id: "OPEN_DATA", name: "Dữ liệu mở", path: "/cong-khai/du-lieu-mo" },
-    { id: "BIDDING", name: "Đấu thầu, mua sắm công", path: "/cong-khai/dau-thau" },
-    { id: "STRATEGY", name: "Chiến lược, quy hoạch", path: "/cong-khai/quy-hoach" },
-    { id: "SATISFACTION", name: "Khảo sát sự hài lòng", path: "/dich-vu-cong/khao-sat" },
-    { id: "SITEMAP", name: "Sơ đồ trang (Sitemap)", path: "/sitemap" },
-    { id: "ENGLISH", name: "Phiên bản tiếng Anh", path: "/en" }
-  ]);
+  const [docGroups, setDocGroups] = useState<any[]>([]);
+  const [complianceModules, setComplianceModules] = useState<any[]>([]);
+  const [systemPages, setSystemPages] = useState<any[]>([]);
+  const [isImporting, setIsImporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
 
   const handleImportCompliance = async (module: typeof complianceModules[0]) => {
@@ -72,7 +61,19 @@ export default function PortalMenuPage() {
   useEffect(() => {
     fetchMenus();
     fetchCategories();
+    fetchQuickSetupData();
   }, [activeTab]);
+
+  const fetchQuickSetupData = async () => {
+    try {
+      const { docGroups, complianceModules, defaultPages } = await postsApi.getQuickSetupData();
+      setDocGroups(docGroups || []);
+      setComplianceModules(complianceModules || []);
+      setSystemPages(defaultPages || []);
+    } catch (error) {
+      console.error("Error fetching quick setup data:", error);
+    }
+  };
 
   const fetchMenus = async () => {
     setLoading(true);
@@ -263,20 +264,17 @@ export default function PortalMenuPage() {
   };
 
   const addDefaultPages = async () => {
+    if (systemPages.length === 0) {
+      toast.error("Không tìm thấy dữ liệu trang hệ thống");
+      return;
+    }
     setIsImporting(true);
-    const defaultPages = [
-      { name: "Trang chủ", link: "/", order: 1, icon: "Home" },
-      { name: "Tin tức & Sự kiện", link: "/tin-tuc", order: 2, icon: "Newspaper" },
-      { name: "Văn bản quy phạm", link: "/van-ban", order: 3, icon: "FileText" },
-      { name: "Liên hệ", link: "/lien-he", order: 10, icon: "Phone" },
-    ];
-
     try {
-      for (const page of defaultPages) {
+      for (const page of systemPages) {
         await postsApi.createPortalMenu({
           name: page.name,
           type: "URL",
-          link: page.link,
+          link: page.path,
           isActive: true,
           order: page.order,
           target: "_self",

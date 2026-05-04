@@ -68,6 +68,8 @@ export const postsApi = {
     apiClient.put(`/portal-menus/${id}`, data).then((res: any) => res.data),
   deletePortalMenu: (id: string) =>
     apiClient.delete(`/portal-menus/${id}`).then((res: any) => res.data),
+  getQuickSetupData: () =>
+    apiClient.get("/portal-menus/quick-setup").then((res: any) => res.data),
 
   // Interactions - Comments
   getComments: (params: any) =>
@@ -99,4 +101,11 @@ export const postsApi = {
     })),
   updateFeedbackStatus: (id: string, status: string) =>
     apiClient.put(`/interactions/feedbacks/${id}/status`, { status }).then((res: any) => res.data),
+
+  // Tags
+  getTags: (params?: any) =>
+    apiClient.get("/posts/tags", { params }).then((res: any) => res.data),
+  createTag: (data: any) =>
+    apiClient.post("/posts/tags", data).then((res: any) => res.data),
+
 };
