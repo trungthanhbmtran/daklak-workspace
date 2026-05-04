@@ -9,7 +9,6 @@ import {
   Inject,
   Query,
   UseGuards,
-  Req,
 } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -23,7 +22,7 @@ import { Roles, Role } from '../../common/decorators/roles.decorator';
 export class PortalMenuController {
   private portalMenuService: any;
 
-  constructor(@Inject(MICROSERVICES.PORTAL_MENU.SYMBOL) private client: ClientGrpc) {}
+  constructor(@Inject(MICROSERVICES.PORTAL_MENU.SYMBOL) private client: ClientGrpc) { }
 
   onModuleInit() {
     this.portalMenuService = this.client.getService<any>(MICROSERVICES.PORTAL_MENU.SERVICE);
@@ -43,6 +42,14 @@ export class PortalMenuController {
     return result;
   }
 
+  @Get('quick-setup')
+  async getQuickSetupData() {
+    console.log('Gateway: Calling GetQuickSetupData');
+    const result = await firstValueFrom(this.portalMenuService.getQuickSetupData({}));
+    console.log('Gateway: GetQuickSetupData response received');
+    return result;
+  }
+  
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return firstValueFrom(this.portalMenuService.getPortalMenu({ id }));
@@ -58,13 +65,5 @@ export class PortalMenuController {
   @Roles(Role.ADMIN)
   async remove(@Param('id') id: string) {
     return firstValueFrom(this.portalMenuService.deletePortalMenu({ id }));
-  }
-
-  @Get('quick-setup')
-  async getQuickSetupData() {
-    console.log('Gateway: Calling GetQuickSetupData');
-    const result = await firstValueFrom(this.portalMenuService.getQuickSetupData({}));
-    console.log('Gateway: GetQuickSetupData response received');
-    return result;
   }
 }

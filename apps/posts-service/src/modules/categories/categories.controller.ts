@@ -3,7 +3,27 @@ import { GrpcMethod } from '@nestjs/microservices';
 import { CategoriesService } from './categories.service';
 
 function sanitizeCategory(cat: any): any {
-  if (!cat) return null;
+  if (!cat) {
+    return {
+      id: '',
+      name: '',
+      slug: '',
+      parentId: '',
+      lft: 0,
+      rgt: 0,
+      depth: 0,
+      thumbnail: '',
+      linkType: '',
+      customUrl: '',
+      target: '_self',
+      orderIndex: 0,
+      children: [],
+      description: '',
+      status: true,
+      isGovStandard: false,
+      attachmentId: '',
+    };
+  }
   const sanitized: any = {
     id: cat.id || '',
     name: cat.name || '',

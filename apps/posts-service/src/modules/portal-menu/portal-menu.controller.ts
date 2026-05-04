@@ -57,7 +57,25 @@ export class PortalMenuController {
   }
 
   private mapToProto(menu: any): any {
-    if (!menu) return null;
+    if (!menu) {
+      return {
+        id: '',
+        name: '',
+        description: '',
+        icon: '',
+        link: '',
+        order: 0,
+        parentId: '',
+        isActive: false,
+        target: '_self',
+        type: 'URL',
+        referenceId: '',
+        position: 'HORIZONTAL',
+        children: [],
+        createdAt: '',
+        updatedAt: '',
+      };
+    }
     return {
       id: menu.id || '',
       name: menu.name || '',
@@ -74,6 +92,8 @@ export class PortalMenuController {
       children: Array.isArray(menu.children)
         ? menu.children.filter((c: any) => !!c).map((c: any) => this.mapToProto(c))
         : [],
+      createdAt: menu.createdAt ? (typeof menu.createdAt === 'string' ? menu.createdAt : menu.createdAt.toISOString()) : '',
+      updatedAt: menu.updatedAt ? (typeof menu.updatedAt === 'string' ? menu.updatedAt : menu.updatedAt.toISOString()) : '',
     };
   }
 }
