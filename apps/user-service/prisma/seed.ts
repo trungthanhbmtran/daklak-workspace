@@ -206,6 +206,10 @@ async function main() {
     { group: 'LANGUAGE_SKILL', code: 'ENGLISH_B1', name: 'Tiếng Anh B1', order: 1 },
     { group: 'LANGUAGE_SKILL', code: 'ENGLISH_B2', name: 'Tiếng Anh B2', order: 2 },
 
+    // --- SYSTEM LANGUAGES ---
+    { group: 'LANGUAGE', code: 'vi', name: 'Tiếng Việt', order: 1 },
+    { group: 'LANGUAGE', code: 'en', name: 'Tiếng Anh', order: 2 },
+
     // --- OTHER ---
 
     { group: 'DOMAIN', code: 'KHCN', name: 'Khoa học công nghệ', order: 1 },
@@ -270,6 +274,7 @@ async function main() {
     { code: 'STATE_MANAGEMENT', name: 'Quản lý nhà nước' },
     { code: 'IT_SKILL', name: 'Trình độ tin học' },
     { code: 'LANGUAGE_SKILL', name: 'Trình độ ngoại ngữ' },
+    { code: 'LANGUAGE', name: 'Ngôn ngữ hệ thống' },
     { code: 'DOMAIN', name: 'Lĩnh vực nghiệp vụ' },
     { code: 'CONTENT_TYPE', name: 'Loại nội dung' },
     { code: 'DEPARTMENT', name: 'Phòng ban' },

@@ -16,6 +16,7 @@ export interface Category {
   name: string;
   slug: string;
   description?: string;
+  translations?: Record<string, { name?: string; description?: string }>;
   parentId?: string | null;
   status: boolean;
   orderIndex: number;
@@ -92,9 +93,8 @@ export interface Banner {
 export interface PortalMenu {
   id: string;
   name: string;
-  nameEn?: string;
   description?: string;
-  descriptionEn?: string;
+  translations?: Record<string, { name?: string; description?: string }>;
   icon?: string;
   link?: string;
   order: number;

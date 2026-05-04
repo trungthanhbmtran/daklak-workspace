@@ -3,6 +3,8 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { postsApi } from "@/features/posts/api";
 import { PortalMenu, Category } from "@/features/posts/types";
+import { categoryApi } from "@/features/system-admin/categories/api";
+import { CategoryItem } from "@/features/system-admin/categories/types";
 import { Button } from "@/components/ui/button";
 import {
   Plus, Edit, Trash2, Layers, FileText, ExternalLink,
@@ -34,6 +36,8 @@ export default function PortalMenuPage() {
   const [docGroups, setDocGroups] = useState<any[]>([]);
   const [complianceModules, setComplianceModules] = useState<any[]>([]);
   const [systemPages, setSystemPages] = useState<any[]>([]);
+  const [languages, setLanguages] = useState<CategoryItem[]>([]);
+  const [activeLangTab, setActiveLangTab] = useState<string>("vi");
   const [isImporting, setIsImporting] = useState(false);
 
   const toggleExpand = (id: string) => {
@@ -66,23 +70,37 @@ export default function PortalMenuPage() {
 
   useEffect(() => {
     fetchMenus();
-    fetchCategories();
     fetchQuickSetupData();
+    fetchCategories();
+    fetchLanguages();
   }, [activeTab]);
+
+  const fetchLanguages = async () => {
+    try {
+      const allCategories = await categoryApi.fetchAll();
+      const langs = allCategories.filter(c => c.group === 'LANGUAGE' && c.active);
+      setLanguages(langs);
+      if (langs.length > 0 && !langs.find(l => l.code === 'vi')) {
+        setActiveLangTab(langs[0].code);
+      }
+    } catch (error) {
+      console.error("Error fetching languages:", error);
+    }
+  };
 
   const fetchQuickSetupData = async () => {
     try {
       console.log("Fetching quick setup data...");
       const result = await postsApi.getQuickSetupData();
       console.log("Quick setup data received:", result);
-      
+
       if (!result) {
         console.warn("Quick setup data is empty");
         return;
       }
 
       const { docGroups, complianceModules, defaultPages } = result;
-      
+
       setDocGroups(Array.isArray(docGroups) ? docGroups : []);
       setComplianceModules(Array.isArray(complianceModules) ? complianceModules : []);
       setSystemPages(Array.isArray(defaultPages) ? defaultPages : []);
@@ -121,7 +139,15 @@ export default function PortalMenuPage() {
 
   const handleOpenDialog = (menu?: PortalMenu) => {
     if (menu) {
-      setEditingMenu({ ...menu });
+      let parsedTranslations = menu.translations || {};
+      if (typeof parsedTranslations === 'string') {
+        try {
+          parsedTranslations = JSON.parse(parsedTranslations);
+        } catch (e) {
+          parsedTranslations = {};
+        }
+      }
+      setEditingMenu({ ...menu, translations: parsedTranslations });
     } else {
       setEditingMenu({
         name: "",
@@ -136,6 +162,18 @@ export default function PortalMenuPage() {
     setIsDialogOpen(true);
   };
 
+  const getTranslation = (langCode: string, field: 'name' | 'description') => {
+    if (!editingMenu?.translations) return "";
+    return editingMenu.translations[langCode]?.[field] || "";
+  };
+
+  const updateTranslation = (langCode: string, field: 'name' | 'description', value: string) => {
+    const newTranslations = { ...(editingMenu.translations || {}) };
+    if (!newTranslations[langCode]) newTranslations[langCode] = {};
+    newTranslations[langCode][field] = value;
+    setEditingMenu({ ...editingMenu, translations: newTranslations });
+  };
+
   const handleSave = async () => {
     if (!editingMenu?.name) {
       toast.error("Vui lòng nhập tên menu");
@@ -143,16 +181,26 @@ export default function PortalMenuPage() {
     }
 
     try {
+      const payload = {
+        ...editingMenu,
+        translations: editingMenu.translations ? JSON.stringify(editingMenu.translations) : "{}"
+      };
+
+      // Clear old fields if they exist
+      delete (payload as any).nameEn;
+      delete (payload as any).descriptionEn;
+
       if (editingMenu.id) {
-        await postsApi.updatePortalMenu(editingMenu.id, editingMenu);
+        await postsApi.updatePortalMenu(editingMenu.id, payload);
         toast.success("Cập nhật menu thành công");
       } else {
-        await postsApi.createPortalMenu(editingMenu);
+        await postsApi.createPortalMenu(payload);
         toast.success("Thêm menu mới thành công");
       }
       setIsDialogOpen(false);
       fetchMenus();
-    } catch {
+    } catch (error) {
+      console.error("Error saving menu:", error);
       toast.error("Lỗi khi lưu dữ liệu");
     }
   };
@@ -183,7 +231,7 @@ export default function PortalMenuPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   const toggleCategorySelection = (id: string) => {
-    setSelectedCategories(prev => 
+    setSelectedCategories(prev =>
       prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
     );
   };
@@ -193,12 +241,12 @@ export default function PortalMenuPage() {
       toast.error("Vui lòng chọn ít nhất một chuyên mục");
       return;
     }
-    
+
     setIsImporting(true);
     try {
       const rootCats = categories.filter(c => selectedCategories.includes(c.id));
       for (const cat of rootCats) {
-        await importCategoryTree(cat, false); 
+        await importCategoryTree(cat, false);
       }
       toast.success(`Đã nhập xong ${selectedCategories.length} cây danh mục`);
       setIsQuickSetupOpen(false);
@@ -217,6 +265,9 @@ export default function PortalMenuPage() {
       // Step 1: Create the parent menu for this category
       const rootMenu = await postsApi.createPortalMenu({
         name: rootCategory.name,
+        translations: typeof rootCategory.translations === 'string'
+          ? rootCategory.translations
+          : JSON.stringify(rootCategory.translations || {}),
         type: "CATEGORY",
         referenceId: rootCategory.id,
         link: `/chuyen-muc/${rootCategory.slug}`,
@@ -249,6 +300,9 @@ export default function PortalMenuPage() {
       const child = children[i];
       const childMenu = await postsApi.createPortalMenu({
         name: child.name,
+        translations: typeof child.translations === 'string'
+          ? child.translations
+          : JSON.stringify(child.translations || {}),
         type: "CATEGORY",
         referenceId: child.id,
         parentId: parentMenuId,
@@ -277,6 +331,7 @@ export default function PortalMenuPage() {
 
       const groupMenu = await postsApi.createPortalMenu({
         name: group.name,
+        translations: JSON.stringify({ en: { name: group.name } }),
         type: "URL",
         link: pathMap[group.id] || "/van-ban",
         isActive: true,
@@ -291,6 +346,7 @@ export default function PortalMenuPage() {
         const cat = docCategories[i];
         await postsApi.createPortalMenu({
           name: cat.name,
+          translations: cat.translations ? JSON.stringify(cat.translations) : "{}",
           type: "URL",
           parentId: groupMenu.id,
           link: `${pathMap[group.id] || "/van-ban"}?category=${cat.slug}`,
@@ -353,9 +409,9 @@ export default function PortalMenuPage() {
               <div className="flex items-center min-h-[52px]" style={{ paddingLeft: `${depth * 28 + 12}px` }}>
                 <div className="flex items-center gap-2 flex-1">
                   {hasChildren ? (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       className="h-6 w-6 p-0 hover:bg-blue-100 text-blue-600 transition-transform duration-200"
                       onClick={() => toggleExpand(menu.id)}
                       style={{ transform: isExpanded ? 'rotate(90deg)' : 'rotate(0deg)' }}
@@ -365,16 +421,16 @@ export default function PortalMenuPage() {
                   ) : (
                     <div className="w-6" /> // Spacer for alignment
                   )}
-                  
+
                   {depth > 0 && <div className="w-4 h-[2px] bg-slate-200 -ml-2 mr-1" />}
-                  
+
                   <div className={`p-1.5 rounded ${!menu.isActive ? 'bg-slate-100 text-slate-400' : 'bg-blue-50 text-blue-600'}`}>
                     {menu.type === 'CATEGORY' && <Layers className="w-3.5 h-3.5" />}
                     {menu.type === 'POST' && <FileText className="w-3.5 h-3.5" />}
                     {menu.type === 'URL' && <ExternalLink className="w-3.5 h-3.5" />}
                     {menu.type === 'STATIC_PAGE' && <Layout className="w-3.5 h-3.5" />}
                   </div>
-                  
+
                   <div className="flex flex-col">
                     <span className={`text-sm ${!menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"}`}>
                       {menu.name}
@@ -389,11 +445,10 @@ export default function PortalMenuPage() {
               </div>
             </TableCell>
             <TableCell>
-              <Badge variant="secondary" className={`text-[10px] uppercase font-bold py-0 h-5 ${
-                menu.position === 'HORIZONTAL' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+              <Badge variant="secondary" className={`text-[10px] uppercase font-bold py-0 h-5 ${menu.position === 'HORIZONTAL' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                 menu.position === 'VERTICAL' ? 'bg-amber-50 text-amber-700 border-amber-100' :
-                'bg-slate-100 text-slate-600 border-slate-200'
-              }`}>
+                  'bg-slate-100 text-slate-600 border-slate-200'
+                }`}>
                 {menu.position === 'HORIZONTAL' ? 'Ngang' : menu.position === 'VERTICAL' ? 'Dọc' : 'Chân trang'}
               </Badge>
             </TableCell>
@@ -423,19 +478,19 @@ export default function PortalMenuPage() {
             </TableCell>
             <TableCell className="text-right">
               <div className="flex justify-end gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600" 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
                   onClick={() => handleOpenDialog(menu)}
                   title="Chỉnh sửa"
                 >
                   <Edit className="w-3.5 h-3.5" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50" 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-red-400 hover:text-red-600 hover:bg-red-50"
                   onClick={() => handleDelete(menu.id)}
                   title="Xóa"
                 >
@@ -444,7 +499,7 @@ export default function PortalMenuPage() {
               </div>
             </TableCell>
           </TableRow>
-          
+
           {hasChildren && isExpanded && (
             renderMenuRows(menu.children, depth + 1)
           )}
@@ -564,8 +619,8 @@ export default function PortalMenuPage() {
                     <p>Chọn một hoặc nhiều chuyên mục. Hệ thống sẽ tự động tạo menu cho chuyên mục đó và toàn bộ các chuyên mục con.</p>
                   </div>
                   {selectedCategories.length > 0 && (
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm whitespace-nowrap"
                       onClick={importSelectedCategories}
                       disabled={isImporting}
@@ -577,26 +632,23 @@ export default function PortalMenuPage() {
                 </div>
                 <div className="grid gap-2">
                   {categories.filter(c => !c.parentId).map(cat => (
-                    <div 
-                      key={cat.id} 
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all group cursor-pointer ${
-                        selectedCategories.includes(cat.id) 
-                        ? 'border-blue-500 bg-blue-50 shadow-sm' 
+                    <div
+                      key={cat.id}
+                      className={`flex items-center justify-between p-3 rounded-lg border transition-all group cursor-pointer ${selectedCategories.includes(cat.id)
+                        ? 'border-blue-500 bg-blue-50 shadow-sm'
                         : 'hover:border-blue-300 hover:bg-slate-50'
-                      }`}
+                        }`}
                       onClick={() => toggleCategorySelection(cat.id)}
                     >
                       <div className="flex items-center gap-3">
-                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${
-                          selectedCategories.includes(cat.id) 
-                          ? 'bg-blue-600 border-blue-600 text-white' 
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${selectedCategories.includes(cat.id)
+                          ? 'bg-blue-600 border-blue-600 text-white'
                           : 'border-slate-300 bg-white'
-                        }`}>
+                          }`}>
                           {selectedCategories.includes(cat.id) && <Plus className="w-3.5 h-3.5" />}
                         </div>
-                        <div className={`p-2 rounded transition-colors ${
-                          selectedCategories.includes(cat.id) ? 'bg-blue-100 text-blue-600' : 'bg-slate-100'
-                        }`}>
+                        <div className={`p-2 rounded transition-colors ${selectedCategories.includes(cat.id) ? 'bg-blue-100 text-blue-600' : 'bg-slate-100'
+                          }`}>
                           <Layers className="w-4 h-4" />
                         </div>
                         <div>
@@ -713,33 +765,67 @@ export default function PortalMenuPage() {
 
           {editingMenu && (
             <div className="grid gap-4 py-4">
-              <Tabs defaultValue="vi" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-4">
-                  <TabsTrigger value="vi">Tiếng Việt</TabsTrigger>
-                  <TabsTrigger value="en">English</TabsTrigger>
+              <Tabs defaultValue="vi" value={activeLangTab} onValueChange={setActiveLangTab} className="w-full">
+                <TabsList className={`grid w-full mb-4`} style={{ gridTemplateColumns: `repeat(${Math.max(languages.length, 1)}, minmax(0, 1fr))` }}>
+                  {languages.length > 0 ? (
+                    languages.map(lang => (
+                      <TabsTrigger key={lang.code} value={lang.code}>
+                        {lang.name}
+                      </TabsTrigger>
+                    ))
+                  ) : (
+                    <TabsTrigger value="vi">Tiếng Việt</TabsTrigger>
+                  )}
                 </TabsList>
-                
-                <TabsContent value="vi" className="space-y-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right font-bold">Tên Menu</Label>
-                    <Input id="name" className="col-span-3 rounded-lg" value={editingMenu.name || ""} onChange={e => setEditingMenu({ ...editingMenu, name: e.target.value })} />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="description" className="text-right">Mô tả</Label>
-                    <Textarea id="description" className="col-span-3 rounded-lg resize-none" rows={2} value={editingMenu.description || ""} onChange={e => setEditingMenu({ ...editingMenu, description: e.target.value })} />
-                  </div>
-                </TabsContent>
 
-                <TabsContent value="en" className="space-y-4">
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="nameEn" className="text-right font-bold text-blue-600">Name (EN)</Label>
-                    <Input id="nameEn" className="col-span-3 rounded-lg border-blue-100" placeholder="English name..." value={editingMenu.nameEn || ""} onChange={e => setEditingMenu({ ...editingMenu, nameEn: e.target.value })} />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="descriptionEn" className="text-right text-blue-600">Description</Label>
-                    <Textarea id="descriptionEn" className="col-span-3 rounded-lg resize-none border-blue-100" rows={2} placeholder="English description..." value={editingMenu.descriptionEn || ""} onChange={e => setEditingMenu({ ...editingMenu, descriptionEn: e.target.value })} />
-                  </div>
-                </TabsContent>
+                {languages.map(lang => (
+                  <TabsContent key={lang.code} value={lang.code} className="space-y-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor={`name-${lang.code}`} className={`text-right font-bold ${lang.code !== 'vi' ? 'text-blue-600' : ''}`}>
+                        Tên Menu ({lang.code.toUpperCase()})
+                      </Label>
+                      <Input
+                        id={`name-${lang.code}`}
+                        className={`col-span-3 rounded-lg ${lang.code !== 'vi' ? 'border-blue-100' : ''}`}
+                        placeholder={`Tên bằng ${lang.name}...`}
+                        value={lang.code === 'vi' ? (editingMenu.name || "") : getTranslation(lang.code, 'name')}
+                        onChange={e => lang.code === 'vi'
+                          ? setEditingMenu({ ...editingMenu, name: e.target.value })
+                          : updateTranslation(lang.code, 'name', e.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor={`desc-${lang.code}`} className={`text-right ${lang.code !== 'vi' ? 'text-blue-600' : ''}`}>
+                        Mô tả
+                      </Label>
+                      <Textarea
+                        id={`desc-${lang.code}`}
+                        className={`col-span-3 rounded-lg resize-none ${lang.code !== 'vi' ? 'border-blue-100' : ''}`}
+                        rows={2}
+                        placeholder={`Mô tả bằng ${lang.name}...`}
+                        value={lang.code === 'vi' ? (editingMenu.description || "") : getTranslation(lang.code, 'description')}
+                        onChange={e => lang.code === 'vi'
+                          ? setEditingMenu({ ...editingMenu, description: e.target.value })
+                          : updateTranslation(lang.code, 'description', e.target.value)
+                        }
+                      />
+                    </div>
+                  </TabsContent>
+                ))}
+
+                {languages.length === 0 && (
+                  <TabsContent value="vi" className="space-y-4">
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="name" className="text-right font-bold">Tên Menu</Label>
+                      <Input id="name" className="col-span-3 rounded-lg" value={editingMenu.name || ""} onChange={e => setEditingMenu({ ...editingMenu, name: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-4 items-center gap-4">
+                      <Label htmlFor="description" className="text-right">Mô tả</Label>
+                      <Textarea id="description" className="col-span-3 rounded-lg resize-none" rows={2} value={editingMenu.description || ""} onChange={e => setEditingMenu({ ...editingMenu, description: e.target.value })} />
+                    </div>
+                  </TabsContent>
+                )}
               </Tabs>
 
               <div className="grid grid-cols-4 items-center gap-4 border-t pt-4">
@@ -818,11 +904,6 @@ export default function PortalMenuPage() {
                     onCheckedChange={v => setEditingMenu({ ...editingMenu, isActive: v })}
                   />
                 </div>
-              </div>
-
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">Mô tả</Label>
-                <Textarea id="description" className="col-span-3 rounded-lg resize-none" rows={2} value={editingMenu.description || ""} onChange={e => setEditingMenu({ ...editingMenu, description: e.target.value })} />
               </div>
             </div>
           )}

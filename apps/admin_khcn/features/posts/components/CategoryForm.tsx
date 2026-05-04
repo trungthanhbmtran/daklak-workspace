@@ -10,6 +10,10 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
+import { categoryApi } from "@/features/system-admin/categories/api";
+import { CategoryItem } from "@/features/system-admin/categories/types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Label as UILabel } from "@/components/ui/label";
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -45,6 +49,10 @@ const categorySchema = z.object({
   orderIndex: z.number().default(0),
   linkType: z.enum(["internal", "external"]).default("internal"),
   customUrl: z.string().optional(),
+  translations: z.record(z.string(), z.object({
+    name: z.string().optional(),
+    description: z.string().optional()
+  })).optional(),
 });
 
 type CategoryFormValues = z.infer<typeof categorySchema>;
@@ -64,12 +72,15 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     resolver: zodResolver(categorySchema) as any,
     defaultValues: {
       name: "", slug: "", description: "", parentId: null,
-      thumbnail: "", attachmentId: "", orderIndex: 0, linkType: "internal", customUrl: ""
+      thumbnail: "", attachmentId: "", orderIndex: 0, linkType: "internal", customUrl: "",
+      translations: {}
     },
   });
 
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [languages, setLanguages] = useState<CategoryItem[]>([]);
+  const [activeLangTab, setActiveLangTab] = useState<string>("vi");
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (id) => form.setValue("thumbnail", id, { shouldDirty: true }),
@@ -91,9 +102,34 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   });
 
   useEffect(() => {
+    fetchLanguages();
+  }, []);
+
+  const fetchLanguages = async () => {
+    try {
+      const all = await categoryApi.fetchAll();
+      const langs = all.filter(c => c.group === 'LANGUAGE' && c.active);
+      setLanguages(langs);
+    } catch (error) {
+      console.error("Error fetching languages:", error);
+    }
+  };
+
+  useEffect(() => {
     if (categoryData) {
+      // Parse translations if it's a string
+      let parsedTranslations = categoryData.translations || {};
+      if (typeof parsedTranslations === 'string') {
+        try {
+          parsedTranslations = JSON.parse(parsedTranslations);
+        } catch (e) {
+          parsedTranslations = {};
+        }
+      }
+
       form.reset({
         ...categoryData,
+        translations: parsedTranslations,
         parentId: categoryData.parentId || null,
         linkType: (categoryData.linkType === "external" ? "external" : "internal") as "internal" | "external",
       });
@@ -157,7 +193,11 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   };
 
   const onSubmit = (values: CategoryFormValues) => {
-    mutation.mutate(values);
+    const payload = {
+      ...values,
+      translations: values.translations ? JSON.stringify(values.translations) : "{}"
+    };
+    mutation.mutate(payload as any);
   };
 
   if (isFetching) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto h-8 w-8 text-blue-500" /></div>;
@@ -188,31 +228,106 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                 <CardTitle className="text-base flex items-center gap-2"><Info className="h-4 w-4 text-blue-600" /> Thông tin cơ bản</CardTitle>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <FormField name="name" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold">Tên chuyên mục <span className="text-destructive">*</span></FormLabel>
-                    <FormControl><Input placeholder="VD: Tin tức nổi bật, Sự kiện..." {...field} /></FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+                <Tabs defaultValue="vi" value={activeLangTab} onValueChange={setActiveLangTab} className="w-full">
+                  <TabsList className="bg-slate-100/50 p-1 mb-6 border w-full flex justify-start h-auto overflow-x-auto">
+                    {languages.length > 0 ? (
+                      languages.map(lang => (
+                        <TabsTrigger key={lang.code} value={lang.code} className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-2">
+                          {lang.name}
+                        </TabsTrigger>
+                      ))
+                    ) : (
+                      <TabsTrigger value="vi" className="px-4 py-2">Tiếng Việt</TabsTrigger>
+                    )}
+                  </TabsList>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {languages.map(lang => (
+                    <TabsContent key={lang.code} value={lang.code} className="space-y-4 animate-in fade-in-50 duration-300">
+                      {lang.code === 'vi' ? (
+                        <>
+                          <FormField name="name" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-semibold text-slate-700 flex items-center gap-2">
+                                Tên chuyên mục (VN) <span className="text-destructive">*</span>
+                              </FormLabel>
+                              <FormControl><Input placeholder="VD: Tin tức nổi bật..." {...field} className="rounded-lg border-slate-200" /></FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )} />
+                          <FormField name="description" render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="font-semibold text-slate-700">Mô tả ngắn</FormLabel>
+                              <FormControl><Textarea className="min-h-[100px] resize-none rounded-lg border-slate-200" {...field} /></FormControl>
+                            </FormItem>
+                          )} />
+                        </>
+                      ) : (
+                        <>
+                          <div className="space-y-2">
+                            <UILabel className="font-semibold text-blue-700">Tên chuyên mục ({lang.name})</UILabel>
+                            <Input
+                              placeholder={`Tên bằng ${lang.name}...`}
+                              className="rounded-lg border-blue-100 bg-blue-50/20"
+                              value={form.watch(`translations.${lang.code}.name`) || ""}
+                              onChange={e => form.setValue(`translations.${lang.code}.name`, e.target.value, { shouldDirty: true })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <UILabel className="font-semibold text-blue-700">Mô tả ({lang.name})</UILabel>
+                            <Textarea
+                              className="min-h-[100px] resize-none rounded-lg border-blue-100 bg-blue-50/20"
+                              placeholder={`Mô tả bằng ${lang.name}...`}
+                              value={form.watch(`translations.${lang.code}.description`) || ""}
+                              onChange={e => form.setValue(`translations.${lang.code}.description`, e.target.value, { shouldDirty: true })}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </TabsContent>
+                  ))}
+
+                  {languages.length === 0 && (
+                    <TabsContent value="vi" className="space-y-4">
+                      <FormField name="name" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold">Tên chuyên mục <span className="text-destructive">*</span></FormLabel>
+                          <FormControl><Input placeholder="VD: Tin tức nổi bật..." {...field} /></FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                      <FormField name="description" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-semibold">Mô tả ngắn</FormLabel>
+                          <FormControl><Textarea className="min-h-[100px] resize-none" {...field} /></FormControl>
+                        </FormItem>
+                      )} />
+                    </TabsContent>
+                  )}
+                </Tabs>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                   <FormField name="slug" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-semibold">Slug (Đường dẫn tĩnh)</FormLabel>
-                      <FormControl><Input className="font-mono bg-slate-50" {...field} /></FormControl>
+                      <FormLabel className="font-semibold text-slate-700 flex items-center gap-2">
+                        Slug (Đường dẫn tĩnh) <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl><Input className="font-mono bg-slate-50 rounded-lg" {...field} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )} />
 
                   <FormField name="parentId" render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-semibold">Chuyên mục cha</FormLabel>
+                      <FormLabel className="font-semibold text-slate-700">Chuyên mục cha</FormLabel>
                       <Select
                         onValueChange={(val) => field.onChange(val === "none" ? null : val)}
                         value={field.value || "none"}
                       >
-                        <FormControl><SelectTrigger><SelectValue placeholder="Chọn cấp cha" /></SelectTrigger></FormControl>
+                        <FormControl>
+                          <SelectTrigger className="rounded-lg">
+                            <SelectValue placeholder="Chọn cấp cha" />
+                          </SelectTrigger>
+                        </FormControl>
                         <SelectContent>
                           <SelectItem value="none">-- Không có (Cấp gốc) --</SelectItem>
                           {(categories?.length ?? 0) > 0 ? (
@@ -225,13 +340,6 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
                     </FormItem>
                   )} />
                 </div>
-
-                <FormField name="description" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-semibold">Mô tả ngắn</FormLabel>
-                    <FormControl><Textarea className="min-h-[100px] resize-none" {...field} /></FormControl>
-                  </FormItem>
-                )} />
               </CardContent>
             </Card>
 

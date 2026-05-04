@@ -16,9 +16,8 @@ service PortalMenuService {
 message PortalMenu {
   string id = 1;
   string name = 2;
-  string nameEn = 16;
   string description = 3;
-  string descriptionEn = 17;
+  string translations = 16;
   string icon = 4;
   string link = 5;
   int32 order = 6;
@@ -35,9 +34,8 @@ message PortalMenu {
 
 message CreatePortalMenuRequest {
   string name = 1;
-  string nameEn = 12;
   string description = 2;
-  string descriptionEn = 13;
+  string translations = 12;
   string icon = 3;
   string link = 4;
   int32 order = 5;
@@ -66,9 +64,8 @@ message ListPortalMenusResponse {
 message UpdatePortalMenuRequest {
   string id = 1;
   optional string name = 2;
-  optional string nameEn = 13;
   optional string description = 3;
-  optional string descriptionEn = 14;
+  optional string translations = 13;
   optional string icon = 4;
   optional string link = 5;
   optional int32 order = 6;
