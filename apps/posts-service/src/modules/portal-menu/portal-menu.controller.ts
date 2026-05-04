@@ -21,7 +21,7 @@ export class PortalMenuController {
   @GrpcMethod('PortalMenuService', 'ListPortalMenus')
   async findAll(data: { onlyActive: boolean, position?: string }) {
     const items = await this.service.findAll(data.onlyActive, data.position);
-    return { data: items.map(i => this.mapToProto(i)) };
+    return { data: items.map(i => this.mapToProto(i)).filter(i => !!i) };
   }
 
   @GrpcMethod('PortalMenuService', 'UpdatePortalMenu')

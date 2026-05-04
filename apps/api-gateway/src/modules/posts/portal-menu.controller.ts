@@ -37,7 +37,10 @@ export class PortalMenuController {
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.portalMenuService.listPortalMenus(query));
+    console.log('Gateway: Calling ListPortalMenus with query:', query);
+    const result = await firstValueFrom(this.portalMenuService.listPortalMenus(query));
+    console.log('Gateway: ListPortalMenus response received');
+    return result;
   }
 
   @Get(':id')
@@ -59,6 +62,9 @@ export class PortalMenuController {
 
   @Get('quick-setup')
   async getQuickSetupData() {
-    return firstValueFrom(this.portalMenuService.getQuickSetupData({}));
+    console.log('Gateway: Calling GetQuickSetupData');
+    const result = await firstValueFrom(this.portalMenuService.getQuickSetupData({}));
+    console.log('Gateway: GetQuickSetupData response received');
+    return result;
   }
 }

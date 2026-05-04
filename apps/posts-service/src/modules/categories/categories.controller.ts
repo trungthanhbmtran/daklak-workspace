@@ -64,7 +64,10 @@ export class CategoriesController {
         : await this.categoriesService.findAll();
 
       console.log(`Result count: ${result?.length}`);
-      const sanitized = (result || []).map(sanitizeCategory).filter(Boolean);
+      const sanitized = (result || []).map(cat => sanitizeCategory(cat)).filter(c => !!c);
+      console.log(`Sanitized count: ${sanitized.length}`);
+      
+      // Safety check: ensure no nulls in children arrays
       return { data: sanitized };
     } catch (error) {
       console.error('Error in listCategories:', error);

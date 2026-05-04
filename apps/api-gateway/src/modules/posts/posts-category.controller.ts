@@ -36,7 +36,10 @@ export class PostsCategoryController {
 
   @Get()
   async findAll(@Query() query: any) {
-    return firstValueFrom(this.categoryService.listCategories(query));
+    console.log('Gateway: Calling ListCategories with query:', query);
+    const result = await firstValueFrom(this.categoryService.listCategories(query));
+    console.log('Gateway: ListCategories response received');
+    return result;
   }
 
   @Get(':id')
