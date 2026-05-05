@@ -43,7 +43,7 @@ export class PostsService {
       data: {
         ...rest,
         slug,
-        status: PostStatus.DRAFT,
+        status: rest.status || PostStatus.DRAFT,
         tags: {
           connect: tagIds?.map((id: string) => ({ id })) || [],
         },
@@ -98,6 +98,11 @@ export class PostsService {
     });
 
     await this.triggerTranslation(post);
+
+    // 4. Nếu trạng thái là SUBMITTED, kích hoạt workflow
+    if (post.status === PostStatus.SUBMITTED) {
+      await this.submit(post.id, post.authorId, 'Auto-submitted on creation');
+    }
 
     return post;
   }
@@ -223,6 +228,11 @@ export class PostsService {
     });
 
     await this.triggerTranslation(updatedPost);
+
+    // 4. Nếu trạng thái chuyển sang SUBMITTED, kích hoạt workflow
+    if (updatedPost.status === PostStatus.SUBMITTED && post.status !== PostStatus.SUBMITTED) {
+      await this.submit(updatedPost.id, actorId || updatedPost.authorId, changeNote || 'Submitted via update');
+    }
 
     return updatedPost;
   }
