@@ -7,6 +7,13 @@ from database.session import SessionLocal
 class SmartTranslator:
     def __init__(self):
         self.ai = Translator()
+        self.lang_mapping = {
+            'en-us': 'en',
+            'en-gb': 'en',
+            'vi-vn': 'vi',
+            'zh-cn': 'zh-cn',
+            'zh-tw': 'zh-tw'
+        }
 
     def _get_hash(self, text: str, lang: str):
         # Chuẩn hóa văn bản trước khi băm
@@ -15,6 +22,13 @@ class SmartTranslator:
 
     def translate(self, text: str, target_lang: str):
         if not text: return ""
+        if not target_lang: return text
+        
+        # Chuẩn hóa mã ngôn ngữ (lowercase)
+        target_lang = target_lang.strip().lower()
+        
+        # Mapping sang mã chuẩn nếu cần
+        target_lang = self.lang_mapping.get(target_lang, target_lang)
         
         db = SessionLocal()
         text_hash = self._get_hash(text, target_lang)
@@ -28,6 +42,7 @@ class SmartTranslator:
                 return record.translated_text
 
             # 2. Nếu không có, gọi AI (Google/LLM)
+            # GoogleTrans yêu cầu mã ngôn ngữ chuẩn (vd: 'en', 'vi', 'ja')
             result = self.ai.translate(text, dest=target_lang)
             translated_text = result.text
 
