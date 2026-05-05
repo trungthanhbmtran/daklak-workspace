@@ -64,7 +64,7 @@ const postSchema = z.object({
   tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
   isNotification: z.boolean().default(false),
-  translations: z.record(z.object({
+  translations: z.record(z.string(), z.object({
     title: z.string().optional(),
     slug: z.string().optional(),
     description: z.string().optional(),
