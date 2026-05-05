@@ -64,8 +64,9 @@ const postSchema = z.object({
   tags: z.array(z.string()).default([]),
   isFeatured: z.boolean().default(false),
   isNotification: z.boolean().default(false),
-  translations: z.record(z.string(), z.object({
+  translations: z.record(z.object({
     title: z.string().optional(),
+    slug: z.string().optional(),
     description: z.string().optional(),
     content: z.string().optional(),
     contentJson: z.any().optional(),
@@ -112,14 +113,22 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
     setIsTranslating(prev => ({ ...prev, [langCode]: true }));
     try {
+      // 1. Dịch Tiêu đề
       const resTitle = await postsApi.translate(title, langCode);
-      form.setValue(`translations.${langCode}.title`, resTitle.translated_text, { shouldDirty: true });
+      const translatedTitle = resTitle.translated_text;
+      form.setValue(`translations.${langCode}.title`, translatedTitle, { shouldDirty: true });
 
+      // 2. Tạo Slug từ Tiêu đề đã dịch (Cực kỳ quan trọng cho SEO)
+      const translatedSlug = convertToSlug(translatedTitle);
+      form.setValue(`translations.${langCode}.slug`, translatedSlug, { shouldDirty: true });
+
+      // 3. Dịch Tóm tắt
       if (description) {
         const resDesc = await postsApi.translate(description, langCode);
         form.setValue(`translations.${langCode}.description`, resDesc.translated_text, { shouldDirty: true });
       }
 
+      // 4. Dịch Nội dung
       if (content) {
         const resContent = await postsApi.translate(content, langCode);
         form.setValue(`translations.${langCode}.content`, resContent.translated_text, { shouldDirty: true });
@@ -431,27 +440,44 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         </Button>
                       </div>
 
-                      <FormField control={form.control} name={`translations.${lang.code}.title`} render={({ field }) => (
-                        <FormItem>
-                          <FormLabel className="font-semibold text-blue-700">Tiêu đề ({lang.name})</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
-                              className="text-lg py-6 focus-visible:ring-blue-500 border-blue-100 bg-blue-50/10"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )} />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <FormField control={form.control} name={`translations.${lang.code}.title`} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold text-blue-700">Tiêu đề ({lang.name})</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
+                                className="text-lg py-6 focus-visible:ring-blue-500 border-blue-100 bg-blue-50/10"
+                                {...field}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+
+                        <FormField control={form.control} name={`translations.${lang.code}.slug`} render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="font-semibold text-blue-700">Slug / Đường dẫn ({lang.name})</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="news-and-events"
+                                className="font-mono text-sm border-blue-100 bg-blue-50/10"
+                                {...field}
+                                onChange={(e) => field.onChange(convertToSlug(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )} />
+                      </div>
 
                       <FormField control={form.control} name={`translations.${lang.code}.description`} render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-semibold text-blue-700">Tóm tắt ({lang.name})</FormLabel>
                           <FormControl>
                             <Textarea
-                              placeholder={`Mô tả bằng ${lang.name}...`}
-                              className="min-h-[80px] resize-none border-blue-100 bg-blue-50/10"
+                              placeholder={`Mô tả ngắn bằng ${lang.name}...`}
+                              className="min-h-[100px] resize-none focus-visible:ring-blue-500 border-blue-100 bg-blue-50/10"
                               {...field}
                             />
                           </FormControl>
