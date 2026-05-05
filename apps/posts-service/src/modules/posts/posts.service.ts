@@ -42,7 +42,6 @@ export class PostsService {
     const post = await this.prisma.post.create({
       data: {
         ...rest,
-        translations: translations || {}, // Vẫn giữ JSON để cache
         slug,
         status: PostStatus.DRAFT,
         tags: {
@@ -85,7 +84,6 @@ export class PostsService {
         description: post.description,
         content: post.content,
         contentJson: post.contentJson,
-        translations: translations || {},
         editorId: post.authorId,
         changeNote: 'Initial creation',
       },
@@ -127,7 +125,7 @@ export class PostsService {
         }
       });
     }
-    
+
     return {
       ...post,
       translations: latestTranslations
@@ -137,7 +135,7 @@ export class PostsService {
   async update(id: string, data: any) {
     const { tagIds, actorId, changeNote, translations, ...rest } = data;
 
-    const post = await this.prisma.post.findUnique({ 
+    const post = await this.prisma.post.findUnique({
       where: { id },
       include: { translations_rel: true }
     });
@@ -157,7 +155,6 @@ export class PostsService {
       where: { id },
       data: {
         ...rest,
-        translations: parsedTranslations || post.translations,
         currentVersion: nextVersion,
         tags: tagIds ? {
           set: tagIds.map((id: string) => ({ id })),
@@ -180,8 +177,8 @@ export class PostsService {
         });
 
         // Kiểm tra xem có thay đổi nội dung dịch không
-        const isChanged = !existingTrans || 
-          existingTrans.title !== t.title || 
+        const isChanged = !existingTrans ||
+          existingTrans.title !== t.title ||
           existingTrans.content !== t.content ||
           existingTrans.description !== t.description;
 
@@ -212,7 +209,6 @@ export class PostsService {
         description: updatedPost.description,
         content: updatedPost.content,
         contentJson: updatedPost.contentJson,
-        translations: parsedTranslations || updatedPost.translations,
         editorId: actorId || updatedPost.authorId,
         changeNote: changeNote || 'Updated content',
       },
@@ -282,13 +278,29 @@ export class PostsService {
         include: {
           tags: true,
           category: true,
+          translations_rel: {
+            select: { langCode: true, version: true } // Chỉ lấy thông tin cần thiết cho list
+          }
         },
       }),
       this.prisma.post.count({ where }),
     ]);
 
+    // Format lại translations cho từng item để Frontend hiển thị được badge ngôn ngữ
+    const formattedItems = items.map(post => {
+      const translations: any = {};
+      if (post.translations_rel) {
+        post.translations_rel.forEach(trans => {
+          if (!translations[trans.langCode]) {
+            translations[trans.langCode] = trans;
+          }
+        });
+      }
+      return { ...post, translations };
+    });
+
     return {
-      data: items,
+      data: formattedItems,
       meta: {
         total,
         page,
@@ -354,7 +366,7 @@ export class PostsService {
   }
 
   async updateTranslation(postId: string, langCode: string, data: { title?: string, description?: string, content?: string, slug?: string }) {
-    const post = await this.prisma.post.findUnique({ 
+    const post = await this.prisma.post.findUnique({
       where: { id: postId },
       include: { translations_rel: true }
     });
@@ -381,19 +393,6 @@ export class PostsService {
         mainVersionRef: post.currentVersion,
         isPublished: post.status === PostStatus.PUBLISHED
       }
-    });
-
-    // Cập nhật ngược lại trường JSON để cache
-    const translations = (post.translations || {}) as any;
-    translations[langCode] = {
-      ...data,
-      version: nextTransVersion,
-      mainVersionRef: post.currentVersion
-    };
-
-    await this.prisma.post.update({
-      where: { id: postId },
-      data: { translations }
     });
 
     return newTrans;
