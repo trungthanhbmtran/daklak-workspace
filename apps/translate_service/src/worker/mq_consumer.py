@@ -24,34 +24,44 @@ def start_mq_worker():
         data = payload.get("data") if isinstance(payload, dict) and "data" in payload else payload
         
         post_id = data.get("postId")
-        content = data.get("content")
         target_lang = data.get("targetLang", "en")
+        
+        # Các trường cần dịch
+        fields_to_translate = ["title", "description", "content"]
+        
+        print(f"[*] Đang dịch bài viết: {post_id} sang {target_lang}")
+        
+        for field in fields_to_translate:
+            text_to_translate = data.get(field)
+            if not text_to_translate or not str(text_to_translate).strip():
+                continue
+                
+            print(f"  - Đang dịch trường '{field}'...")
+            
+            # Dịch nội dung
+            translated = translator.translate(str(text_to_translate), target_lang)
+            
+            # Gửi kết quả ngược lại cho posts_service qua queue 'translation_response'
+            response_data = {
+                "postId": post_id,
+                "targetLang": target_lang,
+                "translatedText": translated,
+                "field": field
+            }
+            
+            # Publish tới queue phản hồi
+            channel.queue_declare(queue='translation_response', durable=False)
+            channel.basic_publish(
+                exchange='',
+                routing_key='translation_response',
+                body=json.dumps({
+                    "pattern": "translation_response",
+                    "data": response_data
+                })
+            )
+            print(f"  [v] Đã dịch xong trường '{field}'")
 
-        print(f"[*] Đang dịch bài viết dài: {post_id}")
-        
-        # Dịch nội dung (tự động lưu vào MySQL dictionary)
-        translated = translator.translate(content, target_lang)
-        
-        # Gửi kết quả ngược lại cho posts_service qua queue 'translation_response'
-        response_data = {
-            "postId": post_id,
-            "targetLang": target_lang,
-            "translatedText": translated,
-            "field": "content" # Mặc định là content
-        }
-        
-        # Publish tới queue phản hồi
-        channel.queue_declare(queue='translation_response', durable=False)
-        channel.basic_publish(
-            exchange='',
-            routing_key='translation_response',
-            body=json.dumps({
-                "pattern": "translation_response", # NestJS yêu cầu pattern field nếu dùng @MessagePattern
-                "data": response_data
-            })
-        )
-
-        print(f"[v] Đã dịch xong và gửi phản hồi bài viết: {post_id}")
+        print(f"[v] Hoàn thành dịch toàn bộ bài viết: {post_id}")
         
         ch.basic_ack(delivery_tag=method.delivery_tag)
 
