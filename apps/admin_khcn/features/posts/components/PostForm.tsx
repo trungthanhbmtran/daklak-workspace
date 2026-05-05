@@ -195,7 +195,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   });
 
   useEffect(() => {
-    if (postData) {
+    if (postData && languages.length > 0) {
       let parsedTranslations = postData.translations || {};
       if (typeof parsedTranslations === 'string') {
         try {
@@ -204,6 +204,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
           parsedTranslations = {};
         }
       }
+
+      // Đảm bảo mọi ngôn ngữ đều có key trong object để Form không bị lỗi
+      const fullTranslations = { ...parsedTranslations };
+      languages.forEach(lang => {
+        if (lang.code !== 'vi' && !fullTranslations[lang.code]) {
+          fullTranslations[lang.code] = { title: "", description: "", content: "" };
+        }
+      });
 
       form.reset({
         title: postData.title,
@@ -216,10 +224,10 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         tags: Array.isArray(postData.tags) ? postData.tags : [],
         isFeatured: postData.isFeatured || false,
         isNotification: postData.isNotification || false,
-        translations: (parsedTranslations || {}) as Record<string, any>,
+        translations: fullTranslations,
       });
     }
-  }, [postData, form]);
+  }, [postData, languages, form]);
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (id) => form.setValue("thumbnail", id, { shouldDirty: true }),

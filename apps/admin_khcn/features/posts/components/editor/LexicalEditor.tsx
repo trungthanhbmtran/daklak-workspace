@@ -21,6 +21,7 @@ import { TableResizerPlugin } from "./plugins/TableResizerPlugin";
 import { MediaContextMenuPlugin } from "./plugins/MediaContextMenuPlugin";
 import { ImageResizerPlugin } from "./plugins/ImageResizerPlugin";
 import PasteLogPlugin from "./plugins/PasteLogPlugin";
+import ValueUpdaterPlugin from "./plugins/ValueUpdaterPlugin";
 
 interface LexicalEditorProps {
   value: string;
@@ -60,6 +61,7 @@ export function LexicalEditor({ value, onChange, placeholder = "Nhập nội dun
           <ImageResizerPlugin />
           <ImagePlugin />
           <PasteLogPlugin />
+          <ValueUpdaterPlugin value={value} />
           {/* <MarkdownShortcutPlugin transformers={CUSTOM_TRANSFORMERS} /> */}
 
           <OnChangePlugin
