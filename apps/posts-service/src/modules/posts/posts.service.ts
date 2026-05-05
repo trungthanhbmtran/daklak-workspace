@@ -1,17 +1,25 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '@/database/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { WorkflowService, PostStatus } from '../workflow/workflow.service';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class PostsService {
+export class PostsService implements OnModuleInit {
+  private categoryService: any;
+
   constructor(
     private prisma: PrismaService,
     private auditService: AuditService,
     private workflowService: WorkflowService,
     @Inject('TRANSLATE_MQ_CLIENT') private mqClient: ClientProxy,
+    @Inject('CATEGORY_PACKAGE') private client: ClientGrpc,
   ) { }
+
+  onModuleInit() {
+    this.categoryService = this.client.getService<any>('CategoryService');
+  }
 
   /**
    * Chuyển đổi cấu trúc Lexical JSON sang HTML cơ bản để render ở Portal
@@ -60,12 +68,30 @@ export class PostsService {
     }
   }
 
+  private async getTargetLanguages(): Promise<string[]> {
+    try {
+      // Gọi gRPC sang user-service để lấy danh mục ngôn ngữ
+      const response = await firstValueFrom(
+        this.categoryService.getByGroup({ group: 'LANGUAGE' })
+      );
+      
+      const langs = response.data || [];
+      // Lọc bỏ tiếng Việt (ngôn ngữ gốc) và chỉ lấy ngôn ngữ đang active
+      return langs
+        .filter((l: any) => l.code !== 'vi' && (l.active === 1 || l.active === true))
+        .map((l: any) => l.code);
+    } catch (error) {
+      console.error('[PostsService] Error fetching languages from user-service gRPC:', error);
+      // Fallback về các ngôn ngữ mặc định nếu gRPC lỗi
+      return ['en', 'ede'];
+    }
+  }
+
   private async triggerTranslation(post: any) {
     if (!post.content) return;
 
-    // Danh sách ngôn ngữ đích cần dịch sang (ngoại trừ tiếng Việt)
-    // Theo yêu cầu mới: chỉ dịch sang tiếng Anh
-    const targetLanguages = ['en'];
+    // Lấy danh sách ngôn ngữ đích từ danh mục dùng chung
+    const targetLanguages = await this.getTargetLanguages();
 
     for (const langCode of targetLanguages) {
       // Đẩy nội dung (Lexical JSON hoặc Text) vào queue translation_request
@@ -112,16 +138,21 @@ export class PostsService {
     // 1. Lưu bản dịch vào bảng PostTranslation
     if (translations) {
       const translationEntries = typeof translations === 'string' ? JSON.parse(translations) : translations;
+      const targetLangs = await this.getTargetLanguages();
+      
       for (const [langCode, trans] of Object.entries(translationEntries)) {
         const t = trans as any;
+        const isAuto = targetLangs.includes(langCode);
+        
         await this.prisma.postTranslation.create({
           data: {
             postId: post.id,
             langCode,
-            title: t.title || post.title,
+            // Nếu là ngôn ngữ tự động dịch và để trống -> dùng nhãn chờ, ngược lại mới fallback VN
+            title: t.title || (isAuto ? `[Đang dịch ${langCode}...]` : post.title),
             slug: t.slug || "",
-            description: t.description || "",
-            content: t.content || post.content,
+            description: t.description || (isAuto ? "" : post.description),
+            content: t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content),
             version: 1,
             mainVersionRef: 1,
             isPublished: post.status === PostStatus.PUBLISHED
@@ -236,8 +267,11 @@ export class PostsService {
 
     // 1. Xử lý lưu bản dịch vào bảng PostTranslation với versioning
     if (parsedTranslations) {
+      const targetLangs = await this.getTargetLanguages();
       for (const [langCode, trans] of Object.entries(parsedTranslations)) {
         const t = trans as any;
+        const isAuto = targetLangs.includes(langCode);
+
         // Tìm bản dịch hiện tại của ngôn ngữ này
         const existingTrans = await this.prisma.postTranslation.findFirst({
           where: { postId: id, langCode },
@@ -255,10 +289,10 @@ export class PostsService {
             data: {
               postId: id,
               langCode,
-              title: t.title || updatedPost.title,
-              slug: t.slug || "",
-              description: t.description || "",
-              content: t.content || updatedPost.content,
+              title: t.title || (existingTrans?.title || (isAuto ? `[Đang dịch ${langCode}...]` : updatedPost.title)),
+              slug: t.slug || existingTrans?.slug || "",
+              description: t.description || existingTrans?.description || (isAuto ? "" : updatedPost.description),
+              content: t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content)),
               version: existingTrans ? existingTrans.version + 1 : 1,
               mainVersionRef: nextVersion,
               isPublished: updatedPost.status === PostStatus.PUBLISHED

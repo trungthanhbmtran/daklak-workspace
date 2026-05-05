@@ -8,14 +8,14 @@ from database.session import SessionLocal
 
 class SmartTranslator:
     def __init__(self):
-        # Tăng timeout lên 20 giây để xử lý các đoạn văn bản dài
-        self.ai = Translator(timeout=20.0)
+        # Tăng timeout lên 20 giây để xử lý các đoạn         self.ai = Translator(timeout=20.0)
         self.lang_mapping = {
             'en-us': 'en',
             'en-gb': 'en',
             'vi-vn': 'vi',
             'zh-cn': 'zh-cn',
-            'zh-tw': 'zh-tw'
+            'zh-tw': 'zh-tw',
+            'ede': 'en' # Fallback to English for AI if Ede is requested, but we will rely on Glossary
         }
 
     def _get_hash(self, text: str, lang: str):
@@ -44,7 +44,7 @@ class SmartTranslator:
             
         return result_text
 
-    def _translate_lexical_recursive(self, data, dest, db):
+    def _translate_lexical_recursive(self, data, dest, db, is_unsupported=False):
         """Duyệt cây JSON của Lexical và chỉ dịch các node text"""
         if isinstance(data, dict):
             # Nếu là node văn bản của Lexical
@@ -52,31 +52,37 @@ class SmartTranslator:
                 original_text = data['text']
                 if original_text and original_text.strip():
                     try:
-                        # 1. Áp dụng Glossary trước khi dịch
+                        # 1. Áp dụng Glossary trước khi dịch (Cực kỳ quan trọng cho Ede)
                         processed_text = self._apply_glossary(original_text, dest, db)
                         
-                        # 2. Gửi sang AI với cơ chế thử lại
-                        translated = ""
-                        for attempt in range(3):
-                            try:
-                                translated = self.ai.translate(processed_text, dest=dest).text
-                                break
-                            except Exception as e:
-                                if attempt == 2: raise e
-                                print(f"Retrying translation (attempt {attempt + 1})...")
-                        
-                        data['text'] = translated
+                        if is_unsupported:
+                            # Nếu ngôn ngữ không hỗ trợ AI, chỉ dùng Glossary hoặc đánh dấu
+                            if processed_text == original_text:
+                                data['text'] = f"[Chưa có bản dịch Ê-đê] {original_text}"
+                            else:
+                                data['text'] = processed_text
+                        else:
+                            # 2. Gửi sang AI với cơ chế thử lại
+                            translated = ""
+                            for attempt in range(2):
+                                try:
+                                    translated = self.ai.translate(processed_text, dest=dest).text
+                                    break
+                                except Exception:
+                                    if attempt == 1: 
+                                        translated = f"[Lỗi dịch AI] {processed_text}"
+                            data['text'] = translated
                     except Exception as e:
-                        print(f"Error translating lexical text node after retries: {e}")
+                        print(f"Error translating lexical text node: {e}")
             
             # Duyệt tiếp các thuộc tính khác (đặc biệt là 'children')
             for key, value in data.items():
                 if isinstance(value, (dict, list)):
-                    self._translate_lexical_recursive(value, dest, db)
+                    self._translate_lexical_recursive(value, dest, db, is_unsupported)
                     
         elif isinstance(data, list):
             for item in data:
-                self._translate_lexical_recursive(item, dest, db)
+                self._translate_lexical_recursive(item, dest, db, is_unsupported)
         
         return data
 
@@ -84,12 +90,15 @@ class SmartTranslator:
         if not text: return ""
         if not target_lang: return text
         
-        # 1. Giữ nguyên mã gốc để lưu DB và băm Hash nhằm đảm bảo tính toàn vẹn
-        original_lang = target_lang
+        # 1. Giữ nguyên mã gốc để lưu DB
+        original_lang = target_lang.strip().lower()
+        
+        # Kiểm tra xem ngôn ngữ có được AI hỗ trợ không
+        unsupported_langs = ['ede']
+        is_unsupported = original_lang in unsupported_langs
         
         # 2. Chỉ chuẩn hóa "nội bộ" để AI hiểu (không làm thay đổi dữ liệu gốc)
-        ai_dest_lang = original_lang.strip().lower()
-        ai_dest_lang = self.lang_mapping.get(ai_dest_lang, ai_dest_lang)
+        ai_dest_lang = self.lang_mapping.get(original_lang, original_lang)
         
         db = SessionLocal()
         text_hash = self._get_hash(text, original_lang)
@@ -98,9 +107,14 @@ class SmartTranslator:
             # 1. Tra cứu từ điển (exact match) trước
             record = db.query(TranslationDictionary).filter_by(hash=text_hash).first()
             if record:
-                record.usage_count += 1
-                db.commit()
-                return record.translated_text
+                # Nếu cache là bản dịch lỗi (vẫn còn tiếng Việt), thì xóa để dịch lại
+                if record.translated_text == text and not is_unsupported:
+                    db.delete(record)
+                    db.commit()
+                else:
+                    record.usage_count += 1
+                    db.commit()
+                    return record.translated_text
 
             # 2. Xử lý dịch thuật
             translated_text = ""
@@ -112,30 +126,34 @@ class SmartTranslator:
                 if (stripped_text.startswith('{') and stripped_text.endswith('}')) or \
                    (stripped_text.startswith('[') and stripped_text.endswith(']')):
                     json_data = json.loads(stripped_text)
-                    # Đặc trưng của Lexical là có thuộc tính 'root'
                     if isinstance(json_data, dict) and 'root' in json_data:
                         is_lexical = True
-                        print(f"[SmartTranslator] Detecting Lexical JSON with Glossary support. Translating nodes...")
-                        translated_obj = self._translate_lexical_recursive(json_data, ai_dest_lang, db)
+                        translated_obj = self._translate_lexical_recursive(json_data, original_lang, db, is_unsupported)
                         translated_text = json.dumps(translated_obj, ensure_ascii=False)
-            except Exception as e:
+            except Exception:
                 is_lexical = False
 
             if not is_lexical:
-                # 1. Áp dụng Glossary trước (ví dụ: thay thế UBND -> People's Committee)
-                processed_text = self._apply_glossary(text, ai_dest_lang, db)
+                # 1. Áp dụng Glossary trước
+                processed_text = self._apply_glossary(text, original_lang, db)
                 
-                # 2. Gửi sang AI dịch phần còn lại với cơ chế thử lại
-                for attempt in range(3):
+                if is_unsupported:
+                    if processed_text == text:
+                        translated_text = f"[Dịch {original_lang}] {text}"
+                    else:
+                        translated_text = processed_text
+                else:
+                    # 2. Gửi sang AI
                     try:
                         result = self.ai.translate(processed_text, dest=ai_dest_lang)
                         translated_text = result.text
-                        break
+                        if translated_text == text:
+                             translated_text = f"[AI chưa dịch] {text}"
                     except Exception as e:
-                        if attempt == 2: raise e
-                        print(f"Retrying plain text translation (attempt {attempt + 1})...")
+                        print(f"Lỗi AI: {e}")
+                        translated_text = f"[Lỗi kết nối AI] {text}"
 
-            # 3. Tự học: Lưu vào database với mã ngôn ngữ GỐC
+            # 3. Tự học: Lưu vào database
             new_entry = TranslationDictionary(
                 source_text=text,
                 translated_text=translated_text,
@@ -147,7 +165,7 @@ class SmartTranslator:
             return translated_text
 
         except Exception as e:
-            print(f"Lỗi AI: {e}")
-            return text # Trả về text gốc nếu lỗi
+            print(f"Lỗi Translator: {e}")
+            return f"[Lỗi hệ thống] {text}"
         finally:
             db.close()

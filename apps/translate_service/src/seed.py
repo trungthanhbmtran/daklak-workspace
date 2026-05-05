@@ -52,6 +52,14 @@ def seed_glossary():
             {"term": "Một cửa liên thông", "translation": "One-stop-shop mechanism", "lang_code": "en"},
             {"term": "Kinh tế - Xã hội", "translation": "Socio-Economic", "lang_code": "en"},
             {"term": "Khoa học công nghệ và Đổi mới sáng tạo", "translation": "Science, Technology and Innovation", "lang_code": "en"},
+            
+            # 5. Tiếng Ê-đê (Ede/Rade)
+            {"term": "Ủy ban nhân dân", "translation": "Ủy ban nhân dân [EDE]", "lang_code": "ede"},
+            {"term": "UBND", "translation": "UBND [EDE]", "lang_code": "ede"},
+            {"term": "Hội đồng nhân dân", "translation": "Hội đồng nhân dân [EDE]", "lang_code": "ede"},
+            {"term": "Quyết định", "translation": "Quyết định [EDE]", "lang_code": "ede"},
+            {"term": "Thông báo", "translation": "Thông báo [EDE]", "lang_code": "ede"},
+            {"term": "Cổng thông tin điện tử", "translation": "Cổng thông tin điện tử [EDE]", "lang_code": "ede"},
         ]
 
         print(f"Bắt đầu nạp {len(glossary_items)} thuật ngữ chuẩn...")
