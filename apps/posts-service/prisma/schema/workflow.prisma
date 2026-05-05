@@ -5,7 +5,6 @@ model PostVersion {
   title         String
   description   String?  @db.Text
   content       String?  @db.LongText
-  contentJson   String?  @db.LongText @map("content_json")
   editorId      String   @map("editor_id")
   changeNote    String?  @db.Text @map("change_note")
   
@@ -66,6 +65,7 @@ model PostTranslation {
   slug            String?
   description     String?  @db.Text
   content         String?  @db.LongText
+  contentHtml     String?  @db.LongText @map("content_html")
   
   version         Int      @default(1)
   mainVersionRef  Int      @map("main_version_ref") // Phiên bản của nội dung gốc mà bản dịch này dựa trên

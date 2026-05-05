@@ -44,6 +44,7 @@ export type PostTranslationMinAggregateOutputType = {
   slug: string | null
   description: string | null
   content: string | null
+  contentHtml: string | null
   version: number | null
   mainVersionRef: number | null
   isPublished: boolean | null
@@ -59,6 +60,7 @@ export type PostTranslationMaxAggregateOutputType = {
   slug: string | null
   description: string | null
   content: string | null
+  contentHtml: string | null
   version: number | null
   mainVersionRef: number | null
   isPublished: boolean | null
@@ -74,6 +76,7 @@ export type PostTranslationCountAggregateOutputType = {
   slug: number
   description: number
   content: number
+  contentHtml: number
   version: number
   mainVersionRef: number
   isPublished: number
@@ -101,6 +104,7 @@ export type PostTranslationMinAggregateInputType = {
   slug?: true
   description?: true
   content?: true
+  contentHtml?: true
   version?: true
   mainVersionRef?: true
   isPublished?: true
@@ -116,6 +120,7 @@ export type PostTranslationMaxAggregateInputType = {
   slug?: true
   description?: true
   content?: true
+  contentHtml?: true
   version?: true
   mainVersionRef?: true
   isPublished?: true
@@ -131,6 +136,7 @@ export type PostTranslationCountAggregateInputType = {
   slug?: true
   description?: true
   content?: true
+  contentHtml?: true
   version?: true
   mainVersionRef?: true
   isPublished?: true
@@ -233,6 +239,7 @@ export type PostTranslationGroupByOutputType = {
   slug: string | null
   description: string | null
   content: string | null
+  contentHtml: string | null
   version: number
   mainVersionRef: number
   isPublished: boolean
@@ -271,6 +278,7 @@ export type PostTranslationWhereInput = {
   slug?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   description?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   content?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
+  contentHtml?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   version?: Prisma.IntFilter<"PostTranslation"> | number
   mainVersionRef?: Prisma.IntFilter<"PostTranslation"> | number
   isPublished?: Prisma.BoolFilter<"PostTranslation"> | boolean
@@ -287,6 +295,7 @@ export type PostTranslationOrderByWithRelationInput = {
   slug?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
+  contentHtml?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
   mainVersionRef?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -307,6 +316,7 @@ export type PostTranslationWhereUniqueInput = Prisma.AtLeast<{
   slug?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   description?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   content?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
+  contentHtml?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   version?: Prisma.IntFilter<"PostTranslation"> | number
   mainVersionRef?: Prisma.IntFilter<"PostTranslation"> | number
   isPublished?: Prisma.BoolFilter<"PostTranslation"> | boolean
@@ -323,6 +333,7 @@ export type PostTranslationOrderByWithAggregationInput = {
   slug?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
+  contentHtml?: Prisma.SortOrderInput | Prisma.SortOrder
   version?: Prisma.SortOrder
   mainVersionRef?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -346,6 +357,7 @@ export type PostTranslationScalarWhereWithAggregatesInput = {
   slug?: Prisma.StringNullableWithAggregatesFilter<"PostTranslation"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"PostTranslation"> | string | null
   content?: Prisma.StringNullableWithAggregatesFilter<"PostTranslation"> | string | null
+  contentHtml?: Prisma.StringNullableWithAggregatesFilter<"PostTranslation"> | string | null
   version?: Prisma.IntWithAggregatesFilter<"PostTranslation"> | number
   mainVersionRef?: Prisma.IntWithAggregatesFilter<"PostTranslation"> | number
   isPublished?: Prisma.BoolWithAggregatesFilter<"PostTranslation"> | boolean
@@ -360,6 +372,7 @@ export type PostTranslationCreateInput = {
   slug?: string | null
   description?: string | null
   content?: string | null
+  contentHtml?: string | null
   version?: number
   mainVersionRef: number
   isPublished?: boolean
@@ -376,6 +389,7 @@ export type PostTranslationUncheckedCreateInput = {
   slug?: string | null
   description?: string | null
   content?: string | null
+  contentHtml?: string | null
   version?: number
   mainVersionRef: number
   isPublished?: boolean
@@ -390,6 +404,7 @@ export type PostTranslationUpdateInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -406,6 +421,7 @@ export type PostTranslationUncheckedUpdateInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -421,6 +437,7 @@ export type PostTranslationCreateManyInput = {
   slug?: string | null
   description?: string | null
   content?: string | null
+  contentHtml?: string | null
   version?: number
   mainVersionRef: number
   isPublished?: boolean
@@ -435,6 +452,7 @@ export type PostTranslationUpdateManyMutationInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -450,6 +468,7 @@ export type PostTranslationUncheckedUpdateManyInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -481,6 +500,7 @@ export type PostTranslationCountOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentHtml?: Prisma.SortOrder
   version?: Prisma.SortOrder
   mainVersionRef?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -501,6 +521,7 @@ export type PostTranslationMaxOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentHtml?: Prisma.SortOrder
   version?: Prisma.SortOrder
   mainVersionRef?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -516,6 +537,7 @@ export type PostTranslationMinOrderByAggregateInput = {
   slug?: Prisma.SortOrder
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
+  contentHtml?: Prisma.SortOrder
   version?: Prisma.SortOrder
   mainVersionRef?: Prisma.SortOrder
   isPublished?: Prisma.SortOrder
@@ -577,6 +599,7 @@ export type PostTranslationCreateWithoutPostInput = {
   slug?: string | null
   description?: string | null
   content?: string | null
+  contentHtml?: string | null
   version?: number
   mainVersionRef: number
   isPublished?: boolean
@@ -591,6 +614,7 @@ export type PostTranslationUncheckedCreateWithoutPostInput = {
   slug?: string | null
   description?: string | null
   content?: string | null
+  contentHtml?: string | null
   version?: number
   mainVersionRef: number
   isPublished?: boolean
@@ -635,6 +659,7 @@ export type PostTranslationScalarWhereInput = {
   slug?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   description?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   content?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
+  contentHtml?: Prisma.StringNullableFilter<"PostTranslation"> | string | null
   version?: Prisma.IntFilter<"PostTranslation"> | number
   mainVersionRef?: Prisma.IntFilter<"PostTranslation"> | number
   isPublished?: Prisma.BoolFilter<"PostTranslation"> | boolean
@@ -649,6 +674,7 @@ export type PostTranslationCreateManyPostInput = {
   slug?: string | null
   description?: string | null
   content?: string | null
+  contentHtml?: string | null
   version?: number
   mainVersionRef: number
   isPublished?: boolean
@@ -663,6 +689,7 @@ export type PostTranslationUpdateWithoutPostInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -677,6 +704,7 @@ export type PostTranslationUncheckedUpdateWithoutPostInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -691,6 +719,7 @@ export type PostTranslationUncheckedUpdateManyWithoutPostInput = {
   slug?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contentHtml?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   version?: Prisma.IntFieldUpdateOperationsInput | number
   mainVersionRef?: Prisma.IntFieldUpdateOperationsInput | number
   isPublished?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -708,6 +737,7 @@ export type PostTranslationSelect<ExtArgs extends runtime.Types.Extensions.Inter
   slug?: boolean
   description?: boolean
   content?: boolean
+  contentHtml?: boolean
   version?: boolean
   mainVersionRef?: boolean
   isPublished?: boolean
@@ -726,6 +756,7 @@ export type PostTranslationSelectScalar = {
   slug?: boolean
   description?: boolean
   content?: boolean
+  contentHtml?: boolean
   version?: boolean
   mainVersionRef?: boolean
   isPublished?: boolean
@@ -733,7 +764,7 @@ export type PostTranslationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PostTranslationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "langCode" | "title" | "slug" | "description" | "content" | "version" | "mainVersionRef" | "isPublished" | "createdAt" | "updatedAt", ExtArgs["result"]["postTranslation"]>
+export type PostTranslationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "langCode" | "title" | "slug" | "description" | "content" | "contentHtml" | "version" | "mainVersionRef" | "isPublished" | "createdAt" | "updatedAt", ExtArgs["result"]["postTranslation"]>
 export type PostTranslationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }
@@ -751,6 +782,7 @@ export type $PostTranslationPayload<ExtArgs extends runtime.Types.Extensions.Int
     slug: string | null
     description: string | null
     content: string | null
+    contentHtml: string | null
     version: number
     mainVersionRef: number
     isPublished: boolean
@@ -1133,6 +1165,7 @@ export interface PostTranslationFieldRefs {
   readonly slug: Prisma.FieldRef<"PostTranslation", 'String'>
   readonly description: Prisma.FieldRef<"PostTranslation", 'String'>
   readonly content: Prisma.FieldRef<"PostTranslation", 'String'>
+  readonly contentHtml: Prisma.FieldRef<"PostTranslation", 'String'>
   readonly version: Prisma.FieldRef<"PostTranslation", 'Int'>
   readonly mainVersionRef: Prisma.FieldRef<"PostTranslation", 'Int'>
   readonly isPublished: Prisma.FieldRef<"PostTranslation", 'Boolean'>

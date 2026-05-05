@@ -13,6 +13,53 @@ export class PostsService {
     @Inject('TRANSLATE_MQ_CLIENT') private mqClient: ClientProxy,
   ) { }
 
+  /**
+   * Chuyển đổi cấu trúc Lexical JSON sang HTML cơ bản để render ở Portal
+   */
+  private lexicalToHtml(jsonString: string): string {
+    if (!jsonString) return '';
+
+    try {
+      // Nếu không phải JSON (văn bản thuần), trả về chính nó bọc trong thẻ p
+      if (!jsonString.trim().startsWith('{')) return `<p>${jsonString}</p>`;
+
+      const data = JSON.parse(jsonString);
+      if (!data.root || !data.root.children) return '';
+
+      const renderNode = (node: any): string => {
+        if (node.type === 'text') {
+          let text = node.text || '';
+          // Xử lý format (1: Bold, 2: Italic, 8: Underline, 16: Strikethrough)
+          if (node.format & 1) text = `<strong>${text}</strong>`;
+          if (node.format & 2) text = `<em>${text}</em>`;
+          if (node.format & 8) text = `<span style="text-decoration: underline;">${text}</span>`;
+          if (node.format & 16) text = `<strike>${text}</strike>`;
+          return text;
+        }
+
+        if (node.children) {
+          const childrenHtml = node.children.map((child: any) => renderNode(child)).join('');
+
+          switch (node.type) {
+            case 'paragraph': return `<p>${childrenHtml}</p>`;
+            case 'list': return node.tag === 'ol' ? `<ol>${childrenHtml}</ol>` : `<ul>${childrenHtml}</ul>`;
+            case 'listitem': return `<li>${childrenHtml}</li>`;
+            case 'heading': return `<${node.tag}>${childrenHtml}</${node.tag}>`;
+            case 'quote': return `<blockquote>${childrenHtml}</blockquote>`;
+            case 'link': return `<a href="${node.url}">${childrenHtml}</a>`;
+            default: return childrenHtml;
+          }
+        }
+        return '';
+      };
+
+      return data.root.children.map((node: any) => renderNode(node)).join('');
+    } catch (e) {
+      console.error('[PostsService] Error converting Lexical to HTML:', e);
+      return jsonString; // Trả về gốc nếu lỗi
+    }
+  }
+
   private async triggerTranslation(post: any) {
     if (!post.content) return;
 
@@ -21,7 +68,7 @@ export class PostsService {
     const targetLanguages = ['en'];
 
     for (const langCode of targetLanguages) {
-      // Đẩy vào queue translation_request
+      // Đẩy nội dung (Lexical JSON hoặc Text) vào queue translation_request
       this.mqClient.emit('translation_request', {
         postId: post.id,
         content: post.content,
@@ -66,7 +113,7 @@ export class PostsService {
             title: t.title || post.title,
             slug: t.slug || "",
             description: t.description || "",
-            content: t.content || "",
+            content: t.content || post.content,
             version: 1,
             mainVersionRef: 1,
             isPublished: post.status === PostStatus.PUBLISHED
@@ -83,7 +130,6 @@ export class PostsService {
         title: post.title,
         description: post.description,
         content: post.content,
-        contentJson: post.contentJson,
         editorId: post.authorId,
         changeNote: 'Initial creation',
       },
@@ -195,7 +241,7 @@ export class PostsService {
               title: t.title || updatedPost.title,
               slug: t.slug || "",
               description: t.description || "",
-              content: t.content || "",
+              content: t.content || updatedPost.content,
               version: existingTrans ? existingTrans.version + 1 : 1,
               mainVersionRef: nextVersion,
               isPublished: updatedPost.status === PostStatus.PUBLISHED
@@ -213,7 +259,6 @@ export class PostsService {
         title: updatedPost.title,
         description: updatedPost.description,
         content: updatedPost.content,
-        contentJson: updatedPost.contentJson,
         editorId: actorId || updatedPost.authorId,
         changeNote: changeNote || 'Updated content',
       },
@@ -349,7 +394,19 @@ export class PostsService {
   }
 
   async approve(id: string, actorId: string, note?: string) {
-    return this.workflowService.approve(id, actorId, note);
+    const result = await this.workflowService.approve(id, actorId, note);
+
+    // Tự động tạo HTML khi bài viết được duyệt
+    const post = await this.prisma.post.findUnique({ where: { id } });
+    if (post && post.content) {
+      await this.prisma.post.update({
+        where: { id },
+        data: { contentHtml: this.lexicalToHtml(post.content || '') }
+      });
+      console.log(`[PostsService] Generated HTML for approved post ${id}`);
+    }
+
+    return result;
   }
 
   async reject(id: string, actorId: string, note?: string) {
@@ -357,7 +414,18 @@ export class PostsService {
   }
 
   async publish(id: string, actorId: string, note?: string) {
-    return this.workflowService.publish(id, actorId, note);
+    const result = await this.workflowService.publish(id, actorId, note);
+
+    // Đảm bảo có HTML khi xuất bản
+    const post = await this.prisma.post.findUnique({ where: { id } });
+    if (post && post.content) {
+      await this.prisma.post.update({
+        where: { id },
+        data: { contentHtml: this.lexicalToHtml(post.content || '') }
+      });
+    }
+
+    return result;
   }
 
   async unpublish(id: string, actorId: string, note?: string) {
@@ -398,7 +466,8 @@ export class PostsService {
         title: data.title || (existingTrans?.title || post.title),
         slug: data.slug || existingTrans?.slug || "",
         description: data.description || existingTrans?.description || "",
-        content: data.content || existingTrans?.content || "",
+        content: data.content || existingTrans?.content || post.content,
+        contentHtml: this.lexicalToHtml(data.content || existingTrans?.content || post.content || ''),
         version: nextTransVersion,
         mainVersionRef: post.currentVersion,
         isPublished: post.status === PostStatus.PUBLISHED

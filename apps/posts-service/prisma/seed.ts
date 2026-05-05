@@ -97,36 +97,109 @@ async function main() {
   // 2. SAMPLE POSTS
   // ==========================================================
   console.log('📦 Seeding Sample Posts...');
-  const posts = [
+
+  // Mẫu Lexical JSON cho nội dung
+  const createLexicalJson = (text: string) => JSON.stringify({
+    root: {
+      children: [
+        {
+          type: 'paragraph',
+          children: [{ type: 'text', text, format: 0, version: 1 }],
+          version: 1
+        }
+      ],
+      direction: 'ltr',
+      format: '',
+      indent: 0,
+      type: 'root',
+      version: 1
+    }
+  });
+
+  const postsData = [
     {
       title: 'UBND tỉnh họp thường kỳ tháng 5/2024',
       slug: 'ubnd-tinh-hop-thuong-ky-thang-5-2024',
       description: 'Sáng nay, dưới sự chủ trì của Chủ tịch UBND tỉnh, phiên họp thường kỳ tháng 5 đã diễn ra...',
-      content: 'Nội dung chi tiết về phiên họp thường kỳ...',
+      content: createLexicalJson('Nội dung chi tiết về phiên họp thường kỳ tháng 5/2024 của UBND tỉnh Đắk Lắk...'),
+      contentHtml: '<p>Nội dung chi tiết về phiên họp thường kỳ tháng 5/2024 của UBND tỉnh Đắk Lắk...</p>',
       categoryId: categoryMap['hoat-dong-lanh-dao']?.id,
       status: 'PUBLISHED',
-      isFeatured: true
+      isFeatured: true,
+      translations: {
+        en: {
+          title: 'Provincial People\'s Committee May 2024 Regular Meeting',
+          description: 'This morning, chaired by the Provincial Chairman, the regular meeting of May took place...',
+          content: createLexicalJson('Detailed content of the regular meeting of May 2024 of Dak Lak Provincial People\'s Committee...'),
+          contentHtml: '<p>Detailed content of the regular meeting of May 2024 of Dak Lak Provincial People\'s Committee...</p>'
+        }
+      }
     },
     {
       title: 'Thông báo về việc nghỉ lễ Quốc khánh 2/9',
       slug: 'thong-bao-nghi-le-quoc-khanh-2-9',
       description: 'Căn cứ quy định của Bộ luật Lao động, UBND tỉnh thông báo lịch nghỉ lễ như sau...',
-      content: 'Nội dung chi tiết thông báo nghỉ lễ...',
+      content: createLexicalJson('Căn cứ thông báo của Bộ Lao động - Thương binh và Xã hội, cán bộ công chức được nghỉ lễ 4 ngày...'),
+      contentHtml: '<p>Căn cứ thông báo của Bộ Lao động - Thương binh và Xã hội, cán bộ công chức được nghỉ lễ 4 ngày...</p>',
       categoryId: categoryMap['thong-bao']?.id,
       status: 'PUBLISHED',
-      isNotification: true
+      isNotification: true,
+      translations: {
+        en: {
+          title: 'Announcement on National Day Holiday 2/9',
+          description: 'Based on the provisions of the Labor Code, the Provincial People\'s Committee announces the holiday schedule...',
+          content: createLexicalJson('Based on the announcement of the Ministry of Labor, Invalids and Social Affairs, civil servants are entitled to 4 days off...'),
+          contentHtml: '<p>Based on the announcement of the Ministry of Labor, Invalids and Social Affairs, civil servants are entitled to 4 days off...</p>'
+        }
+      }
     }
   ];
 
-  for (const post of posts) {
+  for (const post of postsData) {
     if (!post.categoryId) continue;
-    await (prisma as any).post.upsert({
-      where: { slug: post.slug },
-      update: post,
-      create: { ...post, authorId, publishedAt: new Date() }
+    const { translations, ...mainPost } = post;
+
+    // 1. Create/Update Post
+    const createdPost = await (prisma as any).post.upsert({
+      where: { slug: mainPost.slug },
+      update: mainPost,
+      create: { ...mainPost, authorId, publishedAt: new Date() }
     });
+
+    // 2. Create Translations in PostTranslation model
+    if (translations) {
+      for (const [langCode, trans] of Object.entries(translations)) {
+        const t = trans as any;
+        await (prisma as any).postTranslation.upsert({
+          where: {
+            id: `${createdPost.id}_${langCode}_v1` // Unique ID for seed
+          },
+          update: {
+            title: t.title,
+            description: t.description,
+            content: t.content,
+            contentHtml: t.contentHtml,
+            slug: `${mainPost.slug}-${langCode}`,
+            isPublished: true
+          },
+          create: {
+            id: `${createdPost.id}_${langCode}_v1`,
+            postId: createdPost.id,
+            langCode,
+            title: t.title,
+            description: t.description,
+            content: t.content,
+            contentHtml: t.contentHtml,
+            slug: `${mainPost.slug}-${langCode}`,
+            version: 1,
+            mainVersionRef: 1,
+            isPublished: true
+          }
+        });
+      }
+    }
   }
-  console.log('✅ Posts seeded');
+  console.log('✅ Posts & Translations seeded');
 
   // ==========================================================
   // 3. BANNERS

@@ -41,7 +41,6 @@ export type PostVersionMinAggregateOutputType = {
   title: string | null
   description: string | null
   content: string | null
-  contentJson: string | null
   editorId: string | null
   changeNote: string | null
   createdAt: Date | null
@@ -54,7 +53,6 @@ export type PostVersionMaxAggregateOutputType = {
   title: string | null
   description: string | null
   content: string | null
-  contentJson: string | null
   editorId: string | null
   changeNote: string | null
   createdAt: Date | null
@@ -67,7 +65,6 @@ export type PostVersionCountAggregateOutputType = {
   title: number
   description: number
   content: number
-  contentJson: number
   editorId: number
   changeNote: number
   createdAt: number
@@ -90,7 +87,6 @@ export type PostVersionMinAggregateInputType = {
   title?: true
   description?: true
   content?: true
-  contentJson?: true
   editorId?: true
   changeNote?: true
   createdAt?: true
@@ -103,7 +99,6 @@ export type PostVersionMaxAggregateInputType = {
   title?: true
   description?: true
   content?: true
-  contentJson?: true
   editorId?: true
   changeNote?: true
   createdAt?: true
@@ -116,7 +111,6 @@ export type PostVersionCountAggregateInputType = {
   title?: true
   description?: true
   content?: true
-  contentJson?: true
   editorId?: true
   changeNote?: true
   createdAt?: true
@@ -216,7 +210,6 @@ export type PostVersionGroupByOutputType = {
   title: string
   description: string | null
   content: string | null
-  contentJson: string | null
   editorId: string
   changeNote: string | null
   createdAt: Date
@@ -252,7 +245,6 @@ export type PostVersionWhereInput = {
   title?: Prisma.StringFilter<"PostVersion"> | string
   description?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   content?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  contentJson?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostVersion"> | Date | string
@@ -266,7 +258,6 @@ export type PostVersionOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
-  contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -284,7 +275,6 @@ export type PostVersionWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"PostVersion"> | string
   description?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   content?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  contentJson?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostVersion"> | Date | string
@@ -298,7 +288,6 @@ export type PostVersionOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   content?: Prisma.SortOrderInput | Prisma.SortOrder
-  contentJson?: Prisma.SortOrderInput | Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -319,7 +308,6 @@ export type PostVersionScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"PostVersion"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
   content?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
-  contentJson?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringWithAggregatesFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableWithAggregatesFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"PostVersion"> | Date | string
@@ -331,7 +319,6 @@ export type PostVersionCreateInput = {
   title: string
   description?: string | null
   content?: string | null
-  contentJson?: string | null
   editorId: string
   changeNote?: string | null
   createdAt?: Date | string
@@ -345,7 +332,6 @@ export type PostVersionUncheckedCreateInput = {
   title: string
   description?: string | null
   content?: string | null
-  contentJson?: string | null
   editorId: string
   changeNote?: string | null
   createdAt?: Date | string
@@ -357,7 +343,6 @@ export type PostVersionUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,7 +356,6 @@ export type PostVersionUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -384,7 +368,6 @@ export type PostVersionCreateManyInput = {
   title: string
   description?: string | null
   content?: string | null
-  contentJson?: string | null
   editorId: string
   changeNote?: string | null
   createdAt?: Date | string
@@ -396,7 +379,6 @@ export type PostVersionUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -409,7 +391,6 @@ export type PostVersionUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -438,7 +419,6 @@ export type PostVersionCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  contentJson?: Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -455,7 +435,6 @@ export type PostVersionMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  contentJson?: Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -468,7 +447,6 @@ export type PostVersionMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   content?: Prisma.SortOrder
-  contentJson?: Prisma.SortOrder
   editorId?: Prisma.SortOrder
   changeNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -526,7 +504,6 @@ export type PostVersionCreateWithoutPostInput = {
   title: string
   description?: string | null
   content?: string | null
-  contentJson?: string | null
   editorId: string
   changeNote?: string | null
   createdAt?: Date | string
@@ -538,7 +515,6 @@ export type PostVersionUncheckedCreateWithoutPostInput = {
   title: string
   description?: string | null
   content?: string | null
-  contentJson?: string | null
   editorId: string
   changeNote?: string | null
   createdAt?: Date | string
@@ -580,7 +556,6 @@ export type PostVersionScalarWhereInput = {
   title?: Prisma.StringFilter<"PostVersion"> | string
   description?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   content?: Prisma.StringNullableFilter<"PostVersion"> | string | null
-  contentJson?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   editorId?: Prisma.StringFilter<"PostVersion"> | string
   changeNote?: Prisma.StringNullableFilter<"PostVersion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PostVersion"> | Date | string
@@ -592,7 +567,6 @@ export type PostVersionCreateManyPostInput = {
   title: string
   description?: string | null
   content?: string | null
-  contentJson?: string | null
   editorId: string
   changeNote?: string | null
   createdAt?: Date | string
@@ -604,7 +578,6 @@ export type PostVersionUpdateWithoutPostInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -616,7 +589,6 @@ export type PostVersionUncheckedUpdateWithoutPostInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -628,7 +600,6 @@ export type PostVersionUncheckedUpdateManyWithoutPostInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   content?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  contentJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   editorId?: Prisma.StringFieldUpdateOperationsInput | string
   changeNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -643,7 +614,6 @@ export type PostVersionSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   title?: boolean
   description?: boolean
   content?: boolean
-  contentJson?: boolean
   editorId?: boolean
   changeNote?: boolean
   createdAt?: boolean
@@ -659,13 +629,12 @@ export type PostVersionSelectScalar = {
   title?: boolean
   description?: boolean
   content?: boolean
-  contentJson?: boolean
   editorId?: boolean
   changeNote?: boolean
   createdAt?: boolean
 }
 
-export type PostVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "version" | "title" | "description" | "content" | "contentJson" | "editorId" | "changeNote" | "createdAt", ExtArgs["result"]["postVersion"]>
+export type PostVersionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "postId" | "version" | "title" | "description" | "content" | "editorId" | "changeNote" | "createdAt", ExtArgs["result"]["postVersion"]>
 export type PostVersionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   post?: boolean | Prisma.PostDefaultArgs<ExtArgs>
 }
@@ -682,7 +651,6 @@ export type $PostVersionPayload<ExtArgs extends runtime.Types.Extensions.Interna
     title: string
     description: string | null
     content: string | null
-    contentJson: string | null
     editorId: string
     changeNote: string | null
     createdAt: Date
@@ -1062,7 +1030,6 @@ export interface PostVersionFieldRefs {
   readonly title: Prisma.FieldRef<"PostVersion", 'String'>
   readonly description: Prisma.FieldRef<"PostVersion", 'String'>
   readonly content: Prisma.FieldRef<"PostVersion", 'String'>
-  readonly contentJson: Prisma.FieldRef<"PostVersion", 'String'>
   readonly editorId: Prisma.FieldRef<"PostVersion", 'String'>
   readonly changeNote: Prisma.FieldRef<"PostVersion", 'String'>
   readonly createdAt: Prisma.FieldRef<"PostVersion", 'DateTime'>

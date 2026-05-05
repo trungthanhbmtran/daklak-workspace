@@ -3,7 +3,7 @@ model Post {
   title                 String
   description           String?  @db.Text
   content               String?  @db.LongText
-  contentJson           String?  @db.LongText @map("content_json") // Lexical format
+  contentHtml           String?  @db.LongText @map("content_html")
   slug                  String   @unique
   thumbnail             String?
   authorId              String   @map("author_id")

@@ -1376,7 +1376,7 @@ export const PostScalarFieldEnum = {
   title: 'title',
   description: 'description',
   content: 'content',
-  contentJson: 'contentJson',
+  contentHtml: 'contentHtml',
   slug: 'slug',
   thumbnail: 'thumbnail',
   authorId: 'authorId',
@@ -1414,7 +1414,6 @@ export const PostVersionScalarFieldEnum = {
   title: 'title',
   description: 'description',
   content: 'content',
-  contentJson: 'contentJson',
   editorId: 'editorId',
   changeNote: 'changeNote',
   createdAt: 'createdAt'
@@ -1461,6 +1460,7 @@ export const PostTranslationScalarFieldEnum = {
   slug: 'slug',
   description: 'description',
   content: 'content',
+  contentHtml: 'contentHtml',
   version: 'version',
   mainVersionRef: 'mainVersionRef',
   isPublished: 'isPublished',
@@ -1614,7 +1614,7 @@ export const PostOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   content: 'content',
-  contentJson: 'contentJson',
+  contentHtml: 'contentHtml',
   slug: 'slug',
   thumbnail: 'thumbnail',
   authorId: 'authorId',
@@ -1640,7 +1640,6 @@ export const PostVersionOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   content: 'content',
-  contentJson: 'contentJson',
   editorId: 'editorId',
   changeNote: 'changeNote'
 } as const
@@ -1683,7 +1682,8 @@ export const PostTranslationOrderByRelevanceFieldEnum = {
   title: 'title',
   slug: 'slug',
   description: 'description',
-  content: 'content'
+  content: 'content',
+  contentHtml: 'contentHtml'
 } as const
 
 export type PostTranslationOrderByRelevanceFieldEnum = (typeof PostTranslationOrderByRelevanceFieldEnum)[keyof typeof PostTranslationOrderByRelevanceFieldEnum]
