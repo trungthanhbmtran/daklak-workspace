@@ -88,7 +88,15 @@ export class PostsService {
 
     const post = await this.prisma.post.create({
       data: {
-        ...rest,
+        title: rest.title,
+        description: rest.description,
+        content: rest.content,
+        thumbnail: rest.thumbnail,
+        authorId: rest.authorId || rest.actorId || '1', // Default to '1' if not provided
+        categoryId: rest.categoryId,
+        isFeatured: rest.isFeatured ?? false,
+        isNotification: rest.isNotification ?? false,
+        isCommentAllowed: rest.isCommentAllowed ?? true,
         slug,
         status: rest.status || PostStatus.DRAFT,
         tags: {
@@ -205,7 +213,16 @@ export class PostsService {
     const updatedPost = await this.prisma.post.update({
       where: { id },
       data: {
-        ...rest,
+        title: rest.title,
+        description: rest.description,
+        content: rest.content,
+        thumbnail: rest.thumbnail,
+        categoryId: rest.categoryId,
+        isFeatured: rest.isFeatured,
+        isNotification: rest.isNotification,
+        isCommentAllowed: rest.isCommentAllowed,
+        slug: rest.slug,
+        status: rest.status,
         currentVersion: nextVersion,
         tags: tagIds ? {
           set: tagIds.map((id: string) => ({ id })),

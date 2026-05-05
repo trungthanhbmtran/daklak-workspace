@@ -69,7 +69,6 @@ const postSchema = z.object({
     slug: z.string().optional(),
     description: z.string().optional(),
     content: z.string().optional(),
-    contentJson: z.any().optional(),
   })).default({}),
 });
 

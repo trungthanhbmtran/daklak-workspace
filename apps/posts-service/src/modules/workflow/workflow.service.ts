@@ -32,10 +32,20 @@ export class WorkflowService implements OnModuleInit {
   // --- Atomic Business Actions ---
 
   async submit(postId: string, actorId: string, note?: string) {
-    const post = await this.updateStatus(postId, PostStatus.SUBMITTED);
+    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+    if (!post) throw new BadRequestException('Post not found');
+    const oldStatus = post.status;
+
+    const updatedPost = await this.updateStatus(postId, PostStatus.SUBMITTED);
+
+    // Ghi log phê duyệt để theo dõi lịch sử
+    await this.logModeration(postId, actorId, oldStatus, PostStatus.SUBMITTED, 'SUBMIT', note);
     await this.logAudit(postId, actorId, 'SUBMIT', { note });
-    await this.triggerDynamicWorkflow(post, actorId);
-    return post;
+
+    // Kích hoạt quy trình động (không làm nghẽn luồng chính nếu lỗi)
+    this.triggerDynamicWorkflow(updatedPost, actorId);
+
+    return updatedPost;
   }
 
   async review(postId: string, actorId: string, note?: string) {
