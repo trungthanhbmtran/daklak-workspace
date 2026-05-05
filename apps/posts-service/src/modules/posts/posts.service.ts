@@ -15,10 +15,17 @@ export class PostsService implements OnModuleInit {
     private workflowService: WorkflowService,
     @Inject('TRANSLATE_MQ_CLIENT') private mqClient: ClientProxy,
     @Inject('CATEGORY_PACKAGE') private client: ClientGrpc,
-  ) { }
+  ) { 
+    console.log('[PostsService] Constructor called');
+  }
 
   onModuleInit() {
     this.categoryService = this.client.getService<any>('CategoryService');
+    const methods = Object.keys(this.categoryService || {});
+    console.log('[PostsService] CategoryService initialized. Available methods:', methods);
+    if (!this.categoryService.getByGroup) {
+      console.error('[PostsService] CRITICAL: getByGroup method NOT FOUND in CategoryService. This might be a gRPC naming collision!');
+    }
   }
 
   /**
@@ -71,14 +78,16 @@ export class PostsService implements OnModuleInit {
   private async getTargetLanguages(): Promise<string[]> {
     try {
       // Gọi gRPC sang user-service để lấy danh mục ngôn ngữ
-      const response = await firstValueFrom(
+      const response: any = await firstValueFrom(
         this.categoryService.getByGroup({ group: 'LANGUAGE' })
       );
-      
-      const langs = response.data || [];
+
+      // Đảm bảo lấy được mảng data, nếu không có thì trả về mảng rỗng
+      const langs = response?.data || [];
+
       // Lọc bỏ tiếng Việt (ngôn ngữ gốc) và chỉ lấy ngôn ngữ đang active
       return langs
-        .filter((l: any) => l.code !== 'vi' && (l.active === 1 || l.active === true))
+        .filter((l: any) => l && l.code && l.code !== 'vi' && (l.active === 1 || l.active === true))
         .map((l: any) => l.code);
     } catch (error) {
       console.error('[PostsService] Error fetching languages from user-service gRPC:', error);
@@ -139,11 +148,11 @@ export class PostsService implements OnModuleInit {
     if (translations) {
       const translationEntries = typeof translations === 'string' ? JSON.parse(translations) : translations;
       const targetLangs = await this.getTargetLanguages();
-      
+
       for (const [langCode, trans] of Object.entries(translationEntries)) {
         const t = trans as any;
         const isAuto = targetLangs.includes(langCode);
-        
+
         await this.prisma.postTranslation.create({
           data: {
             postId: post.id,

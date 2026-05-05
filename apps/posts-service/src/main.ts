@@ -54,7 +54,7 @@ async function bootstrap() {
 
     // 4. Khởi chạy microservices
     await app.startAllMicroservices();
-    
+
     // 5. Lắng nghe trên một port để duy trì ứng dụng (Hybrid App)
     const port = process.env.PORT || 3005; // Dùng port 3005 để tránh xung đột
     await app.listen(port);

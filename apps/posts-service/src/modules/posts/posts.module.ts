@@ -16,7 +16,9 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         transport: Transport.GRPC,
         options: {
           package: 'category',
-          protoPath: join(__dirname, '../../../../shared/protos/users/categories.proto'),
+          protoPath: process.env.PROTO_PATH
+            ? join(process.env.PROTO_PATH, 'users', 'categories.proto')
+            : join(__dirname, '../../../../shared/protos/users/categories.proto'),
           url: process.env.USER_SERVICE_URL || 'user-service:50051',
         },
       },
@@ -37,4 +39,4 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
   providers: [PostsService],
 })
 
-export class PostsModule {}
+export class PostsModule { }
