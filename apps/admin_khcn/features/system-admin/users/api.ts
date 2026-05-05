@@ -51,7 +51,7 @@ function unwrapData<T>(res: any): T {
 export const userApi = {
   list: async (): Promise<UserItem[]> => {
     try {
-      const res = await apiClient.get("/admin/users");
+      const res = await apiClient.get("/users");
       const data = unwrapData<any>(res);
       const arr = Array.isArray(data) ? data : (data?.data ?? []);
       return arr.map((r: any) => normalizeUser(r as Record<string, unknown>));
@@ -63,7 +63,7 @@ export const userApi = {
   },
 
   getOne: async (id: number): Promise<UserDetail> => {
-    const res = await apiClient.get(`/admin/users/${id}`);
+    const res = await apiClient.get(`/users/${id}`);
     const raw = unwrapData<Record<string, unknown> | null>(res);
     return normalizeUserDetail(raw ?? {});
   },
@@ -79,21 +79,21 @@ export const userApi = {
       cccd: payload.cccd,
       employeeCode: payload.employeeCode,
     };
-    const res = await apiClient.post("/admin/users", body);
+    const res = await apiClient.post("/users", body);
     const raw = unwrapData<Record<string, unknown> | null>(res);
     return normalizeUser(raw ?? {});
   },
 
   /** Khóa hoặc mở tài khoản (PATCH /users/:id/active) */
   setActive: async (id: number, isActive: boolean): Promise<{ success: boolean; message?: string }> => {
-    const res = await apiClient.patch(`/admin/users/${id}/active`, { isActive });
+    const res = await apiClient.patch(`/users/${id}/active`, { isActive });
     const data = unwrapData<{ success?: boolean; message?: string } | null>(res);
     return { success: data?.success ?? true, message: data?.message };
   },
 
   /** Gán lại vai trò cho user (POST /users/:id/assign-roles) */
   assignRoles: async (id: number, roleIds: number[]): Promise<{ success: boolean; message?: string }> => {
-    const res = await apiClient.post(`/admin/users/${id}/assign-roles`, { roleIds });
+    const res = await apiClient.post(`/users/${id}/assign-roles`, { roleIds });
     const data = unwrapData<{ success?: boolean; message?: string } | null>(res);
     return { success: data?.success ?? true, message: data?.message };
   },
