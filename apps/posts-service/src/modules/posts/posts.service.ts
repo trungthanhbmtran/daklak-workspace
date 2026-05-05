@@ -299,7 +299,8 @@ export class PostsService {
     return updatedPost;
   }
   async findBySlug(slug: string) {
-    const post = await this.prisma.post.findFirst({
+    // 1. Tìm trong bảng Post trước
+    let post = await this.prisma.post.findFirst({
       where: { slug, isDeleted: false, status: PostStatus.PUBLISHED },
       include: {
         tags: true,
@@ -309,9 +310,42 @@ export class PostsService {
         }
       },
     });
+
+    // 2. Nếu không thấy, tìm trong bảng PostTranslation
+    if (!post) {
+      const translation = await this.prisma.postTranslation.findFirst({
+        where: { slug, isPublished: true },
+        include: {
+          post: {
+            include: {
+              tags: true,
+              category: true,
+              translations_rel: {
+                orderBy: { version: 'desc' }
+              }
+            }
+          }
+        }
+      });
+
+      if (translation && translation.post) {
+        // "Merge" dữ liệu bản dịch vào post chính để Portal dùng được luôn
+        const mainPost = translation.post;
+        post = {
+          ...mainPost,
+          title: translation.title,
+          description: translation.description || mainPost.description,
+          content: translation.content || mainPost.content,
+          contentHtml: translation.contentHtml || mainPost.contentHtml,
+          slug: translation.slug || mainPost.slug, // Dùng slug của bản dịch hoặc gốc
+          langCode: translation.langCode // Đánh dấu ngôn ngữ hiện tại
+        } as any;
+      }
+    }
+
     if (!post) return null;
 
-    // Format translations
+    // Format translations object cho tương thích
     const latestTranslations: any = {};
     if (post.translations_rel) {
       post.translations_rel.forEach(trans => {
@@ -325,7 +359,7 @@ export class PostsService {
   }
 
   async findAll(query: any) {
-    const { authorId, categoryId, search, status } = query;
+    const { authorId, categoryId, search, status, lang } = query;
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
@@ -351,24 +385,39 @@ export class PostsService {
           tags: true,
           category: true,
           translations_rel: {
-            select: { langCode: true, version: true } // Chỉ lấy thông tin cần thiết cho list
+            // Nếu có lang, ưu tiên lấy bản dịch của ngôn ngữ đó
+            where: lang ? { langCode: lang, isPublished: true } : undefined,
+            orderBy: { version: 'desc' },
+            take: 1
           }
         },
       }),
       this.prisma.post.count({ where }),
     ]);
 
-    // Format lại translations cho từng item để Frontend hiển thị được badge ngôn ngữ
+    // Format và Merge bản dịch nếu được yêu cầu
     const formattedItems = items.map(post => {
-      const translations: any = {};
-      if (post.translations_rel) {
-        post.translations_rel.forEach(trans => {
-          if (!translations[trans.langCode]) {
-            translations[trans.langCode] = trans;
-          }
-        });
+      let finalPost = { ...post };
+
+      // Nếu yêu cầu ngôn ngữ cụ thể và có bản dịch tương ứng
+      if (lang && post.translations_rel && post.translations_rel.length > 0) {
+        const trans = post.translations_rel[0];
+        finalPost = {
+          ...finalPost,
+          title: trans.title,
+          description: trans.description || post.description,
+          slug: trans.slug || post.slug,
+          // Lưu ý: Content thường không trả về ở list để tối ưu, nhưng nếu có thì merge luôn
+          content: trans.content || post.content,
+          contentHtml: trans.contentHtml || post.contentHtml
+        };
       }
-      return { ...post, translations };
+
+      // Vẫn giữ lại object translations để UI hiển thị các ngôn ngữ khả dụng khác
+      const translations: any = {};
+      // Re-fetch translations if we filtered them above, or just keep as is for list
+      // For list, we usually only care about the current lang or availability
+      return { ...finalPost, translations };
     });
 
     return {
