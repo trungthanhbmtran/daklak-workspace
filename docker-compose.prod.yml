@@ -124,6 +124,7 @@ services:
       - .env.production
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
+      PROTO_PATH: /app/protos
 
   workflow-service:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}

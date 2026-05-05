@@ -20,6 +20,13 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
             ? join(process.env.PROTO_PATH, 'users', 'categories.proto')
             : join(__dirname, '../../../../shared/protos/users/categories.proto'),
           url: process.env.USER_SERVICE_URL || 'user-service:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: process.env.PROTO_PATH ? [process.env.PROTO_PATH, join(process.env.PROTO_PATH, 'users')] : [],
+          },
         },
       },
       {

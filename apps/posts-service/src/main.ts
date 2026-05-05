@@ -34,7 +34,11 @@ async function bootstrap() {
           longs: String,
           enums: String,
           defaults: true,
-          includeDirs: [protoRoot],
+          includeDirs: [
+            protoRoot,
+            join(protoRoot, 'posts'),
+            join(protoRoot, 'users'),
+          ],
         },
       },
     });

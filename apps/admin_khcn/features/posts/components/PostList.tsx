@@ -197,12 +197,24 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             </p>
                             <p className="text-[11px] text-muted-foreground mt-1 font-mono flex items-center gap-2">
                               ID: {post.id?.substring(0, 8)}...
-                              {post.translations && Object.keys(post.translations).length > 0 && (
-                                <span className="flex items-center gap-1 bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-sans font-bold uppercase text-[9px]">
-                                  <Globe className="h-2.5 w-2.5" />
-                                  {Object.keys(post.translations).join(", ")}
-                                </span>
-                              )}
+                              {(() => {
+                                let translationsObj = {};
+                                try {
+                                  translationsObj = typeof post.translations === 'string' 
+                                    ? JSON.parse(post.translations) 
+                                    : (post.translations || {});
+                                } catch (e) {
+                                  translationsObj = {};
+                                }
+                                const langKeys = Object.keys(translationsObj);
+                                if (langKeys.length === 0) return null;
+                                return (
+                                  <span className="flex items-center gap-1 bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-sans font-bold uppercase text-[9px]">
+                                    <Globe className="h-2.5 w-2.5" />
+                                    {langKeys.join(", ")}
+                                  </span>
+                                );
+                              })()}
                             </p>
                           </div>
                         </div>
