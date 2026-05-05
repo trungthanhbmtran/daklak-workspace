@@ -103,6 +103,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const handleAutoTranslate = async (langCode: string) => {
     const title = form.getValues("title");
     const description = form.getValues("description");
+    const content = form.getValues("content");
 
     if (!title) {
       toast.error("Vui lòng nhập tiêu đề tiếng Việt trước khi dịch");
@@ -117,6 +118,11 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
       if (description) {
         const resDesc = await postsApi.translate(description, langCode);
         form.setValue(`translations.${langCode}.description`, resDesc.translated_text, { shouldDirty: true });
+      }
+
+      if (content) {
+        const resContent = await postsApi.translate(content, langCode);
+        form.setValue(`translations.${langCode}.content`, resContent.translated_text, { shouldDirty: true });
       }
 
       toast.success(`Đã dịch xong sang ${languages.find(l => l.code === langCode)?.name}`);
