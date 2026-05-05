@@ -8,7 +8,8 @@ from database.session import SessionLocal
 
 class SmartTranslator:
     def __init__(self):
-        # Tăng timeout lên 20 giây để xử lý các đoạn         self.ai = Translator(timeout=20.0)
+        # Tăng timeout lên 20 giây để xử lý các đoạn
+        self.ai = Translator()
         self.lang_mapping = {
             'en-us': 'en',
             'en-gb': 'en',
@@ -128,7 +129,7 @@ class SmartTranslator:
                     json_data = json.loads(stripped_text)
                     if isinstance(json_data, dict) and 'root' in json_data:
                         is_lexical = True
-                        translated_obj = self._translate_lexical_recursive(json_data, original_lang, db, is_unsupported)
+                        translated_obj = self._translate_lexical_recursive(json_data, ai_dest_lang, db, is_unsupported)
                         translated_text = json.dumps(translated_obj, ensure_ascii=False)
             except Exception:
                 is_lexical = False
