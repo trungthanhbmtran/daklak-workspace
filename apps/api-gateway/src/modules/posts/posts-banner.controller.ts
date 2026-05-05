@@ -17,7 +17,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class PostsBannerController {
   private bannerService: any;
 
-  constructor(@Inject(MICROSERVICES.BANNER.SYMBOL) private client: ClientGrpc) {}
+  constructor(@Inject(MICROSERVICES.BANNER.SYMBOL) private client: ClientGrpc) { }
 
   onModuleInit() {
     this.bannerService = this.client.getService<any>(MICROSERVICES.BANNER.SERVICE);

@@ -23,7 +23,7 @@ import { Roles, Role } from '../../common/decorators/roles.decorator';
 export class PostsController {
   private postService: any;
 
-  constructor(@Inject(MICROSERVICES.POST.SYMBOL) private client: ClientGrpc) {}
+  constructor(@Inject(MICROSERVICES.POST.SYMBOL) private client: ClientGrpc) { }
 
   onModuleInit() {
     this.postService = this.client.getService<any>(MICROSERVICES.POST.SERVICE);
@@ -32,9 +32,9 @@ export class PostsController {
   @Post()
   @Roles(Role.AUTHOR, Role.EDITOR, Role.ADMIN)
   async create(@Body() createPostDto: any, @Req() req: any) {
-    return firstValueFrom(this.postService.createPost({ 
-      ...createPostDto, 
-      authorId: req.user.id 
+    return firstValueFrom(this.postService.createPost({
+      ...createPostDto,
+      authorId: req.user.id
     }));
   }
 
@@ -51,10 +51,10 @@ export class PostsController {
   @Put(':id')
   @Roles(Role.AUTHOR, Role.EDITOR, Role.ADMIN)
   async update(@Param('id') id: string, @Body() updatePostDto: any, @Req() req: any) {
-    return firstValueFrom(this.postService.updatePost({ 
-      id, 
-      ...updatePostDto, 
-      actorId: req.user.id 
+    return firstValueFrom(this.postService.updatePost({
+      id,
+      ...updatePostDto,
+      actorId: req.user.id
     }));
   }
 

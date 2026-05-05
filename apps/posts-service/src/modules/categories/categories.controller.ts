@@ -87,7 +87,7 @@ export class CategoriesController {
       console.log(`Result count: ${result?.length}`);
       const sanitized = (result || []).map(cat => sanitizeCategory(cat)).filter(c => !!c);
       console.log(`Sanitized count: ${sanitized.length}`);
-      
+
       // Safety check: ensure no nulls in children arrays
       return { data: sanitized };
     } catch (error) {

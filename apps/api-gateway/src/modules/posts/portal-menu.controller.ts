@@ -49,7 +49,7 @@ export class PortalMenuController {
     console.log('Gateway: GetQuickSetupData response received');
     return result;
   }
-  
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return firstValueFrom(this.portalMenuService.getPortalMenu({ id }));

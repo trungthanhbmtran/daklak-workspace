@@ -137,6 +137,20 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         const all = await categoryApi.fetchAll();
         const langs = all.filter((c: any) => c.group === 'LANGUAGE' && c.active === 1);
         setLanguages(langs);
+
+        // Đảm bảo translations object có đầy đủ keys cho các ngôn ngữ
+        const currentTranslations = form.getValues("translations") || {};
+        const newTranslations = { ...currentTranslations };
+        let hasNew = false;
+        langs.forEach(l => {
+          if (l.code !== 'vi' && !newTranslations[l.code]) {
+            newTranslations[l.code] = { title: "", description: "", content: "" };
+            hasNew = true;
+          }
+        });
+        if (hasNew) {
+          form.setValue("translations", newTranslations);
+        }
       } catch (error) {
         console.error("Error fetching languages:", error);
       }
@@ -319,7 +333,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                   </TabsList>
 
                   <TabsContent value="vi" className="space-y-6">
-                    <FormField name="title" render={({ field }) => (
+                    <FormField control={form.control} name="title" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-semibold">Tiêu đề chính <span className="text-destructive">*</span></FormLabel>
                         <FormControl>
@@ -335,7 +349,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     )} />
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField name="categoryId" render={({ field }) => (
+                      <FormField control={form.control} name="categoryId" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-semibold">Chuyên mục</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value}>
@@ -348,7 +362,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         </FormItem>
                       )} />
 
-                      <FormField name="slug" render={({ field }) => (
+                      <FormField control={form.control} name="slug" render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-semibold">Đường dẫn tĩnh (Slug)</FormLabel>
                           <FormControl>
@@ -362,7 +376,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       )} />
                     </div>
 
-                    <FormField name="description" render={({ field }) => (
+                    <FormField control={form.control} name="description" render={({ field }) => (
                       <FormItem>
                         <FormLabel className="font-semibold">Tóm tắt ngắn (Description)</FormLabel>
                         <FormControl><Textarea placeholder="Mô tả nội dung bài viết trong khoảng 160 ký tự..." className="min-h-[80px] resize-none bg-slate-50/50" {...field} /></FormControl>
@@ -376,7 +390,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       <Controller
                         control={form.control}
                         name="content"
-                        render={({ field }) => <LexicalEditorDynamic key="vi" value={field.value || ""} onChange={field.onChange} />}
+                        render={({ field }) => <LexicalEditorDynamic key={`vi-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />}
                       />
                       {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
                     </div>
@@ -411,7 +425,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         </Button>
                       </div>
 
-                      <FormField name={`translations.${lang.code}.title`} render={({ field }) => (
+                      <FormField control={form.control} name={`translations.${lang.code}.title`} render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-semibold text-blue-700">Tiêu đề ({lang.name})</FormLabel>
                           <FormControl>
@@ -425,7 +439,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         </FormItem>
                       )} />
 
-                      <FormField name={`translations.${lang.code}.description`} render={({ field }) => (
+                      <FormField control={form.control} name={`translations.${lang.code}.description`} render={({ field }) => (
                         <FormItem>
                           <FormLabel className="font-semibold text-blue-700">Tóm tắt ({lang.name})</FormLabel>
                           <FormControl>
@@ -444,7 +458,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                         <Controller
                           control={form.control}
                           name={`translations.${lang.code}.content`}
-                          render={({ field }) => <LexicalEditorDynamic key={lang.code} value={field.value || ""} onChange={field.onChange} />}
+                          render={({ field }) => <LexicalEditorDynamic key={`${lang.code}-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />}
                         />
                       </div>
                     </TabsContent>

@@ -134,7 +134,7 @@ export class PostsController {
       }
 
       console.log(`[PostsController] Processing translation for post ${postId}, lang ${targetLang}`);
-      
+
       const updateData: any = {};
       if (field) {
         updateData[field] = translatedText;

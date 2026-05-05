@@ -23,7 +23,7 @@ import { UseGuards } from '@nestjs/common';
 export class PostsCategoryController {
   private categoryService: any;
 
-  constructor(@Inject(MICROSERVICES.POSTS_CATEGORY.SYMBOL) private client: ClientGrpc) {}
+  constructor(@Inject(MICROSERVICES.POSTS_CATEGORY.SYMBOL) private client: ClientGrpc) { }
 
   onModuleInit() {
     this.categoryService = this.client.getService<any>(MICROSERVICES.POSTS_CATEGORY.SERVICE);
