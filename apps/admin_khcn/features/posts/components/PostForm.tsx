@@ -180,6 +180,18 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     }
   };
 
+  const handleTranslationTitleChange = (langCode: string, e: React.ChangeEvent<HTMLInputElement>, onChangeOriginal: (...event: any[]) => void) => {
+    const newTitle = e.target.value;
+    onChangeOriginal(newTitle);
+
+    const slugName = `translations.${langCode}.slug` as any;
+    const isSlugDirty = (form.formState.dirtyFields as any).translations?.[langCode]?.slug;
+
+    if (!isSlugDirty) {
+      form.setValue(slugName, convertToSlug(newTitle), { shouldValidate: true });
+    }
+  };
+
   const { data: categories } = useQuery({
     queryKey: ["posts-categories"],
     queryFn: async () => {
@@ -456,6 +468,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                                 placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
                                 className="text-lg py-6 focus-visible:ring-blue-500 border-blue-100 bg-blue-50/10"
                                 {...field}
+                                onChange={(e) => handleTranslationTitleChange(lang.code, e, field.onChange)}
                               />
                             </FormControl>
                             <FormMessage />

@@ -115,11 +115,21 @@ export class PostsService implements OnModuleInit {
     }
   }
 
+  private generateSlug(text: string): string {
+    if (!text) return '';
+    return text.toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[đĐ]/g, 'd')
+      .replace(/([^a-z0-9\s-]|(?<=\s)-|-(?=\s))/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  }
+
   async create(data: any) {
     const { tagIds, translations, ...rest } = data;
-    const slug = rest.slug || rest.title.toLowerCase()
-      .replace(/ /g, '-')
-      .replace(/[^\w-]+/g, '');
+    const slug = rest.slug || this.generateSlug(rest.title);
 
     const post = await this.prisma.post.create({
       data: {
@@ -159,7 +169,7 @@ export class PostsService implements OnModuleInit {
             langCode,
             // Nếu là ngôn ngữ tự động dịch và để trống -> dùng nhãn chờ, ngược lại mới fallback VN
             title: t.title || (isAuto ? `[Đang dịch ${langCode}...]` : post.title),
-            slug: t.slug || "",
+            slug: t.slug || this.generateSlug(t.title || post.title),
             description: t.description || (isAuto ? "" : post.description),
             content: t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content),
             version: 1,
@@ -242,6 +252,7 @@ export class PostsService implements OnModuleInit {
 
     const nextVersion = post.currentVersion + 1;
     let parsedTranslations = translations;
+    const slug = rest.slug || (rest.title ? this.generateSlug(rest.title) : post.slug);
     if (translations && typeof translations === 'string') {
       try {
         parsedTranslations = JSON.parse(translations);
@@ -261,7 +272,7 @@ export class PostsService implements OnModuleInit {
         isFeatured: rest.isFeatured,
         isNotification: rest.isNotification,
         isCommentAllowed: rest.isCommentAllowed,
-        slug: rest.slug,
+        slug: slug,
         status: rest.status,
         currentVersion: nextVersion,
         tags: tagIds ? {
@@ -299,7 +310,7 @@ export class PostsService implements OnModuleInit {
               postId: id,
               langCode,
               title: t.title || (existingTrans?.title || (isAuto ? `[Đang dịch ${langCode}...]` : updatedPost.title)),
-              slug: t.slug || existingTrans?.slug || "",
+              slug: t.slug || this.generateSlug(t.title || existingTrans?.title || updatedPost.title),
               description: t.description || existingTrans?.description || (isAuto ? "" : updatedPost.description),
               content: t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content)),
               version: existingTrans ? existingTrans.version + 1 : 1,
@@ -573,7 +584,7 @@ export class PostsService implements OnModuleInit {
         postId,
         langCode,
         title: data.title || (existingTrans?.title || post.title),
-        slug: data.slug || existingTrans?.slug || "",
+        slug: data.slug || existingTrans?.slug || this.generateSlug(data.title || existingTrans?.title || post.title),
         description: data.description || existingTrans?.description || "",
         content: data.content || existingTrans?.content || post.content,
         contentHtml: this.lexicalToHtml(data.content || existingTrans?.content || post.content || ''),

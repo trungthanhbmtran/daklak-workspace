@@ -23,7 +23,7 @@ import { Roles, Role } from '../../common/decorators/roles.decorator';
 export class InteractionsController {
   private interactionService: any;
 
-  constructor(@Inject(MICROSERVICES.INTERACTION.SYMBOL) private client: ClientGrpc) {}
+  constructor(@Inject(MICROSERVICES.INTERACTION.SYMBOL) private client: ClientGrpc) { }
 
   onModuleInit() {
     this.interactionService = this.client.getService<any>(MICROSERVICES.INTERACTION.SERVICE);
@@ -33,7 +33,16 @@ export class InteractionsController {
   @Get('comments')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listComments(@Query() query: any) {
-    return firstValueFrom(this.interactionService.listComments(query));
+    const response = (await firstValueFrom(this.interactionService.listComments(query))) as any;
+    return {
+      success: true,
+      data: response.items,
+      meta: {
+        total: response.total,
+        page: Number(query.page) || 1,
+        limit: Number(query.limit) || 10,
+      },
+    };
   }
 
   @Put('comments/:id/status')
@@ -52,16 +61,25 @@ export class InteractionsController {
   @Get('questions')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listQuestions(@Query() query: any) {
-    return firstValueFrom(this.interactionService.listQuestions(query));
+    const response = (await firstValueFrom(this.interactionService.listQuestions(query))) as any;
+    return {
+      success: true,
+      data: response.items,
+      meta: {
+        total: response.total,
+        page: Number(query.page) || 1,
+        limit: Number(query.limit) || 10,
+      },
+    };
   }
 
   @Post('questions/:id/answer')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async answerQuestion(@Param('id') id: string, @Body() dto: any, @Req() req: any) {
-    return firstValueFrom(this.interactionService.answerQuestion({ 
-      id, 
-      ...dto, 
-      answeredById: req.user.id 
+    return firstValueFrom(this.interactionService.answerQuestion({
+      id,
+      ...dto,
+      answeredById: req.user.id
     }));
   }
 
@@ -74,7 +92,16 @@ export class InteractionsController {
   @Get('feedbacks')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listFeedbacks(@Query() query: any) {
-    return firstValueFrom(this.interactionService.listFeedbacks(query));
+    const response = (await firstValueFrom(this.interactionService.listFeedbacks(query))) as any;
+    return {
+      success: true,
+      data: response.items,
+      meta: {
+        total: response.total,
+        page: Number(query.page) || 1,
+        limit: Number(query.limit) || 10,
+      },
+    };
   }
 
   @Put('feedbacks/:id/status')

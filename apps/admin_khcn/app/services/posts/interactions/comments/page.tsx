@@ -17,9 +17,8 @@ export default function CommentsModerationPage() {
 
   const fetchComments = async () => {
     try {
-      // Mặc định lấy các bình luận đang chờ duyệt (PENDING)
-      const { data } = await postsApi.getComments({ status: 'PENDING', page: 1, limit: 50 });
-      setComments(data);
+      const response = await postsApi.getComments({ status: 'PENDING', page: 1, limit: 50 });
+      setComments(response.data || []);
     } catch {
       toast.error("Không thể tải danh sách bình luận");
     } finally {
