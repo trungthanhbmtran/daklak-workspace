@@ -8,7 +8,8 @@ from database.session import SessionLocal
 
 class SmartTranslator:
     def __init__(self):
-        self.ai = Translator()
+        # Tăng timeout lên 20 giây để xử lý các đoạn văn bản dài
+        self.ai = Translator(timeout=20.0)
         self.lang_mapping = {
             'en-us': 'en',
             'en-gb': 'en',
@@ -54,12 +55,19 @@ class SmartTranslator:
                         # 1. Áp dụng Glossary trước khi dịch
                         processed_text = self._apply_glossary(original_text, dest, db)
                         
-                        # 2. Nếu sau khi áp dụng glossary mà text vẫn chứa ký tự cần dịch (hoặc nếu muốn AI xử lý tiếp)
-                        # Ở đây chúng ta gửi đoạn đã xử lý sang AI
-                        translated = self.ai.translate(processed_text, dest=dest).text
+                        # 2. Gửi sang AI với cơ chế thử lại
+                        translated = ""
+                        for attempt in range(3):
+                            try:
+                                translated = self.ai.translate(processed_text, dest=dest).text
+                                break
+                            except Exception as e:
+                                if attempt == 2: raise e
+                                print(f"Retrying translation (attempt {attempt + 1})...")
+                        
                         data['text'] = translated
                     except Exception as e:
-                        print(f"Error translating lexical text node: {e}")
+                        print(f"Error translating lexical text node after retries: {e}")
             
             # Duyệt tiếp các thuộc tính khác (đặc biệt là 'children')
             for key, value in data.items():
@@ -117,9 +125,15 @@ class SmartTranslator:
                 # 1. Áp dụng Glossary trước (ví dụ: thay thế UBND -> People's Committee)
                 processed_text = self._apply_glossary(text, ai_dest_lang, db)
                 
-                # 2. Gửi sang AI dịch phần còn lại
-                result = self.ai.translate(processed_text, dest=ai_dest_lang)
-                translated_text = result.text
+                # 2. Gửi sang AI dịch phần còn lại với cơ chế thử lại
+                for attempt in range(3):
+                    try:
+                        result = self.ai.translate(processed_text, dest=ai_dest_lang)
+                        translated_text = result.text
+                        break
+                    except Exception as e:
+                        if attempt == 2: raise e
+                        print(f"Retrying plain text translation (attempt {attempt + 1})...")
 
             # 3. Tự học: Lưu vào database với mã ngôn ngữ GỐC
             new_entry = TranslationDictionary(
