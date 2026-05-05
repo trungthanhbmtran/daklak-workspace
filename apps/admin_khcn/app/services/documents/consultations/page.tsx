@@ -91,7 +91,7 @@ export default function ConsultationsPage() {
                   </Button>
                </Link>
 
-               <Button 
+               <Button
                   onClick={() => setIsModalOpen(true)}
                   className="flex-1 md:flex-none rounded-xl shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 font-bold px-6"
                >
@@ -105,7 +105,7 @@ export default function ConsultationsPage() {
          <Card className="border-none shadow-xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-2xl p-4 overflow-hidden relative">
             <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
             <div className="flex flex-col lg:flex-row gap-4 items-center">
-               
+
                {/* SEARCH BOX */}
                <div className="relative flex-1 w-full">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
@@ -157,14 +157,14 @@ export default function ConsultationsPage() {
             ) : consultations.map((con: any) => {
                const totalUnits = Number(con.totalUnits) || 0;
                const totalResponses = Number(con.totalResponses) || 0;
-               const progress = totalUnits > 0 
-                  ? Math.min(100, Math.round((totalResponses / totalUnits) * 100)) 
+               const progress = totalUnits > 0
+                  ? Math.min(100, Math.round((totalResponses / totalUnits) * 100))
                   : 0;
                const isUrgent = !!con.isUrgent;
 
                return (
                   <Card key={con.id} className="border-none shadow-2xl shadow-foreground/5 overflow-hidden group hover:shadow-primary/10 transition-all duration-500 rounded-3xl bg-background flex flex-col md:flex-row">
-                     
+
                      {/* CARD MAIN CONTENT */}
                      <div className="flex-1 p-8 space-y-6">
                         <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
@@ -194,9 +194,8 @@ export default function ConsultationsPage() {
                               </div>
                            </div>
 
-                           <div className={`px-5 py-2 rounded-2xl font-black text-xs shadow-inner ${
-                              con.status === "OPEN" ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
-                           }`}>
+                           <div className={`px-5 py-2 rounded-2xl font-black text-xs shadow-inner ${con.status === "OPEN" ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
+                              }`}>
                               {con.status === "OPEN" ? "ĐANG LẤY Ý KIẾN" : "ĐÃ KẾT THÚC"}
                            </div>
                         </div>
@@ -237,7 +236,7 @@ export default function ConsultationsPage() {
                            <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-muted-foreground">
                               <FileText className="h-4 w-4" /> Tài liệu đính kèm
                            </div>
-                           
+
                            {con.documentId ? (
                               <a
                                  href={`/api/v1/media/download/${con.documentId}`}
@@ -274,7 +273,7 @@ export default function ConsultationsPage() {
                );
             })}
          </div>
-         <ConsultationCreateModal 
+         <ConsultationCreateModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
          />

@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { useFileUpload } from "@/hooks/useFileUpload";
+import { FileUp, FileCheck } from "lucide-react";
 
 const consultationSchema = z.object({
   title: z.string().min(5, "Tiêu đề đợt lấy ý kiến phải có ít nhất 5 ký tự"),
@@ -52,6 +54,8 @@ function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): a
 export function ConsultationCreateModal({ isOpen, onClose, documentId }: ConsultationCreateModalProps) {
   const { createConsultation, isLoading } = useDocuments();
   const [unitSearch, setUnitSearch] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { uploadFile, isUploading } = useFileUpload();
 
   const { data: treeNodes } = useQuery({
     queryKey: ["organizations", "tree"],
@@ -75,11 +79,33 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
 
   const onSubmit = async (values: ConsultationFormValues) => {
     try {
-      await createConsultation(values);
+      let finalDocumentId = values.documentId;
+
+      // 1. Upload file if selected
+      if (selectedFile) {
+        const media = await uploadFile(selectedFile);
+        if (media?.id) {
+          finalDocumentId = media.id;
+        }
+      }
+
+      // 2. Create consultation
+      await createConsultation({
+        ...values,
+        documentId: finalDocumentId
+      });
+      
       onClose();
       form.reset();
+      setSelectedFile(null);
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
     }
   };
 
@@ -138,12 +164,52 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
                     <FormItem>
                       <FormLabel className="text-xs font-black uppercase text-muted-foreground tracking-widest">Nội dung / Yêu cầu góp ý</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="Mô tả chi tiết các nội dung cần các đơn vị tập trung góp ý..." className="rounded-xl min-h-[150px] resize-none bg-muted/20 border-none font-medium" {...field} />
+                        <Textarea placeholder="Mô tả chi tiết các nội dung cần các đơn vị tập trung góp ý..." className="rounded-xl min-h-[120px] resize-none bg-muted/20 border-none font-medium" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {/* File Upload Section */}
+                <div className="space-y-3">
+                  <FormLabel className="text-xs font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
+                    <FileUp className="h-3.5 w-3.5 text-primary" /> Tệp dự thảo lấy ý kiến
+                  </FormLabel>
+                  
+                  {!selectedFile ? (
+                    <div 
+                      onClick={() => document.getElementById("consult-file-upload")?.click()}
+                      className="border-2 border-dashed border-primary/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group"
+                    >
+                      <div className="p-3 bg-white rounded-xl shadow-sm text-primary group-hover:scale-110 transition-transform">
+                        <FileUp className="h-6 w-6" />
+                      </div>
+                      <p className="text-sm font-bold text-primary">Nhấn để chọn tệp PDF/Docx</p>
+                      <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Tối đa 25MB</p>
+                      <input id="consult-file-upload" type="file" className="hidden" accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4 p-4 rounded-2xl bg-emerald-50 border border-emerald-100 shadow-sm animate-in fade-in zoom-in duration-300">
+                      <div className="p-3 bg-emerald-500 rounded-xl text-white">
+                        <FileCheck className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-emerald-900 truncate">{selectedFile.name}</p>
+                        <p className="text-[10px] font-mono text-emerald-600">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <Button 
+                        type="button" 
+                        variant="ghost" 
+                        size="icon" 
+                        onClick={() => setSelectedFile(null)}
+                        className="rounded-full text-emerald-600 hover:bg-emerald-100"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
 
                 <div className="grid grid-cols-1 gap-4">
                   <FormField
@@ -243,8 +309,8 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
 
             <DialogFooter className="pt-6 gap-2 border-t mt-4 shrink-0">
               <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl h-12 px-8 font-bold">Hủy bỏ</Button>
-              <Button type="submit" className="rounded-xl h-12 px-12 shadow-xl shadow-primary/20 bg-primary font-black text-lg transition-all active:scale-95 group" disabled={isLoading}>
-                {isLoading ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Save className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />}
+              <Button type="submit" className="rounded-xl h-12 px-12 shadow-xl shadow-primary/20 bg-primary font-black text-lg transition-all active:scale-95 group" disabled={isLoading || isUploading}>
+                {isLoading || isUploading ? <Loader2 className="h-5 w-5 mr-2 animate-spin" /> : <Save className="h-5 w-5 mr-2 group-hover:scale-110 transition-transform" />}
                 PHÁT HÀNH
               </Button>
             </DialogFooter>
