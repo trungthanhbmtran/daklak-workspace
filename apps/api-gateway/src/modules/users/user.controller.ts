@@ -15,7 +15,7 @@ export class UserController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.userService = this.client.getService(MICROSERVICES.USER.SERVICE);
@@ -25,14 +25,23 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách user' })
   @ApiResponse({ status: 200, description: 'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)' })
   async list() {
-    return firstValueFrom(this.userService.ListUsers({}));
+    const response = (await firstValueFrom(this.userService.ListUsers({}))) as any;
+    return {
+      success: true,
+      data: response.data || [],
+      meta: response.meta,
+    };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết user theo ID' })
   @ApiResponse({ status: 200, description: 'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)' })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.userService.FindOne({ id }));
+    const data = await firstValueFrom(this.userService.FindOne({ id }));
+    return {
+      success: true,
+      data: data,
+    };
   }
 
   @Post()

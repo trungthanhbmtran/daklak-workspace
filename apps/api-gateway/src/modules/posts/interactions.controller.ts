@@ -33,7 +33,7 @@ export class InteractionsController {
   @Get('comments')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listComments(@Query() query: any) {
-    const response = (await firstValueFrom(this.interactionService.listComments(query))) as any;
+    const response: any = await firstValueFrom(this.interactionService.listComments(query));
     return {
       success: true,
       data: response.items,
@@ -61,7 +61,7 @@ export class InteractionsController {
   @Get('questions')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listQuestions(@Query() query: any) {
-    const response = (await firstValueFrom(this.interactionService.listQuestions(query))) as any;
+    const response: any = await firstValueFrom(this.interactionService.listQuestions(query));
     return {
       success: true,
       data: response.items,
@@ -92,7 +92,7 @@ export class InteractionsController {
   @Get('feedbacks')
   @Roles(Role.ADMIN, Role.REVIEWER)
   async listFeedbacks(@Query() query: any) {
-    const response = (await firstValueFrom(this.interactionService.listFeedbacks(query))) as any;
+    const response: any = await firstValueFrom(this.interactionService.listFeedbacks(query));
     return {
       success: true,
       data: response.items,
