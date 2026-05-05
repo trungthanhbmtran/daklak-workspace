@@ -136,6 +136,7 @@ CREATE TABLE `posts` (
     `description` TEXT NULL,
     `content` LONGTEXT NULL,
     `content_json` LONGTEXT NULL,
+    `translations` JSON NULL,
     `slug` VARCHAR(191) NOT NULL,
     `thumbnail` VARCHAR(191) NULL,
     `author_id` VARCHAR(191) NOT NULL,
@@ -181,6 +182,7 @@ CREATE TABLE `posts_versions` (
     `description` TEXT NULL,
     `content` LONGTEXT NULL,
     `content_json` LONGTEXT NULL,
+    `translations` JSON NULL,
     `editor_id` VARCHAR(191) NOT NULL,
     `change_note` TEXT NULL,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
@@ -226,6 +228,26 @@ CREATE TABLE `posts_audit_logs` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
+CREATE TABLE `posts_translations` (
+    `id` VARCHAR(191) NOT NULL,
+    `post_id` VARCHAR(191) NOT NULL,
+    `lang_code` VARCHAR(191) NOT NULL,
+    `title` VARCHAR(191) NOT NULL,
+    `slug` VARCHAR(191) NULL,
+    `description` TEXT NULL,
+    `content` LONGTEXT NULL,
+    `version` INTEGER NOT NULL DEFAULT 1,
+    `main_version_ref` INTEGER NOT NULL,
+    `is_published` BOOLEAN NOT NULL DEFAULT false,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL,
+
+    INDEX `posts_translations_post_id_idx`(`post_id`),
+    INDEX `posts_translations_lang_code_idx`(`lang_code`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
 CREATE TABLE `_PostToTag` (
     `A` VARCHAR(191) NOT NULL,
     `B` VARCHAR(191) NOT NULL,
@@ -257,6 +279,9 @@ ALTER TABLE `posts_moderation_logs` ADD CONSTRAINT `posts_moderation_logs_post_i
 
 -- AddForeignKey
 ALTER TABLE `posts_audit_logs` ADD CONSTRAINT `posts_audit_logs_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `posts_translations` ADD CONSTRAINT `posts_translations_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_PostToTag` ADD CONSTRAINT `_PostToTag_A_fkey` FOREIGN KEY (`A`) REFERENCES `posts`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

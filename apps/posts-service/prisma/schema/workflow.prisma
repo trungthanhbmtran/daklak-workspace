@@ -57,3 +57,27 @@ model AuditLog {
   @@index([action])
   @@map("posts_audit_logs")
 }
+
+model PostTranslation {
+  id              String   @id @default(uuid())
+  postId          String   @map("post_id")
+  langCode        String   @map("lang_code")
+  
+  title           String
+  slug            String?
+  description     String?  @db.Text
+  content         String?  @db.LongText
+  
+  version         Int      @default(1)
+  mainVersionRef  Int      @map("main_version_ref") // Phiên bản của nội dung gốc mà bản dịch này dựa trên
+  
+  isPublished     Boolean  @default(false) @map("is_published")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade, name: "PostToTranslation")
+
+  @@index([postId])
+  @@index([langCode])
+  @@map("posts_translations")
+}

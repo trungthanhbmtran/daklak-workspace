@@ -394,7 +394,8 @@ export const ModelName = {
   Tag: 'Tag',
   PostVersion: 'PostVersion',
   ModerationLog: 'ModerationLog',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  PostTranslation: 'PostTranslation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -410,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "banner" | "category" | "comment" | "citizenQuestion" | "citizenFeedback" | "portalMenu" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog"
+    modelProps: "banner" | "category" | "comment" | "citizenQuestion" | "citizenFeedback" | "portalMenu" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog" | "postTranslation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1140,6 +1141,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PostTranslation: {
+      payload: Prisma.$PostTranslationPayload<ExtArgs>
+      fields: Prisma.PostTranslationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PostTranslationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PostTranslationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>
+        }
+        findFirst: {
+          args: Prisma.PostTranslationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PostTranslationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>
+        }
+        findMany: {
+          args: Prisma.PostTranslationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>[]
+        }
+        create: {
+          args: Prisma.PostTranslationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>
+        }
+        createMany: {
+          args: Prisma.PostTranslationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PostTranslationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>
+        }
+        update: {
+          args: Prisma.PostTranslationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>
+        }
+        deleteMany: {
+          args: Prisma.PostTranslationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PostTranslationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PostTranslationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PostTranslationPayload>
+        }
+        aggregate: {
+          args: Prisma.PostTranslationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePostTranslation>
+        }
+        groupBy: {
+          args: Prisma.PostTranslationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostTranslationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PostTranslationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PostTranslationCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1388,6 +1455,24 @@ export const AuditLogScalarFieldEnum = {
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
+export const PostTranslationScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  langCode: 'langCode',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  content: 'content',
+  version: 'version',
+  mainVersionRef: 'mainVersionRef',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PostTranslationScalarFieldEnum = (typeof PostTranslationScalarFieldEnum)[keyof typeof PostTranslationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1593,6 +1678,19 @@ export const AuditLogOrderByRelevanceFieldEnum = {
 export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
 
 
+export const PostTranslationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  langCode: 'langCode',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  content: 'content'
+} as const
+
+export type PostTranslationOrderByRelevanceFieldEnum = (typeof PostTranslationOrderByRelevanceFieldEnum)[keyof typeof PostTranslationOrderByRelevanceFieldEnum]
+
+
 
 /**
  * Field references
@@ -1753,6 +1851,7 @@ export type GlobalOmitConfig = {
   postVersion?: Prisma.PostVersionOmit
   moderationLog?: Prisma.ModerationLogOmit
   auditLog?: Prisma.AuditLogOmit
+  postTranslation?: Prisma.PostTranslationOmit
 }
 
 /* Types for Logging */

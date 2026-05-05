@@ -32,6 +32,7 @@ model Post {
   
   tags                  Tag[]     @relation("PostToTag")
   versions              PostVersion[]
+  translations_rel      PostTranslation[] @relation("PostToTranslation")
   comments              Comment[]
   moderationLogs        ModerationLog[]
   auditLogs             AuditLog[]

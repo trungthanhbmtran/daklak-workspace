@@ -61,7 +61,8 @@ export const ModelName = {
   Tag: 'Tag',
   PostVersion: 'PostVersion',
   ModerationLog: 'ModerationLog',
-  AuditLog: 'AuditLog'
+  AuditLog: 'AuditLog',
+  PostTranslation: 'PostTranslation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -289,6 +290,24 @@ export const AuditLogScalarFieldEnum = {
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum]
 
 
+export const PostTranslationScalarFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  langCode: 'langCode',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  content: 'content',
+  version: 'version',
+  mainVersionRef: 'mainVersionRef',
+  isPublished: 'isPublished',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PostTranslationScalarFieldEnum = (typeof PostTranslationScalarFieldEnum)[keyof typeof PostTranslationScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -492,4 +511,17 @@ export const AuditLogOrderByRelevanceFieldEnum = {
 } as const
 
 export type AuditLogOrderByRelevanceFieldEnum = (typeof AuditLogOrderByRelevanceFieldEnum)[keyof typeof AuditLogOrderByRelevanceFieldEnum]
+
+
+export const PostTranslationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  postId: 'postId',
+  langCode: 'langCode',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  content: 'content'
+} as const
+
+export type PostTranslationOrderByRelevanceFieldEnum = (typeof PostTranslationOrderByRelevanceFieldEnum)[keyof typeof PostTranslationOrderByRelevanceFieldEnum]
 

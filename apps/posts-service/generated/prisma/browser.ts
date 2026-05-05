@@ -72,3 +72,8 @@ export type ModerationLog = Prisma.ModerationLogModel
  * 
  */
 export type AuditLog = Prisma.AuditLogModel
+/**
+ * Model PostTranslation
+ * 
+ */
+export type PostTranslation = Prisma.PostTranslationModel

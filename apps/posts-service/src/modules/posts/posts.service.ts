@@ -34,24 +34,15 @@ export class PostsService {
   }
 
   async create(data: any) {
-    const { tagIds, ...rest } = data;
+    const { tagIds, translations, ...rest } = data;
     const slug = rest.slug || rest.title.toLowerCase()
       .replace(/ /g, '-')
       .replace(/[^\w-]+/g, '');
 
-    let parsedTranslations = {};
-    if (rest.translations) {
-      try {
-        parsedTranslations = typeof rest.translations === 'string' ? JSON.parse(rest.translations) : rest.translations;
-      } catch (e) {
-        console.error('Error parsing translations in post create:', e);
-      }
-    }
-
     const post = await this.prisma.post.create({
       data: {
         ...rest,
-        translations: parsedTranslations,
+        translations: translations || {}, // Vẫn giữ JSON để cache
         slug,
         status: PostStatus.DRAFT,
         tags: {
@@ -64,7 +55,28 @@ export class PostsService {
       },
     });
 
-    // Create initial version
+    // 1. Lưu bản dịch vào bảng PostTranslation
+    if (translations) {
+      const translationEntries = typeof translations === 'string' ? JSON.parse(translations) : translations;
+      for (const [langCode, trans] of Object.entries(translationEntries)) {
+        const t = trans as any;
+        await this.prisma.postTranslation.create({
+          data: {
+            postId: post.id,
+            langCode,
+            title: t.title || post.title,
+            slug: t.slug || "",
+            description: t.description || "",
+            content: t.content || "",
+            version: 1,
+            mainVersionRef: 1,
+            isPublished: post.status === PostStatus.PUBLISHED
+          }
+        });
+      }
+    }
+
+    // 2. Create initial version
     await this.prisma.postVersion.create({
       data: {
         postId: post.id,
@@ -73,7 +85,7 @@ export class PostsService {
         description: post.description,
         content: post.content,
         contentJson: post.contentJson,
-        translations: post.translations || {},
+        translations: translations || {},
         editorId: post.authorId,
         changeNote: 'Initial creation',
       },
@@ -98,20 +110,150 @@ export class PostsService {
       include: {
         tags: true,
         category: true,
+        translations_rel: {
+          orderBy: { version: 'desc' }
+        }
       },
     });
     if (!post) throw new NotFoundException('Post not found');
-    return post;
+
+    // Format lại translations từ bảng PostTranslation để tương thích với Frontend
+    const latestTranslations: any = {};
+    if (post.translations_rel) {
+      // Chỉ lấy bản mới nhất của từng ngôn ngữ
+      post.translations_rel.forEach(trans => {
+        if (!latestTranslations[trans.langCode]) {
+          latestTranslations[trans.langCode] = trans;
+        }
+      });
+    }
+    
+    return {
+      ...post,
+      translations: latestTranslations
+    };
   }
 
-  async findBySlug(slug: string) {
-    return this.prisma.post.findFirst({
-      where: { slug, isDeleted: false, status: PostStatus.PUBLISHED },
+  async update(id: string, data: any) {
+    const { tagIds, actorId, changeNote, translations, ...rest } = data;
+
+    const post = await this.prisma.post.findUnique({ 
+      where: { id },
+      include: { translations_rel: true }
+    });
+    if (!post) throw new NotFoundException('Post not found');
+
+    const nextVersion = post.currentVersion + 1;
+    let parsedTranslations = translations;
+    if (translations && typeof translations === 'string') {
+      try {
+        parsedTranslations = JSON.parse(translations);
+      } catch (e) {
+        console.error('Error parsing translations in post update:', e);
+      }
+    }
+
+    const updatedPost = await this.prisma.post.update({
+      where: { id },
+      data: {
+        ...rest,
+        translations: parsedTranslations || post.translations,
+        currentVersion: nextVersion,
+        tags: tagIds ? {
+          set: tagIds.map((id: string) => ({ id })),
+        } : undefined,
+      },
       include: {
         tags: true,
         category: true,
       },
     });
+
+    // 1. Xử lý lưu bản dịch vào bảng PostTranslation với versioning
+    if (parsedTranslations) {
+      for (const [langCode, trans] of Object.entries(parsedTranslations)) {
+        const t = trans as any;
+        // Tìm bản dịch hiện tại của ngôn ngữ này
+        const existingTrans = await this.prisma.postTranslation.findFirst({
+          where: { postId: id, langCode },
+          orderBy: { version: 'desc' }
+        });
+
+        // Kiểm tra xem có thay đổi nội dung dịch không
+        const isChanged = !existingTrans || 
+          existingTrans.title !== t.title || 
+          existingTrans.content !== t.content ||
+          existingTrans.description !== t.description;
+
+        if (isChanged) {
+          await this.prisma.postTranslation.create({
+            data: {
+              postId: id,
+              langCode,
+              title: t.title || updatedPost.title,
+              slug: t.slug || "",
+              description: t.description || "",
+              content: t.content || "",
+              version: existingTrans ? existingTrans.version + 1 : 1,
+              mainVersionRef: nextVersion,
+              isPublished: updatedPost.status === PostStatus.PUBLISHED
+            }
+          });
+        }
+      }
+    }
+
+    // 2. Create new version
+    await this.prisma.postVersion.create({
+      data: {
+        postId: id,
+        version: nextVersion,
+        title: updatedPost.title,
+        description: updatedPost.description,
+        content: updatedPost.content,
+        contentJson: updatedPost.contentJson,
+        translations: parsedTranslations || updatedPost.translations,
+        editorId: actorId || updatedPost.authorId,
+        changeNote: changeNote || 'Updated content',
+      },
+    });
+
+    await this.auditService.log({
+      postId: id,
+      actorId: actorId || updatedPost.authorId,
+      action: 'UPDATE_POST',
+      entityId: id,
+      metadata: { version: nextVersion, changeNote },
+    });
+
+    await this.triggerTranslation(updatedPost);
+
+    return updatedPost;
+  }
+  async findBySlug(slug: string) {
+    const post = await this.prisma.post.findFirst({
+      where: { slug, isDeleted: false, status: PostStatus.PUBLISHED },
+      include: {
+        tags: true,
+        category: true,
+        translations_rel: {
+          orderBy: { version: 'desc' }
+        }
+      },
+    });
+    if (!post) return null;
+
+    // Format translations
+    const latestTranslations: any = {};
+    if (post.translations_rel) {
+      post.translations_rel.forEach(trans => {
+        if (!latestTranslations[trans.langCode]) {
+          latestTranslations[trans.langCode] = trans;
+        }
+      });
+    }
+
+    return { ...post, translations: latestTranslations };
   }
 
   async findAll(query: any) {
@@ -154,65 +296,6 @@ export class PostsService {
         totalPages: Math.ceil(total / limit),
       },
     };
-  }
-
-  async update(id: string, data: any) {
-    const { tagIds, actorId, changeNote, ...rest } = data;
-
-    const post = await this.prisma.post.findUnique({ where: { id } });
-    if (!post) throw new NotFoundException('Post not found');
-
-    const nextVersion = post.currentVersion + 1;
-
-    if (rest.translations && typeof rest.translations === 'string') {
-      try {
-        rest.translations = JSON.parse(rest.translations);
-      } catch (e) {
-        console.error('Error parsing translations in post update:', e);
-      }
-    }
-
-    const updatedPost = await this.prisma.post.update({
-      where: { id },
-      data: {
-        ...rest,
-        currentVersion: nextVersion,
-        tags: tagIds ? {
-          set: tagIds.map((id: string) => ({ id })),
-        } : undefined,
-      },
-      include: {
-        tags: true,
-        category: true,
-      },
-    });
-
-    // Create new version
-    await this.prisma.postVersion.create({
-      data: {
-        postId: id,
-        version: nextVersion,
-        title: updatedPost.title,
-        description: updatedPost.description,
-        content: updatedPost.content,
-        contentJson: updatedPost.contentJson,
-        translations: updatedPost.translations || {},
-        editorId: actorId || updatedPost.authorId,
-        changeNote: changeNote || 'Updated content',
-      },
-    });
-
-    await this.auditService.log({
-      postId: id,
-      actorId: actorId || updatedPost.authorId,
-      action: 'UPDATE_POST',
-      entityId: id,
-      metadata: { version: nextVersion, changeNote },
-    });
-
-    await this.triggerTranslation(updatedPost);
-
-    return updatedPost;
   }
 
   async remove(id: string, actorId?: string) {
@@ -270,20 +353,50 @@ export class PostsService {
     });
   }
 
-  async updateTranslation(postId: string, langCode: string, data: { title?: string, description?: string, content?: string }) {
-    const post = await this.prisma.post.findUnique({ where: { id: postId } });
+  async updateTranslation(postId: string, langCode: string, data: { title?: string, description?: string, content?: string, slug?: string }) {
+    const post = await this.prisma.post.findUnique({ 
+      where: { id: postId },
+      include: { translations_rel: true }
+    });
     if (!post) return;
 
+    // Lấy bản dịch hiện tại
+    const existingTrans = await this.prisma.postTranslation.findFirst({
+      where: { postId, langCode },
+      orderBy: { version: 'desc' }
+    });
+
+    const nextTransVersion = existingTrans ? existingTrans.version + 1 : 1;
+
+    // Tạo bản dịch mới
+    const newTrans = await this.prisma.postTranslation.create({
+      data: {
+        postId,
+        langCode,
+        title: data.title || (existingTrans?.title || post.title),
+        slug: data.slug || existingTrans?.slug || "",
+        description: data.description || existingTrans?.description || "",
+        content: data.content || existingTrans?.content || "",
+        version: nextTransVersion,
+        mainVersionRef: post.currentVersion,
+        isPublished: post.status === PostStatus.PUBLISHED
+      }
+    });
+
+    // Cập nhật ngược lại trường JSON để cache
     const translations = (post.translations || {}) as any;
     translations[langCode] = {
-      ...(translations[langCode] || {}),
-      ...data
+      ...data,
+      version: nextTransVersion,
+      mainVersionRef: post.currentVersion
     };
 
-    return this.prisma.post.update({
+    await this.prisma.post.update({
       where: { id: postId },
       data: { translations }
     });
+
+    return newTrans;
   }
 }
 
