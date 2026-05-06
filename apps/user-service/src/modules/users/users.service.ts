@@ -27,7 +27,7 @@ export class UsersService implements OnModuleInit {
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
     @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.workflowEngine = this.workflowClient.getService<any>('WorkflowService');
@@ -280,9 +280,9 @@ export class UsersService implements OnModuleInit {
     await this.cache.del(redisKey);
     const user = await this.prisma.user.findFirst({
       where: { id: userId, isActive: true },
-      include: { 
+      include: {
         roles: true,
-        jobPositions: { include: { unit: true }, orderBy: [{ isPrimary: 'desc' }] } 
+        jobPositions: { include: { unit: true }, orderBy: [{ isPrimary: 'desc' }] }
       },
     });
     if (!user) {

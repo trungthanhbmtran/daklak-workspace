@@ -45,7 +45,7 @@ message ListUsersRequest {
 }
 
 message ListUsersResponse {
-  repeated UserResponse items = 1;
+  repeated UserResponse data = 1;
 }
 
 // Chính sách hiệu lực (quyền kế thừa từ vai trò) – dùng cho màn chi tiết user
