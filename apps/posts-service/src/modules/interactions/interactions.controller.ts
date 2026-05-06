@@ -4,7 +4,7 @@ import { InteractionsService } from './interactions.service';
 
 @Controller()
 export class InteractionsController {
-  constructor(private readonly service: InteractionsService) {}
+  constructor(private readonly service: InteractionsService) { }
 
   // --- Comments ---
   @GrpcMethod('InteractionService', 'CreateComment')
@@ -18,7 +18,14 @@ export class InteractionsController {
     const { items, total } = await this.service.listComments(query);
     return {
       data: items.map(i => this.mapComment(i)),
-      meta: { total, page: query.page || 1, limit: query.limit || 10 }
+      meta: {
+        pagination: {
+          total,
+          page: Number(query.page) || 1,
+          pageSize: Number(query.limit) || 10,
+          totalPages: Math.ceil(total / (Number(query.limit) || 10)),
+        },
+      },
     };
   }
 
@@ -45,7 +52,14 @@ export class InteractionsController {
     const { items, total } = await this.service.listQuestions(query);
     return {
       data: items.map(i => this.mapQuestion(i)),
-      meta: { total, page: query.page || 1, limit: query.limit || 10 }
+      meta: {
+        pagination: {
+          total,
+          page: Number(query.page) || 1,
+          pageSize: Number(query.limit) || 10,
+          totalPages: Math.ceil(total / (Number(query.limit) || 10)),
+        },
+      },
     };
   }
 
@@ -73,7 +87,14 @@ export class InteractionsController {
     const { items, total } = await this.service.listFeedbacks(query);
     return {
       data: items.map(i => this.mapFeedback(i)),
-      meta: { total, page: query.page || 1, limit: query.limit || 10 }
+      meta: {
+        pagination: {
+          total,
+          page: Number(query.page) || 1,
+          pageSize: Number(query.limit) || 10,
+          totalPages: Math.ceil(total / (Number(query.limit) || 10)),
+        },
+      },
     };
   }
 

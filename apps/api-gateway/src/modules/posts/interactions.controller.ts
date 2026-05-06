@@ -36,9 +36,9 @@ export class InteractionsController {
     const response: any = await firstValueFrom(this.interactionService.listComments(query));
     return {
       success: true,
-      data: response.items,
+      data: response.data || [],
       meta: {
-        total: response.total,
+        total: response.meta?.pagination?.total || 0,
         page: Number(query.page) || 1,
         limit: Number(query.limit) || 10,
       },
@@ -64,9 +64,9 @@ export class InteractionsController {
     const response: any = await firstValueFrom(this.interactionService.listQuestions(query));
     return {
       success: true,
-      data: response.items,
+      data: response.data || [],
       meta: {
-        total: response.total,
+        total: response.meta?.pagination?.total || 0,
         page: Number(query.page) || 1,
         limit: Number(query.limit) || 10,
       },
@@ -95,9 +95,9 @@ export class InteractionsController {
     const response: any = await firstValueFrom(this.interactionService.listFeedbacks(query));
     return {
       success: true,
-      data: response.items,
+      data: response.data || [],
       meta: {
-        total: response.total,
+        total: response.meta?.pagination?.total || 0,
         page: Number(query.page) || 1,
         limit: Number(query.limit) || 10,
       },
