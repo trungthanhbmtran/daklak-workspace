@@ -14,6 +14,7 @@ const protoPath = [
   join(postsDir, 'tag.proto'),
   join(postsDir, 'banner.proto'),
   join(postsDir, 'portal_menu.proto'),
+  join(postsDir, 'interaction.proto'),
 ];
 
 async function bootstrap() {
@@ -26,7 +27,7 @@ async function bootstrap() {
     app.connectMicroservice<MicroserviceOptions>({
       transport: Transport.GRPC,
       options: {
-        package: ['post', 'category', 'tag', 'banner', 'portal_menu'],
+        package: ['post', 'category', 'tag', 'banner', 'portal_menu', 'interaction'],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50055',
         loader: {
