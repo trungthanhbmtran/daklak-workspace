@@ -8,7 +8,7 @@ import { useUserUI } from "./hooks/useUserUI";
 import { UserTable } from "./components/UserTable";
 import { CreateUserModal } from "./components/CreateUserModal";
 // Thay thế UserDetailCard bằng UserDetailSheet
-import { UserDetailSheet } from "./components/UserDetailCard"; 
+import { UserDetailSheet } from "./components/UserDetailCard";
 
 export function UserClient() {
   // GIỮ NGUYÊN TOÀN BỘ LOGIC API VÀ STATE CỦA BẠN
@@ -22,7 +22,7 @@ export function UserClient() {
     // Đổi layout thành flex-col để Table chiếm 100% chiều ngang màn hình
     <div className="flex flex-col gap-6">
       <div className="flex-1 space-y-4">
-        
+
         {/* Thanh công cụ tìm kiếm và nút Thêm */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-4 rounded-lg border shadow-sm">
           <div className="relative w-full sm:w-96">
