@@ -44,12 +44,12 @@ jobs:
             user-service: 'apps/user-service/**'
             workflow-service: 'apps/workflow-service/**'
             document-service: 'apps/document-service/**'
-            portal_goverment: 'apps/portal-goverment/**'
+            portal-goverment: 'apps/portal-goverment/**'
 
       - id: prepare
         run: |
           if [ "${{ steps.filter.outputs.workflow }}" == "true" ]; then
-            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts-service","translate_service","user-service","workflow-service","document-service","portal_goverment"]'
+            SERVICES='["admin_khcn","api-gateway","hrm-service","media-service","notification_service","posts-service","translate_service","user-service","workflow-service","document-service","portal-goverment"]'
           else
             SERVICES='${{ steps.filter.outputs.changes }}'
           fi

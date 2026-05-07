@@ -31,7 +31,7 @@ jobs:
             user-service: 'apps/user-service/**'
             workflow-service: 'apps/workflow-service/**'
             document-service: 'apps/document-service/**'
-            portal_goverment: 'apps/portal-goverment/**'
+            portal-goverment: 'apps/portal-goverment/**'
   build-push:
     needs: filter
     if: ${{ needs.filter.outputs.services != '[]' && needs.filter.outputs.services != '' }}
