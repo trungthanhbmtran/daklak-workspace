@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Grid, Headset, Info, Loader2 } from "lucide-react";
+import { Globe, Grid, Headset, Info, Loader2 } from "lucide-react";
 
 import {
   Sidebar,
@@ -63,6 +63,14 @@ export function AppSidebar({
                 <Link href="/hub">
                   <Grid className="size-4" />
                   <span>Về trang Portal (Hub)</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip="Xem Cổng Dân Cư (Portal)">
+                <Link href="/">
+                  <Globe className="size-4" />
+                  <span>Xem Cổng Dân Cư (Portal)</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

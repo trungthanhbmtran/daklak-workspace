@@ -182,6 +182,12 @@ services:
     env_file:
       - .env.production
 
+  digital-goverment:
+    image: ${DOCKER_USERNAME}/daklak-digital-goverment:${IMAGE_TAG:-latest}
+    restart: unless-stopped
+    env_file:
+      - .env.production
+
   # =============================
   # Migration Jobs
   # =============================
@@ -257,6 +263,7 @@ services:
     depends_on:
       - api-gateway
       - admin-frontend
+      - digital-goverment
 
 volumes:
   mysql_data:
