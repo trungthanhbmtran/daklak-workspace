@@ -182,8 +182,8 @@ services:
     env_file:
       - .env.production
 
-  digital-goverment:
-    image: ${DOCKER_USERNAME}/daklak-digital-goverment:${IMAGE_TAG:-latest}
+  portal-goverment:
+    image: ${DOCKER_USERNAME}/daklak-portal-goverment:${IMAGE_TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env.production
@@ -263,7 +263,7 @@ services:
     depends_on:
       - api-gateway
       - admin-frontend
-      - digital-goverment
+      - portal-goverment
 
 volumes:
   mysql_data:
