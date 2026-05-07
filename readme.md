@@ -71,5 +71,16 @@ Thông tin đăng nhập mặc định cho các dịch vụ:
 | `translate-service` | `3006` | `daklak_translation` |
 | `workflow-service` | `50060` (gRPC), `3001` (REST) | `admin_workflow` |
 | `admin-khcn` | `3007` | - |
+| `portal-goverment` | `3000` | - |
 
-*Lưu ý: Đảm bảo file `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*
+### 5. Triển khai Cổng thông tin Công dân (`portal-goverment`)
+Dịch vụ mới thêm **Cổng thông tin Công dân (`portal-goverment`)** chạy hoàn hảo bên dưới lớp proxy bảo mật của Nginx:
+- **Đường dẫn truy cập người dân (Công khai)**: `http://<IP-SERVER>/` (Proxy qua Nginx trực tiếp vào container `portal-goverment:3000`).
+- **Tích hợp API động**: Phía Client của Cổng thông tin gọi API Gateway thông qua đường dẫn bảo mật `/api/v1` được định nghĩa trong Nginx.
+- **Cách deploy thủ công hoặc cập nhật**:
+  ```bash
+  # Khởi chạy toàn bộ dịch vụ kèm Portal mới
+  docker compose -f docker-compose.prod.yml up -d portal-goverment nginx
+  ```
+
+*Lưu ý: Đảm bảo tệp `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*
