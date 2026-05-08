@@ -36,7 +36,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
   const queryClient = useQueryClient();
   const { data: categories = [] } = useGetCategories();
   const updateCategoryMutation = useUpdateCategory();
-  
+
   const [showConfig, setShowConfig] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("all");
@@ -117,7 +117,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
 
       {/* Elegant Slideshow Configuration Panel */}
       <Card className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all">
-        <div 
+        <div
           onClick={() => setShowConfig(!showConfig)}
           className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors"
         >
@@ -136,7 +136,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
             {showConfig ? "Thu gọn" : "Thiết lập"}
           </Button>
         </div>
-        
+
         {showConfig && (
           <div className="border-t border-slate-100 dark:border-slate-800 p-6 bg-slate-50/40 dark:bg-slate-950/10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
             {positionCategories.length === 0 ? (
@@ -147,8 +147,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
               positionCategories.map((cat: any) => {
                 const isSlideshow = cat.description === "slideshow";
                 return (
-                  <div 
-                    key={cat.id} 
+                  <div
+                    key={cat.id}
                     className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow transition-shadow"
                   >
                     <div className="space-y-1">
@@ -156,14 +156,13 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">{cat.code}</p>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${
-                        isSlideshow 
-                          ? "text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/50" 
-                          : "text-slate-400 bg-slate-100 dark:text-slate-300 dark:bg-slate-800"
-                      }`}>
+                      <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${isSlideshow
+                        ? "text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/50"
+                        : "text-slate-400 bg-slate-100 dark:text-slate-300 dark:bg-slate-800"
+                        }`}>
                         {isSlideshow ? "Slideshow" : "Chiến dịch"}
                       </span>
-                      <Switch 
+                      <Switch
                         checked={isSlideshow}
                         onCheckedChange={(checked) => {
                           updateCategoryMutation.mutate({
@@ -288,30 +287,21 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                     />
                   )}
 
-                  {/* Dropdown controls in top-right */}
+                  {/* Quick Delete button in top-right */}
                   <div className="absolute top-2 right-2 z-20">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="secondary" size="icon" className="h-7 w-7 rounded-full shadow-md hover:bg-slate-100">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl">
-                        <DropdownMenuItem onClick={() => onNavigateToEdit(banner.id)} className="cursor-pointer">
-                          <Edit className="h-4 w-4 mr-2 text-slate-500" /> Chỉnh sửa
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-rose-600 focus:text-rose-600 focus:bg-rose-50 cursor-pointer"
-                          onClick={() => {
-                            if (confirm(`Bạn có chắc muốn xóa banner "${banner.name}"?`)) {
-                              deleteMutation.mutate(banner.id);
-                            }
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" /> Xóa banner
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="h-7 w-7 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 border border-slate-100 hover:scale-105 shadow-sm transition-all duration-200"
+                      onClick={() => {
+                        if (confirm(`Bạn có chắc muốn xóa banner "${banner.name}"?`)) {
+                          deleteMutation.mutate(banner.id);
+                        }
+                      }}
+                      title="Xóa banner"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
 
                   {/* Overlay placement and status badges in bottom-left */}
@@ -385,23 +375,15 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                     )}
                   </div>
 
-                  {/* Action buttons footer */}
-                  <div className="grid grid-cols-2 gap-2.5 pt-1">
+                  {/* Action button footer */}
+                  <div className="pt-1.5">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 text-slate-700"
+                      className="w-full rounded-xl text-xs font-bold border-slate-200 bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-200 shadow-sm transition-all duration-200 py-4"
                       onClick={() => onNavigateToEdit(banner.id)}
                     >
-                      <Edit className="h-3.5 w-3.5 mr-1.5 text-slate-500" /> Cấu hình
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="rounded-xl text-xs font-bold bg-blue-50/50 text-blue-700 border-blue-100 hover:bg-blue-100/70"
-                      onClick={() => onNavigateToEdit(banner.id)}
-                    >
-                      <Eye className="h-3.5 w-3.5 mr-1.5 text-blue-500" /> Xem chi tiết
+                      <Edit className="h-3.5 w-3.5 mr-1.5 text-slate-500 group-hover:text-blue-600" /> Chỉnh sửa & Cấu hình
                     </Button>
                   </div>
                 </div>
