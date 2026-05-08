@@ -71,6 +71,8 @@ services:
       - .env.production
     ports:
       - "8080:8080"
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   user-service:
     image: ${DOCKER_USERNAME}/daklak-user-service:${IMAGE_TAG:-latest}
@@ -89,6 +91,8 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   hrm-service:
     image: ${DOCKER_USERNAME}/daklak-hrm-service:${IMAGE_TAG:-latest}
@@ -100,6 +104,8 @@ services:
       - .env.production
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_hrm
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   media-service:
     image: ${DOCKER_USERNAME}/daklak-media-service:${IMAGE_TAG:-latest}
@@ -113,6 +119,8 @@ services:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_media
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   posts-service:
     image: ${DOCKER_USERNAME}/daklak-posts-service:${IMAGE_TAG:-latest}
@@ -125,6 +133,8 @@ services:
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_posts
       PROTO_PATH: /app/protos
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   workflow-service:
     image: ${DOCKER_USERNAME}/daklak-workflow-service:${IMAGE_TAG:-latest}
@@ -136,6 +146,8 @@ services:
       - .env.production
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_workflow
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   document-service:
     image: ${DOCKER_USERNAME}/daklak-document-service:${IMAGE_TAG:-latest}
@@ -147,6 +159,8 @@ services:
       - .env.production
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document
+    volumes:
+      - ./shared/protos:/app/protos:ro
 
   translate-service:
     image: ${DOCKER_USERNAME}/daklak-translate-service:${IMAGE_TAG:-latest}

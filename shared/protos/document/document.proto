@@ -273,6 +273,10 @@ message DeleteProcedureRequest {
   string id = 1;
 }
 
+message GetProcedureRequest {
+  string id = 1;
+}
+
 message Dossier {
   string id = 1;
   string code = 2;
