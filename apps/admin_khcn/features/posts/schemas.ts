@@ -25,6 +25,8 @@ export const bannerSchema = z.object({
   status: z.boolean().default(true),
   startAt: z.string().optional(),
   endAt: z.string().optional(),
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
   translations: z.record(z.string(), z.object({
     name: z.string().optional(),
     description: z.string().optional(),

@@ -751,44 +751,98 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* 3. Horizontal Decorative Patriotic Promotion Banner 1 */}
       {customPatrioticBanners.length > 0 ? (
-        customPatrioticBanners.map((banner: any) => (
-          <div key={banner.id} className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
-            {/* Intricate Gold Borders */}
-            <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+        customPatrioticBanners.map((banner: any) => {
+          let styles = {
+            bgType: "gradient",
+            bgGradientStart: "#990000",
+            bgGradientMiddle: "#cc0000",
+            bgGradientEnd: "#800000",
+            titleColor: "#fbc02d",
+            textColor: "#fff7ed",
+            alignment: "left",
+            showStar: true,
+            starColor: "#ffff00",
+            starOpacity: 0.08,
+            buttonBg: "#ffde59",
+            buttonTextColor: "#0f172a",
+            buttonText: "Tìm hiểu thêm"
+          };
+          if (banner.metaDescription) {
+            try {
+              const parsed = JSON.parse(banner.metaDescription);
+              if (parsed && typeof parsed === "object") {
+                styles = { ...styles, ...parsed };
+              }
+            } catch (e) {
+              // fallback
+            }
+          }
 
-            {/* Traditional Gold Star Watermark */}
-            <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
-              <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
-              </svg>
-            </div>
+          const bgStyle = {
+            background: `linear-gradient(to right, ${styles.bgGradientStart}, ${styles.bgGradientMiddle || styles.bgGradientStart}, ${styles.bgGradientEnd})`
+          };
 
-            <div className="z-10 flex flex-col gap-1 flex-1">
-              <span className="text-[#fbc02d] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
-                <span>⭐</span> {banner.name}
-              </span>
-              {banner.description && (
-                <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-amber-50 drop-shadow">
-                  &quot;{banner.description}&quot;
-                </h3>
+          return (
+            <div 
+              key={banner.id} 
+              style={bgStyle}
+              className={`w-full text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${
+                styles.alignment === "center" ? "text-center md:items-center" : 
+                styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
+              }`}
+            >
+              {/* Intricate Gold Borders */}
+              <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+
+              {/* Traditional Gold Star Watermark */}
+              {styles.showStar && (
+                <div 
+                  className="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none select-none z-0"
+                  style={{ opacity: styles.starOpacity }}
+                >
+                  <svg className="w-56 h-56" style={{ color: styles.starColor }} viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
+                  </svg>
+                </div>
+              )}
+
+              <div className="z-10 flex flex-col gap-1 flex-1">
+                <span 
+                  style={{ color: styles.titleColor }}
+                  className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${
+                    styles.alignment === "center" ? "justify-center" : 
+                    styles.alignment === "right" ? "justify-end" : "justify-start"
+                  }`}
+                >
+                  <span>⭐</span> {banner.name}
+                </span>
+                {banner.description && (
+                  <h3 
+                    style={{ color: styles.textColor }}
+                    className="text-sm md:text-base font-black tracking-wide leading-snug uppercase drop-shadow"
+                  >
+                    &quot;{banner.description}&quot;
+                  </h3>
+                )}
+              </div>
+              {banner.customUrl && (
+                <div className="z-10 shrink-0">
+                  <a
+                    href={banner.customUrl}
+                    target={banner.target || "_self"}
+                    rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
+                    style={{ backgroundColor: styles.buttonBg, color: styles.buttonTextColor }}
+                    className="inline-flex items-center gap-1.5 text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
+                  >
+                    {styles.buttonText || "Tìm hiểu thêm"}
+                    <Info className="w-4 h-4" />
+                  </a>
+                </div>
               )}
             </div>
-            {banner.customUrl && (
-              <div className="z-10 shrink-0">
-                <a
-                  href={banner.customUrl}
-                  target={banner.target || "_self"}
-                  rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
-                  className="inline-flex items-center gap-1.5 bg-[#ffde59] hover:bg-[#f1c40f] text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300 transition-all transform hover:scale-105"
-                >
-                  Tìm hiểu thêm
-                  <Info className="w-4 h-4 text-slate-900" />
-                </a>
-              </div>
-            )}
-          </div>
-        ))
+          );
+        })
       ) : (
         <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
           {/* Intricate Gold Borders */}
