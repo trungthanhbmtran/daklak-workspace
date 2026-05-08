@@ -235,6 +235,15 @@ async function main() {
     { group: 'WORKFLOW_ACTION', code: 'REJECT', name: 'Từ chối', order: 2 },
     { group: 'WORKFLOW_ACTION', code: 'PUBLISH', name: 'Xuất bản', order: 3 },
     { group: 'WORKFLOW_ACTION', code: 'REQUEST_INFO', name: 'Yêu cầu bổ sung', order: 4 },
+
+    // --- BANNER POSITIONS ---
+    { group: 'BANNER_POSITION', code: 'top', name: 'Đầu trang (Header)', order: 1 },
+    { group: 'BANNER_POSITION', code: 'middle_1', name: 'Giữa trang - Vị trí 1', order: 2 },
+    { group: 'BANNER_POSITION', code: 'middle_2', name: 'Giữa trang - Vị trí 2', order: 3 },
+    { group: 'BANNER_POSITION', code: 'middle_3', name: 'Giữa trang - Vị trí 3', order: 4 },
+    { group: 'BANNER_POSITION', code: 'middle', name: 'Thân trang (Sidebar)', order: 5 },
+    { group: 'BANNER_POSITION', code: 'bottom', name: 'Cuối trang (Footer)', order: 6 },
+    { group: 'BANNER_POSITION', code: 'custom', name: 'Khẩu hiệu chính', order: 7 },
   ];
 
   console.log(`📦 Seeding ${categoriesData.length} categories...`);
@@ -280,6 +289,7 @@ async function main() {
     { code: 'DEPARTMENT', name: 'Phòng ban' },
     { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
     { code: 'WORKFLOW_ACTION', name: 'Hành động quy trình' },
+    { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
   ];
 
   console.log('📦 Seeding Category Groups...');

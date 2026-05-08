@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import {
   FormControl,
   FormField,
@@ -40,6 +41,26 @@ export function BannerBasicInfo({
   designType,
   setDesignType
 }: BannerBasicInfoProps) {
+  const { data: categories = [] } = useGetCategories();
+
+  const dbPositions = React.useMemo(() => {
+    return categories
+      .filter((cat: any) => cat.group === "BANNER_POSITION" && cat.active !== 0)
+      .sort((a: any, b: any) => (a.sort || 0) - (b.sort || 0));
+  }, [categories]);
+
+  const defaultPositions = [
+    { code: "top", name: "Đầu trang (Header)" },
+    { code: "middle_1", name: "Giữa trang - Vị trí 1" },
+    { code: "middle_2", name: "Giữa trang - Vị trí 2" },
+    { code: "middle_3", name: "Giữa trang - Vị trí 3" },
+    { code: "middle", name: "Thân trang (Sidebar)" },
+    { code: "bottom", name: "Phía dưới (Footer)" },
+    { code: "custom", name: "Khẩu hiệu chính" },
+  ];
+
+  const renderPositions = dbPositions.length > 0 ? dbPositions : defaultPositions;
+
   return (
     <div className="space-y-6">
       {/* Design Type Selector Card */}
@@ -219,13 +240,11 @@ export function BannerBasicInfo({
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger className="bg-slate-50/50 dark:bg-slate-900"><SelectValue /></SelectTrigger></FormControl>
                     <SelectContent>
-                      <SelectItem value="top">Đầu trang (Header)</SelectItem>
-                      <SelectItem value="middle_1">Giữa trang - Vị trí 1</SelectItem>
-                      <SelectItem value="middle_2">Giữa trang - Vị trí 2</SelectItem>
-                      <SelectItem value="middle_3">Giữa trang - Vị trí 3</SelectItem>
-                      <SelectItem value="middle">Giữa trang (Cột liên kết cũ)</SelectItem>
-                      <SelectItem value="bottom">Phía dưới (Footer)</SelectItem>
-                      <SelectItem value="custom">Dòng Khẩu hiệu chính giữa trang</SelectItem>
+                      {renderPositions.map((p: any) => (
+                        <SelectItem key={p.code} value={p.code}>
+                          {p.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
