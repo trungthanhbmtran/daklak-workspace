@@ -343,6 +343,78 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
     return dbSlides.length > 0 ? dbSlides : FEATURED_SLIDES
   }, [postsData])
 
+  const tickerText = React.useMemo(() => {
+    if (postsData?.data) {
+      const notices = postsData.data.filter((p: any) => p.isNotification || p.category?.slug === "thong-bao").slice(0, 5)
+      if (notices.length > 0) {
+        return notices.map((n: any) => `🌟 ${n.title}`).join(" | ")
+      }
+    }
+    return "🌟 Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 | 🌟 Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng | 🌟 Lãnh đạo tỉnh dâng hương, viếng Nghĩa trang Liệt sĩ tỉnh khu vực phía Đông | 🌟 Lãnh đạo Đảng, Nhà nước vào Lăng viếng Chủ tịch Hồ Chí Minh nhân ngày Thống nhất Đất nước | 🌟 Xã Dang Kang đạt tiêu chuẩn xuất khẩu sầu riêng và cà phê hữu cơ sang thị trường Châu Âu"
+  }, [postsData])
+
+  const announcements = React.useMemo(() => {
+    if (postsData?.data) {
+      const filtered = postsData.data.filter((p: any) => p.isNotification || p.category?.slug === "thong-bao").slice(0, 6).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN"),
+        dept: post.category?.name || "Thông báo"
+      }))
+      if (filtered.length > 0) return filtered
+    }
+    return ANNOUNCEMENTS_SIDE
+  }, [postsData])
+
+  const constructionNews = React.useMemo(() => {
+    if (postsData?.data) {
+      const filtered = postsData.data.filter((p: any) => 
+        p.category?.slug === "xay-dung" || 
+        p.category?.name?.toLowerCase().includes("xây dựng") ||
+        p.category?.name?.toLowerCase().includes("công thương")
+      ).slice(0, 3).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.description || post.content || "",
+        image: post.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=400&q=80",
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN")
+      }))
+      if (filtered.length > 0) return filtered
+    }
+    return CONSTRUCTION_NEWS
+  }, [postsData])
+
+  const agricultureNews = React.useMemo(() => {
+    if (postsData?.data) {
+      const filtered = postsData.data.filter((p: any) => 
+        p.category?.slug === "nong-nghiep" || 
+        p.category?.name?.toLowerCase().includes("nông nghiệp") ||
+        p.category?.name?.toLowerCase().includes("nông thôn")
+      ).slice(0, 3).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        excerpt: post.description || post.content || "",
+        image: post.thumbnail || "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=400&q=80",
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN")
+      }))
+      if (filtered.length > 0) return filtered
+    }
+    return AGRICULTURE_NEWS
+  }, [postsData])
+
+  const galleryPhotos = React.useMemo(() => {
+    if (postsData?.data) {
+      const withImages = postsData.data.filter((p: any) => p.thumbnail).slice(0, 4).map((post: any) => ({
+        id: post.id,
+        title: post.title,
+        image: post.thumbnail,
+        tag: post.category?.name || "Hình ảnh"
+      }))
+      if (withImages.length > 0) return withImages
+    }
+    return GALLERY_PHOTOS
+  }, [postsData])
+
   React.useEffect(() => {
     // Setup automatic slide transition
     const slideTimer = setInterval(() => {
@@ -351,7 +423,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
 
     // Setup automatic gallery slideshow transition
     const galleryTimer = setInterval(() => {
-      setCurrentGalleryIdx(prev => (prev + 1) % GALLERY_PHOTOS.length)
+      setCurrentGalleryIdx(prev => (prev + 1) % galleryPhotos.length)
     }, 5000)
 
     // Check if user has already voted
@@ -371,7 +443,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
       clearInterval(slideTimer)
       clearInterval(galleryTimer)
     }
-  }, [slides.length])
+  }, [slides.length, galleryPhotos.length])
 
   const nextSlide = () => {
     setCurrentSlide((currentSlide + 1) % slides.length)
@@ -437,8 +509,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
         </div>
         <div className="overflow-hidden relative flex-1 h-5 flex items-center">
           <div className="absolute whitespace-nowrap text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer animate-marquee">
-            <span>🌟 Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 | 🌟 Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng | 🌟 Lãnh đạo tỉnh dâng hương, viếng Nghĩa trang Liệt sĩ tỉnh khu vực phía Đông | 🌟 Lãnh đạo Đảng, Nhà nước vào Lăng viếng Chủ tịch Hồ Chí Minh nhân ngày Thống nhất Đất nước | 🌟 Xã Dang Kang đạt tiêu chuẩn xuất khẩu sầu riêng và cà phê hữu cơ sang thị trường Châu Âu</span>
-            <span className="pl-20">🌟 Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 | 🌟 Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng | 🌟 Lãnh đạo tỉnh dâng hương, viếng Nghĩa trang Liệt sĩ tỉnh khu vực phía Đông | 🌟 Lãnh đạo Đảng, Nhà nước vào Lăng viếng Chủ tịch Hồ Chí Minh nhân ngày Thống nhất Đất nước | 🌟 Xã Dang Kang đạt tiêu chuẩn xuất khẩu sầu riêng và cà phê hữu cơ sang thị trường Châu Âu</span>
+            <span>{tickerText}</span>
+            <span className="pl-20">{tickerText}</span>
           </div>
         </div>
       </div>
@@ -567,7 +639,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
               <div className="h-[260px] overflow-hidden relative z-10 select-none mb-2">
                 <div className="animate-vertical-marquee flex flex-col gap-4">
                   {/* First set of announcements */}
-                  {ANNOUNCEMENTS_SIDE.map((ann) => (
+                  {announcements.map((ann: any) => (
                     <div key={`${ann.id}-1`} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                       <Link
                         href="/tin-tuc"
@@ -589,7 +661,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
                     </div>
                   ))}
                   {/* Second set of announcements for seamless vertical loop */}
-                  {ANNOUNCEMENTS_SIDE.map((ann) => (
+                  {announcements.map((ann: any) => (
                     <div key={`${ann.id}-2`} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                       <Link
                         href="/tin-tuc"
@@ -724,7 +796,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
           </div>
 
           <div className="flex flex-col gap-4">
-            {CONSTRUCTION_NEWS.map((news) => (
+            {constructionNews.map((news: any) => (
               <div
                 key={news.id}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-[#cc0000] transition-all flex flex-col sm:flex-row gap-4 group"
@@ -804,7 +876,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
           </div>
 
           <div className="flex flex-col gap-4">
-            {AGRICULTURE_NEWS.map((news) => (
+            {agricultureNews.map((news: any) => (
               <div
                 key={news.id}
                 className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-[#cc0000] transition-all flex flex-col sm:flex-row gap-4 group"
@@ -885,7 +957,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
 
           {/* Left Column: Large Highlight Image Slide */}
           <div className="lg:col-span-8 relative h-64 sm:h-[420px] rounded-xl overflow-hidden group/slide bg-slate-950 shadow-inner">
-            {GALLERY_PHOTOS.map((photo, idx) => {
+            {galleryPhotos.map((photo: any, idx: number) => {
               const isActive = idx === currentGalleryIdx
               return (
                 <div
@@ -925,7 +997,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setCurrentGalleryIdx((currentGalleryIdx - 1 + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length)
+                setCurrentGalleryIdx((currentGalleryIdx - 1 + galleryPhotos.length) % galleryPhotos.length)
               }}
               className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/75 text-white transition-colors z-20 border border-white/5 opacity-0 group-hover/slide:opacity-100"
               title="Trước"
@@ -935,7 +1007,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
             <button
               onClick={(e) => {
                 e.stopPropagation()
-                setCurrentGalleryIdx((currentGalleryIdx + 1) % GALLERY_PHOTOS.length)
+                setCurrentGalleryIdx((currentGalleryIdx + 1) % galleryPhotos.length)
               }}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/75 text-white transition-colors z-20 border border-white/5 opacity-0 group-hover/slide:opacity-100"
               title="Sau"
@@ -946,7 +1018,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
 
           {/* Right Column: Thumbnail Selector List */}
           <div className="lg:col-span-4 flex flex-col gap-3 justify-center">
-            {GALLERY_PHOTOS.map((photo, idx) => {
+            {galleryPhotos.map((photo: any, idx: number) => {
               const isActive = idx === currentGalleryIdx
               return (
                 <button
