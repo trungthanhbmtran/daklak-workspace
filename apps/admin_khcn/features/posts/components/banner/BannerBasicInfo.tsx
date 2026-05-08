@@ -130,7 +130,7 @@ export function BannerBasicInfo({
             ))}
           </Tabs>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+          <div className="grid grid-cols-2 gap-6 pt-4 border-t">
             <FormField
               control={form.control}
               name="slug"

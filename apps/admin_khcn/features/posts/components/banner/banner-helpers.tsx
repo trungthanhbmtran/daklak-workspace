@@ -6,6 +6,7 @@ export const DEFAULT_STYLES = {
   bgGradientMiddle: "#cc0000",
   bgGradientEnd: "#800000",
   bgImage: "",
+  bgOpacity: 0.45,
   titleColor: "#fbc02d",
   textColor: "#fff7ed",
   alignment: "left",
@@ -27,6 +28,7 @@ export const PRESETS = [
     bgGradientMiddle: "#cc0000",
     bgGradientEnd: "#800000",
     bgImage: "",
+    bgOpacity: 0.45,
     titleColor: "#fbc02d",
     textColor: "#fff7ed",
     starColor: "#ffff00",
@@ -44,6 +46,7 @@ export const PRESETS = [
     bgGradientMiddle: "#db2777",
     bgGradientEnd: "#9d174d",
     bgImage: "",
+    bgOpacity: 0.45,
     titleColor: "#fdf2f8",
     textColor: "#fce7f3",
     starColor: "#ffffff",
@@ -61,6 +64,7 @@ export const PRESETS = [
     bgGradientMiddle: "#2563eb",
     bgGradientEnd: "#172554",
     bgImage: "",
+    bgOpacity: 0.45,
     titleColor: "#60a5fa",
     textColor: "#dbeafe",
     starColor: "#60a5fa",
@@ -78,6 +82,7 @@ export const PRESETS = [
     bgGradientMiddle: "#059669",
     bgGradientEnd: "#022c22",
     bgImage: "",
+    bgOpacity: 0.45,
     titleColor: "#a7f3d0",
     textColor: "#ecfdf5",
     starColor: "#34d399",
@@ -95,6 +100,7 @@ export const PRESETS = [
     bgGradientMiddle: "#d97706",
     bgGradientEnd: "#451a03",
     bgImage: "",
+    bgOpacity: 0.45,
     titleColor: "#fef3c7",
     textColor: "#fffbeb",
     starColor: "#fbbf24",
@@ -108,7 +114,8 @@ export const PRESETS = [
 ];
 
 export const getBannerBackgroundStyle = (styles: any) => {
-  if (styles.bgType === "image") {
+  const isPattern = styles.bgType === "pattern" || styles.bgType === "image";
+  if (isPattern) {
     if (styles.bgImage === "pattern-drum") {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' opacity='0.08'><circle cx='50%' cy='50%' r='40%' fill='none' stroke='%23ffffff' stroke-width='2'/><circle cx='50%' cy='50%' r='30%' fill='none' stroke='%23ffffff' stroke-dasharray='10,10'/><circle cx='50%' cy='50%' r='20%' fill='none' stroke='%23ffffff'/><circle cx='50%' cy='50%' r='10%' fill='none' stroke='%23ffffff'/></svg>`;
       const drumBg = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
@@ -128,14 +135,17 @@ export const getBannerBackgroundStyle = (styles: any) => {
         backgroundRepeat: "repeat"
       };
     }
-    if (styles.bgImage && styles.bgImage.startsWith("http")) {
-      return {
-        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.45), rgba(0,0,0,0.45)), url(${styles.bgImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center"
-      };
-    }
   }
+
+  if (styles.bgType === "image" && styles.bgImage && styles.bgImage.startsWith("http")) {
+    const overlayOpacity = styles.bgOpacity !== undefined ? styles.bgOpacity : 0.45;
+    return {
+      backgroundImage: `linear-gradient(to right, rgba(0,0,0,${overlayOpacity}), rgba(0,0,0,${overlayOpacity})), url(${styles.bgImage})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center"
+    };
+  }
+
   return {
     background: `linear-gradient(to right, ${styles.bgGradientStart || "#990000"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "#cc0000"}, ${styles.bgGradientEnd || "#800000"})`
   };

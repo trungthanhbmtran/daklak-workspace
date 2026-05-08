@@ -93,7 +93,7 @@ export function SloganCustomizer({
                   type="button"
                   onClick={() => updateStyle("bgType", "gradient")}
                   className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    customStyles.bgType !== "image" 
+                    customStyles.bgType !== "pattern" && customStyles.bgType !== "image"
                       ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200" 
                       : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
@@ -102,33 +102,53 @@ export function SloganCustomizer({
                 </button>
                 <button
                   type="button"
-                  onClick={() => updateStyle("bgType", "image")}
+                  onClick={() => {
+                    updateStyle("bgType", "pattern");
+                    if (customStyles.bgImage !== "pattern-drum" && customStyles.bgImage !== "pattern-clouds") {
+                      updateStyle("bgImage", "pattern-drum");
+                    }
+                  }}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
+                    customStyles.bgType === "pattern" 
+                      ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200" 
+                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                  }`}
+                >
+                  Hình chìm nghệ thuật
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateStyle("bgType", "image");
+                    if (customStyles.bgImage === "pattern-drum" || customStyles.bgImage === "pattern-clouds" || !customStyles.bgImage) {
+                      updateStyle("bgImage", "custom");
+                    }
+                  }}
                   className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
                     customStyles.bgType === "image" 
                       ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200" 
                       : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
                   }`}
                 >
-                  Hình ảnh hoa văn
+                  Ảnh nền toàn phần
                 </button>
               </div>
 
-              {customStyles.bgType === "image" ? (
-                <div className="space-y-4 pt-2">
+              {customStyles.bgType === "pattern" && (
+                <div className="space-y-4 pt-2 animate-in fade-in duration-200">
                   <div>
                     <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Chọn hoa văn chìm có sẵn</Label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-1.5">
+                    <div className="grid grid-cols-2 gap-2 mt-1.5">
                       {[
                         { name: "Trống đồng Đông Sơn", value: "pattern-drum" },
-                        { name: "Họa tiết mây sóng cổ", value: "pattern-clouds" },
-                        { name: "Hình ảnh tự tải lên", value: "custom" }
+                        { name: "Họa tiết mây sóng cổ", value: "pattern-clouds" }
                       ].map((pat) => (
                         <button
                           key={pat.value}
                           type="button"
                           onClick={() => updateStyle("bgImage", pat.value)}
-                          className={`p-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer ${
-                            customStyles.bgImage === pat.value || (pat.value === "custom" && customStyles.bgImage && customStyles.bgImage.startsWith("http"))
+                          className={`p-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer text-center ${
+                            customStyles.bgImage === pat.value
                               ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:border-blue-400" 
                               : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
                           }`}
@@ -139,41 +159,8 @@ export function SloganCustomizer({
                     </div>
                   </div>
 
-                  {(customStyles.bgImage === "custom" || (customStyles.bgImage && customStyles.bgImage.startsWith("http"))) && (
-                    <div className="space-y-2">
-                      <Label className="text-[11px] font-bold uppercase text-slate-500">Tải ảnh nền tùy chọn</Label>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        id="bg-image-uploader" 
-                        className="hidden" 
-                        onChange={handleBgImageUpload} 
-                      />
-                      {isUploadingBg ? (
-                        <div className="h-20 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center bg-slate-50">
-                          <Loader2 className="animate-spin text-blue-500 w-5 h-5" />
-                        </div>
-                      ) : customStyles.bgImage && customStyles.bgImage.startsWith("http") ? (
-                        <div className="relative rounded-xl overflow-hidden border">
-                          <img src={customStyles.bgImage} className="w-full h-20 object-cover" alt="Custom BG" />
-                          <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-all flex items-center justify-center">
-                            <Button type="button" variant="secondary" size="xs" onClick={() => document.getElementById("bg-image-uploader")?.click()}>Thay đổi hình ảnh</Button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div 
-                          onClick={() => document.getElementById("bg-image-uploader")?.click()}
-                          className="h-20 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
-                        >
-                          <Upload className="w-5 h-5 text-slate-400 group-hover:scale-110 transition-transform mb-1" />
-                          <span className="text-[11px] font-semibold text-slate-500">Tải lên hình ảnh nền riêng</span>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
                   <div>
-                    <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Bộ lọc màu nền dốc bên dưới (Gradient Filter)</Label>
+                    <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Màu sắc dốc phía dưới hoa văn (Gradient Colors)</Label>
                     <div className="grid grid-cols-3 gap-2 mt-1.5">
                       <div>
                         <span className="text-[9px] text-slate-400 font-bold uppercase">Bắt đầu</span>
@@ -199,8 +186,62 @@ export function SloganCustomizer({
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="space-y-4 pt-2">
+              )}
+
+              {customStyles.bgType === "image" && (
+                <div className="space-y-4 pt-2 animate-in fade-in duration-200">
+                  <div className="space-y-2">
+                    <Label className="text-[11px] font-bold uppercase text-slate-500">Tải ảnh nền tùy chọn</Label>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      id="bg-image-uploader" 
+                      className="hidden" 
+                      onChange={handleBgImageUpload} 
+                    />
+                    {isUploadingBg ? (
+                      <div className="h-24 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center bg-slate-50">
+                        <Loader2 className="animate-spin text-blue-500 w-5 h-5" />
+                      </div>
+                    ) : customStyles.bgImage && customStyles.bgImage.startsWith("http") ? (
+                      <div className="relative rounded-xl overflow-hidden border shadow-inner">
+                        <img src={customStyles.bgImage} className="w-full h-24 object-cover" alt="Custom BG" />
+                        <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-all flex items-center justify-center">
+                          <Button type="button" variant="secondary" size="sm" onClick={() => document.getElementById("bg-image-uploader")?.click()}>Thay đổi hình ảnh</Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div 
+                        onClick={() => document.getElementById("bg-image-uploader")?.click()}
+                        className="h-24 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
+                      >
+                        <Upload className="w-5 h-5 text-slate-400 group-hover:scale-110 transition-transform mb-1" />
+                        <span className="text-xs font-semibold text-slate-500">Tải lên ảnh nền của bạn</span>
+                        <p className="text-[10px] text-slate-400 italic mt-0.5">Tệp tối đa 1MB, khuyến nghị tỷ lệ rộng (landscape)</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {customStyles.bgImage && customStyles.bgImage.startsWith("http") && (
+                    <div className="space-y-2 p-3 bg-slate-50 rounded-lg border">
+                      <div className="flex justify-between items-center">
+                        <Label className="text-[11px] font-bold text-slate-600 uppercase">Độ tối lớp phủ nền (Overlay Dimmer)</Label>
+                        <span className="text-xs font-mono font-bold text-blue-600">{Math.round((customStyles.bgOpacity !== undefined ? customStyles.bgOpacity : 0.45) * 100)}%</span>
+                      </div>
+                      <input 
+                        type="range" min="0" max="0.90" step="0.05" 
+                        value={customStyles.bgOpacity !== undefined ? customStyles.bgOpacity : 0.45}
+                        onChange={(e) => updateStyle("bgOpacity", parseFloat(e.target.value))}
+                        className="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer accent-blue-600"
+                      />
+                      <p className="text-[10px] text-slate-400 italic">Tăng độ tối giúp chữ tuyên truyền hiển thị sắc nét hơn trên ảnh nền phức tạp.</p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {customStyles.bgType !== "pattern" && customStyles.bgType !== "image" && (
+                <div className="space-y-4 pt-2 animate-in fade-in duration-200">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                       <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Màu bắt đầu (Start)</Label>
