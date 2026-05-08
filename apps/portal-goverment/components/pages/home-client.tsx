@@ -32,14 +32,10 @@ import {
   Smartphone,
   BookOpen,
   FolderOpen,
-  AlertCircle,
-  Search,
-  Sparkles,
-  DollarSign,
-  Layers,
-  HelpCircle
+  AlertCircle
 } from "lucide-react"
 
+// Premium mock images using high-quality administrative/natural patterns
 const FEATURED_SLIDES = [
   {
     id: 1,
@@ -67,6 +63,7 @@ const FEATURED_SLIDES = [
   }
 ]
 
+// Left side directory menu items - strictly matching the reference portal
 const LEFT_MENU_ITEMS = [
   { name: "Hoạt động của Đảng Ủy xã", path: "/tin-tuc?category=dang-uy" },
   { name: "Hội đồng nhân dân", path: "/tin-tuc?category=hdnd" },
@@ -81,6 +78,7 @@ const LEFT_MENU_ITEMS = [
   { name: "Thư viện video, hình ảnh", path: "/tin-tuc" }
 ]
 
+// Right side announcements - strictly matching the reference portal's Announcements sidebar
 const ANNOUNCEMENTS_SIDE = [
   {
     id: 1,
@@ -111,6 +109,24 @@ const ANNOUNCEMENTS_SIDE = [
     title: "Thông báo Kết quả giải thưởng Đợt 1 Cuộc thi trực tuyến tìm hiểu khoa học công nghệ & chuyển đổi số",
     date: "22/04/2026",
     dept: "Đoàn Xã"
+  },
+  {
+    id: 6,
+    title: "Kế hoạch tổ chức Lễ dâng hương kỷ niệm Ngày Thống nhất Đất nước tại Đài tưởng niệm các Anh hùng Liệt sĩ xã Dang Kang",
+    date: "20/04/2026",
+    dept: "VP HĐND-UBND"
+  },
+  {
+    id: 7,
+    title: "Lịch tiêm chủng mở rộng định kỳ cho trẻ em dưới 5 tuổi và tư vấn dinh dưỡng tháng 5 năm 2026",
+    date: "18/04/2026",
+    dept: "Trạm Y Tế"
+  },
+  {
+    id: 8,
+    title: "Thông báo treo cờ Tổ quốc chào mừng ngày Giải phóng miền Nam 30/4 và Ngày Quốc tế Lao động 1/5",
+    date: "15/04/2026",
+    dept: "Văn Hóa Xã"
   }
 ]
 
@@ -131,7 +147,7 @@ const QUICK_SERVICES = [
     iconBg: "bg-emerald-50 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-400",
     hoverBg: "hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10",
     icon: FileSearch,
-    link: "#one-stop-widget"
+    link: "/thu-tuc#tra-cuu"
   },
   {
     title: "Phản ánh & Kiến nghị",
@@ -153,6 +169,7 @@ const QUICK_SERVICES = [
   }
 ]
 
+// Category-specific structured news conforming 100% to reference portal
 const CONSTRUCTION_NEWS = [
   {
     id: 201,
@@ -167,12 +184,23 @@ const CONSTRUCTION_NEWS = [
     excerpt: "Công trình có diện tích sử dụng hơn 800m2, phục vụ các hội nghị sinh hoạt cộng đồng, hội diễn văn nghệ quần chúng và phong trào rèn luyện thể chất nhân dân.",
     image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=400&q=80",
     date: "26/04/2026"
+  },
+  {
+    id: 203,
+    title: "Kiểm tra tiến độ thi công công trình đường liên huyện kết nối Krông Bông đi xã Dang Kang",
+    excerpt: "Đoàn liên ngành tiến hành kiểm tra thực tế, yêu cầu các nhà thầu khẩn trương trải nhựa áp-phan và lắp đặt đầy đủ đèn đường, biển báo an toàn trước mùa mưa lũ.",
+    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=400&q=80",
+    date: "24/04/2026"
   }
 ]
 
 const CONSTRUCTION_LINKS = [
   { text: "Kế hoạch quy hoạch, xây dựng, kiến trúc; hoạt động đầu tư xây dựng xã", link: "/van-ban" },
-  { text: "Báo cáo công tác quản lý hạ tầng kỹ thuật và nâng cấp lộ giới đường nông thôn", link: "/van-ban" }
+  { text: "Báo cáo công tác quản lý hạ tầng kỹ thuật và nâng cấp lộ giới đường nông thôn", link: "/van-ban" },
+  { text: "Lịch cúp nước tạm thời phục vụ sửa chữa mạng lưới đường ống xã", link: "/tin-tuc" },
+  { text: "Lịch cúp điện và bảo trì lưới điện trung - hạ thế nông thôn huyện Krông Bông", link: "/tin-tuc" },
+  { text: "Lịch tắt/mở hệ thống đèn chiếu sáng công cộng tại trục đường chính xã", link: "/tin-tuc" },
+  { text: "Tiếp nhận, xử lý, phản ánh, kiến nghị của nhân dân về trật tự xây dựng", link: "/tuong-tac" }
 ]
 
 const AGRICULTURE_NEWS = [
@@ -189,12 +217,23 @@ const AGRICULTURE_NEWS = [
     excerpt: "Hơn 500 cây phân tán bản địa đã được gieo trồng dọc các tuyến suối Thôn 2 và Thôn 3, góp phần bảo vệ nguồn tài nguyên nước và chống xói mòn đất nông nghiệp.",
     image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80",
     date: "27/04/2026"
+  },
+  {
+    id: 303,
+    title: "Hội thảo chuyển giao kỹ thuật phân bón hữu cơ sinh học cao cấp cho hồ tiêu vụ mùa mới",
+    excerpt: "Các kỹ sư hướng dẫn bà con phương pháp ủ phân hữu cơ kết hợp nấm đối kháng Trichoderma phòng trừ bệnh chết nhanh chết chậm thường gặp ở hồ tiêu.",
+    image: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=400&q=80",
+    date: "22/04/2026"
   }
 ]
 
 const AGRICULTURE_LINKS = [
   { text: "Báo cáo công tác quản lý tài nguyên đất, tài nguyên nước địa phương", link: "/van-ban" },
-  { text: "Kế hoạch, chương trình mục tiêu quốc gia xây dựng phát triển nông thôn mới", link: "/van-ban" }
+  { text: "Kế hoạch, chương trình mục tiêu quốc gia xây dựng phát triển nông thôn mới", link: "/van-ban" },
+  { text: "Công tác phòng chống thiên tai, tìm kiếm cứu nạn chủ động mùa mưa bão", link: "/tin-tuc" },
+  { text: "Kế hoạch và chương trình mục tiêu quốc gia giảm nghèo bền vững xã", link: "/van-ban" },
+  { text: "Quản lý chất lượng và an toàn thực phẩm đối với nông sản, lâm sản cấp xã", link: "/thu-tuc" },
+  { text: "Chương trình khuyến nông phát triển mô hình kinh tế hộ gia đình, trang trại mới", link: "/tin-tuc" }
 ]
 
 const GALLERY_PHOTOS = [
@@ -209,6 +248,18 @@ const GALLERY_PHOTOS = [
     title: "Hội nghị Ban chỉ đạo xã triển khai chuyển đổi số năm 2026",
     image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
     tag: "Hội nghị"
+  },
+  {
+    id: 3,
+    title: "Bà con nông dân buôn Êga thu hoạch hạt cà phê chín mọng",
+    image: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80",
+    tag: "Sản xuất"
+  },
+  {
+    id: 4,
+    title: "Toàn cảnh trung tâm hành chính văn hóa mới xã Dang Kang",
+    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+    tag: "Quy hoạch"
   }
 ]
 
@@ -224,6 +275,12 @@ const MOCK_QA = [
     a: "Chào anh/chị, thủ tục đăng ký khai sinh quá hạn được giải quyết trực tiếp tại bộ phận Một cửa UBND xã Dang Kang. Thành phần hồ sơ gồm: (1) Tờ khai đăng ký khai sinh theo mẫu; (2) Giấy chứng sinh của cơ sở y tế, hoặc văn bản xác nhận của người làm chứng. Lệ phí giải quyết: Miễn phí hoàn toàn. Thời gian xử lý: Trong ngày làm việc nếu đầy đủ hồ sơ.",
     sender: "Lê Thị Lan (Thôn 3)",
     date: "29/04/2026"
+  },
+  {
+    q: "Tôi muốn làm thủ tục chuyển nhượng quyền sử dụng đất nông nghiệp tại xã thì nộp hồ sơ ở cấp xã hay văn phòng đăng ký đất đai huyện?",
+    a: "Chào anh, hồ sơ chuyển nhượng quyền sử dụng đất trước hết cần nộp tại Bộ phận Một cửa của UBND xã Dang Kang để cán bộ địa chính kiểm tra quy hoạch, niêm yết công khai và thực hiện thủ tục hòa giải (nếu có). Sau khi hoàn tất thủ tục cấp xã, hồ sơ sẽ liên thông chuyển lên Chi nhánh Văn phòng Đăng ký đất đai huyện Krông Bông giải quyết theo thẩm quyền.",
+    sender: "Y-Nguên Mlô (Buôn Êga)",
+    date: "25/04/2026"
   }
 ]
 
@@ -247,12 +304,6 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
   const [lightboxTitle, setLightboxTitle] = React.useState<string | null>(null)
   const [currentGalleryIdx, setCurrentGalleryIdx] = React.useState(0)
 
-  // Một cửa điện tử State
-  const [activeTab, setActiveTab] = React.useState<"procedure" | "dossier">("procedure")
-  const [procedureSearch, setProcedureSearch] = React.useState("")
-  const [dossierCode, setDossierCode] = React.useState("")
-  const [selectedProcedure, setSelectedProcedure] = React.useState<any | null>(null)
-
   // React Query Hooks initialized with pre-fetched ISR data as initialData
   const { data: postsData } = useQuery({
     queryKey: ["public-posts", undefined],
@@ -270,28 +321,6 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
       return response
     },
     initialData: initialPortalMenus,
-  })
-
-  // Real-time queries for Procedure Search and Dossier status
-  const { data: proceduresData, isLoading: searchingProcedures } = useQuery({
-    queryKey: ["procedures-search", procedureSearch],
-    queryFn: async () => {
-      const res: any = await apiClient.get("/public/documents/procedures", {
-        params: { search: procedureSearch, limit: 5 }
-      })
-      return res?.data || []
-    },
-    enabled: activeTab === "procedure" && procedureSearch.length > 1
-  })
-
-  const { data: dossierData, error: dossierError, refetch: searchDossier, isFetching: searchingDossier } = useQuery({
-    queryKey: ["dossier-status", dossierCode],
-    queryFn: async () => {
-      const res: any = await apiClient.get(`/public/documents/dossiers/${dossierCode}`)
-      return res?.data || null
-    },
-    enabled: false, // only trigger on button click
-    retry: false
   })
 
   const menuItems = React.useMemo(() => {
@@ -315,21 +344,27 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
   }, [postsData])
 
   React.useEffect(() => {
+    // Setup automatic slide transition
     const slideTimer = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % slides.length)
     }, 6000)
 
+    // Setup automatic gallery slideshow transition
     const galleryTimer = setInterval(() => {
       setCurrentGalleryIdx(prev => (prev + 1) % GALLERY_PHOTOS.length)
     }, 5000)
 
+    // Check if user has already voted
     const savedVote = localStorage.getItem("dangkang_portal_poll_voted")
     const savedChoice = localStorage.getItem("dangkang_portal_poll_choice")
     if (savedVote && savedChoice) {
       setPollVoted(true)
       setPollChoice(savedChoice)
+
       const savedStats = localStorage.getItem("dangkang_portal_poll_stats")
-      if (savedStats) setPollStats(JSON.parse(savedStats))
+      if (savedStats) {
+        setPollStats(JSON.parse(savedStats))
+      }
     }
 
     return () => {
@@ -338,126 +373,150 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
     }
   }, [slides.length])
 
-  const nextSlide = () => setCurrentSlide(prev => (prev + 1) % slides.length)
-  const prevSlide = () => setCurrentSlide(prev => (prev - 1 + slides.length) % slides.length)
+  const nextSlide = () => {
+    setCurrentSlide((currentSlide + 1) % slides.length)
+  }
 
-  const handleVote = (choice: string) => {
-    if (pollVoted) return
-    let updatedStats = { ...pollStats }
-    if (choice === "verySatisfied") updatedStats.verySatisfied += 1
-    else if (choice === "satisfied") updatedStats.satisfied += 1
-    else if (choice === "normal") updatedStats.normal += 1
-    else if (choice === "unsatisfied") updatedStats.unsatisfied += 1
+  const prevSlide = () => {
+    setCurrentSlide((currentSlide - 1 + slides.length) % slides.length)
+  }
+
+  const handleVoteSubmit = () => {
+    if (!pollChoice) return
+
+    const updatedStats = { ...pollStats }
+    if (pollChoice === "verySatisfied") updatedStats.verySatisfied += 1
+    else if (pollChoice === "satisfied") updatedStats.satisfied += 1
+    else if (pollChoice === "normal") updatedStats.normal += 1
+    else if (pollChoice === "unsatisfied") updatedStats.unsatisfied += 1
 
     setPollStats(updatedStats)
     setPollVoted(true)
-    setPollChoice(choice)
+
     localStorage.setItem("dangkang_portal_poll_voted", "true")
-    localStorage.setItem("dangkang_portal_poll_choice", choice)
+    localStorage.setItem("dangkang_portal_poll_choice", pollChoice)
     localStorage.setItem("dangkang_portal_poll_stats", JSON.stringify(updatedStats))
   }
 
-  const handleDossierSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (dossierCode.trim()) {
-      searchDossier()
-    }
-  }
+  const totalVotes = pollStats.verySatisfied + pollStats.satisfied + pollStats.normal + pollStats.unsatisfied
 
   return (
-    <div className="flex flex-col gap-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-      {/* 1. National Emblem Banner with high-end administrative style */}
-      <div className="bg-[#cc0000] dark:bg-slate-950 text-white rounded-lg shadow-md border-b-4 border-[#ffde59] p-4.5 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="absolute inset-0 bg-[radial-gradient(#ffde5906_1.5px,transparent_1.5px)] [background-size:16px_16px] pointer-events-none" />
-        <div className="absolute left-1/2 md:left-auto md:right-8 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none select-none z-0">
-          <svg className="w-48 h-48 text-[#ffde59]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
-          </svg>
-        </div>
+    <div className="flex flex-col gap-8 md:gap-10 animate-fade-in select-none">
 
-        <div className="flex items-center gap-4 text-center md:text-left z-10">
-          <div className="relative w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-full border-2 border-[#ffde59] flex items-center justify-center shrink-0 shadow">
-            <svg className="w-10 h-10 md:w-12 md:h-12 text-[#ffde59]" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
-            </svg>
-          </div>
-          <div className="flex flex-col gap-0.5">
-            <h1 className="text-base md:text-lg lg:text-xl font-black uppercase tracking-wider text-amber-100 leading-snug drop-shadow-sm">
-              ỦY BAN NHÂN DÂN XÃ DANG KANG
-            </h1>
-            <p className="text-xs md:text-sm font-bold text-slate-100 tracking-wide uppercase drop-shadow-sm">
-              CỔNG THÔNG TIN ĐIỆN TỬ - HỆ THỐNG MỘT CỬA LIÊN THÔNG CHÍNH PHỦ
-            </p>
-            <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-1 text-[10px] md:text-xs font-semibold text-slate-200">
-              <span className="flex items-center gap-1"><MapPin className="w-3.5 h-3.5" /> Huyện Krông Bông, Tỉnh Đắk Lắk</span>
-              <span className="hidden sm:inline">•</span>
-              <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" /> 0262.3812.345</span>
-            </div>
-          </div>
-        </div>
+      {/* Dynamic Keyframe Injection for Marquee and Aesthetic Animations */}
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          display: inline-block;
+          animation: marquee 30s linear infinite;
+        }
+        .animate-marquee:hover {
+          animation-play-state: paused;
+        }
 
-        <div className="z-10 bg-black/25 px-4.5 py-3 rounded border border-white/10 backdrop-blur-sm self-center text-center">
-          <span className="text-[10px] md:text-xs text-amber-200 font-extrabold uppercase tracking-widest block">ĐƯỜNG DÂY NÓNG HỖ TRỢ</span>
-          <span className="text-sm md:text-base font-black text-white mt-0.5 block">1900.8686 • 24/7</span>
+        @keyframes verticalMarquee {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-50%); }
+        }
+        .animate-vertical-marquee {
+          animation: verticalMarquee 24s linear infinite;
+        }
+        .animate-vertical-marquee:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
+      {/* 1. Horizontal Scrolling Ticker: Chạy TIN NỔI BẬT (Under the Header) */}
+      <div className="w-full bg-[#fff9db] dark:bg-amber-950/20 border border-[#ffe066] dark:border-amber-900/30 rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm select-none">
+        <div className="flex items-center gap-1.5 text-[#cc0000] dark:text-red-400 font-black shrink-0 text-xs tracking-wider uppercase animate-pulse">
+          <Volume2 className="w-4 h-4 shrink-0" />
+          <span>TIN NỔI BẬT:</span>
+        </div>
+        <div className="overflow-hidden relative flex-1 h-5 flex items-center">
+          <div className="absolute whitespace-nowrap text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer animate-marquee">
+            <span>🌟 Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 | 🌟 Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng | 🌟 Lãnh đạo tỉnh dâng hương, viếng Nghĩa trang Liệt sĩ tỉnh khu vực phía Đông | 🌟 Lãnh đạo Đảng, Nhà nước vào Lăng viếng Chủ tịch Hồ Chí Minh nhân ngày Thống nhất Đất nước | 🌟 Xã Dang Kang đạt tiêu chuẩn xuất khẩu sầu riêng và cà phê hữu cơ sang thị trường Châu Âu</span>
+            <span className="pl-20">🌟 Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 | 🌟 Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng | 🌟 Lãnh đạo tỉnh dâng hương, viếng Nghĩa trang Liệt sĩ tỉnh khu vực phía Đông | 🌟 Lãnh đạo Đảng, Nhà nước vào Lăng viếng Chủ tịch Hồ Chí Minh nhân ngày Thống nhất Đất nước | 🌟 Xã Dang Kang đạt tiêu chuẩn xuất khẩu sầu riêng và cà phê hữu cơ sang thị trường Châu Âu</span>
+          </div>
         </div>
       </div>
 
-      {/* 2. Main Portal Sections Grid (Left Sidebar Menu + Middle Slideshow + Right Announcements) */}
-      <div className="bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800 p-4.5 shadow-sm">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          
-          {/* Column 1 (Left, span 3): Public Directory Menus */}
-          <div className="lg:col-span-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 flex flex-col gap-3 shadow-inner">
-            <div className="border-b-2 border-[#cc0000] pb-1.5 flex items-center gap-1.5">
-              <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
-                Danh mục điều hướng
-              </span>
+      {/* 2. Top Main Portal News Layout: 3-Column Structured Layout (Left Menu, Middle Slideshow, Right Announcements) */}
+      <div className="flex flex-col gap-4">
+        {/* Unified Star Accent Section Header */}
+        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+          <span className="text-[#f1c40f] text-lg animate-pulse">⭐</span>
+          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+            TIN TỨC SỰ KIỆN NỔI BẬT & CHỈ ĐẠO ĐIỀU HÀNH
+          </h2>
+        </div>
+
+        {/* The 3-Column layout: Left menu links, Middle main slider, Right Announcements sidebar */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+
+          {/* Column 1 (Left, span 3): Danh mục chuyên mục (Internal wing navigation links) */}
+          <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col gap-3 shadow-sm justify-between">
+            <div>
+              <div className="bg-[#cc0000] text-white py-2 px-3 rounded font-bold text-xs uppercase tracking-wide text-center mb-2 shadow-sm">
+                Danh mục chuyên mục
+              </div>
+              <div className="flex flex-col">
+                {menuItems.map((item: any, idx: number) => (
+                  <Link
+                    key={idx}
+                    href={item.path}
+                    className="flex gap-2 items-center p-2 rounded text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 hover:text-[#cc0000] dark:hover:text-red-400 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-950/40 transition-all group"
+                  >
+                    <span className="text-[#cc0000]/70 text-[11px] shrink-0 group-hover:translate-x-0.5 transition-transform">
+                      🔸
+                    </span>
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <nav className="flex flex-col gap-1.5">
-              {menuItems.map((menu: any, index: number) => (
-                <Link
-                  key={index}
-                  href={menu.path}
-                  className="px-3 py-2 text-xs font-semibold md:font-bold text-slate-700 dark:text-slate-300 hover:text-white hover:bg-[#cc0000] dark:hover:bg-red-700 rounded transition-all flex items-center justify-between group border-b border-slate-100 dark:border-slate-800 last:border-none"
-                >
-                  <span className="truncate">{menu.name}</span>
-                  <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all shrink-0" />
-                </Link>
-              ))}
-            </nav>
+
+            <div className="bg-slate-50 dark:bg-slate-950/40 p-2 rounded text-center border border-slate-100 dark:border-slate-800">
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-extrabold block uppercase tracking-wide">ĐƯỜNG DÂY NÓNG UBND XÃ</span>
+              <a href="tel:02623812345" className="text-sm text-[#cc0000] dark:text-red-400 font-black tracking-widest mt-0.5 block font-mono">0262.3812.345</a>
+            </div>
           </div>
 
-          {/* Column 2 (Middle, span 6): Beautiful Featured News Carousel */}
-          <div className="lg:col-span-6 flex flex-col rounded-lg border border-slate-200 dark:border-slate-800 overflow-hidden relative min-h-[380px] shadow">
+          {/* Column 2 (Middle, span 6): Large Featured Image Slider with Overlay Block */}
+          <div className="lg:col-span-6 flex flex-col relative bg-slate-900 rounded-lg overflow-hidden shadow border border-slate-200/5 min-h-[350px] md:h-auto">
             {slides.map((slide: any, idx: number) => (
               <div
                 key={slide.id}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-1000 flex flex-col justify-end ${
-                  idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                }`}
+                className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === currentSlide ? "opacity-100 pointer-events-auto scale-100" : "opacity-0 pointer-events-none scale-105"
+                  }`}
               >
-                {/* Background Image */}
-                <div
-                  className="absolute inset-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url(${slide.image})` }}
+                {/* Slide Background Image */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-black/15 z-10" />
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="w-full h-full object-cover"
                 />
-                {/* Visual Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent z-10" />
 
-                <div className="p-5 md:p-6 z-20 flex flex-col gap-2 text-white relative">
-                  <span className="px-2 py-0.5 text-[9px] md:text-xs font-black bg-[#cc0000] text-amber-50 uppercase rounded self-start tracking-wide shadow-sm">
-                    {slide.category}
-                  </span>
-                  <h3 className="text-sm md:text-base lg:text-lg font-black tracking-wide leading-snug uppercase text-amber-100 hover:underline">
+                {/* Semi-transparent Overlay Bottom Block */}
+                <div className="absolute bottom-0 left-0 right-0 p-5 z-20 flex flex-col gap-2 bg-gradient-to-t from-black/95 to-black/60 border-t border-white/5">
+                  <div className="flex items-center gap-2">
+                    <span className="bg-[#cc0000] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow">
+                      {slide.category}
+                    </span>
+                    <span className="text-white/80 text-[10px] font-bold flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {slide.date}
+                    </span>
+                  </div>
+                  <h3 className="text-sm md:text-base font-extrabold text-[#fef08a] leading-snug tracking-wide">
                     <Link href={`/tin-tuc`}>{slide.title}</Link>
                   </h3>
-                  <p className="text-xs font-medium text-slate-200 line-clamp-2 md:line-clamp-3 leading-relaxed">
+                  <p className="text-white/80 text-[11px] line-clamp-2 leading-relaxed">
                     {slide.excerpt}
                   </p>
-                  <div className="flex items-center gap-1 text-[10px] font-bold text-slate-300 uppercase mt-1">
-                    <Clock className="w-3.5 h-3.5" />
-                    <span>Cập nhật: {slide.date}</span>
-                  </div>
                 </div>
               </div>
             ))}
@@ -484,16 +543,16 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
-                  className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    idx === currentSlide ? "bg-[#fef08a] w-4" : "bg-white/40 hover:bg-white/75"
-                  }`}
+                  className={`w-1.5 h-1.5 rounded-full transition-all ${idx === currentSlide ? "bg-[#fef08a] w-4" : "bg-white/40 hover:bg-white/75"
+                    }`}
                 />
               ))}
             </div>
           </div>
 
-          {/* Column 3 (Right, span 3): Dynamic Administrative Announcements */}
+          {/* Column 3 (Right, span 3): Thông báo (Announcements Box on side of slider) */}
           <div className="lg:col-span-3 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg p-4 flex flex-col relative overflow-hidden shadow-sm justify-between">
+            {/* Subtle administrative bronze pattern watermark */}
             <div className="absolute inset-0 bg-[radial-gradient(#cc000004_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
 
             <div>
@@ -504,33 +563,59 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
                 </span>
               </div>
 
-              <div className="flex flex-col gap-4 z-10 relative">
-                {ANNOUNCEMENTS_SIDE.slice(0, 4).map((ann) => (
-                  <div key={ann.id} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
-                    <Link
-                      href="/tin-tuc"
-                      className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
-                    >
-                      <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
-                        🔴
-                      </span>
-                      <span className="line-clamp-2">{ann.title}</span>
-                    </Link>
-                    <div className="flex items-center gap-2 mt-1 pl-4 text-[10px] md:text-xs text-slate-400 font-bold uppercase">
-                      <span>{ann.dept}</span>
-                      <span>•</span>
-                      <span className="flex items-center gap-0.5">
-                        <Clock className="w-2.5 h-2.5" />
-                        {ann.date}
-                      </span>
+              {/* The scrolling container gets fixed height to display exactly 4 items at a time */}
+              <div className="h-[260px] overflow-hidden relative z-10 select-none mb-2">
+                <div className="animate-vertical-marquee flex flex-col gap-4">
+                  {/* First set of announcements */}
+                  {ANNOUNCEMENTS_SIDE.map((ann) => (
+                    <div key={`${ann.id}-1`} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
+                      <Link
+                        href="/tin-tuc"
+                        className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                      >
+                        <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                          🔴
+                        </span>
+                        <span className="line-clamp-2">{ann.title}</span>
+                      </Link>
+                      <div className="flex items-center gap-2 mt-1 pl-4 text-[10px] md:text-xs text-slate-400 font-bold uppercase">
+                        <span>{ann.dept}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-0.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          {ann.date}
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                  {/* Second set of announcements for seamless vertical loop */}
+                  {ANNOUNCEMENTS_SIDE.map((ann) => (
+                    <div key={`${ann.id}-2`} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
+                      <Link
+                        href="/tin-tuc"
+                        className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                      >
+                        <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                          🔴
+                        </span>
+                        <span className="line-clamp-2">{ann.title}</span>
+                      </Link>
+                      <div className="flex items-center gap-2 mt-1 pl-4 text-[10px] md:text-xs text-slate-400 font-bold uppercase">
+                        <span>{ann.dept}</span>
+                        <span>•</span>
+                        <span className="flex items-center gap-0.5">
+                          <Clock className="w-2.5 h-2.5" />
+                          {ann.date}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
             {/* Citizen Support Quick Info Box */}
-            <div className="p-2.5 bg-white dark:bg-slate-950 rounded-lg border border-amber-200/30 dark:border-slate-800/60 flex items-center gap-3 z-10 shrink-0 shadow-sm mt-3">
+            <div className="p-2.5 bg-white dark:bg-slate-950 rounded-lg border border-amber-200/30 dark:border-slate-800/60 flex items-center gap-3 z-10 shrink-0 shadow-sm mb-1">
               <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#cc0000] dark:text-red-400 shrink-0">
                 <Clock className="w-4 h-4" />
               </div>
@@ -542,7 +627,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
 
             <Link
               href="/tin-tuc"
-              className="mt-2.5 pt-2 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] md:text-xs text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1 shrink-0"
+              className="mt-1 pt-2.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-xs text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1 shrink-0"
             >
               Xem tất cả thông báo
               <ArrowRight className="w-3.5 h-3.5" />
@@ -552,11 +637,13 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
         </div>
       </div>
 
-      {/* 3. Horizontal Decorative Patriotic Promotion Banner */}
+      {/* 3. Horizontal Decorative Patriotic Promotion Banner 1 */}
       <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
+        {/* Intricate Gold Borders */}
         <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
         <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
 
+        {/* Traditional Gold Star Watermark */}
         <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
           <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
@@ -600,6 +687,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
                 href={serv.link}
                 className={`p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 ${serv.borderColor} ${serv.hoverBg} shadow-sm hover:shadow-md hover:border-[#cc0000] dark:hover:border-red-600 transition-all transform hover:-translate-y-1 flex flex-col gap-3.5 relative group overflow-hidden`}
               >
+                {/* Micro hover shadow glow decoration */}
                 <div className="absolute right-0 top-0 w-24 h-24 bg-slate-500/5 dark:bg-white/5 rounded-full blur-xl translate-x-8 -translate-y-8 scale-75 group-hover:scale-125 transition-transform duration-500 pointer-events-none" />
 
                 <div className={`w-11 h-11 rounded-lg ${serv.iconBg} flex items-center justify-center border border-slate-100 dark:border-slate-800 shadow-sm group-hover:scale-110 transition-transform`}>
@@ -624,241 +712,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
         </div>
       </div>
 
-      {/* 5. INTERACTIVE ONE-STOP SEARCH & DOSSIER TRACKING WIDGET (NEW PREMIUM ADDITION) */}
-      <div id="one-stop-widget" className="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 rounded-xl border border-slate-300 dark:border-slate-800 p-6 shadow-md flex flex-col gap-5 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#cc0000]/5 dark:bg-red-900/5 rounded-full blur-2xl pointer-events-none" />
-        
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-lg bg-[#cc0000] text-white">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div className="flex flex-col">
-              <h2 className="text-base md:text-lg font-black text-slate-800 dark:text-white uppercase tracking-wider">
-                TRA CỨU HÀNH CHÍNH & MỘT CỬA ĐIỆN TỬ LIÊN THÔNG
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
-                Tra cứu nhanh thành phần hồ sơ và tiến trình xử lý hồ sơ công dân thời gian thực
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
-            <button
-              onClick={() => setActiveTab("procedure")}
-              className={`px-3 py-1.5 text-xs font-bold uppercase rounded transition-colors ${
-                activeTab === "procedure"
-                  ? "bg-[#cc0000] text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              Thủ tục hành chính
-            </button>
-            <button
-              onClick={() => setActiveTab("dossier")}
-              className={`px-3 py-1.5 text-xs font-bold uppercase rounded transition-colors ${
-                activeTab === "dossier"
-                  ? "bg-[#cc0000] text-white shadow-sm"
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-              }`}
-            >
-              Theo dõi hồ sơ một cửa
-            </button>
-          </div>
-        </div>
-
-        {/* Tab 1: Administrative Procedure Search */}
-        {activeTab === "procedure" && (
-          <div className="flex flex-col gap-4">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Nhập tên thủ tục, từ khóa (ví dụ: khai sinh, chứng thực, kết hôn, đất đai...)"
-                  value={procedureSearch}
-                  onChange={(e) => setProcedureSearch(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs md:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#cc0000] focus:border-transparent text-slate-800 dark:text-slate-100 shadow-sm"
-                />
-              </div>
-              {procedureSearch && (
-                <button
-                  onClick={() => setProcedureSearch("")}
-                  className="px-3 text-xs font-bold text-slate-500 hover:text-[#cc0000]"
-                >
-                  Xóa
-                </button>
-              )}
-            </div>
-
-            {/* Results Grid */}
-            {searchingProcedures ? (
-              <div className="flex items-center justify-center py-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#cc0000]" />
-              </div>
-            ) : procedureSearch.length > 1 ? (
-              <div className="flex flex-col gap-2.5 max-h-[300px] overflow-y-auto">
-                {proceduresData && proceduresData.length > 0 ? (
-                  proceduresData.map((proc: any) => (
-                    <div
-                      key={proc.id}
-                      onClick={() => setSelectedProcedure(proc)}
-                      className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg hover:border-[#cc0000] dark:hover:border-red-600 cursor-pointer transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-sm"
-                    >
-                      <div className="flex flex-col gap-1 min-w-0">
-                        <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">{proc.code}</span>
-                        <h4 className="text-xs md:text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{proc.name}</h4>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-[11px] text-slate-500">
-                          <span className="flex items-center gap-1 font-semibold"><Clock className="w-3 h-3 text-[#cc0000]" /> {proc.duration}</span>
-                          <span className="flex items-center gap-1 font-semibold"><DollarSign className="w-3 h-3 text-emerald-600" /> {proc.fee}</span>
-                        </div>
-                      </div>
-                      <span className="text-xs font-extrabold text-[#cc0000] dark:text-red-400 uppercase tracking-wider flex items-center gap-0.5 shrink-0 hover:underline">
-                        Xem hướng dẫn hồ sơ
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-6 text-xs font-bold text-slate-400">
-                    Không tìm thấy thủ tục nào khớp với từ khóa tìm kiếm.
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="bg-slate-100/65 dark:bg-slate-900/65 rounded-lg p-5 flex items-center gap-4.5 border border-dashed border-slate-200 dark:border-slate-800">
-                <div className="p-3 bg-red-50 dark:bg-red-950/20 text-[#cc0000] rounded-full shrink-0">
-                  <FileText className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300">Tính năng tra cứu thông tin thủ tục</span>
-                  <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Hỗ trợ công dân tìm kiếm nhanh các giấy tờ bắt buộc, biểu mẫu đi kèm, trình tự thực hiện các thủ tục hành chính thuộc thẩm quyền giải quyết của UBND xã (đất đai, hộ khẩu, chứng thực...).
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Tab 2: Dossier Tracking Status */}
-        {activeTab === "dossier" && (
-          <div className="flex flex-col gap-4.5">
-            <form onSubmit={handleDossierSearch} className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Nhập mã số hồ sơ biên nhận một cửa (ví dụ: DK-2026-101, DK-2026-102...)"
-                value={dossierCode}
-                onChange={(e) => setDossierCode(e.target.value)}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs md:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#cc0000] focus:border-transparent text-slate-800 dark:text-slate-100 shadow-sm"
-              />
-              <button
-                type="submit"
-                disabled={searchingDossier || !dossierCode.trim()}
-                className="px-5 py-2.5 bg-[#cc0000] text-white rounded-lg text-xs font-extrabold uppercase tracking-wider hover:bg-red-700 transition-colors shrink-0 flex items-center gap-1 shadow disabled:opacity-50"
-              >
-                {searchingDossier ? "Đang tra cứu..." : "Tra cứu"}
-                <Search className="w-4 h-4" />
-              </button>
-            </form>
-
-            {/* Timelines Display */}
-            {dossierData ? (
-              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-5 shadow-sm flex flex-col gap-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-dashed border-slate-200 dark:border-slate-800 pb-3 gap-2">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Hồ sơ công dân</span>
-                    <h4 className="text-xs md:text-sm font-extrabold text-slate-800 dark:text-white uppercase tracking-wide flex items-center gap-1.5">
-                      {dossierData.code} <span className="text-xs px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 font-bold">{dossierData.status}</span>
-                    </h4>
-                  </div>
-                  <div className="flex flex-col text-left sm:text-right text-[11px] text-slate-500 font-semibold">
-                    <span>Người nộp: {dossierData.senderName}</span>
-                    <span className="flex items-center sm:justify-end gap-1"><Clock className="w-3.5 h-3.5 text-red-500" /> Ngày hẹn trả: {new Date(dossierData.dueDate).toLocaleDateString("vi-VN")}</span>
-                  </div>
-                </div>
-
-                {/* Progress Pipeline */}
-                <div className="grid grid-cols-4 gap-2 relative mt-2 pb-2">
-                  {/* Pipeline line */}
-                  <div className="absolute top-4 left-1/8 right-1/8 h-1 bg-slate-200 dark:bg-slate-800 z-0" />
-                  <div
-                    className="absolute top-4 left-1/8 h-1 bg-emerald-500 z-0 transition-all duration-700"
-                    style={{ width: `${((dossierData.currentStep - 1) / 3) * 75}%` }}
-                  />
-
-                  {/* Step Nodes */}
-                  {[
-                    { step: 1, name: "Tiếp nhận" },
-                    { step: 2, name: "Thụ lý & Thẩm định" },
-                    { step: 3, name: "Phê duyệt" },
-                    { step: 4, name: "Trả kết quả" }
-                  ].map((s) => {
-                    const isActive = s.step <= dossierData.currentStep
-                    const isCurrent = s.step === dossierData.currentStep
-                    return (
-                      <div key={s.step} className="flex flex-col items-center gap-1.5 z-10 text-center relative min-w-0">
-                        <div
-                          className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all ${
-                            isCurrent
-                              ? "bg-white dark:bg-slate-900 border-emerald-500 text-emerald-600 ring-4 ring-emerald-100 dark:ring-emerald-950 scale-110"
-                              : isActive
-                              ? "bg-emerald-500 border-emerald-500 text-white"
-                              : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-800 text-slate-400"
-                          }`}
-                        >
-                          {isActive && !isCurrent ? <Check className="w-5 h-5" /> : <span className="text-xs font-bold">{s.step}</span>}
-                        </div>
-                        <span
-                          className={`text-[10px] md:text-xs font-bold leading-tight ${
-                            isCurrent
-                              ? "text-emerald-600 dark:text-emerald-400 font-extrabold"
-                              : isActive
-                              ? "text-slate-700 dark:text-slate-300"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          {s.name}
-                        </span>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* Status message */}
-                <div className="bg-slate-50 dark:bg-slate-950 rounded border border-slate-100 dark:border-slate-850 p-3 mt-1 flex items-start gap-2.5">
-                  <Info className="w-4.5 h-4.5 text-blue-500 shrink-0 mt-0.5" />
-                  <div className="flex flex-col gap-0.5 text-xs">
-                    <span className="font-bold text-slate-700 dark:text-slate-200">Chi tiết tiến trình xử lý:</span>
-                    <p className="text-slate-500 dark:text-slate-400 font-semibold italic">{dossierData.stepDetails || "Hồ sơ đang ở trạng thái xử lý nghiệp vụ theo trình tự quy định."}</p>
-                  </div>
-                </div>
-              </div>
-            ) : dossierError ? (
-              <div className="p-4 bg-red-50 dark:bg-red-950/20 border border-red-200/50 rounded-lg flex items-center gap-2.5 text-red-700 dark:text-red-400 text-xs font-bold">
-                <AlertCircle className="w-5 h-5 shrink-0" />
-                <span>Không thể tìm thấy mã biên nhận hồ sơ một cửa này trong hệ thống. Vui lòng kiểm tra lại chính xác mã số trên biên nhận giấy của quý khách.</span>
-              </div>
-            ) : (
-              <div className="bg-slate-100/65 dark:bg-slate-900/65 rounded-lg p-5 flex items-center gap-4.5 border border-dashed border-slate-200 dark:border-slate-800">
-                <div className="p-3 bg-red-50 dark:bg-red-950/20 text-[#cc0000] rounded-full shrink-0">
-                  <FileSearch className="w-5 h-5" />
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-xs md:text-sm font-bold text-slate-700 dark:text-slate-300">Tiến trình giải quyết hồ sơ công dân trực tuyến</span>
-                  <p className="text-[11px] md:text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Nhập chính xác mã biên nhận ghi trên phiếu hẹn trả kết quả để giám sát từng bước thực thi công vụ: Thụ lý hồ sơ, thẩm định hồ sơ của chuyên viên phòng ban, ký phê duyệt lãnh đạo xã, và trạng thái sẵn sàng nhận kết quả.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* 6. News category blocks and links */}
+      {/* 5. Cloned Category Section 1: LĨNH VỰC XÂY DỰNG & CÔNG THƯƠNG */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: News lists */}
+        {/* Left Column: News list */}
         <div className="lg:col-span-8 flex flex-col gap-4">
           <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
             <span className="text-[#f1c40f] text-lg">⭐</span>
@@ -867,348 +723,555 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {CONSTRUCTION_NEWS.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm hover:shadow transition-shadow flex flex-col justify-between">
-                <div>
-                  <img src={item.image} alt={item.title} className="w-full h-40 object-cover" />
-                  <div className="p-4 flex flex-col gap-1.5">
-                    <span className="text-[10px] font-black text-[#cc0000] uppercase tracking-wider">{item.date}</span>
-                    <h4 className="text-xs md:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 hover:text-[#cc0000] transition-colors leading-snug">
-                      <Link href="/tin-tuc">{item.title}</Link>
-                    </h4>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium line-clamp-3">
-                      {item.excerpt}
-                    </p>
-                  </div>
+          <div className="flex flex-col gap-4">
+            {CONSTRUCTION_NEWS.map((news) => (
+              <div
+                key={news.id}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-[#cc0000] transition-all flex flex-col sm:flex-row gap-4 group"
+              >
+                <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0">
+                  <img
+                    src={news.image}
+                    alt={news.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <div className="px-4 pb-4.5 pt-1">
-                  <Link href="/tin-tuc" className="text-[10px] md:text-xs font-black uppercase tracking-wider text-[#cc0000] dark:text-red-400 flex items-center gap-1 hover:underline">
-                    Xem chi tiết
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                <div className="flex flex-col gap-2 flex-1">
+                  <span className="text-slate-400 text-[9px] font-bold tracking-wider flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {news.date}
+                  </span>
+                  <h4 className="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors tracking-wide line-clamp-2">
+                    <Link href={`/tin-tuc`}>{news.title}</Link>
+                  </h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2 leading-relaxed font-semibold">
+                    {news.excerpt}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
+        </div>
 
-          <div className="p-4 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg flex flex-col gap-2.5">
-            {CONSTRUCTION_LINKS.map((link, idx) => (
-              <Link
-                key={idx}
-                href={link.link}
-                className="text-xs md:text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:text-[#cc0000] flex items-start gap-1.5 leading-normal"
-              >
-                <span className="text-[#cc0000] shrink-0 mt-0.5">•</span>
-                <span className="hover:underline">{link.text}</span>
-              </Link>
-            ))}
+        {/* Right Column: Category navigation links on light textured background */}
+        <div className="lg:col-span-4 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg p-4 flex flex-col relative overflow-hidden shadow-sm h-full self-stretch justify-between">
+          <div className="absolute inset-0 bg-[radial-gradient(#cc000004_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
+
+          <div>
+            <div className="border-b border-amber-200/60 dark:border-slate-800 pb-2 mb-3.5 z-10 flex items-center gap-1.5">
+              <FolderOpen className="w-4 h-4 text-[#cc0000]" />
+              <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
+                Chuyên mục xây dựng
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-3 z-10">
+              {CONSTRUCTION_LINKS.map((link, idx) => (
+                <div key={idx} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
+                  <Link
+                    href={link.link}
+                    className="flex gap-2 items-start text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                  >
+                    <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                      🔴
+                    </span>
+                    <span>{link.text}</span>
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Agriculture Section */}
-          <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2 mt-2">
+          <Link
+            href="/tin-tuc"
+            className="mt-6 pt-3.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1"
+          >
+            Xem tất cả chuyên đề
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* 6. Cloned Category Section 2: LĨNH VỰC NÔNG NGHIỆP & TÀI NGUYÊN */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Left Column: News list */}
+        <div className="lg:col-span-8 flex flex-col gap-4">
+          <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
             <span className="text-[#f1c40f] text-lg">⭐</span>
             <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
-              Tin tức nông nghiệp & phát triển nông thôn mới
+              Tin tức lĩnh vực nông nghiệp và môi trường
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {AGRICULTURE_NEWS.map((item) => (
-              <div key={item.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm hover:shadow transition-shadow flex flex-col justify-between">
-                <div>
-                  <img src={item.image} alt={item.title} className="w-full h-40 object-cover" />
-                  <div className="p-4 flex flex-col gap-1.5">
-                    <span className="text-[10px] font-black text-[#cc0000] uppercase tracking-wider">{item.date}</span>
-                    <h4 className="text-xs md:text-sm font-bold text-slate-900 dark:text-white line-clamp-2 hover:text-[#cc0000] transition-colors leading-snug">
-                      <Link href="/tin-tuc">{item.title}</Link>
-                    </h4>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium line-clamp-3">
-                      {item.excerpt}
-                    </p>
-                  </div>
+          <div className="flex flex-col gap-4">
+            {AGRICULTURE_NEWS.map((news) => (
+              <div
+                key={news.id}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-[#cc0000] transition-all flex flex-col sm:flex-row gap-4 group"
+              >
+                <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0">
+                  <img
+                    src={news.image}
+                    alt={news.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 </div>
-                <div className="px-4 pb-4.5 pt-1">
-                  <Link href="/tin-tuc" className="text-[10px] md:text-xs font-black uppercase tracking-wider text-[#cc0000] dark:text-red-400 flex items-center gap-1 hover:underline">
-                    Xem chi tiết
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                <div className="flex flex-col gap-2 flex-1">
+                  <span className="text-slate-400 text-[9px] font-bold tracking-wider flex items-center gap-1">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    {news.date}
+                  </span>
+                  <h4 className="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors tracking-wide line-clamp-2">
+                    <Link href={`/tin-tuc`}>{news.title}</Link>
+                  </h4>
+                  <p className="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2 leading-relaxed font-semibold">
+                    {news.excerpt}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
-
-          <div className="p-4 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg flex flex-col gap-2.5">
-            {AGRICULTURE_LINKS.map((link, idx) => (
-              <Link
-                key={idx}
-                href={link.link}
-                className="text-xs md:text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:text-[#cc0000] flex items-start gap-1.5 leading-normal"
-              >
-                <span className="text-[#cc0000] shrink-0 mt-0.5">•</span>
-                <span className="hover:underline">{link.text}</span>
-              </Link>
-            ))}
-          </div>
         </div>
 
-        {/* Right Column: Sidebar Widgets (Leaders, Polls, QA) */}
-        <div className="lg:col-span-4 flex flex-col gap-5">
-          {/* Leaders Widget */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
-            <div className="border-b-2 border-[#cc0000] pb-1.5 mb-3 flex items-center gap-1.5">
-              <span className="text-xs font-black uppercase text-[#cc0000] tracking-wide">Lãnh đạo UBND xã Dang Kang</span>
+        {/* Right Column: Category navigation links on light textured background */}
+        <div className="lg:col-span-4 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg p-4 flex flex-col relative overflow-hidden shadow-sm h-full self-stretch justify-between">
+          <div className="absolute inset-0 bg-[radial-gradient(#cc000004_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
+
+          <div>
+            <div className="border-b border-amber-200/60 dark:border-slate-800 pb-2 mb-3.5 z-10 flex items-center gap-1.5">
+              <FolderOpen className="w-4 h-4 text-[#cc0000]" />
+              <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
+                Chuyên mục nông nghiệp
+              </span>
             </div>
-            <div className="flex flex-col gap-3">
-              {LEADERS.map((ldr, idx) => (
-                <div key={idx} className="p-3 bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 rounded-lg flex items-start gap-3 relative overflow-hidden group">
-                  <div className="p-2 bg-red-50 dark:bg-red-950/40 rounded-full text-[#cc0000]">
-                    <User className="w-5 h-5 shrink-0" />
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <h5 className="text-xs md:text-sm font-bold text-slate-800 dark:text-slate-100 uppercase tracking-wide flex items-center gap-1">
-                      {ldr.name} {ldr.hasStar && <span className="text-yellow-500 text-xs">⭐</span>}
-                    </h5>
-                    <span className="text-[11px] font-bold text-[#cc0000] dark:text-red-400 mt-0.5">{ldr.role}</span>
-                    <div className="flex flex-col gap-0.5 mt-2 text-[10px] md:text-xs text-slate-500 font-semibold">
-                      <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5 shrink-0" /> {ldr.phone}</span>
-                      <span className="flex items-center gap-1 shrink-0"><Mail className="w-3.5 h-3.5 shrink-0" /> {ldr.email}</span>
+
+            <div className="flex flex-col gap-3 z-10">
+              {AGRICULTURE_LINKS.map((link, idx) => (
+                <div key={idx} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
+                  <Link
+                    href={link.link}
+                    className="flex gap-2 items-start text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                  >
+                    <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                      🔴
+                    </span>
+                    <span>{link.text}</span>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <Link
+            href="/tin-tuc"
+            className="mt-6 pt-3.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1"
+          >
+            Xem tất cả chuyên đề
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+      </div>
+
+      {/* 7. Commune Photo Gallery Section - "THƯ VIỆN ẢNH HOẠT ĐỘNG DANG KANG" */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+          <span className="text-[#f1c40f] text-lg">⭐</span>
+          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+            THƯ VIỆN ẢNH HOẠT ĐỘNG & QUÊ HƯƠNG DANG KANG
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 md:p-6 shadow-sm">
+
+          {/* Left Column: Large Highlight Image Slide */}
+          <div className="lg:col-span-8 relative h-64 sm:h-[420px] rounded-xl overflow-hidden group/slide bg-slate-950 shadow-inner">
+            {GALLERY_PHOTOS.map((photo, idx) => {
+              const isActive = idx === currentGalleryIdx
+              return (
+                <div
+                  key={photo.id}
+                  onClick={() => {
+                    setLightboxImg(photo.image)
+                    setLightboxTitle(photo.title)
+                  }}
+                  className={`absolute inset-0 transition-all duration-700 ease-in-out cursor-zoom-in ${isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-105 pointer-events-none"
+                    }`}
+                >
+                  <img
+                    src={photo.image}
+                    alt={photo.title}
+                    className="w-full h-full object-cover group-hover/slide:scale-105 transition-transform duration-700"
+                  />
+                  {/* Tag and Title Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-between p-4 sm:p-6 z-10">
+                    <span className="self-start bg-[#cc0000] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded shadow border border-white/5">
+                      {photo.tag}
+                    </span>
+                    <div className="flex flex-col gap-1.5">
+                      <h3 className="text-sm sm:text-lg font-black text-white leading-snug tracking-wide drop-shadow">
+                        {photo.title}
+                      </h3>
+                      <span className="text-[10px] text-slate-300 font-bold tracking-wider flex items-center gap-1.5 uppercase">
+                        <ImageIcon className="w-4 h-4 text-slate-300" />
+                        Xem ảnh lớn phóng to
+                      </span>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
+              )
+            })}
 
-          {/* Citizen Q&A Widget */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
-            <div className="border-b-2 border-[#cc0000] pb-1.5 mb-3 flex items-center justify-between">
-              <span className="text-xs font-black uppercase text-[#cc0000] tracking-wide">Giải đáp công dân</span>
-              <Link href="/tuong-tac" className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-[#cc0000] hover:underline">Tất cả</Link>
-            </div>
-            <div className="flex flex-col gap-3.5">
-              {MOCK_QA.map((qa, idx) => (
-                <div key={idx} className="flex flex-col gap-2">
-                  <div className="p-3 bg-blue-50/45 dark:bg-blue-950/15 border border-blue-100/50 dark:border-blue-900/50 rounded-lg flex flex-col gap-1.5">
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-[#cc0000] flex items-center gap-1">
-                      <HelpCircle className="w-3.5 h-3.5" /> HỎI • {qa.sender}
-                    </span>
-                    <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-relaxed italic">&quot;{qa.q}&quot;</p>
-                  </div>
-                  <div className="p-3 bg-emerald-50/45 dark:bg-emerald-950/15 border border-emerald-100/50 dark:border-emerald-900/50 rounded-lg flex flex-col gap-1.5 ml-2">
-                    <span className="text-[9px] font-extrabold uppercase tracking-widest text-emerald-600 flex items-center gap-1">
-                      <ShieldCheck className="w-3.5 h-3.5" /> UBND TRẢ LỜI
-                    </span>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold leading-relaxed line-clamp-3">{qa.a}</p>
-                    <Link href="/tuong-tac" className="text-[10px] font-extrabold uppercase text-emerald-600 hover:underline mt-1 self-start">Xem câu trả lời đầy đủ</Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Poll Opinion Widget */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4 shadow-sm">
-            <div className="border-b-2 border-[#cc0000] pb-1.5 mb-3 flex items-center gap-1.5">
-              <span className="text-xs font-black uppercase text-[#cc0000] tracking-wide">Khảo sát ý kiến người dân</span>
-            </div>
-            <div className="flex flex-col gap-3 relative overflow-hidden">
-              <p className="text-xs md:text-[13px] font-bold text-slate-800 dark:text-slate-100 leading-snug">
-                Quý vị đánh giá thế nào về thái độ phục vụ và năng lực nghiệp vụ của công chức làm việc tại Bộ phận Một cửa UBND xã?
-              </p>
-
-              {pollVoted ? (
-                <div className="flex flex-col gap-2.5 mt-2 animate-fade-in">
-                  <div className="p-2.5 bg-emerald-50/70 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 rounded text-center mb-1">
-                    <span className="text-xs font-black text-emerald-600 dark:text-emerald-400 block flex items-center justify-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4" /> Cảm ơn bạn đã tham gia bình chọn!
-                    </span>
-                  </div>
-                  {[
-                    { key: "verySatisfied", label: "Rất hài lòng", val: pollStats.verySatisfied },
-                    { key: "satisfied", label: "Hài lòng", val: pollStats.satisfied },
-                    { key: "normal", label: "Trung bình", val: pollStats.normal },
-                    { key: "unsatisfied", label: "Chưa hài lòng", val: pollStats.unsatisfied }
-                  ].map((stat) => {
-                    const total = Object.values(pollStats).reduce((a, b) => a + b, 0)
-                    const percent = total > 0 ? Math.round((stat.val / total) * 100) : 0
-                    const isUserChoice = pollChoice === stat.key
-                    return (
-                      <div key={stat.key} className="flex flex-col gap-1 text-xs">
-                        <div className="flex items-center justify-between font-bold">
-                          <span className={`${isUserChoice ? "text-[#cc0000] dark:text-red-400" : "text-slate-700 dark:text-slate-300"}`}>
-                            {stat.label} {isUserChoice && "✅"}
-                          </span>
-                          <span>{percent}% ({stat.val} phiếu)</span>
-                        </div>
-                        <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded overflow-hidden border border-slate-200/50 dark:border-slate-700">
-                          <div
-                            className={`h-full transition-all duration-1000 ${isUserChoice ? "bg-[#cc0000]" : "bg-slate-400 dark:bg-slate-600"}`}
-                            style={{ width: `${percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              ) : (
-                <div className="flex flex-col gap-2 mt-2">
-                  <button onClick={() => handleVote("verySatisfied")} className="w-full text-left p-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded hover:border-[#cc0000] hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-all flex items-center justify-between">
-                    <span>1. Rất hài lòng</span>
-                    <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100" />
-                  </button>
-                  <button onClick={() => handleVote("satisfied")} className="w-full text-left p-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded hover:border-[#cc0000] hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-all flex items-center justify-between">
-                    <span>2. Hài lòng</span>
-                    <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100" />
-                  </button>
-                  <button onClick={() => handleVote("normal")} className="w-full text-left p-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded hover:border-[#cc0000] hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-all flex items-center justify-between">
-                    <span>3. Bình thường / Tạm hài lòng</span>
-                    <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100" />
-                  </button>
-                  <button onClick={() => handleVote("unsatisfied")} className="w-full text-left p-2.5 text-xs font-bold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 rounded hover:border-[#cc0000] hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-all flex items-center justify-between">
-                    <span>4. Chưa hài lòng / Cần cải tiến thêm</span>
-                    <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100" />
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 7. Gallery Slideshow Section */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-4.5 shadow-sm">
-        <div className="border-b-2 border-[#cc0000] pb-1.5 mb-4 flex items-center gap-1.5">
-          <ImageIcon className="w-5 h-5 text-[#cc0000]" />
-          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">Hình ảnh hoạt động nổi bật</h2>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {GALLERY_PHOTOS.map((photo, idx) => (
-            <div
-              key={photo.id}
-              onClick={() => {
-                setLightboxImg(photo.image)
-                setLightboxTitle(photo.title)
+            {/* Slider Navigation Arrows */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setCurrentGalleryIdx((currentGalleryIdx - 1 + GALLERY_PHOTOS.length) % GALLERY_PHOTOS.length)
               }}
-              className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-lg overflow-hidden group cursor-pointer hover:shadow transition-shadow relative"
+              className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/75 text-white transition-colors z-20 border border-white/5 opacity-0 group-hover/slide:opacity-100"
+              title="Trước"
             >
-              <img src={photo.image} alt={photo.title} className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-500" />
-              <div className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm border border-white/10 px-2 py-0.5 rounded text-[10px] text-white font-extrabold uppercase">{photo.tag}</div>
-              <div className="p-3.5">
-                <p className="text-xs font-bold text-slate-700 dark:text-slate-300 line-clamp-2 leading-relaxed group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors">{photo.title}</p>
-              </div>
-            </div>
-          ))}
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                setCurrentGalleryIdx((currentGalleryIdx + 1) % GALLERY_PHOTOS.length)
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/40 hover:bg-black/75 text-white transition-colors z-20 border border-white/5 opacity-0 group-hover/slide:opacity-100"
+              title="Sau"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Right Column: Thumbnail Selector List */}
+          <div className="lg:col-span-4 flex flex-col gap-3 justify-center">
+            {GALLERY_PHOTOS.map((photo, idx) => {
+              const isActive = idx === currentGalleryIdx
+              return (
+                <button
+                  key={photo.id}
+                  onClick={() => setCurrentGalleryIdx(idx)}
+                  className={`flex gap-3 items-center p-2.5 rounded-xl border text-left transition-all ${isActive
+                    ? "bg-red-50/50 dark:bg-red-950/20 border-[#cc0000] shadow-sm"
+                    : "bg-slate-50/50 dark:bg-slate-950/20 border-slate-150 dark:border-slate-800/80 hover:bg-slate-100/50"
+                    }`}
+                >
+                  <div className="w-16 h-12 rounded-lg overflow-hidden shrink-0 relative border border-slate-200/20">
+                    <img
+                      src={photo.image}
+                      alt={photo.title}
+                      className="w-full h-full object-cover"
+                    />
+                    {isActive && (
+                      <div className="absolute inset-0 bg-[#cc0000]/25 flex items-center justify-center">
+                        <span className="text-white text-xs animate-pulse">⭐</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <span className={`text-[9px] font-black uppercase tracking-wider ${isActive ? "text-[#cc0000] dark:text-red-400" : "text-slate-400"
+                      }`}>
+                      {photo.tag}
+                    </span>
+                    <h4 className={`text-[11px] font-extrabold truncate ${isActive ? "text-[#cc0000] dark:text-red-400" : "text-slate-700 dark:text-slate-300"
+                      }`}>
+                      {photo.title}
+                    </h4>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
         </div>
       </div>
 
-      {/* Lightbox Modal */}
+      {/* Lightbox / Modal for Photo Gallery */}
       {lightboxImg && (
         <div
+          className="fixed inset-0 bg-black/85 z-50 flex flex-col items-center justify-center p-4 animate-fade-in cursor-zoom-out select-none"
           onClick={() => {
             setLightboxImg(null)
             setLightboxTitle(null)
           }}
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9999] flex flex-col items-center justify-center p-4 animate-fade-in select-none cursor-zoom-out"
         >
-          <div className="relative max-w-4xl max-h-[80vh] flex items-center justify-center">
-            <img src={lightboxImg} alt={lightboxTitle || ""} className="max-w-full max-h-[80vh] rounded shadow-2xl object-contain border border-white/10" />
+          <div className="relative max-w-4xl w-full max-h-[80vh] flex items-center justify-center overflow-hidden rounded-lg bg-slate-950 border border-white/10 shadow-2xl">
+            <img
+              src={lightboxImg}
+              alt={lightboxTitle || "Ảnh"}
+              className="max-w-full max-h-[80vh] object-contain"
+            />
             <button
-              onClick={() => {
+              className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white font-black text-sm px-3 py-1.5 rounded-full border border-white/20 transition-colors"
+              onClick={(e) => {
+                e.stopPropagation()
                 setLightboxImg(null)
                 setLightboxTitle(null)
               }}
-              className="absolute -top-12 right-0 p-2 text-white bg-white/10 rounded-full hover:bg-white/20 transition-colors text-xs font-bold"
             >
-              Đóng (ESC)
+              Đóng ✕
             </button>
           </div>
           {lightboxTitle && (
-            <p className="text-slate-200 text-xs md:text-sm font-bold uppercase tracking-wide mt-4 max-w-2xl text-center bg-black/40 px-4 py-2 rounded-full border border-white/5">{lightboxTitle}</p>
+            <p className="mt-4 text-center text-xs md:text-sm font-bold text-white max-w-2xl px-6 py-2.5 bg-black/50 rounded-full backdrop-blur border border-white/5 drop-shadow-md">
+              📌 {lightboxTitle}
+            </p>
           )}
         </div>
       )}
 
-      {/* Administrative Procedure Details Modal */}
-      {selectedProcedure && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 animate-fade-in select-none">
-          <div className="bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-800 rounded-xl max-w-2xl w-full p-6 shadow-2xl flex flex-col gap-4 relative">
-            <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-              <div className="flex flex-col">
-                <span className="text-[10px] text-[#cc0000] font-black uppercase tracking-widest">{selectedProcedure.code}</span>
-                <h3 className="text-xs md:text-sm lg:text-base font-black text-slate-800 dark:text-white uppercase leading-snug">{selectedProcedure.name}</h3>
-              </div>
-              <button
-                onClick={() => setSelectedProcedure(null)}
-                className="px-2.5 py-1 text-slate-400 hover:text-[#cc0000] text-xs font-bold uppercase border border-slate-200 dark:border-slate-800 hover:border-[#cc0000] rounded transition-all"
-              >
-                Đóng
-              </button>
+      {/* 8. Dedicated Interactive Dashboard: Gathered Civic and Sidebar Widgets in elegant 4-column row */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+          <span className="text-[#f1c40f] text-lg">⭐</span>
+          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+            CỔNG TƯƠNG TÁC CÔNG DÂN & TIỆN ÍCH DỊCH VỤ SỐ
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
+
+          {/* Dashboard Item 1: Key leadership directory */}
+          <div className="bg-gradient-to-br from-[#990000] via-[#5c0000] to-slate-950 p-4.5 rounded-lg border border-[#ff0000]/10 shadow text-white relative overflow-hidden h-full animate-fade-in">
+            <div className="absolute right-0 top-0 w-24 h-24 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+
+            <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
+              <Award className="w-4.5 h-4.5 text-[#fbc02d]" />
+              <h4 className="text-xs font-black uppercase tracking-widest text-slate-100">
+                Lãnh đạo UBND Xã
+              </h4>
             </div>
 
-            <div className="flex flex-col gap-3.5 max-h-[60vh] overflow-y-auto pr-1">
-              <div className="grid grid-cols-2 gap-3 bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-850">
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase">Thời hạn giải quyết</span>
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 mt-0.5"><Clock className="w-3.5 h-3.5 text-[#cc0000]" /> {selectedProcedure.duration}</span>
+            <div className="flex flex-col gap-3.5">
+              {LEADERS.map((leader) => (
+                <div key={leader.name} className="flex gap-2.5 items-center border-b border-white/5 pb-3 last:border-0 last:pb-0 group">
+                  <div className="w-9 h-9 rounded-full bg-white/10 shrink-0 border border-white/15 flex items-center justify-center text-[#fbc02d] font-bold text-xs shadow-inner relative">
+                    {leader.hasStar ? (
+                      <span className="absolute -top-1 -right-1 text-[9px] bg-amber-500 rounded-full p-0.5 leading-none shadow-sm border border-slate-900 select-none">
+                        ⭐
+                      </span>
+                    ) : null}
+                    <User className="w-4.5 h-4.5" />
+                  </div>
+                  <div className="flex flex-col flex-1 min-w-0">
+                    <h5 className="text-xs md:text-sm font-extrabold text-[#ffde59] group-hover:text-white transition-colors truncate">{leader.name}</h5>
+                    <span className="text-[10.5px] md:text-xs text-slate-300 font-semibold tracking-wide truncate">{leader.role}</span>
+                    <a
+                      href={`tel:${leader.phone}`}
+                      className="text-[10.5px] md:text-xs text-slate-300 hover:text-white flex items-center gap-1 transition-colors font-mono font-semibold mt-0.5"
+                    >
+                      <Phone className="w-2.5 h-2.5 text-[#fbc02d]" /> {leader.phone}
+                    </a>
+                  </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase">Lệ phí nhà nước</span>
-                  <span className="text-xs font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1 mt-0.5"><DollarSign className="w-3.5 h-3.5 text-emerald-600" /> {selectedProcedure.fee}</span>
-                </div>
-              </div>
-
-              {selectedProcedure.description && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-[11px] text-[#cc0000] font-extrabold uppercase tracking-wide">Mô tả thủ tục</span>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-semibold">{selectedProcedure.description}</p>
-                </div>
-              )}
-
-              {/* Required Documents */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] text-[#cc0000] font-extrabold uppercase tracking-wide flex items-center gap-1">
-                  <FileText className="w-4 h-4" /> Thành phần hồ sơ bắt buộc
-                </span>
-                <ul className="flex flex-col gap-1.5 pl-1">
-                  {selectedProcedure.requiredDocs && selectedProcedure.requiredDocs.length > 0 ? (
-                    selectedProcedure.requiredDocs.map((doc: string, index: number) => (
-                      <li key={index} className="text-xs text-slate-600 dark:text-slate-300 font-semibold leading-relaxed flex items-start gap-2">
-                        <span className="p-0.5 bg-emerald-50 text-emerald-600 rounded mt-0.5"><Check className="w-3 h-3 shrink-0" /></span>
-                        <span>{doc}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li className="text-xs text-slate-400 italic">Liên hệ trực tiếp bộ phận một cửa để biết thêm chi tiết.</li>
-                  )}
-                </ul>
-              </div>
-
-              {/* Action steps */}
-              <div className="flex flex-col gap-1.5">
-                <span className="text-[11px] text-[#cc0000] font-extrabold uppercase tracking-wide flex items-center gap-1">
-                  <Layers className="w-4 h-4" /> Trình tự các bước thực hiện
-                </span>
-                <div className="flex flex-col gap-3 pl-1.5 border-l border-slate-200 dark:border-slate-800 ml-2">
-                  {selectedProcedure.steps && selectedProcedure.steps.length > 0 ? (
-                    selectedProcedure.steps.map((step: string, index: number) => (
-                      <div key={index} className="flex gap-3 items-start relative">
-                        <div className="absolute -left-[14px] top-1.5 w-2 h-2 rounded-full bg-[#cc0000]" />
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-[10px] text-slate-400 font-extrabold uppercase">Bước {index + 1}</span>
-                          <p className="text-xs text-slate-600 dark:text-slate-300 font-semibold leading-relaxed">{step}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-xs text-slate-400 italic">Thực hiện theo hướng dẫn của công chức tiếp nhận tại bộ phận một cửa.</div>
-                  )}
-                </div>
-              </div>
+              ))}
             </div>
           </div>
+
+          {/* Dashboard Item 2: Satisfaction Survey Poll */}
+          <div id="khao-sat" className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4.5 rounded-lg shadow-sm flex flex-col gap-3 h-full justify-between animate-fade-in">
+            <div>
+              <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-2.5">
+                <div className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-lg">
+                  <ThumbsUp className="w-3.5 h-3.5 text-emerald-600" />
+                </div>
+                <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
+                  Khảo sát Một Cửa
+                </h4>
+              </div>
+
+              <p className="text-xs font-extrabold text-slate-700 dark:text-slate-300 leading-relaxed mb-2">
+                Ý kiến của bạn về chất lượng giải quyết thủ tục hành chính tại bộ phận Một cửa xã Dang Kang?
+              </p>
+
+              {!pollVoted ? (
+                <div className="flex flex-col gap-2">
+                  {[
+                    { value: "verySatisfied", label: "🤩 Rất hài lòng" },
+                    { value: "satisfied", label: "😊 Hài lòng" },
+                    { value: "normal", label: "😐 Bình thường" },
+                    { value: "unsatisfied", label: "😞 Không hài lòng" }
+                  ].map((option) => (
+                    <label
+                      key={option.value}
+                      className={`flex items-center gap-2 px-2 py-1.5 rounded border cursor-pointer transition-all text-xs font-semibold ${pollChoice === option.value
+                        ? "bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-500/75 text-emerald-600 dark:text-emerald-400"
+                        : "bg-slate-50/50 dark:bg-slate-950/20 border-slate-100 dark:border-slate-800/45 hover:bg-slate-50 hover:border-slate-300"
+                        }`}
+                    >
+                      <input
+                        type="radio"
+                        name="satisfaction-poll"
+                        value={option.value}
+                        checked={pollChoice === option.value}
+                        onChange={(e) => setPollChoice(e.target.value)}
+                        className="w-3.5 h-3.5 text-emerald-600 bg-slate-100 border-slate-300 focus:ring-emerald-500 accent-emerald-600 cursor-pointer"
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 mt-1 animate-fade-in text-xs font-semibold">
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-wider block">
+                    CẢM ƠN BẠN ĐÃ BÌNH CHỌN!
+                  </span>
+
+                  <div className="flex flex-col gap-2">
+                    {[
+                      { key: "verySatisfied", label: "🤩 Rất hài lòng", count: pollStats.verySatisfied },
+                      { key: "satisfied", label: "😊 Hài lòng", count: pollStats.satisfied },
+                      { key: "normal", label: "😐 Bình thường", count: pollStats.normal },
+                      { key: "unsatisfied", label: "😞 Không hài lòng", count: pollStats.unsatisfied }
+                    ].map((stat) => {
+                      const percent = Math.round((stat.count / totalVotes) * 100) || 0
+                      const isUserChoice = pollChoice === stat.key
+
+                      return (
+                        <div key={stat.key} className="flex flex-col gap-0.5">
+                          <div className="flex justify-between">
+                            <span className={isUserChoice ? "font-black text-emerald-600 dark:text-emerald-400" : "text-slate-700"}>
+                              {stat.label}
+                            </span>
+                            <span className="font-mono text-xs">{percent}%</span>
+                          </div>
+                          <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all duration-1000 ${isUserChoice ? "bg-emerald-500" : "bg-slate-400 dark:bg-slate-700"
+                                }`}
+                              style={{ width: `${percent}%` }}
+                            />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {!pollVoted && (
+              <button
+                onClick={handleVoteSubmit}
+                disabled={!pollChoice}
+                className="w-full mt-2 bg-[#cc0000] hover:bg-[#a80000] disabled:bg-slate-200 text-white text-xs font-black tracking-widest uppercase py-2.5 rounded shadow-sm transition-all"
+              >
+                GỬI BÌNH CHỌN
+              </button>
+            )}
+          </div>
+
+          {/* Dashboard Item 3: Live Citizen Ask & Answer */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4.5 rounded-lg shadow-sm flex flex-col gap-3 h-full justify-between animate-fade-in">
+            <div>
+              <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-2.5">
+                <div className="bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 p-1.5 rounded-lg">
+                  <MessageSquare className="w-3.5 h-3.5 text-indigo-600" />
+                </div>
+                <h4 className="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100">
+                  Phản hồi công dân
+                </h4>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                {MOCK_QA.map((qa, index) => {
+                  const isOpen = activeQaIdx === index
+                  return (
+                    <div
+                      key={index}
+                      className="border border-slate-150 dark:border-slate-800/40 rounded overflow-hidden text-xs bg-slate-50/40 dark:bg-slate-950/10"
+                    >
+                      <button
+                        onClick={() => setActiveQaIdx(isOpen ? null : index)}
+                        className="w-full p-2.5 text-left font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 flex justify-between items-start gap-1 transition-colors"
+                      >
+                        <span className="line-clamp-1 leading-snug font-extrabold">{qa.q}</span>
+                        <ChevronDown className={`w-3.5 h-3.5 shrink-0 text-slate-400 mt-0.5 ${isOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      {isOpen && (
+                        <div className="p-2.5 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800/60 leading-relaxed text-slate-600 dark:text-slate-400 font-semibold flex flex-col gap-1.5 text-xs">
+                          <p className="line-clamp-3 leading-relaxed text-slate-700 dark:text-slate-300">{qa.a}</p>
+                          <div className="flex items-center gap-1 text-[10.5px] font-black text-emerald-600 uppercase">
+                            <Check className="w-2.5 h-2.5 text-emerald-600 shrink-0" strokeWidth={3} />
+                            <span>Đã phản hồi</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <Link
+              href="/tuong-tac"
+              className="text-center bg-[#cc0000] hover:bg-[#a80000] text-white text-xs font-black tracking-widest py-2.5 rounded shadow transition-all block uppercase"
+            >
+              GỬI CÂU HỎI MỚI
+            </Link>
+          </div>
+
+          {/* Dashboard Item 4: Administrative Link Banners */}
+          <div className="flex flex-col gap-2 h-full animate-fade-in">
+            {[
+              { label: "CỔNG DỊCH VỤ CÔNG QUỐC GIA", sub: "dichvucong.gov.vn", url: "https://dichvucong.gov.vn" },
+              { label: "CỔNG THÔNG TIN TỈNH ĐẮK LẮK", sub: "daklak.gov.vn", url: "https://daklak.gov.vn" },
+              { label: "CỔNG THÔNG TIN HUYỆN KRÔNG BÔNG", sub: "krongbong.daklak.gov.vn", url: "https://krongbong.daklak.gov.vn" }
+            ].map((banner) => (
+              <a
+                key={banner.label}
+                href={banner.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-sm shadow-sm transition-all flex items-center justify-between group flex-1"
+              >
+                <div className="flex flex-col">
+                  <span className="text-[10.5px] text-[#cc0000] dark:text-red-400 font-extrabold tracking-wider">LIÊN THÔNG BAN NGÀNH</span>
+                  <span className="text-xs md:text-[13px] font-black text-slate-800 dark:text-slate-100 mt-0.5 tracking-wide group-hover:text-[#cc0000] transition-colors">{banner.label}</span>
+                </div>
+                <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#cc0000] transition-colors shrink-0" />
+              </a>
+            ))}
+          </div>
+
         </div>
-      )}
+      </div>
+
+      {/* 9. Horizontal Decorative Patriotic Sea/Island Promotion Banner 2 */}
+      <div className="w-full bg-gradient-to-r from-blue-900 via-sky-800 to-teal-800 text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-sky-300/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
+        {/* Intricate Gold Borders */}
+        <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
+
+        {/* Lighthouse/Map styling overlay */}
+        <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none select-none z-0">
+          <svg className="w-40 h-40 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+
+        <div className="z-10 flex flex-col gap-1">
+          <span className="text-[#ffde59] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
+            <span>⚓</span> BẢO VỆ CHỦ QUYỀN BIỂN ĐẢO QUÊ HƯƠNG VIỆT NAM
+          </span>
+          <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-sky-50 drop-shadow">
+            &quot;HOÀNG SA - TRƯỜNG SA LÀ CỦA VIỆT NAM • QUYẾT TÂM GIỮ VỮNG BIÊN CƯƠNG TOÀN VẸN LÃNH THỔ!&quot;
+          </h3>
+        </div>
+        <div className="z-10 shrink-0">
+          <a
+            href="https://dichvucong.gov.vn"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-blue-900 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-white transition-all transform hover:scale-105"
+          >
+            Nền tảng một cửa Quốc Gia
+            <ExternalLink className="w-4 h-4 text-blue-900" />
+          </a>
+        </div>
+      </div>
+
     </div>
   )
 }
