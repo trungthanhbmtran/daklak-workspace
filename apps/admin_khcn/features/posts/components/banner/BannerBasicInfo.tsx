@@ -160,12 +160,18 @@ export function BannerBasicInfo({
                       <SelectItem value="custom">Khẩu hiệu Tuyên truyền (Patriotic Slogan)</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription className="text-[11px] text-red-600 dark:text-red-400 font-semibold mt-1">
-                    * Vị trí &quot;Khẩu hiệu Tuyên truyền&quot; sẽ sinh giao diện cờ đỏ sao vàng cực kỳ sang trọng trên Cổng thông tin, sử dụng Tiêu đề làm khẩu hiệu nhỏ, và Nội dung mô tả làm Slogan chính. Không cần tải ảnh lên.
-                  </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
+          </div>
+
+          <div className="p-3.5 bg-rose-50/60 dark:bg-rose-950/20 rounded-xl border border-rose-100/70 dark:border-rose-900/30 text-[11px] text-rose-700 dark:text-rose-300 font-medium leading-relaxed flex items-start gap-2.5 mt-4 shadow-sm">
+            <span className="text-xs shrink-0 mt-0.5 select-none">💡</span>
+            <div>
+              <p className="font-bold mb-0.5">Lưu ý về vị trí hiển thị:</p>
+              Vị trí <span className="font-black text-rose-800 dark:text-rose-200 underline">&quot;Khẩu hiệu Tuyên truyền&quot;</span> sẽ tự động sinh giao diện cờ đỏ sao vàng cực kỳ sang trọng trên Cổng thông tin, sử dụng Tiêu đề làm khẩu hiệu nhỏ và Mô tả làm Slogan chính. Bạn không cần phải thiết kế hay tải ảnh banner đồ họa lên.
+            </div>
           </div>
         </CardContent>
       </Card>
