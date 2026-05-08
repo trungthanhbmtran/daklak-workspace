@@ -190,6 +190,9 @@ services:
 
   admin-frontend:
     image: ${DOCKER_USERNAME}/daklak-admin-khcn:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/admin_khcn/Dockerfile
     restart: unless-stopped
     depends_on:
       - api-gateway

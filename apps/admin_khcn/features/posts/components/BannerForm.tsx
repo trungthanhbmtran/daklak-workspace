@@ -207,7 +207,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     queryKey: ["banner", editId],
     queryFn: async () => {
       const res: any = await postsApi.getBanner(editId!);
-      return res?.data;
+      return res;
     },
     enabled: isEdit,
   });
@@ -246,8 +246,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
         description: bannerData.description || "",
         imageUrl: bannerData.imageUrl || "",
         customUrl: bannerData.customUrl || "",
-        startAt: bannerData.startAt ? new Date(bannerData.startAt).toISOString().split('T')[0] : "",
-        endAt: bannerData.endAt ? new Date(bannerData.endAt).toISOString().split('T')[0] : "",
+        startAt: (bannerData.startAt && !isNaN(Date.parse(bannerData.startAt))) ? new Date(bannerData.startAt).toISOString().split('T')[0] : "",
+        endAt: (bannerData.endAt && !isNaN(Date.parse(bannerData.endAt))) ? new Date(bannerData.endAt).toISOString().split('T')[0] : "",
         translations: parsedTranslations,
         metaTitle: bannerData.metaTitle || "",
         metaDescription: bannerData.metaDescription || "",
