@@ -165,7 +165,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                   isSlogan = true;
                   sloganStyles = parsed;
                 }
-              } catch (e) {}
+              } catch (e) { }
             }
 
             return (
