@@ -68,10 +68,10 @@ export function AppSidebar({
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Xem Cổng Dân Cư (Portal)">
-                <Link href="/">
+                <a href="/">
                   <Globe className="size-4" />
                   <span>Xem Cổng Dân Cư (Portal)</span>
-                </Link>
+                </a>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
