@@ -5,6 +5,8 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useLanguage } from "@/components/language-context"
+import { useQuery } from "@tanstack/react-query"
+import apiClient from "@/lib/axiosInstance"
 import {
   Phone,
   Mail,
@@ -86,6 +88,15 @@ function NationalEmblem({ className = "w-16 h-16" }: { className?: string }) {
   )
 }
 
+interface MenuItem {
+  name: string
+  path: string
+  children?: {
+    name: string
+    path: string
+  }[]
+}
+
 export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
@@ -96,6 +107,22 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [dateTimeStr, setDateTimeStr] = React.useState("")
+
+  const { data: menusData } = useQuery({
+    queryKey: ["public-portal-menus"],
+    queryFn: async () => {
+      const response = await apiClient.get("/public/portal-menus")
+      return response
+    },
+  })
+
+  const { data: bannersData } = useQuery({
+    queryKey: ["public-banners"],
+    queryFn: async () => {
+      const response = await apiClient.get("/public/banners")
+      return response
+    },
+  })
 
   React.useEffect(() => {
     setMounted(true)
@@ -125,32 +152,72 @@ export default function Header() {
     return () => clearInterval(timer)
   }, [language])
 
-  const menuItems = [
-    { name: t("Trang chủ"), path: "/" },
-    {
-      name: t("Giới thiệu"),
-      path: language === "vi" ? "/gioi-thieu" : "/aboutus",
-      children: [
-        { name: language === "vi" ? "Giới thiệu chung" : "Overview & History", path: language === "vi" ? "/gioi-thieu#chung" : "/aboutus#chung" },
-        { name: language === "vi" ? "Cơ cấu tổ chức" : "Organizational Structure", path: language === "vi" ? "/gioi-thieu#co-cau" : "/aboutus#co-cau" },
-        { name: language === "vi" ? "Thông tin lãnh đạo" : "Key Leadership Contacts", path: language === "vi" ? "/gioi-thieu#lanh-dao" : "/aboutus#lanh-dao" }
+  const menuItems: MenuItem[] = React.useMemo(() => {
+    if (!menusData?.data || menusData.data.length === 0) {
+      return [
+        { name: t("Trang chủ"), path: "/" },
+        {
+          name: t("Giới thiệu"),
+          path: language === "vi" ? "/gioi-thieu" : "/aboutus",
+          children: [
+            { name: language === "vi" ? "Giới thiệu chung" : "Overview & History", path: language === "vi" ? "/gioi-thieu#chung" : "/aboutus#chung" },
+            { name: language === "vi" ? "Cơ cấu tổ chức" : "Organizational Structure", path: language === "vi" ? "/gioi-thieu#co-cau" : "/aboutus#co-cau" },
+            { name: language === "vi" ? "Thông tin lãnh đạo" : "Key Leadership Contacts", path: language === "vi" ? "/gioi-thieu#lanh-dao" : "/aboutus#lanh-dao" }
+          ]
+        },
+        {
+          name: t("Tin tức"),
+          path: language === "vi" ? "/tin-tuc" : "/news",
+          children: [
+            { name: language === "vi" ? "Tin hoạt động Đảng Ủy" : "Party Committee News", path: language === "vi" ? "/tin-tuc?category=dang-uy" : "/news?category=dang-uy" },
+            { name: language === "vi" ? "Tin Hội đồng nhân dân" : "People's Council News", path: language === "vi" ? "/tin-tuc?category=hdnd" : "/news?category=hdnd" },
+            { name: language === "vi" ? "Tin Ủy ban nhân dân" : "People's Committee News", path: language === "vi" ? "/tin-tuc?category=ubnd" : "/news?category=ubnd" },
+            { name: language === "vi" ? "Kinh tế - Xã hội" : "Economy & Society", path: language === "vi" ? "/tin-tuc?category=kinh-te" : "/news?category=kinh-te" }
+          ]
+        },
+        { name: t("Văn bản"), path: language === "vi" ? "/van-ban" : "/documents" },
+        { name: t("Thủ tục hành chính"), path: language === "vi" ? "/thu-tuc" : "/procedures" },
+        { name: t("Hỏi đáp & Góp ý"), path: language === "vi" ? "/tuong-tac" : "/feedback" },
+        { name: t("Liên hệ"), path: language === "vi" ? "/lien-he" : "/contact" }
       ]
-    },
-    {
-      name: t("Tin tức"),
-      path: language === "vi" ? "/tin-tuc" : "/news",
-      children: [
-        { name: language === "vi" ? "Tin hoạt động Đảng Ủy" : "Party Committee News", path: language === "vi" ? "/tin-tuc?category=dang-uy" : "/news?category=dang-uy" },
-        { name: language === "vi" ? "Tin Hội đồng nhân dân" : "People's Council News", path: language === "vi" ? "/tin-tuc?category=hdnd" : "/news?category=hdnd" },
-        { name: language === "vi" ? "Tin Ủy ban nhân dân" : "People's Committee News", path: language === "vi" ? "/tin-tuc?category=ubnd" : "/news?category=ubnd" },
-        { name: language === "vi" ? "Kinh tế - Xã hội" : "Economy & Society", path: language === "vi" ? "/tin-tuc?category=kinh-te" : "/news?category=kinh-te" }
-      ]
-    },
-    { name: t("Văn bản"), path: language === "vi" ? "/van-ban" : "/documents" },
-    { name: t("Thủ tục hành chính"), path: language === "vi" ? "/thu-tuc" : "/procedures" },
-    { name: t("Hỏi đáp & Góp ý"), path: language === "vi" ? "/tuong-tac" : "/feedback" },
-    { name: t("Liên hệ"), path: language === "vi" ? "/lien-he" : "/contact" }
-  ]
+    }
+
+    const allMenus = menusData.data
+    // Filter HORIZONTAL position
+    const horizontalMenus = allMenus.filter(
+      (m: any) => m.position?.toUpperCase() === "HORIZONTAL" && m.isActive !== false
+    )
+
+    // Sort by order ascending
+    horizontalMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+
+    // Find root menus (where parentId is null/empty or parent not in horizontal items)
+    const roots = horizontalMenus.filter(
+      (m: any) => !m.parentId || !horizontalMenus.some((p: any) => p.id === m.parentId)
+    )
+
+    return roots.map((root: any) => {
+      const children = horizontalMenus.filter((m: any) => m.parentId === root.id)
+      return {
+        name: root.name,
+        path: root.link || "/",
+        children: children.length > 0
+          ? children.map((c: any) => ({ name: c.name, path: c.link || "/" }))
+          : undefined
+      }
+    })
+  }, [menusData, language, t])
+
+  const topBanner = React.useMemo(() => {
+    if (!bannersData?.data || bannersData.data.length === 0) {
+      return null
+    }
+    const topBanners = bannersData.data.filter(
+      (b: any) => b.position?.toLowerCase() === "top" && b.status !== false
+    )
+    topBanners.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    return topBanners[0] || null
+  }, [bannersData])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -288,11 +355,21 @@ export default function Header() {
           <div className="absolute right-4 top-0 bottom-0 h-full w-[45%] lg:w-[50%] hidden md:block select-none z-0">
             {/* Beautiful fading overlay gradient that seamlessly merges the banner scenery into the left parchment color */}
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fdfbf7] to-transparent dark:from-slate-900 z-10" />
-            <img
-              src="/banner_scenery.png"
-              alt="Cảnh quan nông thôn mới xã Dang Kang"
-              className="w-full h-full object-cover object-right"
-            />
+            {topBanner ? (
+              <a href={topBanner.customUrl || "#"} target={topBanner.target || "_self"}>
+                <img
+                  src={topBanner.imageUrl}
+                  alt={topBanner.name}
+                  className="w-full h-full object-cover object-right"
+                />
+              </a>
+            ) : (
+              <img
+                src="/banner_scenery.png"
+                alt="Cảnh quan nông thôn mới xã Dang Kang"
+                className="w-full h-full object-cover object-right"
+              />
+            )}
           </div>
 
         </div>
@@ -302,7 +379,7 @@ export default function Header() {
       <nav className="w-full bg-[#cc0000] dark:bg-red-950 border-b border-[#a80000] dark:border-slate-900 text-white font-medium sticky top-0 shadow-md z-40 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-12">
           <div className="flex items-center gap-0.5 flex-wrap h-full">
-            {menuItems.map((item) => {
+            {menuItems.map((item: MenuItem) => {
               const hasChildren = !!item.children
               const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path))
 
@@ -345,7 +422,7 @@ export default function Header() {
                   {/* Desktop Dropdown */}
                   {hasChildren && (
                     <div className="absolute top-full left-0 bg-[#b91c1c] dark:bg-slate-950 border border-[#991313] dark:border-slate-800 rounded-b-lg shadow-xl py-1 min-w-[220px] transition-all transform opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
-                      {item.children?.map((child) => (
+                      {item.children?.map((child: { name: string; path: string }) => (
                         <Link
                           key={child.name}
                           href={child.path}
@@ -448,7 +525,7 @@ export default function Header() {
             </form>
 
             <div className="flex flex-col gap-3.5 overflow-y-auto max-h-[calc(100vh-200px)] pr-2">
-              {menuItems.map((item) => {
+              {menuItems.map((item: MenuItem) => {
                 const hasChildren = !!item.children
                 const isDropdownActive = activeDropdown === item.name
                 const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path))
@@ -467,7 +544,7 @@ export default function Header() {
                         </button>
                         {isDropdownActive && (
                           <div className="pl-4 mt-2 border-l border-white/25 flex flex-col gap-2 bg-[#a80000]/50 dark:bg-slate-900/40 p-2 rounded-lg">
-                            {item.children?.map((child) => (
+                            {item.children?.map((child: { name: string; path: string }) => (
                               <Link
                                 key={child.name}
                                 href={child.path}

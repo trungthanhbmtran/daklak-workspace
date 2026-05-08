@@ -287,9 +287,10 @@ const MOCK_QA = [
 interface HomeClientProps {
   initialPortalMenus?: any
   initialPosts?: any
+  initialBanners?: any
 }
 
-export default function HomeClient({ initialPortalMenus, initialPosts }: HomeClientProps) {
+export default function HomeClient({ initialPortalMenus, initialPosts, initialBanners }: HomeClientProps) {
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const [pollVoted, setPollVoted] = React.useState(false)
   const [pollChoice, setPollChoice] = React.useState<string | null>(null)
@@ -323,11 +324,38 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
     initialData: initialPortalMenus,
   })
 
+  const { data: bannersData } = useQuery({
+    queryKey: ["public-banners"],
+    queryFn: async () => {
+      const response = await apiClient.get("/public/banners")
+      return response
+    },
+    initialData: initialBanners,
+  })
+
   const menuItems = React.useMemo(() => {
-    return menusData?.data && menusData.data.length > 0
-      ? menusData.data.map((m: any) => ({ name: m.name, path: m.link || "/tin-tuc" }))
+    if (!menusData?.data || menusData.data.length === 0) {
+      return LEFT_MENU_ITEMS
+    }
+    const verticalMenus = menusData.data.filter(
+      (m: any) => m.position?.toUpperCase() === "VERTICAL" && m.isActive !== false
+    )
+    verticalMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+    return verticalMenus.length > 0
+      ? verticalMenus.map((m: any) => ({ name: m.name, path: m.link || "/tin-tuc" }))
       : LEFT_MENU_ITEMS
   }, [menusData])
+
+  const middleBanners = React.useMemo(() => {
+    if (!bannersData?.data || bannersData.data.length === 0) {
+      return []
+    }
+    const list = bannersData.data.filter(
+      (b: any) => (b.position?.toLowerCase() === "middle" || b.position?.toLowerCase() === "bottom") && b.status !== false
+    )
+    list.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    return list
+  }, [bannersData])
 
   const slides = React.useMemo(() => {
     const dbSlides = postsData?.data
@@ -1285,26 +1313,52 @@ export default function HomeClient({ initialPortalMenus, initialPosts }: HomeCli
           </div>
 
           {/* Dashboard Item 4: Administrative Link Banners */}
-          <div className="flex flex-col gap-2 h-full animate-fade-in">
-            {[
-              { label: "CỔNG DỊCH VỤ CÔNG QUỐC GIA", sub: "dichvucong.gov.vn", url: "https://dichvucong.gov.vn" },
-              { label: "CỔNG THÔNG TIN TỈNH ĐẮK LẮK", sub: "daklak.gov.vn", url: "https://daklak.gov.vn" },
-              { label: "CỔNG THÔNG TIN HUYỆN KRÔNG BÔNG", sub: "krongbong.daklak.gov.vn", url: "https://krongbong.daklak.gov.vn" }
-            ].map((banner) => (
-              <a
-                key={banner.label}
-                href={banner.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-sm shadow-sm transition-all flex items-center justify-between group flex-1"
-              >
-                <div className="flex flex-col">
-                  <span className="text-[10.5px] text-[#cc0000] dark:text-red-400 font-extrabold tracking-wider">LIÊN THÔNG BAN NGÀNH</span>
-                  <span className="text-xs md:text-[13px] font-black text-slate-800 dark:text-slate-100 mt-0.5 tracking-wide group-hover:text-[#cc0000] transition-colors">{banner.label}</span>
-                </div>
-                <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#cc0000] transition-colors shrink-0" />
-              </a>
-            ))}
+          <div className="flex flex-col gap-2 h-full animate-fade-in justify-start">
+            {middleBanners.length > 0 ? (
+              middleBanners.map((banner: any) => (
+                <a
+                  key={banner.id}
+                  href={banner.customUrl || "#"}
+                  target={banner.target || "_blank"}
+                  rel="noopener noreferrer"
+                  className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-md transition-all flex flex-col group flex-1"
+                >
+                  <div className="w-full h-24 overflow-hidden relative">
+                    <img 
+                      src={banner.imageUrl} 
+                      alt={banner.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-2 flex flex-col justify-center">
+                    <span className="text-[9px] text-[#cc0000] dark:text-red-400 font-extrabold tracking-wider uppercase">LIÊN THÔNG BAN NGÀNH</span>
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate mt-0.5 group-hover:text-[#cc0000] transition-colors">
+                      {banner.name}
+                    </span>
+                  </div>
+                </a>
+              ))
+            ) : (
+              [
+                { label: "CỔNG DỊCH VỤ CÔNG QUỐC GIA", sub: "dichvucong.gov.vn", url: "https://dichvucong.gov.vn" },
+                { label: "CỔNG THÔNG TIN TỈNH ĐẮK LẮK", sub: "daklak.gov.vn", url: "https://daklak.gov.vn" },
+                { label: "CỔNG THÔNG TIN HUYỆN KRÔNG BÔNG", sub: "krongbong.daklak.gov.vn", url: "https://krongbong.daklak.gov.vn" }
+              ].map((banner) => (
+                <a
+                  key={banner.label}
+                  href={banner.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-sm shadow-sm transition-all flex items-center justify-between group flex-1"
+                >
+                  <div className="flex flex-col">
+                    <span className="text-[10.5px] text-[#cc0000] dark:text-red-400 font-extrabold tracking-wider">LIÊN THÔNG BAN NGÀNH</span>
+                    <span className="text-xs md:text-[13px] font-black text-slate-800 dark:text-slate-100 mt-0.5 tracking-wide group-hover:text-[#cc0000] transition-colors">{banner.label}</span>
+                  </div>
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#cc0000] transition-colors shrink-0" />
+                </a>
+              ))
+            )}
           </div>
 
         </div>

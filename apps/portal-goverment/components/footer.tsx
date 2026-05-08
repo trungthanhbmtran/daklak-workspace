@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useQuery } from "@tanstack/react-query"
+import apiClient from "@/lib/axiosInstance"
 import { 
   MapPin, 
   Phone, 
@@ -20,6 +22,14 @@ export default function Footer() {
   const [todayCount, setTodayCount] = React.useState(38)
   const [totalCount, setTotalCount] = React.useState(107)
 
+  const { data: menusData } = useQuery({
+    queryKey: ["public-portal-menus"],
+    queryFn: async () => {
+      const response = await apiClient.get("/public/portal-menus")
+      return response
+    },
+  })
+
   React.useEffect(() => {
     // Generate organic visitor fluctuation
     const interval = setInterval(() => {
@@ -35,15 +45,35 @@ export default function Footer() {
     return () => clearInterval(interval)
   }, [])
 
-  const mainLinks = [
-    { name: "Trang chủ", path: "/" },
-    { name: "Giới thiệu chung", path: "/gioi-thieu" },
-    { name: "Tin tức & Chuyên mục", path: "/tin-tuc" },
-    { name: "Văn bản pháp quy", path: "/van-ban" },
-    { name: "Thủ tục hành chính", path: "/thu-tuc" },
-    { name: "Hỏi đáp & Ý kiến công dân", path: "/tuong-tac" },
-    { name: "Thông tin liên hệ", path: "/lien-he" }
-  ]
+  const mainLinks = React.useMemo(() => {
+    if (!menusData?.data || menusData.data.length === 0) {
+      return [
+        { name: "Trang chủ", path: "/" },
+        { name: "Giới thiệu chung", path: "/gioi-thieu" },
+        { name: "Tin tức & Chuyên mục", path: "/tin-tuc" },
+        { name: "Văn bản pháp quy", path: "/van-ban" },
+        { name: "Thủ tục hành chính", path: "/thu-tuc" },
+        { name: "Hỏi đáp & Ý kiến công dân", path: "/tuong-tac" },
+        { name: "Thông tin liên hệ", path: "/lien-he" }
+      ]
+    }
+    const footerMenus = menusData.data.filter(
+      (m: any) => m.position?.toUpperCase() === "FOOTER" && m.isActive !== false
+    )
+    footerMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+
+    return footerMenus.length > 0
+      ? footerMenus.map((m: any) => ({ name: m.name, path: m.link || "/" }))
+      : [
+          { name: "Trang chủ", path: "/" },
+          { name: "Giới thiệu chung", path: "/gioi-thieu" },
+          { name: "Tin tức & Chuyên mục", path: "/tin-tuc" },
+          { name: "Văn bản pháp quy", path: "/van-ban" },
+          { name: "Thủ tục hành chính", path: "/thu-tuc" },
+          { name: "Hỏi đáp & Ý kiến công dân", path: "/tuong-tac" },
+          { name: "Thông tin liên hệ", path: "/lien-he" }
+        ]
+  }, [menusData])
 
   const govLinks = [
     { name: "Cổng Dịch vụ công Quốc gia", url: "https://dichvucong.gov.vn" },
@@ -122,7 +152,7 @@ export default function Footer() {
             CƠ CẤU TRANG
           </h4>
           <ul className="flex flex-col gap-2.5 text-xs font-semibold text-slate-400">
-            {mainLinks.map((item) => (
+            {mainLinks.map((item: any) => (
               <li key={item.name}>
                 <Link href={item.path} className="hover:text-[#fef08a] flex items-center gap-1 transition-colors group">
                   <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover:text-[#fef08a] transition-colors" />
@@ -139,7 +169,7 @@ export default function Footer() {
             LIÊN KẾT LIÊN THÔNG
           </h4>
           <ul className="flex flex-col gap-2.5 text-xs font-semibold text-slate-400">
-            {govLinks.map((item) => (
+            {govLinks.map((item: any) => (
               <li key={item.name}>
                 <a 
                   href={item.url} 

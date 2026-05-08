@@ -9,15 +9,17 @@ export default async function Page() {
   console.log("[Server Component] Rendering home page on server (ISR)...");
   
   // Pre-fetch dữ liệu tĩnh trên server
-  const [portalMenus, posts] = await Promise.all([
+  const [portalMenus, posts, banners] = await Promise.all([
     serverFetch("public/portal-menus"),
-    serverFetch("public/posts")
+    serverFetch("public/posts"),
+    serverFetch("public/banners")
   ]);
 
   return (
     <HomeClient 
       initialPortalMenus={portalMenus || { success: true, data: [] }} 
       initialPosts={posts || { success: true, data: [] }} 
+      initialBanners={banners || { success: true, data: [] }}
     />
   );
 }

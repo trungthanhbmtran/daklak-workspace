@@ -6,6 +6,7 @@ import { PublicPostsController } from './public-posts.controller';
 import { PostsCategoryController } from './posts-category.controller';
 import { PostsTagController } from './posts-tag.controller';
 import { PostsBannerController } from './posts-banner.controller';
+import { PublicBannersController } from './public-banners.controller';
 import { PortalMenuController } from './portal-menu.controller';
 import { PublicPortalMenuController } from './public-portal-menu.controller';
 import { InteractionsController } from './interactions.controller';
@@ -23,6 +24,7 @@ import { InteractionsController } from './interactions.controller';
     PostsCategoryController,
     PostsTagController,
     PostsBannerController,
+    PublicBannersController,
     PostsController,
     PublicPostsController,
     PortalMenuController,
