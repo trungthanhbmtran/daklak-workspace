@@ -209,6 +209,20 @@ export default function Header() {
     })
   }, [menusData, language, t])
 
+  const { data: positionsData } = useQuery({
+    queryKey: ["public-categories", "BANNER_POSITION"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=BANNER_POSITION")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch banner positions configurations", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
   const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
       return []
@@ -217,26 +231,16 @@ export default function Header() {
       (b: any) => b.position?.toLowerCase() === "top" && b.status !== false
     )
     filtered.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
-    return filtered.map((b: any) => {
-      let isSlideshow = false
-      if (b.metaDescription) {
-        try {
-          const parsed = JSON.parse(b.metaDescription)
-          if (parsed && parsed.isSlideshow === true) {
-            isSlideshow = true
-          }
-        } catch (e) {}
-      }
-      return { ...b, isSlideshow }
-    })
+    return filtered
   }, [bannersData])
 
   const [topActiveIdx, setTopActiveIdx] = React.useState(0)
 
   const shouldTopSlide = React.useMemo(() => {
     if (topBanners.length <= 1) return false
-    return topBanners.some((b: any) => b.isSlideshow === true)
-  }, [topBanners])
+    const posCat = (positionsData || []).find((cat: any) => cat.code?.toLowerCase() === "top")
+    return posCat?.description === "slideshow"
+  }, [topBanners, positionsData])
 
   React.useEffect(() => {
     if (!shouldTopSlide) return
@@ -384,25 +388,37 @@ export default function Header() {
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fdfbf7] to-transparent dark:from-slate-900 z-10" />
             {topBanners.length > 0 ? (
               <div className="relative w-full h-full overflow-hidden">
-                {topBanners.map((banner: any, idx: number) => {
-                  const isActive = idx === topActiveIdx
-                  return (
-                    <div
-                      key={banner.id}
-                      className={`absolute inset-0 transition-opacity duration-1000 ${
-                        isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                      }`}
-                    >
-                      <a href={banner.customUrl || "#"} target={banner.target || "_self"} className="block w-full h-full">
-                        <img
-                          src={resolveMediaUrl(banner.imageUrl)}
-                          alt={banner.name}
-                          className="w-full h-full object-cover object-right"
-                        />
-                      </a>
-                    </div>
-                  )
-                })}
+                {shouldTopSlide ? (
+                  topBanners.map((banner: any, idx: number) => {
+                    const isActive = idx === topActiveIdx
+                    return (
+                      <div
+                        key={banner.id}
+                        className={`absolute inset-0 transition-opacity duration-1000 ${
+                          isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                        }`}
+                      >
+                        <a href={banner.customUrl || "#"} target={banner.target || "_self"} className="block w-full h-full">
+                          <img
+                            src={resolveMediaUrl(banner.imageUrl)}
+                            alt={banner.name}
+                            className="w-full h-full object-cover object-right"
+                          />
+                        </a>
+                      </div>
+                    )
+                  })
+                ) : (
+                  <div className="absolute inset-0">
+                    <a href={topBanners[0].customUrl || "#"} target={topBanners[0].target || "_self"} className="block w-full h-full">
+                      <img
+                        src={resolveMediaUrl(topBanners[0].imageUrl)}
+                        alt={topBanners[0].name}
+                        className="w-full h-full object-cover object-right"
+                      />
+                    </a>
+                  </div>
+                )}
               </div>
             ) : (
               <img

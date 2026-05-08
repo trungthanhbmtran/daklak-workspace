@@ -53,19 +53,6 @@ export function BannerConfig({ form, customStyles, updateStyle }: BannerConfigPr
             </div>
           )}
         />
-
-        {customStyles && updateStyle && (
-          <div className="flex items-center justify-between p-3 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/20 dark:bg-amber-950/20 animate-in fade-in-50 duration-300">
-            <div className="space-y-0.5">
-              <Label className="text-sm font-semibold text-amber-950 dark:text-amber-300">Trình chiếu Slideshow</Label>
-              <p className="text-[10px] text-amber-700/80 dark:text-amber-400 italic">Chạy slide xoay vòng nếu vị trí này có nhiều banner</p>
-            </div>
-            <Switch 
-              checked={customStyles.isSlideshow || false} 
-              onCheckedChange={(checked) => updateStyle("isSlideshow", checked)} 
-            />
-          </div>
-        )}
       </CardContent>
     </Card>
   );

@@ -5,6 +5,7 @@ export interface CategoryItem {
     name: string;
     sort: number;
     active: number;
+    description?: string | null;
   }
   
   export interface CategoryPayload {
@@ -13,4 +14,5 @@ export interface CategoryItem {
     name?: string;
     order?: number;
     active?: number;
+    description?: string | null;
   }

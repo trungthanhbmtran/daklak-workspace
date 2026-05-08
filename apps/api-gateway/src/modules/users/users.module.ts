@@ -5,7 +5,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { UserController } from './user.controller';
 import { PbacController } from './pbac.controller';
 import { ResourcesController } from './resources.controller';
-import { CategoriesController } from './categories.controller';
+import { CategoriesController, PublicCategoriesController } from './categories.controller';
 import { MenusController } from './menus.controller';
 import { OrganizationsController } from './organizations.controller';
 
@@ -23,6 +23,7 @@ import { OrganizationsController } from './organizations.controller';
     PbacController,
     ResourcesController,
     CategoriesController,
+    PublicCategoriesController,
     MenusController,
     OrganizationsController,
   ],

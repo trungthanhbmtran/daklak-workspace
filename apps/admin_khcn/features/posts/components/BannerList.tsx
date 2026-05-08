@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Search, Plus, Edit, Trash2, Image as ImageIcon,
   ExternalLink, Link as LinkIcon, Loader2, MoreVertical,
-  Calendar, MapPin, CheckCircle2, XCircle, Grid, Layers, Type, PlayCircle, Eye
+  Calendar, MapPin, CheckCircle2, XCircle, Grid, Layers, Type, PlayCircle, Eye, Sliders
 } from "lucide-react";
 import { useState } from "react";
 
@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { postsApi } from "../api";
 import { Banner } from "../types";
 import {
@@ -24,7 +25,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 
-import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { useGetCategories, useUpdateCategory } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 interface BannerListProps {
   onNavigateToCreate: () => void;
@@ -34,6 +35,11 @@ interface BannerListProps {
 export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListProps) {
   const queryClient = useQueryClient();
   const { data: categories = [] } = useGetCategories();
+  const updateCategoryMutation = useUpdateCategory();
+  
+  const [showConfig, setShowConfig] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState<string>("all");
 
   const getFriendlyPositionName = (pos: string) => {
     const found = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code === pos);
@@ -49,8 +55,10 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     if (p === "custom") return "Khẩu hiệu chính";
     return pos || "Chưa phân loại";
   };
-  const [searchTerm, setSearchTerm] = useState("");
-  const [activeTab, setActiveTab] = useState<string>("all");
+
+  const positionCategories = categories
+    .filter((cat: any) => cat.group === "BANNER_POSITION")
+    .sort((a: any, b: any) => (a.sort || 0) - (b.sort || 0));
 
   const { data: banners, isLoading } = useQuery({
     queryKey: ["banners"],
@@ -73,11 +81,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
   });
 
   const filteredBanners = (banners?.items || []).filter((b: Banner) => {
-    // 1. Search term match
     const matchesSearch = b.name.toLowerCase().includes(searchTerm.toLowerCase());
     if (!matchesSearch) return false;
 
-    // 2. Position tab filtering
     if (activeTab === "all") return true;
     if (activeTab === "top") return b.position === "top";
     if (activeTab === "middle") {
@@ -104,10 +110,79 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
           <h2 className="text-2xl font-bold tracking-tight">Quản lý Banner/Quảng cáo</h2>
           <p className="text-xs text-muted-foreground mt-0.5">Phân phối banner hình ảnh và thiết kế khẩu hiệu tuyên truyền đồng bộ</p>
         </div>
-        <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-xl px-5">
+        <Button onClick={onNavigateToCreate} className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 rounded-xl px-5 font-bold transition-all transform hover:scale-[1.02]">
           <Plus className="h-4 w-4 mr-2" /> Thêm banner mới
         </Button>
       </div>
+
+      {/* Elegant Slideshow Configuration Panel */}
+      <Card className="border border-slate-200/80 dark:border-slate-800 rounded-2xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-all">
+        <div 
+          onClick={() => setShowConfig(!showConfig)}
+          className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="p-2.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl shadow-inner">
+              <Sliders className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-sm text-slate-800 dark:text-slate-100">Cấu hình chế độ Trình chiếu (Slideshow) theo Vị trí</h3>
+              <p className="text-xs text-muted-foreground/90 mt-0.5">
+                Bật để tự động xoay vòng (slideshow) các banner hoạt động tại vị trí, tắt để hiển thị cố định theo chiến dịch (banner ưu tiên cao nhất)
+              </p>
+            </div>
+          </div>
+          <Button variant="ghost" size="sm" className="rounded-xl font-bold text-xs text-blue-600 hover:text-blue-700 bg-blue-50/20 hover:bg-blue-50/60 dark:bg-slate-900">
+            {showConfig ? "Thu gọn" : "Thiết lập"}
+          </Button>
+        </div>
+        
+        {showConfig && (
+          <div className="border-t border-slate-100 dark:border-slate-800 p-6 bg-slate-50/40 dark:bg-slate-950/10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
+            {positionCategories.length === 0 ? (
+              <div className="col-span-full text-center py-4 text-xs text-muted-foreground">
+                Đang tải danh sách vị trí hiển thị từ hệ thống...
+              </div>
+            ) : (
+              positionCategories.map((cat: any) => {
+                const isSlideshow = cat.description === "slideshow";
+                return (
+                  <div 
+                    key={cat.id} 
+                    className="flex items-center justify-between p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow transition-shadow"
+                  >
+                    <div className="space-y-1">
+                      <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{cat.name}</p>
+                      <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">{cat.code}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className={`text-[10px] font-black uppercase tracking-wide px-2 py-0.5 rounded-md ${
+                        isSlideshow 
+                          ? "text-blue-600 bg-blue-50 dark:text-blue-300 dark:bg-blue-950/50" 
+                          : "text-slate-400 bg-slate-100 dark:text-slate-300 dark:bg-slate-800"
+                      }`}>
+                        {isSlideshow ? "Slideshow" : "Chiến dịch"}
+                      </span>
+                      <Switch 
+                        checked={isSlideshow}
+                        onCheckedChange={(checked) => {
+                          updateCategoryMutation.mutate({
+                            id: cat.id,
+                            payload: {
+                              ...cat,
+                              description: checked ? "slideshow" : "campaign"
+                            }
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        )}
+      </Card>
 
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         {/* Modern Tabs Category Selector */}
@@ -155,7 +230,6 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
           </div>
         ) : (
           filteredBanners.map((banner: Banner) => {
-            // Check if this banner has slogan style configs in metaDescription
             let isSlogan = false;
             let sloganStyles: any = null;
             if (banner.metaDescription) {
@@ -168,12 +242,14 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
               } catch (e) { }
             }
 
+            const posCat = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code === banner.position);
+            const isPositionSlideshow = posCat?.description === "slideshow";
+
             return (
               <Card key={banner.id} className="group overflow-hidden border border-slate-100 shadow-sm hover:shadow-md hover:border-slate-200/80 transition-all flex flex-col bg-card rounded-2xl relative">
                 {/* Visual Thumbnail */}
                 <div className="relative aspect-[21/9] overflow-hidden bg-slate-50 border-b border-slate-100/80 flex items-center justify-center">
                   {isSlogan && sloganStyles ? (
-                    /* Miniature real-time rendition of slogan styles */
                     <div
                       className="w-full h-full flex flex-col justify-center items-center p-3 text-center relative overflow-hidden"
                       style={{
@@ -182,7 +258,6 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                           : `linear-gradient(to right, ${sloganStyles.gradientColorStart || "#cc0000"}, ${sloganStyles.gradientColorMiddle || "#cc0000"}, ${sloganStyles.gradientColorEnd || "#990000"})`,
                       }}
                     >
-                      {/* Concentrate Watermark overlay miniature */}
                       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-25">
                         <span className="text-5xl text-amber-300 select-none">★</span>
                       </div>
@@ -200,7 +275,6 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       </p>
                     </div>
                   ) : (
-                    /* Standard Image Thumbnail */
                     <img
                       src={banner.imageUrl?.startsWith('http') ? banner.imageUrl : `/api/v1/admin/media/download/${banner.imageUrl}`}
                       alt={banner.name}
@@ -282,9 +356,13 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                         🖼️ Đồ họa Thiết kế
                       </Badge>
                     )}
-                    {sloganStyles?.isSlideshow && (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100 text-[10px] font-extrabold px-2 py-0.5 flex items-center gap-1">
-                        <PlayCircle className="w-3 h-3 text-amber-600 animate-spin-slow" /> Trình chiếu Slideshow
+                    {isPositionSlideshow ? (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-100 text-[10px] font-extrabold px-2.5 py-0.5 flex items-center gap-1">
+                        <PlayCircle className="w-3 h-3 text-blue-600 animate-spin" /> Trình chiếu Slideshow
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-slate-100 text-slate-600 border-slate-200 text-[10px] font-extrabold px-2.5 py-0.5 flex items-center gap-1">
+                        <Layers className="w-3 h-3 text-slate-500" /> Chiến dịch
                       </Badge>
                     )}
                   </div>

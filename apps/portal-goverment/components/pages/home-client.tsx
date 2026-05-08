@@ -446,6 +446,20 @@ function BannerItemContent({ banner }: { banner: any }) {
 }
 
 function PortalBannerSlot({ position, banners }: { position: string; banners: any[] }) {
+  const { data: categories = [] } = useQuery({
+    queryKey: ["public-categories", "BANNER_POSITION"],
+    queryFn: async () => {
+      try {
+        const res: any = await apiClient.get("/public/categories?group=BANNER_POSITION");
+        return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      } catch (e) {
+        console.error("Failed to fetch public categories for banner positions", e);
+        return [];
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const slotBanners = React.useMemo(() => {
     if (!banners || banners.length === 0) return [];
     const filtered = banners.filter(
@@ -467,8 +481,7 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
         starOpacity: 0.08,
         buttonBg: "#ffde59",
         buttonTextColor: "#0f172a",
-        buttonText: "Tìm hiểu thêm",
-        isSlideshow: false
+        buttonText: "Tìm hiểu thêm"
       };
       if (b.metaDescription) {
         try {
@@ -487,8 +500,9 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
 
   const shouldSlide = React.useMemo(() => {
     if (slotBanners.length <= 1) return false;
-    return slotBanners.some((b: any) => b.styles.isSlideshow === true);
-  }, [slotBanners]);
+    const posCat = categories.find((cat: any) => cat.code?.toLowerCase() === position.toLowerCase());
+    return posCat?.description === "slideshow";
+  }, [slotBanners, categories, position]);
 
   React.useEffect(() => {
     if (!shouldSlide) return;
@@ -549,13 +563,10 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
     );
   }
 
+  // If slideshow is disabled ("chiến dịch"), show only the highest priority banner (the first one)
   return (
-    <div className="flex flex-col gap-5 w-full">
-      {slotBanners.map((banner: any) => (
-        <div key={banner.id} className="w-full rounded-xl overflow-hidden shadow-sm border border-slate-200/20">
-          <BannerItemContent banner={banner} />
-        </div>
-      ))}
+    <div className="w-full rounded-xl overflow-hidden shadow-sm border border-slate-200/20">
+      <BannerItemContent banner={slotBanners[0]} />
     </div>
   );
 }

@@ -25,6 +25,7 @@ function toFrontendItem(c: any) {
     name: c.name ?? '',
     sort: c.order ?? 0,
     active: (c.isActive ?? c.is_active ?? true) ? 1 : 0,
+    description: c.description ?? '',
   };
 }
 
@@ -113,5 +114,32 @@ export class CategoriesController implements OnModuleInit {
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(this.categoryService.Delete({ id }))) as any;
     return { success: res?.success ?? true, message: res?.message ?? 'Đã xóa danh mục' };
+  }
+}
+
+@ApiTags('Danh mục hệ thống công khai')
+@Controller('public/categories')
+export class PublicCategoriesController implements OnModuleInit {
+  private categoryService: any;
+
+  constructor(
+    @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly client: any,
+  ) { }
+
+  onModuleInit() {
+    this.categoryService = this.client.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Lấy danh mục theo nhóm hoặc tất cả nếu không truyền group (Công khai)' })
+  @ApiQuery({ name: 'group', required: false, description: 'Mã nhóm danh mục (để trống để lấy tất cả)' })
+  @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
+  async getByGroup(@Query('group') group?: string) {
+    if (!group) {
+      const result = await firstValueFrom(this.categoryService.GetAllCategories({}));
+      return { success: true, data: (result as any)?.data || [] };
+    }
+    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: group || '' }));
+    return { success: true, data: (result as any)?.data || [] };
   }
 }
