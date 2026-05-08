@@ -198,6 +198,9 @@ services:
 
   portal-goverment:
     image: ${DOCKER_USERNAME}/daklak-portal-goverment:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/portal-goverment/Dockerfile
     restart: unless-stopped
     env_file:
       - .env.production
