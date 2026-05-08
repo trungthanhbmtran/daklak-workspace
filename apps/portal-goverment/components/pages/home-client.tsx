@@ -347,11 +347,11 @@ const renderBannerWatermark = (styles: any) => {
 
   if (styles.watermarkType === "custom" && styles.watermarkUrl) {
     return (
-      <img 
-        src={styles.watermarkUrl} 
-        alt="Custom Watermark" 
-        className="w-48 h-48 object-contain transition-all duration-300" 
-        style={{ opacity, filter: `drop-shadow(0 0 8px ${color})` }} 
+      <img
+        src={styles.watermarkUrl}
+        alt="Custom Watermark"
+        className="w-48 h-48 object-contain transition-all duration-300"
+        style={{ opacity, filter: `drop-shadow(0 0 8px ${color})` }}
       />
     );
   }
@@ -367,12 +367,11 @@ function BannerItemContent({ banner }: { banner: any }) {
   const styles = banner.styles;
   if (banner.isSlogan) {
     return (
-      <div 
+      <div
         style={getBannerBackgroundStyle(styles)}
-        className={`w-full h-full text-white py-5 px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${
-          styles.alignment === "center" ? "text-center md:items-center justify-center" : 
-          styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
-        }`}
+        className={`w-full h-full text-white py-5 px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${styles.alignment === "center" ? "text-center md:items-center justify-center" :
+            styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
+          }`}
       >
         {/* Intricate Gold Borders */}
         <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
@@ -386,17 +385,16 @@ function BannerItemContent({ banner }: { banner: any }) {
         )}
 
         <div className="z-10 flex flex-col gap-1 flex-1">
-          <span 
+          <span
             style={{ color: styles.titleColor }}
-            className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${
-              styles.alignment === "center" ? "justify-center" : 
-              styles.alignment === "right" ? "justify-end" : "justify-start"
-            }`}
+            className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${styles.alignment === "center" ? "justify-center" :
+                styles.alignment === "right" ? "justify-end" : "justify-start"
+              }`}
           >
             <span>⭐</span> {banner.name}
           </span>
           {banner.description && (
-            <h3 
+            <h3
               style={{ color: styles.textColor }}
               className="text-sm md:text-base font-black tracking-wide leading-snug uppercase drop-shadow"
             >
@@ -404,20 +402,18 @@ function BannerItemContent({ banner }: { banner: any }) {
             </h3>
           )}
         </div>
-        {banner.customUrl && (
-          <div className="z-10 shrink-0">
-            <a
-              href={banner.customUrl}
-              target={banner.target || "_self"}
-              rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
-              style={{ backgroundColor: styles.buttonBg, color: styles.buttonTextColor }}
-              className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
-            >
-              {styles.buttonText || "Tìm hiểu thêm"}
-              <Info className="w-4 h-4 text-white" />
-            </a>
-          </div>
-        )}
+        <div className="z-10 shrink-0">
+          <a
+            href={banner.customUrl || `/banners/${banner.slug}`}
+            target={banner.target || "_self"}
+            rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
+            style={{ backgroundColor: styles.buttonBg, color: styles.buttonTextColor }}
+            className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
+          >
+            {styles.buttonText || "Tìm hiểu thêm"}
+            <Info className="w-4 h-4" />
+          </a>
+        </div>
       </div>
     );
   }
@@ -430,8 +426,8 @@ function BannerItemContent({ banner }: { banner: any }) {
       rel="noopener noreferrer"
       className="w-full h-full block overflow-hidden relative group/img"
     >
-      <img 
-        src={resolveMediaUrl(banner.imageUrl)} 
+      <img
+        src={resolveMediaUrl(banner.imageUrl)}
         alt={banner.name}
         className="w-full h-full object-cover group-hover/img:scale-[1.02] transition-transform duration-500"
       />
@@ -490,7 +486,7 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
             isSlogan = true;
             styles = { ...styles, ...parsed };
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return { ...b, isSlogan, styles };
     });
@@ -523,9 +519,8 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
             return (
               <div
                 key={banner.id}
-                className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-                  isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-                }`}
+                className={`absolute inset-0 transition-all duration-700 ease-in-out ${isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                  }`}
               >
                 <BannerItemContent banner={banner} />
               </div>
@@ -539,9 +534,8 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
             <button
               key={idx}
               onClick={() => setActiveIndex(idx)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                idx === activeIndex ? "bg-[#ffde59] scale-125" : "bg-white/40 hover:bg-white/70"
-              }`}
+              className={`w-2 h-2 rounded-full transition-all ${idx === activeIndex ? "bg-[#ffde59] scale-125" : "bg-white/40 hover:bg-white/70"
+                }`}
             />
           ))}
         </div>
@@ -658,13 +652,13 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   const slides = React.useMemo(() => {
     const dbSlides = postsData?.data
       ? postsData.data.slice(0, 3).map((post: any) => ({
-          id: post.id,
-          title: post.title,
-          excerpt: post.description || post.content || "",
-          image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
-          date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN"),
-          category: post.category?.name || "Tin tức"
-        }))
+        id: post.id,
+        title: post.title,
+        excerpt: post.description || post.content || "",
+        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN"),
+        category: post.category?.name || "Tin tức"
+      }))
       : []
     return dbSlides.length > 0 ? dbSlides : FEATURED_SLIDES
   }, [postsData])
@@ -694,8 +688,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
   const constructionNews = React.useMemo(() => {
     if (postsData?.data) {
-      const filtered = postsData.data.filter((p: any) => 
-        p.category?.slug === "xay-dung" || 
+      const filtered = postsData.data.filter((p: any) =>
+        p.category?.slug === "xay-dung" ||
         p.category?.name?.toLowerCase().includes("xây dựng") ||
         p.category?.name?.toLowerCase().includes("công thương")
       ).slice(0, 3).map((post: any) => ({
@@ -712,8 +706,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
   const agricultureNews = React.useMemo(() => {
     if (postsData?.data) {
-      const filtered = postsData.data.filter((p: any) => 
-        p.category?.slug === "nong-nghiep" || 
+      const filtered = postsData.data.filter((p: any) =>
+        p.category?.slug === "nong-nghiep" ||
         p.category?.name?.toLowerCase().includes("nông nghiệp") ||
         p.category?.name?.toLowerCase().includes("nông thôn")
       ).slice(0, 3).map((post: any) => ({
@@ -1043,7 +1037,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         if (hasMiddle1) {
           return <PortalBannerSlot position="middle_1" banners={bannersData?.data || []} />;
         }
-        
+
         // Fallback to legacy custom Patriotic banners if they exist
         if (customPatrioticBanners.length > 0) {
           return (
@@ -1070,7 +1064,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     if (parsed && typeof parsed === "object") {
                       styles = { ...styles, ...parsed };
                     }
-                  } catch (e) {}
+                  } catch (e) { }
                 }
                 const parsedBanner = { ...banner, isSlogan: true, styles };
                 return <div key={banner.id} className="w-full rounded-xl overflow-hidden shadow-sm border border-slate-200/20"><BannerItemContent banner={parsedBanner} /></div>;
@@ -1675,8 +1669,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-md transition-all flex flex-col group flex-1"
                 >
                   <div className="w-full h-24 overflow-hidden relative">
-                    <img 
-                      src={resolveMediaUrl(banner.imageUrl)} 
+                    <img
+                      src={resolveMediaUrl(banner.imageUrl)}
                       alt={banner.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
