@@ -44,6 +44,70 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.ListDocuments(req));
   }
 
+  // --- Administrative Procedures CRUD ---
+  @Get('procedures/list')
+  async listAdminProcedures(@Query() query: any) {
+    const req = {
+      page: parseInt(query.page) || 1,
+      limit: parseInt(query.limit) || 10,
+      search: query.search || "",
+      category: query.category || "ALL",
+    };
+    return firstValueFrom(this.documentService.ListProcedures(req));
+  }
+
+  @Get('procedures/:id')
+  async getAdminProcedure(@Param('id') id: string) {
+    return firstValueFrom(this.documentService.GetProcedure({ id }));
+  }
+
+  @Post('procedures')
+  async createAdminProcedure(@Body() body: any) {
+    return firstValueFrom(this.documentService.CreateProcedure(body));
+  }
+
+  @Put('procedures/:id')
+  async updateAdminProcedure(@Param('id') id: string, @Body() body: any) {
+    return firstValueFrom(this.documentService.UpdateProcedure({ id, ...body }));
+  }
+
+  @Delete('procedures/:id')
+  async deleteAdminProcedure(@Param('id') id: string) {
+    return firstValueFrom(this.documentService.DeleteProcedure({ id }));
+  }
+
+  // --- One-Stop Dossiers CRUD ---
+  @Get('dossiers/list')
+  async listAdminDossiers(@Query() query: any) {
+    const req = {
+      page: parseInt(query.page) || 1,
+      limit: parseInt(query.limit) || 10,
+      search: query.search || "",
+      status: query.status || "",
+    };
+    return firstValueFrom(this.documentService.ListDossiers(req));
+  }
+
+  @Get('dossiers/:id')
+  async getAdminDossier(@Param('id') id: string) {
+    return firstValueFrom(this.documentService.GetDossier({ id }));
+  }
+
+  @Post('dossiers')
+  async createAdminDossier(@Body() body: any) {
+    return firstValueFrom(this.documentService.CreateDossier(body));
+  }
+
+  @Put('dossiers/:id')
+  async updateAdminDossier(@Param('id') id: string, @Body() body: any) {
+    return firstValueFrom(this.documentService.UpdateDossier({ id, ...body }));
+  }
+
+  @Delete('dossiers/:id')
+  async deleteAdminDossier(@Param('id') id: string) {
+    return firstValueFrom(this.documentService.DeleteDossier({ id }));
+  }
+
   @Get(':id')
   async getDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.GetDocument({ id }));

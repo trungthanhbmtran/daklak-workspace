@@ -56,7 +56,9 @@ export const ModelName = {
   ConsultationResponse: 'ConsultationResponse',
   Document: 'Document',
   DocumentLog: 'DocumentLog',
-  Minutes: 'Minutes'
+  Minutes: 'Minutes',
+  AdministrativeProcedure: 'AdministrativeProcedure',
+  OneStopDossier: 'OneStopDossier'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -196,6 +198,39 @@ export const MinutesScalarFieldEnum = {
 export type MinutesScalarFieldEnum = (typeof MinutesScalarFieldEnum)[keyof typeof MinutesScalarFieldEnum]
 
 
+export const AdministrativeProcedureScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  category: 'category',
+  description: 'description',
+  duration: 'duration',
+  fee: 'fee',
+  requiredDocs: 'requiredDocs',
+  steps: 'steps',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdministrativeProcedureScalarFieldEnum = (typeof AdministrativeProcedureScalarFieldEnum)[keyof typeof AdministrativeProcedureScalarFieldEnum]
+
+
+export const OneStopDossierScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  senderName: 'senderName',
+  receiveDate: 'receiveDate',
+  dueDate: 'dueDate',
+  status: 'status',
+  currentStep: 'currentStep',
+  stepDetails: 'stepDetails',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OneStopDossierScalarFieldEnum = (typeof OneStopDossierScalarFieldEnum)[keyof typeof OneStopDossierScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -305,4 +340,30 @@ export const MinutesOrderByRelevanceFieldEnum = {
 } as const
 
 export type MinutesOrderByRelevanceFieldEnum = (typeof MinutesOrderByRelevanceFieldEnum)[keyof typeof MinutesOrderByRelevanceFieldEnum]
+
+
+export const AdministrativeProcedureOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  category: 'category',
+  description: 'description',
+  duration: 'duration',
+  fee: 'fee',
+  requiredDocs: 'requiredDocs',
+  steps: 'steps'
+} as const
+
+export type AdministrativeProcedureOrderByRelevanceFieldEnum = (typeof AdministrativeProcedureOrderByRelevanceFieldEnum)[keyof typeof AdministrativeProcedureOrderByRelevanceFieldEnum]
+
+
+export const OneStopDossierOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  senderName: 'senderName',
+  status: 'status',
+  stepDetails: 'stepDetails'
+} as const
+
+export type OneStopDossierOrderByRelevanceFieldEnum = (typeof OneStopDossierOrderByRelevanceFieldEnum)[keyof typeof OneStopDossierOrderByRelevanceFieldEnum]
 

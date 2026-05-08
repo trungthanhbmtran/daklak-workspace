@@ -389,7 +389,9 @@ export const ModelName = {
   ConsultationResponse: 'ConsultationResponse',
   Document: 'Document',
   DocumentLog: 'DocumentLog',
-  Minutes: 'Minutes'
+  Minutes: 'Minutes',
+  AdministrativeProcedure: 'AdministrativeProcedure',
+  OneStopDossier: 'OneStopDossier'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "consultation" | "publicComment" | "consultationResponse" | "document" | "documentLog" | "minutes"
+    modelProps: "consultation" | "publicComment" | "consultationResponse" | "document" | "documentLog" | "minutes" | "administrativeProcedure" | "oneStopDossier"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -805,6 +807,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    AdministrativeProcedure: {
+      payload: Prisma.$AdministrativeProcedurePayload<ExtArgs>
+      fields: Prisma.AdministrativeProcedureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AdministrativeProcedureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AdministrativeProcedureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>
+        }
+        findFirst: {
+          args: Prisma.AdministrativeProcedureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AdministrativeProcedureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>
+        }
+        findMany: {
+          args: Prisma.AdministrativeProcedureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>[]
+        }
+        create: {
+          args: Prisma.AdministrativeProcedureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>
+        }
+        createMany: {
+          args: Prisma.AdministrativeProcedureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.AdministrativeProcedureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>
+        }
+        update: {
+          args: Prisma.AdministrativeProcedureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>
+        }
+        deleteMany: {
+          args: Prisma.AdministrativeProcedureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AdministrativeProcedureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.AdministrativeProcedureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AdministrativeProcedurePayload>
+        }
+        aggregate: {
+          args: Prisma.AdministrativeProcedureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAdministrativeProcedure>
+        }
+        groupBy: {
+          args: Prisma.AdministrativeProcedureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdministrativeProcedureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AdministrativeProcedureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AdministrativeProcedureCountAggregateOutputType> | number
+        }
+      }
+    }
+    OneStopDossier: {
+      payload: Prisma.$OneStopDossierPayload<ExtArgs>
+      fields: Prisma.OneStopDossierFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OneStopDossierFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OneStopDossierFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>
+        }
+        findFirst: {
+          args: Prisma.OneStopDossierFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OneStopDossierFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>
+        }
+        findMany: {
+          args: Prisma.OneStopDossierFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>[]
+        }
+        create: {
+          args: Prisma.OneStopDossierCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>
+        }
+        createMany: {
+          args: Prisma.OneStopDossierCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.OneStopDossierDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>
+        }
+        update: {
+          args: Prisma.OneStopDossierUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>
+        }
+        deleteMany: {
+          args: Prisma.OneStopDossierDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OneStopDossierUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.OneStopDossierUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OneStopDossierPayload>
+        }
+        aggregate: {
+          args: Prisma.OneStopDossierAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOneStopDossier>
+        }
+        groupBy: {
+          args: Prisma.OneStopDossierGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OneStopDossierGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OneStopDossierCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OneStopDossierCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -965,6 +1099,39 @@ export const MinutesScalarFieldEnum = {
 export type MinutesScalarFieldEnum = (typeof MinutesScalarFieldEnum)[keyof typeof MinutesScalarFieldEnum]
 
 
+export const AdministrativeProcedureScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  category: 'category',
+  description: 'description',
+  duration: 'duration',
+  fee: 'fee',
+  requiredDocs: 'requiredDocs',
+  steps: 'steps',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AdministrativeProcedureScalarFieldEnum = (typeof AdministrativeProcedureScalarFieldEnum)[keyof typeof AdministrativeProcedureScalarFieldEnum]
+
+
+export const OneStopDossierScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  senderName: 'senderName',
+  receiveDate: 'receiveDate',
+  dueDate: 'dueDate',
+  status: 'status',
+  currentStep: 'currentStep',
+  stepDetails: 'stepDetails',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OneStopDossierScalarFieldEnum = (typeof OneStopDossierScalarFieldEnum)[keyof typeof OneStopDossierScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1074,6 +1241,32 @@ export const MinutesOrderByRelevanceFieldEnum = {
 } as const
 
 export type MinutesOrderByRelevanceFieldEnum = (typeof MinutesOrderByRelevanceFieldEnum)[keyof typeof MinutesOrderByRelevanceFieldEnum]
+
+
+export const AdministrativeProcedureOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  category: 'category',
+  description: 'description',
+  duration: 'duration',
+  fee: 'fee',
+  requiredDocs: 'requiredDocs',
+  steps: 'steps'
+} as const
+
+export type AdministrativeProcedureOrderByRelevanceFieldEnum = (typeof AdministrativeProcedureOrderByRelevanceFieldEnum)[keyof typeof AdministrativeProcedureOrderByRelevanceFieldEnum]
+
+
+export const OneStopDossierOrderByRelevanceFieldEnum = {
+  id: 'id',
+  code: 'code',
+  senderName: 'senderName',
+  status: 'status',
+  stepDetails: 'stepDetails'
+} as const
+
+export type OneStopDossierOrderByRelevanceFieldEnum = (typeof OneStopDossierOrderByRelevanceFieldEnum)[keyof typeof OneStopDossierOrderByRelevanceFieldEnum]
 
 
 
@@ -1232,6 +1425,8 @@ export type GlobalOmitConfig = {
   document?: Prisma.DocumentOmit
   documentLog?: Prisma.DocumentLogOmit
   minutes?: Prisma.MinutesOmit
+  administrativeProcedure?: Prisma.AdministrativeProcedureOmit
+  oneStopDossier?: Prisma.OneStopDossierOmit
 }
 
 /* Types for Logging */

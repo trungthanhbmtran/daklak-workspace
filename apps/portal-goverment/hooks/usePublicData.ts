@@ -31,3 +31,25 @@ export function usePublicPortalMenus() {
     },
   });
 }
+
+export function usePublicProcedures(query?: { search?: string; category?: string; page?: number; limit?: number }) {
+  return useQuery({
+    queryKey: ["public-procedures", query],
+    queryFn: async () => {
+      const response = await apiClient.get("/public/documents/procedures", { params: query });
+      return response;
+    },
+  });
+}
+
+export function usePublicDossier(code: string) {
+  return useQuery({
+    queryKey: ["public-dossier", code],
+    queryFn: async () => {
+      const response = await apiClient.get(`/public/documents/dossiers/${code}`);
+      return response;
+    },
+    enabled: !!code,
+    retry: false,
+  });
+}

@@ -1,0 +1,34 @@
+model AdministrativeProcedure {
+  id           String   @id @default(uuid())
+  code         String   @unique
+  name         String
+  category     String   // e.g. "ho-tich", "chung-thuc"
+  description  String?  @db.Text
+  duration     String   // e.g. "3 ngày làm việc"
+  fee          String   @default("Miễn phí")
+  requiredDocs String   @db.Text // Store list as JSON array of strings
+  steps        String   @db.Text // Store list as JSON array of strings
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@index([category])
+  @@index([code])
+  @@map("administrative_procedures")
+}
+
+model OneStopDossier {
+  id          String   @id @default(uuid())
+  code        String   @unique // e.g. "DK-2026-888"
+  senderName  String   @map("sender_name")
+  receiveDate DateTime @map("receive_date")
+  dueDate     DateTime @map("due_date")
+  status      String   @default("RECEIVED") // RECEIVED, PROCESSING, RESOLVED, RETURNED
+  currentStep Int      @default(1) @map("current_step") // 1 to 4
+  stepDetails String?  @db.Text @map("step_details") // JSON array of step timeline
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@index([status])
+  @@map("one_stop_dossiers")
+}

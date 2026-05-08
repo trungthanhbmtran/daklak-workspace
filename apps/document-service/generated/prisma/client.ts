@@ -69,3 +69,13 @@ export type DocumentLog = Prisma.DocumentLogModel
  * 
  */
 export type Minutes = Prisma.MinutesModel
+/**
+ * Model AdministrativeProcedure
+ * 
+ */
+export type AdministrativeProcedure = Prisma.AdministrativeProcedureModel
+/**
+ * Model OneStopDossier
+ * 
+ */
+export type OneStopDossier = Prisma.OneStopDossierModel

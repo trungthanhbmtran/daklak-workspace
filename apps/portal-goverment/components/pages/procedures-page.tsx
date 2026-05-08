@@ -3,6 +3,7 @@
 import * as React from "react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-context"
+import { usePublicProcedures, usePublicDossier } from "@/hooks/usePublicData"
 import { 
   FileSearch, 
   Search, 
@@ -14,7 +15,8 @@ import {
   Home, 
   ChevronRight, 
   Download,
-  AlertCircle
+  AlertCircle,
+  Check
 } from "lucide-react"
 
 const MOCK_PROCEDURES_VI = [
@@ -204,26 +206,67 @@ export default function ProceduresPage() {
 
   // Tracking code states
   const [trackCode, setTrackCode] = React.useState("")
+  const [activeTrackCode, setActiveTrackCode] = React.useState("")
   const [trackResult, setTrackResult] = React.useState<any | null | "notfound">(null)
+
+  // Dynamic backend queries
+  const { data: dbProceduresData } = usePublicProcedures({
+    search: searchQuery,
+    category: activeCategory === "all" ? undefined : activeCategory
+  })
+
+  const { data: dbDossier, isFetching: trackingDossier, isError: dossierHasError } = usePublicDossier(activeTrackCode)
 
   const handleTrackSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    const code = trackCode.trim()
+    const code = trackCode.trim().toUpperCase()
     if (code) {
       if (TRACKING_DATA[code as keyof typeof TRACKING_DATA]) {
         setTrackResult(TRACKING_DATA[code as keyof typeof TRACKING_DATA])
       } else {
-        setTrackResult("notfound")
+        setActiveTrackCode(code)
       }
     }
   }
 
-  const filteredProcedures = MOCK_PROCEDURES.filter(proc => {
-    const matchesSearch = !searchQuery.trim() || 
-      proc.title.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = activeCategory === "all" || proc.category === activeCategory
-    return matchesSearch && matchesCategory
-  })
+  // Effect to sync dynamic dossier query with trackResult
+  React.useEffect(() => {
+    if (activeTrackCode) {
+      if (dbDossier?.data) {
+        const dossier = dbDossier.data;
+        setTrackResult({
+          title: dossier.title || dossier.name || "Giải quyết hồ sơ liên thông",
+          applicant: dossier.senderName,
+          submitDate: new Date(dossier.createdAt).toLocaleDateString("vi-VN"),
+          completeDate: new Date(dossier.dueDate).toLocaleDateString("vi-VN"),
+          step: dossier.currentStep || 1,
+          status: dossier.status
+        });
+      } else if (dossierHasError) {
+        setTrackResult("notfound");
+      }
+    }
+  }, [dbDossier, dossierHasError, activeTrackCode])
+
+  const filteredProcedures = React.useMemo(() => {
+    if (dbProceduresData?.data && dbProceduresData.data.length > 0) {
+      return dbProceduresData.data.map((proc: any) => ({
+        id: proc.id,
+        title: proc.name,
+        time: proc.duration,
+        fee: proc.fee,
+        docs: proc.requiredDocs || [],
+        steps: proc.steps || [],
+        category: proc.category
+      }));
+    }
+    return MOCK_PROCEDURES.filter(proc => {
+      const matchesSearch = !searchQuery.trim() || 
+        proc.title.toLowerCase().includes(searchQuery.toLowerCase())
+      const matchesCategory = activeCategory === "all" || proc.category === activeCategory
+      return matchesSearch && matchesCategory
+    });
+  }, [dbProceduresData, searchQuery, activeCategory, MOCK_PROCEDURES])
 
   return (
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-12 animate-fade-in select-none">
@@ -407,7 +450,7 @@ export default function ProceduresPage() {
           </div>
 
           <div className="flex flex-col gap-4">
-            {filteredProcedures.map((proc) => {
+            {filteredProcedures.map((proc: any) => {
               const isOpen = activeProcedureIdx === proc.id
               return (
                 <div 
@@ -455,7 +498,7 @@ export default function ProceduresPage() {
                           {language === "vi" ? "1. Thành phần hồ sơ cần chuẩn bị" : "1. Required Document Checklist"}
                         </span>
                         <div className="flex flex-col gap-2 mt-1">
-                          {proc.docs.map((doc, idx) => (
+                          {proc.docs.map((doc: string, idx: number) => (
                             <div key={idx} className="flex gap-2.5 items-start">
                               <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                               <span className="font-semibold">{doc}</span>
@@ -470,7 +513,7 @@ export default function ProceduresPage() {
                           {language === "vi" ? "2. Các bước trình tự thực hiện" : "2. Standard Processing Sequence"}
                         </span>
                         <div className="flex flex-col gap-3 mt-1.5 pl-1.5 border-l-2 border-red-200 dark:border-red-900/40">
-                           {proc.steps.map((step, idx) => (
+                           {proc.steps.map((step: string, idx: number) => (
                             <div key={idx} className="flex gap-2 items-start">
                               <span className="w-5 h-5 rounded-full bg-[#b91c1c] text-white flex items-center justify-center font-bold text-[10px] font-mono shrink-0">
                                 {idx + 1}

@@ -330,5 +330,255 @@ export class DocumentService {
 
     return { success: true, count: mockExternalDocs.length };
   }
+
+  // --- Administrative Procedures ---
+  async createProcedure(data: any) {
+    const requiredDocs = Array.isArray(data.requiredDocs) 
+      ? JSON.stringify(data.requiredDocs) 
+      : (typeof data.requiredDocs === 'string' ? data.requiredDocs : "[]");
+      
+    const steps = Array.isArray(data.steps) 
+      ? JSON.stringify(data.steps) 
+      : (typeof data.steps === 'string' ? data.steps : "[]");
+
+    const procedure = await this.prisma.administrativeProcedure.create({
+      data: {
+        code: data.code || `TTHC-${Date.now()}`,
+        name: data.name || "Chưa đặt tên thủ tục",
+        category: data.category || "khac",
+        description: data.description || "",
+        duration: data.duration || "Trong ngày",
+        fee: data.fee || "Miễn phí",
+        requiredDocs,
+        steps,
+      },
+    });
+
+    return { data: this.mapProcedureToProto(procedure) };
+  }
+
+  async findProcedureOne(id: string) {
+    const procedure = await this.prisma.administrativeProcedure.findUnique({
+      where: { id },
+    });
+    if (!procedure) {
+      throw new Error(`Procedure with ID ${id} not found`);
+    }
+    return { data: this.mapProcedureToProto(procedure) };
+  }
+
+  async findProcedureAll(query: any) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.search) {
+      where.OR = [
+        { code: { contains: query.search } },
+        { name: { contains: query.search } },
+        { description: { contains: query.search } },
+      ];
+    }
+    if (query.category && query.category !== 'ALL') {
+      where.category = query.category;
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.administrativeProcedure.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { code: 'asc' },
+      }),
+      this.prisma.administrativeProcedure.count({ where }),
+    ]);
+
+    return {
+      data: items.map(item => this.mapProcedureToProto(item)),
+      meta: {
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async updateProcedure(id: string, data: any) {
+    const updateData: any = {};
+    const allowed = ['code', 'name', 'category', 'description', 'duration', 'fee'];
+    allowed.forEach(field => {
+      if (data[field] !== undefined) updateData[field] = data[field];
+    });
+
+    if (data.requiredDocs) {
+      updateData.requiredDocs = Array.isArray(data.requiredDocs) 
+        ? JSON.stringify(data.requiredDocs) 
+        : data.requiredDocs;
+    }
+    if (data.steps) {
+      updateData.steps = Array.isArray(data.steps) 
+        ? JSON.stringify(data.steps) 
+        : data.steps;
+    }
+
+    const procedure = await this.prisma.administrativeProcedure.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return { data: this.mapProcedureToProto(procedure) };
+  }
+
+  async removeProcedure(id: string) {
+    await this.prisma.administrativeProcedure.delete({ where: { id } });
+    return { success: true };
+  }
+
+  private mapProcedureToProto(item: any) {
+    if (!item) return null;
+
+    let requiredDocs: string[] = [];
+    try {
+      requiredDocs = typeof item.requiredDocs === 'string' ? JSON.parse(item.requiredDocs) : item.requiredDocs;
+    } catch {
+      requiredDocs = [];
+    }
+
+    let steps: string[] = [];
+    try {
+      steps = typeof item.steps === 'string' ? JSON.parse(item.steps) : item.steps;
+    } catch {
+      steps = [];
+    }
+
+    return {
+      id: item.id,
+      code: item.code,
+      name: item.name,
+      category: item.category,
+      description: item.description || "",
+      duration: item.duration || "",
+      fee: item.fee || "",
+      requiredDocs,
+      steps,
+      createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : (item.createdAt || ""),
+      updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : (item.updatedAt || ""),
+    };
+  }
+
+  // --- One-Stop Dossiers ---
+  async createDossier(data: any) {
+    const dossier = await this.prisma.oneStopDossier.create({
+      data: {
+        code: data.code || `DK-2026-${Math.floor(100 + Math.random() * 900)}`,
+        senderName: data.senderName || "Người dân nộp hồ sơ",
+        receiveDate: data.receiveDate ? new Date(data.receiveDate) : new Date(),
+        dueDate: data.dueDate ? new Date(data.dueDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        status: data.status || "RECEIVED",
+        currentStep: Number(data.currentStep) || 1,
+        stepDetails: data.stepDetails || "[]",
+      },
+    });
+
+    return { data: this.mapDossierToProto(dossier) };
+  }
+
+  async findDossierOne(query: { id?: string, code?: string }) {
+    const where: any = {};
+    if (query.id) where.id = query.id;
+    if (query.code) where.code = query.code;
+
+    if (!query.id && !query.code) {
+      throw new Error(`Dossier query must specify either ID or code`);
+    }
+
+    const dossier = await this.prisma.oneStopDossier.findUnique({
+      where: where as any,
+    });
+    if (!dossier) {
+      throw new Error(`Dossier not found`);
+    }
+    return { data: this.mapDossierToProto(dossier) };
+  }
+
+  async findDossierAll(query: any) {
+    const page = Number(query.page) || 1;
+    const limit = Number(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+    if (query.search) {
+      where.OR = [
+        { code: { contains: query.search } },
+        { senderName: { contains: query.search } },
+      ];
+    }
+    if (query.status) {
+      where.status = query.status;
+    }
+
+    const [items, total] = await Promise.all([
+      this.prisma.oneStopDossier.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.oneStopDossier.count({ where }),
+    ]);
+
+    return {
+      data: items.map(item => this.mapDossierToProto(item)),
+      meta: {
+        total,
+        page,
+        pageSize: limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async updateDossier(id: string, data: any) {
+    const updateData: any = {};
+    const allowed = ['code', 'senderName', 'status', 'currentStep', 'stepDetails'];
+    allowed.forEach(field => {
+      if (data[field] !== undefined) updateData[field] = data[field];
+    });
+
+    if (data.receiveDate) updateData.receiveDate = new Date(data.receiveDate);
+    if (data.dueDate) updateData.dueDate = new Date(data.dueDate);
+
+    const dossier = await this.prisma.oneStopDossier.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return { data: this.mapDossierToProto(dossier) };
+  }
+
+  async removeDossier(id: string) {
+    await this.prisma.oneStopDossier.delete({ where: { id } });
+    return { success: true };
+  }
+
+  private mapDossierToProto(item: any) {
+    if (!item) return null;
+
+    return {
+      id: item.id,
+      code: item.code,
+      senderName: item.senderName,
+      receiveDate: item.receiveDate instanceof Date ? item.receiveDate.toISOString() : (item.receiveDate || ""),
+      dueDate: item.dueDate instanceof Date ? item.dueDate.toISOString() : (item.dueDate || ""),
+      status: item.status || "RECEIVED",
+      currentStep: item.currentStep || 1,
+      stepDetails: item.stepDetails || "[]",
+      createdAt: item.createdAt instanceof Date ? item.createdAt.toISOString() : (item.createdAt || ""),
+      updatedAt: item.updatedAt instanceof Date ? item.updatedAt.toISOString() : (item.updatedAt || ""),
+    };
+  }
 }
+
 

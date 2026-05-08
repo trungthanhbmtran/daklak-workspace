@@ -19,7 +19,21 @@ service DocumentService {
   rpc ReceiveDocument(WorkflowRequest) returns (DocumentResponse) {}
   rpc ProcessDocument(WorkflowRequest) returns (DocumentResponse) {}
   rpc FinalizeDocument(WorkflowRequest) returns (DocumentResponse) {}
+
+  // Procedure & Dossier methods
+  rpc CreateProcedure(CreateProcedureRequest) returns (ProcedureResponse) {}
+  rpc GetProcedure(GetProcedureRequest) returns (ProcedureResponse) {}
+  rpc ListProcedures(ListProceduresRequest) returns (ListProceduresResponse) {}
+  rpc UpdateProcedure(UpdateProcedureRequest) returns (ProcedureResponse) {}
+  rpc DeleteProcedure(DeleteProcedureRequest) returns (common.DeleteResponse) {}
+  
+  rpc CreateDossier(CreateDossierRequest) returns (DossierResponse) {}
+  rpc GetDossier(GetDossierRequest) returns (DossierResponse) {}
+  rpc ListDossiers(ListDossiersRequest) returns (ListDossiersResponse) {}
+  rpc UpdateDossier(UpdateDossierRequest) returns (DossierResponse) {}
+  rpc DeleteDossier(DeleteDossierRequest) returns (common.DeleteResponse) {}
 }
+
 
 message WorkflowRequest {
   string id = 1;
@@ -201,3 +215,120 @@ message ExtractMetadataResponse {
   int32 pageCount = 11;
   bool signatureValid = 12;
 }
+
+message Procedure {
+  string id = 1;
+  string code = 2;
+  string name = 3;
+  string category = 4;
+  string description = 5;
+  string duration = 6;
+  string fee = 7;
+  repeated string requiredDocs = 8;
+  repeated string steps = 9;
+  string createdAt = 10;
+  string updatedAt = 11;
+}
+
+message ProcedureResponse {
+  Procedure data = 1;
+}
+
+message CreateProcedureRequest {
+  string code = 1;
+  string name = 2;
+  string category = 3;
+  string description = 4;
+  string duration = 5;
+  string fee = 6;
+  repeated string requiredDocs = 7;
+  repeated string steps = 8;
+}
+
+message ListProceduresRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string category = 4;
+}
+
+message ListProceduresResponse {
+  repeated Procedure data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateProcedureRequest {
+  string id = 1;
+  optional string code = 2;
+  optional string name = 3;
+  optional string category = 4;
+  optional string description = 5;
+  optional string duration = 6;
+  optional string fee = 7;
+  repeated string requiredDocs = 8;
+  repeated string steps = 9;
+}
+
+message DeleteProcedureRequest {
+  string id = 1;
+}
+
+message Dossier {
+  string id = 1;
+  string code = 2;
+  string senderName = 3;
+  string receiveDate = 4;
+  string dueDate = 5;
+  string status = 6;
+  int32 currentStep = 7;
+  string stepDetails = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+}
+
+message DossierResponse {
+  Dossier data = 1;
+}
+
+message CreateDossierRequest {
+  string code = 1;
+  string senderName = 2;
+  string receiveDate = 3;
+  string dueDate = 4;
+  string status = 5;
+  int32 currentStep = 6;
+  string stepDetails = 7;
+}
+
+message GetDossierRequest {
+  string id = 1;
+  optional string code = 2;
+}
+
+message ListDossiersRequest {
+  int32 page = 1;
+  int32 limit = 2;
+  string search = 3;
+  string status = 4;
+}
+
+message ListDossiersResponse {
+  repeated Dossier data = 1;
+  common.Meta meta = 2;
+}
+
+message UpdateDossierRequest {
+  string id = 1;
+  optional string code = 2;
+  optional string senderName = 3;
+  optional string receiveDate = 4;
+  optional string dueDate = 5;
+  optional string status = 6;
+  optional int32 currentStep = 7;
+  optional string stepDetails = 8;
+}
+
+message DeleteDossierRequest {
+  string id = 1;
+}
+

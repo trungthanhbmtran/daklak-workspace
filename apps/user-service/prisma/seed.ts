@@ -475,6 +475,8 @@ async function main() {
     { code: 'DOC_MENU_FEEDBACKS', name: 'Duyệt Góp ý Công chúng', route: 'consultations/public-feedbacks', icon: 'megaphone-outline', order: 8, res: 'DOC_CONSULTATION' },
     { code: 'DOC_MENU_MINUTES', name: 'Biên bản cuộc họp', route: 'minutes', icon: 'list-outline', order: 9, res: 'DOC_MINUTES' },
     { code: 'DOC_MENU_CATEGORIES', name: 'Danh mục dùng chung', route: 'categories', icon: 'settings-outline', order: 10, res: 'DOC_CATEGORIES' },
+    { code: 'DOC_MENU_PROCEDURES', name: 'Thủ tục hành chính', route: 'procedures', icon: 'briefcase-outline', order: 11, res: 'DOC_INCOMING' },
+    { code: 'DOC_MENU_DOSSIERS', name: 'Hồ sơ một cửa', route: 'dossiers', icon: 'folder-open-outline', order: 12, res: 'DOC_INCOMING' },
   ];
 
   for (const { res, ...m } of docMenus) {
