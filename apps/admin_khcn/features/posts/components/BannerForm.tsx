@@ -589,7 +589,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                             className="p-2 text-[11px] font-bold rounded-lg border text-center transition-all bg-white hover:bg-slate-50 border-slate-200 active:scale-95 shadow-xs flex flex-col items-center gap-1 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
                           >
                             <div 
-                              style={{ background: `linear-gradient(to r, ${preset.bgGradientStart}, ${preset.bgGradientEnd})` }}
+                              style={{ background: `linear-gradient(to right, ${preset.bgGradientStart}, ${preset.bgGradientMiddle || preset.bgGradientStart}, ${preset.bgGradientEnd})` }}
                               className="w-full h-3 rounded border border-black/10" 
                             />
                             <span>{preset.name}</span>
@@ -811,7 +811,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                       <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Mô phỏng hiển thị thực tế trên Cổng thông tin (Realtime Preview)</Label>
                       <div 
                         style={{
-                          background: `linear-gradient(to r, ${customStyles.bgGradientStart || "#990000"}, ${customStyles.bgGradientMiddle || customStyles.bgGradientStart || "#cc0000"}, ${customStyles.bgGradientEnd || "#800000"})`
+                          background: `linear-gradient(to right, ${customStyles.bgGradientStart || "#990000"}, ${customStyles.bgGradientMiddle || customStyles.bgGradientStart || "#cc0000"}, ${customStyles.bgGradientEnd || "#800000"})`
                         }}
                         className={`w-full text-white py-6 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${
                           customStyles.alignment === "center" ? "text-center md:items-center" : 
@@ -851,17 +851,15 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                             &quot;{form.watch("description") || "Nội dung khẩu hiệu chi tiết, slogan hành động của cơ quan nhà nước."}&quot;
                           </h3>
                         </div>
-                        {form.watch("customUrl") && (
-                          <div className="z-10 shrink-0">
-                            <div
-                              style={{ backgroundColor: customStyles.buttonBg || "#ffde59", color: customStyles.buttonTextColor || "#0f172a" }}
-                              className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-white/10 transition-all cursor-not-allowed"
-                            >
-                              {customStyles.buttonText || "Tìm hiểu thêm"}
-                              <Info className="w-4 h-4" />
-                            </div>
+                        <div className="z-10 shrink-0">
+                          <div
+                            style={{ backgroundColor: customStyles.buttonBg || "#ffde59", color: customStyles.buttonTextColor || "#0f172a" }}
+                            className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-white/10 transition-all cursor-not-allowed"
+                          >
+                            {customStyles.buttonText || "Tìm hiểu thêm"}
+                            <Info className="w-4 h-4" />
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
 
@@ -1044,7 +1042,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
 
                   <div 
                     style={{
-                      background: `linear-gradient(to r, ${customStyles.bgGradientStart || "#990000"}, ${customStyles.bgGradientMiddle || customStyles.bgGradientStart || "#cc0000"}, ${customStyles.bgGradientEnd || "#800000"})`
+                      background: `linear-gradient(to right, ${customStyles.bgGradientStart || "#990000"}, ${customStyles.bgGradientMiddle || customStyles.bgGradientStart || "#cc0000"}, ${customStyles.bgGradientEnd || "#800000"})`
                     }}
                     className={`w-full text-white py-8 px-8 md:px-10 rounded-2xl shadow-xl border-y border-[#ffde59]/30 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden transition-all duration-300 ${
                       customStyles.alignment === "center" ? "text-center md:items-center" : 
@@ -1084,17 +1082,15 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                         &quot;{form.watch("description") || "Nội dung khẩu hiệu chi tiết, slogan hành động của cơ quan nhà nước."}&quot;
                       </h3>
                     </div>
-                    {form.watch("customUrl") && (
-                      <div className="z-10 shrink-0">
-                        <div
-                          style={{ backgroundColor: customStyles.buttonBg || "#ffde59", color: customStyles.buttonTextColor || "#0f172a" }}
-                          className="inline-flex items-center gap-2 text-xs font-black tracking-wider uppercase px-5 py-3 rounded-md shadow-lg border border-white/10 transition-all hover:scale-105"
-                        >
-                          {customStyles.buttonText || "Tìm hiểu thêm"}
-                          <Info className="w-4 h-4" />
-                        </div>
+                    <div className="z-10 shrink-0">
+                      <div
+                        style={{ backgroundColor: customStyles.buttonBg || "#ffde59", color: customStyles.buttonTextColor || "#0f172a" }}
+                        className="inline-flex items-center gap-2 text-xs font-black tracking-wider uppercase px-5 py-3 rounded-md shadow-lg border border-white/10 transition-all hover:scale-105"
+                      >
+                        {customStyles.buttonText || "Tìm hiểu thêm"}
+                        <Info className="w-4 h-4" />
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
 

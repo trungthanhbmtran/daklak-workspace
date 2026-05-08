@@ -833,7 +833,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     target={banner.target || "_self"}
                     rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
                     style={{ backgroundColor: styles.buttonBg, color: styles.buttonTextColor }}
-                    className="inline-flex items-center gap-1.5 text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
+                    className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
                   >
                     {styles.buttonText || "Tìm hiểu thêm"}
                     <Info className="w-4 h-4" />
