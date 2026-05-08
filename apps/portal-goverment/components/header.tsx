@@ -209,16 +209,42 @@ export default function Header() {
     })
   }, [menusData, language, t])
 
-  const topBanner = React.useMemo(() => {
+  const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
-      return null
+      return []
     }
-    const topBanners = bannersData.data.filter(
+    const filtered = bannersData.data.filter(
       (b: any) => b.position?.toLowerCase() === "top" && b.status !== false
     )
-    topBanners.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
-    return topBanners[0] || null
+    filtered.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    return filtered.map((b: any) => {
+      let isSlideshow = false
+      if (b.metaDescription) {
+        try {
+          const parsed = JSON.parse(b.metaDescription)
+          if (parsed && parsed.isSlideshow === true) {
+            isSlideshow = true
+          }
+        } catch (e) {}
+      }
+      return { ...b, isSlideshow }
+    })
   }, [bannersData])
+
+  const [topActiveIdx, setTopActiveIdx] = React.useState(0)
+
+  const shouldTopSlide = React.useMemo(() => {
+    if (topBanners.length <= 1) return false
+    return topBanners.some((b: any) => b.isSlideshow === true)
+  }, [topBanners])
+
+  React.useEffect(() => {
+    if (!shouldTopSlide) return
+    const interval = setInterval(() => {
+      setTopActiveIdx((prev) => (prev + 1) % topBanners.length)
+    }, 6000)
+    return () => clearInterval(interval)
+  }, [shouldTopSlide, topBanners.length])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -356,14 +382,28 @@ export default function Header() {
           <div className="absolute right-4 top-0 bottom-0 h-full w-[45%] lg:w-[50%] hidden md:block select-none z-0">
             {/* Beautiful fading overlay gradient that seamlessly merges the banner scenery into the left parchment color */}
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fdfbf7] to-transparent dark:from-slate-900 z-10" />
-            {topBanner ? (
-              <a href={topBanner.customUrl || "#"} target={topBanner.target || "_self"}>
-                <img
-                  src={resolveMediaUrl(topBanner.imageUrl)}
-                  alt={topBanner.name}
-                  className="w-full h-full object-cover object-right"
-                />
-              </a>
+            {topBanners.length > 0 ? (
+              <div className="relative w-full h-full overflow-hidden">
+                {topBanners.map((banner: any, idx: number) => {
+                  const isActive = idx === topActiveIdx
+                  return (
+                    <div
+                      key={banner.id}
+                      className={`absolute inset-0 transition-opacity duration-1000 ${
+                        isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                      }`}
+                    >
+                      <a href={banner.customUrl || "#"} target={banner.target || "_self"} className="block w-full h-full">
+                        <img
+                          src={resolveMediaUrl(banner.imageUrl)}
+                          alt={banner.name}
+                          className="w-full h-full object-cover object-right"
+                        />
+                      </a>
+                    </div>
+                  )
+                })}
+              </div>
             ) : (
               <img
                 src="/banner_scenery.png"

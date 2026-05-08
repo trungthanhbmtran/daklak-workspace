@@ -20,7 +20,7 @@ export const bannerSchema = z.object({
   linkType: z.enum(["internal", "external"]).default("internal"),
   customUrl: z.string().optional(),
   target: z.string().default("_self"),
-  position: z.enum(["top", "middle", "bottom", "custom"]).default("top"),
+  position: z.string().default("top"),
   orderIndex: z.number().int().default(0),
   status: z.boolean().default(true),
   startAt: z.string().optional(),
@@ -39,7 +39,19 @@ export const bannerSchema = z.object({
       path: ["customUrl"],
     });
   }
-  if (data.position !== "custom" && (!data.imageUrl || data.imageUrl.trim() === "")) {
+
+  // Check if it is a slogan designed banner (metaDescription contains styling JSON)
+  let isSlogan = false;
+  if (data.metaDescription) {
+    try {
+      const parsed = JSON.parse(data.metaDescription);
+      if (parsed && typeof parsed === "object") {
+        isSlogan = true;
+      }
+    } catch (e) {}
+  }
+
+  if (!isSlogan && data.position !== "custom" && (!data.imageUrl || data.imageUrl.trim() === "")) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Vui lòng tải ảnh lên cho vị trí này",

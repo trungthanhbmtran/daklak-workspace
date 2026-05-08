@@ -363,6 +363,203 @@ const renderBannerWatermark = (styles: any) => {
   );
 };
 
+function BannerItemContent({ banner }: { banner: any }) {
+  const styles = banner.styles;
+  if (banner.isSlogan) {
+    return (
+      <div 
+        style={getBannerBackgroundStyle(styles)}
+        className={`w-full h-full text-white py-5 px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${
+          styles.alignment === "center" ? "text-center md:items-center justify-center" : 
+          styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
+        }`}
+      >
+        {/* Intricate Gold Borders */}
+        <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+
+        {/* Custom / Traditional Watermark */}
+        {styles.showStar !== false && (
+          <div className="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none select-none z-0">
+            {renderBannerWatermark(styles)}
+          </div>
+        )}
+
+        <div className="z-10 flex flex-col gap-1 flex-1">
+          <span 
+            style={{ color: styles.titleColor }}
+            className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${
+              styles.alignment === "center" ? "justify-center" : 
+              styles.alignment === "right" ? "justify-end" : "justify-start"
+            }`}
+          >
+            <span>⭐</span> {banner.name}
+          </span>
+          {banner.description && (
+            <h3 
+              style={{ color: styles.textColor }}
+              className="text-sm md:text-base font-black tracking-wide leading-snug uppercase drop-shadow"
+            >
+              &quot;{banner.description}&quot;
+            </h3>
+          )}
+        </div>
+        {banner.customUrl && (
+          <div className="z-10 shrink-0">
+            <a
+              href={banner.customUrl}
+              target={banner.target || "_self"}
+              rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
+              style={{ backgroundColor: styles.buttonBg, color: styles.buttonTextColor }}
+              className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
+            >
+              {styles.buttonText || "Tìm hiểu thêm"}
+              <Info className="w-4 h-4 text-white" />
+            </a>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // If standard graphic image banner
+  return (
+    <a
+      href={banner.customUrl || "#"}
+      target={banner.target || "_blank"}
+      rel="noopener noreferrer"
+      className="w-full h-full block overflow-hidden relative group/img"
+    >
+      <img 
+        src={resolveMediaUrl(banner.imageUrl)} 
+        alt={banner.name}
+        className="w-full h-full object-cover group-hover/img:scale-[1.02] transition-transform duration-500"
+      />
+      {/* Subtle label overlay on hover */}
+      <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-end p-3">
+        <span className="text-white text-[11px] font-black uppercase tracking-wider bg-black/60 px-2 py-1 rounded backdrop-blur">
+          {banner.name}
+        </span>
+      </div>
+    </a>
+  );
+}
+
+function PortalBannerSlot({ position, banners }: { position: string; banners: any[] }) {
+  const slotBanners = React.useMemo(() => {
+    if (!banners || banners.length === 0) return [];
+    const filtered = banners.filter(
+      (b: any) => b.position?.toLowerCase() === position.toLowerCase() && b.status !== false
+    );
+    filtered.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0));
+    return filtered.map((b: any) => {
+      let isSlogan = false;
+      let styles: any = {
+        bgType: "gradient",
+        bgGradientStart: "#990000",
+        bgGradientMiddle: "#cc0000",
+        bgGradientEnd: "#800000",
+        titleColor: "#fbc02d",
+        textColor: "#fff7ed",
+        alignment: "left",
+        showStar: true,
+        starColor: "#ffff00",
+        starOpacity: 0.08,
+        buttonBg: "#ffde59",
+        buttonTextColor: "#0f172a",
+        buttonText: "Tìm hiểu thêm",
+        isSlideshow: false
+      };
+      if (b.metaDescription) {
+        try {
+          const parsed = JSON.parse(b.metaDescription);
+          if (parsed && typeof parsed === "object") {
+            isSlogan = true;
+            styles = { ...styles, ...parsed };
+          }
+        } catch (e) {}
+      }
+      return { ...b, isSlogan, styles };
+    });
+  }, [banners, position]);
+
+  const [activeIndex, setActiveIndex] = React.useState(0);
+
+  const shouldSlide = React.useMemo(() => {
+    if (slotBanners.length <= 1) return false;
+    return slotBanners.some((b: any) => b.styles.isSlideshow === true);
+  }, [slotBanners]);
+
+  React.useEffect(() => {
+    if (!shouldSlide) return;
+    const interval = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % slotBanners.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [shouldSlide, slotBanners.length]);
+
+  if (slotBanners.length === 0) return null;
+
+  if (shouldSlide) {
+    return (
+      <div className="relative w-full overflow-hidden rounded-xl shadow-lg border border-slate-200/20 group/slider">
+        <div className="relative h-44 sm:h-52 md:h-60 w-full bg-slate-900">
+          {slotBanners.map((banner: any, idx: number) => {
+            const isActive = idx === activeIndex;
+            return (
+              <div
+                key={banner.id}
+                className={`absolute inset-0 transition-all duration-700 ease-in-out ${
+                  isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+                }`}
+              >
+                <BannerItemContent banner={banner} />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Carousel indicators */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5 bg-black/35 px-2.5 py-1 rounded-full backdrop-blur-sm border border-white/5">
+          {slotBanners.map((_, idx) => (
+            <button
+              key={idx}
+              onClick={() => setActiveIndex(idx)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                idx === activeIndex ? "bg-[#ffde59] scale-125" : "bg-white/40 hover:bg-white/70"
+              }`}
+            />
+          ))}
+        </div>
+
+        {/* Carousel Arrows */}
+        <button
+          onClick={() => setActiveIndex((activeIndex - 1 + slotBanners.length) % slotBanners.length)}
+          className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/35 hover:bg-black/60 text-white transition-all z-20 opacity-0 group-hover/slider:opacity-100 border border-white/5"
+        >
+          <ChevronLeft className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => setActiveIndex((activeIndex + 1) % slotBanners.length)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/35 hover:bg-black/60 text-white transition-all z-20 opacity-0 group-hover/slider:opacity-100 border border-white/5"
+        >
+          <ChevronRight className="w-4 h-4" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-5 w-full">
+      {slotBanners.map((banner: any) => (
+        <div key={banner.id} className="w-full rounded-xl overflow-hidden shadow-sm border border-slate-200/20">
+          <BannerItemContent banner={banner} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 interface HomeClientProps {
   initialPortalMenus?: any
   initialPosts?: any
@@ -430,7 +627,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       return []
     }
     const list = bannersData.data.filter(
-      (b: any) => (b.position?.toLowerCase() === "middle" || b.position?.toLowerCase() === "bottom") && b.status !== false
+      (b: any) => b.position?.toLowerCase() === "middle" && b.status !== false
     )
     list.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
     return list
@@ -828,122 +1025,83 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       </div>
 
       {/* 3. Horizontal Decorative Patriotic Promotion Banner 1 */}
-      {customPatrioticBanners.length > 0 ? (
-        customPatrioticBanners.map((banner: any) => {
-          let styles: any = {
-            bgType: "gradient",
-            bgGradientStart: "#990000",
-            bgGradientMiddle: "#cc0000",
-            bgGradientEnd: "#800000",
-            titleColor: "#fbc02d",
-            textColor: "#fff7ed",
-            alignment: "left",
-            showStar: true,
-            starColor: "#ffff00",
-            starOpacity: 0.08,
-            buttonBg: "#ffde59",
-            buttonTextColor: "#0f172a",
-            buttonText: "Tìm hiểu thêm"
-          };
-          if (banner.metaDescription) {
-            try {
-              const parsed = JSON.parse(banner.metaDescription);
-              if (parsed && typeof parsed === "object") {
-                styles = { ...styles, ...parsed };
-              }
-            } catch (e) {
-              // fallback
-            }
-          }
-
+      {(() => {
+        const hasMiddle1 = bannersData?.data?.some(
+          (b: any) => b.position?.toLowerCase() === "middle_1" && b.status !== false
+        );
+        if (hasMiddle1) {
+          return <PortalBannerSlot position="middle_1" banners={bannersData?.data || []} />;
+        }
+        
+        // Fallback to legacy custom Patriotic banners if they exist
+        if (customPatrioticBanners.length > 0) {
           return (
-            <div 
-              key={banner.id} 
-              style={getBannerBackgroundStyle(styles)}
-              className={`w-full text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${
-                styles.alignment === "center" ? "text-center md:items-center" : 
-                styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
-              }`}
-            >
-              {/* Intricate Gold Borders */}
-              <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
-
-              {/* Custom / Traditional Watermark */}
-              {styles.showStar !== false && (
-                <div className="absolute right-12 top-1/2 -translate-y-1/2 pointer-events-none select-none z-0">
-                  {renderBannerWatermark(styles)}
-                </div>
-              )}
-
-              <div className="z-10 flex flex-col gap-1 flex-1">
-                <span 
-                  style={{ color: styles.titleColor }}
-                  className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${
-                    styles.alignment === "center" ? "justify-center" : 
-                    styles.alignment === "right" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <span>⭐</span> {banner.name}
-                </span>
-                {banner.description && (
-                  <h3 
-                    style={{ color: styles.textColor }}
-                    className="text-sm md:text-base font-black tracking-wide leading-snug uppercase drop-shadow"
-                  >
-                    &quot;{banner.description}&quot;
-                  </h3>
-                )}
-              </div>
-              {banner.customUrl && (
-                <div className="z-10 shrink-0">
-                  <a
-                    href={banner.customUrl}
-                    target={banner.target || "_self"}
-                    rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
-                    style={{ backgroundColor: styles.buttonBg, color: styles.buttonTextColor }}
-                    className="inline-flex items-center gap-1.5 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300/30 transition-all transform hover:scale-105"
-                  >
-                    {styles.buttonText || "Tìm hiểu thêm"}
-                    <Info className="w-4 h-4" />
-                  </a>
-                </div>
-              )}
+            <div className="flex flex-col gap-5 w-full animate-in fade-in duration-300">
+              {customPatrioticBanners.map((banner: any) => {
+                let styles: any = {
+                  bgType: "gradient",
+                  bgGradientStart: "#990000",
+                  bgGradientMiddle: "#cc0000",
+                  bgGradientEnd: "#800000",
+                  titleColor: "#fbc02d",
+                  textColor: "#fff7ed",
+                  alignment: "left",
+                  showStar: true,
+                  starColor: "#ffff00",
+                  starOpacity: 0.08,
+                  buttonBg: "#ffde59",
+                  buttonTextColor: "#0f172a",
+                  buttonText: "Tìm hiểu thêm"
+                };
+                if (banner.metaDescription) {
+                  try {
+                    const parsed = JSON.parse(banner.metaDescription);
+                    if (parsed && typeof parsed === "object") {
+                      styles = { ...styles, ...parsed };
+                    }
+                  } catch (e) {}
+                }
+                const parsedBanner = { ...banner, isSlogan: true, styles };
+                return <div key={banner.id} className="w-full rounded-xl overflow-hidden shadow-sm border border-slate-200/20"><BannerItemContent banner={parsedBanner} /></div>;
+              })}
             </div>
           );
-        })
-      ) : (
-        <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
-          {/* Intricate Gold Borders */}
-          <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+        }
 
-          {/* Traditional Gold Star Watermark */}
-          <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
-            <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
-            </svg>
-          </div>
+        // Ultimate beautiful fallback static banner
+        return (
+          <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
+            {/* Intricate Gold Borders */}
+            <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
 
-          <div className="z-10 flex flex-col gap-1">
-            <span className="text-[#fbc02d] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
-              <span>⭐</span> HỌC TẬP VÀ LÀM THEO TƯ TƯỞNG, ĐẠO ĐỨC, PHONG CÁCH HỒ CHÍ MINH
-            </span>
-            <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-amber-50 drop-shadow">
-              &quot;ĐOÀN KẾT - ĐOÀN KẾT - ĐẠI ĐOÀN KẾT • THÀNH CÔNG - THÀNH CÔNG - ĐẠI THÀNH CÔNG&quot;
-            </h3>
+            {/* Traditional Gold Star Watermark */}
+            <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
+              <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
+              </svg>
+            </div>
+
+            <div className="z-10 flex flex-col gap-1">
+              <span className="text-[#fbc02d] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
+                <span>⭐</span> HỌC TẬP VÀ LÀM THEO TƯ TƯỞNG, ĐẠO ĐỨC, PHONG CÁCH HỒ CHÍ MINH
+              </span>
+              <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-amber-50 drop-shadow">
+                &quot;ĐOÀN KẾT - ĐOÀN KẾT - ĐẠI ĐOÀN KẾT • THÀNH CÔNG - THÀNH CÔNG - ĐẠI THÀNH CÔNG&quot;
+              </h3>
+            </div>
+            <div className="z-10 shrink-0">
+              <Link
+                href="/gioi-thieu"
+                className="inline-flex items-center gap-1.5 bg-[#ffde59] hover:bg-[#f1c40f] text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300 transition-all transform hover:scale-105"
+              >
+                Tìm hiểu Lịch sử Xã
+                <Info className="w-4 h-4 text-slate-900" />
+              </Link>
+            </div>
           </div>
-          <div className="z-10 shrink-0">
-            <Link
-              href="/gioi-thieu"
-              className="inline-flex items-center gap-1.5 bg-[#ffde59] hover:bg-[#f1c40f] text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300 transition-all transform hover:scale-105"
-            >
-              Tìm hiểu Lịch sử Xã
-              <Info className="w-4 h-4 text-slate-900" />
-            </Link>
-          </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* 4. Quick Services Administrative Icons Grid */}
       <div className="flex flex-col gap-4">
@@ -1068,6 +1226,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         </div>
       </div>
 
+      {/* Dynamic Banner Slot - Giữa trang - Vị trí 2 */}
+      <PortalBannerSlot position="middle_2" banners={bannersData?.data || []} />
+
       {/* 6. Cloned Category Section 2: LĨNH VỰC NÔNG NGHIỆP & TÀI NGUYÊN */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: News list */}
@@ -1147,6 +1308,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
           </Link>
         </div>
       </div>
+
+      {/* Dynamic Banner Slot - Giữa trang - Vị trí 3 */}
+      <PortalBannerSlot position="middle_3" banners={bannersData?.data || []} />
 
       {/* 7. Commune Photo Gallery Section - "THƯ VIỆN ẢNH HOẠT ĐỘNG DANG KANG" */}
       <div className="flex flex-col gap-4">
@@ -1539,6 +1703,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
         </div>
       </div>
+
+      {/* Dynamic Banner Slot - Phía dưới (Footer / Bottom) */}
+      <PortalBannerSlot position="bottom" banners={bannersData?.data || []} />
 
       {/* 9. Horizontal Decorative Patriotic Sea/Island Promotion Banner 2 */}
       <div className="w-full bg-gradient-to-r from-blue-900 via-sky-800 to-teal-800 text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-sky-300/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">

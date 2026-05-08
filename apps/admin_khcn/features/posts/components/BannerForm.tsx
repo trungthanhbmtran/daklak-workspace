@@ -64,6 +64,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
 
   const [customStyles, setCustomStyles] = useState<any>(DEFAULT_STYLES);
+  const [designType, setDesignType] = useState<"image" | "slogan">("image");
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isUploadingBg, setIsUploadingBg] = useState(false);
   const [isUploadingWatermark, setIsUploadingWatermark] = useState(false);
@@ -218,17 +219,20 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       }
 
       let loadedStyles = DEFAULT_STYLES;
+      let isSlogan = false;
       if (bannerData.metaDescription) {
         try {
           const parsed = JSON.parse(bannerData.metaDescription);
           if (parsed && typeof parsed === 'object') {
             loadedStyles = { ...DEFAULT_STYLES, ...parsed };
+            isSlogan = true;
           }
         } catch (e) {
           console.log("metaDescription is not a JSON styling config");
         }
       }
       setCustomStyles(loadedStyles);
+      setDesignType(isSlogan ? "slogan" : "image");
 
       form.reset({
         ...bannerData,
@@ -251,7 +255,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       const payload = {
         ...values,
         translations: JSON.stringify(values.translations || {}),
-        metaDescription: values.position === "custom" ? JSON.stringify(customStyles) : values.metaDescription || ""
+        metaDescription: designType === "slogan" ? JSON.stringify(customStyles) : ""
       };
       if (isEdit) return postsApi.updateBanner(editId!, payload);
       return postsApi.createBanner(payload);
@@ -294,7 +298,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          {watchedPosition === "custom" && (
+          {designType === "slogan" && (
             <Button
               type="button"
               variant="outline"
@@ -334,9 +338,11 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                 activeLangTab={activeLangTab}
                 setActiveLangTab={setActiveLangTab}
                 watchedPosition={watchedPosition}
+                designType={designType}
+                setDesignType={setDesignType}
               />
 
-              {watchedPosition === "custom" && (
+              {designType === "slogan" && (
                 <SloganCustomizer
                   customStyles={customStyles}
                   setCustomStyles={setCustomStyles}
@@ -352,16 +358,18 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
             </div>
 
             <div className="lg:col-span-4 space-y-6">
-              <BannerImageUpload
-                form={form}
-                fileInputRef={fileInputRef}
-                isUploading={isUploading}
-                previewUrl={previewUrl}
-                handleImageUpload={handleImageUpload}
-                removeImage={removeImage}
-              />
+              {designType === "image" && (
+                <BannerImageUpload
+                  form={form}
+                  fileInputRef={fileInputRef}
+                  isUploading={isUploading}
+                  previewUrl={previewUrl}
+                  handleImageUpload={handleImageUpload}
+                  removeImage={removeImage}
+                />
+              )}
 
-              <BannerConfig form={form} />
+              <BannerConfig form={form} customStyles={customStyles} updateStyle={updateStyle} />
 
               <BannerSchedule form={form} />
             </div>
