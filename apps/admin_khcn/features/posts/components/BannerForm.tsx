@@ -55,6 +55,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       startAt: "",
       endAt: "",
       translations: {},
+      designType: "image",
     },
   });
 
@@ -64,7 +65,11 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
 
   const [customStyles, setCustomStyles] = useState<any>(DEFAULT_STYLES);
-  const [designType, setDesignType] = useState<"image" | "slogan">("image");
+  const [designType, _setDesignType] = useState<"image" | "slogan">("image");
+  const setDesignType = (type: "image" | "slogan") => {
+    _setDesignType(type);
+    form.setValue("designType", type, { shouldValidate: true });
+  };
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isUploadingBg, setIsUploadingBg] = useState(false);
   const [isUploadingWatermark, setIsUploadingWatermark] = useState(false);
@@ -246,15 +251,17 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
         translations: parsedTranslations,
         metaTitle: bannerData.metaTitle || "",
         metaDescription: bannerData.metaDescription || "",
+        designType: isSlogan ? "slogan" : "image",
       });
     }
   }, [bannerData, form]);
 
   const mutation = useMutation({
     mutationFn: (values: any) => {
+      const { designType, ...payloadValues } = values;
       const payload = {
-        ...values,
-        translations: JSON.stringify(values.translations || {}),
+        ...payloadValues,
+        translations: JSON.stringify(payloadValues.translations || {}),
         metaDescription: designType === "slogan" ? JSON.stringify(customStyles) : ""
       };
       if (isEdit) return postsApi.updateBanner(editId!, payload);
@@ -272,6 +279,17 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
 
   const onSubmit = (values: BannerFormValues) => {
     mutation.mutate(values);
+  };
+
+  const onError = (errors: any) => {
+    console.warn("Form validation errors:", errors);
+    const firstErrorKey = Object.keys(errors)[0];
+    if (firstErrorKey) {
+      const msg = errors[firstErrorKey]?.message || "Vui lòng kiểm tra lại thông tin nhập liệu!";
+      toast.error(msg);
+    } else {
+      toast.error("Vui lòng kiểm tra lại thông tin nhập liệu!");
+    }
   };
 
   if (isFetching) {
@@ -320,7 +338,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
             type="button"
             className="bg-blue-600 hover:bg-blue-700 text-white min-w-[140px] shadow-lg shadow-blue-500/20"
             disabled={mutation.isPending}
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={form.handleSubmit(onSubmit, onError)}
           >
             {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
             {isEdit ? "Cập nhật Banner" : "Lưu Banner"}
@@ -329,7 +347,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-6">
               <BannerBasicInfo
@@ -385,7 +403,7 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
         watchedDescription={watchedDescription}
         onSaveAndSubmit={() => {
           setIsPreviewModalOpen(false);
-          form.handleSubmit(onSubmit)();
+          form.handleSubmit(onSubmit, onError)();
         }}
       />
     </div>

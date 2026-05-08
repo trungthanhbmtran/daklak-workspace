@@ -27,6 +27,7 @@ export const bannerSchema = z.object({
   endAt: z.string().optional(),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
+  designType: z.enum(["image", "slogan"]).default("image"),
   translations: z.record(z.string(), z.object({
     name: z.string().optional(),
     description: z.string().optional(),
@@ -40,18 +41,7 @@ export const bannerSchema = z.object({
     });
   }
 
-  // Check if it is a slogan designed banner (metaDescription contains styling JSON)
-  let isSlogan = false;
-  if (data.metaDescription) {
-    try {
-      const parsed = JSON.parse(data.metaDescription);
-      if (parsed && typeof parsed === "object") {
-        isSlogan = true;
-      }
-    } catch (e) {}
-  }
-
-  if (!isSlogan && data.position !== "custom" && (!data.imageUrl || data.imageUrl.trim() === "")) {
+  if (data.designType !== "slogan" && data.position !== "custom" && (!data.imageUrl || data.imageUrl.trim() === "")) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "Vui lòng tải ảnh lên cho vị trí này",
