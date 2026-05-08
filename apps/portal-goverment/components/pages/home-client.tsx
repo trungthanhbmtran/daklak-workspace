@@ -4,6 +4,7 @@ import * as React from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { resolveMediaUrl } from "@/lib/utils"
 import {
   ArrowRight,
   ChevronLeft,
@@ -363,7 +364,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
           id: post.id,
           title: post.title,
           excerpt: post.description || post.content || "",
-          image: post.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
+          image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
           date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN"),
           category: post.category?.name || "Tin tức"
         }))
@@ -404,7 +405,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         id: post.id,
         title: post.title,
         excerpt: post.description || post.content || "",
-        image: post.thumbnail || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=400&q=80",
+        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=400&q=80",
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN")
       }))
       if (filtered.length > 0) return filtered
@@ -422,7 +423,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         id: post.id,
         title: post.title,
         excerpt: post.description || post.content || "",
-        image: post.thumbnail || "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=400&q=80",
+        image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=400&q=80",
         date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN")
       }))
       if (filtered.length > 0) return filtered
@@ -435,7 +436,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       const withImages = postsData.data.filter((p: any) => p.thumbnail).slice(0, 4).map((post: any) => ({
         id: post.id,
         title: post.title,
-        image: post.thumbnail,
+        image: resolveMediaUrl(post.thumbnail),
         tag: post.category?.name || "Hình ảnh"
       }))
       if (withImages.length > 0) return withImages
@@ -1325,7 +1326,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 >
                   <div className="w-full h-24 overflow-hidden relative">
                     <img 
-                      src={banner.imageUrl} 
+                      src={resolveMediaUrl(banner.imageUrl)} 
                       alt={banner.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

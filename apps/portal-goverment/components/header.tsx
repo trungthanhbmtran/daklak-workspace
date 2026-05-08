@@ -7,6 +7,7 @@ import { useTheme } from "next-themes"
 import { useLanguage } from "@/components/language-context"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { resolveMediaUrl } from "@/lib/utils"
 import {
   Phone,
   Mail,
@@ -358,7 +359,7 @@ export default function Header() {
             {topBanner ? (
               <a href={topBanner.customUrl || "#"} target={topBanner.target || "_self"}>
                 <img
-                  src={topBanner.imageUrl}
+                  src={resolveMediaUrl(topBanner.imageUrl)}
                   alt={topBanner.name}
                   className="w-full h-full object-cover object-right"
                 />
