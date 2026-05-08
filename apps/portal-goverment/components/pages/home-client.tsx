@@ -358,6 +358,17 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     return list
   }, [bannersData])
 
+  const customPatrioticBanners = React.useMemo(() => {
+    if (!bannersData?.data || bannersData.data.length === 0) {
+      return []
+    }
+    const list = bannersData.data.filter(
+      (b: any) => b.position?.toLowerCase() === "custom" && b.status !== false
+    )
+    list.sort((a: any, b: any) => (a.orderIndex || 0) - (b.orderIndex || 0))
+    return list
+  }, [bannersData])
+
   const slides = React.useMemo(() => {
     const dbSlides = postsData?.data
       ? postsData.data.slice(0, 3).map((post: any) => ({
@@ -739,36 +750,77 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       </div>
 
       {/* 3. Horizontal Decorative Patriotic Promotion Banner 1 */}
-      <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
-        {/* Intricate Gold Borders */}
-        <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+      {customPatrioticBanners.length > 0 ? (
+        customPatrioticBanners.map((banner: any) => (
+          <div key={banner.id} className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
+            {/* Intricate Gold Borders */}
+            <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
 
-        {/* Traditional Gold Star Watermark */}
-        <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
-          <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
-          </svg>
-        </div>
+            {/* Traditional Gold Star Watermark */}
+            <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
+              <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
+              </svg>
+            </div>
 
-        <div className="z-10 flex flex-col gap-1">
-          <span className="text-[#fbc02d] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
-            <span>⭐</span> HỌC TẬP VÀ LÀM THEO TƯ TƯỞNG, ĐẠO ĐỨC, PHONG CÁCH HỒ CHÍ MINH
-          </span>
-          <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-amber-50 drop-shadow">
-            &quot;ĐOÀN KẾT - ĐOÀN KẾT - ĐẠI ĐOÀN KẾT • THÀNH CÔNG - THÀNH CÔNG - ĐẠI THÀNH CÔNG&quot;
-          </h3>
+            <div className="z-10 flex flex-col gap-1 flex-1">
+              <span className="text-[#fbc02d] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
+                <span>⭐</span> {banner.name}
+              </span>
+              {banner.description && (
+                <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-amber-50 drop-shadow">
+                  &quot;{banner.description}&quot;
+                </h3>
+              )}
+            </div>
+            {banner.customUrl && (
+              <div className="z-10 shrink-0">
+                <a
+                  href={banner.customUrl}
+                  target={banner.target || "_self"}
+                  rel={banner.target === "_blank" ? "noopener noreferrer" : undefined}
+                  className="inline-flex items-center gap-1.5 bg-[#ffde59] hover:bg-[#f1c40f] text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300 transition-all transform hover:scale-105"
+                >
+                  Tìm hiểu thêm
+                  <Info className="w-4 h-4 text-slate-900" />
+                </a>
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
+          {/* Intricate Gold Borders */}
+          <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+
+          {/* Traditional Gold Star Watermark */}
+          <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-[0.08] pointer-events-none select-none z-0">
+            <svg className="w-56 h-56 text-[#ffff00]" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 .587l3.668 7.431 8.2 1.192-5.934 5.787 1.4 8.168L12 18.896l-7.334 3.857 1.4-8.168L.132 9.21l8.2-1.192z" />
+            </svg>
+          </div>
+
+          <div className="z-10 flex flex-col gap-1">
+            <span className="text-[#fbc02d] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
+              <span>⭐</span> HỌC TẬP VÀ LÀM THEO TƯ TƯỞNG, ĐẠO ĐỨC, PHONG CÁCH HỒ CHÍ MINH
+            </span>
+            <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-amber-50 drop-shadow">
+              &quot;ĐOÀN KẾT - ĐOÀN KẾT - ĐẠI ĐOÀN KẾT • THÀNH CÔNG - THÀNH CÔNG - ĐẠI THÀNH CÔNG&quot;
+            </h3>
+          </div>
+          <div className="z-10 shrink-0">
+            <Link
+              href="/gioi-thieu"
+              className="inline-flex items-center gap-1.5 bg-[#ffde59] hover:bg-[#f1c40f] text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300 transition-all transform hover:scale-105"
+            >
+              Tìm hiểu Lịch sử Xã
+              <Info className="w-4 h-4 text-slate-900" />
+            </Link>
+          </div>
         </div>
-        <div className="z-10 shrink-0">
-          <Link
-            href="/gioi-thieu"
-            className="inline-flex items-center gap-1.5 bg-[#ffde59] hover:bg-[#f1c40f] text-slate-950 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-amber-300 transition-all transform hover:scale-105"
-          >
-            Tìm hiểu Lịch sử Xã
-            <Info className="w-4 h-4 text-slate-900" />
-          </Link>
-        </div>
-      </div>
+      )}
 
       {/* 4. Quick Services Administrative Icons Grid */}
       <div className="flex flex-col gap-4">

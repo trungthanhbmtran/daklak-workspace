@@ -372,9 +372,12 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                               <SelectItem value="top">Phía trên (Top Header)</SelectItem>
                               <SelectItem value="middle">Giữa trang (Body)</SelectItem>
                               <SelectItem value="bottom">Phía dưới (Footer)</SelectItem>
-                              <SelectItem value="custom">Vị trí tùy chỉnh</SelectItem>
+                              <SelectItem value="custom">Khẩu hiệu Tuyên truyền (Patriotic Slogan)</SelectItem>
                             </SelectContent>
                           </Select>
+                          <FormDescription className="text-[11px] text-red-600 dark:text-red-400 font-semibold mt-1">
+                            * Vị trí &quot;Khẩu hiệu Tuyên truyền&quot; sẽ sinh giao diện cờ đỏ sao vàng cực kỳ sang trọng trên Cổng thông tin, sử dụng Tiêu đề làm khẩu hiệu nhỏ, và Nội dung mô tả làm Slogan chính. Không cần tải ảnh lên.
+                          </FormDescription>
                         </FormItem>
                       )}
                     />

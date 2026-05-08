@@ -16,7 +16,7 @@ export const bannerSchema = z.object({
   name: z.string().min(2, "Tên banner phải có ít nhất 2 ký tự"),
   slug: z.string().min(2, "Slug không được để trống"),
   description: z.string().optional(),
-  imageUrl: z.string().min(1, "Vui lòng tải ảnh lên"),
+  imageUrl: z.string().optional().or(z.literal("")),
   linkType: z.enum(["internal", "external"]).default("internal"),
   customUrl: z.string().optional(),
   target: z.string().default("_self"),
@@ -35,6 +35,13 @@ export const bannerSchema = z.object({
       code: z.ZodIssueCode.custom,
       message: "Vui lòng nhập đường dẫn liên kết ngoài (URL)",
       path: ["customUrl"],
+    });
+  }
+  if (data.position !== "custom" && (!data.imageUrl || data.imageUrl.trim() === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Vui lòng tải ảnh lên cho vị trí này",
+      path: ["imageUrl"],
     });
   }
 });
