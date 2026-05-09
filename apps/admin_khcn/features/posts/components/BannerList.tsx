@@ -18,13 +18,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { postsApi } from "../api";
 import { Banner } from "../types";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-
 import { useGetCategories, useUpdateCategory } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 interface BannerListProps {
@@ -42,22 +35,12 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
   const [activeTab, setActiveTab] = useState<string>("all");
 
   const getFriendlyPositionName = (pos: string) => {
-    const found = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code === pos);
-    if (found) return found.name;
-
-    const p = pos?.toLowerCase();
-    if (p === "top") return "Đầu trang (Header)";
-    if (p === "middle_1") return "Giữa trang - Vị trí 1";
-    if (p === "middle_2") return "Giữa trang - Vị trí 2";
-    if (p === "middle_3") return "Giữa trang - Vị trí 3";
-    if (p === "middle") return "Thân trang (Sidebar)";
-    if (p === "bottom") return "Cuối trang (Footer)";
-    if (p === "custom") return "Khẩu hiệu chính";
-    return pos || "Chưa phân loại";
+    const found = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code?.toLowerCase() === pos?.toLowerCase());
+    return found ? found.name : (pos || "Chưa phân loại");
   };
 
   const positionCategories = categories
-    .filter((cat: any) => cat.group === "BANNER_POSITION")
+    .filter((cat: any) => cat.group === "BANNER_POSITION" && cat.active !== 0)
     .sort((a: any, b: any) => (a.sort || 0) - (b.sort || 0));
 
   const { data: banners, isLoading } = useQuery({
@@ -85,13 +68,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     if (!matchesSearch) return false;
 
     if (activeTab === "all") return true;
-    if (activeTab === "top") return b.position === "top";
-    if (activeTab === "middle") {
-      return ["middle", "middle_1", "middle_2", "middle_3"].includes(b.position);
-    }
-    if (activeTab === "bottom") return b.position === "bottom";
-    if (activeTab === "custom") return b.position === "custom";
-    return true;
+    return b.position?.toLowerCase() === activeTab?.toLowerCase();
   });
 
   if (isLoading) {
@@ -186,22 +163,15 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         {/* Modern Tabs Category Selector */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full lg:w-auto">
-          <TabsList className="bg-slate-100/75 p-1 rounded-xl grid grid-cols-2 sm:flex sm:flex-wrap gap-1">
+          <TabsList className="bg-slate-100/75 p-1 rounded-xl flex flex-wrap gap-1">
             <TabsTrigger value="all" className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
               <Grid className="h-3.5 w-3.5" /> Tất cả
             </TabsTrigger>
-            <TabsTrigger value="top" className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
-              <Layers className="h-3.5 w-3.5" /> Đầu trang (Header)
-            </TabsTrigger>
-            <TabsTrigger value="middle" className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
-              <Layers className="h-3.5 w-3.5" /> Thân trang (Body)
-            </TabsTrigger>
-            <TabsTrigger value="bottom" className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
-              <Layers className="h-3.5 w-3.5" /> Cuối trang (Footer)
-            </TabsTrigger>
-            <TabsTrigger value="custom" className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
-              <Type className="h-3.5 w-3.5" /> Khẩu hiệu chính
-            </TabsTrigger>
+            {positionCategories.map((cat: any) => (
+              <TabsTrigger key={cat.code} value={cat.code?.toLowerCase()} className="flex items-center gap-1.5 px-4 py-2 text-xs rounded-lg">
+                <Layers className="h-3.5 w-3.5" /> {cat.name}
+              </TabsTrigger>
+            ))}
           </TabsList>
         </Tabs>
 
@@ -241,7 +211,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
               } catch (e) { }
             }
 
-            const posCat = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code === banner.position);
+            const posCat = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code?.toLowerCase() === banner.position?.toLowerCase());
             const isPositionSlideshow = posCat?.description === "slideshow";
 
             return (

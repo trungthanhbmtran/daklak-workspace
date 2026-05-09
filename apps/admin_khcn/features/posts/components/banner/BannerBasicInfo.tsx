@@ -43,23 +43,16 @@ export function BannerBasicInfo({
 }: BannerBasicInfoProps) {
   const { data: categories = [] } = useGetCategories();
 
-  const dbPositions = React.useMemo(() => {
+  const renderPositions = React.useMemo(() => {
     return categories
       .filter((cat: any) => cat.group === "BANNER_POSITION" && cat.active !== 0)
-      .sort((a: any, b: any) => (a.sort || 0) - (b.sort || 0));
+      .map((cat: any) => ({
+        code: cat.code.toLowerCase(),
+        name: cat.name,
+        sort: cat.sort || 0
+      }))
+      .sort((a: any, b: any) => a.sort - b.sort);
   }, [categories]);
-
-  const defaultPositions = [
-    { code: "top", name: "Đầu trang (Header)" },
-    { code: "middle_1", name: "Giữa trang - Vị trí 1" },
-    { code: "middle_2", name: "Giữa trang - Vị trí 2" },
-    { code: "middle_3", name: "Giữa trang - Vị trí 3" },
-    { code: "middle", name: "Thân trang (Sidebar)" },
-    { code: "bottom", name: "Phía dưới (Footer)" },
-    { code: "custom", name: "Khẩu hiệu chính" },
-  ];
-
-  const renderPositions = dbPositions.length > 0 ? dbPositions : defaultPositions;
 
   return (
     <div className="space-y-6">
@@ -78,11 +71,10 @@ export function BannerBasicInfo({
             <button
               type="button"
               onClick={() => setDesignType("image")}
-              className={`relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${
-                designType === "image"
-                  ? "border-blue-500 bg-blue-50/40 text-blue-900 dark:text-blue-200 shadow-sm"
-                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-900"
-              }`}
+              className={`relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${designType === "image"
+                ? "border-blue-500 bg-blue-50/40 text-blue-900 dark:text-blue-200 shadow-sm"
+                : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-900"
+                }`}
             >
               <div className={`p-3 rounded-lg ${designType === "image" ? "bg-blue-100 text-blue-600 dark:bg-blue-950" : "bg-slate-100 text-slate-500 dark:bg-slate-800"}`}>
                 <ImageIcon className="h-6 w-6" />
@@ -101,11 +93,10 @@ export function BannerBasicInfo({
             <button
               type="button"
               onClick={() => setDesignType("slogan")}
-              className={`relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${
-                designType === "slogan"
-                  ? "border-amber-500 bg-amber-50/40 text-amber-900 dark:text-amber-200 shadow-sm"
-                  : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-900"
-              }`}
+              className={`relative flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${designType === "slogan"
+                ? "border-amber-500 bg-amber-50/40 text-amber-900 dark:text-amber-200 shadow-sm"
+                : "border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 dark:border-slate-800 dark:hover:bg-slate-900"
+                }`}
             >
               <div className={`p-3 rounded-lg ${designType === "slogan" ? "bg-amber-100 text-amber-600 dark:bg-amber-950" : "bg-slate-100 text-slate-500 dark:bg-slate-800"}`}>
                 <Type className="h-6 w-6" />
@@ -237,8 +228,12 @@ export function BannerBasicInfo({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-semibold">Vị trí hiển thị</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl><SelectTrigger className="bg-slate-50/50 dark:bg-slate-900"><SelectValue /></SelectTrigger></FormControl>
+                  <Select onValueChange={field.onChange} value={field.value?.toLowerCase() || ""}>
+                    <FormControl>
+                      <SelectTrigger className="bg-slate-50/50 dark:bg-slate-900">
+                        <SelectValue placeholder="Chọn vị trí hiển thị" />
+                      </SelectTrigger>
+                    </FormControl>
                     <SelectContent>
                       {renderPositions.map((p: any) => (
                         <SelectItem key={p.code} value={p.code}>
