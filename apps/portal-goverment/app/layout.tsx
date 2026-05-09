@@ -14,11 +14,6 @@ export const metadata = {
   title: "Cổng thông tin điện tử xã Dang Kang - Huyện Krông Bông, Tỉnh Đắk Lắk",
   description: "Trang thông tin điện tử chính thức của Ủy ban nhân dân xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk. Cung cấp tin tức chính trị, kinh tế, xã hội, thủ tục hành chính và dịch vụ công trực tuyến.",
   keywords: "cổng thông tin điện tử, xã dang kang, uỷ ban nhân dân, dịch vụ công trực tuyến, huyện krông bông, đắk lắk, thủ tục hành chính",
-  icons: {
-    icon: "/QuocHuy.png",
-    shortcut: "/QuocHuy.png",
-    apple: "/QuocHuy.png",
-  },
 }
 
 export default function RootLayout({
