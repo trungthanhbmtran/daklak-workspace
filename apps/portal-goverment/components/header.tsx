@@ -635,7 +635,7 @@ export default function Header() {
 
             <div className="mt-auto border-t border-white/25 pt-4 text-center">
               <span className="text-[10px] text-white/70 font-mono block">
-                Hotline: {getConfigValue("hotline", "0262.3812.345")}
+                {getConfigValue("hotline", "Đường dây nóng: 0262.3812.345")}
               </span>
               <span className="text-[10px] text-white/70 font-mono block mt-1">
                 © 2026 {getConfigValue("unit_name", "UBND XÃ DANG KANG")}

@@ -62,6 +62,9 @@ export default function PortalConfigPage() {
     contactMapTitle: string;
     footerPortalTitle: string;
     footerPortalSubtitle: string;
+    hotline: string;
+    fax: string;
+    email: string;
   }>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -137,7 +140,10 @@ export default function PortalConfigPage() {
           contactFormSuccessDesc: "",
           contactMapTitle: "",
           footerPortalTitle: "",
-          footerPortalSubtitle: ""
+          footerPortalSubtitle: "",
+          hotline: "",
+          fax: "",
+          email: ""
         };
       });
 
@@ -188,6 +194,9 @@ export default function PortalConfigPage() {
           contactMapTitle: extractField(contactMapTitleCat, langCode),
           footerPortalTitle: extractField(footerPortalTitleCat, langCode),
           footerPortalSubtitle: extractField(footerPortalSubtitleCat, langCode),
+          hotline: extractField(hotlineCat, langCode),
+          fax: extractField(faxCat, langCode),
+          email: extractField(emailCat, langCode),
         };
       });
 
@@ -321,8 +330,8 @@ export default function PortalConfigPage() {
         // Global non-translatable configurations
         {
           code: "hotline",
-          name: hotline || "0262.3812.345",
-          description: "Đường dây nóng hỗ trợ công dân"
+          name: configTranslations["vi"]?.hotline || "0262.3812.345",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.hotline)
         },
         {
           code: "logo_url",
@@ -331,13 +340,13 @@ export default function PortalConfigPage() {
         },
         {
           code: "fax",
-          name: fax || "0262.3812.346",
-          description: "Số Fax cơ quan"
+          name: configTranslations["vi"]?.fax || "0262.3812.346",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.fax)
         },
         {
           code: "email",
-          name: email || "xadangkang@krongbong.daklak.gov.vn",
-          description: "Địa chỉ Email cơ quan"
+          name: configTranslations["vi"]?.email || "xadangkang@krongbong.daklak.gov.vn",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.email)
         }
       ];
 
@@ -646,6 +655,72 @@ export default function PortalConfigPage() {
     );
   };
 
+  const renderContactDetailsCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || {
+      hotline: "",
+      fax: "",
+      email: ""
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Phone className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Thông tin Liên hệ (Đường dây nóng, Fax, Email)
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Đường dây nóng (Hotline) - Nhập đầy đủ nội dung hiển thị
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: Điện thoại: 0262.3812.345 hoặc Đường dây nóng: 0262.3812.345" : "e.g., Hotline: 0262.3812.345"}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+              value={trans.hotline || ""}
+              onChange={(e) => updateTranslationField(langCode, "hotline", e.target.value)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                Số Fax - Nhập đầy đủ nội dung hiển thị
+              </Label>
+              <Input
+                placeholder={langCode === 'vi' ? "Ví dụ: Fax: 0262.3812.346" : "e.g., Fax: 0262.3812.346"}
+                className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+                value={trans.fax || ""}
+                onChange={(e) => updateTranslationField(langCode, "fax", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                Địa chỉ Thư điện tử (Email) - Nhập đầy đủ nội dung hiển thị
+              </Label>
+              <Input
+                placeholder={langCode === 'vi' ? "Ví dụ: Email: xadangkang@krongbong.daklak.gov.vn" : "e.g., Email: xadangkang@krongbong.daklak.gov.vn"}
+                className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+                value={trans.email || ""}
+                onChange={(e) => updateTranslationField(langCode, "email", e.target.value)}
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Simulator Localized values
   const simName = configTranslations[activeLangTab]?.unitName || "UBND XÃ DANG KANG";
   const simTitle = configTranslations[activeLangTab]?.unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ";
@@ -653,12 +728,15 @@ export default function PortalConfigPage() {
   const simSchedule = configTranslations[activeLangTab]?.citizenSchedule || "Thứ 5 hàng tuần • 08:00 - 11:30";
   const simLicense = configTranslations[activeLangTab]?.licenseInfo || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp";
   const simResponsible = configTranslations[activeLangTab]?.responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang";
-  const simAddress = configTranslations[activeLangTab]?.address || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk";
+  const simAddress = configTranslations[activeLangTab]?.address || "Địa chỉ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk";
   const simContactFormTitle = configTranslations[activeLangTab]?.contactFormTitle || "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG";
   const simContactFormSuccessDesc = configTranslations[activeLangTab]?.contactFormSuccessDesc || "Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn và sẽ phản hồi sớm nhất có thể.";
   const simContactMapTitle = configTranslations[activeLangTab]?.contactMapTitle || "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG";
   const simFooterPortalTitle = configTranslations[activeLangTab]?.footerPortalTitle || "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG";
   const simFooterPortalSubtitle = configTranslations[activeLangTab]?.footerPortalSubtitle || "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng";
+  const simHotline = configTranslations[activeLangTab]?.hotline || "Đường dây nóng: 0262.3812.345";
+  const simFax = configTranslations[activeLangTab]?.fax || "Fax: 0262.3812.346";
+  const simEmail = configTranslations[activeLangTab]?.email || "Email: xadangkang@krongbong.daklak.gov.vn";
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
@@ -738,11 +816,10 @@ export default function PortalConfigPage() {
                 variant={isCompareMode ? "default" : "outline"}
                 size="sm"
                 onClick={() => setIsCompareMode(!isCompareMode)}
-                className={`rounded-lg text-xs font-bold uppercase py-1.5 px-3 flex items-center gap-1.5 transition-all ${
-                  isCompareMode
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
-                    : "border-slate-250 text-slate-600 hover:bg-slate-100"
-                }`}
+                className={`rounded-lg text-xs font-bold uppercase py-1.5 px-3 flex items-center gap-1.5 transition-all ${isCompareMode
+                  ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
+                  : "border-slate-250 text-slate-600 hover:bg-slate-100"
+                  }`}
               >
                 <Columns className="w-3.5 h-3.5" />
                 {isCompareMode ? "Tắt dịch song song" : "Dịch song song (VI / EN)"}
@@ -790,59 +867,15 @@ export default function PortalConfigPage() {
             renderCustomLabelsCard(activeLangTab)
           )}
 
-          {/* GLOBAL CONFIGS CARD (FAX, EMAIL, HOTLINE) */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Đường dây nóng, Fax & Thư điện tử (Cấu hình chung hệ thống)
-                </CardTitle>
-              </div>
-              <CardDescription>Các liên hệ hành chính kỹ thuật dùng chung cho toàn bộ các phiên bản ngôn ngữ.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="hotline" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Số điện thoại hotline
-                  </Label>
-                  <Input
-                    id="hotline"
-                    placeholder="Ví dụ: 0262.3812.345"
-                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 font-mono tracking-wider font-semibold"
-                    value={hotline}
-                    onChange={(e) => setHotline(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="fax" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Số Fax cơ quan
-                  </Label>
-                  <Input
-                    id="fax"
-                    placeholder="Ví dụ: 0262.3812.346"
-                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 font-mono"
-                    value={fax}
-                    onChange={(e) => setFax(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Địa chỉ Email cơ quan
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Ví dụ: xadangkang@krongbong.daklak.gov.vn"
-                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 font-mono"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* CARD 5: CONTACT INFORMATION */}
+          {isCompareMode ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderContactDetailsCard("vi", "(Bản gốc)")}
+              {renderContactDetailsCard("en", "(Bản dịch)")}
+            </div>
+          ) : (
+            renderContactDetailsCard(activeLangTab)
+          )}
         </div>
 
         {/* RIGHT COLUMN: LOGO UPLOADER & LIVE PORTAL PREVIEW */}
@@ -1016,9 +1049,13 @@ export default function PortalConfigPage() {
                   {simLicense || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp"}. Chịu trách nhiệm nội dung: {simResponsible || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang"}.
                 </p>
                 <div className="text-slate-400 space-y-0.5 pt-1 border-t border-slate-800 font-medium">
-                  <p>Địa chỉ: {simAddress || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk"}</p>
-                  <p>Đường dây nóng: <span className="text-amber-300 font-mono font-bold">{hotline || "0262.3812.345"}</span> | Fax: <span className="font-mono">{fax || "0262.3812.346"}</span></p>
-                  <p>Email: <span className="text-sky-300">{email || "xadangkang@krongbong.daklak.gov.vn"}</span></p>
+                  <p>{simAddress}</p>
+                  <p>
+                    <span className="text-amber-300 font-mono font-bold">{simHotline}</span>
+                    {simFax && ` | `}
+                    <span className="font-mono">{simFax}</span>
+                  </p>
+                  <p className="text-sky-300">{simEmail}</p>
                 </div>
               </div>
             </CardContent>

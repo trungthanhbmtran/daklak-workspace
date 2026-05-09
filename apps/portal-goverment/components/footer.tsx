@@ -166,7 +166,7 @@ export default function Footer() {
               {getConfigValue("unit_name", "ỦY BAN NHÂN DÂN XÃ DANG KANG")}
             </h3>
             <span className="text-xs font-semibold text-[#fef08a] uppercase tracking-wide mt-0.5">
-              HUYỆN KRÔNG BÔNG - {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+              {getConfigValue("unit_identifier", "HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK")}
             </span>
           </div>
 
@@ -177,22 +177,22 @@ export default function Footer() {
           <div className="flex flex-col gap-2.5 mt-2 text-xs font-medium">
             <div className="flex items-start gap-2.5">
               <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <span>Địa chỉ: {getConfigValue("address", "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
+              <span>{getConfigValue("address", "Địa chỉ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-              <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/\./g, "")}`} className="hover:text-white transition-colors">
-                Điện thoại: {getConfigValue("hotline", "0262.3812.345")}
+              <a href={`tel:${getConfigValue("hotline", "Điện thoại: 0262.3812.345").replace(/[^\d]/g, "")}`} className="hover:text-white transition-colors">
+                {getConfigValue("hotline", "Điện thoại: 0262.3812.345")}
               </a>
             </div>
             <div className="flex items-center gap-2.5">
               <Printer className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Fax: {getConfigValue("fax", "0262.3812.346")}</span>
+              <span>{getConfigValue("fax", "Fax: 0262.3812.346")}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-              <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-white transition-colors">
-                Email: {getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}
+              <a href={`mailto:${getConfigValue("email", "Email: xadangkang@krongbong.daklak.gov.vn").replace(/.*:\s*/, "")}`} className="hover:text-white transition-colors">
+                {getConfigValue("email", "Email: xadangkang@krongbong.daklak.gov.vn")}
               </a>
             </div>
           </div>

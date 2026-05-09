@@ -120,14 +120,14 @@ export default function ContactPage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-                <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/\./g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
-                  {getConfigValue("hotline", "0262.3812.345")}
+                <a href={`tel:${getConfigValue("hotline", "Điện thoại: 0262.3812.345").replace(/[^\d]/g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
+                  {getConfigValue("hotline", "Điện thoại: 0262.3812.345")}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
-                  Email: {getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}
+                <a href={`mailto:${getConfigValue("email", "Email: xadangkang@krongbong.daklak.gov.vn").replace(/.*:\s*/, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
+                  {getConfigValue("email", "Email: xadangkang@krongbong.daklak.gov.vn")}
                 </a>
               </div>
               <div className="flex items-start gap-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 font-medium text-slate-500">
