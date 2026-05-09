@@ -239,8 +239,31 @@ export default function Header() {
 
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
     const found = (portalConfigData || []).find((c: any) => c.code === code);
-    return found ? found.name : fallback;
-  }, [portalConfigData]);
+    if (!found) return fallback;
+
+    // Check if description contains JSON translations
+    if (found.description && found.description.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(found.description);
+        if (parsed && typeof parsed === 'object') {
+          if (parsed[language]) {
+            return parsed[language];
+          }
+          if (parsed.translations && parsed.translations[language]) {
+            return parsed.translations[language];
+          }
+        }
+      } catch (e) {
+        // Fallback if not valid JSON
+      }
+    }
+
+    if (code === "citizen_schedule") {
+      return found.description || found.name || fallback;
+    }
+
+    return found.name || fallback;
+  }, [portalConfigData, language]);
 
   const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
@@ -307,8 +330,8 @@ export default function Header() {
                 onClick={() => setLanguage("vi")}
                 viewBox="0 0 30 20"
                 className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border cursor-pointer transition-all hover:scale-110 ${language === "vi"
-                    ? "border-amber-400 ring-1 ring-amber-400 scale-105"
-                    : "border-slate-300 dark:border-slate-700 opacity-60 hover:opacity-100"
+                  ? "border-amber-400 ring-1 ring-amber-400 scale-105"
+                  : "border-slate-300 dark:border-slate-700 opacity-60 hover:opacity-100"
                   }`}
               >
                 <title>Tiếng Việt</title>
@@ -320,8 +343,8 @@ export default function Header() {
                 onClick={() => setLanguage("en")}
                 viewBox="0 0 60 30"
                 className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border cursor-pointer transition-all hover:scale-110 ${language === "en"
-                    ? "border-amber-400 ring-1 ring-amber-400 scale-105"
-                    : "border-slate-300 dark:border-slate-700 opacity-60 hover:opacity-100"
+                  ? "border-amber-400 ring-1 ring-amber-400 scale-105"
+                  : "border-slate-300 dark:border-slate-700 opacity-60 hover:opacity-100"
                   }`}
               >
                 <title>English</title>
@@ -394,19 +417,14 @@ export default function Header() {
             </div>
             <div className="flex flex-col">
               <span className="text-[#0056b3] dark:text-blue-400 text-[10px] sm:text-xs md:text-sm font-serif font-black tracking-widest uppercase leading-none">
-                {getConfigValue("unit_title", t("TRANG THÔNG TIN ĐIỆN TỬ"))}
+                {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
               </span>
               <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-serif font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide leading-tight my-0.5 sm:my-1">
-                {getConfigValue("unit_name", t("UBND XÃ DANG KANG"))}
+                {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
               </h1>
               <span className="text-blue-800 dark:text-blue-400/80 text-[8px] sm:text-[10px] md:text-xs font-serif font-bold tracking-wider leading-none uppercase">
-                {t("TỈNH ĐĂK LĂK")}
+                {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
               </span>
-              {getConfigValue("unit_identifier", "") && (
-                <span className="text-slate-500 dark:text-slate-400 text-[7px] sm:text-[8px] md:text-[9px] font-mono font-bold leading-none mt-1 tracking-wider uppercase block">
-                  Mã định danh: {getConfigValue("unit_identifier", "")}
-                </span>
-              )}
             </div>
           </div>
 
@@ -422,9 +440,8 @@ export default function Header() {
                     return (
                       <div
                         key={banner.id}
-                        className={`absolute inset-0 transition-opacity duration-1000 ${
-                          isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                        }`}
+                        className={`absolute inset-0 transition-opacity duration-1000 ${isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                          }`}
                       >
                         <a href={banner.customUrl || "#"} target={banner.target || "_self"} className="block w-full h-full">
                           <img
@@ -659,7 +676,7 @@ export default function Header() {
 
             <div className="mt-auto border-t border-white/25 pt-4 text-center">
               <span className="text-[10px] text-white/70 font-mono block">
-                Hotline trực ban: {getConfigValue("hotline", "0262.3812.345")}
+                Hotline: {getConfigValue("hotline", "0262.3812.345")}
               </span>
               <span className="text-[10px] text-white/70 font-mono block mt-1">
                 © 2026 {getConfigValue("unit_name", "UBND XÃ DANG KANG")}

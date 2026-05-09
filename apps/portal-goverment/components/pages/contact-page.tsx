@@ -62,8 +62,31 @@ export default function ContactPage() {
 
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
     const found = (portalConfigData || []).find((c: any) => c.code === code);
-    return found ? found.name : fallback;
-  }, [portalConfigData]);
+    if (!found) return fallback;
+
+    // Check if description contains JSON translations
+    if (found.description && found.description.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(found.description);
+        if (parsed && typeof parsed === 'object') {
+          if (parsed[language]) {
+            return parsed[language];
+          }
+          if (parsed.translations && parsed.translations[language]) {
+            return parsed.translations[language];
+          }
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    if (code === "citizen_schedule") {
+      return found.description || found.name || fallback;
+    }
+
+    return found.name || fallback;
+  }, [portalConfigData, language]);
 
   const [activeZone, setActiveZone] = React.useState<typeof COMMUNE_ZONES[0] | null>(null)
   
@@ -127,23 +150,19 @@ export default function ContactPage() {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <span>
-                  {language === "vi" 
-                    ? "Trụ sở: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk" 
-                    : "HQ: Hamlet 6, Dang Kang Commune, Krong Bong District, Dak Lak Province"}
+                  {getConfigValue("address", "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
                 <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/\./g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
-                  {language === "vi" 
-                    ? `Điện thoại khẩn: ${getConfigValue("hotline", "0262.3812.345")}` 
-                    : `Hotline Office: ${getConfigValue("hotline", "0262.3812.345")}`}
+                  {getConfigValue("hotline", "0262.3812.345")}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                <a href="mailto:xadangkang@krongbong.daklak.gov.vn" className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
-                  Email: xadangkang@krongbong.daklak.gov.vn
+                <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
+                  Email: {getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}
                 </a>
               </div>
               <div className="flex items-start gap-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 font-medium text-slate-500">
@@ -152,15 +171,11 @@ export default function ContactPage() {
                   <span className="text-slate-850 dark:text-slate-300 font-bold">
                     {language === "vi" ? "Thời gian tiếp nhận công dân trực tiếp:" : "Citizen Direct Reception Office Hours:"}
                   </span>
-                  <span>
-                    {language === "vi" 
-                      ? "Từ thứ Hai đến thứ Sáu hàng tuần (Trừ ngày lễ, Tết)" 
-                      : "Monday to Friday weekly (Except Public Holidays)"}
-                  </span>
-                  <span>
-                    {language === "vi" 
-                      ? "Sáng: 07:30 – 11:30 | Chiều: 13:30 – 17:00" 
-                      : "Morning: 07:30 – 11:30 | Afternoon: 13:30 – 17:00"}
+                  <span className="whitespace-pre-line text-slate-600 dark:text-slate-400">
+                    {getConfigValue("citizen_schedule", language === "vi" 
+                      ? "Từ thứ Hai đến thứ Sáu hàng tuần (Trừ ngày lễ, Tết)\nSáng: 07:30 – 11:30 | Chiều: 13:30 – 17:00" 
+                      : "Monday to Friday weekly (Except Public Holidays)\nMorning: 07:30 – 11:30 | Afternoon: 13:30 – 17:00"
+                    )}
                   </span>
                 </div>
               </div>

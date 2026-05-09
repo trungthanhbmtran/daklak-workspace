@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Settings,
@@ -36,11 +37,43 @@ export default function PortalConfigPage() {
   const [responsiblePerson, setResponsiblePerson] = useState("");
   const [citizenSchedule, setCitizenSchedule] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
+  const [licenseInfo, setLicenseInfo] = useState("");
+  const [fax, setFax] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+
+  const [languages, setLanguages] = useState<any[]>([]);
+  const [activeLangTab, setActiveLangTab] = useState<string>("vi");
+
+  const [configTranslations, setConfigTranslations] = useState<Record<string, {
+    unitName: string;
+    unitTitle: string;
+    unitIdentifier: string;
+    responsiblePerson: string;
+    citizenSchedule: string;
+    licenseInfo: string;
+    address: string;
+  }>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 1. Fetch existing portal config categories
+  // 1. Fetch registered active languages from Category module
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const all = await categoryApi.fetchAll();
+        const langs = all.filter((c: any) => c.group === "LANGUAGE" && c.active === 1);
+        setLanguages(langs.length > 0 ? langs : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }]);
+      } catch (error) {
+        console.error("Error fetching languages", error);
+        setLanguages([{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }]);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
+  // 2. Fetch existing portal config categories
   const { data: dbCategories, isLoading, refetch } = useQuery({
     queryKey: ["categories", "PORTAL_CONFIG"],
     queryFn: async () => {
@@ -54,7 +87,7 @@ export default function PortalConfigPage() {
     }
   });
 
-  // 2. Load existing configs into form state
+  // 3. Load existing configs and translation sets into state
   useEffect(() => {
     if (dbCategories && dbCategories.length > 0) {
       const nameCat = dbCategories.find((c) => c.code === "unit_name");
@@ -64,18 +97,113 @@ export default function PortalConfigPage() {
       const respCat = dbCategories.find((c) => c.code === "responsible_person");
       const scheduleCat = dbCategories.find((c) => c.code === "citizen_schedule");
       const logoCat = dbCategories.find((c) => c.code === "logo_url");
+      const licenseCat = dbCategories.find((c) => c.code === "license_info");
+      const faxCat = dbCategories.find((c) => c.code === "fax");
+      const emailCat = dbCategories.find((c) => c.code === "email");
+      const addressCat = dbCategories.find((c) => c.code === "address");
 
+      // Set global fields
+      if (hotlineCat) setHotline(hotlineCat.name);
+      if (logoCat) setLogoUrl(logoCat.name);
+      if (faxCat) setFax(faxCat.name);
+      if (emailCat) setEmail(emailCat.name);
+
+      const activeLangs = languages.length > 0 ? languages.map(l => l.code) : ["vi", "en"];
+      const newTranslations: typeof configTranslations = {};
+
+      activeLangs.forEach(langCode => {
+        newTranslations[langCode] = {
+          unitName: "",
+          unitTitle: "",
+          unitIdentifier: "",
+          responsiblePerson: "",
+          citizenSchedule: "",
+          licenseInfo: "",
+          address: ""
+        };
+      });
+
+      const extractField = (cat: any, lang: string) => {
+        if (!cat) return "";
+        
+        // Handle backwards compatibility for long plain text in citizen schedule
+        if (cat.code === "citizen_schedule" && lang === "vi" && cat.description && !cat.description.trim().startsWith('{')) {
+          return cat.description || cat.name || "";
+        }
+        
+        // Check if there is valid JSON dictionary in description field
+        if (cat.description && cat.description.trim().startsWith('{')) {
+          try {
+            const parsed = JSON.parse(cat.description);
+            if (parsed && typeof parsed === 'object') {
+              if (parsed[lang] !== undefined) {
+                return parsed[lang];
+              }
+              if (parsed.translations && parsed.translations[lang] !== undefined) {
+                return parsed.translations[lang];
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing JSON description", e);
+          }
+        }
+
+        // Return name field as primary language (vi) fallback
+        if (lang === "vi") {
+          return cat.name || "";
+        }
+
+        return "";
+      };
+
+      activeLangs.forEach(langCode => {
+        newTranslations[langCode] = {
+          unitName: extractField(nameCat, langCode),
+          unitTitle: extractField(titleCat, langCode),
+          unitIdentifier: extractField(identCat, langCode),
+          responsiblePerson: extractField(respCat, langCode),
+          citizenSchedule: extractField(scheduleCat, langCode),
+          licenseInfo: extractField(licenseCat, langCode),
+          address: extractField(addressCat, langCode),
+        };
+      });
+
+      setConfigTranslations(newTranslations);
+
+      // Save fallback local state
       if (nameCat) setUnitName(nameCat.name);
       if (titleCat) setUnitTitle(titleCat.name);
       if (identCat) setUnitIdentifier(identCat.name);
-      if (hotlineCat) setHotline(hotlineCat.name);
       if (respCat) setResponsiblePerson(respCat.name);
       if (scheduleCat) setCitizenSchedule(scheduleCat.description || scheduleCat.name);
-      if (logoCat) setLogoUrl(logoCat.name);
+      if (licenseCat) setLicenseInfo(licenseCat.name);
+      if (addressCat) setAddress(addressCat.name);
     }
-  }, [dbCategories]);
+  }, [dbCategories, languages]);
 
-  // 3. Image Upload Hook integration
+  // helper to update active tab field translation state
+  const updateTranslationField = (lang: string, field: string, value: string) => {
+    setConfigTranslations((prev) => {
+      const existingLang = prev[lang] || {
+        unitName: "",
+        unitTitle: "",
+        unitIdentifier: "",
+        responsiblePerson: "",
+        citizenSchedule: "",
+        licenseInfo: "",
+        address: ""
+      };
+      return {
+        ...prev,
+        [lang]: {
+          ...existingLang,
+          [field]: value
+        }
+      };
+    });
+  };
+
+  // 4. Image Upload Hook integration
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => {
       toast.success("Tải logo thành công!");
@@ -85,22 +213,81 @@ export default function PortalConfigPage() {
   // Dynamic active logo selection
   const activeLogo = previewUrl || logoUrl;
 
-  // 4. Save/Update Handler
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // 5. Save/Update Handler
+  const handleSave = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setIsSaving(true);
 
-    const configItems = [
-      { code: "unit_name", name: unitName || "UBND XÃ DANG KANG", description: "Tên đơn vị chính quyền" },
-      { code: "unit_title", name: unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ", description: "Tiêu đề phụ của cổng thông tin" },
-      { code: "unit_identifier", name: unitIdentifier || "", description: "Mã định danh điện tử của cơ quan" },
-      { code: "hotline", name: hotline || "0262.3812.345", description: "Đường dây nóng hỗ trợ công dân" },
-      { code: "responsible_person", name: responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang", description: "Người chịu trách nhiệm nội dung thông tin" },
-      { code: "logo_url", name: activeLogo || "", description: "Đường dẫn ảnh logo cơ quan" },
-      { code: "citizen_schedule", name: citizenSchedule.slice(0, 255), description: citizenSchedule } // Use description to store long schedules
-    ];
-
     try {
+      const activeLangs = languages.length > 0 ? languages : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
+      
+      const buildTranslationsJson = (fieldExtractor: (langCode: string) => string) => {
+        const dict: Record<string, string> = {};
+        activeLangs.forEach(l => {
+          dict[l.code] = fieldExtractor(l.code) || "";
+        });
+        return JSON.stringify(dict);
+      };
+
+      const configItems = [
+        {
+          code: "unit_name",
+          name: configTranslations["vi"]?.unitName || "UBND XÃ DANG KANG",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.unitName)
+        },
+        {
+          code: "unit_title",
+          name: configTranslations["vi"]?.unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.unitTitle)
+        },
+        {
+          code: "unit_identifier",
+          name: configTranslations["vi"]?.unitIdentifier || "TỈNH ĐẮK LẮK",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.unitIdentifier)
+        },
+        {
+          code: "responsible_person",
+          name: configTranslations["vi"]?.responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.responsiblePerson)
+        },
+        {
+          code: "citizen_schedule",
+          name: (configTranslations["vi"]?.citizenSchedule || "Thứ 5 hàng tuần • 08:00 - 11:30").slice(0, 255),
+          description: buildTranslationsJson(lang => configTranslations[lang]?.citizenSchedule)
+        },
+        {
+          code: "license_info",
+          name: configTranslations["vi"]?.licenseInfo || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.licenseInfo)
+        },
+        {
+          code: "address",
+          name: configTranslations["vi"]?.address || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.address)
+        },
+        // Global non-translatable configurations
+        {
+          code: "hotline",
+          name: hotline || "0262.3812.345",
+          description: "Đường dây nóng hỗ trợ công dân"
+        },
+        {
+          code: "logo_url",
+          name: activeLogo || "",
+          description: "Đường dẫn ảnh logo cơ quan"
+        },
+        {
+          code: "fax",
+          name: fax || "0262.3812.346",
+          description: "Số Fax cơ quan"
+        },
+        {
+          code: "email",
+          name: email || "xadangkang@krongbong.daklak.gov.vn",
+          description: "Địa chỉ Email cơ quan"
+        }
+      ];
+
       for (const item of configItems) {
         const existing = dbCategories?.find((c) => c.code === item.code);
 
@@ -137,14 +324,25 @@ export default function PortalConfigPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-3 select-none">
-        <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+        <Loader2 className="w-10 h-10 animate-spin text-indigo-600" />
         <p className="text-sm font-medium text-slate-500 animate-pulse">Đang tải dữ liệu cấu hình đơn vị...</p>
       </div>
     );
   }
 
+  const activeLangs = languages.length > 0 ? languages : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
+
+  // Simulator Localized values
+  const simName = configTranslations[activeLangTab]?.unitName || "UBND XÃ DANG KANG";
+  const simTitle = configTranslations[activeLangTab]?.unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ";
+  const simIdentifier = configTranslations[activeLangTab]?.unitIdentifier || "TỈNH ĐẮK LẮK";
+  const simSchedule = configTranslations[activeLangTab]?.citizenSchedule || "Thứ 5 hàng tuần • 08:00 - 11:30";
+  const simLicense = configTranslations[activeLangTab]?.licenseInfo || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp";
+  const simResponsible = configTranslations[activeLangTab]?.responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang";
+  const simAddress = configTranslations[activeLangTab]?.address || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk";
+
   return (
-    <div className="p-6 max-w-7xl mx-auto space-y-8 select-none">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div className="space-y-1">
@@ -156,13 +354,13 @@ export default function PortalConfigPage() {
               Cấu hình chung đơn vị & Portal
             </h1>
           </div>
-          <p className="text-sm text-slate-500">
-            Cấu hình thông tin hoạt động, nhận diện thương hiệu, đường dây nóng và lịch tiếp công dân của Ủy ban Nhân dân.
+          <p className="text-sm text-slate-500 font-medium">
+            Quản lý thông tin nhận diện cơ quan, bản quyền, đường dây nóng, và lịch tiếp công dân đa ngôn ngữ.
           </p>
         </div>
         <Button
-          type="submit"
-          onClick={handleSave}
+          type="button"
+          onClick={() => handleSave()}
           disabled={isSaving}
           className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-lg shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
@@ -181,88 +379,191 @@ export default function PortalConfigPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* LEFT COLUMN: EDITOR FORM */}
-        <div className="lg:col-span-2 space-y-8">
-          <form onSubmit={handleSave} className="space-y-8">
-            {/* CARD 1: BRANDING & IDENTITIES */}
-            <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden">
-              <CardHeader className="bg-slate-50/50 border-b">
-                <div className="flex items-center gap-2.5">
-                  <Building className="w-4 h-4 text-indigo-600" />
-                  <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                    Nhận diện & Bản quyền
-                  </CardTitle>
-                </div>
-                <CardDescription>Thiết lập tiêu đề chính hiển thị trên đỉnh của Cổng thông tin điện tử.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="unit-name" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                      Tên đơn vị chính (Hàng dưới)
-                    </Label>
-                    <Input
-                      id="unit-name"
-                      placeholder="Ví dụ: UBND XÃ DANG KANG"
-                      className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
-                      value={unitName}
-                      onChange={(e) => setUnitName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="unit-title" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                      Tiêu đề phụ (Hàng trên)
-                    </Label>
-                    <Input
-                      id="unit-title"
-                      placeholder="Ví dụ: TRANG THÔNG TIN ĐIỆN TỬ"
-                      className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
-                      value={unitTitle}
-                      onChange={(e) => setUnitTitle(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="unit-identifier" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                      Mã định danh điện tử (Hàng 4)
-                    </Label>
-                    <Input
-                      id="unit-identifier"
-                      placeholder="Ví dụ: 000.05.02.H06"
-                      className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
-                      value={unitIdentifier}
-                      onChange={(e) => setUnitIdentifier(e.target.value)}
-                    />
-                  </div>
-                </div>
+        {/* LEFT COLUMN: EDITOR FORM WITH TRANSLATION TABS */}
+        <div className="lg:col-span-2 space-y-6">
+          <Tabs value={activeLangTab} onValueChange={setActiveLangTab} className="w-full">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 border border-slate-150 p-2 rounded-xl mb-6 shadow-sm">
+              <span className="text-xs font-extrabold text-slate-600 uppercase tracking-wider pl-2">
+                Ngôn ngữ soạn thảo cấu hình:
+              </span>
+              <TabsList className="bg-slate-200/50 p-1 w-full sm:w-auto flex justify-start gap-1 rounded-lg">
+                {activeLangs.map(lang => (
+                  <TabsTrigger
+                    key={lang.code}
+                    value={lang.code}
+                    className="px-3.5 py-1.5 font-extrabold uppercase text-[10px] rounded-md transition-all data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm"
+                  >
+                    {lang.name}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="resp-person" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Người chịu trách nhiệm nội dung (Phần chân trang)
-                  </Label>
-                  <Input
-                    id="resp-person"
-                    placeholder="Ví dụ: Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang"
-                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
-                    value={responsiblePerson}
-                    onChange={(e) => setResponsiblePerson(e.target.value)}
-                  />
-                  <p className="text-[11px] text-slate-400 font-medium">Hiển thị ở chân trang để tuân thủ quy định pháp luật về Cổng thông tin cơ quan nhà nước.</p>
-                </div>
-              </CardContent>
-            </Card>
+            {activeLangs.map(lang => {
+              const trans = configTranslations[lang.code] || {
+                unitName: "",
+                unitTitle: "",
+                unitIdentifier: "",
+                responsiblePerson: "",
+                citizenSchedule: "",
+                licenseInfo: "",
+                address: ""
+              };
 
-            {/* CARD 2: CONTACT & HOTLINE */}
-            <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden">
-              <CardHeader className="bg-slate-50/50 border-b">
-                <div className="flex items-center gap-2.5">
-                  <Phone className="w-4 h-4 text-indigo-600" />
-                  <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                    Liên hệ & Đường dây nóng
-                  </CardTitle>
-                </div>
-                <CardDescription>Thiết lập số điện thoại khẩn cấp phục vụ tiếp nhận ý kiến, phản ánh kiến nghị.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
+              return (
+                <TabsContent key={lang.code} value={lang.code} className="space-y-6 mt-0 focus-visible:outline-none">
+                  {/* CARD 1: BRANDING & IDENTITIES */}
+                  <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <CardHeader className="bg-slate-50/50 border-b">
+                      <div className="flex items-center gap-2.5">
+                        <Building className="w-4 h-4 text-indigo-600" />
+                        <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                          Nhận diện & Bản quyền ({lang.name})
+                        </CardTitle>
+                      </div>
+                      <CardDescription>Thiết lập tiêu đề chính hiển thị trên đỉnh của Cổng thông tin điện tử.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-6">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <Label htmlFor={`unit-name-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Tên đơn vị chính (Hàng dưới)
+                          </Label>
+                          <Input
+                            id={`unit-name-${lang.code}`}
+                            placeholder="Ví dụ: UBND XÃ DANG KANG"
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.unitName || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "unitName", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`unit-title-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Tiêu đề phụ (Hàng trên)
+                          </Label>
+                          <Input
+                            id={`unit-title-${lang.code}`}
+                            placeholder="Ví dụ: TRANG THÔNG TIN ĐIỆN TỬ"
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.unitTitle || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "unitTitle", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`unit-identifier-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Đơn vị hành chính cấp tỉnh (Hàng 3)
+                          </Label>
+                          <Input
+                            id={`unit-identifier-${lang.code}`}
+                            placeholder="Ví dụ: TỈNH ĐẮK LẮK"
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.unitIdentifier || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "unitIdentifier", e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`resp-person-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          Người chịu trách nhiệm nội dung (Phần chân trang)
+                        </Label>
+                        <Input
+                          id={`resp-person-${lang.code}`}
+                          placeholder="Ví dụ: Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang"
+                          className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                          value={trans.responsiblePerson || ""}
+                          onChange={(e) => updateTranslationField(lang.code, "responsiblePerson", e.target.value)}
+                        />
+                        <p className="text-[11px] text-slate-400 font-medium">Hiển thị ở chân trang để tuân thủ quy định pháp luật về Cổng thông tin cơ quan nhà nước.</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* CARD 3: CITIZEN RECEPTION SCHEDULE */}
+                  <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <CardHeader className="bg-slate-50/50 border-b">
+                      <div className="flex items-center gap-2.5">
+                        <Calendar className="w-4 h-4 text-indigo-600" />
+                        <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                          Lịch tiếp công dân định kỳ ({lang.name})
+                        </CardTitle>
+                      </div>
+                      <CardDescription>Cấu hình lịch trình hoạt động, thời gian gặp gỡ đối thoại trực tiếp của lãnh đạo.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6">
+                      <div className="space-y-2">
+                        <Label htmlFor={`schedule-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          Nội dung chi tiết thời gian tiếp công dân
+                        </Label>
+                        <Textarea
+                          id={`schedule-${lang.code}`}
+                          rows={4}
+                          placeholder="Ví dụ: Thứ 5 hàng tuần • 08:00 - 11:30"
+                          className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-medium leading-relaxed"
+                          value={trans.citizenSchedule || ""}
+                          onChange={(e) => updateTranslationField(lang.code, "citizenSchedule", e.target.value)}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* CARD 4: EXTENDED FOOTER INFO */}
+                  <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <CardHeader className="bg-slate-50/50 border-b">
+                      <div className="flex items-center gap-2.5">
+                        <FileText className="w-4 h-4 text-indigo-600" />
+                        <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                          Địa chỉ & Giấy phép ({lang.name})
+                        </CardTitle>
+                      </div>
+                      <CardDescription>Cấu hình các thông tin liên hệ và pháp lý khác hiển thị tại chân trang của cổng thông tin.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor={`address-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          Địa chỉ trụ sở chính cơ quan
+                        </Label>
+                        <Input
+                          id={`address-${lang.code}`}
+                          placeholder="Ví dụ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk"
+                          className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                          value={trans.address || ""}
+                          onChange={(e) => updateTranslationField(lang.code, "address", e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor={`license-info-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          Thông tin Giấy phép hoạt động
+                        </Label>
+                        <Textarea
+                          id={`license-info-${lang.code}`}
+                          rows={3}
+                          placeholder="Ví dụ: Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp"
+                          className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-medium leading-relaxed"
+                          value={trans.licenseInfo || ""}
+                          onChange={(e) => updateTranslationField(lang.code, "licenseInfo", e.target.value)}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              );
+            })}
+          </Tabs>
+
+          {/* GLOBAL CONFIGS CARD (FAX, EMAIL, HOTLINE) */}
+          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+            <CardHeader className="bg-slate-50/50 border-b">
+              <div className="flex items-center gap-2.5">
+                <Phone className="w-4 h-4 text-indigo-600" />
+                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                  Đường dây nóng, Fax & Thư điện tử (Cấu hình chung hệ thống)
+                </CardTitle>
+              </div>
+              <CardDescription>Các liên hệ hành chính kỹ thuật dùng chung cho toàn bộ các phiên bản ngôn ngữ.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="hotline" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                     Số điện thoại hotline
@@ -275,43 +576,40 @@ export default function PortalConfigPage() {
                     onChange={(e) => setHotline(e.target.value)}
                   />
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* CARD 3: CITIZEN RECEPTION SCHEDULE */}
-            <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden">
-              <CardHeader className="bg-slate-50/50 border-b">
-                <div className="flex items-center gap-2.5">
-                  <Calendar className="w-4 h-4 text-indigo-600" />
-                  <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                    Lịch tiếp công dân định kỳ
-                  </CardTitle>
-                </div>
-                <CardDescription>Cấu hình lịch trình hoạt động, thời gian gặp gỡ đối thoại trực tiếp của lãnh đạo.</CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
                 <div className="space-y-2">
-                  <Label htmlFor="schedule" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
-                    Nội dung chi tiết thời gian tiếp công dân
+                  <Label htmlFor="fax" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Số Fax cơ quan
                   </Label>
-                  <Textarea
-                    id="schedule"
-                    rows={4}
-                    placeholder="Ví dụ: Thứ 5 hàng tuần • 08:00 - 11:30"
-                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-medium leading-relaxed"
-                    value={citizenSchedule}
-                    onChange={(e) => setCitizenSchedule(e.target.value)}
+                  <Input
+                    id="fax"
+                    placeholder="Ví dụ: 0262.3812.346"
+                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 font-mono"
+                    value={fax}
+                    onChange={(e) => setFax(e.target.value)}
                   />
                 </div>
-              </CardContent>
-            </Card>
-          </form>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                    Địa chỉ Email cơ quan
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="Ví dụ: xadangkang@krongbong.daklak.gov.vn"
+                    className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 font-mono"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* RIGHT COLUMN: LOGO UPLOADER & LIVE PORTAL PREVIEW */}
         <div className="space-y-8">
           {/* LOGO CONFIG */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden">
+          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
             <CardHeader className="bg-slate-50/50 border-b">
               <div className="flex items-center gap-2.5">
                 <ImageIcon className="w-4 h-4 text-indigo-600" />
@@ -384,7 +682,7 @@ export default function PortalConfigPage() {
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-emerald-600" />
                 <CardTitle className="text-xs font-black text-emerald-800 uppercase tracking-wider">
-                  Mô phỏng hiển thị Portal thực tế
+                  Mô phỏng hiển thị Portal ({activeLangTab.toUpperCase()})
                 </CardTitle>
               </div>
             </CardHeader>
@@ -402,19 +700,14 @@ export default function PortalConfigPage() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[8px] font-serif font-black tracking-widest text-[#0056b3] uppercase leading-none">
-                      {unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ"}
+                      {simTitle || "TRANG THÔNG TIN ĐIỆN TỬ"}
                     </span>
                     <h2 className="text-[11px] font-serif font-black text-[#cc0000] uppercase tracking-wide leading-tight mt-0.5 truncate">
-                      {unitName || "UBND XÃ DANG KANG"}
+                      {simName || "UBND XÃ DANG KANG"}
                     </h2>
                     <span className="text-blue-800 text-[6px] font-serif font-bold tracking-wider leading-none uppercase mt-0.5">
-                      TỈNH ĐĂK LĂK
+                      {simIdentifier || "TỈNH ĐẮK LẮK"}
                     </span>
-                    {unitIdentifier && (
-                      <span className="text-slate-400 text-[6px] font-mono leading-none mt-0.5">
-                        Mã định danh: {unitIdentifier}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -428,21 +721,26 @@ export default function PortalConfigPage() {
                   </div>
                   <div className="flex flex-col min-w-0">
                     <span className="text-[8px] font-bold text-indigo-700 uppercase tracking-wider">LỊCH TIẾP CÔNG DÂN</span>
-                    <span className="text-[10px] font-semibold text-slate-700 truncate mt-0.5">
-                      {citizenSchedule || "Thứ 5 hàng tuần • 08:00 - 11:30"}
+                    <span className="text-[10px] font-semibold text-slate-700 mt-0.5 whitespace-pre-wrap leading-relaxed">
+                      {simSchedule || "Thứ 5 hàng tuần • 08:00 - 11:30"}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* License/Footer simulator */}
-              <div className="bg-slate-900 text-slate-300 rounded-lg p-3 space-y-2 text-[9px] shadow-md">
+              <div className="bg-slate-900 text-slate-300 rounded-lg p-3 space-y-1.5 text-[8px] shadow-md">
                 <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none block border-b pb-1 border-slate-800">Mô phỏng Chân Trang (Footer)</span>
-                <p className="font-extrabold text-white text-[10px] uppercase">{unitName || "UBND XÃ DANG KANG"}</p>
+                <p className="font-extrabold text-white text-[9px] uppercase">{simName || "UBND XÃ DANG KANG"}</p>
+                <p className="text-[#fef08a] font-bold text-[8px] uppercase tracking-wide">HUYỆN KRÔNG BÔNG - {simIdentifier || "TỈNH ĐẮK LẮK"}</p>
                 <p className="text-slate-400 leading-normal">
-                  Chịu trách nhiệm nội dung: {responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang"}.
+                  {simLicense || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp"}. Chịu trách nhiệm nội dung: {simResponsible || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang"}.
                 </p>
-                <p className="text-slate-400">Đường dây nóng: <span className="text-amber-300 font-mono font-bold">{hotline || "0262.3812.345"}</span></p>
+                <div className="text-slate-400 space-y-0.5 pt-1 border-t border-slate-800 font-medium">
+                  <p>Địa chỉ: {simAddress || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk"}</p>
+                  <p>Đường dây nóng: <span className="text-amber-300 font-mono font-bold">{hotline || "0262.3812.345"}</span> | Fax: <span className="font-mono">{fax || "0262.3812.346"}</span></p>
+                  <p>Email: <span className="text-sky-300">{email || "xadangkang@krongbong.daklak.gov.vn"}</span></p>
+                </div>
               </div>
             </CardContent>
           </Card>
