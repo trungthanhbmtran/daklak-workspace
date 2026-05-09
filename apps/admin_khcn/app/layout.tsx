@@ -16,6 +16,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Hệ thống quản trị",
   description: "Hệ thống quản trị doanh nghiệp",
+  icons: {
+    icon: "/QuocHuy.png",
+    shortcut: "/QuocHuy.png",
+    apple: "/QuocHuy.png",
+  },
 };
 
 export default function RootLayout({
