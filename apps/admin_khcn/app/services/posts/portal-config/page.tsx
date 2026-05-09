@@ -25,7 +25,9 @@ import {
   X,
   FileText,
   UserCheck,
-  Eye
+  Eye,
+  Columns,
+  Languages
 } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
 
@@ -45,6 +47,7 @@ export default function PortalConfigPage() {
 
   const [languages, setLanguages] = useState<any[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
+  const [isCompareMode, setIsCompareMode] = useState<boolean>(false);
 
   const [configTranslations, setConfigTranslations] = useState<Record<string, {
     unitName: string;
@@ -382,10 +385,271 @@ export default function PortalConfigPage() {
 
   const activeLangs = languages.length > 0 ? languages : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
+  // -------------------------------------------------------------
+  // REUSABLE CARD RENDERING FUNCTIONS (PREVENTS CODE DUPLICATION)
+  // -------------------------------------------------------------
+  const renderBrandingCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || {
+      unitName: "",
+      unitTitle: "",
+      unitIdentifier: "",
+      responsiblePerson: ""
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Building className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Nhận diện & Bản quyền Đơn vị (2 Cấp)
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Tên đơn vị cấp Xã (Đơn vị trực tiếp)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: UBND XÃ DANG KANG" : "Enter commune agency name..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+              value={trans.unitName || ""}
+              onChange={(e) => updateTranslationField(langCode, "unitName", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Đơn vị quản lý cấp Huyện (Quản lý cấp trên)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK" : "Enter supervising district..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+              value={trans.unitIdentifier || ""}
+              onChange={(e) => updateTranslationField(langCode, "unitIdentifier", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Tiêu đề phụ của Cổng (Hàng trên cùng banner)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: TRANG THÔNG TIN ĐIỆN TỬ" : "Enter portal top subtitle..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+              value={trans.unitTitle || ""}
+              onChange={(e) => updateTranslationField(langCode, "unitTitle", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Người chịu trách nhiệm nội dung (Chân trang)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang" : "Enter editor-in-chief name..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+              value={trans.responsiblePerson || ""}
+              onChange={(e) => updateTranslationField(langCode, "responsiblePerson", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderScheduleCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || { citizenSchedule: "" };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Lịch tiếp công dân định kỳ
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Nội dung chi tiết thời gian tiếp công dân
+            </Label>
+            <Textarea
+              rows={4}
+              placeholder={langCode === 'vi' ? "Ví dụ: Thứ 5 hàng tuần • 08:00 - 11:30" : "Enter reception hours description..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold leading-relaxed"
+              value={trans.citizenSchedule || ""}
+              onChange={(e) => updateTranslationField(langCode, "citizenSchedule", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderAddressLicenseCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || { address: "", licenseInfo: "" };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Địa chỉ & Giấy phép hoạt động
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Địa chỉ trụ sở chính cơ quan
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk" : "Enter office address..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+              value={trans.address || ""}
+              onChange={(e) => updateTranslationField(langCode, "address", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Thông tin Giấy phép hoạt động
+            </Label>
+            <Textarea
+              rows={3}
+              placeholder={langCode === 'vi' ? "Ví dụ: Giấy phép số: 45/GP-TTĐT do Sở..." : "Enter operating license info..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold leading-relaxed"
+              value={trans.licenseInfo || ""}
+              onChange={(e) => updateTranslationField(langCode, "licenseInfo", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderCustomLabelsCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || {
+      footerPortalTitle: "",
+      footerPortalSubtitle: "",
+      contactFormTitle: "",
+      contactMapTitle: "",
+      contactFormSuccessDesc: ""
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Các tiêu đề và Nhãn hiển thị phụ
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          <div className="grid grid-cols-1 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                Tiêu đề Cổng Dịch vụ công (Footer)
+              </Label>
+              <Input
+                placeholder={langCode === 'vi' ? "Ví dụ: CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN" : "Enter DVC portal title..."}
+                className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+                value={trans.footerPortalTitle || ""}
+                onChange={(e) => updateTranslationField(langCode, "footerPortalTitle", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                Mô tả phụ Cổng Dịch vụ công (Footer)
+              </Label>
+              <Input
+                placeholder={langCode === 'vi' ? "Ví dụ: Tiếp nhận giải quyết TTHC..." : "Enter DVC subtitle..."}
+                className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+                value={trans.footerPortalSubtitle || ""}
+                onChange={(e) => updateTranslationField(langCode, "footerPortalSubtitle", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                Tiêu đề Biểu mẫu (Trang liên hệ)
+              </Label>
+              <Input
+                placeholder={langCode === 'vi' ? "Ví dụ: GỬI PHẢN ÁNH / GÓP Ý" : "Enter feedback form title..."}
+                className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+                value={trans.contactFormTitle || ""}
+                onChange={(e) => updateTranslationField(langCode, "contactFormTitle", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                Tiêu đề Bản đồ (Trang liên hệ)
+              </Label>
+              <Input
+                placeholder={langCode === 'vi' ? "Ví dụ: BẢN ĐỒ HÀNH CHÍNH" : "Enter map title..."}
+                className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
+                value={trans.contactMapTitle || ""}
+                onChange={(e) => updateTranslationField(langCode, "contactMapTitle", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Thông điệp gửi thành công (Trang liên hệ)
+            </Label>
+            <Textarea
+              rows={2}
+              placeholder={langCode === 'vi' ? "Ví dụ: Cảm ơn bạn đã gửi đóng góp ý kiến..." : "Enter success message..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold leading-relaxed"
+              value={trans.contactFormSuccessDesc || ""}
+              onChange={(e) => updateTranslationField(langCode, "contactFormSuccessDesc", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   // Simulator Localized values
   const simName = configTranslations[activeLangTab]?.unitName || "UBND XÃ DANG KANG";
   const simTitle = configTranslations[activeLangTab]?.unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ";
-  const simIdentifier = configTranslations[activeLangTab]?.unitIdentifier || "TỈNH ĐẮK LẮK";
+  const simIdentifier = configTranslations[activeLangTab]?.unitIdentifier || "HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK";
   const simSchedule = configTranslations[activeLangTab]?.citizenSchedule || "Thứ 5 hàng tuần • 08:00 - 11:30";
   const simLicense = configTranslations[activeLangTab]?.licenseInfo || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp";
   const simResponsible = configTranslations[activeLangTab]?.responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang";
@@ -434,373 +698,97 @@ export default function PortalConfigPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-        {/* LEFT COLUMN: EDITOR FORM WITH TRANSLATION CLUSTERS */}
+        {/* LEFT COLUMN: EDITOR FORM */}
         <div className="lg:col-span-2 space-y-6">
+          {/* EDITOR VIEW MODE CONTROLLER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50 border border-slate-150 p-3 rounded-xl shadow-sm">
+            <div className="flex items-center gap-2">
+              <Languages className="w-4 h-4 text-indigo-600 animate-pulse" />
+              <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+                Ngôn ngữ soạn thảo:
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Single Language Tabs (only active when compare mode is disabled) */}
+              <Tabs
+                value={activeLangTab}
+                onValueChange={(val) => {
+                  setActiveLangTab(val);
+                }}
+                className="w-auto"
+              >
+                <TabsList className="bg-slate-200/60 p-0.5 flex gap-0.5 rounded-lg border border-slate-200/50">
+                  {activeLangs.map((lang) => (
+                    <TabsTrigger
+                      key={lang.code}
+                      value={lang.code}
+                      disabled={isCompareMode}
+                      className="px-3 py-1.5 font-extrabold uppercase text-[10px] rounded-md transition-all data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm disabled:opacity-50"
+                    >
+                      {lang.name}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </Tabs>
+
+              {/* Compare Mode Switch Button */}
+              <Button
+                type="button"
+                variant={isCompareMode ? "default" : "outline"}
+                size="sm"
+                onClick={() => setIsCompareMode(!isCompareMode)}
+                className={`rounded-lg text-xs font-bold uppercase py-1.5 px-3 flex items-center gap-1.5 transition-all ${
+                  isCompareMode
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-500/20"
+                    : "border-slate-250 text-slate-600 hover:bg-slate-100"
+                }`}
+              >
+                <Columns className="w-3.5 h-3.5" />
+                {isCompareMode ? "Tắt dịch song song" : "Dịch song song (VI / EN)"}
+              </Button>
+            </div>
+          </div>
+
           {/* CARD 1: BRANDING & IDENTITIES (2 LEVELS) */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
-              <div className="flex items-center gap-2.5">
-                <Building className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Nhận diện & Bản quyền Đơn vị (2 Cấp)
-                </CardTitle>
-              </div>
-              <CardDescription>Thiết lập thông tin nhận diện chính quyền cấp Xã và cấp Huyện đồng bộ đa ngôn ngữ.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-8">
-              {/* 1. Tên đơn vị cấp Xã (Đơn vị trực tiếp) */}
-              <div className="space-y-3 border-l-2 border-red-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Tên đơn vị cấp Xã (Đơn vị trực tiếp)
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Tiêu đề chính ở trung tâm banner, ví dụ: UBND XÃ DANG KANG</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tên bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.unitName || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "unitName", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 2. Cấp quản lý cấp Huyện (Đơn vị quản lý cấp trên) */}
-              <div className="space-y-3 border-l-2 border-blue-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Đơn vị hành chính cấp Huyện (Đơn vị quản lý cấp trên)
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Hiển thị ở dòng dưới cùng của banner và chân trang, ví dụ: HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tên bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.unitIdentifier || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "unitIdentifier", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 3. Tiêu đề phụ (Hàng trên) */}
-              <div className="space-y-3 border-l-2 border-amber-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Tiêu đề phụ của Cổng (Hàng trên cùng banner)
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Ví dụ: TRANG THÔNG TIN ĐIỆN TỬ hoặc CỔNG THÔNG TIN ĐIỆN TỬ</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.unitTitle || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "unitTitle", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 4. Người chịu trách nhiệm nội dung */}
-              <div className="space-y-3 border-l-2 border-slate-400 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Người chịu trách nhiệm nội dung (Hiển thị ở Chân trang)
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Ví dụ: Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tên bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.responsiblePerson || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "responsiblePerson", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {isCompareMode ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderBrandingCard("vi", "(Bản gốc)")}
+              {renderBrandingCard("en", "(Bản dịch)")}
+            </div>
+          ) : (
+            renderBrandingCard(activeLangTab)
+          )}
 
           {/* CARD 2: CITIZEN RECEPTION SCHEDULE */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
-              <div className="flex items-center gap-2.5">
-                <Calendar className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Lịch tiếp công dân định kỳ
-                </CardTitle>
-              </div>
-              <CardDescription>Cấu hình lịch trình hoạt động, thời gian gặp gỡ đối thoại trực tiếp của lãnh đạo.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-6">
-              <div className="space-y-3 border-l-2 border-indigo-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Nội dung chi tiết thời gian tiếp công dân
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Ví dụ: Thứ 5 hàng tuần • 08:00 - 11:30</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Textarea
-                        id={`schedule-${lang.code}`}
-                        rows={4}
-                        placeholder={`Nhập nội dung bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold leading-relaxed"
-                        value={configTranslations[lang.code]?.citizenSchedule || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "citizenSchedule", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {isCompareMode ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderScheduleCard("vi", "(Bản gốc)")}
+              {renderScheduleCard("en", "(Bản dịch)")}
+            </div>
+          ) : (
+            renderScheduleCard(activeLangTab)
+          )}
 
           {/* CARD 3: EXTENDED FOOTER INFO */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
-              <div className="flex items-center gap-2.5">
-                <FileText className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Địa chỉ & Giấy phép hoạt động
-                </CardTitle>
-              </div>
-              <CardDescription>Cấu hình các thông tin liên hệ và pháp lý khác hiển thị tại chân trang của cổng thông tin.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-8">
-              {/* Địa chỉ trụ sở */}
-              <div className="space-y-3 border-l-2 border-emerald-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Địa chỉ trụ sở chính cơ quan
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Ví dụ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập địa chỉ bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.address || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "address", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Giấy phép */}
-              <div className="space-y-3 border-l-2 border-teal-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Thông tin Giấy phép hoạt động
-                </Label>
-                <p className="text-[11px] text-slate-400 font-medium">Ví dụ: Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp</p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Textarea
-                        rows={3}
-                        placeholder={`Nhập thông tin giấy phép bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold leading-relaxed"
-                        value={configTranslations[lang.code]?.licenseInfo || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "licenseInfo", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {isCompareMode ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderAddressLicenseCard("vi", "(Bản gốc)")}
+              {renderAddressLicenseCard("en", "(Bản dịch)")}
+            </div>
+          ) : (
+            renderAddressLicenseCard(activeLangTab)
+          )}
 
           {/* CARD 4: CUSTOM PORTAL LABELS */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
-              <div className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Các tiêu đề và Nhãn hiển thị phụ
-                </CardTitle>
-              </div>
-              <CardDescription>Cấu hình các tiêu đề và nhãn hiển thị tại các trang cụ thể của Portal.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-6 space-y-8">
-              {/* Tiêu đề Cổng Dịch vụ công */}
-              <div className="space-y-3 border-l-2 border-indigo-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Tiêu đề Cổng Dịch vụ công (Footer)
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.footerPortalTitle || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "footerPortalTitle", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Mô tả phụ Cổng Dịch vụ công */}
-              <div className="space-y-3 border-l-2 border-sky-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Mô tả phụ Cổng Dịch vụ công (Footer)
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập mô tả bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.footerPortalSubtitle || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "footerPortalSubtitle", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tiêu đề Biểu mẫu liên hệ */}
-              <div className="space-y-3 border-l-2 border-violet-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Tiêu đề Biểu mẫu liên hệ (Trang liên hệ)
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.contactFormTitle || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "contactFormTitle", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Tiêu đề Bản đồ hành chính */}
-              <div className="space-y-3 border-l-2 border-purple-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Tiêu đề Bản đồ hành chính (Trang liên hệ)
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Input
-                        placeholder={`Nhập tiêu đề bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.contactMapTitle || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "contactMapTitle", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Thông điệp báo gửi thành công */}
-              <div className="space-y-3 border-l-2 border-fuchsia-500 pl-4 py-0.5">
-                <Label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
-                  Thông điệp báo gửi thành công (Trang liên hệ)
-                </Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {activeLangs.map(lang => (
-                    <div key={lang.code} className="space-y-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded uppercase ${lang.code === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {lang.code.toUpperCase()}
-                        </span>
-                        <span className="text-xs text-slate-500 font-semibold">{lang.name}</span>
-                      </div>
-                      <Textarea
-                        rows={2}
-                        placeholder={`Nhập thông điệp bằng ${lang.name}...`}
-                        className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-semibold"
-                        value={configTranslations[lang.code]?.contactFormSuccessDesc || ""}
-                        onChange={(e) => updateTranslationField(lang.code, "contactFormSuccessDesc", e.target.value)}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {isCompareMode ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {renderCustomLabelsCard("vi", "(Bản gốc)")}
+              {renderCustomLabelsCard("en", "(Bản dịch)")}
+            </div>
+          ) : (
+            renderCustomLabelsCard(activeLangTab)
+          )}
 
           {/* GLOBAL CONFIGS CARD (FAX, EMAIL, HOTLINE) */}
           <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
