@@ -223,6 +223,25 @@ export default function Header() {
     staleTime: 5 * 60 * 1000,
   })
 
+  const { data: portalConfigData } = useQuery({
+    queryKey: ["public-categories", "PORTAL_CONFIG"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=PORTAL_CONFIG")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch portal configurations", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const getConfigValue = React.useCallback((code: string, fallback: string) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code);
+    return found ? found.name : fallback;
+  }, [portalConfigData]);
+
   const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
       return []
@@ -366,15 +385,19 @@ export default function Header() {
 
           {/* Left Side: National Emblem + Logo Text */}
           <div className="flex items-center gap-3.5 sm:gap-4 text-left z-10 select-none max-w-[85%] md:max-w-[55%]">
-            <div className="bg-white p-1 rounded-full border border-slate-200/80 dark:border-slate-800 shadow-sm shrink-0">
-              <NationalEmblem className="w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 animate-fade-in" />
+            <div className="bg-white p-1 rounded-full border border-slate-200/80 dark:border-slate-800 shadow-sm shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex items-center justify-center">
+              {getConfigValue("logo_url", "") ? (
+                <img src={getConfigValue("logo_url", "")} alt="Logo" className="w-full h-full object-contain" />
+              ) : (
+                <NationalEmblem className="w-full h-full animate-fade-in" />
+              )}
             </div>
             <div className="flex flex-col">
               <span className="text-[#0056b3] dark:text-blue-400 text-[10px] sm:text-xs md:text-sm font-serif font-black tracking-widest uppercase leading-none">
-                {t("TRANG THÔNG TIN ĐIỆN TỬ")}
+                {getConfigValue("unit_title", t("TRANG THÔNG TIN ĐIỆN TỬ"))}
               </span>
               <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-serif font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide leading-tight my-0.5 sm:my-1">
-                {t("UBND XÃ DANG KANG")}
+                {getConfigValue("unit_name", t("UBND XÃ DANG KANG"))}
               </h1>
               <span className="text-blue-800 dark:text-blue-400/80 text-[8px] sm:text-[10px] md:text-xs font-serif font-bold tracking-wider leading-none uppercase">
                 {t("TỈNH ĐĂK LĂK")}
@@ -631,10 +654,10 @@ export default function Header() {
 
             <div className="mt-auto border-t border-white/25 pt-4 text-center">
               <span className="text-[10px] text-white/70 font-mono block">
-                Hotline trực ban: 0262.3812.345
+                Hotline trực ban: {getConfigValue("hotline", "0262.3812.345")}
               </span>
               <span className="text-[10px] text-white/70 font-mono block mt-1">
-                © 2026 UBND XÃ DANG KANG
+                © 2026 {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
               </span>
             </div>
           </div>

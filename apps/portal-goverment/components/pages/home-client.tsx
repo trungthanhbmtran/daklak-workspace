@@ -614,6 +614,26 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     initialData: initialBanners,
   })
 
+  const { data: portalConfigData } = useQuery({
+    queryKey: ["public-categories", "PORTAL_CONFIG"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=PORTAL_CONFIG")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch portal configurations", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const getScheduleValue = React.useCallback((fallback: string) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === "citizen_schedule");
+    if (!found) return fallback;
+    return found.description || found.name || fallback;
+  }, [portalConfigData]);
+
   const menuItems = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
       return LEFT_MENU_ITEMS
@@ -1013,7 +1033,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               </div>
               <div className="flex flex-col min-w-0">
                 <span className="text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-wide">LỊCH TIẾP CÔNG DÂN</span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-0.5 truncate">Thứ 5 hàng tuần • 08:00 - 11:30</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-0.5 truncate">{getScheduleValue("Thứ 5 hàng tuần • 08:00 - 11:30")}</span>
               </div>
             </div>
 

@@ -519,6 +519,7 @@ async function main() {
     { code: 'CONTENT_MENU_PORTAL', name: 'Cấu hình Portal Menu', route: 'portal-menu', icon: 'menu-outline', order: 3, res: 'PORTAL_MENU' },
     { code: 'CONTENT_MENU_INTERACTIONS', name: 'Tương tác công dân', route: 'interactions', icon: 'chatbubbles-outline', order: 4, res: 'CITIZEN_INTERACTION' },
     { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 5, res: 'BANNER' },
+    { code: 'CONTENT_MENU_PORTAL_CONFIG', name: 'Cấu hình chung đơn vị', route: 'portal-config', icon: 'settings-outline', order: 6, res: 'PORTAL_MENU' },
   ];
 
   for (const { res, ...m } of postMenus) {

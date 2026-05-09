@@ -30,6 +30,25 @@ export default function Footer() {
     },
   })
 
+  const { data: portalConfigData } = useQuery({
+    queryKey: ["public-categories", "PORTAL_CONFIG"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=PORTAL_CONFIG")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch portal configurations", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const getConfigValue = React.useCallback((code: string, fallback: string) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code);
+    return found ? found.name : fallback;
+  }, [portalConfigData]);
+
   React.useEffect(() => {
     // Generate organic visitor fluctuation
     const interval = setInterval(() => {
@@ -115,7 +134,7 @@ export default function Footer() {
           <div className="flex flex-col">
             <span className="text-[10px] text-red-400 font-bold tracking-widest uppercase">CƠ QUAN CHỦ QUẢN</span>
             <h3 className="text-lg font-extrabold text-white uppercase tracking-wide mt-1">
-              ỦY BAN NHÂN DÂN XÃ DANG KANG
+              {getConfigValue("unit_name", "ỦY BAN NHÂN DÂN XÃ DANG KANG")}
             </h3>
             <span className="text-xs font-semibold text-[#fef08a] uppercase tracking-wide mt-0.5">
               HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK
@@ -123,7 +142,7 @@ export default function Footer() {
           </div>
 
           <p className="text-xs text-slate-400 leading-relaxed">
-            Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp. Chịu trách nhiệm nội dung: Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang.
+            Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp. Chịu trách nhiệm nội dung: {getConfigValue("responsible_person", "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang")}.
           </p>
 
           <div className="flex flex-col gap-2.5 mt-2 text-xs font-medium">
@@ -133,7 +152,9 @@ export default function Footer() {
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-              <a href="tel:02623812345" className="hover:text-white transition-colors">Điện thoại: 0262.3812.345</a>
+              <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/\./g, "")}`} className="hover:text-white transition-colors">
+                Điện thoại: {getConfigValue("hotline", "0262.3812.345")}
+              </a>
             </div>
             <div className="flex items-center gap-2.5">
               <Printer className="w-4 h-4 text-emerald-400 shrink-0" />

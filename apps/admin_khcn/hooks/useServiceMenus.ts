@@ -149,6 +149,15 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
     menuItems = flattenMenus(targetRoot.children ?? [], config.basePath).sort(
       (a, b) => a.order - b.order
     );
+
+    if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/portal-config"))) {
+      menuItems.push({
+        name: "Cấu hình đơn vị",
+        href: `${config.basePath}/portal-config`,
+        icon: ICON_MAP["settings-outline"] || Settings2,
+        order: 6,
+      });
+    }
   }
 
   return {

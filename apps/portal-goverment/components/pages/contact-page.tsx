@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useQuery } from "@tanstack/react-query"
+import apiClient from "@/lib/axiosInstance"
 import { useLanguage } from "@/components/language-context"
 import { 
   MapPin, 
@@ -43,6 +45,25 @@ const COMMUNE_ZONES_EN = [
 export default function ContactPage() {
   const { language, t } = useLanguage()
   const COMMUNE_ZONES = language === "vi" ? COMMUNE_ZONES_VI : COMMUNE_ZONES_EN
+
+  const { data: portalConfigData } = useQuery({
+    queryKey: ["public-categories", "PORTAL_CONFIG"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=PORTAL_CONFIG")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch portal configurations", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const getConfigValue = React.useCallback((code: string, fallback: string) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code);
+    return found ? found.name : fallback;
+  }, [portalConfigData]);
 
   const [activeZone, setActiveZone] = React.useState<typeof COMMUNE_ZONES[0] | null>(null)
   
@@ -113,8 +134,10 @@ export default function ContactPage() {
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-                <a href="tel:02623812345" className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
-                  {language === "vi" ? "Điện thoại khẩn: 0262.3812.345" : "Hotline Office: 0262.3812.345"}
+                <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/\./g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
+                  {language === "vi" 
+                    ? `Điện thoại khẩn: ${getConfigValue("hotline", "0262.3812.345")}` 
+                    : `Hotline Office: ${getConfigValue("hotline", "0262.3812.345")}`}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
