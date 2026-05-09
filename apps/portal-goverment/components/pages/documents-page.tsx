@@ -256,8 +256,8 @@ export default function DocumentsPage() {
                   key={t.value}
                   onClick={() => setActiveType(t.value)}
                   className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all ${activeType === t.value
-                      ? "bg-[#b91c1c] text-white shadow"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-950 dark:border dark:border-slate-800 dark:text-slate-400"
+                    ? "bg-[#b91c1c] text-white shadow"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-950 dark:border dark:border-slate-800 dark:text-slate-400"
                     }`}
                 >
                   {t.label}
@@ -277,8 +277,8 @@ export default function DocumentsPage() {
                   key={o.value}
                   onClick={() => setActiveOrg(o.value)}
                   className={`text-[11px] font-bold px-3 py-1.5 rounded-lg transition-all ${activeOrg === o.value
-                      ? "bg-[#b91c1c] text-white shadow"
-                      : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-950 dark:border dark:border-slate-800 dark:text-slate-400"
+                    ? "bg-[#b91c1c] text-white shadow"
+                    : "bg-slate-100 hover:bg-slate-200 text-slate-600 dark:bg-slate-950 dark:border dark:border-slate-800 dark:text-slate-400"
                     }`}
                 >
                   {o.label}

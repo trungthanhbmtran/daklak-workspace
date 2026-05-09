@@ -196,7 +196,7 @@ function NewsListPageContent() {
   const { language, t } = useLanguage()
   const searchParams = useSearchParams()
   const router = useRouter()
-  
+
   const initialCategory = searchParams.get("category") || "all"
   const initialSearch = searchParams.get("search") || ""
 
@@ -242,15 +242,15 @@ function NewsListPageContent() {
   // Filter posts logic
   const filteredNews = ALL_NEWS.filter(post => {
     const matchesCategory = activeCategory === "all" || post.category === activeCategory
-    const matchesSearch = !searchQuery.trim() || 
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch = !searchQuery.trim() ||
+      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
     return matchesCategory && matchesSearch
   })
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 animate-fade-in select-none">
-      
+
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
@@ -270,8 +270,8 @@ function NewsListPageContent() {
             {language === "vi" ? "KÊNH TIN TỨC CHÍNH THỨC" : "OFFICIAL NEWS PORTAL"}
           </h2>
           <p className="text-xs text-slate-400 mt-1 font-medium">
-            {language === "vi" 
-              ? "Theo dõi các hoạt động chính trị, kinh tế, đời sống xã hội tại xã Dang Kang" 
+            {language === "vi"
+              ? "Theo dõi các hoạt động chính trị, kinh tế, đời sống xã hội tại xã Dang Kang"
               : "Follow political, economic, and social life events in Dang Kang Commune"}
           </p>
         </div>
@@ -285,8 +285,8 @@ function NewsListPageContent() {
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 focus:text-slate-900 text-xs sm:text-sm pl-4 pr-10 py-2.5 rounded-xl focus:outline-none focus:border-red-600 transition-all shadow-inner dark:bg-slate-950 dark:border-slate-800 dark:text-white"
           />
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="absolute right-1 p-2 rounded-lg text-slate-400 hover:text-[#b91c1c]"
           >
             <Search className="w-4 h-4" />
@@ -296,7 +296,7 @@ function NewsListPageContent() {
 
       {/* Main Content Layout (Sidebar Categories vs Listings) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-        
+
         {/* Left Sidebar Category Filter List */}
         <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4">
           <h4 className="text-[10px] sm:text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">
@@ -307,16 +307,14 @@ function NewsListPageContent() {
               <button
                 key={cat.value}
                 onClick={() => handleCategorySelect(cat.value)}
-                className={`text-left px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all flex items-center justify-between group ${
-                  activeCategory === cat.value
+                className={`text-left px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all flex items-center justify-between group ${activeCategory === cat.value
                     ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/20 dark:text-[#fbc02d]"
                     : "hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-700 dark:text-slate-400 hover:text-slate-950"
-                }`}
+                  }`}
               >
                 <span>{cat.label}</span>
-                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                  activeCategory === cat.value ? "opacity-100 text-[#b91c1c] dark:text-[#fbc02d]" : "text-slate-400"
-                }`} />
+                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${activeCategory === cat.value ? "opacity-100 text-[#b91c1c] dark:text-[#fbc02d]" : "text-slate-400"
+                  }`} />
               </button>
             ))}
           </div>
@@ -329,7 +327,7 @@ function NewsListPageContent() {
               {filteredNews.map((post) => {
                 const articlePath = language === "vi" ? `/tin-tuc/${post.id}` : `/news/${post.id}`
                 return (
-                  <div 
+                  <div
                     key={post.id}
                     className="bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 rounded-xl sm:rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all flex flex-col group h-full"
                   >
@@ -337,8 +335,8 @@ function NewsListPageContent() {
                       <div className="absolute top-3 left-3 bg-black/60 text-white text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-md backdrop-blur-sm z-10 border border-white/5">
                         {post.categoryName}
                       </div>
-                      <img 
-                        src={post.image} 
+                      <img
+                        src={post.image}
                         alt={post.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -358,7 +356,7 @@ function NewsListPageContent() {
                         {post.excerpt}
                       </p>
                       <div className="mt-auto pt-3 border-t border-slate-50 dark:border-slate-850 flex items-center justify-between">
-                        <Link 
+                        <Link
                           href={articlePath}
                           className="text-[10px] text-slate-900 dark:text-[#fbc02d] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:underline"
                         >
@@ -378,8 +376,8 @@ function NewsListPageContent() {
                 {language === "vi" ? "Không tìm thấy bài viết phù hợp" : "No matching articles found"}
               </h5>
               <p className="text-xs text-slate-400 font-medium">
-                {language === "vi" 
-                  ? "Vui lòng nhập từ khóa tìm kiếm khác hoặc lựa chọn chuyên mục khác." 
+                {language === "vi"
+                  ? "Vui lòng nhập từ khóa tìm kiếm khác hoặc lựa chọn chuyên mục khác."
                   : "Please input a different search keyword or select another news category."}
               </p>
             </div>

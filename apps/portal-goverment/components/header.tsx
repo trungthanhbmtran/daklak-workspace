@@ -325,25 +325,23 @@ export default function Header() {
             </a>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <div className="flex items-center gap-2">
-              {(languages || []).map((lang) => {
+              {(languages || []).map((lang: any) => {
                 const isActive = language === lang.code
                 return (
                   <div
                     key={lang.code}
                     onClick={() => setLanguage(lang.code)}
-                    className={`cursor-pointer transition-all hover:scale-110 ${
-                      isActive
-                        ? "scale-105 filter drop-shadow-[0_0_2px_rgba(251,192,45,0.8)]"
-                        : "opacity-60 hover:opacity-100"
-                    }`}
+                    className={`cursor-pointer transition-all hover:scale-110 ${isActive
+                      ? "scale-105 filter drop-shadow-[0_0_2px_rgba(251,192,45,0.8)]"
+                      : "opacity-60 hover:opacity-100"
+                      }`}
                     title={lang.name}
                   >
                     {lang.code === "vi" ? (
                       <svg
                         viewBox="0 0 30 20"
-                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${
-                          isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
-                        }`}
+                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
+                          }`}
                       >
                         <title>{lang.name}</title>
                         <rect width="30" height="20" fill="#da251d" />
@@ -352,9 +350,8 @@ export default function Header() {
                     ) : lang.code === "en" ? (
                       <svg
                         viewBox="0 0 60 30"
-                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${
-                          isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
-                        }`}
+                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
+                          }`}
                       >
                         <title>{lang.name}</title>
                         <clipPath id={`s_flag_${lang.code}`}><path d="M0,0 v30 h60 v-30 z" /></clipPath>
@@ -368,11 +365,10 @@ export default function Header() {
                       </svg>
                     ) : (
                       <div
-                        className={`px-1.5 py-0.5 text-[9px] font-black tracking-wide rounded-sm shadow-sm border uppercase leading-none ${
-                          isActive
-                            ? "bg-amber-400 text-slate-950 border-amber-400 ring-1 ring-amber-400"
-                            : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
-                        }`}
+                        className={`px-1.5 py-0.5 text-[9px] font-black tracking-wide rounded-sm shadow-sm border uppercase leading-none ${isActive
+                          ? "bg-amber-400 text-slate-950 border-amber-400 ring-1 ring-amber-400"
+                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                          }`}
                       >
                         {lang.code}
                       </div>

@@ -5,15 +5,15 @@ import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
 import { useLanguage } from "@/components/language-context"
-import { 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Clock, 
-  Send, 
-  CheckCircle2, 
-  Home, 
-  ChevronRight, 
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Send,
+  CheckCircle2,
+  Home,
+  ChevronRight,
   Info,
   Building2,
   MapIcon
@@ -89,7 +89,7 @@ export default function ContactPage() {
   }, [portalConfigData, language]);
 
   const [activeZone, setActiveZone] = React.useState<typeof COMMUNE_ZONES[0] | null>(null)
-  
+
   // Set default active zone once mounted to match corresponding localized version
   React.useEffect(() => {
     setActiveZone(COMMUNE_ZONES[2] || null)
@@ -106,7 +106,7 @@ export default function ContactPage() {
     e.preventDefault()
     if (!fullName || !email || !message) return
     setSubmitted(true)
-    
+
     // Clear inputs
     setSubject("")
     setMessage("")
@@ -118,7 +118,7 @@ export default function ContactPage() {
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 md:gap-12 animate-fade-in select-none">
-      
+
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
@@ -133,10 +133,10 @@ export default function ContactPage() {
 
       {/* Main Grid: Info cards & interactive map */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        
+
         {/* Left Side: Contact specifications & forms */}
         <div className="lg:col-span-6 flex flex-col gap-6">
-          
+
           {/* Metadata Section */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5">
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -245,7 +245,7 @@ export default function ContactPage() {
                   />
                 </div>
 
-                <button 
+                <button
                   type="submit"
                   className="w-full mt-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
                 >
@@ -261,7 +261,7 @@ export default function ContactPage() {
                     {t("ĐÃ GỬI THƯ THÀNH CÔNG!")}
                   </h4>
                   <p className="text-slate-500 font-medium leading-relaxed">
-                    {getConfigValue("contact_form_success_desc", language === "vi" 
+                    {getConfigValue("contact_form_success_desc", language === "vi"
                       ? "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử."
                       : "Dang Kang clerical team has received your inquiry and will reply as soon as possible via email."
                     )}
@@ -294,8 +294,8 @@ export default function ContactPage() {
 
           {/* Interactive SVG Rendering */}
           <div className="w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850 relative">
-            <svg 
-              viewBox="0 0 100 100" 
+            <svg
+              viewBox="0 0 100 100"
               className="w-full max-w-[340px] h-auto drop-shadow-md"
             >
               {COMMUNE_ZONES.map((zone) => {
@@ -304,11 +304,10 @@ export default function ContactPage() {
                   <path
                     key={zone.id}
                     d={zone.path}
-                    className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${
-                      isActive 
-                        ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg" 
+                    className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${isActive
+                        ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg"
                         : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
-                    }`}
+                      }`}
                     onClick={() => setActiveZone(zone)}
                   />
                 )
@@ -323,9 +322,8 @@ export default function ContactPage() {
                   fontSize="4"
                   fontWeight="bold"
                   textAnchor="middle"
-                  className={`pointer-events-none transition-colors ${
-                    activeZone?.id === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
-                  }`}
+                  className={`pointer-events-none transition-colors ${activeZone?.id === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
+                    }`}
                 >
                   {zone.id}
                 </text>
@@ -342,7 +340,7 @@ export default function ContactPage() {
                   {t("CHI TIẾT:")} {activeZone.name}
                 </span>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 font-semibold text-slate-600 dark:text-slate-400">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] text-slate-400 uppercase tracking-widest">

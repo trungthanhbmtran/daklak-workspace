@@ -3,15 +3,15 @@
 import * as React from "react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-context"
-import { 
-  MessageSquare, 
-  Send, 
-  User, 
-  Clock, 
-  CheckCircle2, 
-  ChevronDown, 
-  Home, 
-  ChevronRight, 
+import {
+  MessageSquare,
+  Send,
+  User,
+  Clock,
+  CheckCircle2,
+  ChevronDown,
+  Home,
+  ChevronRight,
   HelpCircle,
   AlertTriangle,
   Mail,
@@ -109,7 +109,7 @@ export default function InteractionsPage() {
 
   const [questions, setQuestions] = React.useState<QuestionItem[]>([])
   const [activeQaIdx, setActiveQaIdx] = React.useState<string | null>("Q-101")
-  
+
   // Set and reset questions list on language change
   React.useEffect(() => {
     setQuestions(INITIAL_QUESTIONS)
@@ -148,7 +148,7 @@ export default function InteractionsPage() {
     // Prepend question to mock list
     setQuestions([newQuestion, ...questions])
     setFormSubmitted(true)
-    
+
     // Clear form inputs
     setSubject("")
     setContent("")
@@ -160,7 +160,7 @@ export default function InteractionsPage() {
 
   return (
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-12 animate-fade-in select-none">
-      
+
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
@@ -175,7 +175,7 @@ export default function InteractionsPage() {
 
       {/* Main Grid Layout (Left: Form, Right: Historical replies list) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        
+
         {/* Left Column: Interactive Q&A submission form */}
         <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5 md:gap-6">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
@@ -304,7 +304,7 @@ export default function InteractionsPage() {
                 </span>
               </div>
 
-              <button 
+              <button
                 type="submit"
                 className="w-full mt-2 bg-[#b91c1c] hover:bg-red-700 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
               >
@@ -348,17 +348,16 @@ export default function InteractionsPage() {
             {questions.map((item) => {
               const isOpen = activeQaIdx === item.id
               const isPending = item.status === "pending"
-              
+
               return (
-                <div 
+                <div
                   key={item.id}
-                  className={`bg-white dark:bg-slate-900 border rounded-xl sm:rounded-2xl overflow-hidden shadow-sm transition-all text-xs ${
-                    isOpen 
-                      ? "border-[#b91c1c]" 
-                      : isPending 
+                  className={`bg-white dark:bg-slate-900 border rounded-xl sm:rounded-2xl overflow-hidden shadow-sm transition-all text-xs ${isOpen
+                      ? "border-[#b91c1c]"
+                      : isPending
                         ? "border-amber-400 bg-amber-500/5"
                         : "border-slate-200/80 dark:border-slate-800"
-                  }`}
+                    }`}
                 >
                   {/* Item Accordion Header */}
                   <button
@@ -367,11 +366,10 @@ export default function InteractionsPage() {
                   >
                     <div className="flex flex-col gap-1.5 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                          isPending 
-                            ? "bg-amber-500 text-white animate-pulse" 
+                        <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${isPending
+                            ? "bg-amber-500 text-white animate-pulse"
                             : "bg-[#b91c1c] text-white"
-                        }`}>
+                          }`}>
                           {item.categoryName}
                         </span>
                         {isPending && (
@@ -406,7 +404,7 @@ export default function InteractionsPage() {
                       {item.answer ? (
                         <div className="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-850 pt-4">
                           <span className="text-[10px] text-red-600 dark:text-[#fbc02d] font-black uppercase tracking-widest flex items-center gap-1">
-                            <CheckCircle2 className="w-4 h-4 text-emerald-500" /> 
+                            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                             {language === "vi" ? "PHẢN HỒI CHÍNH THỨC TỪ CHÍNH QUYỀN XÃ DANG KANG" : "OFFICIAL RESPONSE FROM DANG KANG COMMUNE PC"}
                           </span>
                           <p className="font-semibold text-slate-700 dark:text-slate-300 mt-1 leading-relaxed pl-1">{item.answer}</p>
@@ -423,7 +421,7 @@ export default function InteractionsPage() {
                         <div className="flex items-center gap-2 text-slate-400 font-semibold italic border-t border-slate-100 pt-4">
                           <Clock className="w-4 h-4" />
                           <span>
-                            {language === "vi" 
+                            {language === "vi"
                               ? "Hồ sơ đã được duyệt công khai, đang chờ ý kiến tham mưu chuyên môn từ bộ phận địa chính/tư pháp để ban hành câu trả lời chính thức."
                               : "This inquiry is approved publicly. Currently awaiting consulting suggestions from judicial/cadastral department to issue official response."}
                           </span>

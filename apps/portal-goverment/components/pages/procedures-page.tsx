@@ -4,16 +4,16 @@ import * as React from "react"
 import Link from "next/link"
 import { useLanguage } from "@/components/language-context"
 import { usePublicProcedures, usePublicDossier } from "@/hooks/usePublicData"
-import { 
-  FileSearch, 
-  Search, 
-  Clock, 
-  Coins, 
-  CheckCircle2, 
-  ChevronDown, 
-  HelpCircle, 
-  Home, 
-  ChevronRight, 
+import {
+  FileSearch,
+  Search,
+  Clock,
+  Coins,
+  CheckCircle2,
+  ChevronDown,
+  HelpCircle,
+  Home,
+  ChevronRight,
   Download,
   AlertCircle,
   Check
@@ -261,7 +261,7 @@ export default function ProceduresPage() {
       }));
     }
     return MOCK_PROCEDURES.filter(proc => {
-      const matchesSearch = !searchQuery.trim() || 
+      const matchesSearch = !searchQuery.trim() ||
         proc.title.toLowerCase().includes(searchQuery.toLowerCase())
       const matchesCategory = activeCategory === "all" || proc.category === activeCategory
       return matchesSearch && matchesCategory
@@ -270,7 +270,7 @@ export default function ProceduresPage() {
 
   return (
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-12 animate-fade-in select-none">
-      
+
       {/* Breadcrumb row */}
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
@@ -294,14 +294,14 @@ export default function ProceduresPage() {
               {language === "vi" ? "TRA CỨU TIẾN ĐỘ HỒ SƠ MỘT CỬA ĐIỆN TỬ" : "ELECTRONIC ONE-STOP RECORD PROGRESS FINDER"}
             </h3>
             <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-              {language === "vi" 
-                ? "Nhập mã số hồ sơ (Ví dụ mẫu: " 
+              {language === "vi"
+                ? "Nhập mã số hồ sơ (Ví dụ mẫu: "
                 : "Enter record tracking code (Example: "}
               <span className="text-[#fbc02d] underline font-mono cursor-pointer" onClick={() => setTrackCode("DK-2026-888")}>DK-2026-888</span>
               {language === "vi" ? " hoặc " : " or "}
               <span className="text-[#fbc02d] underline font-mono cursor-pointer" onClick={() => setTrackCode("DK-2026-999")}>DK-2026-999</span>
-              {language === "vi" 
-                ? ") để theo dõi trạng thái xử lý liên thông cấp xã" 
+              {language === "vi"
+                ? ") để theo dõi trạng thái xử lý liên thông cấp xã"
                 : ") to track administrative processing status locally"}
             </p>
           </div>
@@ -315,7 +315,7 @@ export default function ProceduresPage() {
             onChange={(e) => setTrackCode(e.target.value.toUpperCase())}
             className="flex-1 bg-white/10 hover:bg-white/15 focus:bg-white text-white focus:text-slate-950 placeholder-white/50 focus:placeholder-slate-400 text-sm pl-4 pr-4 py-3 rounded-xl border border-white/20 focus:border-white focus:outline-none transition-all shadow-inner font-mono tracking-wider"
           />
-          <button 
+          <button
             type="submit"
             className="bg-[#b91c1c] hover:bg-red-700 text-white font-bold tracking-wider text-xs px-6 py-3 rounded-xl transition-all uppercase shadow"
           >
@@ -330,7 +330,7 @@ export default function ProceduresPage() {
               <div className="flex items-center gap-3 text-red-400 text-xs font-semibold">
                 <AlertCircle className="w-5 h-5 shrink-0" />
                 <span>
-                  {language === "vi" 
+                  {language === "vi"
                     ? "Không tìm thấy hồ sơ tương ứng với mã vừa nhập trong cơ sở dữ liệu quốc gia. Quý công dân vui lòng kiểm tra lại mã số biên nhận in trên giấy hẹn."
                     : "No record matching this tracking code was found in the database. Please double check the receipt code on your appointment slip."}
                 </span>
@@ -371,23 +371,22 @@ export default function ProceduresPage() {
                   </span>
                   <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold uppercase tracking-wide mt-2">
                     {[
-                       { step: 1, label: language === "vi" ? "Đã nộp" : "Submitted" },
-                       { step: 2, label: language === "vi" ? "Đã nhận" : "Received" },
-                       { step: 3, label: language === "vi" ? "Đang xử lý" : "Processing" },
-                       { step: 4, label: language === "vi" ? "Hoàn thành" : "Completed" }
+                      { step: 1, label: language === "vi" ? "Đã nộp" : "Submitted" },
+                      { step: 2, label: language === "vi" ? "Đã nhận" : "Received" },
+                      { step: 3, label: language === "vi" ? "Đang xử lý" : "Processing" },
+                      { step: 4, label: language === "vi" ? "Hoàn thành" : "Completed" }
                     ].map((node) => {
                       const isActive = trackResult.step >= node.step
                       const isCurrent = trackResult.step === node.step
-                      
+
                       return (
                         <div key={node.step} className="flex flex-col items-center gap-2">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold font-mono transition-all border ${
-                            isCurrent 
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold font-mono transition-all border ${isCurrent
                               ? "bg-[#b91c1c] border-[#fef08a] text-white shadow-lg animate-pulse"
-                              : isActive 
-                                ? "bg-emerald-600 border-emerald-500 text-white" 
+                              : isActive
+                                ? "bg-emerald-600 border-emerald-500 text-white"
                                 : "bg-slate-800 border-slate-700 text-slate-500"
-                          }`}>
+                            }`}>
                             {node.step}
                           </div>
                           <span className={isActive ? "text-white text-[9px] sm:text-[10px]" : "text-slate-500 text-[9px] sm:text-[10px]"}>{node.label}</span>
@@ -404,7 +403,7 @@ export default function ProceduresPage() {
 
       {/* Section 2: Thủ tục cấp xã */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
-        
+
         {/* Left Side Category Switcher */}
         <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4">
           <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">
@@ -419,16 +418,14 @@ export default function ProceduresPage() {
               <button
                 key={cat.value}
                 onClick={() => setActiveCategory(cat.value)}
-                className={`text-left px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-between group ${
-                  activeCategory === cat.value
+                className={`text-left px-3.5 py-2.5 rounded-xl transition-all flex items-center justify-between group ${activeCategory === cat.value
                     ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/20 dark:text-[#fbc02d]"
                     : "hover:bg-slate-50 dark:hover:bg-slate-950 text-slate-700 dark:text-slate-400 hover:text-slate-950"
-                }`}
+                  }`}
               >
                 <span>{cat.label}</span>
-                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                  activeCategory === cat.value ? "opacity-100 text-[#b91c1c] dark:text-[#fbc02d]" : "text-slate-400"
-                }`} />
+                <ChevronRight className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${activeCategory === cat.value ? "opacity-100 text-[#b91c1c] dark:text-[#fbc02d]" : "text-slate-400"
+                  }`} />
               </button>
             ))}
           </div>
@@ -436,7 +433,7 @@ export default function ProceduresPage() {
 
         {/* Expandable Procedures list */}
         <div className="lg:col-span-9 flex flex-col gap-4">
-          
+
           {/* Internal quick text filter */}
           <div className="relative w-full max-w-sm flex items-center mb-1">
             <input
@@ -453,7 +450,7 @@ export default function ProceduresPage() {
             {filteredProcedures.map((proc: any) => {
               const isOpen = activeProcedureIdx === proc.id
               return (
-                <div 
+                <div
                   key={proc.id}
                   className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm text-xs"
                 >
@@ -469,7 +466,7 @@ export default function ProceduresPage() {
                   {/* Accordion body content */}
                   {isOpen && (
                     <div className="p-4 sm:p-5 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-950/20 flex flex-col gap-4 sm:gap-5 leading-relaxed text-slate-700 dark:text-slate-300">
-                      
+
                       {/* Specs Row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         <div className="flex gap-2.5 p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800/60 shadow-sm font-semibold">
@@ -513,7 +510,7 @@ export default function ProceduresPage() {
                           {language === "vi" ? "2. Các bước trình tự thực hiện" : "2. Standard Processing Sequence"}
                         </span>
                         <div className="flex flex-col gap-3 mt-1.5 pl-1.5 border-l-2 border-red-200 dark:border-red-900/40">
-                           {proc.steps.map((step: string, idx: number) => (
+                          {proc.steps.map((step: string, idx: number) => (
                             <div key={idx} className="flex gap-2 items-start">
                               <span className="w-5 h-5 rounded-full bg-[#b91c1c] text-white flex items-center justify-center font-bold text-[10px] font-mono shrink-0">
                                 {idx + 1}
@@ -527,8 +524,8 @@ export default function ProceduresPage() {
                       {/* Download link / direct application trigger */}
                       <div className="border-t border-slate-100 dark:border-slate-800/60 pt-4 flex flex-wrap gap-3 justify-between items-center font-semibold text-[11px]">
                         <span className="text-slate-400 flex items-center gap-1">
-                          <HelpCircle className="w-4 h-4" /> 
-                          {language === "vi" 
+                          <HelpCircle className="w-4 h-4" />
+                          {language === "vi"
                             ? "Liên hệ phòng Một cửa xã Dang Kang để được hướng dẫn trực tiếp."
                             : "Contact the commune One-Stop department directly for offline assistance."}
                         </span>
