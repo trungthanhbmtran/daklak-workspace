@@ -31,6 +31,7 @@ import apiClient from "@/lib/axiosInstance";
 export default function PortalConfigPage() {
   const [unitName, setUnitName] = useState("");
   const [unitTitle, setUnitTitle] = useState("");
+  const [unitIdentifier, setUnitIdentifier] = useState("");
   const [hotline, setHotline] = useState("");
   const [responsiblePerson, setResponsiblePerson] = useState("");
   const [citizenSchedule, setCitizenSchedule] = useState("");
@@ -58,6 +59,7 @@ export default function PortalConfigPage() {
     if (dbCategories && dbCategories.length > 0) {
       const nameCat = dbCategories.find((c) => c.code === "unit_name");
       const titleCat = dbCategories.find((c) => c.code === "unit_title");
+      const identCat = dbCategories.find((c) => c.code === "unit_identifier");
       const hotlineCat = dbCategories.find((c) => c.code === "hotline");
       const respCat = dbCategories.find((c) => c.code === "responsible_person");
       const scheduleCat = dbCategories.find((c) => c.code === "citizen_schedule");
@@ -65,6 +67,7 @@ export default function PortalConfigPage() {
 
       if (nameCat) setUnitName(nameCat.name);
       if (titleCat) setUnitTitle(titleCat.name);
+      if (identCat) setUnitIdentifier(identCat.name);
       if (hotlineCat) setHotline(hotlineCat.name);
       if (respCat) setResponsiblePerson(respCat.name);
       if (scheduleCat) setCitizenSchedule(scheduleCat.description || scheduleCat.name);
@@ -90,6 +93,7 @@ export default function PortalConfigPage() {
     const configItems = [
       { code: "unit_name", name: unitName || "UBND XÃ DANG KANG", description: "Tên đơn vị chính quyền" },
       { code: "unit_title", name: unitTitle || "TRANG THÔNG TIN ĐIỆN TỬ", description: "Tiêu đề phụ của cổng thông tin" },
+      { code: "unit_identifier", name: unitIdentifier || "", description: "Mã định danh điện tử của cơ quan" },
       { code: "hotline", name: hotline || "0262.3812.345", description: "Đường dây nóng hỗ trợ công dân" },
       { code: "responsible_person", name: responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang", description: "Người chịu trách nhiệm nội dung thông tin" },
       { code: "logo_url", name: activeLogo || "", description: "Đường dẫn ảnh logo cơ quan" },
@@ -192,7 +196,7 @@ export default function PortalConfigPage() {
                 <CardDescription>Thiết lập tiêu đề chính hiển thị trên đỉnh của Cổng thông tin điện tử.</CardDescription>
               </CardHeader>
               <CardContent className="p-6 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="unit-name" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
                       Tên đơn vị chính (Hàng dưới)
@@ -215,6 +219,18 @@ export default function PortalConfigPage() {
                       className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
                       value={unitTitle}
                       onChange={(e) => setUnitTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="unit-identifier" className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                      Mã định danh điện tử (Hàng 4)
+                    </Label>
+                    <Input
+                      id="unit-identifier"
+                      placeholder="Ví dụ: 000.05.02.H06"
+                      className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                      value={unitIdentifier}
+                      onChange={(e) => setUnitIdentifier(e.target.value)}
                     />
                   </div>
                 </div>
@@ -391,6 +407,14 @@ export default function PortalConfigPage() {
                     <h2 className="text-[11px] font-serif font-black text-[#cc0000] uppercase tracking-wide leading-tight mt-0.5 truncate">
                       {unitName || "UBND XÃ DANG KANG"}
                     </h2>
+                    <span className="text-blue-800 text-[6px] font-serif font-bold tracking-wider leading-none uppercase mt-0.5">
+                      TỈNH ĐĂK LĂK
+                    </span>
+                    {unitIdentifier && (
+                      <span className="text-slate-400 text-[6px] font-mono leading-none mt-0.5">
+                        Mã định danh: {unitIdentifier}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

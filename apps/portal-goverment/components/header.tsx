@@ -402,6 +402,11 @@ export default function Header() {
               <span className="text-blue-800 dark:text-blue-400/80 text-[8px] sm:text-[10px] md:text-xs font-serif font-bold tracking-wider leading-none uppercase">
                 {t("TỈNH ĐĂK LĂK")}
               </span>
+              {getConfigValue("unit_identifier", "") && (
+                <span className="text-slate-500 dark:text-slate-400 text-[7px] sm:text-[8px] md:text-[9px] font-mono font-bold leading-none mt-1 tracking-wider uppercase block">
+                  Mã định danh: {getConfigValue("unit_identifier", "")}
+                </span>
+              )}
             </div>
           </div>
 
