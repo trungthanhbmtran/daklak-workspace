@@ -54,6 +54,11 @@ export default function PortalConfigPage() {
     citizenSchedule: string;
     licenseInfo: string;
     address: string;
+    contactFormTitle: string;
+    contactFormSuccessDesc: string;
+    contactMapTitle: string;
+    footerPortalTitle: string;
+    footerPortalSubtitle: string;
   }>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -101,6 +106,11 @@ export default function PortalConfigPage() {
       const faxCat = dbCategories.find((c) => c.code === "fax");
       const emailCat = dbCategories.find((c) => c.code === "email");
       const addressCat = dbCategories.find((c) => c.code === "address");
+      const contactFormTitleCat = dbCategories.find((c) => c.code === "contact_form_title");
+      const contactFormSuccessDescCat = dbCategories.find((c) => c.code === "contact_form_success_desc");
+      const contactMapTitleCat = dbCategories.find((c) => c.code === "contact_map_title");
+      const footerPortalTitleCat = dbCategories.find((c) => c.code === "footer_portal_title");
+      const footerPortalSubtitleCat = dbCategories.find((c) => c.code === "footer_portal_subtitle");
 
       // Set global fields
       if (hotlineCat) setHotline(hotlineCat.name);
@@ -119,7 +129,12 @@ export default function PortalConfigPage() {
           responsiblePerson: "",
           citizenSchedule: "",
           licenseInfo: "",
-          address: ""
+          address: "",
+          contactFormTitle: "",
+          contactFormSuccessDesc: "",
+          contactMapTitle: "",
+          footerPortalTitle: "",
+          footerPortalSubtitle: ""
         };
       });
 
@@ -165,6 +180,11 @@ export default function PortalConfigPage() {
           citizenSchedule: extractField(scheduleCat, langCode),
           licenseInfo: extractField(licenseCat, langCode),
           address: extractField(addressCat, langCode),
+          contactFormTitle: extractField(contactFormTitleCat, langCode),
+          contactFormSuccessDesc: extractField(contactFormSuccessDescCat, langCode),
+          contactMapTitle: extractField(contactMapTitleCat, langCode),
+          footerPortalTitle: extractField(footerPortalTitleCat, langCode),
+          footerPortalSubtitle: extractField(footerPortalSubtitleCat, langCode),
         };
       });
 
@@ -191,7 +211,12 @@ export default function PortalConfigPage() {
         responsiblePerson: "",
         citizenSchedule: "",
         licenseInfo: "",
-        address: ""
+        address: "",
+        contactFormTitle: "",
+        contactFormSuccessDesc: "",
+        contactMapTitle: "",
+        footerPortalTitle: "",
+        footerPortalSubtitle: ""
       };
       return {
         ...prev,
@@ -264,6 +289,31 @@ export default function PortalConfigPage() {
           code: "address",
           name: configTranslations["vi"]?.address || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk",
           description: buildTranslationsJson(lang => configTranslations[lang]?.address)
+        },
+        {
+          code: "contact_form_title",
+          name: configTranslations["vi"]?.contactFormTitle || "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.contactFormTitle)
+        },
+        {
+          code: "contact_form_success_desc",
+          name: configTranslations["vi"]?.contactFormSuccessDesc || "Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn và sẽ phản hồi sớm nhất có thể.",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.contactFormSuccessDesc)
+        },
+        {
+          code: "contact_map_title",
+          name: configTranslations["vi"]?.contactMapTitle || "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.contactMapTitle)
+        },
+        {
+          code: "footer_portal_title",
+          name: configTranslations["vi"]?.footerPortalTitle || "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.footerPortalTitle)
+        },
+        {
+          code: "footer_portal_subtitle",
+          name: configTranslations["vi"]?.footerPortalSubtitle || "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.footerPortalSubtitle)
         },
         // Global non-translatable configurations
         {
@@ -340,6 +390,11 @@ export default function PortalConfigPage() {
   const simLicense = configTranslations[activeLangTab]?.licenseInfo || "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp";
   const simResponsible = configTranslations[activeLangTab]?.responsiblePerson || "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang";
   const simAddress = configTranslations[activeLangTab]?.address || "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk";
+  const simContactFormTitle = configTranslations[activeLangTab]?.contactFormTitle || "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG";
+  const simContactFormSuccessDesc = configTranslations[activeLangTab]?.contactFormSuccessDesc || "Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn và sẽ phản hồi sớm nhất có thể.";
+  const simContactMapTitle = configTranslations[activeLangTab]?.contactMapTitle || "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG";
+  const simFooterPortalTitle = configTranslations[activeLangTab]?.footerPortalTitle || "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG";
+  const simFooterPortalSubtitle = configTranslations[activeLangTab]?.footerPortalSubtitle || "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng";
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
@@ -407,7 +462,12 @@ export default function PortalConfigPage() {
                 responsiblePerson: "",
                 citizenSchedule: "",
                 licenseInfo: "",
-                address: ""
+                address: "",
+                contactFormTitle: "",
+                contactFormSuccessDesc: "",
+                contactMapTitle: "",
+                footerPortalTitle: "",
+                footerPortalSubtitle: ""
               };
 
               return (
@@ -542,6 +602,88 @@ export default function PortalConfigPage() {
                           className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm font-medium leading-relaxed"
                           value={trans.licenseInfo || ""}
                           onChange={(e) => updateTranslationField(lang.code, "licenseInfo", e.target.value)}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* CARD 5: CUSTOM PORTAL LABELS */}
+                  <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                    <CardHeader className="bg-slate-50/50 border-b">
+                      <div className="flex items-center gap-2.5">
+                        <Sparkles className="w-4 h-4 text-indigo-600" />
+                        <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                          Các tiêu đề và Nhãn hiển thị phụ ({lang.name})
+                        </CardTitle>
+                      </div>
+                      <CardDescription>Cấu hình các tiêu đề và nhãn hiển thị tại các trang cụ thể của Portal.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`footer-portal-title-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Tiêu đề Cổng Dịch vụ công (Footer)
+                          </Label>
+                          <Input
+                            id={`footer-portal-title-${lang.code}`}
+                            placeholder="Ví dụ: CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG"
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.footerPortalTitle || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "footerPortalTitle", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`footer-portal-subtitle-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Mô tả phụ Cổng Dịch vụ công (Footer)
+                          </Label>
+                          <Input
+                            id={`footer-portal-subtitle-${lang.code}`}
+                            placeholder="Ví dụ: Tiếp nhận giải quyết thủ tục hành chính..."
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.footerPortalSubtitle || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "footerPortalSubtitle", e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div className="space-y-2">
+                          <Label htmlFor={`contact-form-title-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Tiêu đề Biểu mẫu liên hệ (Trang liên hệ)
+                          </Label>
+                          <Input
+                            id={`contact-form-title-${lang.code}`}
+                            placeholder="Ví dụ: GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG"
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.contactFormTitle || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "contactFormTitle", e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`contact-map-title-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                            Tiêu đề Bản đồ hành chính (Trang liên hệ)
+                          </Label>
+                          <Input
+                            id={`contact-map-title-${lang.code}`}
+                            placeholder="Ví dụ: BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG"
+                            className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20"
+                            value={trans.contactMapTitle || ""}
+                            onChange={(e) => updateTranslationField(lang.code, "contactMapTitle", e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2 pt-2">
+                        <Label htmlFor={`contact-form-success-desc-${lang.code}`} className="text-xs font-bold text-slate-600 uppercase tracking-wider">
+                          Thông điệp báo gửi thành công (Trang liên hệ)
+                        </Label>
+                        <Textarea
+                          id={`contact-form-success-desc-${lang.code}`}
+                          rows={2}
+                          placeholder="Ví dụ: Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn..."
+                          className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-sm"
+                          value={trans.contactFormSuccessDesc || ""}
+                          onChange={(e) => updateTranslationField(lang.code, "contactFormSuccessDesc", e.target.value)}
                         />
                       </div>
                     </CardContent>
@@ -726,6 +868,33 @@ export default function PortalConfigPage() {
                     </span>
                   </div>
                 </div>
+              </div>
+
+              {/* Dynamic Portal Service Title Simulation */}
+              <div className="bg-emerald-50/30 border border-emerald-100 rounded-lg p-3 shadow-inner space-y-2">
+                <span className="text-[8px] font-black text-emerald-800 uppercase tracking-widest leading-none block border-b pb-1 border-emerald-150">Dịch vụ công trực tuyến (Footer Portal Widget)</span>
+                <div className="space-y-0.5">
+                  <h4 className="text-[9px] font-extrabold text-emerald-800 uppercase tracking-wide leading-tight">
+                    {simFooterPortalTitle}
+                  </h4>
+                  <p className="text-[8px] font-medium text-slate-600 leading-normal">
+                    {simFooterPortalSubtitle}
+                  </p>
+                </div>
+              </div>
+
+              {/* Dynamic Contact Labels Simulation */}
+              <div className="bg-sky-50/20 border border-sky-100 rounded-lg p-3 shadow-inner space-y-1.5">
+                <span className="text-[8px] font-black text-sky-800 uppercase tracking-widest leading-none block border-b pb-1 border-sky-150">Góp ý & Bản đồ (Contact Page Labels)</span>
+                <p className="text-[8px] font-bold text-sky-900 uppercase tracking-wide leading-tight">
+                  Form: {simContactFormTitle}
+                </p>
+                <p className="text-[8px] font-medium text-slate-500 leading-tight">
+                  Map: {simContactMapTitle}
+                </p>
+                <p className="text-[7.5px] italic text-slate-400 leading-normal border-t pt-1 border-slate-100">
+                  Thành công: "{simContactFormSuccessDesc}"
+                </p>
               </div>
 
               {/* License/Footer simulator */}

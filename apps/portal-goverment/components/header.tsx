@@ -102,7 +102,7 @@ export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const { language, setLanguage, t } = useLanguage()
+  const { language, setLanguage, t, languages } = useLanguage()
   const [mounted, setMounted] = React.useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null)
@@ -325,38 +325,61 @@ export default function Header() {
             </a>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <div className="flex items-center gap-2">
-              {/* Vietnam Flag SVG */}
-              <svg
-                onClick={() => setLanguage("vi")}
-                viewBox="0 0 30 20"
-                className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border cursor-pointer transition-all hover:scale-110 ${language === "vi"
-                  ? "border-amber-400 ring-1 ring-amber-400 scale-105"
-                  : "border-slate-300 dark:border-slate-700 opacity-60 hover:opacity-100"
-                  }`}
-              >
-                <title>Tiếng Việt</title>
-                <rect width="30" height="20" fill="#da251d" />
-                <polygon points="15,4 15.8,7.6 19.5,7.6 16.3,9.8 17.2,13.4 15,11.2 12.8,13.4 13.7,9.8 10.5,7.6 14.2,7.6" fill="#ffff00" />
-              </svg>
-              {/* UK Flag SVG */}
-              <svg
-                onClick={() => setLanguage("en")}
-                viewBox="0 0 60 30"
-                className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border cursor-pointer transition-all hover:scale-110 ${language === "en"
-                  ? "border-amber-400 ring-1 ring-amber-400 scale-105"
-                  : "border-slate-300 dark:border-slate-700 opacity-60 hover:opacity-100"
-                  }`}
-              >
-                <title>English</title>
-                <clipPath id="s_flag"><path d="M0,0 v30 h60 v-30 z" /></clipPath>
-                <g clipPath="url(#s_flag)">
-                  <rect width="60" height="30" fill="#012169" />
-                  <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
-                  <path d="M0,0 L60,30 M60,0 L0,30" stroke="#c8102e" strokeWidth="4" />
-                  <path d="M0,15 H60 M30,0 V30" stroke="#fff" strokeWidth="10" />
-                  <path d="M0,15 H60 M30,0 V30" stroke="#c8102e" strokeWidth="6" />
-                </g>
-              </svg>
+              {(languages || []).map((lang) => {
+                const isActive = language === lang.code
+                return (
+                  <div
+                    key={lang.code}
+                    onClick={() => setLanguage(lang.code)}
+                    className={`cursor-pointer transition-all hover:scale-110 ${
+                      isActive
+                        ? "scale-105 filter drop-shadow-[0_0_2px_rgba(251,192,45,0.8)]"
+                        : "opacity-60 hover:opacity-100"
+                    }`}
+                    title={lang.name}
+                  >
+                    {lang.code === "vi" ? (
+                      <svg
+                        viewBox="0 0 30 20"
+                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${
+                          isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
+                        }`}
+                      >
+                        <title>{lang.name}</title>
+                        <rect width="30" height="20" fill="#da251d" />
+                        <polygon points="15,4 15.8,7.6 19.5,7.6 16.3,9.8 17.2,13.4 15,11.2 12.8,13.4 13.7,9.8 10.5,7.6 14.2,7.6" fill="#ffff00" />
+                      </svg>
+                    ) : lang.code === "en" ? (
+                      <svg
+                        viewBox="0 0 60 30"
+                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${
+                          isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
+                        }`}
+                      >
+                        <title>{lang.name}</title>
+                        <clipPath id={`s_flag_${lang.code}`}><path d="M0,0 v30 h60 v-30 z" /></clipPath>
+                        <g clipPath={`url(#s_flag_${lang.code})`}>
+                          <rect width="60" height="30" fill="#012169" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
+                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#c8102e" strokeWidth="4" />
+                          <path d="M0,15 H60 M30,0 V30" stroke="#fff" strokeWidth="10" />
+                          <path d="M0,15 H60 M30,0 V30" stroke="#c8102e" strokeWidth="6" />
+                        </g>
+                      </svg>
+                    ) : (
+                      <div
+                        className={`px-1.5 py-0.5 text-[9px] font-black tracking-wide rounded-sm shadow-sm border uppercase leading-none ${
+                          isActive
+                            ? "bg-amber-400 text-slate-950 border-amber-400 ring-1 ring-amber-400"
+                            : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                        }`}
+                      >
+                        {lang.code}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
             {mounted && (
               <>

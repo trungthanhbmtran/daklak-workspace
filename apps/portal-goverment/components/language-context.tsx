@@ -2,13 +2,15 @@
 
 import * as React from "react"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import apiClient from "@/lib/axiosInstance"
 
-export type Language = "vi" | "en"
+export type Language = string
 
 interface LanguageContextType {
-  language: Language
-  setLanguage: (lang: Language) => void
+  language: string
+  setLanguage: (lang: string) => void
   t: (key: string) => string
+  languages: Array<{ code: string; name: string }>
 }
 
 const LanguageContext = React.createContext<LanguageContextType | undefined>(undefined)
@@ -46,7 +48,7 @@ export const translatePathname = (pathname: string, targetLang: Language): strin
 
   const mapped = ROUTE_MAP[pathname]
   if (mapped) {
-    return mapped[targetLang]
+    return (mapped as any)[targetLang] || mapped["vi"]
   }
 
   return targetLang === "vi" ? "/" : "/"
@@ -105,6 +107,56 @@ const DICTIONARY: Record<string, Record<Language, string>> = {
   "Đang truy cập:": { vi: "Đang truy cập:", en: "Online Visitors:" },
   "Hôm nay:": { vi: "Hôm nay:", en: "Today Hits:" },
   "Tổng lượt truy cập:": { vi: "Tổng lượt truy cập:", en: "Total Visits:" },
+  "CƠ QUAN CHỦ QUẢN": { vi: "CƠ QUAN CHỦ QUẢN", en: "MANAGING AGENCY" },
+  "HUYỆN KRÔNG BÔNG": { vi: "HUYỆN KRÔNG BÔNG", en: "KRONG BONG DISTRICT" },
+  "CƠ CẤU TRANG": { vi: "CƠ CẤU TRANG", en: "SITEMAP STRUCTURE" },
+  "LIÊN KẾT LIÊN THÔNG": { vi: "LIÊN KẾT LIÊN THÔNG", en: "INTEGRATED LINKS" },
+  "THỐNG KÊ TRUY CẬP": { vi: "THỐNG KÊ TRUY CẬP", en: "VISITOR STATISTICS" },
+  "Đang trực tuyến": { vi: "Đang trực tuyến", en: "Online" },
+  "Hôm nay": { vi: "Hôm nay", en: "Today" },
+  "Tổng lượt truy cập": { vi: "Tổng lượt truy cập", en: "Total Visits" },
+  "Website Bảo mật": { vi: "Website Bảo mật", en: "Secure Website" },
+  "Được kiểm duyệt an ninh mạng bởi Cục An toàn thông tin.": { vi: "Được kiểm duyệt an ninh mạng bởi Cục An toàn thông tin.", en: "Audited and certified by the Department of Information Security." },
+  "Điều khoản sử dụng": { vi: "Điều khoản sử dụng", en: "Terms of Use" },
+  "Chính sách bảo mật": { vi: "Chính sách bảo mật", en: "Privacy Policy" },
+  "Bản đồ trang web": { vi: "Bản đồ trang web", en: "Sitemap" },
+  "Bản quyền © 2026 Trang thông tin điện tử Ủy ban nhân dân xã Dang Kang. Phát triển trên nền tảng Portal Hành chính 4.0.": {
+    vi: "Bản quyền © 2026 Trang thông tin điện tử Ủy ban nhân dân xã Dang Kang. Phát triển trên nền tảng Portal Hành chính 4.0.",
+    en: "Copyright © 2026 Public Portal of Dang Kang Commune People's Committee. Powered by Portal Admin 4.0."
+  },
+  "Cổng Dịch vụ công Quốc gia": { vi: "Cổng Dịch vụ công Quốc gia", en: "National Public Services Portal" },
+  "Cổng thông tin Điện tử Chính phủ": { vi: "Cổng thông tin Điện tử Chính phủ", en: "National Government Web Portal" },
+  "Cổng thông tin tỉnh Đắk Lắk": { vi: "Cổng thông tin tỉnh Đắk Lắk", en: "Dak Lak Province Official Portal" },
+  "Trang thông tin huyện Krông Bông": { vi: "Trang thông tin huyện Krông Bông", en: "Krong Bong District Web Portal" },
+  "Cơ sở dữ liệu văn bản pháp luật": { vi: "Cơ sở dữ liệu văn bản pháp luật", en: "Vietnam Legal Database" },
+  "Tra cứu thủ tục hành chính": { vi: "Tra cứu thủ tục hành chính", en: "Search Public Procedures" },
+  "Địa chỉ:": { vi: "Địa chỉ:", en: "Address:" },
+  "Điện thoại:": { vi: "Điện thoại:", en: "Phone:" },
+  "Thông tin liên hệ": { vi: "Thông tin liên hệ", en: "Contact Information" },
+  "THÔNG TIN TRỤ SỞ CHÍNH": { vi: "THÔNG TIN TRỤ SỞ CHÍNH", en: "OFFICIAL HEADQUARTERS ADDRESS & CONTACTS" },
+  "Thời gian tiếp nhận công dân trực tiếp:": { vi: "Thời gian tiếp nhận công dân trực tiếp:", en: "Citizen Direct Reception Office Hours:" },
+  "Lịch tiếp công dân mặc định": {
+    vi: "Từ thứ Hai đến thứ Sáu hàng tuần (Trừ ngày lễ, Tết)\nSáng: 07:30 – 11:30 | Chiều: 13:30 – 17:00",
+    en: "Monday to Friday weekly (Except Public Holidays)\nMorning: 07:30 – 11:30 | Afternoon: 13:30 – 17:00"
+  },
+  "Họ và tên": { vi: "Họ và tên", en: "Full Name" },
+  "Nhập họ tên của bạn...": { vi: "Nhập họ tên của bạn...", en: "Type your full name..." },
+  "Email liên hệ": { vi: "Email liên hệ", en: "Contact Email" },
+  "Nhập email của bạn...": { vi: "Nhập email của bạn...", en: "Type your email address..." },
+  "Tiêu đề ý kiến": { vi: "Tiêu đề ý kiến", en: "Inquiry Subject" },
+  "Chủ đề góp ý...": { vi: "Chủ đề góp ý...", en: "Subject theme..." },
+  "Nội dung thư góp ý": { vi: "Nội dung thư góp ý", en: "Inquiry / Message Content" },
+  "Gõ nội dung tin nhắn gửi đến ban biên tập...": { vi: "Gõ nội dung tin nhắn gửi đến ban biên tập...", en: "Write your feedback details here..." },
+  "GỬI THƯ GÓP Ý": { vi: "GỬI THƯ GÓP Ý", en: "SUBMIT FEEDBACK MESSAGE" },
+  "ĐÃ GỬI THƯ THÀNH CÔNG!": { vi: "ĐÃ GỬI THƯ THÀNH CÔNG!", en: "MESSAGE SUBMITTED SUCCESSFULLY!" },
+  "Gửi thêm tin nhắn mới": { vi: "Gửi thêm tin nhắn mới", en: "Send another inquiry" },
+  "Bản đồ vẽ tay vector mô phỏng diện tích 8 phân khu thôn, buôn của địa bàn xã Dang Kang. Click chuột vào bất kỳ phân vùng nào trên bản đồ để xem thống kê nhanh số liệu địa giới:": {
+    vi: "Bản đồ vẽ tay vector mô phỏng diện tích 8 phân khu thôn, buôn của địa bàn xã Dang Kang. Click chuột vào bất kỳ phân vùng nào trên bản đồ để xem thống kê nhanh số liệu địa giới:",
+    en: "Hand-drawn vector map simulating 8 hamlet/village subdivisions of Dang Kang Commune. Click on any subdivision segment to review real-time geographic data:"
+  },
+  "CHI TIẾT:": { vi: "CHI TIẾT:", en: "DETAILS:" },
+  "Diện tích ước tính": { vi: "Diện tích ước tính", en: "Estimated Area" },
+  "Quy mô dân cư": { vi: "Quy mô dân cư", en: "Estimated Population" },
 
   // About Page Translations
   "GIỚI THIỆU CHUNG & CƠ CẤU TỔ CHỨC": {
@@ -248,8 +300,34 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  const [languages, setLanguages] = React.useState<Array<{ code: string; name: string }>>([
+    { code: "vi", name: "Tiếng Việt" },
+    { code: "en", name: "English" }
+  ])
+
   // Detect language state from current pathname or query string
-  const [language, setLanguageState] = React.useState<Language>("vi")
+  const [language, setLanguageState] = React.useState<string>("vi")
+
+  React.useEffect(() => {
+    const fetchSystemLanguages = async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=LANGUAGE")
+        const list = Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+        const activeLangs = list
+          .filter((item: any) => item.active !== 0 && item.isActive !== false)
+          .map((item: any) => ({
+            code: item.code,
+            name: item.name
+          }))
+        if (activeLangs.length > 0) {
+          setLanguages(activeLangs)
+        }
+      } catch (error) {
+        console.error("Failed to fetch system languages", error)
+      }
+    }
+    fetchSystemLanguages()
+  }, [])
 
   React.useEffect(() => {
     // Check path for English routing keywords
@@ -271,7 +349,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     }
   }, [pathname, searchParams])
 
-  const setLanguage = (lang: Language) => {
+  const setLanguage = (lang: string) => {
     setLanguageState(lang)
     const newPath = translatePathname(pathname, lang)
     if (newPath !== pathname) {
@@ -285,13 +363,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     const trimmed = key.trim()
     const match = DICTIONARY[trimmed]
     if (match) {
-      return match[language] || trimmed
+      return match[language as any] || match["vi"] || trimmed
     }
     return trimmed
   }
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, languages }}>
       {children}
     </LanguageContext.Provider>
   )

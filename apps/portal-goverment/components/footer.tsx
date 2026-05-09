@@ -109,22 +109,22 @@ export default function Footer() {
     return footerMenus.length > 0
       ? footerMenus.map((m: any) => ({ name: m.name, path: m.link || "/" }))
       : [
-        { name: language === "vi" ? "Trang chủ" : "Home", path: "/" },
-        { name: language === "vi" ? "Giới thiệu chung" : "About Us", path: language === "vi" ? "/gioi-thieu" : "/aboutus" },
-        { name: language === "vi" ? "Tin tức & Chuyên mục" : "News & Categories", path: language === "vi" ? "/tin-tuc" : "/news" },
-        { name: language === "vi" ? "Văn bản pháp quy" : "Legal Documents", path: language === "vi" ? "/van-ban" : "/documents" },
-        { name: language === "vi" ? "Thủ tục hành chính" : "Public Procedures", path: language === "vi" ? "/thu-tuc" : "/procedures" },
-        { name: language === "vi" ? "Hỏi đáp & Ý kiến công dân" : "Feedback & Inquiries", path: language === "vi" ? "/tuong-tac" : "/feedback" },
-        { name: language === "vi" ? "Thông tin liên hệ" : "Contact Address", path: language === "vi" ? "/lien-he" : "/contact" }
+        { name: t("Trang chủ"), path: "/" },
+        { name: t("Giới thiệu"), path: language === "vi" ? "/gioi-thieu" : "/aboutus" },
+        { name: t("Tin tức"), path: language === "vi" ? "/tin-tuc" : "/news" },
+        { name: t("Văn bản"), path: language === "vi" ? "/van-ban" : "/documents" },
+        { name: t("Thủ tục hành chính"), path: language === "vi" ? "/thu-tuc" : "/procedures" },
+        { name: t("Hỏi đáp & Góp ý"), path: language === "vi" ? "/tuong-tac" : "/feedback" },
+        { name: t("Liên hệ"), path: language === "vi" ? "/lien-he" : "/contact" }
       ]
-  }, [menusData, language])
+  }, [menusData, language, t])
 
   const govLinks = [
-    { name: language === "vi" ? "Cổng Dịch vụ công Quốc gia" : "National Public Services Portal", url: "https://dichvucong.gov.vn" },
-    { name: language === "vi" ? "Cổng thông tin Điện tử Chính phủ" : "National Government Web Portal", url: "https://chinhphu.vn" },
-    { name: language === "vi" ? "Cổng thông tin tỉnh Đắk Lắk" : "Dak Lak Province Official Portal", url: "https://daklak.gov.vn" },
-    { name: language === "vi" ? "Trang thông tin huyện Krông Bông" : "Krong Bong District Web Portal", url: "https://krongbong.daklak.gov.vn" },
-    { name: language === "vi" ? "Cơ sở dữ liệu văn bản pháp luật" : "Vietnam Legal Database", url: "https://vbpl.vn" }
+    { name: t("Cổng Dịch vụ công Quốc gia"), url: "https://dichvucong.gov.vn" },
+    { name: t("Cổng thông tin Điện tử Chính phủ"), url: "https://chinhphu.vn" },
+    { name: t("Cổng thông tin tỉnh Đắk Lắk"), url: "https://daklak.gov.vn" },
+    { name: t("Trang thông tin huyện Krông Bông"), url: "https://krongbong.daklak.gov.vn" },
+    { name: t("Cơ sở dữ liệu văn bản pháp luật"), url: "https://vbpl.vn" }
   ]
 
   return (
@@ -138,10 +138,10 @@ export default function Footer() {
             </div>
             <div>
               <p className="text-sm font-bold text-white uppercase tracking-wider">
-                {language === "vi" ? "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG" : "ONLINE PUBLIC SERVICE PORTAL OF DANG KANG"}
+                {getConfigValue("footer_portal_title", language === "vi" ? "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG" : "ONLINE PUBLIC SERVICE PORTAL OF DANG KANG")}
               </p>
               <p className="text-xs text-slate-400">
-                {language === "vi" ? "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng" : "Providing high-speed, modern one-stop administrative procedure resolutions"}
+                {getConfigValue("footer_portal_subtitle", language === "vi" ? "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng" : "Providing high-speed, modern one-stop administrative procedure resolutions")}
               </p>
             </div>
           </div>
@@ -150,7 +150,7 @@ export default function Footer() {
             className="flex items-center gap-1.5 text-xs text-[#fef08a] hover:text-white bg-red-700/20 hover:bg-red-700/40 px-4 py-2 rounded-full border border-red-700/40 transition-all font-medium uppercase tracking-wider shadow-sm"
           >
             <FileText className="w-4 h-4" />
-            {language === "vi" ? "Tra cứu thủ tục hành chính" : "Search Public Procedures"}
+            {t("Tra cứu thủ tục hành chính")}
           </Link>
         </div>
       </div>
@@ -162,29 +162,29 @@ export default function Footer() {
         <div className="lg:col-span-4 flex flex-col gap-4">
           <div className="flex flex-col">
             <span className="text-[10px] text-red-400 font-bold tracking-widest uppercase">
-              {language === "vi" ? "CƠ QUAN CHỦ QUẢN" : "GOVERNING AGENCY"}
+              {t("CƠ QUAN CHỦ QUẢN")}
             </span>
             <h3 className="text-lg font-extrabold text-white uppercase tracking-wide mt-1">
               {getConfigValue("unit_name", "ỦY BAN NHÂN DÂN XÃ DANG KANG")}
             </h3>
             <span className="text-xs font-semibold text-[#fef08a] uppercase tracking-wide mt-0.5">
-              {language === "vi" ? "HUYỆN KRÔNG BÔNG" : "KRONG BONG DISTRICT"} - {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+              {t("HUYỆN KRÔNG BÔNG")} - {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
             </span>
           </div>
 
           <p className="text-xs text-slate-400 leading-relaxed">
-            {getConfigValue("license_info", "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp")}. {language === "vi" ? "Chịu trách nhiệm nội dung:" : "Content Responsible Officer:"} {getConfigValue("responsible_person", "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang")}.
+            {getConfigValue("license_info", "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp")}. {t("Chịu trách nhiệm nội dung:")} {getConfigValue("responsible_person", "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang")}.
           </p>
 
           <div className="flex flex-col gap-2.5 mt-2 text-xs font-medium">
             <div className="flex items-start gap-2.5">
               <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-              <span>{language === "vi" ? "Địa chỉ:" : "Address:"} {getConfigValue("address", "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
+              <span>{t("Địa chỉ:")} {getConfigValue("address", "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
             </div>
             <div className="flex items-center gap-2.5">
               <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
               <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/\./g, "")}`} className="hover:text-white transition-colors">
-                {language === "vi" ? "Điện thoại:" : "Phone:"} {getConfigValue("hotline", "0262.3812.345")}
+                {t("Điện thoại:")} {getConfigValue("hotline", "0262.3812.345")}
               </a>
             </div>
             <div className="flex items-center gap-2.5">
@@ -203,7 +203,7 @@ export default function Footer() {
         {/* Column 2: Sitemap & Main categories */}
         <div className="lg:col-span-2 flex flex-col gap-4">
           <h4 className="text-sm font-bold text-white uppercase border-b border-slate-700 pb-2 tracking-wide">
-            {language === "vi" ? "CƠ CẤU TRANG" : "SITE NAVIGATION"}
+            {t("CƠ CẤU TRANG")}
           </h4>
           <ul className="flex flex-col gap-2.5 text-xs font-semibold text-slate-400">
             {mainLinks.map((item: any) => (
@@ -220,7 +220,7 @@ export default function Footer() {
         {/* Column 3: External Government links */}
         <div className="lg:col-span-3 flex flex-col gap-4">
           <h4 className="text-sm font-bold text-white uppercase border-b border-slate-700 pb-2 tracking-wide">
-            {language === "vi" ? "LIÊN KẾT LIÊN THÔNG" : "RELATED SITES"}
+            {t("LIÊN KẾT LIÊN THÔNG")}
           </h4>
           <ul className="flex flex-col gap-2.5 text-xs font-semibold text-slate-400">
             {govLinks.map((item: any) => (
@@ -242,27 +242,27 @@ export default function Footer() {
         {/* Column 4: Counter widget and security badge */}
         <div className="lg:col-span-3 flex flex-col gap-5">
           <h4 className="text-sm font-bold text-white uppercase border-b border-slate-700 pb-2 tracking-wide">
-            {language === "vi" ? "THỐNG KÊ TRUY CẬP" : "VISITOR STATISTICS"}
+            {t("THỐNG KÊ TRUY CẬP")}
           </h4>
 
           <div className="grid grid-cols-2 gap-3 bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 shadow-inner">
             <div className="flex flex-col items-center justify-center p-2.5 bg-slate-950/40 rounded-lg">
               <span className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                 <Users className="w-3 h-3 text-sky-400" />
-                Online
+                {t("Đang trực tuyến")}
               </span>
               <span className="text-lg font-black text-white mt-1 font-mono tracking-wide">{onlineCount}</span>
             </div>
             <div className="flex flex-col items-center justify-center p-2.5 bg-slate-950/40 rounded-lg">
               <span className="flex items-center gap-1 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
                 <Eye className="w-3 h-3 text-emerald-400" />
-                {language === "vi" ? "Hôm nay" : "Today"}
+                {t("Hôm nay")}
               </span>
               <span className="text-lg font-black text-white mt-1 font-mono tracking-wide">{todayCount}</span>
             </div>
             <div className="flex flex-col items-center justify-center p-2.5 bg-slate-950/40 rounded-lg col-span-2 mt-1">
               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                {language === "vi" ? "TỔNG LƯỢT TRUY CẬP" : "TOTAL VISITS"}
+                {t("Tổng lượt truy cập")}
               </span>
               <span className="text-xl font-black text-[#fef08a] mt-1 font-mono tracking-widest">{totalCount.toLocaleString()}</span>
             </div>
@@ -272,10 +272,10 @@ export default function Footer() {
             <Shield className="w-8 h-8 text-red-500 shrink-0" />
             <div className="flex flex-col">
               <span className="text-[10px] text-white font-extrabold uppercase tracking-wide">
-                {language === "vi" ? "Website Bảo Mật" : "Secure Website"}
+                {t("Website Bảo mật")}
               </span>
               <span className="text-[9px] text-slate-400 leading-normal">
-                {language === "vi" ? "Được kiểm duyệt an ninh mạng bởi Cục An toàn thông tin." : "Audited and certified by the Department of Information Security."}
+                {t("Được kiểm duyệt an ninh mạng bởi Cục An toàn thông tin.")}
               </span>
             </div>
           </div>
@@ -288,22 +288,20 @@ export default function Footer() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap justify-center items-center gap-3">
             <Link href="/gioi-thieu" className="hover:text-[#fef08a] transition-colors">
-              {language === "vi" ? "Điều khoản sử dụng" : "Terms of Use"}
+              {t("Điều khoản sử dụng")}
             </Link>
             <span className="text-slate-700">|</span>
             <Link href="/gioi-thieu" className="hover:text-[#fef08a] transition-colors">
-              {language === "vi" ? "Chính sách bảo mật" : "Privacy Policy"}
+              {t("Chính sách bảo mật")}
             </Link>
             <span className="text-slate-700">|</span>
             <Link href="/lien-he" className="hover:text-[#fef08a] transition-colors">
-              {language === "vi" ? "Bản đồ trang web" : "Sitemap"}
+              {t("Bản đồ trang web")}
             </Link>
           </div>
           <div>
             <span>
-              {language === "vi" 
-                ? "Bản quyền © 2026 Trang thông tin điện tử Ủy ban nhân dân xã Dang Kang. Phát triển trên nền tảng Portal Hành chính 4.0." 
-                : "Copyright © 2026 Public Portal of Dang Kang Commune People's Committee. Powered by Portal Admin 4.0."}
+              {t("Bản quyền © 2026 Trang thông tin điện tử Ủy ban nhân dân xã Dang Kang. Phát triển trên nền tảng Portal Hành chính 4.0.")}
             </span>
           </div>
         </div>
