@@ -4,7 +4,6 @@ import * as React from "react"
 import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
-import { useLanguage } from "@/components/language-context"
 import {
   MapPin,
   Phone,
@@ -20,7 +19,7 @@ import {
 } from "lucide-react"
 
 // Pure SVG interactive styled outline representing Dang Kang Commune subdivision zones
-const COMMUNE_ZONES_VI = [
+const COMMUNE_ZONES = [
   { id: "T1", name: "Thôn 1 (Khu vực phía Tây Bắc)", path: "M 10,10 L 45,10 L 40,40 L 10,35 Z", area: "125 ha", pop: "780 người", center: { x: 25, y: 22 } },
   { id: "T2", name: "Thôn 2 (Khu vực sông Krông Ana)", path: "M 45,10 L 85,15 L 75,45 L 40,40 Z", area: "240 ha", pop: "1,120 người", center: { x: 62, y: 26 } },
   { id: "T3", name: "Thôn 3 (Khu vực Trung tâm Hành chính)", path: "M 10,35 L 40,40 L 35,65 L 8,60 Z", area: "95 ha", pop: "950 người", center: { x: 23, y: 50 } },
@@ -31,21 +30,7 @@ const COMMUNE_ZONES_VI = [
   { id: "BM", name: "Buôn Êđê (Khu bảo tồn văn hóa truyền thống)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 người", center: { x: 78, y: 72 } }
 ]
 
-const COMMUNE_ZONES_EN = [
-  { id: "T1", name: "Hamlet 1 (Northwestern Area)", path: "M 10,10 L 45,10 L 40,40 L 10,35 Z", area: "125 ha", pop: "780 people", center: { x: 25, y: 22 } },
-  { id: "T2", name: "Hamlet 2 (Krong Ana River Area)", path: "M 45,10 L 85,15 L 75,45 L 40,40 Z", area: "240 ha", pop: "1,120 people", center: { x: 62, y: 26 } },
-  { id: "T3", name: "Hamlet 3 (Administrative Center)", path: "M 10,35 L 40,40 L 35,65 L 8,60 Z", area: "95 ha", pop: "950 people", center: { x: 23, y: 50 } },
-  { id: "T4", name: "Hamlet 4 (Coffee Cultivation Zone)", path: "M 40,40 L 75,45 L 70,70 L 35,65 Z", area: "180 ha", pop: "840 people", center: { x: 55, y: 54 } },
-  { id: "T5", name: "Hamlet 5 (Forestry District)", path: "M 8,60 L 35,65 L 30,95 L 5,90 Z", area: "320 ha", pop: "650 people", center: { x: 19, y: 78 } },
-  { id: "T6", name: "Hamlet 6 (Chư Yang Sin Foothills)", path: "M 35,65 L 70,70 L 65,95 L 30,95 Z", area: "450 ha", pop: "1,030 people", center: { x: 50, y: 80 } },
-  { id: "BE", name: "Ega Village (Ede Ethnic Hamlet)", path: "M 75,15 L 98,18 L 92,55 L 75,45 Z", area: "580 ha", pop: "920 people", center: { x: 86, y: 32 } },
-  { id: "BM", name: "Ede Village (Cultural Preservation Area)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 people", center: { x: 78, y: 72 } }
-]
-
 export default function ContactPage() {
-  const { language, t } = useLanguage()
-  const COMMUNE_ZONES = language === "vi" ? COMMUNE_ZONES_VI : COMMUNE_ZONES_EN
-
   const { data: portalConfigData } = useQuery({
     queryKey: ["public-categories", "PORTAL_CONFIG"],
     queryFn: async () => {
@@ -63,37 +48,17 @@ export default function ContactPage() {
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
     const found = (portalConfigData || []).find((c: any) => c.code === code);
     if (!found) return fallback;
-
-    // Check if description contains JSON translations
-    if (found.description && found.description.trim().startsWith('{')) {
-      try {
-        const parsed = JSON.parse(found.description);
-        if (parsed && typeof parsed === 'object') {
-          if (parsed[language]) {
-            return parsed[language];
-          }
-          if (parsed.translations && parsed.translations[language]) {
-            return parsed.translations[language];
-          }
-        }
-      } catch (e) {
-        // Fallback
-      }
-    }
-
     if (code === "citizen_schedule") {
       return found.description || found.name || fallback;
     }
-
     return found.name || fallback;
-  }, [portalConfigData, language]);
+  }, [portalConfigData]);
 
   const [activeZone, setActiveZone] = React.useState<typeof COMMUNE_ZONES[0] | null>(null)
 
-  // Set default active zone once mounted to match corresponding localized version
   React.useEffect(() => {
     setActiveZone(COMMUNE_ZONES[2] || null)
-  }, [language])
+  }, [])
 
   // Form submission state
   const [fullName, setFullName] = React.useState("")
@@ -123,11 +88,11 @@ export default function ContactPage() {
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
-          {t("Trang chủ")}
+          Trang chủ
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-slate-600 dark:text-slate-300">
-          {t("Thông tin liên hệ")}
+          Thông tin liên hệ
         </span>
       </div>
 
@@ -142,7 +107,7 @@ export default function ContactPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
               <Building2 className="w-5 h-5 text-[#b91c1c]" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-                {t("THÔNG TIN TRỤ SỞ CHÍNH")}
+                THÔNG TIN TRỤ SỞ CHÍNH
               </h3>
             </div>
 
@@ -169,10 +134,10 @@ export default function ContactPage() {
                 <Clock className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
                   <span className="text-slate-850 dark:text-slate-300 font-bold">
-                    {t("Thời gian tiếp nhận công dân trực tiếp:")}
+                    Thời gian tiếp nhận công dân trực tiếp:
                   </span>
                   <span className="whitespace-pre-line text-slate-600 dark:text-slate-400">
-                    {getConfigValue("citizen_schedule", t("Lịch tiếp công dân mặc định"))}
+                    {getConfigValue("citizen_schedule", "Lịch tiếp công dân mặc định")}
                   </span>
                 </div>
               </div>
@@ -184,7 +149,7 @@ export default function ContactPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
               <Mail className="w-5 h-5 text-[#b91c1c]" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-                {getConfigValue("contact_form_title", language === "vi" ? "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG" : "SUBMIT FEEDBACK / INQUIRIES TO OFFICE")}
+                {getConfigValue("contact_form_title", "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG")}
               </h3>
             </div>
 
@@ -192,12 +157,12 @@ export default function ContactPage() {
               <form onSubmit={handleContactSubmit} className="flex flex-col gap-4 text-xs font-semibold">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    {t("Họ và tên")} *
+                    Họ và tên *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder={t("Nhập họ tên của bạn...")}
+                    placeholder="Nhập họ tên của bạn..."
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -206,12 +171,12 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    {t("Email liên hệ")} *
+                    Email liên hệ *
                   </label>
                   <input
                     type="email"
                     required
-                    placeholder={t("Nhập email của bạn...")}
+                    placeholder="Nhập email của bạn..."
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -220,11 +185,11 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    {t("Tiêu đề ý kiến")}
+                    Tiêu đề ý kiến
                   </label>
                   <input
                     type="text"
-                    placeholder={t("Chủ đề góp ý...")}
+                    placeholder="Chủ đề góp ý..."
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -233,12 +198,12 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    {t("Nội dung thư góp ý")} *
+                    Nội dung thư góp ý *
                   </label>
                   <textarea
                     required
                     rows={4}
-                    placeholder={t("Gõ nội dung tin nhắn gửi đến ban biên tập...")}
+                    placeholder="Gõ nội dung tin nhắn gửi đến ban biên tập..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white leading-relaxed"
@@ -250,7 +215,7 @@ export default function ContactPage() {
                   className="w-full mt-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
                 >
                   <Send className="w-4 h-4 text-[#fef08a] dark:text-[#b91c1c]" />
-                  {t("GỬI THƯ GÓP Ý")}
+                  GỬI THƯ GÓP Ý
                 </button>
               </form>
             ) : (
@@ -258,20 +223,17 @@ export default function ContactPage() {
                 <CheckCircle2 className="w-12 h-12 text-emerald-500" />
                 <div className="flex flex-col gap-1">
                   <h4 className="text-sm font-black text-slate-850 uppercase">
-                    {t("ĐÃ GỬI THƯ THÀNH CÔNG!")}
+                    ĐÃ GỬI THƯ THÀNH CÔNG!
                   </h4>
                   <p className="text-slate-500 font-medium leading-relaxed">
-                    {getConfigValue("contact_form_success_desc", language === "vi"
-                      ? "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử."
-                      : "Dang Kang clerical team has received your inquiry and will reply as soon as possible via email."
-                    )}
+                    {getConfigValue("contact_form_success_desc", "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
                   </p>
                 </div>
                 <button
                   onClick={resetContactForm}
                   className="bg-slate-900 text-white hover:bg-slate-800 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all shadow"
                 >
-                  {t("Gửi thêm tin nhắn mới")}
+                  Gửi thêm tin nhắn mới
                 </button>
               </div>
             )}
@@ -284,12 +246,12 @@ export default function ContactPage() {
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
             <MapIcon className="w-5 h-5 text-[#b91c1c]" />
             <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-              {getConfigValue("contact_map_title", language === "vi" ? "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG" : "DANG KANG ADMINISTRATIVE SUBDIVISIONS MAP")}
+              {getConfigValue("contact_map_title", "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG")}
             </h3>
           </div>
 
           <p className="text-[11px] text-slate-400 font-semibold leading-normal">
-            {t("Bản đồ vẽ tay vector mô phỏng diện tích 8 phân khu thôn, buôn của địa bàn xã Dang Kang. Click chuột vào bất kỳ phân vùng nào trên bản đồ để xem thống kê nhanh số liệu địa giới:")}
+            Bản đồ vẽ tay vector mô phỏng diện tích 8 phân khu thôn, buôn của địa bàn xã Dang Kang. Click chuột vào bất kỳ phân vùng nào trên bản đồ để xem thống kê nhanh số liệu địa giới:
           </p>
 
           {/* Interactive SVG Rendering */}
@@ -305,8 +267,8 @@ export default function ContactPage() {
                     key={zone.id}
                     d={zone.path}
                     className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${isActive
-                        ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg"
-                        : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
+                      ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg"
+                      : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
                       }`}
                     onClick={() => setActiveZone(zone)}
                   />
@@ -337,20 +299,20 @@ export default function ContactPage() {
               <div className="flex items-center gap-2 border-b border-slate-200/50 dark:border-slate-800/60 pb-2">
                 <Info className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
                 <span className="font-extrabold text-[#b91c1c] dark:text-[#fbc02d] uppercase tracking-wide">
-                  {t("CHI TIẾT:")} {activeZone.name}
+                  CHI TIẾT: {activeZone.name}
                 </span>
               </div>
 
               <div className="grid grid-cols-2 gap-4 font-semibold text-slate-600 dark:text-slate-400">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] text-slate-400 uppercase tracking-widest">
-                    {t("Diện tích ước tính")}
+                    Diện tích ước tính
                   </span>
                   <span className="text-slate-850 dark:text-slate-200 font-bold text-xs sm:text-sm">{activeZone.area}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] text-slate-400 uppercase tracking-widest">
-                    {t("Quy mô dân cư")}
+                    Quy mô dân cư
                   </span>
                   <span className="text-slate-850 dark:text-slate-200 font-bold text-xs sm:text-sm">{activeZone.pop}</span>
                 </div>

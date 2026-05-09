@@ -3,7 +3,6 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useLanguage } from "@/components/language-context"
 import {
   Calendar,
   User,
@@ -21,7 +20,7 @@ import {
   FileText
 } from "lucide-react"
 
-const ALL_NEWS_VI = [
+const ALL_NEWS = [
   {
     id: 1,
     title: "Lãnh đạo huyện làm việc với UBND xã Dang Kang về phát triển KT-XH năm 2026",
@@ -160,7 +159,7 @@ const ALL_NEWS_VI = [
     readTime: "6 phút đọc",
     author: "Văn hóa - Thông tin xã",
     content: [
-      "Trong 2 ngày 23 và 24/4/2026, UBND xã Dang Kang đã tưng bừng tổ chức Ngày hội Văn hóa - Thể thao các dân tộc thiểu số lần thứ III năm 2026.",
+      "Trong 2 ngày 23 and 24/4/2026, UBND xã Dang Kang đã tưng bừng tổ chức Ngày hội Văn hóa - Thể thao các dân tộc thiểu số lần thứ III năm 2026.",
       "Đây là hoạt động ý nghĩa thiết thực nhằm tôn vinh, bảo tồn và phát huy bản sắc văn hóa truyền thống tốt đẹp của các dân tộc anh em đang sinh sống hòa quyện trên mảnh đất Dang Kang anh hùng.",
       "Ngày hội thu hút hơn 300 nghệ nhân, diễn viên, vận động viên không chuyên đến từ các buôn đồng bào dân tộc thiểu số trong toàn xã, cùng giao lưu tranh tài sôi nổi ở các nội dung thi đấu thể thao dân gian truyền thống như bắn nỏ, đẩy gậy, kéo co, đi cà kheo... đặc biệt là liên hoan trình tấu cồng chiêng Êđê cổ kính và văn nghệ quần chúng."
     ]
@@ -183,177 +182,16 @@ const ALL_NEWS_VI = [
   }
 ]
 
-const ALL_NEWS_EN = [
-  {
-    id: 1,
-    title: "District leadership works with Dang Kang Commune on Socio-Economic Development in 2026",
-    excerpt: "On the morning of April 29, Krong Bong District People's Committee held a live meeting at Dang Kang PC regarding high-tech agricultural cultivation crop restructuring...",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-    date: "29/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "4 min read",
-    author: "Editorial Department - PC Office",
-    content: [
-      "On the morning of April 29, 2026, the delegation of the Krong Bong District People's Committee, led by the President, held a direct working session with the Party Committee, People's Council, and People's Committee of Dang Kang Commune on the socio-economic status, national defense, and security during the first 4 months, outlining critical orientations for Q2 2026.",
-      "Attending the meeting were leading representatives from specialized district departments, including Finance & Planning, Agriculture & Rural Development, Natural Resources & Environment, Economy & Infrastructure, and the District People's Committee Office.",
-      "According to the commune report, local socio-economic growth remained stable in the first four months. The winter-spring cultivation acreage reached 100% of the targets. Land administration and mineral resource management were strictly enforced; budget collection reached 38% of the annual projection. Social welfare, public healthcare, and educational programs were carried out timely and accurately.",
-      "Nevertheless, challenges remain, such as slow public investment disbursement rates, uneven agricultural restructuring across different villages, and obstacles in handling domestic waste in rural areas.",
-      "In his concluding address, the District President praised the results achieved by Dang Kang Commune. He emphasized key tasks that the commune needs to focus on in the upcoming months:",
-      "First, resolve current obstacles to accelerate site clearance, construction, and disbursement of public investment, focusing on projects belonging to the National Target Program on Building New Countryside.",
-      "Second, push crop and livestock restructuring toward high-tech commercial farming. Encourage co-ops to establish market connections for main products like coffee, durian, and hybrid pigs.",
-      "Third, strengthen state management over land administration, construction order, and rural environmental safety. Strictly prohibit any encroachment of public land or illegal mineral extraction.",
-      "Fourth, accelerate administrative reforms and commune-level digital transformation, improving online public service resolution rates and public satisfaction scores."
-    ]
-  },
-  {
-    id: 2,
-    title: "Commenced expansion of inter-hamlet 3 and hamlet 4 model new countryside roads",
-    excerpt: "The project has a total investment of over 5 billion VND funded by commune budget and local citizens' land donations to expand the road width to 8m...",
-    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80",
-    date: "28/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "5 min read",
-    author: "New Rural Development Board",
-    content: [
-      "Joining the nationwide movement to build model new countryside, on the morning of April 28, 2026, Dang Kang Commune People's Committee held a groundbreaking ceremony to upgrade and expand the main inter-village connecting Hamlet 3 and Hamlet 4.",
-      "In attendance were members of the local Party Committee, People's Council, People's Committee, Vietnam Fatherland Front of Dang Kang, and a large number of residents from both villages.",
-      "The road connecting Hamlet 3 and Hamlet 4 is a critical transportation route serving agricultural transport and commuting for nearly 500 households. The previous road was extremely narrow (3.5m) and severely degraded, posing traffic risks and hampering local trade.",
-      "The approved layout features a 2.2 km long road with an 8m roadbed, a 6m asphalt concrete surface, and consolidated concrete drainage ditches along both sides. The total budget exceeds 5 billion VND, supported by provincial and district allocations (60%), the commune budget (20%), and private donations.",
-      "The highlight of the project is the consensus shown by residents. Through local campaigns, 42 households along the route voluntarily donated over 1,800 m2 of land and dismantled 400m of concrete fences to clear the land for construction without demanding compensation.",
-      "Speaking at the event, the Commune PC President expressed deep gratitude for the villagers' unity and sacrifices for the public good. He requested the construction company to deploy modern machinery, ensuring the highest engineering quality, aiming to finish before the rainy season."
-    ]
-  },
-  {
-    id: 3,
-    title: "Digital transformation and IT training for coffee farming households",
-    excerpt: "Over 120 key households in the commune attended training on utilizing agricultural traceability apps and tracking daily global market coffee prices...",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80",
-    date: "26/04/2026",
-    category: "kinh-te",
-    categoryName: "Socio-Economics",
-    readTime: "3 min read",
-    author: "Dang Kang Farmers Association",
-    content: [
-      "To help local farmers apply advanced technology and increase the economic value of coffee crops, on April 26, 2026, the Dang Kang Commune Farmers' Association cooperated with the Provincial Agricultural Extension Center to organize a training class on 'Agricultural Digital Transformation and IT Applications in Sustainable Coffee Production'.",
-      "The course attracted over 120 farmers who own local plantations, farms, and coffee production cooperatives.",
-      "During the session, agricultural engineers and tech specialists trained farmers in setting up and operating smartphone applications for cultivation. The course focused on three areas:",
-      "First, using mobile apps to monitor weather forecasts and real-time pests, calculating precise fertilizer and watering amounts to save 20-30% of input expenses.",
-      "Second, implementing agricultural traceability through QR code scanning. This helps farmers maintain electronic logs and transparent agricultural history, fulfilling European Union regulations (EUDR).",
-      "Third, accessing agricultural e-commerce platforms and joining price updates groups, avoiding price exploitation by brokers."
-    ]
-  },
-  {
-    id: 101,
-    title: "Provincial Party: Enforce operational discipline, flexible policies for double-digit growth",
-    excerpt: "The Provincial People's Committee requires strict administrative discipline, raising leaders' responsibility to remove barriers and boost sustainable economic growth.",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80",
-    date: "29/04/2026",
-    category: "dang-uy",
-    categoryName: "Party Activity",
-    readTime: "3 min read",
-    author: "Party Propaganda Board",
-    content: [
-      "The leadership conference of the Provincial People's Committee Party Executive emphasized the requirement of reinforcing state administration and administrative discipline across all departments.",
-      "The Committee requested elevating the accountability of leaders in solving administrative procedures, cutting through red tape, and constructing a clear, transparent business environment for enterprises and residents.",
-      "At the same time, it highlighted the importance of strengthening Party values, preventing public servants from evading duties or fear of mistakes, steering toward a sustainable double-digit economic growth goal for the 2026 fiscal year."
-    ]
-  },
-  {
-    id: 102,
-    title: "Dang Kang Commune Council prepares documents for 8th special session",
-    excerpt: "The Council standing board works to unify draft blueprints on building the administrative center and allocating mid-term public investment funds.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
-    date: "28/04/2026",
-    category: "hdnd",
-    categoryName: "People's Council",
-    readTime: "4 min read",
-    author: "Council Standing Board",
-    content: [
-      "In preparation for the 8th special session of the Dang Kang Commune People's Council XI (term 2021-2026), the Council Standing Board organized a preparatory meeting to finalize the agenda and verify documents.",
-      "The board discussed and agreed on draft proposals from the Commune People's Committee on: detailed zoning of the Dang Kang administrative center, the mid-term public investment allocation for 2026-2030, and adjustments to the local budget collection and spending in 2026.",
-      "The Council Standing Board requested the executive committee to absorb comments, refine drafts, and send documents to Council deputies for advance study, ensuring a transparent, democratic, and law-abiding session."
-    ]
-  },
-  {
-    id: 103,
-    title: "Commune PC launches environmental sanitation campaign to prevent dengue fever",
-    excerpt: "Simultaneously, 8 hamlets across the commune took action to eradicate mosquitoes, clear bushes, and drain stagnant water in preparation for the rainy season.",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80",
-    date: "27/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "3 min read",
-    author: "Dang Kang Medical Center",
-    content: [
-      "Due to erratic weather and the beginning of the rainy season, Dang Kang Commune People's Committee launched a campaign for environmental sanitation and larval control to actively prevent dengue fever outbreaks.",
-      "The campaign received an active response from public servants, youth members, women associations, and residents across all 8 villages.",
-      "In residential areas, citizens cleaned up inside and around their houses, cleared bushes, overturned unused water-holding containers, cleared sewers, and introduced larvae-eating fish into water containers to prevent mosquito breeding sites and preserve community health."
-    ]
-  },
-  {
-    id: 104,
-    title: "Disseminated Land Law 2026 updates training course for commune cadastral officers",
-    excerpt: "Enhancing state management capacity in land administration, resolving disputes locally in accordance with regulations and safeguarding citizens' rights.",
-    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80",
-    date: "25/04/2026",
-    category: "ubnd",
-    categoryName: "People's Committee",
-    readTime: "5 min read",
-    author: "Commune Justice Office",
-    content: [
-      "To update crucial state management regulations on land resources, Dang Kang Commune People's Committee coordinated with the Krong Bong District Justice Department to host a dissemination workshop on key amendments to the Land Law 2026.",
-      "Participants included cadastral & construction public servants, judicial-civil status officers, village chiefs, and local reconciliation board members.",
-      "The session focused on groundbreaking improvements of the Land Law 2026, such as: land reclamation mechanisms, compensation, resettlement support, market-based land pricing, and granting land-use rights certificates to secure citizen interests."
-    ]
-  },
-  {
-    id: 105,
-    title: "The 3rd Ethnic Minority Cultural and Sports Festival of Dang Kang commune",
-    excerpt: "Gathering more than 300 athletes and artisans to compete in archery, stick pushing, tug of war, and traditional Ede gong instrument performances.",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80",
-    date: "24/04/2026",
-    category: "kinh-te",
-    categoryName: "Socio-Economics",
-    readTime: "6 min read",
-    author: "Commune Culture Board",
-    content: [
-      "On April 23 and 24, 2026, Dang Kang Commune hosted the 3rd Ethnic Minority Cultural and Sports Festival.",
-      "This meaningful event aims to honor, preserve, and promote the rich cultural heritage of various ethnic groups living together in the historic land of Dang Kang.",
-      "The festival gathered over 300 non-professional artisans, performers, and athletes from ethnic minority villages, participating in traditional folk sports such as crossbow shooting, stick pushing, tug-of-war, and ancient Ede gong music performances."
-    ]
-  },
-  {
-    id: 106,
-    title: "Crossbred wild boar farming model represents economic growth for Ega village",
-    excerpt: "Using preferential loan funds from the Social Policy Bank, many ethnic minority households successfully escaped poverty by raising boars for food.",
-    image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=600&q=80",
-    date: "22/04/2026",
-    category: "kinh-te",
-    categoryName: "Socio-Economics",
-    readTime: "4 min read",
-    author: "Commune Agriculture Board",
-    content: [
-      "Regarding the efficiency of preferential job creation loans from the District Social Policy Bank, the family of Mr. Y-Nuoi Nie in Ega Village, Dang Kang Commune, is a prime example of escaping poverty and building wealth through raising hybrid wild boars.",
-      "In 2024, with a loan of 50 million VND, his family built a semi-wild fenced shelter of 300m2 and purchased 5 hybrid boars for initial trial breeding.",
-      "By learning care methods and disease prevention techniques from local workshops, the pigs grew healthy and bred well. To date, the family maintains over 40 pigs for meat, earning a stable net income of over 120 million VND annually."
-    ]
-  }
-]
-
 interface Props {
   id: string
 }
 
 export default function NewsDetailPage({ id }: Props) {
-  const { language, t } = useLanguage()
   const router = useRouter()
   const [fontSize, setFontSize] = React.useState<"sm" | "md" | "lg">("md")
   const [isCopied, setIsCopied] = React.useState(false)
 
   const articleId = parseInt(id) || 1
-  const ALL_NEWS = language === "vi" ? ALL_NEWS_VI : ALL_NEWS_EN
   const article = ALL_NEWS.find(n => n.id === articleId) || ALL_NEWS[0]
   if (!article) return null
 
@@ -364,9 +202,7 @@ export default function NewsDetailPage({ id }: Props) {
   }
 
   const handleDownloadPDF = () => {
-    alert(language === "vi"
-      ? "Đang chuẩn bị tải xuống bản in PDF chính thức của bài viết..."
-      : "Preparing download for official PDF article layout...")
+    alert("Đang chuẩn bị tải xuống bản in PDF chính thức của bài viết...")
   }
 
   const handleShare = () => {
@@ -392,11 +228,11 @@ export default function NewsDetailPage({ id }: Props) {
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
-          {t("Trang chủ")}
+          Trang chủ
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
-        <Link href={language === "vi" ? "/tin-tuc" : "/news"} className="hover:text-[#b91c1c]">
-          {language === "vi" ? "Tin tức" : "News"}
+        <Link href="/tin-tuc" className="hover:text-[#b91c1c]">
+          Tin tức
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-slate-600 dark:text-slate-300 truncate max-w-[200px] md:max-w-md">
@@ -451,21 +287,21 @@ export default function NewsDetailPage({ id }: Props) {
               <div className="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1 gap-1">
                 <button
                   onClick={() => setFontSize("sm")}
-                  title={language === "vi" ? "Thu nhỏ chữ" : "Decrease text size"}
+                  title="Thu nhỏ chữ"
                   className={`p-1.5 rounded transition-colors ${fontSize === "sm" ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
                 >
                   <ZoomOut className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setFontSize("md")}
-                  title={language === "vi" ? "Cỡ chữ mặc định" : "Reset text size"}
+                  title="Cỡ chữ mặc định"
                   className={`p-1.5 rounded transition-colors ${fontSize === "md" ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={() => setFontSize("lg")}
-                  title={language === "vi" ? "Phóng to chữ" : "Increase text size"}
+                  title="Phóng to chữ"
                   className={`p-1.5 rounded transition-colors ${fontSize === "lg" ? "bg-red-50 text-[#b91c1c] dark:bg-red-950/40" : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400"}`}
                 >
                   <ZoomIn className="w-3.5 h-3.5" />
@@ -476,21 +312,21 @@ export default function NewsDetailPage({ id }: Props) {
               <div className="flex items-center gap-1">
                 <button
                   onClick={handlePrint}
-                  title={language === "vi" ? "In bài viết" : "Print Article"}
+                  title="In bài viết"
                   className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-[#b91c1c] rounded-lg transition-colors text-slate-400"
                 >
                   <Printer className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleDownloadPDF}
-                  title={language === "vi" ? "Tải xuống PDF" : "Download PDF"}
+                  title="Tải xuống PDF"
                   className="p-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:text-[#b91c1c] rounded-lg transition-colors text-slate-400"
                 >
                   <FileDown className="w-3.5 h-3.5" />
                 </button>
                 <button
                   onClick={handleShare}
-                  title={isCopied ? (language === "vi" ? "Đã sao chép!" : "Copied!") : (language === "vi" ? "Chia sẻ" : "Share Link")}
+                  title={isCopied ? "Đã sao chép!" : "Chia sẻ"}
                   className={`p-2 border rounded-lg transition-colors ${isCopied
                     ? "bg-green-50 border-green-200 text-green-600 dark:bg-green-950/20 dark:border-green-900"
                     : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-[#b91c1c]"
@@ -517,15 +353,15 @@ export default function NewsDetailPage({ id }: Props) {
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="text-xs text-slate-400 font-bold">
                 <span className="text-[#b91c1c] dark:text-[#fbc02d]">© Cổng thông tin điện tử Đảng bộ & UBND xã Dang Kang</span>
-                <p className="mt-0.5 font-medium">{language === "vi" ? "Nguồn tin chính thống cấp cơ sở." : "Official local governance news portal."}</p>
+                <p className="mt-0.5 font-medium">Nguồn tin chính thống cấp cơ sở.</p>
               </div>
 
               <Link
-                href={language === "vi" ? "/tin-tuc" : "/news"}
+                href="/tin-tuc"
                 className="self-start md:self-auto flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-black rounded-xl transition-all"
               >
                 <ArrowLeft className="w-4 h-4" />
-                {language === "vi" ? "QUAY LẠI DANH SÁCH" : "BACK TO NEWS LISTING"}
+                QUAY LẠI DANH SÁCH
               </Link>
             </div>
           </div>
@@ -537,12 +373,12 @@ export default function NewsDetailPage({ id }: Props) {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4">
             <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
-              {language === "vi" ? "TIN LIÊN QUAN KHÁC" : "MORE RELATED NEWS"}
+              TIN LIÊN QUAN KHÁC
             </h4>
 
             <div className="flex flex-col gap-4">
               {otherNews.map((post) => {
-                const itemPath = language === "vi" ? `/tin-tuc/${post.id}` : `/news/${post.id}`
+                const itemPath = `/tin-tuc/${post.id}`
                 return (
                   <Link
                     key={post.id}

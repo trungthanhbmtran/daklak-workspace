@@ -1,7 +1,6 @@
 "use client"
 
 import * as React from "react"
-import { useLanguage } from "@/components/language-context"
 import {
   Building2,
   MapPin,
@@ -18,69 +17,53 @@ import {
 } from "lucide-react"
 
 export default function AboutPage() {
-  const { language, t } = useLanguage()
-
   const orgSections = [
     {
-      title: t("ĐẢNG ỦY XÃ"),
-      desc: t("Cơ quan lãnh đạo toàn diện mọi hoạt động chính trị, kinh tế, xã hội, an ninh quốc phòng tại địa phương."),
-      details: language === "vi"
-        ? ["Bí thư Đảng ủy xã", "Phó Bí thư Thường trực Đảng ủy", "Ủy viên Ban Thường vụ Đảng ủy", "Các Chi bộ trực thuộc thôn, buôn, trường học"]
-        : ["Commune Party Secretary", "Permanent Deputy Secretary", "Party Standing Committee Member", "Underlying Hamlet & School branches"]
+      title: "ĐẢNG ỦY XÃ",
+      desc: "Cơ quan lãnh đạo toàn diện mọi hoạt động chính trị, kinh tế, xã hội, an ninh quốc phòng tại địa phương.",
+      details: ["Bí thư Đảng ủy xã", "Phó Bí thư Thường trực Đảng ủy", "Ủy viên Ban Thường vụ Đảng ủy", "Các Chi bộ trực thuộc thôn, buôn, trường học"]
     },
     {
-      title: t("HỘI ĐỒNG NHÂN DÂN"),
-      desc: t("Cơ quan quyền lực nhà nước ở địa phương, đại diện cho ý chí, nguyện vọng và quyền làm chủ của nhân dân."),
-      details: language === "vi"
-        ? ["Chủ tịch Hội đồng nhân dân", "Phó Chủ tịch HĐND xã", "Ban Pháp chế HĐND", "Ban Kinh tế - Xã hội HĐND"]
-        : ["Chairman of People's Council", "Vice Chairman of People's Council", "Council Legal Affairs Committee", "Council Socio-Economic Committee"]
+      title: "HỘI ĐỒNG NHÂN DÂN",
+      desc: "Cơ quan quyền lực nhà nước ở địa phương, đại diện cho ý chí, nguyện vọng và quyền làm chủ của nhân dân.",
+      details: ["Chủ tịch Hội đồng nhân dân", "Phó Chủ tịch HĐND xã", "Ban Pháp chế HĐND", "Ban Kinh tế - Xã hội HĐND"]
     },
     {
-      title: t("ỦY BAN NHÂN DÂN"),
-      desc: t("Cơ quan chấp hành của Hội đồng nhân dân, cơ quan hành chính nhà nước ở địa phương, quản lý điều hành toàn diện."),
-      details: language === "vi"
-        ? ["Chủ tịch Ủy ban nhân dân", "Các Phó Chủ tịch UBND xã", "Bộ phận Tiếp nhận & Trả kết quả (Một cửa)", "Công chức Chuyên môn nghiệp vụ"]
-        : ["Chairman of People's Committee", "Commune Vice Chairmen", "One-Stop Reception & Processing Department", "Specialized Civil Servants"]
+      title: "ỦY BAN NHÂN DÂN",
+      desc: "Cơ quan chấp hành của Hội đồng nhân dân, cơ quan hành chính nhà nước ở địa phương, quản lý điều hành toàn diện.",
+      details: ["Chủ tịch Ủy ban nhân dân", "Các Phó Chủ tịch UBND xã", "Bộ phận Tiếp nhận & Trả kết quả (Một cửa)", "Công chức Chuyên môn nghiệp vụ"]
     },
     {
-      title: t("ỦY BAN MTTQ & ĐOÀN THỂ"),
-      desc: t("Tập hợp lực lượng đại đoàn kết toàn dân tộc, phối hợp cùng chính quyền tổ chức thực hiện các phong trào thi đua."),
-      details: language === "vi"
-        ? ["Ủy ban Mặt trận Tổ quốc xã", "Hội Liên hiệp Phụ nữ xã", "Đoàn Thanh niên Cộng sản Hồ Chí Minh", "Hội Nông dân & Hội Cựu chiến binh"]
-        : ["Fatherland Front Committee", "Women's Union Association", "Youth Communist Union", "Farmers & Veterans Associations"]
+      title: "ỦY BAN MTTQ & ĐOÀN THỂ",
+      desc: "Tập hợp lực lượng đại đoàn kết toàn dân tộc, phối hợp cùng chính quyền tổ chức thực hiện các phong trào thi đua.",
+      details: ["Ủy ban Mặt trận Tổ quốc xã", "Hội Liên hiệp Phụ nữ xã", "Đoàn Thanh niên Cộng sản Hồ Chí Minh", "Hội Nông dân & Hội Cựu chiến binh"]
     }
   ]
 
   const detailLeaders = [
     {
-      name: language === "vi" ? "Nguyễn Văn Hồng" : "Nguyen Van Hong",
-      role: language === "vi" ? "Bí thư Đảng ủy - Chủ tịch HĐND xã" : "Party Secretary - Chairman of Council",
-      responsibility: language === "vi"
-        ? "Chịu trách nhiệm lãnh đạo toàn diện công tác Đảng, công tác chính trị tư tưởng; chỉ đạo toàn bộ hoạt động giám sát, ban hành nghị quyết phát triển của Hội đồng nhân dân xã."
-        : "Responsible for general Party leadership and political ideology; directing all supervisory activities and issuing developmental resolutions of the Commune People's Council.",
+      name: "Nguyễn Văn Hồng",
+      role: "Bí thư Đảng ủy - Chủ tịch HĐND xã",
+      responsibility: "Chịu trách nhiệm lãnh đạo toàn diện công tác Đảng, công tác chính trị tư tưởng; chỉ đạo toàn bộ hoạt động giám sát, ban hành nghị quyết phát triển của Hội đồng nhân dân xã.",
       phone: "0914.281.xxx",
       email: "nvhong@krongbong.daklak.gov.vn",
-      room: language === "vi" ? "Phòng 201 - Tầng 2, Trụ sở UBND xã" : "Room 201 - Floor 2, Commune PC HQ"
+      room: "Phòng 201 - Tầng 2, Trụ sở UBND xã"
     },
     {
-      name: language === "vi" ? "Trần Quốc Tuấn" : "Tran Quoc Tuan",
-      role: language === "vi" ? "Phó Bí thư Đảng ủy - Chủ tịch UBND xã" : "Deputy Party Secretary - Chairman of PC",
-      responsibility: language === "vi"
-        ? "Lãnh đạo, chỉ đạo toàn diện công tác quản lý điều hành hành chính nhà nước; trực tiếp chỉ đạo quy hoạch phát triển kinh tế, thu chi ngân sách, cải cách thủ tục hành chính."
-        : "Leading and directing state administrative operations; directly supervising economic development plans, public budget execution, and administrative reforms.",
+      name: "Trần Quốc Tuấn",
+      role: "Phó Bí thư Đảng ủy - Chủ tịch UBND xã",
+      responsibility: "Lãnh đạo, chỉ đạo toàn diện công tác quản lý điều hành hành chính nhà nước; trực tiếp chỉ đạo quy hoạch phát triển kinh tế, thu chi ngân sách, cải cách thủ tục hành chính.",
       phone: "0905.112.xxx",
       email: "tqtuan@krongbong.daklak.gov.vn",
-      room: language === "vi" ? "Phòng 102 - Tầng 1, Trụ sở UBND xã" : "Room 102 - Floor 1, Commune PC HQ"
+      room: "Phòng 102 - Tầng 1, Trụ sở UBND xã"
     },
     {
-      name: language === "vi" ? "H'Yen Knul" : "H'Yen Knul",
-      role: language === "vi" ? "Phó Chủ tịch UBND xã" : "Vice Chairwoman of People's Committee",
-      responsibility: language === "vi"
-        ? "Phụ trách khối Văn hóa - Xã hội, Y tế, Giáo dục; trực tiếp chỉ đạo thực hiện các chính sách an sinh xã hội, giảm nghèo bền vững và công tác dân tộc thiểu số địa bàn."
-        : "In charge of Culture, Social Affairs, Healthcare, and Education; supervising social security policies, sustainable poverty reduction, and ethnic minority affairs.",
+      name: "H'Yen Knul",
+      role: "Phó Chủ tịch UBND xã",
+      responsibility: "Phụ trách khối Văn hóa - Xã hội, Y tế, Giáo dục; trực tiếp chỉ đạo thực hiện các chính sách an sinh xã hội, giảm nghèo bền vững và công tác dân tộc thiểu số địa bàn.",
       phone: "0983.475.xxx",
       email: "hyenknul@krongbong.daklak.gov.vn",
-      room: language === "vi" ? "Phòng 104 - Tầng 1, Trụ sở UBND xã" : "Room 104 - Floor 1, Commune PC HQ"
+      room: "Phòng 104 - Tầng 1, Trụ sở UBND xã"
     }
   ]
 
@@ -90,10 +73,10 @@ export default function AboutPage() {
       {/* Page Title Header banner */}
       <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-[#b91c1c] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
         <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-white uppercase tracking-wide">
-          {t("GIỚI THIỆU CHUNG & CƠ CẤU TỔ CHỨC")}
+          GIỚI THIỆU CHUNG & CƠ CẤU TỔ CHỨC
         </h2>
         <p className="text-xs text-slate-400 mt-1 font-medium">
-          {t("Tìm hiểu về lịch sử địa lý, bộ máy vận hành hành administrative của xã Dang Kang, huyện Krông Bông")}
+          Tìm hiểu về lịch sử địa lý, bộ máy vận hành hành chính của xã Dang Kang, huyện Krông Bông
         </p>
       </div>
 
@@ -103,42 +86,23 @@ export default function AboutPage() {
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
             <History className="w-5 h-5 text-[#b91c1c]" />
             <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-              {t("Tổng quan Địa lý & Lịch sử")}
+              Tổng quan Địa lý & Lịch sử
             </h3>
           </div>
 
           <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-semibold flex flex-col gap-4">
-            {language === "vi" ? (
-              <>
-                <p>
-                  Xã Dang Kang là một đơn vị hành chính cấp xã nằm ở phía Tây Bắc của huyện Krông Bông, tỉnh Đắk Lắk. Với tổng diện tích đất tự nhiên hơn 2.450 ha, xã sở hữu vị trí địa lý kết nối giao thương nông sản quan trọng của huyện:
-                </p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 bg-slate-100/50 dark:bg-slate-900/40 p-3.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200/50 dark:border-slate-800/50 my-1 font-medium text-slate-600 dark:text-slate-400">
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Đông giáp xã Hòa Lễ</li>
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Tây giáp xã Cư Kty</li>
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Nam giáp dãy núi Chư Yang Sin</li>
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Bắc giáp sông Krông Ana</li>
-                </ul>
-                <p>
-                  Địa hình của xã chủ yếu là các thung lũng xen lẫn đồi bát úp đặc trưng của vùng Tây Nguyên, đất đai trù phú phù hợp canh tác nông sản hàng hóa giá trị cao như cà phê, sầu riêng, cao su và lúa nước 2 vụ. Dân số toàn xã đạt khoảng 6.800 người với 8 dân tộc anh em cùng sinh sống hòa hợp, tạo nên bản sắc văn hóa vùng miền phong phú, đậm đà bản sắc.
-                </p>
-              </>
-            ) : (
-              <>
-                <p>
-                  Dang Kang Commune is an administrative unit located in the northwest of Krong Bong District, Dak Lak Province. Spanning a total natural land area of over 2,450 hectares, the commune holds a highly strategic geographical position for agricultural commerce within the region:
-                </p>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 bg-slate-100/50 dark:bg-slate-900/40 p-3.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200/50 dark:border-slate-800/50 my-1 font-medium text-slate-600 dark:text-slate-400">
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> East: borders Hoa Le commune</li>
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> West: borders Cu Kty commune</li>
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> South: borders Chư Yang Sin mountain range</li>
-                  <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> North: borders Krong Ana river</li>
-                </ul>
-                <p>
-                  The geography of the commune is characterized by fertile valleys intermixed with rolling hills typical of the Central Highlands, yielding premium economic crops such as coffee, durian, rubber, and double-crop wet rice. The commune has a total population of approximately 6,800 people across 8 harmoniously coexisting ethnic groups, contributing to a rich, highly diverse, and vibrant local cultural heritage.
-                </p>
-              </>
-            )}
+            <p>
+              Xã Dang Kang là một đơn vị hành chính cấp xã nằm ở phía Tây Bắc của huyện Krông Bông, tỉnh Đắk Lắk. Với tổng diện tích đất tự nhiên hơn 2.450 ha, xã sở hữu vị trí địa lý kết nối giao thương nông sản quan trọng của huyện:
+            </p>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 bg-slate-100/50 dark:bg-slate-900/40 p-3.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200/50 dark:border-slate-800/50 my-1 font-medium text-slate-600 dark:text-slate-400">
+              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Đông giáp xã Hòa Lễ</li>
+              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Tây giáp xã Cư Kty</li>
+              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Nam giáp dãy núi Chư Yang Sin</li>
+              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Bắc giáp sông Krông Ana</li>
+            </ul>
+            <p>
+              Địa hình của xã chủ yếu là các thung lũng xen lẫn đồi bát úp đặc trưng của vùng Tây Nguyên, đất đai trù phú phù hợp canh tác nông sản hàng hóa giá trị cao như cà phê, sầu riêng, cao su và lúa nước 2 vụ. Dân số toàn xã đạt khoảng 6.800 người với 8 dân tộc anh em cùng sinh sống hòa hợp, tạo nên bản sắc văn hóa vùng miền phong phú, đậm đà bản sắc.
+            </p>
           </div>
         </div>
 
@@ -149,7 +113,7 @@ export default function AboutPage() {
               <Building2 className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t("Diện tích tự nhiên")}
+              Diện tích tự nhiên
             </span>
             <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">2,452.8 Ha</span>
           </div>
@@ -159,9 +123,9 @@ export default function AboutPage() {
               <Users2 className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t("Dân số hiện tại")}
+              Dân số hiện tại
             </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">6,842 {t("Người")}</span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">6,842 người</span>
           </div>
 
           <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
@@ -169,10 +133,10 @@ export default function AboutPage() {
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t("Đơn vị hành chính")}
+              Đơn vị hành chính
             </span>
             <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
-              {t("8 Thôn, Buôn")}
+              8 Thôn, Buôn
             </span>
           </div>
 
@@ -181,10 +145,10 @@ export default function AboutPage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t("Chuẩn nông thôn mới")}
+              Chuẩn nông thôn mới
             </span>
             <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
-              {t("Đạt 19/19 Tiêu chí")}
+              Đạt 19/19 Tiêu chí
             </span>
           </div>
         </div>
@@ -195,12 +159,12 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <Workflow className="w-5 h-5 text-[#b91c1c]" />
           <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-            {t("Sơ đồ Bộ máy hành chính xã Dang Kang")}
+            Sơ đồ Bộ máy hành chính xã Dang Kang
           </h3>
         </div>
 
         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
-          {t("Sơ đồ vận hành liên thông, đảm bảo tính thống nhất chỉ đạo từ cấp Đảng ủy đến giám sát của HĐND xã và điều hành hành chính thực thi nhiệm vụ chuyên môn của UBND xã:")}
+          Sơ đồ vận hành liên thông, đảm bảo tính thống nhất chỉ đạo từ cấp Đảng ủy đến giám sát của HĐND xã và điều hành hành chính thực thi nhiệm vụ chuyên môn của UBND xã:
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
@@ -231,12 +195,12 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <UserSquare2 className="w-5 h-5 text-[#b91c1c]" />
           <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-            {t("Thông tin Lãnh đạo chủ chốt")}
+            Thông tin Lãnh đạo chủ chốt
           </h3>
         </div>
 
         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
-          {t("Danh sách cán bộ lãnh đạo phụ trách, điều hành, có lịch tiếp nhận phản ánh, kiến nghị trực tiếp từ nhân dân:")}
+          Danh sách cán bộ lãnh đạo phụ trách, điều hành, có lịch tiếp nhận phản ánh, kiến nghị trực tiếp từ nhân dân:
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-2">
@@ -259,7 +223,7 @@ export default function AboutPage() {
                 <div className="flex flex-col gap-1.5 flex-1">
                   <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
                     <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                    {language === "vi" ? "Phạm vi trách nhiệm" : "Responsibility Scope"}
+                    Phạm vi trách nhiệm
                   </span>
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
                     {leader.responsibility}
@@ -269,15 +233,15 @@ export default function AboutPage() {
                 <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 flex flex-col gap-2.5 font-medium text-slate-600 dark:text-slate-400">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>{language === "vi" ? "Nơi làm việc:" : "Office Room:"} {leader.room}</span>
+                    <span>Nơi làm việc: {leader.room}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                    <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">{language === "vi" ? "Di động:" : "Phone:"} {leader.phone}</a>
+                    <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">Di động: {leader.phone}</a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                    <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">{language === "vi" ? "Thư điện tử:" : "Email:"} {leader.email}</a>
+                    <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">Thư điện tử: {leader.email}</a>
                   </div>
                 </div>
               </div>

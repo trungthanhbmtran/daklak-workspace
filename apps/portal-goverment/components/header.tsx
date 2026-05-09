@@ -4,7 +4,6 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useTheme } from "next-themes"
-import { useLanguage } from "@/components/language-context"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
 import { resolveMediaUrl } from "@/lib/utils"
@@ -102,7 +101,6 @@ export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const { theme, setTheme, resolvedTheme } = useTheme()
-  const { language, setLanguage, t, languages } = useLanguage()
   const [mounted, setMounted] = React.useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null)
@@ -132,8 +130,7 @@ export default function Header() {
     const updateDateTime = () => {
       const now = new Date()
       const daysVi = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
-      const daysEn = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-      const dayName = language === "vi" ? daysVi[now.getDay()] : daysEn[now.getDay()]
+      const dayName = daysVi[now.getDay()]
       const date = String(now.getDate()).padStart(2, '0')
       const month = String(now.getMonth() + 1).padStart(2, '0')
       const year = now.getFullYear()
@@ -141,45 +138,41 @@ export default function Header() {
       const minutes = String(now.getMinutes()).padStart(2, '0')
       const seconds = String(now.getSeconds()).padStart(2, '0')
 
-      if (language === "vi") {
-        setDateTimeStr(`${dayName}, ${date}/${month}/${year} - ${hours}:${minutes}:${seconds}`)
-      } else {
-        setDateTimeStr(`${dayName}, ${month}/${date}/${year} - ${hours}:${minutes}:${seconds}`)
-      }
+      setDateTimeStr(`${dayName}, ${date}/${month}/${year} - ${hours}:${minutes}:${seconds}`)
     }
 
     updateDateTime()
     const timer = setInterval(updateDateTime, 1000)
     return () => clearInterval(timer)
-  }, [language])
+  }, [])
 
   const menuItems: MenuItem[] = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
       return [
-        { name: t("Trang chủ"), path: "/" },
+        { name: "Trang chủ", path: "/" },
         {
-          name: t("Giới thiệu"),
-          path: language === "vi" ? "/gioi-thieu" : "/aboutus",
+          name: "Giới thiệu",
+          path: "/gioi-thieu",
           children: [
-            { name: language === "vi" ? "Giới thiệu chung" : "Overview & History", path: language === "vi" ? "/gioi-thieu#chung" : "/aboutus#chung" },
-            { name: language === "vi" ? "Cơ cấu tổ chức" : "Organizational Structure", path: language === "vi" ? "/gioi-thieu#co-cau" : "/aboutus#co-cau" },
-            { name: language === "vi" ? "Thông tin lãnh đạo" : "Key Leadership Contacts", path: language === "vi" ? "/gioi-thieu#lanh-dao" : "/aboutus#lanh-dao" }
+            { name: "Giới thiệu chung", path: "/gioi-thieu#chung" },
+            { name: "Cơ cấu tổ chức", path: "/gioi-thieu#co-cau" },
+            { name: "Thông tin lãnh đạo", path: "/gioi-thieu#lanh-dao" }
           ]
         },
         {
-          name: t("Tin tức"),
-          path: language === "vi" ? "/tin-tuc" : "/news",
+          name: "Tin tức",
+          path: "/tin-tuc",
           children: [
-            { name: language === "vi" ? "Tin hoạt động Đảng Ủy" : "Party Committee News", path: language === "vi" ? "/tin-tuc?category=dang-uy" : "/news?category=dang-uy" },
-            { name: language === "vi" ? "Tin Hội đồng nhân dân" : "People's Council News", path: language === "vi" ? "/tin-tuc?category=hdnd" : "/news?category=hdnd" },
-            { name: language === "vi" ? "Tin Ủy ban nhân dân" : "People's Committee News", path: language === "vi" ? "/tin-tuc?category=ubnd" : "/news?category=ubnd" },
-            { name: language === "vi" ? "Kinh tế - Xã hội" : "Economy & Society", path: language === "vi" ? "/tin-tuc?category=kinh-te" : "/news?category=kinh-te" }
+            { name: "Tin hoạt động Đảng Ủy", path: "/tin-tuc?category=dang-uy" },
+            { name: "Tin Hội đồng nhân dân", path: "/tin-tuc?category=hdnd" },
+            { name: "Tin Ủy ban nhân dân", path: "/tin-tuc?category=ubnd" },
+            { name: "Kinh tế - Xã hội", path: "/tin-tuc?category=kinh-te" }
           ]
         },
-        { name: t("Văn bản"), path: language === "vi" ? "/van-ban" : "/documents" },
-        { name: t("Thủ tục hành chính"), path: language === "vi" ? "/thu-tuc" : "/procedures" },
-        { name: t("Hỏi đáp & Góp ý"), path: language === "vi" ? "/tuong-tac" : "/feedback" },
-        { name: t("Liên hệ"), path: language === "vi" ? "/lien-he" : "/contact" }
+        { name: "Văn bản", path: "/van-ban" },
+        { name: "Thủ tục hành chính", path: "/thu-tuc" },
+        { name: "Hỏi đáp & Góp ý", path: "/tuong-tac" },
+        { name: "Liên hệ", path: "/lien-he" }
       ]
     }
 
@@ -207,7 +200,7 @@ export default function Header() {
           : undefined
       }
     })
-  }, [menusData, language, t])
+  }, [menusData])
 
   const { data: positionsData } = useQuery({
     queryKey: ["public-categories", "BANNER_POSITION"],
@@ -246,11 +239,11 @@ export default function Header() {
       try {
         const parsed = JSON.parse(found.description);
         if (parsed && typeof parsed === 'object') {
-          if (parsed[language]) {
-            return parsed[language];
+          if (parsed.vi) {
+            return parsed.vi;
           }
-          if (parsed.translations && parsed.translations[language]) {
-            return parsed.translations[language];
+          if (parsed.translations && parsed.translations.vi) {
+            return parsed.translations.vi;
           }
         }
       } catch (e) {
@@ -263,7 +256,7 @@ export default function Header() {
     }
 
     return found.name || fallback;
-  }, [portalConfigData, language]);
+  }, [portalConfigData]);
 
   const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
@@ -307,6 +300,7 @@ export default function Header() {
       setActiveDropdown(name)
     }
   }
+
   return (
     <header className="w-full flex flex-col z-50 relative select-none">
       {/* 1. Top Utility Bar */}
@@ -323,60 +317,6 @@ export default function Header() {
             <a href="mailto:xadangkang@daklak.gov.vn" className="hover:text-[#cc0000] transition-colors">
               xadangkang@daklak.gov.vn
             </a>
-            <span className="text-slate-300 dark:text-slate-700">|</span>
-            <div className="flex items-center gap-2">
-              {(languages || []).map((lang: any) => {
-                const isActive = language === lang.code
-                return (
-                  <div
-                    key={lang.code}
-                    onClick={() => setLanguage(lang.code)}
-                    className={`cursor-pointer transition-all hover:scale-110 ${isActive
-                      ? "scale-105 filter drop-shadow-[0_0_2px_rgba(251,192,45,0.8)]"
-                      : "opacity-60 hover:opacity-100"
-                      }`}
-                    title={lang.name}
-                  >
-                    {lang.code === "vi" ? (
-                      <svg
-                        viewBox="0 0 30 20"
-                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
-                          }`}
-                      >
-                        <title>{lang.name}</title>
-                        <rect width="30" height="20" fill="#da251d" />
-                        <polygon points="15,4 15.8,7.6 19.5,7.6 16.3,9.8 17.2,13.4 15,11.2 12.8,13.4 13.7,9.8 10.5,7.6 14.2,7.6" fill="#ffff00" />
-                      </svg>
-                    ) : lang.code === "en" ? (
-                      <svg
-                        viewBox="0 0 60 30"
-                        className={`w-5 h-3.5 inline-block rounded-sm shadow-sm border ${isActive ? "border-amber-400 ring-1 ring-amber-400" : "border-slate-300 dark:border-slate-700"
-                          }`}
-                      >
-                        <title>{lang.name}</title>
-                        <clipPath id={`s_flag_${lang.code}`}><path d="M0,0 v30 h60 v-30 z" /></clipPath>
-                        <g clipPath={`url(#s_flag_${lang.code})`}>
-                          <rect width="60" height="30" fill="#012169" />
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
-                          <path d="M0,0 L60,30 M60,0 L0,30" stroke="#c8102e" strokeWidth="4" />
-                          <path d="M0,15 H60 M30,0 V30" stroke="#fff" strokeWidth="10" />
-                          <path d="M0,15 H60 M30,0 V30" stroke="#c8102e" strokeWidth="6" />
-                        </g>
-                      </svg>
-                    ) : (
-                      <div
-                        className={`px-1.5 py-0.5 text-[9px] font-black tracking-wide rounded-sm shadow-sm border uppercase leading-none ${isActive
-                          ? "bg-amber-400 text-slate-950 border-amber-400 ring-1 ring-amber-400"
-                          : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
-                          }`}
-                      >
-                        {lang.code}
-                      </div>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
             {mounted && (
               <>
                 <span className="text-slate-300 dark:text-slate-700">|</span>
@@ -597,7 +537,7 @@ export default function Header() {
               className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white"
             >
               {resolvedTheme === "dark" ? (
-                <Sun className="w-4 h-4 text-amber-400" />
+                <Sun className="w-4 h-4 text-amber-500" />
               ) : (
                 <Moon className="w-4 h-4 text-slate-100" />
               )}

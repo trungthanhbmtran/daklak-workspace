@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useLanguage } from "@/components/language-context"
 import {
   FileText,
   Search,
@@ -18,7 +17,7 @@ import {
   FileSpreadsheet
 } from "lucide-react"
 
-const MOCK_DOCUMENTS_VI = [
+const MOCK_DOCUMENTS = [
   {
     id: "01",
     code: "04-NQ/ĐU",
@@ -91,103 +90,27 @@ const MOCK_DOCUMENTS_VI = [
   }
 ]
 
-const MOCK_DOCUMENTS_EN = [
-  {
-    id: "01",
-    code: "04-NQ/ĐU",
-    title: "Resolution of Dang Kang Commune Party Committee on strengthening direction to build model rural areas in 2026",
-    signer: "Nguyen Van Hong",
-    signDate: "28/04/2026",
-    type: "nghi-quyet",
-    typeName: "Resolution",
-    org: "dang-uy",
-    orgName: "Commune Party",
-    sector: "kinh-te",
-    sectorName: "Economics & Investment",
-    summary: "Resolution outlining goals to fully mobilize the local political system and citizens to complete advanced infrastructure categories, inter-village road concrete works, and transition agricultural exports by Q3 2026."
-  },
-  {
-    id: "02",
-    code: "12/QĐ-UBND",
-    title: "Decision approving procurement bidding plans for modern One-Stop desk equipments of Commune PC",
-    signer: "Tran Quoc Tuan",
-    signDate: "22/04/2026",
-    type: "quyet-dinh",
-    typeName: "Decision",
-    org: "ubnd",
-    orgName: "People's Committee",
-    sector: "noi-vu",
-    sectorName: "Internal Affairs & Admin",
-    summary: "Decision authorizing 450 million VND from recurrent operational budgets to install electronic queuing machines, touch-screen procedure terminals, and monitoring cameras to serve citizens."
-  },
-  {
-    id: "03",
-    code: "18-NQ/HĐND",
-    title: "Resolution approving local budget settlement allocation for fiscal year 2025",
-    signer: "Nguyen Van Hong",
-    signDate: "15/04/2026",
-    type: "nghi-quyet",
-    typeName: "Resolution",
-    org: "hdnd",
-    orgName: "People's Council",
-    sector: "tai-chinh",
-    sectorName: "Finance & Budget",
-    summary: "Resolution endorsing audit results where domestic budget revenues surpassed target benchmarks by 12.4%, and authorizing surplus funds transfer into infrastructural investments for rural hamlets."
-  },
-  {
-    id: "04",
-    code: "45/TB-UBND",
-    title: "Notice on national flag raising and public holidays for Victory Day April 30 and International Workers' Day May 1",
-    signer: "Tran Quoc Tuan",
-    signDate: "20/04/2026",
-    type: "thong-bao",
-    typeName: "Notice",
-    org: "ubnd",
-    orgName: "People's Committee",
-    sector: "noi-vu",
-    sectorName: "Internal Affairs & Admin",
-    summary: "Notice directing civil servants and local citizens to raise the national flag from April 29 to May 2, 2026, and scheduling safety standby security forces throughout the public holidays."
-  },
-  {
-    id: "05",
-    code: "02/KH-UBND",
-    title: "Action plan initiating massive chemical spraying campaign to prevent local Dengue Fever outbreaks",
-    signer: "H'Yen Knul",
-    signDate: "18/04/2026",
-    type: "ke-hoach",
-    typeName: "Plan",
-    org: "ubnd",
-    orgName: "People's Committee",
-    sector: "y-te",
-    sectorName: "Health & Education",
-    summary: "Detailed action plan cooperating with the District Health Center to spray sanitizing chemical vapors across Hamlet 2, Hamlet 6, and Ega Village, and distribute free anti-larval kits to households."
-  }
-]
-
 export default function DocumentsPage() {
-  const { language, t } = useLanguage()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeType, setActiveType] = React.useState("all")
   const [activeOrg, setActiveOrg] = React.useState("all")
 
-  const MOCK_DOCUMENTS = language === "vi" ? MOCK_DOCUMENTS_VI : MOCK_DOCUMENTS_EN
-
   const TYPE_FILTERS = [
-    { label: language === "vi" ? "Tất cả loại" : "All Types", value: "all" },
-    { label: language === "vi" ? "Quyết định" : "Decision", value: "quyet-dinh" },
-    { label: language === "vi" ? "Nghị quyết" : "Resolution", value: "nghi-quyet" },
-    { label: language === "vi" ? "Thông báo" : "Notice", value: "thong-bao" },
-    { label: language === "vi" ? "Kế hoạch" : "Plan", value: "ke-hoach" }
+    { label: "Tất cả loại", value: "all" },
+    { label: "Quyết định", value: "quyet-dinh" },
+    { label: "Nghị quyết", value: "nghi-quyet" },
+    { label: "Thông báo", value: "thong-bao" },
+    { label: "Kế hoạch", value: "ke-hoach" }
   ]
 
   const ORG_FILTERS = [
-    { label: language === "vi" ? "Tất cả cơ quan" : "All Bodies", value: "all" },
-    { label: language === "vi" ? "Đảng ủy" : "Party Board", value: "dang-uy" },
-    { label: language === "vi" ? "HĐND" : "Commune Council", value: "hdnd" },
-    { label: language === "vi" ? "UBND" : "People's Committee", value: "ubnd" }
+    { label: "Tất cả cơ quan", value: "all" },
+    { label: "Đảng ủy", value: "dang-uy" },
+    { label: "HĐND", value: "hdnd" },
+    { label: "UBND", value: "ubnd" }
   ]
 
-  const [selectedDoc, setSelectedDoc] = React.useState<typeof MOCK_DOCUMENTS_VI[0] | null>(null)
+  const [selectedDoc, setSelectedDoc] = React.useState<typeof MOCK_DOCUMENTS[0] | null>(null)
 
   const filteredDocs = MOCK_DOCUMENTS.filter(doc => {
     const matchesSearch = !searchQuery.trim() ||
@@ -205,11 +128,11 @@ export default function DocumentsPage() {
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
-          {t("Trang chủ")}
+          Trang chủ
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-slate-600 dark:text-slate-300">
-          {language === "vi" ? "Văn bản pháp quy" : "Legal Documents"}
+          Văn bản pháp quy
         </span>
       </div>
 
@@ -218,12 +141,10 @@ export default function DocumentsPage() {
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="flex flex-col">
             <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-              {language === "vi" ? "CƠ SỞ DỮ LIỆU VĂN BẢN ĐỊA PHƯƠNG" : "LOCAL LEGAL DOCUMENT DATABASE"}
+              CƠ SỞ DỮ LIỆU VĂN BẢN ĐỊA PHƯƠNG
             </h2>
             <p className="text-xs text-slate-400 mt-1 font-medium">
-              {language === "vi"
-                ? "Tìm kiếm, tra cứu các Nghị quyết, Quyết định chỉ đạo điều hành của xã Dang Kang"
-                : "Search and inspect official Resolutions, Decisions and directives of Dang Kang Commune"}
+              Tìm kiếm, tra cứu các Nghị quyết, Quyết định chỉ đạo điều hành của xã Dang Kang
             </p>
           </div>
 
@@ -231,7 +152,7 @@ export default function DocumentsPage() {
           <div className="relative w-full lg:max-w-md flex items-center">
             <input
               type="text"
-              placeholder={language === "vi" ? "Nhập số hiệu văn bản hoặc từ khóa..." : "Type document number or keyword..."}
+              placeholder="Nhập số hiệu văn bản hoặc từ khóa..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 focus:text-slate-900 text-sm pl-4 pr-10 py-2.5 rounded-xl focus:outline-none focus:border-red-600 transition-all shadow-inner dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -248,7 +169,7 @@ export default function DocumentsPage() {
           {/* Type filters */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
-              {language === "vi" ? "Loại văn bản" : "Document Type"}
+              Loại văn bản
             </span>
             <div className="flex flex-wrap gap-1.5">
               {TYPE_FILTERS.map((t) => (
@@ -269,7 +190,7 @@ export default function DocumentsPage() {
           {/* Org filters */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
-              {language === "vi" ? "Cơ quan ban hành" : "Issuing Authority"}
+              Cơ quan ban hành
             </span>
             <div className="flex flex-wrap gap-1.5">
               {ORG_FILTERS.map((o) => (
@@ -296,11 +217,11 @@ export default function DocumentsPage() {
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-slate-100 dark:bg-slate-950 text-slate-500 font-bold uppercase border-b border-slate-200 dark:border-slate-800">
-                <th className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 w-28">{language === "vi" ? "Số hiệu" : "Doc No."}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4 w-32">{language === "vi" ? "Ngày ban hành" : "Date Issued"}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4">{language === "vi" ? "Trích yếu nội dung văn bản" : "Document Title & Summary"}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4 w-36">{language === "vi" ? "Cơ quan ban hành" : "Issuing Body"}</th>
-                <th className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 text-right w-24">{language === "vi" ? "Tác vụ" : "Action"}</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 w-28">Số hiệu</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-4 w-32">Ngày ban hành</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-4">Trích yếu nội dung văn bản</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-4 w-36">Cơ quan ban hành</th>
+                <th className="py-3 px-3 sm:py-4 sm:px-4 md:px-5 text-right w-24">Tác vụ</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
@@ -330,7 +251,7 @@ export default function DocumentsPage() {
                         <button
                           onClick={() => setSelectedDoc(doc)}
                           className="p-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-slate-300 hover:bg-slate-100 dark:bg-slate-950 dark:border-slate-800 hover:text-[#b91c1c] transition-all text-slate-500"
-                          title={language === "vi" ? "Xem chi tiết" : "View details"}
+                          title="Xem chi tiết"
                         >
                           <Eye className="w-3.5 h-3.5" />
                         </button>
@@ -338,10 +259,10 @@ export default function DocumentsPage() {
                           href="#"
                           onClick={(e) => {
                             e.preventDefault()
-                            alert(language === "vi" ? `Bắt đầu tải tệp đính kèm văn bản: ${doc.code}` : `Starting download for document attachment: ${doc.code}`)
+                            alert(`Bắt đầu tải tệp đính kèm văn bản: ${doc.code}`)
                           }}
                           className="p-1.5 rounded-lg bg-[#b91c1c]/5 hover:bg-[#b91c1c]/15 border border-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] transition-all"
-                          title={language === "vi" ? "Tải văn bản đính kèm" : "Download attachment"}
+                          title="Tải văn bản đính kèm"
                         >
                           <Download className="w-3.5 h-3.5" />
                         </a>
@@ -352,9 +273,7 @@ export default function DocumentsPage() {
               ) : (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-slate-400 font-semibold bg-white dark:bg-slate-900">
-                    {language === "vi"
-                      ? "Không tìm thấy văn bản pháp quy nào phù hợp bộ lọc."
-                      : "No legal documents found matching the selected filters."}
+                    Không tìm thấy văn bản pháp quy nào phù hợp bộ lọc.
                   </td>
                 </tr>
               )}
@@ -363,7 +282,7 @@ export default function DocumentsPage() {
         </div>
       </div>
 
-      {/* 4. Interactive Details Drawer/Modal */}
+      {/* Interactive Details Drawer/Modal */}
       {selectedDoc && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setSelectedDoc(null)}>
           <div
@@ -375,7 +294,7 @@ export default function DocumentsPage() {
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#b91c1c]" />
                 <span className="text-xs font-black text-[#b91c1c] uppercase tracking-wider">
-                  {language === "vi" ? "CHI TIẾT VĂN BẢN PHÁP QUY" : "LEGAL DOCUMENT SPECIFICATIONS"}
+                  CHI TIẾT VĂN BẢN PHÁP QUY
                 </span>
               </div>
               <button
@@ -390,7 +309,7 @@ export default function DocumentsPage() {
             <div className="p-4 sm:p-5 md:p-6 overflow-y-auto flex flex-col gap-4 sm:gap-5 text-xs text-slate-700 dark:text-slate-300">
               <div className="flex flex-col gap-1.5 border-b border-slate-100 dark:border-slate-800/80 pb-3.5 sm:pb-4">
                 <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
-                  {language === "vi" ? "Tên văn bản / Trích yếu" : "Document Title / Abstract"}
+                  Tên văn bản / Trích yếu
                 </span>
                 <h4 className="text-sm font-extrabold text-slate-900 dark:text-white leading-normal tracking-wide">{selectedDoc.title}</h4>
               </div>
@@ -399,25 +318,25 @@ export default function DocumentsPage() {
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div className="flex flex-col gap-1">
                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <Tag className="w-3 h-3 text-red-500" /> {language === "vi" ? "Số ký hiệu" : "Document Code"}
+                    <Tag className="w-3 h-3 text-red-500" /> Số ký hiệu
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white text-xs">{selectedDoc.code}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <Calendar className="w-3 h-3 text-sky-500" /> {language === "vi" ? "Ngày ban hành" : "Date of Issue"}
+                    <Calendar className="w-3 h-3 text-sky-500" /> Ngày ban hành
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white text-xs font-mono">{selectedDoc.signDate}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <Building2 className="w-3 h-3 text-emerald-500" /> {language === "vi" ? "Cơ quan ban hành" : "Issuing Body"}
+                    <Building2 className="w-3 h-3 text-emerald-500" /> Cơ quan ban hành
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white text-xs">{selectedDoc.orgName}</span>
                 </div>
                 <div className="flex flex-col gap-1">
                   <span className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3 text-indigo-500" /> {language === "vi" ? "Người ký duyệt" : "Authorized Signer"}
+                    <CheckCircle2 className="w-3 h-3 text-indigo-500" /> Người ký duyệt
                   </span>
                   <span className="font-bold text-slate-900 dark:text-white text-xs">{selectedDoc.signer}</span>
                 </div>
@@ -425,7 +344,7 @@ export default function DocumentsPage() {
 
               <div className="flex flex-col gap-1.5 border-t border-slate-100 dark:border-slate-800/80 pt-3.5 sm:pt-4">
                 <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
-                  {language === "vi" ? "Tóm tắt nội dung văn bản" : "Content Summary"}
+                  Tóm tắt nội dung văn bản
                 </span>
                 <p className="leading-relaxed text-slate-600 dark:text-slate-400 font-semibold">{selectedDoc.summary}</p>
               </div>
@@ -434,17 +353,17 @@ export default function DocumentsPage() {
                 <div className="flex items-center gap-2">
                   <FileSpreadsheet className="w-8 h-8 text-red-500" />
                   <div className="flex flex-col">
-                    <span>Van_ban_so_${selectedDoc.id}.pdf</span>
+                    <span>Van_ban_so_{selectedDoc.id}.pdf</span>
                     <span className="text-[10px] text-slate-400 font-medium">
-                      {language === "vi" ? "Kích thước: 1.45 MB - Định dạng: PDF" : "Size: 1.45 MB - Format: PDF"}
+                      Kích thước: 1.45 MB - Định dạng: PDF
                     </span>
                   </div>
                 </div>
                 <button
-                  onClick={() => alert(language === "vi" ? `Bắt đầu tải xuống tệp: Van_ban_so_${selectedDoc.id}.pdf` : `Starting download for file: Van_ban_so_${selectedDoc.id}.pdf`)}
+                  onClick={() => alert(`Bắt đầu tải xuống tệp: Van_ban_so_${selectedDoc.id}.pdf`)}
                   className="bg-[#b91c1c] text-white hover:bg-red-700 px-4 py-2 rounded-lg flex items-center gap-1 transition-colors font-bold uppercase text-[10px] tracking-wider shadow"
                 >
-                  <Download className="w-3.5 h-3.5" /> {language === "vi" ? "Tải về" : "Download"}
+                  <Download className="w-3.5 h-3.5" /> Tải về
                 </button>
               </div>
             </div>
@@ -455,7 +374,7 @@ export default function DocumentsPage() {
                 onClick={() => setSelectedDoc(null)}
                 className="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 text-xs font-bold transition-all text-slate-700 dark:text-slate-300"
               >
-                {language === "vi" ? "ĐÓNG CỬA SỔ" : "CLOSE WINDOW"}
+                ĐÓNG CỬA SỔ
               </button>
             </div>
           </div>
