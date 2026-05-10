@@ -2,6 +2,8 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { useQuery } from "@tanstack/react-query"
+import apiClient from "@/lib/axiosInstance"
 import {
   MessageSquare,
   Send,
@@ -18,6 +20,15 @@ import {
   ShieldAlert
 } from "lucide-react"
 
+// Browser-safe cookie extraction helper
+function getCookie(name: string): string {
+  if (typeof document === "undefined") return ""
+  const value = `; ${document.cookie}`
+  const parts = value.split(`; ${name}=`)
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || ""
+  return ""
+}
+
 interface QuestionItem {
   id: string
   title: string
@@ -30,49 +41,57 @@ interface QuestionItem {
   status: "approved" | "pending"
 }
 
-const INITIAL_QUESTIONS: QuestionItem[] = [
-  {
-    id: "Q-101",
-    title: "Thủ tục cấp Giấy chứng nhận quyền sử dụng đất nông nghiệp lần đầu",
-    sender: "Nguyễn Văn Hùng (Thôn 4, xã Dang Kang)",
-    submitDate: "02/05/2026",
-    categoryName: "Đất đai - Địa chính",
-    content: "Chào UBND xã Dang Kang, tôi có một thửa đất trồng cây hàng năm khác khai hoang từ năm 1998 đến nay liên tục sản xuất và không có tranh chấp. Nay tôi muốn xin cấp bìa đỏ lần đầu thì cần chuẩn bị những hồ sơ giấy tờ gì và thời gian giải quyết bao lâu?",
-    answer: "Chào anh Hùng, đối với trường hợp cấp Giấy chứng nhận quyền sử dụng đất lần đầu cho đất khai hoang sản xuất ổn định trước năm 2004, anh cần chuẩn bị: (1) Đơn đăng ký cấp Giấy chứng nhận theo mẫu số 04a/ĐK; (2) Bản sao các giấy tờ chứng minh quá trình sử dụng đất (nếu có) hoặc Giấy xác nhận nguồn gốc đất của UBND xã; (3) Bản vẽ trích đo địa chính thửa đất. Bộ phận Địa chính xã sẽ tổ chức niêm yết công khai trạng thái tranh chấp trong 15 ngày tại Nhà văn hóa thôn và Trụ sở UBND xã trước khi chuyển hồ sơ lên UBND huyện giải quyết cấp sổ.",
-    answerDate: "04/05/2026",
-    status: "approved"
-  },
-  {
-    id: "Q-102",
-    title: "Ý kiến phản ánh về việc thu phí vệ sinh môi trường nông thôn mới",
-    sender: "Lê Thị Hồng (Thôn 2, xã Dang Kang)",
-    submitDate: "30/04/2026",
-    categoryName: "Môi trường - Đô thị",
-    content: "Góp ý về chất lượng thu gom rác thải sinh hoạt tại trục đường chính thôn 2. Đề nghị đơn vị vệ sinh môi trường thực hiện thu gom đúng khung giờ quy định tránh để rác ứ đọng bốc mùi ảnh hưởng sinh hoạt người dân và mỹ quan nông thôn.",
-    answer: "Chào chị Hồng, UBND xã xin tiếp thu ý kiến phản ánh từ chị. Ngay sau khi tiếp nhận phản ánh, UBND xã đã có buổi làm việc nhắc nhở trực tiếp với Ban quản lý dịch vụ thu gom rác thải xã yêu cầu điều chỉnh lại lịch trình xe gom rác, bảo đảm thu dọn sạch sẽ rác tồn đọng trước 17h hàng ngày và cam kết không để xảy ra tình trạng bốc mùi hôi thối trên địa bàn dân cư.",
-    answerDate: "02/05/2026",
-    status: "approved"
-  },
-  {
-    id: "Q-103",
-    title: "Quy trình chuyển đổi thông tin Căn cước công dân trên Giấy khai sinh cho con",
-    sender: "Y-Tuyn Knul (Buôn Êga, xã Dang Kang)",
-    submitDate: "28/04/2026",
-    categoryName: "Hộ tịch - Tư pháp",
-    content: "Chào bộ phận hộ tịch xã Dang Kang, tôi vừa đổi từ CMND cũ 9 số sang Căn cước công dân 12 số có mã vạch. Vậy tôi có cần làm thủ tục thay đổi thông tin cha mẹ trên Giấy khai sinh của con tôi hay không, xin hướng dẫn thủ tục?",
-    answer: "Chào anh Y-Tuyn Knul, theo quy định của Luật Hộ tịch, việc công dân thay đổi từ Chứng minh nhân dân sang Căn cước công dân không làm thay đổi hay ảnh hưởng đến tính pháp lý của quan hệ cha - con trên Giấy khai sinh đã cấp. Do đó, anh không cần thực hiện thủ tục đính chính hay thay đổi thông tin trên Giấy khai sinh của cháu bé. Giấy khai sinh cũ vẫn hoàn toàn hợp lệ sử dụng liên thông cùng các giấy tờ khác.",
-    answerDate: "29/04/2026",
-    status: "approved"
-  }
-]
-
 export default function InteractionsPage() {
-  const [questions, setQuestions] = React.useState<QuestionItem[]>([])
-  const [activeQaIdx, setActiveQaIdx] = React.useState<string | null>("Q-101")
+  const [currentLang, setCurrentLang] = React.useState("vi")
+  const [localQuestions, setLocalQuestions] = React.useState<QuestionItem[]>([])
+  const [activeQaIdx, setActiveQaIdx] = React.useState<string | null>(null)
 
   React.useEffect(() => {
-    setQuestions(INITIAL_QUESTIONS)
+    const lang = getCookie("lang") || "vi"
+    setCurrentLang(lang)
   }, [])
+
+  // Fetch live answered citizen questions
+  const { data: questionsResponse, refetch } = useQuery({
+    queryKey: ["public-interactions", currentLang],
+    queryFn: async () => {
+      try {
+        const res: any = await apiClient.get("/public/interactions/questions?limit=50")
+        return res?.data || []
+      } catch (e) {
+        console.error("Failed to fetch questions", e)
+        return []
+      }
+    }
+  })
+
+  // Map API questions to UI schema
+  const dbQuestions = React.useMemo(() => {
+    const list = Array.isArray(questionsResponse) ? questionsResponse : []
+    return list.map((q: any) => ({
+      id: q.id,
+      title: q.title,
+      sender: q.askedByName || "Ẩn danh",
+      submitDate: q.createdAt ? new Date(q.createdAt).toLocaleDateString("vi-VN") : "Đang cập nhật",
+      categoryName: q.categoryId || "Chung",
+      content: q.content,
+      answer: q.answerContent,
+      answerDate: q.answeredAt ? new Date(q.answeredAt).toLocaleDateString("vi-VN") : null,
+      status: "approved" as const
+    }))
+  }, [questionsResponse])
+
+  // Combine live questions and pending submissions
+  const questions = React.useMemo(() => {
+    return [...localQuestions, ...dbQuestions]
+  }, [localQuestions, dbQuestions])
+
+  // Auto-expand first item if available
+  React.useEffect(() => {
+    if (questions.length > 0 && !activeQaIdx) {
+      setActiveQaIdx(questions[0].id)
+    }
+  }, [questions, activeQaIdx])
 
   // Form states
   const [fullName, setFullName] = React.useState("")
@@ -83,30 +102,45 @@ export default function InteractionsPage() {
   const [content, setContent] = React.useState("")
   const [formSubmitted, setFormSubmitted] = React.useState(false)
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!fullName || !subject || !content) return
 
-    const newQuestion: QuestionItem = {
-      id: `Q-PENDING-${Date.now()}`,
-      title: subject,
-      sender: `${fullName} (Vừa gửi trực tuyến)`,
-      submitDate: new Date().toLocaleDateString("vi-VN"),
-      categoryName: category,
-      content: content,
-      answer: null,
-      answerDate: null,
-      status: "pending"
+    try {
+      // POST directly to the public API endpoint
+      await apiClient.post("/public/interactions/questions", {
+        title: subject,
+        content: content,
+        askedByName: fullName,
+        askedByEmail: email || null,
+        askedByPhone: phone || null,
+        categoryId: category
+      })
+
+      // Store in session state for instant user feedback
+      const newQuestion: QuestionItem = {
+        id: "Q-PENDING-" + Date.now(),
+        title: subject,
+        sender: fullName + " (Vừa gửi trực tuyến)",
+        submitDate: new Date().toLocaleDateString("vi-VN"),
+        categoryName: category,
+        content: content,
+        answer: null,
+        answerDate: null,
+        status: "pending"
+      }
+
+      setLocalQuestions(prev => [newQuestion, ...prev])
+      setFormSubmitted(true)
+
+      setSubject("")
+      setContent("")
+    } catch (e) {
+      console.error("Failed to submit citizen question", e)
+      alert("Gửi câu hỏi thất bại, vui lòng thử lại sau.")
     }
-
-    setQuestions([newQuestion, ...questions])
-    setFormSubmitted(true)
-
-    setSubject("")
-    setContent("")
   }
-
-  const resetFormState = () => {
+const resetFormState = () => {
     setFormSubmitted(false)
   }
 

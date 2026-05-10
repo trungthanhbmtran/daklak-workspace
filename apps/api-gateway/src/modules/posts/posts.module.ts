@@ -10,6 +10,7 @@ import { PublicBannersController } from './public-banners.controller';
 import { PortalMenuController } from './portal-menu.controller';
 import { PublicPortalMenuController } from './public-portal-menu.controller';
 import { InteractionsController } from './interactions.controller';
+import { PublicInteractionsController } from './public-interactions.controller';
 import { PortalConfigController } from './portal-config.controller';
 import { PublicPortalConfigController } from './public-portal-config.controller';
 
@@ -33,6 +34,7 @@ import { PublicPortalConfigController } from './public-portal-config.controller'
     PortalMenuController,
     PublicPortalMenuController,
     InteractionsController,
+    PublicInteractionsController,
     PortalConfigController,
     PublicPortalConfigController,
   ],

@@ -37,254 +37,6 @@ import {
 } from "lucide-react"
 
 // Premium mock images using high-quality administrative/natural patterns
-const FEATURED_SLIDES = [
-  {
-    id: 1,
-    title: "Lãnh đạo huyện Krông Bông làm việc với UBND xã Dang Kang về phát triển KT-XH năm 2026",
-    excerpt: "Sáng 29/4, UBND huyện Krông Bông phối hợp cùng các Sở ban ngành làm việc trực tiếp tại UBND xã Dang Kang về kế hoạch chuyển đổi cơ cấu cây trồng nông nghiệp công nghệ cao và thúc đẩy hạ tầng nông thôn mới nâng cao...",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
-    date: "29/04/2026",
-    category: "Chỉ đạo điều hành"
-  },
-  {
-    id: 2,
-    title: "Khởi công mở rộng đường liên thôn 3 và thôn 4 nông thôn mới kiểu mẫu",
-    excerpt: "Dự án có tổng mức đầu tư hơn 5 tỷ đồng trích từ nguồn ngân sách xã xã hội hóa và người dân tự nguyện hiến đất mở rộng hành lang lộ giới lên 8m, góp phần hiện đại hóa cơ sở hạ tầng giao thông nông thôn...",
-    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=1200&q=80",
-    date: "28/04/2026",
-    category: "Xây dựng nông thôn mới"
-  },
-  {
-    id: 3,
-    title: "Tập huấn chuyển đổi số và ứng dụng CNTT cho bà con nông dân trồng cà phê",
-    excerpt: "Hơn 120 hộ dân tiêu biểu của xã đã tham gia lớp tập huấn sử dụng ứng dụng truy xuất nguồn gốc nông sản, thanh toán không dùng tiền mặt và theo dõi diễn biến giá cả thị trường nông sản Đắk Lắk...",
-    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=80",
-    date: "26/04/2026",
-    category: "Chuyển đổi số"
-  }
-]
-
-// Left side directory menu items - strictly matching the reference portal
-const LEFT_MENU_ITEMS = [
-  { name: "Hoạt động của Đảng Ủy xã", path: "/tin-tuc?category=dang-uy" },
-  { name: "Hội đồng nhân dân", path: "/tin-tuc?category=hdnd" },
-  { name: "Ủy ban nhân dân", path: "/tin-tuc?category=ubnd" },
-  { name: "Ủy ban MTTQ xã & các đoàn thể", path: "/tin-tuc" },
-  { name: "Hoạt động Văn phòng HĐND & UBND", path: "/tin-tuc?category=ubnd" },
-  { name: "Phòng kinh tế - kỹ thuật xã", path: "/tin-tuc?category=kinh-te" },
-  { name: "Phòng Văn hóa - Xã hội", path: "/tin-tuc" },
-  { name: "Trung tâm phục vụ hành chính công", path: "/thu-tuc" },
-  { name: "Trạm Y tế xã Dang Kang", path: "/lien-he" },
-  { name: "Công an xã Dang Kang", path: "/lien-he" },
-  { name: "Thư viện video, hình ảnh", path: "/tin-tuc" }
-]
-
-// Right side announcements - strictly matching the reference portal's Announcements sidebar
-const ANNOUNCEMENTS_SIDE = [
-  {
-    id: 1,
-    title: "Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 tại Nhà văn hóa xã Dang Kang",
-    date: "04/05/2026",
-    dept: "LĐ-TB&XH"
-  },
-  {
-    id: 2,
-    title: "Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng trên địa bàn",
-    date: "02/05/2026",
-    dept: "Công An Xã"
-  },
-  {
-    id: 3,
-    title: "Thông báo tuyển chọn tổ chức, cá nhân chủ trì thực hiện nhiệm vụ khoa học công nghệ cấp xã năm 2026",
-    date: "29/04/2026",
-    dept: "VP UBND"
-  },
-  {
-    id: 4,
-    title: "Thông báo giao, điều chuyển gỗ cho các đơn vị có nhu cầu sử dụng gỗ tịch thu xây dựng trụ sở công cộng",
-    date: "25/04/2026",
-    dept: "Địa Chính"
-  },
-  {
-    id: 5,
-    title: "Thông báo Kết quả giải thưởng Đợt 1 Cuộc thi trực tuyến tìm hiểu khoa học công nghệ & chuyển đổi số",
-    date: "22/04/2026",
-    dept: "Đoàn Xã"
-  },
-  {
-    id: 6,
-    title: "Kế hoạch tổ chức Lễ dâng hương kỷ niệm Ngày Thống nhất Đất nước tại Đài tưởng niệm các Anh hùng Liệt sĩ xã Dang Kang",
-    date: "20/04/2026",
-    dept: "VP HĐND-UBND"
-  },
-  {
-    id: 7,
-    title: "Lịch tiêm chủng mở rộng định kỳ cho trẻ em dưới 5 tuổi và tư vấn dinh dưỡng tháng 5 năm 2026",
-    date: "18/04/2026",
-    dept: "Trạm Y Tế"
-  },
-  {
-    id: 8,
-    title: "Thông báo treo cờ Tổ quốc chào mừng ngày Giải phóng miền Nam 30/4 và Ngày Quốc tế Lao động 1/5",
-    date: "15/04/2026",
-    dept: "Văn Hóa Xã"
-  }
-]
-
-const QUICK_SERVICES = [
-  {
-    title: "Dịch vụ công trực tuyến",
-    description: "Nộp hồ sơ trực tuyến trực tiếp, tinh giản thủ tục hành chính, nộp nhanh 24/7.",
-    borderColor: "border-l-blue-600 dark:border-l-blue-500",
-    iconBg: "bg-blue-50 dark:bg-blue-950/45 text-blue-600 dark:text-blue-400",
-    hoverBg: "hover:bg-blue-50/20 dark:hover:bg-blue-950/10",
-    icon: FileText,
-    link: "/thu-tuc"
-  },
-  {
-    title: "Tra cứu hồ sơ một cửa",
-    description: "Nhập mã số biên nhận để kiểm tra tiến trình giải quyết hồ sơ một cửa chính xác.",
-    borderColor: "border-l-emerald-600 dark:border-l-emerald-500",
-    iconBg: "bg-emerald-50 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-400",
-    hoverBg: "hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10",
-    icon: FileSearch,
-    link: "/thu-tuc#tra-cuu"
-  },
-  {
-    title: "Phản ánh & Kiến nghị",
-    description: "Gửi phản hồi trực tiếp về thủ tục hành chính và thái độ phục vụ của cán bộ.",
-    borderColor: "border-l-amber-600 dark:border-l-amber-500",
-    iconBg: "bg-amber-50 dark:bg-amber-950/45 text-amber-600 dark:text-amber-400",
-    hoverBg: "hover:bg-amber-50/20 dark:hover:bg-amber-950/10",
-    icon: MessageSquare,
-    link: "/tuong-tac"
-  },
-  {
-    title: "Hỏi đáp pháp luật",
-    description: "Giải đáp các thắc mắc pháp lý của công dân về hộ tịch, đất đai, tư pháp cấp xã.",
-    borderColor: "border-l-purple-600 dark:border-l-purple-500",
-    iconBg: "bg-purple-50 dark:bg-purple-950/45 text-purple-600 dark:text-purple-400",
-    hoverBg: "hover:bg-purple-50/20 dark:hover:bg-purple-950/10",
-    icon: CheckCircle2,
-    link: "/tuong-tac#gui-cau-hoi"
-  }
-]
-
-// Category-specific structured news conforming 100% to reference portal
-const CONSTRUCTION_NEWS = [
-  {
-    id: 201,
-    title: "Công bố Quy hoạch chi tiết 1/500 Khu dân cư Trung tâm hành chính mới xã Dang Kang",
-    excerpt: "Ủy ban nhân dân xã chính thức công bố bản vẽ chi tiết phân khu đô thị hóa, đầu tư hạ tầng điện đường trường trạm đồng bộ tại trung tâm xã giai đoạn 2026 - 2030.",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=400&q=80",
-    date: "28/04/2026"
-  },
-  {
-    id: 202,
-    title: "Khởi công xây dựng Nhà văn hóa cộng đồng đa năng thôn 4 kết hợp sân thể thao xã",
-    excerpt: "Công trình có diện tích sử dụng hơn 800m2, phục vụ các hội nghị sinh hoạt cộng đồng, hội diễn văn nghệ quần chúng và phong trào rèn luyện thể chất nhân dân.",
-    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=400&q=80",
-    date: "26/04/2026"
-  },
-  {
-    id: 203,
-    title: "Kiểm tra tiến độ thi công công trình đường liên huyện kết nối Krông Bông đi xã Dang Kang",
-    excerpt: "Đoàn liên ngành tiến hành kiểm tra thực tế, yêu cầu các nhà thầu khẩn trương trải nhựa áp-phan và lắp đặt đầy đủ đèn đường, biển báo an toàn trước mùa mưa lũ.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=400&q=80",
-    date: "24/04/2026"
-  }
-]
-
-const CONSTRUCTION_LINKS = [
-  { text: "Kế hoạch quy hoạch, xây dựng, kiến trúc; hoạt động đầu tư xây dựng xã", link: "/van-ban" },
-  { text: "Báo cáo công tác quản lý hạ tầng kỹ thuật và nâng cấp lộ giới đường nông thôn", link: "/van-ban" },
-  { text: "Lịch cúp nước tạm thời phục vụ sửa chữa mạng lưới đường ống xã", link: "/tin-tuc" },
-  { text: "Lịch cúp điện và bảo trì lưới điện trung - hạ thế nông thôn huyện Krông Bông", link: "/tin-tuc" },
-  { text: "Lịch tắt/mở hệ thống đèn chiếu sáng công cộng tại trục đường chính xã", link: "/tin-tuc" },
-  { text: "Tiếp nhận, xử lý, phản ánh, kiến nghị của nhân dân về trật tự xây dựng", link: "/tuong-tac" }
-]
-
-const AGRICULTURE_NEWS = [
-  {
-    id: 301,
-    title: "Xã Dang Kang đạt tiêu chuẩn vùng trồng Sầu riêng và Cà phê hữu cơ xuất khẩu",
-    excerpt: "Sở Nông nghiệp & PTNT đã ký quyết định cấp mã vùng trồng xuất khẩu chính ngạch cho hợp tác xã Dang Kang, mở ra hướng đi đột phá nâng tầm giá trị nông sản.",
-    image: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=400&q=80",
-    date: "29/04/2026"
-  },
-  {
-    id: 302,
-    title: "Phát động tuần lễ trồng cây 'Đời đời nhớ ơn Bác' và khơi thông dòng suối tự nhiên",
-    excerpt: "Hơn 500 cây phân tán bản địa đã được gieo trồng dọc các tuyến suối Thôn 2 và Thôn 3, góp phần bảo vệ nguồn tài nguyên nước và chống xói mòn đất nông nghiệp.",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=400&q=80",
-    date: "27/04/2026"
-  },
-  {
-    id: 303,
-    title: "Hội thảo chuyển giao kỹ thuật phân bón hữu cơ sinh học cao cấp cho hồ tiêu vụ mùa mới",
-    excerpt: "Các kỹ sư hướng dẫn bà con phương pháp ủ phân hữu cơ kết hợp nấm đối kháng Trichoderma phòng trừ bệnh chết nhanh chết chậm thường gặp ở hồ tiêu.",
-    image: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=400&q=80",
-    date: "22/04/2026"
-  }
-]
-
-const AGRICULTURE_LINKS = [
-  { text: "Báo cáo công tác quản lý tài nguyên đất, tài nguyên nước địa phương", link: "/van-ban" },
-  { text: "Kế hoạch, chương trình mục tiêu quốc gia xây dựng phát triển nông thôn mới", link: "/van-ban" },
-  { text: "Công tác phòng chống thiên tai, tìm kiếm cứu nạn chủ động mùa mưa bão", link: "/tin-tuc" },
-  { text: "Kế hoạch và chương trình mục tiêu quốc gia giảm nghèo bền vững xã", link: "/van-ban" },
-  { text: "Quản lý chất lượng và an toàn thực phẩm đối với nông sản, lâm sản cấp xã", link: "/thu-tuc" },
-  { text: "Chương trình khuyến nông phát triển mô hình kinh tế hộ gia đình, trang trại mới", link: "/tin-tuc" }
-]
-
-const GALLERY_PHOTOS = [
-  {
-    id: 1,
-    title: "Cánh đồng lúa nước trĩu hạt Thôn 3 - nông nghiệp hiện đại",
-    image: "https://images.unsplash.com/photo-1508873535684-277a3cbcc4e8?auto=format&fit=crop&w=600&q=80",
-    tag: "Nông nghiệp"
-  },
-  {
-    id: 2,
-    title: "Hội nghị Ban chỉ đạo xã triển khai chuyển đổi số năm 2026",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
-    tag: "Hội nghị"
-  },
-  {
-    id: 3,
-    title: "Bà con nông dân buôn Êga thu hoạch hạt cà phê chín mọng",
-    image: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80",
-    tag: "Sản xuất"
-  },
-  {
-    id: 4,
-    title: "Toàn cảnh trung tâm hành chính văn hóa mới xã Dang Kang",
-    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-    tag: "Quy hoạch"
-  }
-]
-
-const LEADERS = [
-  { name: "Nguyễn Văn Hồng", role: "Bí thư Đảng ủy - Chủ tịch HĐND", phone: "0262.3812.345", email: "nvhong@krongbong.daklak.gov.vn", hasStar: true },
-  { name: "Trần Quốc Tuấn", role: "Phó Bí thư - Chủ tịch UBND", phone: "0262.3812.346", email: "tqtuan@krongbong.daklak.gov.vn", hasStar: true },
-  { name: "H'Yen Knul", role: "Phó Chủ tịch UBND xã", phone: "0262.3812.347", email: "hyenknul@krongbong.daklak.gov.vn", hasStar: false }
-]
-
-const MOCK_QA = [
-  {
-    q: "Thủ tục đăng ký khai sinh quá hạn cho trẻ em từ 1-5 tuổi cần những hồ sơ gì, nộp ở đâu?",
-    a: "Chào anh/chị, thủ tục đăng ký khai sinh quá hạn được giải quyết trực tiếp tại bộ phận Một cửa UBND xã Dang Kang. Thành phần hồ sơ gồm: (1) Tờ khai đăng ký khai sinh theo mẫu; (2) Giấy chứng sinh của cơ sở y tế, hoặc văn bản xác nhận của người làm chứng. Lệ phí giải quyết: Miễn phí hoàn toàn. Thời gian xử lý: Trong ngày làm việc nếu đầy đủ hồ sơ.",
-    sender: "Lê Thị Lan (Thôn 3)",
-    date: "29/04/2026"
-  },
-  {
-    q: "Tôi muốn làm thủ tục chuyển nhượng quyền sử dụng đất nông nghiệp tại xã thì nộp hồ sơ ở cấp xã hay văn phòng đăng ký đất đai huyện?",
-    a: "Chào anh, hồ sơ chuyển nhượng quyền sử dụng đất trước hết cần nộp tại Bộ phận Một cửa của UBND xã Dang Kang để cán bộ địa chính kiểm tra quy hoạch, niêm yết công khai và thực hiện thủ tục hòa giải (nếu có). Sau khi hoàn tất thủ tục cấp xã, hồ sơ sẽ liên thông chuyển lên Chi nhánh Văn phòng Đăng ký đất đai huyện Krông Bông giải quyết theo thẩm quyền.",
-    sender: "Y-Nguên Mlô (Buôn Êga)",
-    date: "25/04/2026"
-  }
-]
-
 const getBannerBackgroundStyle = (styles: any) => {
   if (styles.bgType === "image") {
     if (styles.bgImage === "pattern-drum") {
@@ -565,6 +317,14 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
   );
 }
 
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null
+  const value = "; " + document.cookie
+  const parts = value.split("; " + name + "=")
+  if (parts.length === 2) return parts.pop()?.split(";").shift() || null
+  return null
+}
+
 interface HomeClientProps {
   initialPortalMenus?: any
   initialPosts?: any
@@ -572,6 +332,13 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialPortalMenus, initialPosts, initialBanners }: HomeClientProps) {
+  const [currentLang, setCurrentLang] = React.useState("vi")
+
+  React.useEffect(() => {
+    const lang = getCookie("lang") || "vi"
+    setCurrentLang(lang)
+  }, [])
+
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const [pollVoted, setPollVoted] = React.useState(false)
   const [pollChoice, setPollChoice] = React.useState<string | null>(null)
@@ -581,12 +348,49 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     normal: 15,
     unsatisfied: 5
   })
-  const [activeQaIdx, setActiveQaIdx] = React.useState<number | null>(0)
+  const [activeQaIdx, setActiveQaIdx] = React.useState<any>(0)
   const [lightboxImg, setLightboxImg] = React.useState<string | null>(null)
   const [lightboxTitle, setLightboxTitle] = React.useState<string | null>(null)
   const [currentGalleryIdx, setCurrentGalleryIdx] = React.useState(0)
 
-  // React Query Hooks initialized with pre-fetched ISR data as initialData
+  // 1. Fetch public questions
+  const { data: questionsData } = useQuery({
+    queryKey: ["public-questions", currentLang],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/interactions/questions?limit=5")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch public questions", e)
+        return []
+      }
+    },
+  })
+
+  // 2. Fetch public employees (leaders)
+  const { data: leadersData } = useQuery({
+    queryKey: ["public-employees", currentLang],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/hrm/employees?pageSize=10")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch public employees", e)
+        return []
+      }
+    },
+  })
+
+  // Localized field selection helper
+  const getLocalizedField = (obj: any, baseField: string, lang: string): string => {
+    if (!obj) return ""
+    if (lang === "en") {
+      const enValue = obj[baseField + "En"] || obj[baseField + "_en"]
+      if (enValue) return enValue
+    }
+    return obj[baseField] || ""
+  }
+
   const { data: postsData } = useQuery({
     queryKey: ["public-posts", undefined],
     queryFn: async () => {
@@ -636,16 +440,19 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
   const menuItems = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
-      return LEFT_MENU_ITEMS
+      return []
     }
     const verticalMenus = menusData.data.filter(
       (m: any) => m.position?.toUpperCase() === "VERTICAL" && m.isActive !== false
     )
     verticalMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
     return verticalMenus.length > 0
-      ? verticalMenus.map((m: any) => ({ name: m.name, path: m.link || "/tin-tuc" }))
-      : LEFT_MENU_ITEMS
-  }, [menusData])
+      ? verticalMenus.map((m: any) => ({
+        name: getLocalizedField(m, "name", currentLang),
+        path: m.link || "/tin-tuc"
+      }))
+      : []
+  }, [menusData, currentLang])
 
   const middleBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
@@ -673,38 +480,38 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     const dbSlides = postsData?.data
       ? postsData.data.slice(0, 3).map((post: any) => ({
         id: post.id,
-        title: post.title,
-        excerpt: post.description || post.content || "",
+        title: getLocalizedField(post, "title", currentLang),
+        excerpt: getLocalizedField(post, "description", currentLang) || getLocalizedField(post, "content", currentLang) || "",
         image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
-        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN"),
-        category: post.category?.name || "Tin tức"
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN"),
+        category: getLocalizedField(post.category, "name", currentLang) || (currentLang === "en" ? "News" : "Tin tức")
       }))
       : []
-    return dbSlides.length > 0 ? dbSlides : FEATURED_SLIDES
-  }, [postsData])
+    return dbSlides
+  }, [postsData, currentLang])
 
   const tickerText = React.useMemo(() => {
     if (postsData?.data) {
       const notices = postsData.data.filter((p: any) => p.isNotification || p.category?.slug === "thong-bao").slice(0, 5)
       if (notices.length > 0) {
-        return notices.map((n: any) => `🌟 ${n.title}`).join(" | ")
+        return notices.map((n: any) => '🌟 ' + getLocalizedField(n, "title", currentLang)).join(" | ")
       }
     }
-    return "🌟 Chi trả lương hưu và trợ cấp bảo hiểm xã hội tháng 5 từ ngày 4/5 | 🌟 Tập huấn nhận diện kỹ năng phòng, chống tội phạm cướp ngân hàng, tiệm vàng | 🌟 Lãnh đạo tỉnh dâng hương, viếng Nghĩa trang Liệt sĩ tỉnh khu vực phía Đông | 🌟 Lãnh đạo Đảng, Nhà nước vào Lăng viếng Chủ tịch Hồ Chí Minh nhân ngày Thống nhất Đất nước | 🌟 Xã Dang Kang đạt tiêu chuẩn xuất khẩu sầu riêng và cà phê hữu cơ sang thị trường Châu Âu"
-  }, [postsData])
+    return ""
+  }, [postsData, currentLang])
 
   const announcements = React.useMemo(() => {
     if (postsData?.data) {
       const filtered = postsData.data.filter((p: any) => p.isNotification || p.category?.slug === "thong-bao").slice(0, 6).map((post: any) => ({
         id: post.id,
-        title: post.title,
-        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN"),
-        dept: post.category?.name || "Thông báo"
+        title: getLocalizedField(post, "title", currentLang),
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN"),
+        dept: getLocalizedField(post.category, "name", currentLang) || (currentLang === "en" ? "Announcement" : "Thông báo")
       }))
       if (filtered.length > 0) return filtered
     }
-    return ANNOUNCEMENTS_SIDE
-  }, [postsData])
+    return []
+  }, [postsData, currentLang])
 
   const constructionNews = React.useMemo(() => {
     if (postsData?.data) {
@@ -714,15 +521,15 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         p.category?.name?.toLowerCase().includes("công thương")
       ).slice(0, 3).map((post: any) => ({
         id: post.id,
-        title: post.title,
-        excerpt: post.description || post.content || "",
+        title: getLocalizedField(post, "title", currentLang),
+        excerpt: getLocalizedField(post, "description", currentLang) || getLocalizedField(post, "content", currentLang) || "",
         image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=400&q=80",
-        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN")
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN")
       }))
       if (filtered.length > 0) return filtered
     }
-    return CONSTRUCTION_NEWS
-  }, [postsData])
+    return []
+  }, [postsData, currentLang])
 
   const agricultureNews = React.useMemo(() => {
     if (postsData?.data) {
@@ -732,40 +539,145 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         p.category?.name?.toLowerCase().includes("nông thôn")
       ).slice(0, 3).map((post: any) => ({
         id: post.id,
-        title: post.title,
-        excerpt: post.description || post.content || "",
+        title: getLocalizedField(post, "title", currentLang),
+        excerpt: getLocalizedField(post, "description", currentLang) || getLocalizedField(post, "content", currentLang) || "",
         image: post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=400&q=80",
-        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString("vi-VN") : new Date(post.createdAt).toLocaleDateString("vi-VN")
+        date: post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : new Date(post.createdAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN")
       }))
       if (filtered.length > 0) return filtered
     }
-    return AGRICULTURE_NEWS
-  }, [postsData])
+    return []
+  }, [postsData, currentLang])
 
   const galleryPhotos = React.useMemo(() => {
     if (postsData?.data) {
       const withImages = postsData.data.filter((p: any) => p.thumbnail).slice(0, 4).map((post: any) => ({
         id: post.id,
-        title: post.title,
+        title: getLocalizedField(post, "title", currentLang),
         image: resolveMediaUrl(post.thumbnail),
-        tag: post.category?.name || "Hình ảnh"
+        tag: getLocalizedField(post.category, "name", currentLang) || (currentLang === "en" ? "Photo" : "Hình ảnh")
       }))
       if (withImages.length > 0) return withImages
     }
-    return GALLERY_PHOTOS
-  }, [postsData])
+    return []
+  }, [postsData, currentLang])
+
+  const leaders = React.useMemo(() => {
+    const list = Array.isArray(leadersData) ? leadersData : []
+    return list.map((e: any) => ({
+      name: ((e.firstname || "") + " " + (e.lastname || "")).trim() || "Cán bộ UBND",
+      role: e.jobTitle?.name || (currentLang === "en" ? "Commune Official" : "Cán bộ Xã"),
+      phone: e.phone || "0262.3812.345",
+      hasStar: e.jobTitleId === 1 || e.jobTitle?.id === 1 || e.jobTitle?.code === "giamDoc",
+    }))
+  }, [leadersData, currentLang])
+
+  const questions = React.useMemo(() => {
+    const list = Array.isArray(questionsData) ? questionsData : []
+    return list.map((q: any) => ({
+      q: getLocalizedField(q, "title", currentLang),
+      a: getLocalizedField(q, "answerContent", currentLang) || (currentLang === "en" ? "Answer in progress..." : "Đang cập nhật giải đáp..."),
+    }))
+  }, [questionsData, currentLang])
+
+  const constructionLinks = React.useMemo(() => {
+    if (!postsData?.data) return []
+    const filtered = postsData.data.filter((p: any) =>
+      p.category?.slug === "xay-dung" ||
+      p.category?.name?.toLowerCase().includes("xây dựng") ||
+      p.category?.name?.toLowerCase().includes("công thương")
+    ).slice(3, 8).map((post: any) => ({
+      text: getLocalizedField(post, "title", currentLang),
+      link: '/tin-tuc'
+    }))
+    return filtered
+  }, [postsData, currentLang])
+
+  const agricultureLinks = React.useMemo(() => {
+    if (!postsData?.data) return []
+    const filtered = postsData.data.filter((p: any) =>
+      p.category?.slug === "nong-nghiep" ||
+      p.category?.name?.toLowerCase().includes("nông nghiệp") ||
+      p.category?.name?.toLowerCase().includes("nông thôn")
+    ).slice(3, 8).map((post: any) => ({
+      text: getLocalizedField(post, "title", currentLang),
+      link: '/tin-tuc'
+    }))
+    return filtered
+  }, [postsData, currentLang])
+
+  const quickServices = React.useMemo(() => {
+    return [
+      {
+        title: currentLang === "en" ? "Online Public Services" : "Dịch vụ công trực tuyến",
+        description: currentLang === "en" 
+          ? "Submit files online directly, streamlining administrative procedures, fast 24/7." 
+          : "Nộp hồ sơ trực tuyến trực tiếp, tinh giản thủ tục hành chính, nộp nhanh 24/7.",
+        borderColor: "border-l-blue-600 dark:border-l-blue-500",
+        iconBg: "bg-blue-50 dark:bg-blue-950/45 text-blue-600 dark:text-blue-400",
+        hoverBg: "hover:bg-blue-50/20 dark:hover:bg-blue-950/10",
+        icon: FileText,
+        link: "/thu-tuc"
+      },
+      {
+        title: currentLang === "en" ? "One-Stop Dossier Lookup" : "Tra cứu hồ sơ một cửa",
+        description: currentLang === "en"
+          ? "Enter recipient number to check accurate resolution progress."
+          : "Nhập mã số biên nhận để kiểm tra tiến trình giải quyết hồ sơ một cửa chính xác.",
+        borderColor: "border-l-emerald-600 dark:border-l-emerald-500",
+        iconBg: "bg-emerald-50 dark:bg-emerald-950/45 text-emerald-600 dark:text-emerald-400",
+        hoverBg: "hover:bg-emerald-50/20 dark:hover:bg-emerald-950/10",
+        icon: FileSearch,
+        link: "/thu-tuc#tra-cuu"
+      },
+      {
+        title: currentLang === "en" ? "Reflections & Recommendations" : "Phản ánh & Kiến nghị",
+        description: currentLang === "en"
+          ? "Submit direct feedback regarding administrative procedures and employee attitude."
+          : "Gửi phản hồi trực tiếp về thủ tục hành chính và thái độ phục vụ của cán bộ.",
+        borderColor: "border-l-amber-600 dark:border-l-amber-500",
+        iconBg: "bg-amber-50 dark:bg-amber-950/45 text-amber-600 dark:text-amber-400",
+        hoverBg: "hover:bg-amber-50/20 dark:hover:bg-amber-950/10",
+        icon: MessageSquare,
+        link: "/tuong-tac"
+      },
+      {
+        title: currentLang === "en" ? "Legal Q&A" : "Hỏi đáp pháp luật",
+        description: currentLang === "en"
+          ? "Get answers to citizen legal inquiries regarding civil status, land, commune justice."
+          : "Giải đáp các thắc mắc pháp lý của công dân về hộ tịch, đất đai, tư pháp cấp xã.",
+        borderColor: "border-l-purple-600 dark:border-l-purple-500",
+        iconBg: "bg-purple-50 dark:bg-purple-950/45 text-purple-600 dark:text-purple-400",
+        hoverBg: "hover:bg-purple-50/20 dark:hover:bg-purple-950/10",
+        icon: CheckCircle2,
+        link: "/tuong-tac#gui-cau-hoi"
+      }
+    ]
+  }, [currentLang])
 
   React.useEffect(() => {
+    if (slides.length === 0) return
+
     // Setup automatic slide transition
     const slideTimer = setInterval(() => {
       setCurrentSlide(prev => (prev + 1) % slides.length)
     }, 6000)
+
+    return () => clearInterval(slideTimer)
+  }, [slides.length])
+
+  React.useEffect(() => {
+    if (galleryPhotos.length === 0) return
 
     // Setup automatic gallery slideshow transition
     const galleryTimer = setInterval(() => {
       setCurrentGalleryIdx(prev => (prev + 1) % galleryPhotos.length)
     }, 5000)
 
+    return () => clearInterval(galleryTimer)
+  }, [galleryPhotos.length])
+
+  React.useEffect(() => {
     // Check if user has already voted
     const savedVote = localStorage.getItem("dangkang_portal_poll_voted")
     const savedChoice = localStorage.getItem("dangkang_portal_poll_choice")
@@ -778,18 +690,15 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         setPollStats(JSON.parse(savedStats))
       }
     }
-
-    return () => {
-      clearInterval(slideTimer)
-      clearInterval(galleryTimer)
-    }
-  }, [slides.length, galleryPhotos.length])
+  }, [])
 
   const nextSlide = () => {
+    if (slides.length === 0) return
     setCurrentSlide((currentSlide + 1) % slides.length)
   }
 
   const prevSlide = () => {
+    if (slides.length === 0) return
     setCurrentSlide((currentSlide - 1 + slides.length) % slides.length)
   }
 
@@ -1138,7 +1047,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-          {QUICK_SERVICES.map((serv) => {
+          {quickServices.map((serv) => {
             const Icon = serv.icon
             return (
               <Link
@@ -1225,7 +1134,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
             </div>
 
             <div className="flex flex-col gap-3 z-10">
-              {CONSTRUCTION_LINKS.map((link, idx) => (
+              {constructionLinks.map((link: any, idx: number) => (
                 <div key={idx} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                   <Link
                     href={link.link}
@@ -1308,7 +1217,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
             </div>
 
             <div className="flex flex-col gap-3 z-10">
-              {AGRICULTURE_LINKS.map((link, idx) => (
+              {agricultureLinks.map((link: any, idx: number) => (
                 <div key={idx} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                   <Link
                     href={link.link}
@@ -1509,7 +1418,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
             </div>
 
             <div className="flex flex-col gap-3.5">
-              {LEADERS.map((leader) => (
+              {leaders.map((leader) => (
                 <div key={leader.name} className="flex gap-2.5 items-center border-b border-white/5 pb-3 last:border-0 last:pb-0 group">
                   <div className="w-9 h-9 rounded-full bg-white/10 shrink-0 border border-white/15 flex items-center justify-center text-[#fbc02d] font-bold text-xs shadow-inner relative">
                     {leader.hasStar ? (
@@ -1640,7 +1549,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               </div>
 
               <div className="flex flex-col gap-2">
-                {MOCK_QA.map((qa, index) => {
+                {questions.map((qa, index) => {
                   const isOpen = activeQaIdx === index
                   return (
                     <div

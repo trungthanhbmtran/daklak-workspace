@@ -5,6 +5,7 @@ import { DepartmentController } from './department.controller';
 import { EmployeeController } from './employee.controller';
 import { PositionController } from './position.controller';
 import { JobTitleController } from './jobtitle.controller';
+import { PublicHrmController } from './public-hrm.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { JobTitleController } from './jobtitle.controller';
     EmployeeController,
     PositionController,
     JobTitleController,
+    PublicHrmController,
   ],
 })
 export class HrmModule {}
