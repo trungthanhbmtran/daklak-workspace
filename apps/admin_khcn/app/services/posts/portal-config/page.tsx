@@ -89,22 +89,22 @@ export default function PortalConfigPage() {
   // 3. Load existing configs and translation sets into state
   useEffect(() => {
     if (dbCategories && dbCategories.length > 0) {
-      const nameCat = dbCategories.find((c) => c.code === "unit_name");
-      const titleCat = dbCategories.find((c) => c.code === "unit_title");
-      const identCat = dbCategories.find((c) => c.code === "unit_identifier");
-      const hotlineCat = dbCategories.find((c) => c.code === "hotline");
-      const respCat = dbCategories.find((c) => c.code === "responsible_person");
-      const scheduleCat = dbCategories.find((c) => c.code === "citizen_schedule");
-      const logoCat = dbCategories.find((c) => c.code === "logo_url");
-      const licenseCat = dbCategories.find((c) => c.code === "license_info");
-      const faxCat = dbCategories.find((c) => c.code === "fax");
-      const emailCat = dbCategories.find((c) => c.code === "email");
-      const addressCat = dbCategories.find((c) => c.code === "address");
-      const contactFormTitleCat = dbCategories.find((c) => c.code === "contact_form_title");
-      const contactFormSuccessDescCat = dbCategories.find((c) => c.code === "contact_form_success_desc");
-      const contactMapTitleCat = dbCategories.find((c) => c.code === "contact_map_title");
-      const footerPortalTitleCat = dbCategories.find((c) => c.code === "footer_portal_title");
-      const footerPortalSubtitleCat = dbCategories.find((c) => c.code === "footer_portal_subtitle");
+      const nameCat: any = dbCategories.find((c: any) => c.code === "unit_name");
+      const titleCat: any = dbCategories.find((c: any) => c.code === "unit_title");
+      const identCat: any = dbCategories.find((c: any) => c.code === "unit_identifier");
+      const hotlineCat: any = dbCategories.find((c: any) => c.code === "hotline");
+      const respCat: any = dbCategories.find((c: any) => c.code === "responsible_person");
+      const scheduleCat: any = dbCategories.find((c: any) => c.code === "citizen_schedule");
+      const logoCat: any = dbCategories.find((c: any) => c.code === "logo_url");
+      const licenseCat: any = dbCategories.find((c: any) => c.code === "license_info");
+      const faxCat: any = dbCategories.find((c: any) => c.code === "fax");
+      const emailCat: any = dbCategories.find((c: any) => c.code === "email");
+      const addressCat: any = dbCategories.find((c: any) => c.code === "address");
+      const contactFormTitleCat: any = dbCategories.find((c: any) => c.code === "contact_form_title");
+      const contactFormSuccessDescCat: any = dbCategories.find((c: any) => c.code === "contact_form_success_desc");
+      const contactMapTitleCat: any = dbCategories.find((c: any) => c.code === "contact_map_title");
+      const footerPortalTitleCat: any = dbCategories.find((c: any) => c.code === "footer_portal_title");
+      const footerPortalSubtitleCat: any = dbCategories.find((c: any) => c.code === "footer_portal_subtitle");
 
       // Set global fields
       if (logoCat) setLogoUrl(logoCat.name);
@@ -339,7 +339,7 @@ export default function PortalConfigPage() {
       ];
 
       for (const item of configItems) {
-        const existing = dbCategories?.find((c) => c.code === item.code);
+        const existing = dbCategories?.find((c: any) => c.code === item.code);
 
         if (existing) {
           // UPDATE

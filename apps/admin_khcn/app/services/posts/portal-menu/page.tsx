@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import {
   Plus, Edit, Trash2, Layers, FileText, ExternalLink,
   ChevronRight, Zap, Globe, Layout, Settings2,
-  ArrowRight, Loader2, Sparkles, FolderTree, BookOpen, ShieldCheck
+  ArrowRight, Loader2, Sparkles, FolderTree, BookOpen, ShieldCheck,
+  Languages
 } from "lucide-react";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -39,6 +40,7 @@ export default function PortalMenuPage() {
   const [languages, setLanguages] = useState<CategoryItem[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
   const [isImporting, setIsImporting] = useState(false);
+  const [displayLang, setDisplayLang] = useState<string>("vi");
 
   const toggleExpand = (id: string) => {
     setExpandedItems(prev => ({
@@ -79,12 +81,20 @@ export default function PortalMenuPage() {
     try {
       const allCategories = await categoryApi.fetchAll();
       const langs = allCategories.filter(c => c.group === 'LANGUAGE' && c.active === 1);
-      setLanguages(langs);
-      if (langs.length > 0 && !langs.find(l => l.code === 'vi')) {
-        setActiveLangTab(langs[0].code);
+      const activeLanguages = langs.length > 0 ? langs : [
+        { id: 1, group: 'LANGUAGE', code: 'vi', name: 'Tiếng Việt', sort: 1, active: 1 },
+        { id: 2, group: 'LANGUAGE', code: 'en', name: 'English', sort: 2, active: 1 }
+      ];
+      setLanguages(activeLanguages);
+      if (activeLanguages.length > 0 && !activeLanguages.find(l => l.code === 'vi')) {
+        setActiveLangTab(activeLanguages[0].code);
       }
     } catch (error) {
       console.error("Error fetching languages:", error);
+      setLanguages([
+        { id: 1, group: 'LANGUAGE', code: 'vi', name: 'Tiếng Việt', sort: 1, active: 1 },
+        { id: 2, group: 'LANGUAGE', code: 'en', name: 'English', sort: 2, active: 1 }
+      ]);
     }
   };
 
@@ -172,6 +182,72 @@ export default function PortalMenuPage() {
     if (!newTranslations[langCode]) newTranslations[langCode] = {};
     newTranslations[langCode][field] = value;
     setEditingMenu({ ...editingMenu, translations: newTranslations });
+  };
+
+  const getMenuTranslation = (menu: PortalMenu, langCode: string) => {
+    if (langCode === 'vi') {
+      return { name: menu.name, description: menu.description || "" };
+    }
+    let parsedTranslations = menu.translations || {};
+    if (typeof parsedTranslations === 'string') {
+      try {
+        parsedTranslations = JSON.parse(parsedTranslations);
+      } catch (e) {
+        parsedTranslations = {};
+      }
+    }
+    const trans = parsedTranslations[langCode];
+    return {
+      name: trans?.name || "",
+      description: trans?.description || ""
+    };
+  };
+
+  const handleTranslateAllFields = async (langCode: string) => {
+    const sourceName = editingMenu?.name || "";
+    const sourceDesc = editingMenu?.description || "";
+    if (!sourceName && !sourceDesc) {
+      toast.warning("Vui lòng nhập tên hoặc mô tả Tiếng Việt trước khi dịch");
+      return;
+    }
+
+    const translateApi = async (text: string, targetLang: string) => {
+      if (!text.trim()) return "";
+      try {
+        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=vi&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`);
+        if (!res.ok) throw new Error("Translation failed");
+        const json = await res.json();
+        return json[0].map((item: any) => item[0]).join('');
+      } catch (error) {
+        console.error("Auto translate error:", error);
+        return "";
+      }
+    };
+
+    toast.promise(
+      (async () => {
+        const [translatedName, translatedDesc] = await Promise.all([
+          translateApi(sourceName, langCode),
+          translateApi(sourceDesc, langCode)
+        ]);
+
+        const newTranslations = { ...(editingMenu?.translations || {}) };
+        if (!newTranslations[langCode]) newTranslations[langCode] = {};
+        
+        if (translatedName) newTranslations[langCode].name = translatedName;
+        if (translatedDesc) newTranslations[langCode].description = translatedDesc;
+
+        setEditingMenu({
+          ...editingMenu,
+          translations: newTranslations
+        });
+      })(),
+      {
+        loading: `Đang dịch sang ${langCode.toUpperCase()}...`,
+        success: `Đã dịch thành công sang ${langCode.toUpperCase()}!`,
+        error: "Không thể tự động dịch, vui lòng thử lại.",
+      }
+    );
   };
 
   const handleSave = async () => {
@@ -402,6 +478,11 @@ export default function PortalMenuPage() {
       const hasChildren = menu.children && menu.children.length > 0;
       const isExpanded = !!expandedItems[menu.id];
 
+      const trans = getMenuTranslation(menu, displayLang);
+      const isTranslated = displayLang === 'vi' || !!trans.name;
+      const displayName = trans.name || menu.name;
+      const displayDescription = trans.description || menu.description;
+
       return (
         <Fragment key={menu.id}>
           <TableRow className={`${depth > 0 ? "bg-slate-50/30" : ""} hover:bg-slate-50 transition-colors`}>
@@ -432,16 +513,40 @@ export default function PortalMenuPage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <span className={`text-sm ${!menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"}`}>
-                      {menu.name}
+                    <span className={`text-sm ${!menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"} ${!isTranslated ? "italic text-slate-400 font-medium" : ""}`}>
+                      {displayName}
+                      {!isTranslated && (
+                        <span className="text-[9px] text-amber-600 font-bold ml-1.5 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-full uppercase" title="Mục này chưa được cấu hình bản dịch">
+                          Chưa dịch
+                        </span>
+                      )}
                     </span>
-                    {menu.description && (
-                      <span className="text-[10px] text-slate-400 truncate max-w-[200px]">
-                        {menu.description}
+                    {displayDescription && (
+                      <span className="text-[10px] text-slate-400 truncate max-w-[200px] italic">
+                        {displayDescription}
                       </span>
                     )}
                   </div>
                 </div>
+              </div>
+            </TableCell>
+            <TableCell>
+              <div className="flex items-center gap-1">
+                <span className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 cursor-default" title="Tiếng Việt (Gốc)">
+                  VI
+                </span>
+                {(languages.length > 0 ? languages : [{ code: 'en', name: 'English' }]).filter(l => l.code !== 'vi').map(lang => {
+                  const hasTrans = !!getMenuTranslation(menu, lang.code).name;
+                  return hasTrans ? (
+                    <span key={lang.code} className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default" title={`Đã dịch sang ${lang.name}`}>
+                      {lang.code.toUpperCase()}
+                    </span>
+                  ) : (
+                    <span key={lang.code} className="inline-flex items-center justify-center text-[9px] font-black w-5 h-5 rounded-full border border-dashed border-slate-300 bg-slate-50 text-slate-400 cursor-default" title={`Chưa dịch sang ${lang.name}`}>
+                      {lang.code.toUpperCase()}
+                    </span>
+                  );
+                })}
               </div>
             </TableCell>
             <TableCell>
@@ -536,20 +641,42 @@ export default function PortalMenuPage() {
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
         <Tabs defaultValue="ALL" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <div className="px-4 py-2 border-b bg-slate-50/50 flex items-center justify-between">
-            <TabsList className="bg-transparent border-0 p-0 h-auto gap-4">
+          <div className="px-4 py-2 border-b bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <TabsList className="bg-transparent border-0 p-0 h-auto gap-4 flex-wrap">
               <TabsTrigger value="ALL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Tất cả</TabsTrigger>
               <TabsTrigger value="HORIZONTAL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Ngang</TabsTrigger>
               <TabsTrigger value="VERTICAL" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Dọc</TabsTrigger>
               <TabsTrigger value="FOOTER" className="data-[state=active]:bg-white data-[state=active]:shadow-sm px-4 py-1.5 rounded-lg border border-transparent data-[state=active]:border-slate-200 transition-all">Menu Chân trang</TabsTrigger>
             </TabsList>
-            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100">{menus.length} mục</Badge>
+
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                  <Languages className="w-3.5 h-3.5 text-blue-600" /> Xem ngôn ngữ:
+                </span>
+                <Tabs value={displayLang} onValueChange={setDisplayLang} className="w-auto">
+                  <TabsList className="bg-slate-100 p-0.5 h-8 gap-0.5 rounded-lg border border-slate-200">
+                    {(languages.length > 0 ? languages : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }]).map(lang => (
+                      <TabsTrigger
+                        key={lang.code}
+                        value={lang.code}
+                        className="px-2.5 py-1 text-xs font-bold uppercase rounded-md data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm"
+                      >
+                        {lang.code}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </div>
+              <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-blue-100">{menus.length} mục</Badge>
+            </div>
           </div>
         </Tabs>
         <Table>
           <TableHeader className="bg-slate-50/80 backdrop-blur-sm sticky top-0 z-10">
             <TableRow>
-              <TableHead className="w-[30%]">Tên hiển thị</TableHead>
+              <TableHead className="w-[28%]">Tên hiển thị</TableHead>
+              <TableHead className="w-[12%]">Bản dịch</TableHead>
               <TableHead>Vị trí</TableHead>
               <TableHead>Loại liên kết</TableHead>
               <TableHead>Đường dẫn / Tham chiếu</TableHead>
@@ -561,7 +688,7 @@ export default function PortalMenuPage() {
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center">
+                <TableCell colSpan={8} className="h-32 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
                     <span className="text-muted-foreground animate-pulse">Đang tải dữ liệu...</span>
@@ -570,7 +697,7 @@ export default function PortalMenuPage() {
               </TableRow>
             ) : menus.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center text-muted-foreground italic bg-slate-50/30">
+                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground italic bg-slate-50/30">
                   <div className="flex flex-col items-center justify-center gap-2">
                     <Sparkles className="w-8 h-8 text-slate-300" />
                     <span>Không tìm thấy menu nào ở vị trí này.</span>
@@ -780,6 +907,20 @@ export default function PortalMenuPage() {
 
                 {languages.map(lang => (
                   <TabsContent key={lang.code} value={lang.code} className="space-y-4">
+                    {lang.code !== 'vi' && (
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleTranslateAllFields(lang.code)}
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 font-bold gap-1 px-2.5 py-1"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                          Dịch tự động từ Tiếng Việt
+                        </Button>
+                      </div>
+                    )}
                     <div className="grid grid-cols-4 items-center gap-4">
                       <Label htmlFor={`name-${lang.code}`} className={`text-right font-bold ${lang.code !== 'vi' ? 'text-blue-600' : ''}`}>
                         Tên Menu ({lang.code.toUpperCase()})
