@@ -288,10 +288,10 @@ export default function Header() {
   })
 
   const { data: portalConfigData } = useQuery({
-    queryKey: ["public-categories", "PORTAL_CONFIG"],
+    queryKey: ["public-portal-configs"],
     queryFn: async () => {
       try {
-        const response: any = await apiClient.get("/public/categories?group=PORTAL_CONFIG")
+        const response: any = await apiClient.get("/public/portal-configs")
         return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
       } catch (e) {
         console.error("Failed to fetch portal configurations", e)
