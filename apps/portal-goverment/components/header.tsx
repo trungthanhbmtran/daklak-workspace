@@ -88,6 +88,40 @@ function NationalEmblem({ className = "w-16 h-16" }: { className?: string }) {
   )
 }
 
+// Custom crisp SVG flags for high-fidelity cross-platform rendering (no emoji dependency)
+function VietnamFlagSVG({ className = "w-5 h-3.5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 3 2"
+      className={`${className} shadow-sm border border-slate-200/40 dark:border-slate-800/80 rounded-[2px] object-cover`}
+    >
+      <rect width="3" height="2" fill="#DA251D" />
+      <g transform="translate(1.5, 1) scale(0.6)">
+        <polygon
+          points="0,-1 0.225,-0.309 0.951,-0.309 0.363,0.118 0.588,0.809 0,0.382 -0.588,0.809 -0.363,0.118 -0.951,-0.309 -0.225,-0.309"
+          fill="#FFFF00"
+        />
+      </g>
+    </svg>
+  )
+}
+
+function UKFlagSVG({ className = "w-5 h-3.5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 60 30"
+      className={`${className} shadow-sm border border-slate-200/40 dark:border-slate-800/80 rounded-[2px] object-cover`}
+    >
+      <rect width="60" height="30" fill="#012169" />
+      <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" strokeWidth="6" />
+      <path d="M0,0 L60,30" stroke="#c8102e" strokeWidth="2" />
+      <path d="M60,0 L0,30" stroke="#c8102e" strokeWidth="2" />
+      <path d="M30,0 L30,30 M0,15 L60,15" stroke="#fff" strokeWidth="10" />
+      <path d="M30,0 L30,30 M0,15 L60,15" stroke="#c8102e" strokeWidth="6" />
+    </svg>
+  )
+}
+
 interface MenuItem {
   name: string
   path: string
@@ -404,21 +438,23 @@ export default function Header() {
                     { code: "en", name: "Tiếng Anh" }
                   ]).map((lang: any) => {
                     const isSelected = currentLang === lang.code;
-                    const flagIcon = lang.code === "en" ? "🇬🇧" : "🇻🇳";
-                    const shortLabel = lang.code === "en" ? "EN" : "VI";
 
                     return (
                       <button
                         key={lang.code}
                         onClick={() => handleLanguageChange(lang.code)}
-                        className={`flex items-center gap-1.5 px-2 py-1 rounded transition-all cursor-pointer text-[10px] font-black ${isSelected
-                            ? "bg-red-600 text-white shadow-sm scale-105"
-                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-900/60"
-                          }`}
+                        className={`transition-all duration-200 cursor-pointer ${
+                          isSelected
+                            ? "scale-110 opacity-100 ring-2 ring-red-600/50 dark:ring-red-500/50 rounded-[3px] shadow-sm"
+                            : "opacity-45 hover:opacity-100 hover:scale-105"
+                        }`}
                         title={lang.name}
                       >
-                        <span className="text-sm select-none leading-none">{flagIcon}</span>
-                        <span className="uppercase tracking-wider">{shortLabel}</span>
+                        {lang.code === "en" ? (
+                          <UKFlagSVG className="w-[23px] h-[15px]" />
+                        ) : (
+                          <VietnamFlagSVG className="w-[23px] h-[15px]" />
+                        )}
                       </button>
                     );
                   })}
@@ -629,27 +665,29 @@ export default function Header() {
             <>
 
               {/* PREMIUM INLINE MOBILE LANG SELECTOR */}
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 {(languagesData && languagesData.length > 0 ? languagesData : [
                   { code: "vi", name: "Tiếng Việt" },
                   { code: "en", name: "Tiếng Anh" }
                 ]).map((lang: any) => {
                   const isSelected = currentLang === lang.code;
-                  const flagIcon = lang.code === "en" ? "🇬🇧" : "🇻🇳";
-                  const shortLabel = lang.code === "en" ? "EN" : "VI";
 
                   return (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all text-[10px] font-black cursor-pointer ${isSelected
-                          ? "bg-white text-red-700 shadow-sm font-black border border-white"
-                          : "text-white hover:bg-white/10"
-                        }`}
+                      className={`transition-all duration-200 cursor-pointer ${
+                        isSelected
+                          ? "scale-110 opacity-100 ring-2 ring-white/70 rounded-[3px] shadow-sm"
+                          : "opacity-45 hover:opacity-100 hover:scale-105"
+                      }`}
                       title={lang.name}
                     >
-                      <span className="text-xs select-none leading-none">{flagIcon}</span>
-                      <span className="uppercase tracking-wider">{shortLabel}</span>
+                      {lang.code === "en" ? (
+                        <UKFlagSVG className="w-[21px] h-[14px]" />
+                      ) : (
+                        <VietnamFlagSVG className="w-[21px] h-[14px]" />
+                      )}
                     </button>
                   );
                 })}
