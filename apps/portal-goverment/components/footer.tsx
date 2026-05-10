@@ -25,23 +25,7 @@ const getCookie = (name: string): string | null => {
   return match ? decodeURIComponent(match[2]) : null
 }
 
-// 2. Slug translation mappings for footer links
-const LANG_MAPPING: Record<string, { vi: string; en: string }> = {
-  "gioi-thieu": { vi: "gioi-thieu", en: "aboutus" },
-  "aboutus": { vi: "gioi-thieu", en: "aboutus" },
-  "lien-he": { vi: "lien-he", en: "contact" },
-  "contact": { vi: "lien-he", en: "contact" },
-  "thu-tuc": { vi: "thu-tuc", en: "procedures" },
-  "procedures": { vi: "thu-tuc", en: "procedures" },
-  "tin-tuc": { vi: "tin-tuc", en: "news" },
-  "news": { vi: "tin-tuc", en: "news" },
-  "tuong-tac": { vi: "tuong-tac", en: "feedback" },
-  "feedback": { vi: "tuong-tac", en: "feedback" },
-  "van-ban": { vi: "van-ban", en: "documents" },
-  "documents": { vi: "van-ban", en: "documents" },
-}
-
-// 3. Localized dictionaries for layout strings
+// 2. Localized dictionaries for layout strings
 const footerTranslations = {
   vi: {
     oneGateTitle: "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG",
@@ -120,23 +104,13 @@ export default function Footer() {
     setMounted(true)
   }, [])
 
-  // 4. Resolve the active language client-side
+  // 3. Resolve the active language client-side
   const currentLang = React.useMemo(() => {
     if (!mounted) return "vi"
     const cookieLang = getCookie("lang")
     if (cookieLang === "vi" || cookieLang === "en") return cookieLang
-
-    // Check pathname as a safe fallback
-    const pathSegments = pathname.split("/").filter(Boolean)
-    if (pathSegments.length > 0) {
-      const currentSlug = pathSegments[0]
-      const mapping = LANG_MAPPING[currentSlug]
-      if (mapping) {
-        return mapping.en === currentSlug ? "en" : "vi"
-      }
-    }
     return "vi"
-  }, [mounted, pathname])
+  }, [mounted])
 
   const ft = footerTranslations[currentLang] || footerTranslations.vi
 
@@ -228,14 +202,14 @@ export default function Footer() {
       ? footerMenus.map((m: any) => ({ name: m.name, path: m.link || "/" }))
       : [
         { name: ft.home, path: "/" },
-        { name: ft.about, path: currentLang === "en" ? "/aboutus" : "/gioi-thieu" },
-        { name: ft.news, path: currentLang === "en" ? "/news" : "/tin-tuc" },
-        { name: ft.documents, path: currentLang === "en" ? "/documents" : "/van-ban" },
-        { name: ft.procedures, path: currentLang === "en" ? "/procedures" : "/thu-tuc" },
-        { name: ft.feedback, path: currentLang === "en" ? "/feedback" : "/tuong-tac" },
-        { name: ft.contact, path: currentLang === "en" ? "/contact" : "/lien-he" }
+        { name: ft.about, path: "/gioi-thieu" },
+        { name: ft.news, path: "/tin-tuc" },
+        { name: ft.documents, path: "/van-ban" },
+        { name: ft.procedures, path: "/thu-tuc" },
+        { name: ft.feedback, path: "/tuong-tac" },
+        { name: ft.contact, path: "/lien-he" }
       ]
-  }, [menusData, currentLang, ft])
+  }, [menusData, ft])
 
   // 7. Localize external government reference portals
   const govLinks = React.useMemo(() => {
@@ -276,7 +250,7 @@ export default function Footer() {
             </div>
           </div>
           <Link
-            href={currentLang === "en" ? "/procedures" : "/thu-tuc"}
+            href="/thu-tuc"
             className="flex items-center gap-1.5 text-xs text-[#fef08a] hover:text-white bg-red-700/20 hover:bg-red-700/40 px-4 py-2 rounded-full border border-red-700/40 transition-all font-medium uppercase tracking-wider shadow-sm"
           >
             <FileText className="w-4 h-4" />
@@ -417,15 +391,15 @@ export default function Footer() {
       <div className="w-full bg-[#111827] py-6 px-4 md:px-8 border-t border-slate-800 text-center text-xs font-medium text-slate-400">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex flex-wrap justify-center items-center gap-3">
-            <Link href={currentLang === "en" ? "/aboutus" : "/gioi-thieu"} className="hover:text-[#fef08a] transition-colors">
+            <Link href="/gioi-thieu" className="hover:text-[#fef08a] transition-colors">
               {ft.terms}
             </Link>
             <span className="text-slate-700">|</span>
-            <Link href={currentLang === "en" ? "/aboutus" : "/gioi-thieu"} className="hover:text-[#fef08a] transition-colors">
+            <Link href="/gioi-thieu" className="hover:text-[#fef08a] transition-colors">
               {ft.privacy}
             </Link>
             <span className="text-slate-700">|</span>
-            <Link href={currentLang === "en" ? "/contact" : "/lien-he"} className="hover:text-[#fef08a] transition-colors">
+            <Link href="/lien-he" className="hover:text-[#fef08a] transition-colors">
               {ft.sitemapLink}
             </Link>
           </div>

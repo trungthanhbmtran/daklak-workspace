@@ -1,22 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-// Mapping for slug translation
-const LANG_MAPPING: Record<string, { vi: string; en: string }> = {
-  "gioi-thieu": { vi: "gioi-thieu", en: "aboutus" },
-  "aboutus": { vi: "gioi-thieu", en: "aboutus" },
-  "lien-he": { vi: "lien-he", en: "contact" },
-  "contact": { vi: "lien-he", en: "contact" },
-  "thu-tuc": { vi: "thu-tuc", en: "procedures" },
-  "procedures": { vi: "thu-tuc", en: "procedures" },
-  "tin-tuc": { vi: "tin-tuc", en: "news" },
-  "news": { vi: "tin-tuc", en: "news" },
-  "tuong-tac": { vi: "tuong-tac", en: "feedback" },
-  "feedback": { vi: "tuong-tac", en: "feedback" },
-  "van-ban": { vi: "van-ban", en: "documents" },
-  "documents": { vi: "van-ban", en: "documents" },
-}
-
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
@@ -41,47 +25,24 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // 2. Extract path segments and check for slug mapping
-  const segments = pathname.split("/").filter(Boolean)
-  let shouldRedirect = false
-  let targetPath = pathname
-
-  if (segments.length > 0) {
-    const currentSlug = segments[0]
-    const mapping = LANG_MAPPING[currentSlug]
-
-    if (mapping) {
-      const targetSlug = lang === "en" ? mapping.en : mapping.vi
-      if (targetSlug !== currentSlug) {
-        segments[0] = targetSlug
-        targetPath = "/" + segments.join("/")
-        shouldRedirect = true
-      }
-    }
-  }
-
-  // 3. Perform Redirection or Proceed with Response
-  if (shouldRedirect) {
-    const redirectUrl = new URL(targetPath, request.url)
-    
-    // Preserve other search parameters, but optionally remove ?lang to keep URLs clean
+  // 2. Perform Redirection to remove ?lang query param if present, keeping URLs beautiful and clean
+  if (queryLang) {
+    const redirectUrl = new URL(pathname, request.url)
     searchParams.forEach((value, key) => {
       if (key !== "lang") {
         redirectUrl.searchParams.set(key, value)
       }
     })
-
     const response = NextResponse.redirect(redirectUrl)
     response.cookies.set("lang", lang, { path: "/", maxAge: 31536000, sameSite: "lax" })
     return response
   }
 
-  // If not redirecting, proceed to next handler but ensure the language cookie is set correctly
+  // 3. Set cookie if missing or different, then proceed
   const response = NextResponse.next()
   const existingCookie = request.cookies.get("lang")?.value
 
-  // Set cookie if it is missing or different
-  if (existingCookie !== lang || queryLang) {
+  if (existingCookie !== lang) {
     response.cookies.set("lang", lang, { path: "/", maxAge: 31536000, sameSite: "lax" })
   }
 

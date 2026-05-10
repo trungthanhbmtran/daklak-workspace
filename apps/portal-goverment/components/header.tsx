@@ -104,23 +104,7 @@ const getCookie = (name: string): string | null => {
   return match ? decodeURIComponent(match[2]) : null
 }
 
-// 2. Slug translation mappings
-const LANG_MAPPING: Record<string, { vi: string; en: string }> = {
-  "gioi-thieu": { vi: "gioi-thieu", en: "aboutus" },
-  "aboutus": { vi: "gioi-thieu", en: "aboutus" },
-  "lien-he": { vi: "lien-he", en: "contact" },
-  "contact": { vi: "lien-he", en: "contact" },
-  "thu-tuc": { vi: "thu-tuc", en: "procedures" },
-  "procedures": { vi: "thu-tuc", en: "procedures" },
-  "tin-tuc": { vi: "tin-tuc", en: "news" },
-  "news": { vi: "tin-tuc", en: "news" },
-  "tuong-tac": { vi: "tuong-tac", en: "feedback" },
-  "feedback": { vi: "tuong-tac", en: "feedback" },
-  "van-ban": { vi: "van-ban", en: "documents" },
-  "documents": { vi: "van-ban", en: "documents" },
-}
-
-// 3. Static layout translation dictionary
+// 2. Static layout translation dictionary
 const translations = {
   vi: {
     hotline: "Đường dây nóng",
@@ -163,23 +147,13 @@ export default function Header() {
   const [dateTimeStr, setDateTimeStr] = React.useState("")
   const [langOpen, setLangOpen] = React.useState(false)
 
-  // 4. Resolve the active language client-side
+  // 3. Resolve the active language client-side
   const currentLang = React.useMemo(() => {
     if (!mounted) return "vi"
     const cookieLang = getCookie("lang")
     if (cookieLang === "vi" || cookieLang === "en") return cookieLang
-
-    // Check pathname as a safe fallback
-    const pathSegments = pathname.split("/").filter(Boolean)
-    if (pathSegments.length > 0) {
-      const currentSlug = pathSegments[0]
-      const mapping = LANG_MAPPING[currentSlug]
-      if (mapping) {
-        return mapping.en === currentSlug ? "en" : "vi"
-      }
-    }
     return "vi"
-  }, [mounted, pathname])
+  }, [mounted])
 
   const t = translations[currentLang] || translations.vi
 
@@ -252,27 +226,27 @@ export default function Header() {
         { name: t.home, path: "/" },
         {
           name: t.about,
-          path: currentLang === "en" ? "/aboutus" : "/gioi-thieu",
+          path: "/gioi-thieu",
           children: [
-            { name: currentLang === "en" ? "Overview" : "Giới thiệu chung", path: currentLang === "en" ? "/aboutus#chung" : "/gioi-thieu#chung" },
-            { name: currentLang === "en" ? "Organizational Structure" : "Cơ cấu tổ chức", path: currentLang === "en" ? "/aboutus#co-cau" : "/gioi-thieu#co-cau" },
-            { name: currentLang === "en" ? "Leadership Info" : "Thông tin lãnh đạo", path: currentLang === "en" ? "/aboutus#lanh-dao" : "/gioi-thieu#lanh-dao" }
+            { name: currentLang === "en" ? "Overview" : "Giới thiệu chung", path: "/gioi-thieu#chung" },
+            { name: currentLang === "en" ? "Organizational Structure" : "Cơ cấu tổ chức", path: "/gioi-thieu#co-cau" },
+            { name: currentLang === "en" ? "Leadership Info" : "Thông tin lãnh đạo", path: "/gioi-thieu#lanh-dao" }
           ]
         },
         {
           name: t.news,
-          path: currentLang === "en" ? "/news" : "/tin-tuc",
+          path: "/tin-tuc",
           children: [
-            { name: currentLang === "en" ? "Party Activity" : "Tin hoạt động Đảng Ủy", path: currentLang === "en" ? "/news?category=dang-uy" : "/tin-tuc?category=dang-uy" },
-            { name: currentLang === "en" ? "People's Council" : "Tin Hội đồng nhân dân", path: currentLang === "en" ? "/news?category=hdnd" : "/tin-tuc?category=hdnd" },
-            { name: currentLang === "en" ? "People's Committee" : "Tin Ủy ban nhân dân", path: currentLang === "en" ? "/news?category=ubnd" : "/tin-tuc?category=ubnd" },
-            { name: currentLang === "en" ? "Socio-Economic" : "Kinh tế - Xã hội", path: currentLang === "en" ? "/news?category=kinh-te" : "/tin-tuc?category=kinh-te" }
+            { name: currentLang === "en" ? "Party Activity" : "Tin hoạt động Đảng Ủy", path: "/tin-tuc?category=dang-uy" },
+            { name: currentLang === "en" ? "People's Council" : "Tin Hội đồng nhân dân", path: "/tin-tuc?category=hdnd" },
+            { name: currentLang === "en" ? "People's Committee" : "Tin Ủy ban nhân dân", path: "/tin-tuc?category=ubnd" },
+            { name: currentLang === "en" ? "Socio-Economic" : "Kinh tế - Xã hội", path: "/tin-tuc?category=kinh-te" }
           ]
         },
-        { name: t.documents, path: currentLang === "en" ? "/documents" : "/van-ban" },
-        { name: t.procedures, path: currentLang === "en" ? "/procedures" : "/thu-tuc" },
-        { name: t.feedback, path: currentLang === "en" ? "/feedback" : "/tuong-tac" },
-        { name: t.contact, path: currentLang === "en" ? "/contact" : "/lien-he" }
+        { name: t.documents, path: "/van-ban" },
+        { name: t.procedures, path: "/thu-tuc" },
+        { name: t.feedback, path: "/tuong-tac" },
+        { name: t.contact, path: "/lien-he" }
       ]
     }
 
@@ -386,29 +360,13 @@ export default function Header() {
   // 9. Process URL mapping on language change
   const handleLanguageChange = (langCode: string) => {
     document.cookie = `lang=${langCode}; path=/; max-age=31536000; SameSite=Lax`
-
-    const pathSegments = pathname.split("/").filter(Boolean)
-    if (pathSegments.length > 0) {
-      const currentSlug = pathSegments[0]
-      const mapping = LANG_MAPPING[currentSlug]
-      if (mapping) {
-        const targetSlug = langCode === "en" ? mapping.en : mapping.vi
-        if (targetSlug !== currentSlug) {
-          pathSegments[0] = targetSlug
-          const newPath = "/" + pathSegments.join("/")
-          window.location.href = newPath + window.location.search
-          return
-        }
-      }
-    }
-
     window.location.reload()
   }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      const targetSearchPath = currentLang === "en" ? "/news" : "/tin-tuc"
+      const targetSearchPath = "/tin-tuc"
       router.push(`${targetSearchPath}?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery("")
     }
@@ -478,11 +436,10 @@ export default function Header() {
                             handleLanguageChange(lang.code)
                             setLangOpen(false)
                           }}
-                          className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${
-                            currentLang === lang.code
-                              ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20"
-                              : "text-slate-700 dark:text-slate-300"
-                          }`}
+                          className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${currentLang === lang.code
+                            ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20"
+                            : "text-slate-700 dark:text-slate-300"
+                            }`}
                         >
                           <span>{lang.name}</span>
                           {currentLang === lang.code && (
@@ -684,16 +641,6 @@ export default function Header() {
         <div className="flex items-center gap-3">
           {mounted && (
             <>
-              <button
-                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white cursor-pointer"
-              >
-                {resolvedTheme === "dark" ? (
-                  <Sun className="w-4 h-4 text-amber-500" />
-                ) : (
-                  <Moon className="w-4 h-4 text-slate-100" />
-                )}
-              </button>
 
               {/* MOBILE LANG SELECTOR */}
               <div className="relative">
@@ -717,9 +664,8 @@ export default function Header() {
                           handleLanguageChange(lang.code)
                           setLangOpen(false)
                         }}
-                        className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${
-                          currentLang === lang.code ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20" : ""
-                        }`}
+                        className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${currentLang === lang.code ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20" : ""
+                          }`}
                       >
                         {lang.name}
                       </button>
@@ -727,6 +673,16 @@ export default function Header() {
                   </div>
                 )}
               </div>
+              <button
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white cursor-pointer"
+              >
+                {resolvedTheme === "dark" ? (
+                  <Sun className="w-4 h-4 text-amber-500" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-100" />
+                )}
+              </button>
             </>
           )}
           <button
