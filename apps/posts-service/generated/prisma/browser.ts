@@ -43,6 +43,11 @@ export type CitizenQuestion = Prisma.CitizenQuestionModel
  */
 export type CitizenFeedback = Prisma.CitizenFeedbackModel
 /**
+ * Model PortalConfig
+ * 
+ */
+export type PortalConfig = Prisma.PortalConfigModel
+/**
  * Model PortalMenu
  * 
  */

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package portal_config;
+
+// ====================== Portal Config Service ======================
+
+service PortalConfigService {
+  rpc Create(CreateRequest) returns (PortalConfigResponse) {}
+  rpc GetByCode(GetByCodeRequest) returns (PortalConfigResponse) {}
+  rpc GetAll(GetAllRequest) returns (GetAllResponse) {}
+  rpc Update(UpdateRequest) returns (PortalConfigResponse) {}
+}
+
+// ====================== Object ======================
+
+message PortalConfig {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+}
+
+// ====================== Messages ======================
+
+message CreateRequest {
+  string code = 1;
+  string name = 2;
+  string description = 3;
+}
+
+message GetByCodeRequest {
+  string code = 1;
+}
+
+message GetAllRequest {}
+
+message GetAllResponse {
+  repeated PortalConfig data = 1;
+}
+
+message UpdateRequest {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+  string description = 4;
+}
+
+message PortalConfigResponse {
+  PortalConfig data = 1;
+  bool success = 2;
+  string message = 3;
+}

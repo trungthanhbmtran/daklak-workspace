@@ -56,6 +56,7 @@ export const ModelName = {
   Comment: 'Comment',
   CitizenQuestion: 'CitizenQuestion',
   CitizenFeedback: 'CitizenFeedback',
+  PortalConfig: 'PortalConfig',
   PortalMenu: 'PortalMenu',
   Post: 'Post',
   Tag: 'Tag',
@@ -183,6 +184,18 @@ export const CitizenFeedbackScalarFieldEnum = {
 } as const
 
 export type CitizenFeedbackScalarFieldEnum = (typeof CitizenFeedbackScalarFieldEnum)[keyof typeof CitizenFeedbackScalarFieldEnum]
+
+
+export const PortalConfigScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortalConfigScalarFieldEnum = (typeof PortalConfigScalarFieldEnum)[keyof typeof PortalConfigScalarFieldEnum]
 
 
 export const PortalMenuScalarFieldEnum = {
@@ -426,6 +439,15 @@ export const CitizenFeedbackOrderByRelevanceFieldEnum = {
 } as const
 
 export type CitizenFeedbackOrderByRelevanceFieldEnum = (typeof CitizenFeedbackOrderByRelevanceFieldEnum)[keyof typeof CitizenFeedbackOrderByRelevanceFieldEnum]
+
+
+export const PortalConfigOrderByRelevanceFieldEnum = {
+  code: 'code',
+  name: 'name',
+  description: 'description'
+} as const
+
+export type PortalConfigOrderByRelevanceFieldEnum = (typeof PortalConfigOrderByRelevanceFieldEnum)[keyof typeof PortalConfigOrderByRelevanceFieldEnum]
 
 
 export const PortalMenuOrderByRelevanceFieldEnum = {

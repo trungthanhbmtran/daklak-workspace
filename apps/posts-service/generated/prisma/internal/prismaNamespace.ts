@@ -389,6 +389,7 @@ export const ModelName = {
   Comment: 'Comment',
   CitizenQuestion: 'CitizenQuestion',
   CitizenFeedback: 'CitizenFeedback',
+  PortalConfig: 'PortalConfig',
   PortalMenu: 'PortalMenu',
   Post: 'Post',
   Tag: 'Tag',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "banner" | "category" | "comment" | "citizenQuestion" | "citizenFeedback" | "portalMenu" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog" | "postTranslation"
+    modelProps: "banner" | "category" | "comment" | "citizenQuestion" | "citizenFeedback" | "portalConfig" | "portalMenu" | "post" | "tag" | "postVersion" | "moderationLog" | "auditLog" | "postTranslation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -742,6 +743,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CitizenFeedbackCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CitizenFeedbackCountAggregateOutputType> | number
+        }
+      }
+    }
+    PortalConfig: {
+      payload: Prisma.$PortalConfigPayload<ExtArgs>
+      fields: Prisma.PortalConfigFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PortalConfigFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PortalConfigFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>
+        }
+        findFirst: {
+          args: Prisma.PortalConfigFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PortalConfigFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>
+        }
+        findMany: {
+          args: Prisma.PortalConfigFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>[]
+        }
+        create: {
+          args: Prisma.PortalConfigCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>
+        }
+        createMany: {
+          args: Prisma.PortalConfigCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.PortalConfigDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>
+        }
+        update: {
+          args: Prisma.PortalConfigUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>
+        }
+        deleteMany: {
+          args: Prisma.PortalConfigDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PortalConfigUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.PortalConfigUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PortalConfigPayload>
+        }
+        aggregate: {
+          args: Prisma.PortalConfigAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePortalConfig>
+        }
+        groupBy: {
+          args: Prisma.PortalConfigGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PortalConfigGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PortalConfigCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PortalConfigCountAggregateOutputType> | number
         }
       }
     }
@@ -1350,6 +1417,18 @@ export const CitizenFeedbackScalarFieldEnum = {
 export type CitizenFeedbackScalarFieldEnum = (typeof CitizenFeedbackScalarFieldEnum)[keyof typeof CitizenFeedbackScalarFieldEnum]
 
 
+export const PortalConfigScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PortalConfigScalarFieldEnum = (typeof PortalConfigScalarFieldEnum)[keyof typeof PortalConfigScalarFieldEnum]
+
+
 export const PortalMenuScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1591,6 +1670,15 @@ export const CitizenFeedbackOrderByRelevanceFieldEnum = {
 } as const
 
 export type CitizenFeedbackOrderByRelevanceFieldEnum = (typeof CitizenFeedbackOrderByRelevanceFieldEnum)[keyof typeof CitizenFeedbackOrderByRelevanceFieldEnum]
+
+
+export const PortalConfigOrderByRelevanceFieldEnum = {
+  code: 'code',
+  name: 'name',
+  description: 'description'
+} as const
+
+export type PortalConfigOrderByRelevanceFieldEnum = (typeof PortalConfigOrderByRelevanceFieldEnum)[keyof typeof PortalConfigOrderByRelevanceFieldEnum]
 
 
 export const PortalMenuOrderByRelevanceFieldEnum = {
@@ -1843,6 +1931,7 @@ export type GlobalOmitConfig = {
   comment?: Prisma.CommentOmit
   citizenQuestion?: Prisma.CitizenQuestionOmit
   citizenFeedback?: Prisma.CitizenFeedbackOmit
+  portalConfig?: Prisma.PortalConfigOmit
   portalMenu?: Prisma.PortalMenuOmit
   post?: Prisma.PostOmit
   tag?: Prisma.TagOmit

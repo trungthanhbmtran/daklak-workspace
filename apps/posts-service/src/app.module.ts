@@ -9,6 +9,7 @@ import { AuditModule } from './modules/audit/audit.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { PortalMenuModule } from './modules/portal-menu/portal-menu.module';
 import { InteractionsModule } from './modules/interactions/interactions.module';
+import { PortalConfigModule } from './modules/portal-config/portal-config.module';
 
 
 @Module({
@@ -25,6 +26,7 @@ import { InteractionsModule } from './modules/interactions/interactions.module';
     BannersModule,
     PortalMenuModule,
     InteractionsModule,
+    PortalConfigModule,
   ],
 })
 export class AppModule { }

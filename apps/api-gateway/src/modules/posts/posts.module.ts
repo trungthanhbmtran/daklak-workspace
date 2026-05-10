@@ -10,6 +10,8 @@ import { PublicBannersController } from './public-banners.controller';
 import { PortalMenuController } from './portal-menu.controller';
 import { PublicPortalMenuController } from './public-portal-menu.controller';
 import { InteractionsController } from './interactions.controller';
+import { PortalConfigController } from './portal-config.controller';
+import { PublicPortalConfigController } from './public-portal-config.controller';
 
 @Module({
   imports: [
@@ -19,6 +21,7 @@ import { InteractionsController } from './interactions.controller';
     registerGrpcService(MICROSERVICES.BANNER),
     registerGrpcService(MICROSERVICES.PORTAL_MENU),
     registerGrpcService(MICROSERVICES.INTERACTION),
+    registerGrpcService(MICROSERVICES.PORTAL_CONFIG),
   ],
   controllers: [
     PostsCategoryController,
@@ -30,6 +33,8 @@ import { InteractionsController } from './interactions.controller';
     PortalMenuController,
     PublicPortalMenuController,
     InteractionsController,
+    PortalConfigController,
+    PublicPortalConfigController,
   ],
 })
 export class PostsModule { }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { categoryApi } from "@/features/system-admin/categories/api";
+// import { categoryApi } from "@/features/system-admin/categories/api";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -84,15 +84,15 @@ export default function PortalConfigPage() {
     fetchLanguages();
   }, []);
 
-  // 2. Fetch existing portal config categories
+  // 2. Fetch existing portal configurations
   const { data: dbCategories, isLoading, refetch } = useQuery({
-    queryKey: ["categories", "PORTAL_CONFIG"],
+    queryKey: ["portal-configs"],
     queryFn: async () => {
       try {
-        const res = await categoryApi.fetchAll();
-        return Array.isArray(res) ? res.filter((c: any) => c.group === "PORTAL_CONFIG") : [];
+        const res: any = await apiClient.get("/portal-configs");
+        return Array.isArray(res?.data) ? res.data : [];
       } catch (error) {
-        console.error("Error fetching categories", error);
+        console.error("Error fetching portal configs", error);
         return [];
       }
     }
@@ -355,20 +355,17 @@ export default function PortalConfigPage() {
 
         if (existing) {
           // UPDATE
-          await apiClient.put(`/categories/${existing.id}`, {
+          await apiClient.put(`/portal-configs/${existing.id}`, {
             code: item.code,
             name: item.name,
             description: item.description,
-            active: 1
           });
         } else {
           // CREATE NEW
-          await apiClient.post("/categories", {
-            group: "PORTAL_CONFIG",
+          await apiClient.post("/portal-configs", {
             code: item.code,
             name: item.name,
             description: item.description,
-            order: 1
           });
         }
       }

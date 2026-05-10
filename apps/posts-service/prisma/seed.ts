@@ -333,6 +333,109 @@ async function main() {
   await seedPortalMenus(portalMenus);
   console.log('✅ Portal Menus seeded');
 
+  // ==========================================================
+  // 5. PORTAL CONFIGS
+  // ==========================================================
+  console.log('📦 Seeding Portal Configs...');
+  const portalConfigs = [
+    {
+      code: "unit_name",
+      name: "UBND XÃ DANG KANG",
+      description: JSON.stringify({ vi: "UBND XÃ DANG KANG", en: "DANG KANG PEOPLE'S COMMITTEE" })
+    },
+    {
+      code: "unit_title",
+      name: "TRANG THÔNG TIN ĐIỆN TỬ",
+      description: JSON.stringify({ vi: "TRANG THÔNG TIN ĐIỆN TỬ", en: "OFFICIAL PORTAL" })
+    },
+    {
+      code: "unit_identifier",
+      name: "TỈNH ĐẮK LẮK",
+      description: JSON.stringify({ vi: "TỈNH ĐẮK LẮK", en: "DAK LAK PROVINCE" })
+    },
+    {
+      code: "responsible_person",
+      name: "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang",
+      description: JSON.stringify({ vi: "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang", en: "Mr. Tran Van Minh - Chairman of Dang Kang People's Committee" })
+    },
+    {
+      code: "citizen_schedule",
+      name: "Thứ 5 hàng tuần • 08:00 - 11:30",
+      description: JSON.stringify({ vi: "Thứ 5 hàng tuần • 08:00 - 11:30", en: "Every Thursday • 08:00 - 11:30" })
+    },
+    {
+      code: "license_info",
+      name: "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp",
+      description: JSON.stringify({ vi: "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp", en: "License No: 45/GP-TTĐT issued by Department of Information and Communications of Dak Lak Province" })
+    },
+    {
+      code: "address",
+      name: "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk",
+      description: JSON.stringify({ vi: "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk", en: "Hamlet 6, Dang Kang Commune, Krong Bong District, Dak Lak Province" })
+    },
+    {
+      code: "contact_form_title",
+      name: "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG",
+      description: JSON.stringify({ vi: "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG", en: "SEND FEEDBACK / SUGGESTION TO OFFICE" })
+    },
+    {
+      code: "contact_form_success_desc",
+      name: "Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn và sẽ phản hồi sớm nhất có thể.",
+      description: JSON.stringify({ vi: "Bộ phận văn thư xã Dang Kang đã nhận được thư góp ý của bạn và sẽ phản hồi sớm nhất có thể.", en: "Dang Kang Commune clerical department has received your letter and will respond as soon as possible." })
+    },
+    {
+      code: "contact_map_title",
+      name: "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG",
+      description: JSON.stringify({ vi: "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG", en: "ADMINISTRATIVE DIVISION MAP OF DANG KANG COMMUNE" })
+    },
+    {
+      code: "footer_portal_title",
+      name: "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG",
+      description: JSON.stringify({ vi: "CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN XÃ DANG KANG", en: "ONLINE PUBLIC SERVICE PORTAL OF DANG KANG COMMUNE" })
+    },
+    {
+      code: "footer_portal_subtitle",
+      name: "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng",
+      description: JSON.stringify({ vi: "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng", en: "Modern, rapid one-stop shop administrative procedure processing" })
+    },
+    {
+      code: "hotline",
+      name: "0262.3812.345",
+      description: JSON.stringify({ vi: "0262.3812.345", en: "0262.3812.345" })
+    },
+    {
+      code: "logo_url",
+      name: "",
+      description: "Đường dẫn ảnh logo cơ quan"
+    },
+    {
+      code: "fax",
+      name: "0262.3812.346",
+      description: JSON.stringify({ vi: "0262.3812.346", en: "0262.3812.346" })
+    },
+    {
+      code: "email",
+      name: "xadangkang@krongbong.daklak.gov.vn",
+      description: JSON.stringify({ vi: "xadangkang@krongbong.daklak.gov.vn", en: "xadangkang@krongbong.daklak.gov.vn" })
+    }
+  ];
+
+  for (const config of portalConfigs) {
+    await (prisma as any).portalConfig.upsert({
+      where: { code: config.code },
+      update: {
+        name: config.name,
+        description: config.description
+      },
+      create: {
+        code: config.code,
+        name: config.name,
+        description: config.description
+      }
+    });
+  }
+  console.log('✅ Portal Configs seeded');
+
   console.log('🎉 POSTS-SERVICE SEED COMPLETED SUCCESSFULLY');
 }
 

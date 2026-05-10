@@ -159,4 +159,11 @@ export const MICROSERVICES = {
     URL: getPostUrl(),
     SERVICE: 'InteractionService',
   },
+  PORTAL_CONFIG: {
+    PACKAGE: 'portal_config',
+    SYMBOL: 'PORTAL_CONFIG_PACKAGE',
+    PROTO: 'posts/portal_config.proto',
+    URL: getPostUrl(),
+    SERVICE: 'PortalConfigService',
+  },
 };
