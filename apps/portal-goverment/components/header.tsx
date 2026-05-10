@@ -396,49 +396,33 @@ export default function Header() {
             </a>
             {mounted && (
               <>
-                {/* PREMIUM LANG SELECTOR (DESKTOP) */}
+                {/* PREMIUM INLINE LANG SELECTOR (DESKTOP) */}
                 <span className="text-slate-300 dark:text-slate-700">|</span>
-                <div className="relative" onMouseLeave={() => setLangOpen(false)}>
-                  <button
-                    onClick={() => setLangOpen(!langOpen)}
-                    onMouseEnter={() => setLangOpen(true)}
-                    className="flex items-center gap-1.5 p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900 transition-all text-slate-700 dark:text-slate-300 font-bold cursor-pointer"
-                    title={t.selectLanguage}
-                  >
-                    <span className="text-base leading-none select-none">{currentLang === "en" ? "🇬🇧" : "🇻🇳"}</span>
-                    <span className="uppercase text-xs tracking-wider">{currentLang === "en" ? "EN" : "VI"}</span>
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${langOpen ? "rotate-180" : ""}`} />
-                  </button>
-
-                  {/* Glassmorphic animated dropdown */}
-                  {langOpen && (
-                    <div className="absolute right-0 mt-1 bg-white/90 dark:bg-slate-950/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl py-1 min-w-[140px] z-50 animate-fade-in transition-all">
-                      {(languagesData && languagesData.length > 0 ? languagesData : [
-                        { code: "vi", name: "Tiếng Việt" },
-                        { code: "en", name: "Tiếng Anh" }
-                      ]).map((lang: any) => (
-                        <button
-                          key={lang.code}
-                          onClick={() => {
-                            handleLanguageChange(lang.code)
-                            setLangOpen(false)
-                          }}
-                          className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${currentLang === lang.code
-                            ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20"
-                            : "text-slate-700 dark:text-slate-300"
-                            }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-base select-none leading-none">{lang.code === "en" ? "🇬🇧" : "🇻🇳"}</span>
-                            <span>{lang.name}</span>
-                          </div>
-                          {currentLang === lang.code && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#cc0000] dark:bg-red-400" />
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                <div className="flex items-center gap-2">
+                  {(languagesData && languagesData.length > 0 ? languagesData : [
+                    { code: "vi", name: "Tiếng Việt" },
+                    { code: "en", name: "Tiếng Anh" }
+                  ]).map((lang: any) => {
+                    const isSelected = currentLang === lang.code;
+                    const flagIcon = lang.code === "en" ? "🇬🇧" : "🇻🇳";
+                    const shortLabel = lang.code === "en" ? "EN" : "VI";
+                    
+                    return (
+                      <button
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={`flex items-center gap-1.5 px-2 py-1 rounded transition-all cursor-pointer text-[10px] font-black ${
+                          isSelected
+                            ? "bg-red-600 text-white shadow-sm scale-105"
+                            : "text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-900/60"
+                        }`}
+                        title={lang.name}
+                      >
+                        <span className="text-sm select-none leading-none">{flagIcon}</span>
+                        <span className="uppercase tracking-wider">{shortLabel}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <span className="text-slate-300 dark:text-slate-700">|</span>
@@ -645,39 +629,32 @@ export default function Header() {
           {mounted && (
             <>
 
-              {/* MOBILE LANG SELECTOR */}
-              <div className="relative">
-                <button
-                  onClick={() => setLangOpen(!langOpen)}
-                  className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white flex items-center gap-1 cursor-pointer"
-                  title={t.selectLanguage}
-                >
-                  <span className="text-base select-none leading-none">{currentLang === "en" ? "🇬🇧" : "🇻🇳"}</span>
-                  <span className="uppercase text-xs font-bold">{currentLang === "en" ? "EN" : "VI"}</span>
-                </button>
-                {langOpen && (
-                  <div className="absolute right-0 mt-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl py-1 min-w-[120px] z-50 text-slate-900 dark:text-slate-100">
-                    {(languagesData && languagesData.length > 0 ? languagesData : [
-                      { code: "vi", name: "Tiếng Việt" },
-                      { code: "en", name: "Tiếng Anh" }
-                    ]).map((lang: any) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          handleLanguageChange(lang.code)
-                          setLangOpen(false)
-                        }}
-                        className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${currentLang === lang.code ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20" : ""
-                          }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className="text-base select-none leading-none">{lang.code === "en" ? "🇬🇧" : "🇻🇳"}</span>
-                          <span>{lang.name}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
+               {/* PREMIUM INLINE MOBILE LANG SELECTOR */}
+              <div className="flex items-center gap-1">
+                {(languagesData && languagesData.length > 0 ? languagesData : [
+                  { code: "vi", name: "Tiếng Việt" },
+                  { code: "en", name: "Tiếng Anh" }
+                ]).map((lang: any) => {
+                  const isSelected = currentLang === lang.code;
+                  const flagIcon = lang.code === "en" ? "🇬🇧" : "🇻🇳";
+                  const shortLabel = lang.code === "en" ? "EN" : "VI";
+                  
+                  return (
+                    <button
+                      key={lang.code}
+                      onClick={() => handleLanguageChange(lang.code)}
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all text-[10px] font-black cursor-pointer ${
+                        isSelected
+                          ? "bg-white text-red-700 shadow-sm font-black border border-white"
+                          : "text-white hover:bg-white/10"
+                      }`}
+                      title={lang.name}
+                    >
+                      <span className="text-xs select-none leading-none">{flagIcon}</span>
+                      <span className="uppercase tracking-wider">{shortLabel}</span>
+                    </button>
+                  );
+                })}
               </div>
               <button
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
