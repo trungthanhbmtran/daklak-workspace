@@ -7,7 +7,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export function resolveMediaUrl(urlOrId: string | undefined | null) {
   if (!urlOrId) return "";
-  if (urlOrId.startsWith("http://") || urlOrId.startsWith("https://") || urlOrId.startsWith("data:")) {
+  if (
+    urlOrId.startsWith("http://") || 
+    urlOrId.startsWith("https://") || 
+    urlOrId.startsWith("data:") ||
+    urlOrId.startsWith("/")
+  ) {
     return urlOrId;
   }
   return `/api/v1/admin/media/download/${urlOrId}`;

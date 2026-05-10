@@ -219,12 +219,24 @@ export default function PortalConfigPage() {
   // 4. Image Upload Hook integration
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (fileId) => {
+      setLogoUrl(`/api/v1/admin/media/download/${fileId}`);
       toast.success("Tải logo thành công!");
+    },
+    onRemove: () => {
+      setLogoUrl("");
     }
   });
 
   // Dynamic active logo selection
   const activeLogo = previewUrl || logoUrl;
+
+  const resolveLogoUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("/")) {
+      return url;
+    }
+    return `/api/v1/admin/media/download/${url}`;
+  };
 
   // 5. Save/Update Handler
   const handleSave = async (e?: React.FormEvent) => {
@@ -311,7 +323,7 @@ export default function PortalConfigPage() {
         },
         {
           code: "logo_url",
-          name: activeLogo || "",
+          name: logoUrl || "",
           description: "Đường dẫn ảnh logo cơ quan"
         },
         {
@@ -867,7 +879,7 @@ export default function PortalConfigPage() {
               <div className="relative w-32 h-32 rounded-full border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner group">
                 {activeLogo ? (
                   <>
-                    <img src={activeLogo} alt="Logo preview" className="w-full h-full object-contain p-2" />
+                    <img src={resolveLogoUrl(activeLogo)} alt="Logo preview" className="w-full h-full object-contain p-2" />
                     <button
                       type="button"
                       onClick={() => {

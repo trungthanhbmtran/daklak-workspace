@@ -487,9 +487,9 @@ export default function Header() {
 
         <div className="max-w-7xl mx-auto w-full px-4 relative flex items-center justify-between min-h-[96px] md:min-h-[115px] py-3.5 z-10">
           <div className="flex items-center gap-3.5 sm:gap-4 text-left z-10 select-none max-w-[85%] md:max-w-[55%]">
-            <div className="bg-white p-1 rounded-full border border-slate-200/80 dark:border-slate-800 shadow-sm shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex items-center justify-center">
+            <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex items-center justify-center">
               {getConfigValue("logo_url", "") ? (
-                <img src={getConfigValue("logo_url", "")} alt="Logo" className="w-full h-full object-contain" />
+                <img src={resolveMediaUrl(getConfigValue("logo_url", ""))} alt="Logo" className="w-full h-full object-contain" />
               ) : (
                 <NationalEmblem className="w-full h-full animate-fade-in" />
               )}
