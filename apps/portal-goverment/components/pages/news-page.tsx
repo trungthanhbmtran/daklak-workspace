@@ -5,6 +5,13 @@ import Link from "next/link"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Calendar, Search, ArrowRight, Home, ChevronRight } from "lucide-react"
 
+// Client-side cookie getter helper
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
+  return match ? decodeURIComponent(match[2]) : null
+}
+
 const ALL_NEWS = [
   {
     id: 1,
@@ -98,9 +105,151 @@ const ALL_NEWS = [
   }
 ]
 
+const ALL_NEWS_EN = [
+  {
+    id: 1,
+    title: "District Leaders Work with Dang Kang Commune on Socio-Economic Development in 2026",
+    excerpt: "On the morning of April 29, Krông Bông District People's Committee coordinated with departments to work directly with Dang Kang Commune on agricultural crop restructuring...",
+    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+    date: "29/04/2026",
+    category: "ubnd",
+    categoryName: "People's Committee",
+    readTime: "4 min read"
+  },
+  {
+    id: 2,
+    title: "Groundbreaking of Expansion of Inter-village Road 3 and 4 for Model New Rural Area",
+    excerpt: "The project has a total investment of over 5 billion VND from the commune budget, socialization, and voluntary contribution of residents to widen the road to 8m...",
+    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80",
+    date: "28/04/2026",
+    category: "ubnd",
+    categoryName: "People's Committee",
+    readTime: "5 min read"
+  },
+  {
+    id: 3,
+    title: "Digital Transformation and IT Training for Coffee Farmers",
+    excerpt: "More than 120 outstanding households of the commune participated in the training course on using agricultural origin tracking and market price tracking applications...",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80",
+    date: "26/04/2026",
+    category: "kinh-te",
+    categoryName: "Socio-Economy",
+    readTime: "3 min read"
+  },
+  {
+    id: 101,
+    title: "Provincial Party Committee: Tighten discipline, flexible administration, strive for double-digit growth",
+    excerpt: "The Provincial People's Committee requests tightening administrative discipline, raising leaders' responsibility, resolving difficulties to promote sustainable economic growth.",
+    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80",
+    date: "29/04/2026",
+    category: "dang-uy",
+    categoryName: "Party Activities",
+    readTime: "3 min read"
+  },
+  {
+    id: 102,
+    title: "Dang Kang Commune People's Council Prepares for the 8th Extraordinary Session of the 11th Term",
+    excerpt: "The Standing Committee of the People's Council coordinates the master plan of the administrative center and the allocation of medium-term public investment.",
+    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
+    date: "28/04/2026",
+    category: "hdnd",
+    categoryName: "People's Council",
+    readTime: "4 min read"
+  },
+  {
+    id: 103,
+    title: "Commune Launches Environmental Clean-up Campaign to Prevent Dengue Fever",
+    excerpt: "Simultaneously, 8 villages in the commune mobilized to destroy larvae, clear bushes, and clear sewers to avoid standing water during the rainy season.",
+    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80",
+    date: "27/04/2026",
+    category: "ubnd",
+    categoryName: "People's Committee",
+    readTime: "3 min read"
+  },
+  {
+    id: 104,
+    title: "Dissemination and Training on the Revised Land Law 2026 for Commune Land Officers",
+    excerpt: "Strengthen the capacity of state land management, resolve land disputes at the grassroots level according to the law and protect citizens' rights.",
+    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80",
+    date: "25/04/2026",
+    category: "ubnd",
+    categoryName: "People's Committee",
+    readTime: "5 min read"
+  },
+  {
+    id: 105,
+    title: "Dang Kang Ethnic Minority Sports and Culture Festival 2026",
+    excerpt: "Gathering more than 300 athletes and artists competing in crossbow shooting, stick pushing, tug of war, and performing traditional Êđê gong instruments.",
+    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80",
+    date: "24/04/2026",
+    category: "kinh-te",
+    categoryName: "Culture - Society",
+    readTime: "6 min read"
+  },
+  {
+    id: 106,
+    title: "Breeding Wild Boars Model as an Economic Way Forward in Êga Village",
+    excerpt: "From the job creation preferential loans of the Social Policy Bank, many households have got out of poverty sustainably by raising boars.",
+    image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=600&q=80",
+    date: "22/04/2026",
+    category: "kinh-te",
+    categoryName: "Economy - Life",
+    readTime: "4 min read"
+  }
+]
+
+const newsPageTranslations = {
+  vi: {
+    home: "Trang chủ",
+    newsCategory: "Tin tức - Chuyên mục",
+    title: "KÊNH TIN TỨC CHÍNH THỨC",
+    subtitle: "Theo dõi các hoạt động chính trị, kinh tế, đời sống xã hội tại xã Dang Kang",
+    placeholder: "Tìm theo tiêu đề, nội dung bài viết...",
+    categoryTitle: "CHUYÊN MỤC TIN",
+    noNewsTitle: "Không tìm thấy bài viết phù hợp",
+    noNewsDesc: "Vui lòng nhập từ khóa tìm kiếm khác hoặc lựa chọn chuyên mục khác.",
+    detailText: "Chi tiết bài viết",
+    allNews: "Tất cả tin tức",
+    dangUy: "Hoạt động Đảng Ủy",
+    hdnd: "Hội đồng nhân dân",
+    ubnd: "Ủy ban nhân dân",
+    kinhTe: "Kinh tế - Đời sống",
+  },
+  en: {
+    home: "Home",
+    newsCategory: "News - Categories",
+    title: "OFFICIAL NEWS PORTAL",
+    subtitle: "Follow political, economic, and social life events in Dang Kang Commune",
+    placeholder: "Search by title, content of the article...",
+    categoryTitle: "NEWS CATEGORIES",
+    noNewsTitle: "No matching articles found",
+    noNewsDesc: "Please enter a different search keyword or select another category.",
+    detailText: "Article Details",
+    allNews: "All News",
+    dangUy: "Party Committee Activities",
+    hdnd: "People's Council",
+    ubnd: "People's Committee",
+    kinhTe: "Economy - Life",
+  }
+}
+
 function NewsListPageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const currentLang = React.useMemo(() => {
+    if (!mounted) return "vi"
+    const cookieLang = getCookie("lang")
+    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    return "vi"
+  }, [mounted])
+
+  const t = newsPageTranslations[currentLang] || newsPageTranslations.vi
 
   const initialCategory = searchParams.get("category") || "all"
   const initialSearch = searchParams.get("search") || ""
@@ -108,13 +257,13 @@ function NewsListPageContent() {
   const [activeCategory, setActiveCategory] = React.useState(initialCategory)
   const [searchQuery, setSearchQuery] = React.useState(initialSearch)
 
-  const CATEGORIES = [
-    { label: "Tất cả tin tức", value: "all" },
-    { label: "Hoạt động Đảng Ủy", value: "dang-uy" },
-    { label: "Hội đồng nhân dân", value: "hdnd" },
-    { label: "Ủy ban nhân dân", value: "ubnd" },
-    { label: "Kinh tế - Đời sống", value: "kinh-te" }
-  ]
+  const CATEGORIES = React.useMemo(() => [
+    { label: t.allNews, value: "all" },
+    { label: t.dangUy, value: "dang-uy" },
+    { label: t.hdnd, value: "hdnd" },
+    { label: t.ubnd, value: "ubnd" },
+    { label: t.kinhTe, value: "kinh-te" }
+  ], [t])
 
   React.useEffect(() => {
     setActiveCategory(searchParams.get("category") || "all")
@@ -124,7 +273,7 @@ function NewsListPageContent() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const query = searchQuery.trim()
-    const routePath = "/tin-tuc"
+    const routePath = currentLang === "en" ? "/news" : "/tin-tuc"
     if (query) {
       router.push(`${routePath}?search=${encodeURIComponent(query)}&category=${activeCategory}`)
     } else {
@@ -134,7 +283,7 @@ function NewsListPageContent() {
 
   const handleCategorySelect = (val: string) => {
     setActiveCategory(val)
-    const routePath = "/tin-tuc"
+    const routePath = currentLang === "en" ? "/news" : "/tin-tuc"
     if (searchQuery.trim()) {
       router.push(`${routePath}?category=${val}&search=${encodeURIComponent(searchQuery.trim())}`)
     } else {
@@ -142,13 +291,17 @@ function NewsListPageContent() {
     }
   }
 
-  const filteredNews = ALL_NEWS.filter(post => {
-    const matchesCategory = activeCategory === "all" || post.category === activeCategory
-    const matchesSearch = !searchQuery.trim() ||
-      post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+  const newsList = currentLang === "en" ? ALL_NEWS_EN : ALL_NEWS
+
+  const filteredNews = React.useMemo(() => {
+    return newsList.filter(post => {
+      const matchesCategory = activeCategory === "all" || post.category === activeCategory
+      const matchesSearch = !searchQuery.trim() ||
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesCategory && matchesSearch
+    })
+  }, [newsList, activeCategory, searchQuery])
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 animate-fade-in select-none">
@@ -157,11 +310,11 @@ function NewsListPageContent() {
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
-          Trang chủ
+          {t.home}
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-slate-600 dark:text-slate-300">
-          Tin tức - Chuyên mục
+          {t.newsCategory}
         </span>
       </div>
 
@@ -169,10 +322,10 @@ function NewsListPageContent() {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-5 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
         <div className="flex flex-col">
           <h2 className="text-base sm:text-lg md:text-xl font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-            KÊNH TIN TỨC CHÍNH THỨC
+            {t.title}
           </h2>
           <p className="text-xs text-slate-400 mt-1 font-medium">
-            Theo dõi các hoạt động chính trị, kinh tế, đời sống xã hội tại xã Dang Kang
+            {t.subtitle}
           </p>
         </div>
 
@@ -180,7 +333,7 @@ function NewsListPageContent() {
         <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md flex items-center">
           <input
             type="text"
-            placeholder="Tìm theo tiêu đề, nội dung bài viết..."
+            placeholder={t.placeholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full bg-slate-50 border border-slate-200 focus:bg-white text-slate-900 focus:text-slate-900 text-xs sm:text-sm pl-4 pr-10 py-2.5 rounded-xl focus:outline-none focus:border-red-600 transition-all shadow-inner dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -200,7 +353,7 @@ function NewsListPageContent() {
         {/* Left Sidebar Category Filter List */}
         <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4">
           <h4 className="text-[10px] sm:text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2">
-            CHUYÊN MỤC TIN
+            {t.categoryTitle}
           </h4>
           <div className="flex flex-col gap-1.5 font-semibold text-xs text-slate-500">
             {CATEGORIES.map((cat) => (
@@ -225,7 +378,7 @@ function NewsListPageContent() {
           {filteredNews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               {filteredNews.map((post) => {
-                const articlePath = `/tin-tuc/${post.id}`
+                const articlePath = currentLang === "en" ? `/news/${post.id}` : `/tin-tuc/${post.id}`
                 return (
                   <div
                     key={post.id}
@@ -260,7 +413,7 @@ function NewsListPageContent() {
                           href={articlePath}
                           className="text-[10px] text-slate-900 dark:text-[#fbc02d] font-bold uppercase tracking-wider flex items-center gap-1 group-hover:underline"
                         >
-                          Chi tiết bài viết
+                          {t.detailText}
                           <ArrowRight className="w-3 h-3" />
                         </Link>
                       </div>
@@ -273,10 +426,10 @@ function NewsListPageContent() {
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:text-white rounded-2xl p-12 text-center flex flex-col items-center gap-3">
               <Search className="w-12 h-12 text-slate-300 dark:text-slate-700" />
               <h5 className="text-sm font-bold text-slate-850 dark:text-slate-200">
-                Không tìm thấy bài viết phù hợp
+                {t.noNewsTitle}
               </h5>
               <p className="text-xs text-slate-400 font-medium">
-                Vui lòng nhập từ khóa tìm kiếm khác hoặc lựa chọn chuyên mục khác.
+                {t.noNewsDesc}
               </p>
             </div>
           )}

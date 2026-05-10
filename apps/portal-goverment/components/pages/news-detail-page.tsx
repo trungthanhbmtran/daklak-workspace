@@ -20,6 +20,13 @@ import {
   FileText
 } from "lucide-react"
 
+// Client-side cookie getter helper
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
+  return match ? decodeURIComponent(match[2]) : null
+}
+
 const ALL_NEWS = [
   {
     id: 1,
@@ -39,7 +46,7 @@ const ALL_NEWS = [
       "Phát biểu kết luận buổi làm việc, đồng chí Chủ tịch UBND huyện ghi nhận và biểu dương những kết quả mà xã Dang Kang đạt được trong thời gian qua. Đồng thời, đồng chí nhấn mạnh một số nhiệm vụ trọng tâm xã cần tập trung triển khai ngay trong quý II và các tháng tiếp theo:",
       "Một là, tập trung tháo gỡ vướng mắc để đẩy nhanh tiến độ giải phóng mặt bằng, thi công và giải ngân vốn đầu tư công, đặc biệt là các dự án thuộc Chương trình mục tiêu quốc gia xây dựng Nông thôn mới.",
       "Hai là, đẩy mạnh chuyển đổi cơ cấu cây trồng, vật nuôi theo hướng sản xuất hàng hóa ứng dụng công nghệ cao. Khuyến khích hình thành các hợp tác xã liên kết tiêu thụ sản phẩm nông sản chủ lực như cà phê, sầu riêng, heo lai.",
-      "Ba là, tăng cường công tác quản lý nhà nước về đất đai, trật tự xây dựng, bảo vệ môi trường nông thôn. Nghiêm cấm mọi hành vi lấn chiếm đất công, khai thác khoáng sản trái phép.",
+      "Ba là, tăng cường công tác quản lý nhà nước về đất đai, trựt tự xây dựng, bảo vệ môi trường nông thôn. Nghiêm cấm mọi hành vi lấn chiếm đất công, khai thác khoáng sản trái phép.",
       "Bốn là, đẩy mạnh công tác cải cách hành chính, chuyển đổi số cấp xã, nâng cao tỷ lệ giải quyết hồ sơ dịch vụ công trực tuyến và mức độ hài lòng của người dân.",
       "Đoàn công tác của huyện ghi nhận các kiến nghị của xã về phân bổ thêm nguồn kinh phí duy tu đường giao thông nông thôn và sẽ giao các phòng chuyên môn tham mưu giải quyết trong thời gian sớm nhất."
     ]
@@ -83,126 +90,134 @@ const ALL_NEWS = [
       "Ba là, kết nối các sàn giao dịch thương mại điện tử nông sản và tham gia nhóm cộng đồng cập nhật giá cà phê nhân, giá nông sản thế giới hàng giờ, tránh tình trạng bị thương lái ép giá.",
       "Chủ tịch Hội Nông dân xã cho biết: 'Việc đưa chuyển đổi số vào vườn cà phê không còn là chuyện xa vời mà đã trở thành yêu cầu sống còn. Hội sẽ tiếp tục đồng hành, thành lập nhóm Zalo hỗ trợ kỹ thuật tại từng thôn buôn để kịp thời giải đáp khó khăn cho bà con trong quá trình ứng dụng công nghệ vào thực tế sản xuất'."
     ]
-  },
+  }
+]
+
+const ALL_NEWS_EN = [
   {
-    id: 101,
-    title: "Đảng ủy UBND tỉnh: Siết chặt kỷ cương, điều hành linh hoạt, phấn đấu tăng trưởng hai con số",
-    excerpt: "UBND tỉnh yêu cầu siết chặt kỷ luật kỷ cương hành chính, nâng cao trách nhiệm người đứng đầu, tháo gỡ khó khăn thúc đẩy tăng trưởng kinh tế bền vững.",
-    image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80",
+    id: 1,
+    title: "District Leaders Work with Dang Kang Commune on Socio-Economic Development in 2026",
+    excerpt: "On the morning of April 29, Krông Bông District People's Committee coordinated with departments to work directly with Dang Kang Commune on agricultural crop restructuring...",
+    image: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
     date: "29/04/2026",
-    category: "dang-uy",
-    categoryName: "Hoạt động Đảng",
-    readTime: "3 phút đọc",
-    author: "Ban Tuyên giáo Đảng ủy",
+    category: "ubnd",
+    categoryName: "People's Committee",
+    readTime: "4 min read",
+    author: "Editorial Department - People's Committee Office",
     content: [
-      "Hội nghị triển khai công tác điều hành quản lý của Ban cán sự Đảng ủy UBND tỉnh đã chỉ rõ yêu cầu tăng cường hiệu quả quản lý, siết chặt kỷ cương hành chính trên toàn địa bàn.",
-      "Đảng ủy yêu cầu nâng cao vai trò, trách nhiệm của người đứng đầu các cấp, các ngành trong việc giải quyết thủ tục hành chính, tháo gỡ triệt để các rào cản pháp lý, kiến tạo môi trường đầu tư kinh doanh thông thoáng, lành mạnh cho doanh nghiệp và người dân.",
-      "Đồng thời, chú trọng công tác xây dựng chỉnh đốn Đảng, phòng chống các biểu hiện né tránh, đùn đẩy trách nhiệm, sợ sai của một bộ phận cán bộ công chức trong thực thi công vụ, quyết tâm hướng tới mục tiêu tăng trưởng kinh tế bền vững hai con số trong năm tài khóa 2026."
+      "On the morning of April 29, 2026, the working delegation of the Krông Bông District People's Committee, led by the District President, held a direct working session with the Party Committee, People's Council, and People's Committee of Dang Kang Commune on socio-economic development, defense, and security during the first 4 months, and outlined key directions and tasks for the second quarter of 2026.",
+      "Attending the session were representatives from district specialized divisions: Finance & Planning, Agriculture & Rural Development, Natural Resources & Environment, Economy & Infrastructure, and the Office of the District People's Council & People's Committee.",
+      "Reporting at the session, the President of Dang Kang Commune stated that in the first 4 months of 2026, the local socio-economic situation maintained stable growth. The total cultivation area of winter-spring crops reached 100% of the plan. Land and mineral resources management were tightened; local revenue reached 38% of the annual estimate; social welfare, healthcare, and education policies were implemented on time to the correct recipients.",
+      "However, the commune still faces challenges such as: public investment disbursement progress remaining slow; crop restructuring in agriculture is uneven among villages; and rural waste management has some difficulties.",
+      "Concluding the working session, the President of Krông Bông District praised the results achieved by Dang Kang Commune. At the same time, he emphasized key tasks for the commune to focus on immediately in the second quarter and subsequent months:",
+      "First, resolve obstacles to speed up land acquisition, construction, and public investment disbursement, particularly projects belonging to the National Target Program on Building New Rural Areas.",
+      "Second, promote restructuring of crops and livestock towards commodity production applying high technology. Encourage the formation of cooperatives linking and consuming main agricultural products such as coffee, durian, and crossbred pigs.",
+      "Third, strengthen state management on land, construction order, and rural environment protection. Strictly prohibit any acts of public land encroachment or illegal mineral exploitation.",
+      "Fourth, accelerate administrative reform and digital transformation, improve the resolution rate of online public services and satisfaction of residents.",
+      "The district delegation noted the commune's proposals regarding additional funding for local road maintenance and will assign specialized divisions to advise on solutions as soon as possible."
     ]
   },
   {
-    id: 102,
-    title: "HĐND xã Dang Kang chuẩn bị nội dung cho kỳ họp chuyên đề lần thứ 8 khóa XI",
-    excerpt: "Thường trực HĐND xã làm việc thống nhất các tờ trình quy hoạch chi tiết xây dựng trung tâm hành chính và phân bổ ngân sách đầu tư công trung hạn.",
-    image: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=600&q=80",
+    id: 2,
+    title: "Groundbreaking of Expansion of Inter-village Road 3 and 4 for Model New Rural Area",
+    excerpt: "The project has a total investment of over 5 billion VND from the commune budget, socialization, and voluntary contribution of residents to widen the road to 8m...",
+    image: "https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=600&q=80",
     date: "28/04/2026",
-    category: "hdnd",
-    categoryName: "Hội đồng nhân dân",
-    readTime: "4 phút đọc",
-    author: "Thường trực HĐND",
-    content: [
-      "Chuẩn bị cho kỳ họp chuyên đề lần thứ 8 của Hội đồng nhân dân xã Dang Kang khóa XI nhiệm kỳ 2021 - 2026, Thường trực HĐND xã đã tổ chức phiên họp thống nhất chương trình, nội dung và thẩm tra các văn bản trình kỳ họp.",
-      "Phiên họp đã thảo luận và cơ bản thống nhất với các tờ trình của UBND xã về: Quy hoạch chi tiết xây dựng trung tâm hành chính xã Dang Kang; Đề án phân bổ nguồn ngân sách đầu tư công trung hạn giai đoạn 2026 - 2030; và Tờ trình điều chỉnh kế hoạch thu - chi ngân sách địa phương năm 2026.",
-      "Thường trực HĐND xã yêu cầu UBND xã và các bộ phận chuyên môn tiếp thu các ý kiến đóng góp tại phiên họp thẩm tra, hoàn thiện các tờ trình, đề án gửi các đại biểu HĐND xã nghiên cứu trước khi kỳ họp chính thức diễn ra, bảo đảm kỳ họp được tiến hành dân chủ, đúng quy định pháp luật."
-    ]
-  },
-  {
-    id: 103,
-    title: "UBND xã phát động chiến dịch tổng vệ sinh môi trường, phòng ngừa dịch sốt xuất huyết",
-    excerpt: "Đồng loạt 8 thôn buôn trên địa bàn xã ra quân diệt lăng quăng, phát quang bụi rậm, khơi thông cống rãnh tránh nước đọng mùa mưa lũ.",
-    image: "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=600&q=80",
-    date: "27/04/2026",
     category: "ubnd",
-    categoryName: "Ủy ban nhân dân",
-    readTime: "3 phút đọc",
-    author: "Trạm Y tế xã Dang Kang",
+    categoryName: "People's Committee",
+    readTime: "5 min read",
+    author: "New Rural Development Board",
     content: [
-      "Trước diễn biến phức tạp của thời tiết giao mùa và chuẩn bị bước vào mùa mưa, UBND xã Dang Kang vừa phát động chiến dịch ra quân tổng vệ sinh môi trường, diệt bọ gậy, lăng quăng chủ động phòng, chống dịch bệnh Sốt xuất huyết trên địa bàn toàn xã.",
-      "Chiến dịch đã nhận được sự hưởng ứng nhiệt tình của đông đảo cán bộ, công chức, viên chức, đoàn viên, hội viên các tổ chức đoàn thể xã hội và nhân dân tại 8 thôn, buôn.",
-      "Tại các khu dân cư, bà con đã tích cực dọn dẹp vệ sinh trong và xung quanh nhà, phát quang các bụi rậm, lật úp các dụng cụ chứa nước không dùng đến, khai thông cống rãnh, thả cá vào bể nước ăn... nhằm triệt tiêu hoàn toàn nơi sinh sản của muỗi truyền bệnh sốt xuất huyết, bảo vệ sức khỏe cộng đồng nông thôn."
+      "In harmony with the atmosphere of emulation to build model new rural areas across the province, on the morning of April 28, 2026, the Dang Kang Commune People's Committee held a groundbreaking ceremony for the upgrading and expansion of the main inter-commune road connecting Village 3 and Village 4.",
+      "Attending the ceremony were leaders of the Party Committee, People's Council, People's Committee, and Fatherland Front Committee of Dang Kang Commune, together with a large number of residents from both villages.",
+      "The inter-village road connecting Villages 3 and 4 is a vital traffic axis serving the movement and agricultural transport of nearly 500 households. The current old road is narrow (only about 3.5m wide), and the dirt and stone road surface has severely deteriorated, posing traffic safety hazards and hindering trade development.",
+      "According to the approved design, the new road has a length of 2.2 km, a roadbed width of 8m, a concrete asphalt surface width of 6m, and solid concrete drainage systems on both sides. The total project investment is over 5 billion VND, of which provincial and district budgets support 60%, the commune budget 20%, and the remainder is from socialization and voluntary contributions by residents.",
+      "The highlight of the project is the consensus and active contribution of residents in donating land. Through propagation and mobilization 'People know, people discuss, people do, people inspect, people enjoy', 42 households along both sides voluntarily donated over 1,800 m2 of garden land and dismantled over 400m of concrete fences to hand over clean ground to the construction unit without demanding compensation.",
+      "Speaking at the groundbreaking, the President of the Commune expressed deep gratitude for the solidarity and sacrifice of individual benefits for the common cause of the residents. He requested the construction unit to mobilize personnel and machinery to organize construction ensuring the highest progress and quality, striving to complete and put the project into use before the rainy season of this year.",
+      "At the same time, a community supervision board consisting of residents' representatives from the two villages was established to regularly monitor and inspect material quality and construction process, ensuring openness and transparency of the project."
     ]
   },
   {
-    id: 104,
-    title: "Phổ biến tập huấn Luật Đất đai sửa đổi bổ sung năm 2026 cho cán bộ địa chính xã",
-    excerpt: "Tăng cường năng lực quản lý nhà nước về đất đai, giải quyết tranh chấp đất đai tại cơ sở đúng pháp luật và hài hòa quyền lợi công dân.",
-    image: "https://images.unsplash.com/photo-1450133064473-71024230f91b?auto=format&fit=crop&w=600&q=80",
-    date: "25/04/2026",
-    category: "ubnd",
-    categoryName: "Ủy ban nhân dân",
-    readTime: "5 phút đọc",
-    author: "Tư pháp - Địa chính xã",
-    content: [
-      "Nhằm kịp thời cập nhật những quy định mới trong công tác quản lý nhà nước về tài nguyên đất đai, UBND xã Dang Kang vừa phối hợp với Phòng Tư pháp huyện Krông Bông tổ chức hội nghị phổ biến, quán huấn sâu rộng các điểm mới nổi bật của Luật Đất đai sửa đổi bổ sung năm 2026.",
-      "Đối tượng tham gia hội nghị gồm toàn thể cán bộ công chức địa chính - xây dựng, tư pháp - hộ tịch, trưởng thôn, buôn và các thành viên ban hòa giải cơ sở trên địa bàn xã.",
-      "Hội nghị đã tập trung phân tích, làm rõ những đổi mới mang tính đột phá của Luật Đất đai 2026 liên quan đến: cơ chế thu hồi đất, bồi thường hỗ trợ tái định cư; phương pháp xác định giá đất theo nguyên tắc thị trường; công tác cấp giấy chứng nhận quyền sử dụng đất... giúp nâng cao hiệu quả hòa giải và hạn chế tranh chấp khiếu kiện vượt cấp."
-    ]
-  },
-  {
-    id: 105,
-    title: "Ngày hội văn hóa thể thao các dân tộc thiểu số xã Dang Kang lần thứ III năm 2026",
-    excerpt: "Quy tụ hơn 300 vận động viên, nghệ nhân tranh tài ở các nội dung bắn nỏ, đẩy gậy, kéo co và trình diễn nhạc cụ cồng chiêng Êđê truyền thống.",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=600&q=80",
-    date: "24/04/2026",
+    id: 3,
+    title: "Digital Transformation and IT Training for Coffee Farmers",
+    excerpt: "More than 120 outstanding households of the commune participated in the training course on using agricultural origin tracking and market price tracking applications...",
+    image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=600&q=80",
+    date: "26/04/2026",
     category: "kinh-te",
-    categoryName: "Văn hóa - Xã hội",
-    readTime: "6 phút đọc",
-    author: "Văn hóa - Thông tin xã",
+    categoryName: "Socio-Economy",
+    readTime: "3 min read",
+    author: "Dang Kang Commune Farmers Association",
     content: [
-      "Trong 2 ngày 23 and 24/4/2026, UBND xã Dang Kang đã tưng bừng tổ chức Ngày hội Văn hóa - Thể thao các dân tộc thiểu số lần thứ III năm 2026.",
-      "Đây là hoạt động ý nghĩa thiết thực nhằm tôn vinh, bảo tồn và phát huy bản sắc văn hóa truyền thống tốt đẹp của các dân tộc anh em đang sinh sống hòa quyện trên mảnh đất Dang Kang anh hùng.",
-      "Ngày hội thu hút hơn 300 nghệ nhân, diễn viên, vận động viên không chuyên đến từ các buôn đồng bào dân tộc thiểu số trong toàn xã, cùng giao lưu tranh tài sôi nổi ở các nội dung thi đấu thể thao dân gian truyền thống như bắn nỏ, đẩy gậy, kéo co, đi cà kheo... đặc biệt là liên hoan trình tấu cồng chiêng Êđê cổ kính và văn nghệ quần chúng."
-    ]
-  },
-  {
-    id: 106,
-    title: "Mô hình nuôi heo rừng lai sinh sản hướng đi phát triển kinh tế hộ buôn Êga",
-    excerpt: "Từ nguồn vốn vay ưu đãi giải quyết việc làm của Ngân hàng Chính sách Xã hội, nhiều hộ đồng bào đã thoát nghèo bền vững nhờ nuôi heo lai thương phẩm.",
-    image: "https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=600&q=80",
-    date: "22/04/2026",
-    category: "kinh-te",
-    categoryName: "Kinh tế - Đời sống",
-    readTime: "4 phút đọc",
-    author: "Hội Khuyến nông xã",
-    content: [
-      "Nói về hiệu quả từ nguồn vốn vay ưu đãi giải quyết việc làm của Ngân hàng Chính sách Xã hội huyện, hộ gia đình ông Y-Nuôi Niê tại Buôn Êga, xã Dang Kang là một gương điển hình vươn lên thoát nghèo bền vững và làm giàu chính đáng nhờ mô hình nuôi heo rừng lai sinh sản.",
-      "Năm 2024, từ nguồn vốn vay 50 triệu đồng của Ngân hàng chính sách xã hội, gia đình ông đã đầu tư xây dựng hệ thống chuồng trại bán hoang dã kiên cố rộng hơn 300m2 và mua 5 con heo rừng lai giống về nuôi thử nghiệm.",
-      "Nhờ chịu khó học hỏi kỹ thuật chăm sóc, phòng trừ dịch bệnh qua các lớp chuyển giao khoa học kỹ thuật do xã tổ chức, đàn heo lai của gia đình ông sinh trưởng khỏe mạnh, sinh sản tốt. Đến nay quy mô đàn luôn duy trì trên 40 con heo thương phẩm, mang lại nguồn thu nhập ròng ổn định trên 120 triệu đồng mỗi năm."
+      "In order to support member farmers in accessing new technologies, improving productivity, and economic value for main agricultural products, on April 26, 2026, the Farmers Association of Dang Kang Commune coordinated with the Provincial Agricultural Extension Center to organize a training course 'Digital Transformation in Agriculture and IT Application in Sustainable Coffee Production'.",
+      "The training course attracted more than 120 farmers who are owners of farms, family farms, and agricultural production cooperatives in the commune.",
+      "At the session, agricultural engineers and technology experts directly instructed farmers on how to install and use smart mobile applications for production. The focus of the training included three major topics:",
+      "First, using mobile applications to track real-time weather and pests; calculate scientific fertilizer and irrigation water amounts for each stage of coffee growth, helping save 20-30% of input costs.",
+      "Second, accessing the agricultural origin tracking system through scanning QR codes. This helps farming households record electronic production logs, make farming processes transparent, and meet strict standards for official export to the European market (EUDR).",
+      "Third, connecting agricultural e-commerce exchanges and participating in community groups to update coffee bean prices and global agricultural prices hourly, avoiding being forced down by traders.",
+      "The Chairman of the Commune Farmers Association stated: 'Bringing digital transformation to coffee gardens is no longer a remote story but has become a matter of survival. The Association will continue to accompany farmers, establishing Zalo technical support groups in each village to promptly resolve difficulties in the process of applying technology to actual production'."
     ]
   }
 ]
+
+const translations = {
+  vi: {
+    home: "Trang chủ",
+    news: "Tin tức",
+    relatedNews: "TIN LIÊN QUAN KHÁC",
+    source: "© Cổng thông tin điện tử Đảng bộ & UBND xã Dang Kang",
+    sourceDesc: "Nguồn tin chính thức cấp cơ sở.",
+    backToList: "QUAY LẠI DANH SÁCH",
+    preparingPdf: "Đang chuẩn bị tải xuống bản in PDF chính thức của bài viết...",
+    copied: "Đã sao chép!"
+  },
+  en: {
+    home: "Home",
+    news: "News",
+    relatedNews: "OTHER RELATED NEWS",
+    source: "© Official Web Portal of Dang Kang Party & People's Committee",
+    sourceDesc: "Official grassroots level news source.",
+    backToList: "BACK TO LIST",
+    preparingPdf: "Preparing official PDF print version of the article...",
+    copied: "Copied!"
+  }
+}
 
 interface Props {
   id: string
 }
 
 export default function NewsDetailPage({ id }: Props) {
-  const router = useRouter()
   const [fontSize, setFontSize] = React.useState<"sm" | "md" | "lg">("md")
   const [isCopied, setIsCopied] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const currentLang = React.useMemo(() => {
+    if (!mounted) return "vi"
+    const cookieLang = getCookie("lang")
+    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    return "vi"
+  }, [mounted])
+
+  const t = translations[currentLang] || translations.vi
+  const newsList = currentLang === "en" ? ALL_NEWS_EN : ALL_NEWS
 
   const articleId = parseInt(id) || 1
-  const article = ALL_NEWS.find(n => n.id === articleId) || ALL_NEWS[0]
+  const article = newsList.find(n => n.id === articleId) || newsList[0]
+
   if (!article) return null
 
-  const otherNews = ALL_NEWS.filter(n => n.id !== article.id).slice(0, 3)
+  const otherNews = newsList.filter(n => n.id !== article.id).slice(0, 3)
 
   const handlePrint = () => {
     window.print()
   }
 
   const handleDownloadPDF = () => {
-    alert("Đang chuẩn bị tải xuống bản in PDF chính thức của bài viết...")
+    alert(t.preparingPdf)
   }
 
   const handleShare = () => {
@@ -228,11 +243,11 @@ export default function NewsDetailPage({ id }: Props) {
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
-          Trang chủ
+          {t.home}
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
-        <Link href="/tin-tuc" className="hover:text-[#b91c1c]">
-          Tin tức
+        <Link href={currentLang === "en" ? "/news" : "/tin-tuc"} className="hover:text-[#b91c1c]">
+          {t.news}
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-slate-600 dark:text-slate-300 truncate max-w-[200px] md:max-w-md">
@@ -326,10 +341,10 @@ export default function NewsDetailPage({ id }: Props) {
                 </button>
                 <button
                   onClick={handleShare}
-                  title={isCopied ? "Đã sao chép!" : "Chia sẻ"}
+                  title={isCopied ? t.copied : "Share"}
                   className={`p-2 border rounded-lg transition-colors ${isCopied
                     ? "bg-green-50 border-green-200 text-green-600 dark:bg-green-950/20 dark:border-green-900"
-                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-[#b91c1c]"
+                    : "bg-white dark:bg-slate-900 border-slate-200/50 dark:border-slate-800 text-slate-400 hover:text-[#b91c1c]"
                     }`}
                 >
                   <Share2 className="w-3.5 h-3.5" />
@@ -343,7 +358,7 @@ export default function NewsDetailPage({ id }: Props) {
           <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-8">
             <div className={`prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-350 ${getFontSizeClass()} flex flex-col gap-5`}>
               {article.content.map((para, idx) => (
-                <p key={idx} className="indent-4 text-justify font-medium">
+                <p key={idx} className="indent-4 text-justify font-medium leading-relaxed">
                   {para}
                 </p>
               ))}
@@ -352,16 +367,16 @@ export default function NewsDetailPage({ id }: Props) {
             {/* Bottom Signature / Footer */}
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="text-xs text-slate-400 font-bold">
-                <span className="text-[#b91c1c] dark:text-[#fbc02d]">© Cổng thông tin điện tử Đảng bộ & UBND xã Dang Kang</span>
-                <p className="mt-0.5 font-medium">Nguồn tin chính thống cấp cơ sở.</p>
+                <span className="text-[#b91c1c] dark:text-[#fbc02d]">{t.source}</span>
+                <p className="mt-0.5 font-medium">{t.sourceDesc}</p>
               </div>
 
               <Link
-                href="/tin-tuc"
+                href={currentLang === "en" ? "/news" : "/tin-tuc"}
                 className="self-start md:self-auto flex items-center gap-1.5 px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-black rounded-xl transition-all"
               >
                 <ArrowLeft className="w-4 h-4" />
-                QUAY LẠI DANH SÁCH
+                {t.backToList}
               </Link>
             </div>
           </div>
@@ -373,12 +388,12 @@ export default function NewsDetailPage({ id }: Props) {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4">
             <h4 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 pb-2 flex items-center gap-1.5">
               <FileText className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
-              TIN LIÊN QUAN KHÁC
+              {t.relatedNews}
             </h4>
 
             <div className="flex flex-col gap-4">
               {otherNews.map((post) => {
-                const itemPath = `/tin-tuc/${post.id}`
+                const itemPath = currentLang === "en" ? `/news/${post.id}` : `/tin-tuc/${post.id}`
                 return (
                   <Link
                     key={post.id}
