@@ -24,8 +24,8 @@ model CategoryTranslation {
   id          Int      @id @default(autoincrement())
   categoryId  Int      @map("category_id")
   langCode    String   @map("lang_code")
-  name        String   
-  description String?  
+  name        String   @db.Text
+  description String?  @db.Text
 
   category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
