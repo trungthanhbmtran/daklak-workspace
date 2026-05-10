@@ -2,8 +2,6 @@ model Category {
   id          Int      @id @default(autoincrement())
   group       String   @map("group_code") 
   code        String   
-  name        String   
-  description String?
   order       Int      @default(0) 
   
   isSystem    Boolean  @default(false) @map("is_system") 
@@ -15,10 +13,25 @@ model Category {
   jobTitlesGeographicArea JobTitle[]         @relation("JobTitleGeographicArea") 
   staffingSlotsGeographicArea StaffingSlot[]  @relation("StaffingSlotGeographicArea") 
   staffingSlotDomains         StaffingSlotDomain[]  
+  translations            CategoryTranslation[]
 
   @@unique([group, code]) 
   @@index([group])        
   @@map("sys_categories")
+}
+
+model CategoryTranslation {
+  id          Int      @id @default(autoincrement())
+  categoryId  Int      @map("category_id")
+  langCode    String   @map("lang_code")
+  name        String   
+  description String?  
+
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, langCode])
+  @@index([langCode])
+  @@map("sys_category_translations")
 }
 
 model CategoryGroup {

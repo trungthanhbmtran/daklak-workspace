@@ -5,21 +5,63 @@ import { PrismaService } from '../../database/prisma.service';
 export class CategoriesService {
   constructor(private prisma: PrismaService) { }
 
-  // Lấy tất cả danh mục của tất cả các nhóm
-  async getAll() {
-    return this.prisma.category.findMany({
+  // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
+  async getAll(lang?: string) {
+    const targetLang = lang || 'vi';
+    const items = await this.prisma.category.findMany({
       orderBy: [
         { group: 'asc' },
         { order: 'asc' },
       ],
+      include: {
+        translations: {
+          where: { langCode: targetLang }
+        }
+      }
+    });
+
+    return items.map(item => {
+      const trans = item.translations?.[0];
+      return {
+        id: item.id,
+        group: item.group,
+        code: item.code,
+        order: item.order,
+        isSystem: item.isSystem,
+        isActive: item.isActive,
+        createdAt: item.createdAt,
+        name: trans?.name || '',
+        description: trans?.description || '',
+      };
     });
   }
 
-  // Lấy danh mục theo nhóm (trả về tất cả để Admin quản lý, kể cả tạm ẩn)
-  async getByGroup(group: string) {
-    return this.prisma.category.findMany({
+  // Lấy danh mục theo nhóm (tự động hợp nhất bản dịch)
+  async getByGroup(group: string, lang?: string) {
+    const targetLang = lang || 'vi';
+    const items = await this.prisma.category.findMany({
       where: { group },
       orderBy: { order: 'asc' },
+      include: {
+        translations: {
+          where: { langCode: targetLang }
+        }
+      }
+    });
+
+    return items.map(item => {
+      const trans = item.translations?.[0];
+      return {
+        id: item.id,
+        group: item.group,
+        code: item.code,
+        order: item.order,
+        isSystem: item.isSystem,
+        isActive: item.isActive,
+        createdAt: item.createdAt,
+        name: trans?.name || '',
+        description: trans?.description || '',
+      };
     });
   }
 
@@ -55,36 +97,100 @@ export class CategoriesService {
     return result.sort((a, b) => a.order - b.order);
   }
 
-  // Tạo mới (Dành cho Admin cấu hình)
+  // Tạo mới (Tạo danh mục + Bản dịch mặc định Tiếng Việt 'vi')
   async create(data: { group: string; code: string; name: string; description?: string; order?: number }) {
-    return this.prisma.category.create({
+    const created = await this.prisma.category.create({
       data: {
         group: data.group,
         code: data.code,
-        name: data.name,
-        description: data.description ?? null,
         order: data.order ?? 0,
+        translations: {
+          create: {
+            langCode: 'vi',
+            name: data.name,
+            description: data.description ?? null,
+          }
+        }
       },
+      include: {
+        translations: {
+          where: { langCode: 'vi' }
+        }
+      }
     });
+
+    const trans = created.translations?.[0];
+    return {
+      id: created.id,
+      group: created.group,
+      code: created.code,
+      order: created.order,
+      isSystem: created.isSystem,
+      isActive: created.isActive,
+      createdAt: created.createdAt,
+      name: trans?.name || '',
+      description: trans?.description || '',
+    };
   }
 
-  // Cập nhật
+  // Cập nhật (Cập nhật danh mục + Cập nhật hoặc Upsert bản dịch Tiếng Việt 'vi')
   async update(
     id: number,
     data: { code?: string; name?: string; description?: string; order?: number; isActive?: boolean },
   ) {
     const category = await this.prisma.category.findUnique({ where: { id } });
     if (!category) return null;
-    return this.prisma.category.update({
+
+    // 1. Cập nhật các trường chung của Category
+    await this.prisma.category.update({
       where: { id },
       data: {
         ...(data.code !== undefined && { code: data.code }),
-        ...(data.name !== undefined && { name: data.name }),
-        ...(data.description !== undefined && { description: data.description }),
         ...(data.order !== undefined && { order: data.order }),
         ...(data.isActive !== undefined && { isActive: data.isActive }),
       },
     });
+
+    // 2. Cập nhật hoặc Upsert bản dịch mặc định 'vi'
+    if (data.name !== undefined || data.description !== undefined) {
+      await this.prisma.categoryTranslation.upsert({
+        where: { categoryId_langCode: { categoryId: id, langCode: 'vi' } },
+        update: {
+          ...(data.name !== undefined && { name: data.name }),
+          ...(data.description !== undefined && { description: data.description }),
+        },
+        create: {
+          categoryId: id,
+          langCode: 'vi',
+          name: data.name ?? '',
+          description: data.description ?? null,
+        }
+      });
+    }
+
+    // 3. Trả về đối tượng sau cập nhật cùng với bản dịch Tiếng Việt
+    const updatedCategory = await this.prisma.category.findUnique({
+      where: { id },
+      include: {
+        translations: {
+          where: { langCode: 'vi' }
+        }
+      }
+    });
+
+    if (!updatedCategory) return null;
+    const trans = updatedCategory.translations?.[0];
+    return {
+      id: updatedCategory.id,
+      group: updatedCategory.group,
+      code: updatedCategory.code,
+      order: updatedCategory.order,
+      isSystem: updatedCategory.isSystem,
+      isActive: updatedCategory.isActive,
+      createdAt: updatedCategory.createdAt,
+      name: trans?.name || '',
+      description: trans?.description || '',
+    };
   }
 
   // Xóa (không cho xóa dữ liệu hệ thống)

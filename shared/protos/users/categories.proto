@@ -11,7 +11,9 @@ service CategoryService {
   rpc Delete (DeleteCategoryRequest) returns (DeleteCategoryResponse);
 }
 
-message EmptyRequest {}
+message EmptyRequest {
+  string lang = 1;
+}
 
 message Group {
   string code = 1;
@@ -24,6 +26,7 @@ message GetAllGroupsResponse {
 
 message GetByGroupRequest {
   string group = 1;
+  string lang = 2;
 }
 
 message CategoryItem {

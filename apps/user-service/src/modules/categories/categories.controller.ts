@@ -21,14 +21,14 @@ export class CategoriesController {
   constructor(private readonly catService: CategoriesService) { }
 
   @GrpcMethod('CategoryService', 'GetAllCategories')
-  async getAllCategories(_data: any) {
-    const list = await this.catService.getAll();
+  async getAllCategories(data: { lang?: string }) {
+    const list = await this.catService.getAll(data?.lang);
     return { data: list.map(toItem) };
   }
 
   @GrpcMethod('CategoryService', 'GetByGroup')
-  async getByGroup(data: { group: string }) {
-    const list = await this.catService.getByGroup(data.group || '');
+  async getByGroup(data: { group: string; lang?: string }) {
+    const list = await this.catService.getByGroup(data.group || '', data.lang);
     return { data: list.map(toItem) };
   }
 

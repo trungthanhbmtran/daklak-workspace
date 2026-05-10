@@ -51,14 +51,40 @@ export class OrganizationsService {
     }
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
-      include: { type: true, unitDomains: { include: { domain: true } } },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' }
+                }
+              }
+            }
+          }
+        }
+      },
     });
   }
 
   async getById(id: number) {
     const unit = await this.prisma.organizationUnit.findUnique({
       where: { id },
-      include: { type: true, unitDomains: { include: { domain: true } } },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' }
+                }
+              }
+            }
+          }
+        }
+      },
     });
     if (!unit) return null;
     return unit;
@@ -126,7 +152,20 @@ export class OrganizationsService {
     }
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
-      include: { type: true, unitDomains: { include: { domain: true } } },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' }
+                }
+              }
+            }
+          }
+        }
+      },
     });
   }
 
@@ -144,7 +183,20 @@ export class OrganizationsService {
   async getFullTree() {
     const units = await this.prisma.organizationUnit.findMany({
       orderBy: { hierarchyPath: 'asc' },
-      include: { type: true, unitDomains: { include: { domain: true } } },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' }
+                }
+              }
+            }
+          }
+        }
+      },
     });
     return { data: buildTree(units, null) };
   }
@@ -163,7 +215,20 @@ export class OrganizationsService {
         hierarchyPath: { startsWith: root.hierarchyPath || '' },
       },
       orderBy: { hierarchyPath: 'asc' },
-      include: { type: true, unitDomains: { include: { domain: true } } },
+      include: {
+        type: true,
+        unitDomains: {
+          include: {
+            domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' }
+                }
+              }
+            }
+          }
+        }
+      },
     });
 
     return { data: buildTree(units, root.parentId) };
@@ -193,16 +258,20 @@ export class OrganizationsService {
       include: {
         jobTitle: {
           include: {
-            domain: true,
-            geographicArea: true,
+            domain: { include: { translations: { where: { langCode: 'vi' } } } },
+            geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
             monitoredUnits: { include: { unit: true } },
           },
         },
         slots: {
           orderBy: { slotOrder: 'asc' },
           include: {
-            geographicArea: true,
-            domains: { include: { domain: true } },
+            geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
+            domains: {
+              include: {
+                domain: { include: { translations: { where: { langCode: 'vi' } } } }
+              }
+            },
             monitoredUnits: { include: { unit: true } },
           },
         },
@@ -214,8 +283,8 @@ export class OrganizationsService {
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
   async listJobTitles(unitId?: number) {
     const include = {
-      domain: true,
-      geographicArea: true,
+      domain: { include: { translations: { where: { langCode: 'vi' } } } },
+      geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
       monitoredUnits: { include: { unit: true } },
     };
     let items;
@@ -270,8 +339,8 @@ export class OrganizationsService {
     const updated = await this.prisma.jobTitle.findUnique({
       where: { id },
       include: {
-        domain: true,
-        geographicArea: true,
+        domain: { include: { translations: { where: { langCode: 'vi' } } } },
+        geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
         monitoredUnits: { include: { unit: true } },
       },
     });
@@ -322,8 +391,12 @@ export class OrganizationsService {
     const updated = await this.prisma.staffingSlot.findUnique({
       where: { id: slot.id },
       include: {
-        geographicArea: true,
-        domains: { include: { domain: true } },
+        geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
+        domains: {
+          include: {
+            domain: { include: { translations: { where: { langCode: 'vi' } } } }
+          }
+        },
         monitoredUnits: { include: { unit: true } },
       },
     });

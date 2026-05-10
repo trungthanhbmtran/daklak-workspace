@@ -7,11 +7,16 @@ import { OrganizationsService } from './organizations.service';
 export class OrganizationsController {
   constructor(private readonly orgService: OrganizationsService) { }
 
+  private getCatName(cat: any): string {
+    if (!cat) return '';
+    return cat.translations?.[0]?.name ?? '';
+  }
+
   private domainIdsAndNames(unit: any): { domainIds: number[]; domainNames: string[] } {
     const ud = unit.unitDomains ?? [];
     return {
       domainIds: ud.map((d: any) => d.domainId ?? d.domain?.id).filter(Boolean),
-      domainNames: ud.map((d: any) => d.domain?.name).filter(Boolean),
+      domainNames: ud.map((d: any) => this.getCatName(d.domain)).filter(Boolean),
     };
   }
 
@@ -165,18 +170,18 @@ export class OrganizationsController {
           jobTitleName: j?.name ?? '',
           quantity: s.quantity,
           currentCount: s.currentCount ?? 0,
-          jobTitleDomainName: j?.domain?.name ?? '',
+          jobTitleDomainName: this.getCatName(j?.domain),
           jobTitleMonitoredUnitNames: (j?.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? '').filter(Boolean),
-          jobTitleGeographicAreaName: j?.geographicArea?.name ?? '',
+          jobTitleGeographicAreaName: this.getCatName(j?.geographicArea),
           slots: (s.slots ?? []).map((slot: any) => ({
             id: slot.id,
             staffingId: slot.staffingId,
             slotOrder: slot.slotOrder,
             description: slot.description ?? '',
             geographicAreaId: slot.geographicAreaId ?? 0,
-            geographicAreaName: slot.geographicArea?.name ?? '',
+            geographicAreaName: this.getCatName(slot.geographicArea),
             domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-            domainNames: (slot.domains ?? []).map((d: any) => d.domain?.name ?? ''),
+            domainNames: (slot.domains ?? []).map((d: any) => this.getCatName(d.domain)),
             monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
             monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
           })),
@@ -208,9 +213,9 @@ export class OrganizationsController {
       slotOrder: slot.slotOrder,
       description: slot.description ?? '',
       geographicAreaId: slot.geographicAreaId ?? 0,
-      geographicAreaName: slot.geographicArea?.name ?? '',
+      geographicAreaName: this.getCatName(slot.geographicArea),
       domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-      domainNames: (slot.domains ?? []).map((d: any) => d.domain?.name ?? ''),
+      domainNames: (slot.domains ?? []).map((d: any) => this.getCatName(d.domain)),
       monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
       monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
     };
@@ -261,11 +266,11 @@ export class OrganizationsController {
       code: j.code,
       name: j.name,
       domainId: j.domainId ?? 0,
-      domainName: j.domain?.name ?? '',
+      domainName: this.getCatName(j.domain),
       monitoredUnitIds: (j.monitoredUnits ?? []).map((mu: any) => mu.unitId),
       monitoredUnitNames: (j.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
       geographicAreaId: j.geographicAreaId ?? 0,
-      geographicAreaName: j.geographicArea?.name ?? '',
+      geographicAreaName: this.getCatName(j.geographicArea),
       category: j.category ?? '',
       rank: j.rank ?? 0,
     };

@@ -133,13 +133,16 @@ export class PublicCategoriesController implements OnModuleInit {
   @Get()
   @ApiOperation({ summary: 'Lấy danh mục theo nhóm hoặc tất cả nếu không truyền group (Công khai)' })
   @ApiQuery({ name: 'group', required: false, description: 'Mã nhóm danh mục (để trống để lấy tất cả)' })
+  @ApiQuery({ name: 'lang', required: false, description: 'Mã ngôn ngữ' })
   @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
-  async getByGroup(@Query('group') group?: string) {
+  async getByGroup(@Query() query: any) {
+    const group = query.group;
+    const lang = query.lang || 'vi';
     if (!group) {
-      const result = await firstValueFrom(this.categoryService.GetAllCategories({}));
+      const result = await firstValueFrom(this.categoryService.GetAllCategories({ lang }));
       return { success: true, data: (result as any)?.data || [] };
     }
-    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: group || '' }));
+    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: group || '', lang }));
     return { success: true, data: (result as any)?.data || [] };
   }
 }
