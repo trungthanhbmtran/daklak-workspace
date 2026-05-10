@@ -2,21 +2,19 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-// import { categoryApi } from "@/features/system-admin/categories/api";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
   Settings,
   Phone,
   Calendar,
   Sparkles,
-  Shield,
   Building,
   CheckCircle2,
   Image as ImageIcon,
@@ -24,7 +22,6 @@ import {
   UploadCloud,
   X,
   FileText,
-  UserCheck,
   Eye,
   Columns,
   Languages
@@ -32,17 +29,7 @@ import {
 import apiClient from "@/lib/axiosInstance";
 
 export default function PortalConfigPage() {
-  const [unitName, setUnitName] = useState("");
-  const [unitTitle, setUnitTitle] = useState("");
-  const [unitIdentifier, setUnitIdentifier] = useState("");
-  const [hotline, setHotline] = useState("");
-  const [responsiblePerson, setResponsiblePerson] = useState("");
-  const [citizenSchedule, setCitizenSchedule] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
-  const [licenseInfo, setLicenseInfo] = useState("");
-  const [fax, setFax] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const [languages, setLanguages] = useState<any[]>([]);
@@ -73,7 +60,8 @@ export default function PortalConfigPage() {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const all = await categoryApi.fetchAll();
+        const res: any = await apiClient.get("/categories");
+        const all = Array.isArray(res?.data) ? res.data : [];
         const langs = all.filter((c: any) => c.group === "LANGUAGE" && c.active === 1);
         setLanguages(langs.length > 0 ? langs : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }]);
       } catch (error) {
@@ -119,10 +107,7 @@ export default function PortalConfigPage() {
       const footerPortalSubtitleCat = dbCategories.find((c) => c.code === "footer_portal_subtitle");
 
       // Set global fields
-      if (hotlineCat) setHotline(hotlineCat.name);
       if (logoCat) setLogoUrl(logoCat.name);
-      if (faxCat) setFax(faxCat.name);
-      if (emailCat) setEmail(emailCat.name);
 
       const activeLangs = languages.length > 0 ? languages.map(l => l.code) : ["vi", "en"];
       const newTranslations: typeof configTranslations = {};
@@ -201,15 +186,6 @@ export default function PortalConfigPage() {
       });
 
       setConfigTranslations(newTranslations);
-
-      // Save fallback local state
-      if (nameCat) setUnitName(nameCat.name);
-      if (titleCat) setUnitTitle(titleCat.name);
-      if (identCat) setUnitIdentifier(identCat.name);
-      if (respCat) setResponsiblePerson(respCat.name);
-      if (scheduleCat) setCitizenSchedule(scheduleCat.description || scheduleCat.name);
-      if (licenseCat) setLicenseInfo(licenseCat.name);
-      if (addressCat) setAddress(addressCat.name);
     }
   }, [dbCategories, languages]);
 
