@@ -396,19 +396,6 @@ export default function Header() {
             </a>
             {mounted && (
               <>
-                <span className="text-slate-300 dark:text-slate-700">|</span>
-                <button
-                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                  className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900 transition-colors text-slate-600 dark:text-slate-300"
-                  title="Đổi giao diện Sáng/Tối"
-                >
-                  {resolvedTheme === "dark" ? (
-                    <Sun className="w-4 h-4 text-amber-500" />
-                  ) : (
-                    <Moon className="w-4 h-4 text-slate-600" />
-                  )}
-                </button>
-
                 {/* PREMIUM LANG SELECTOR (DESKTOP) */}
                 <span className="text-slate-300 dark:text-slate-700">|</span>
                 <div className="relative" onMouseLeave={() => setLangOpen(false)}>
@@ -418,8 +405,8 @@ export default function Header() {
                     className="flex items-center gap-1.5 p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900 transition-all text-slate-700 dark:text-slate-300 font-bold cursor-pointer"
                     title={t.selectLanguage}
                   >
-                    <Globe className="w-4 h-4 text-[#cc0000] dark:text-red-400" />
-                    <span className="uppercase text-xs tracking-wider">{currentLang}</span>
+                    <span className="text-base leading-none select-none">{currentLang === "en" ? "🇬🇧" : "🇻🇳"}</span>
+                    <span className="uppercase text-xs tracking-wider">{currentLang === "en" ? "EN" : "VI"}</span>
                     <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${langOpen ? "rotate-180" : ""}`} />
                   </button>
 
@@ -441,7 +428,10 @@ export default function Header() {
                             : "text-slate-700 dark:text-slate-300"
                             }`}
                         >
-                          <span>{lang.name}</span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-base select-none leading-none">{lang.code === "en" ? "🇬🇧" : "🇻🇳"}</span>
+                            <span>{lang.name}</span>
+                          </div>
                           {currentLang === lang.code && (
                             <span className="w-1.5 h-1.5 rounded-full bg-[#cc0000] dark:bg-red-400" />
                           )}
@@ -450,6 +440,19 @@ export default function Header() {
                     </div>
                   )}
                 </div>
+
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <button
+                  onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                  className="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900 transition-colors text-slate-600 dark:text-slate-300"
+                  title="Đổi giao diện Sáng/Tối"
+                >
+                  {resolvedTheme === "dark" ? (
+                    <Sun className="w-4 h-4 text-amber-500" />
+                  ) : (
+                    <Moon className="w-4 h-4 text-slate-600" />
+                  )}
+                </button>
               </>
             )}
           </div>
@@ -649,8 +652,8 @@ export default function Header() {
                   className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white flex items-center gap-1 cursor-pointer"
                   title={t.selectLanguage}
                 >
-                  <Globe className="w-4 h-4 text-white" />
-                  <span className="uppercase text-xs font-bold">{currentLang}</span>
+                  <span className="text-base select-none leading-none">{currentLang === "en" ? "🇬🇧" : "🇻🇳"}</span>
+                  <span className="uppercase text-xs font-bold">{currentLang === "en" ? "EN" : "VI"}</span>
                 </button>
                 {langOpen && (
                   <div className="absolute right-0 mt-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl py-1 min-w-[120px] z-50 text-slate-900 dark:text-slate-100">
@@ -667,7 +670,10 @@ export default function Header() {
                         className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${currentLang === lang.code ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20" : ""
                           }`}
                       >
-                        {lang.name}
+                        <div className="flex items-center gap-2">
+                          <span className="text-base select-none leading-none">{lang.code === "en" ? "🇬🇧" : "🇻🇳"}</span>
+                          <span>{lang.name}</span>
+                        </div>
                       </button>
                     ))}
                   </div>
