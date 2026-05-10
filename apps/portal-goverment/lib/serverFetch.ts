@@ -1,13 +1,34 @@
+import { cookies } from "next/headers";
+
 export async function serverFetch<T>(path: string): Promise<T | null> {
+  let lang = "vi";
+  try {
+    const cookieStore = await cookies();
+    const cookieLang = cookieStore.get("lang")?.value;
+    if (cookieLang === "vi" || cookieLang === "en") {
+      lang = cookieLang;
+    }
+  } catch (e) {
+    // Graceful fallback during static compilation or static generation (ISR)
+  }
+
   // Dùng http://api-gateway:8080 trong Docker, fallback về http://localhost:8080 ngoài Docker
   const baseUrl = process.env.INTERNAL_API_URL || "http://api-gateway:8080";
   const cleanPath = path.startsWith('/') ? path.slice(1) : path;
-  const url = `${baseUrl}/api/v1/${cleanPath}`;
   
-  console.log(`[serverFetch] Fetching from: ${url}`);
+  // Construct final URL with language query parameter
+  const rawUrl = `${baseUrl}/api/v1/${cleanPath}`;
+  const separator = rawUrl.includes('?') ? '&' : '?';
+  const url = `${rawUrl}${separator}lang=${lang}`;
+  
+  console.log(`[serverFetch] Fetching from: ${url} (lang: ${lang})`);
   try {
     const res = await fetch(url, {
       next: { revalidate: 60 }, // ISR 60 giây
+      headers: {
+        "x-lang": lang,
+        "Accept-Language": lang,
+      }
     });
     if (!res.ok) {
       console.error(`[serverFetch] Failed to fetch ${url}: ${res.statusText} (${res.status})`);
@@ -18,10 +39,18 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
     console.error(`[serverFetch] Error fetching from ${url}:`, error);
     
     if (!baseUrl.includes("localhost")) {
-      const fallbackUrl = `http://localhost:8080/api/v1/${cleanPath}`;
+      const fallbackRawUrl = `http://localhost:8080/api/v1/${cleanPath}`;
+      const fallbackSeparator = fallbackRawUrl.includes('?') ? '&' : '?';
+      const fallbackUrl = `${fallbackRawUrl}${fallbackSeparator}lang=${lang}`;
       console.log(`[serverFetch] Retrying with localhost fallback: ${fallbackUrl}`);
       try {
-        const res = await fetch(fallbackUrl, { next: { revalidate: 60 } });
+        const res = await fetch(fallbackUrl, {
+          next: { revalidate: 60 },
+          headers: {
+            "x-lang": lang,
+            "Accept-Language": lang,
+          }
+        });
         if (res.ok) {
           return await res.json() as T;
         }
