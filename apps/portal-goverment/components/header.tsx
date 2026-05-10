@@ -432,32 +432,18 @@ export default function Header() {
               <>
                 {/* PREMIUM INLINE LANG SELECTOR (DESKTOP) */}
                 <span className="text-slate-300 dark:text-slate-700">|</span>
-                <div className="flex items-center gap-2">
-                  {(languagesData && languagesData.length > 0 ? languagesData : [
-                    { code: "vi", name: "Tiếng Việt" },
-                    { code: "en", name: "Tiếng Anh" }
-                  ]).map((lang: any) => {
-                    const isSelected = currentLang === lang.code;
-
-                    return (
-                      <button
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code)}
-                        className={`transition-all duration-200 cursor-pointer ${
-                          isSelected
-                            ? "scale-110 opacity-100 ring-2 ring-red-600/50 dark:ring-red-500/50 rounded-[3px] shadow-sm"
-                            : "opacity-45 hover:opacity-100 hover:scale-105"
-                        }`}
-                        title={lang.name}
-                      >
-                        {lang.code === "en" ? (
-                          <UKFlagSVG className="w-[23px] h-[15px]" />
-                        ) : (
-                          <VietnamFlagSVG className="w-[23px] h-[15px]" />
-                        )}
-                      </button>
-                    );
-                  })}
+                <div className="flex items-center">
+                  <button
+                    onClick={() => handleLanguageChange(currentLang === "en" ? "vi" : "en")}
+                    className="transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95 flex items-center justify-center p-0.5 rounded-[3px] ring-1 ring-slate-200/50 dark:ring-slate-800/50 shadow-sm"
+                    title={currentLang === "en" ? "Switch to Tiếng Việt" : "Switch to English"}
+                  >
+                    {currentLang === "en" ? (
+                      <UKFlagSVG className="w-[24px] h-[16px]" />
+                    ) : (
+                      <VietnamFlagSVG className="w-[24px] h-[16px]" />
+                    )}
+                  </button>
                 </div>
 
                 <span className="text-slate-300 dark:text-slate-700">|</span>
@@ -665,32 +651,18 @@ export default function Header() {
             <>
 
               {/* PREMIUM INLINE MOBILE LANG SELECTOR */}
-              <div className="flex items-center gap-1.5">
-                {(languagesData && languagesData.length > 0 ? languagesData : [
-                  { code: "vi", name: "Tiếng Việt" },
-                  { code: "en", name: "Tiếng Anh" }
-                ]).map((lang: any) => {
-                  const isSelected = currentLang === lang.code;
-
-                  return (
-                    <button
-                      key={lang.code}
-                      onClick={() => handleLanguageChange(lang.code)}
-                      className={`transition-all duration-200 cursor-pointer ${
-                        isSelected
-                          ? "scale-110 opacity-100 ring-2 ring-white/70 rounded-[3px] shadow-sm"
-                          : "opacity-45 hover:opacity-100 hover:scale-105"
-                      }`}
-                      title={lang.name}
-                    >
-                      {lang.code === "en" ? (
-                        <UKFlagSVG className="w-[21px] h-[14px]" />
-                      ) : (
-                        <VietnamFlagSVG className="w-[21px] h-[14px]" />
-                      )}
-                    </button>
-                  );
-                })}
+              <div className="flex items-center">
+                <button
+                  onClick={() => handleLanguageChange(currentLang === "en" ? "vi" : "en")}
+                  className="transition-all duration-200 cursor-pointer hover:scale-110 active:scale-95 flex items-center justify-center p-0.5 rounded-[3px] ring-1 ring-white/30 shadow-sm"
+                  title={currentLang === "en" ? "Switch to Tiếng Việt" : "Switch to English"}
+                >
+                  {currentLang === "en" ? (
+                    <UKFlagSVG className="w-[22px] h-[15px]" />
+                  ) : (
+                    <VietnamFlagSVG className="w-[22px] h-[15px]" />
+                  )}
+                </button>
               </div>
               <button
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
