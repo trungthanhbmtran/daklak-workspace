@@ -52,6 +52,7 @@ export class CategoriesController {
       group: category.group,
       code: category.code,
       name: category.name,
+      description: category.description ?? '',
       order: category.order,
       isActive: category.isActive ?? true,
     };
@@ -69,7 +70,15 @@ export class CategoriesController {
     if (!category) {
       throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Category not found' });
     }
-    return toItem(category);
+    return {
+      id: category.id,
+      group: category.group,
+      code: category.code,
+      name: category.name,
+      description: category.description ?? '',
+      order: category.order,
+      isActive: category.isActive ?? true,
+    };
   }
 
   @GrpcMethod('CategoryService', 'Delete')
