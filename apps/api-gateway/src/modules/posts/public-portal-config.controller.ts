@@ -15,7 +15,7 @@ export class PublicPortalConfigController {
 
   @Get()
   async findAll() {
-    const res = await firstValueFrom(this.configService.getAll({}));
+    const res: any = await firstValueFrom(this.configService.getAll({}));
     return { success: true, data: res.data || [] };
   }
 }

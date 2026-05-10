@@ -30,13 +30,13 @@ export class PortalConfigController {
   @Post()
   @Roles(Role.ADMIN)
   async create(@Body() dto: { code: string; name: string; description?: string }) {
-    const res = await firstValueFrom(this.configService.create(dto));
+    const res: any = await firstValueFrom(this.configService.create(dto));
     return { success: true, data: res.data };
   }
 
   @Get()
   async findAll() {
-    const res = await firstValueFrom(this.configService.getAll({}));
+    const res: any = await firstValueFrom(this.configService.getAll({}));
     return { success: true, data: res.data || [] };
   }
 
@@ -46,7 +46,7 @@ export class PortalConfigController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: { code?: string; name?: string; description?: string },
   ) {
-    const res = await firstValueFrom(this.configService.update({ id, ...dto }));
+    const res: any = await firstValueFrom(this.configService.update({ id, ...dto }));
     return { success: true, data: res.data };
   }
 }
