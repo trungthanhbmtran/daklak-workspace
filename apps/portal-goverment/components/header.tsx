@@ -406,16 +406,15 @@ export default function Header() {
                     const isSelected = currentLang === lang.code;
                     const flagIcon = lang.code === "en" ? "🇬🇧" : "🇻🇳";
                     const shortLabel = lang.code === "en" ? "EN" : "VI";
-                    
+
                     return (
                       <button
                         key={lang.code}
                         onClick={() => handleLanguageChange(lang.code)}
-                        className={`flex items-center gap-1.5 px-2 py-1 rounded transition-all cursor-pointer text-[10px] font-black ${
-                          isSelected
+                        className={`flex items-center gap-1.5 px-2 py-1 rounded transition-all cursor-pointer text-[10px] font-black ${isSelected
                             ? "bg-red-600 text-white shadow-sm scale-105"
                             : "text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-900/60"
-                        }`}
+                          }`}
                         title={lang.name}
                       >
                         <span className="text-sm select-none leading-none">{flagIcon}</span>
@@ -629,7 +628,7 @@ export default function Header() {
           {mounted && (
             <>
 
-               {/* PREMIUM INLINE MOBILE LANG SELECTOR */}
+              {/* PREMIUM INLINE MOBILE LANG SELECTOR */}
               <div className="flex items-center gap-1">
                 {(languagesData && languagesData.length > 0 ? languagesData : [
                   { code: "vi", name: "Tiếng Việt" },
@@ -638,16 +637,15 @@ export default function Header() {
                   const isSelected = currentLang === lang.code;
                   const flagIcon = lang.code === "en" ? "🇬🇧" : "🇻🇳";
                   const shortLabel = lang.code === "en" ? "EN" : "VI";
-                  
+
                   return (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageChange(lang.code)}
-                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all text-[10px] font-black cursor-pointer ${
-                        isSelected
+                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded transition-all text-[10px] font-black cursor-pointer ${isSelected
                           ? "bg-white text-red-700 shadow-sm font-black border border-white"
                           : "text-white hover:bg-white/10"
-                      }`}
+                        }`}
                       title={lang.name}
                     >
                       <span className="text-xs select-none leading-none">{flagIcon}</span>
