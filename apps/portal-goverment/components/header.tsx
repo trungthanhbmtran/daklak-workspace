@@ -97,6 +97,61 @@ interface MenuItem {
   }[]
 }
 
+// 1. Helper to parse cookies on the client
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
+  return match ? decodeURIComponent(match[2]) : null
+}
+
+// 2. Slug translation mappings
+const LANG_MAPPING: Record<string, { vi: string; en: string }> = {
+  "gioi-thieu": { vi: "gioi-thieu", en: "aboutus" },
+  "aboutus": { vi: "gioi-thieu", en: "aboutus" },
+  "lien-he": { vi: "lien-he", en: "contact" },
+  "contact": { vi: "lien-he", en: "contact" },
+  "thu-tuc": { vi: "thu-tuc", en: "procedures" },
+  "procedures": { vi: "thu-tuc", en: "procedures" },
+  "tin-tuc": { vi: "tin-tuc", en: "news" },
+  "news": { vi: "tin-tuc", en: "news" },
+  "tuong-tac": { vi: "tuong-tac", en: "feedback" },
+  "feedback": { vi: "tuong-tac", en: "feedback" },
+  "van-ban": { vi: "van-ban", en: "documents" },
+  "documents": { vi: "van-ban", en: "documents" },
+}
+
+// 3. Static layout translation dictionary
+const translations = {
+  vi: {
+    hotline: "Đường dây nóng",
+    searchPlaceholder: "Tìm kiếm nhanh...",
+    sitemapTitle: "DANH MỤC TRANG",
+    home: "Trang chủ",
+    about: "Giới thiệu",
+    news: "Tin tức",
+    documents: "Văn bản",
+    procedures: "Thủ tục hành chính",
+    feedback: "Hỏi đáp & Góp ý",
+    contact: "Liên hệ",
+    days: ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"],
+    selectLanguage: "Chọn ngôn ngữ",
+  },
+  en: {
+    hotline: "Hotline",
+    searchPlaceholder: "Quick search...",
+    sitemapTitle: "SITEMAP",
+    home: "Home",
+    about: "About Us",
+    news: "News",
+    documents: "Documents",
+    procedures: "Procedures",
+    feedback: "Q&A & Feedback",
+    contact: "Contact",
+    days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+    selectLanguage: "Select language",
+  }
+}
+
 export default function Header() {
   const pathname = usePathname()
   const router = useRouter()
@@ -106,6 +161,42 @@ export default function Header() {
   const [activeDropdown, setActiveDropdown] = React.useState<string | null>(null)
   const [searchQuery, setSearchQuery] = React.useState("")
   const [dateTimeStr, setDateTimeStr] = React.useState("")
+  const [langOpen, setLangOpen] = React.useState(false)
+
+  // 4. Resolve the active language client-side
+  const currentLang = React.useMemo(() => {
+    if (!mounted) return "vi"
+    const cookieLang = getCookie("lang")
+    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+
+    // Check pathname as a safe fallback
+    const pathSegments = pathname.split("/").filter(Boolean)
+    if (pathSegments.length > 0) {
+      const currentSlug = pathSegments[0]
+      const mapping = LANG_MAPPING[currentSlug]
+      if (mapping) {
+        return mapping.en === currentSlug ? "en" : "vi"
+      }
+    }
+    return "vi"
+  }, [mounted, pathname])
+
+  const t = translations[currentLang] || translations.vi
+
+  // 5. Fetch dynamic list of system languages from api-gateway (/public/categories?group=LANGUAGE)
+  const { data: languagesData } = useQuery({
+    queryKey: ["public-categories", "LANGUAGE"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/categories?group=LANGUAGE")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch languages", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
 
   const { data: menusData } = useQuery({
     queryKey: ["public-portal-menus"],
@@ -125,67 +216,73 @@ export default function Header() {
 
   React.useEffect(() => {
     setMounted(true)
+  }, [])
 
-    // Setup time updater
+  // 6. Localized clock updater
+  React.useEffect(() => {
+    if (!mounted) return
+
     const updateDateTime = () => {
       const now = new Date()
-      const daysVi = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"]
-      const dayName = daysVi[now.getDay()]
-      const date = String(now.getDate()).padStart(2, '0')
-      const month = String(now.getMonth() + 1).padStart(2, '0')
+      const activeDays = t.days
+      const dayName = activeDays[now.getDay()]
+      const date = String(now.getDate()).padStart(2, "0")
+      const month = String(now.getMonth() + 1).padStart(2, "0")
       const year = now.getFullYear()
-      const hours = String(now.getHours()).padStart(2, '0')
-      const minutes = String(now.getMinutes()).padStart(2, '0')
-      const seconds = String(now.getSeconds()).padStart(2, '0')
+      const hours = String(now.getHours()).padStart(2, "0")
+      const minutes = String(now.getMinutes()).padStart(2, "0")
+      const seconds = String(now.getSeconds()).padStart(2, "0")
 
-      setDateTimeStr(`${dayName}, ${date}/${month}/${year} - ${hours}:${minutes}:${seconds}`)
+      if (currentLang === "en") {
+        setDateTimeStr(`${dayName}, ${month}/${date}/${year} - ${hours}:${minutes}:${seconds}`)
+      } else {
+        setDateTimeStr(`${dayName}, ${date}/${month}/${year} - ${hours}:${minutes}:${seconds}`)
+      }
     }
 
     updateDateTime()
     const timer = setInterval(updateDateTime, 1000)
     return () => clearInterval(timer)
-  }, [])
+  }, [mounted, currentLang, t.days])
 
+  // 7. Memoize and translate menu items
   const menuItems: MenuItem[] = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
       return [
-        { name: "Trang chủ", path: "/" },
+        { name: t.home, path: "/" },
         {
-          name: "Giới thiệu",
-          path: "/gioi-thieu",
+          name: t.about,
+          path: currentLang === "en" ? "/aboutus" : "/gioi-thieu",
           children: [
-            { name: "Giới thiệu chung", path: "/gioi-thieu#chung" },
-            { name: "Cơ cấu tổ chức", path: "/gioi-thieu#co-cau" },
-            { name: "Thông tin lãnh đạo", path: "/gioi-thieu#lanh-dao" }
+            { name: currentLang === "en" ? "Overview" : "Giới thiệu chung", path: currentLang === "en" ? "/aboutus#chung" : "/gioi-thieu#chung" },
+            { name: currentLang === "en" ? "Organizational Structure" : "Cơ cấu tổ chức", path: currentLang === "en" ? "/aboutus#co-cau" : "/gioi-thieu#co-cau" },
+            { name: currentLang === "en" ? "Leadership Info" : "Thông tin lãnh đạo", path: currentLang === "en" ? "/aboutus#lanh-dao" : "/gioi-thieu#lanh-dao" }
           ]
         },
         {
-          name: "Tin tức",
-          path: "/tin-tuc",
+          name: t.news,
+          path: currentLang === "en" ? "/news" : "/tin-tuc",
           children: [
-            { name: "Tin hoạt động Đảng Ủy", path: "/tin-tuc?category=dang-uy" },
-            { name: "Tin Hội đồng nhân dân", path: "/tin-tuc?category=hdnd" },
-            { name: "Tin Ủy ban nhân dân", path: "/tin-tuc?category=ubnd" },
-            { name: "Kinh tế - Xã hội", path: "/tin-tuc?category=kinh-te" }
+            { name: currentLang === "en" ? "Party Activity" : "Tin hoạt động Đảng Ủy", path: currentLang === "en" ? "/news?category=dang-uy" : "/tin-tuc?category=dang-uy" },
+            { name: currentLang === "en" ? "People's Council" : "Tin Hội đồng nhân dân", path: currentLang === "en" ? "/news?category=hdnd" : "/tin-tuc?category=hdnd" },
+            { name: currentLang === "en" ? "People's Committee" : "Tin Ủy ban nhân dân", path: currentLang === "en" ? "/news?category=ubnd" : "/tin-tuc?category=ubnd" },
+            { name: currentLang === "en" ? "Socio-Economic" : "Kinh tế - Xã hội", path: currentLang === "en" ? "/news?category=kinh-te" : "/tin-tuc?category=kinh-te" }
           ]
         },
-        { name: "Văn bản", path: "/van-ban" },
-        { name: "Thủ tục hành chính", path: "/thu-tuc" },
-        { name: "Hỏi đáp & Góp ý", path: "/tuong-tac" },
-        { name: "Liên hệ", path: "/lien-he" }
+        { name: t.documents, path: currentLang === "en" ? "/documents" : "/van-ban" },
+        { name: t.procedures, path: currentLang === "en" ? "/procedures" : "/thu-tuc" },
+        { name: t.feedback, path: currentLang === "en" ? "/feedback" : "/tuong-tac" },
+        { name: t.contact, path: currentLang === "en" ? "/contact" : "/lien-he" }
       ]
     }
 
     const allMenus = menusData.data
-    // Filter HORIZONTAL position
     const horizontalMenus = allMenus.filter(
       (m: any) => m.position?.toUpperCase() === "HORIZONTAL" && m.isActive !== false
     )
 
-    // Sort by order ascending
     horizontalMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
-    // Find root menus (where parentId is null/empty or parent not in horizontal items)
     const roots = horizontalMenus.filter(
       (m: any) => !m.parentId || !horizontalMenus.some((p: any) => p.id === m.parentId)
     )
@@ -200,7 +297,7 @@ export default function Header() {
           : undefined
       }
     })
-  }, [menusData])
+  }, [menusData, currentLang, t])
 
   const { data: positionsData } = useQuery({
     queryKey: ["public-categories", "BANNER_POSITION"],
@@ -230,33 +327,34 @@ export default function Header() {
     staleTime: 5 * 60 * 1000,
   })
 
+  // 8. Localize and render unit details configuration values dynamically
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code);
-    if (!found) return fallback;
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    if (!found) return fallback
 
-    // Check if description contains JSON translations
-    if (found.description && found.description.trim().startsWith('{')) {
+    if (found.description && found.description.trim().startsWith("{")) {
       try {
-        const parsed = JSON.parse(found.description);
-        if (parsed && typeof parsed === 'object') {
-          if (parsed.vi) {
-            return parsed.vi;
+        const parsed = JSON.parse(found.description)
+        if (parsed && typeof parsed === "object") {
+          const trans = parsed.translations || parsed
+          if (trans[currentLang]) {
+            return trans[currentLang]
           }
-          if (parsed.translations && parsed.translations.vi) {
-            return parsed.translations.vi;
+          if (trans.vi) {
+            return trans.vi
           }
         }
       } catch (e) {
-        // Fallback if not valid JSON
+        // Fallback
       }
     }
 
     if (code === "citizen_schedule") {
-      return found.description || found.name || fallback;
+      return found.description || found.name || fallback
     }
 
-    return found.name || fallback;
-  }, [portalConfigData]);
+    return found.name || fallback
+  }, [portalConfigData, currentLang])
 
   const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
@@ -285,10 +383,33 @@ export default function Header() {
     return () => clearInterval(interval)
   }, [shouldTopSlide, topBanners.length])
 
+  // 9. Process URL mapping on language change
+  const handleLanguageChange = (langCode: string) => {
+    document.cookie = `lang=${langCode}; path=/; max-age=31536000; SameSite=Lax`
+
+    const pathSegments = pathname.split("/").filter(Boolean)
+    if (pathSegments.length > 0) {
+      const currentSlug = pathSegments[0]
+      const mapping = LANG_MAPPING[currentSlug]
+      if (mapping) {
+        const targetSlug = langCode === "en" ? mapping.en : mapping.vi
+        if (targetSlug !== currentSlug) {
+          pathSegments[0] = targetSlug
+          const newPath = "/" + pathSegments.join("/")
+          window.location.href = newPath + window.location.search
+          return
+        }
+      }
+    }
+
+    window.location.reload()
+  }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      router.push(`/tin-tuc?search=${encodeURIComponent(searchQuery.trim())}`)
+      const targetSearchPath = currentLang === "en" ? "/news" : "/tin-tuc"
+      router.push(`${targetSearchPath}?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery("")
     }
   }
@@ -305,12 +426,10 @@ export default function Header() {
     <header className="w-full flex flex-col z-50 relative select-none">
       {/* 1. Top Utility Bar */}
       <div className="w-full bg-[#f1f3f5] dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-xs border-b border-slate-200 dark:border-slate-800">
-
-        {/* Centered container wrapping utility bar elements */}
         <div className="max-w-7xl mx-auto w-full px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
-              {dateTimeStr || "Thứ Tư, 06/05/2026"} | Đắk Lắk 20°-23° 🌦️
+              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thứ Tư, 06/05/2026")} | Đắk Lắk 20°-23° 🌦️
             </span>
           </div>
           <div className="flex items-center gap-4 flex-wrap justify-center font-semibold">
@@ -331,23 +450,62 @@ export default function Header() {
                     <Moon className="w-4 h-4 text-slate-600" />
                   )}
                 </button>
+
+                {/* PREMIUM LANG SELECTOR (DESKTOP) */}
+                <span className="text-slate-300 dark:text-slate-700">|</span>
+                <div className="relative" onMouseLeave={() => setLangOpen(false)}>
+                  <button
+                    onClick={() => setLangOpen(!langOpen)}
+                    onMouseEnter={() => setLangOpen(true)}
+                    className="flex items-center gap-1.5 p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-900 transition-all text-slate-700 dark:text-slate-300 font-bold cursor-pointer"
+                    title={t.selectLanguage}
+                  >
+                    <Globe className="w-4 h-4 text-[#cc0000] dark:text-red-400" />
+                    <span className="uppercase text-xs tracking-wider">{currentLang}</span>
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${langOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Glassmorphic animated dropdown */}
+                  {langOpen && (
+                    <div className="absolute right-0 mt-1 bg-white/90 dark:bg-slate-950/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl py-1 min-w-[140px] z-50 animate-fade-in transition-all">
+                      {(languagesData && languagesData.length > 0 ? languagesData : [
+                        { code: "vi", name: "Tiếng Việt" },
+                        { code: "en", name: "Tiếng Anh" }
+                      ]).map((lang: any) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            handleLanguageChange(lang.code)
+                            setLangOpen(false)
+                          }}
+                          className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${
+                            currentLang === lang.code
+                              ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20"
+                              : "text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          <span>{lang.name}</span>
+                          {currentLang === lang.code && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#cc0000] dark:bg-red-400" />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
         </div>
-
       </div>
 
       {/* 2. Main Admin Portal Banner */}
       <div className="w-full bg-[#fdfbf7] dark:bg-slate-900 border-b-2 border-[#cc0000] dark:border-red-700 relative overflow-hidden">
-
-        {/* Repeating Dong Son Bronze Drum watermark background pattern (infinite SVG) */}
         <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06] pointer-events-none select-none z-0">
           <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="drumPattern" width="120" height="120" patternUnits="userSpaceOnUse">
                 <g stroke="#cc0000" strokeWidth="0.5" fill="none">
-                  {/* Traditional Bronze Drum Motif */}
                   <circle cx="60" cy="60" r="54" />
                   <circle cx="60" cy="60" r="48" />
                   <circle cx="60" cy="60" r="40" strokeDasharray="1 1" />
@@ -362,10 +520,7 @@ export default function Header() {
           </svg>
         </div>
 
-        {/* Centered Container aligning exactly with the menu container below */}
         <div className="max-w-7xl mx-auto w-full px-4 relative flex items-center justify-between min-h-[96px] md:min-h-[115px] py-3.5 z-10">
-
-          {/* Left Side: National Emblem + Logo Text */}
           <div className="flex items-center gap-3.5 sm:gap-4 text-left z-10 select-none max-w-[85%] md:max-w-[55%]">
             <div className="bg-white p-1 rounded-full border border-slate-200/80 dark:border-slate-800 shadow-sm shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex items-center justify-center">
               {getConfigValue("logo_url", "") ? (
@@ -387,9 +542,7 @@ export default function Header() {
             </div>
           </div>
 
-          {/* Right Side: Seamless Blended Panoramic Scenery Banner aligned to container right edge */}
           <div className="absolute right-4 top-0 bottom-0 h-full w-[45%] lg:w-[50%] hidden md:block select-none z-0">
-            {/* Beautiful fading overlay gradient that seamlessly merges the banner scenery into the left parchment color */}
             <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fdfbf7] to-transparent dark:from-slate-900 z-10" />
             {topBanners.length > 0 ? (
               <div className="relative w-full h-full overflow-hidden">
@@ -432,7 +585,6 @@ export default function Header() {
               />
             )}
           </div>
-
         </div>
       </div>
 
@@ -444,10 +596,10 @@ export default function Header() {
               const hasChildren = !!item.children
               const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path))
 
-              if (item.name === "Trang chủ") {
+              if (item.name === t.home) {
                 return (
                   <div key={item.name} className="relative flex items-center justify-center h-12 px-3.5 hover:bg-[#a80000] dark:hover:bg-red-900 transition-colors">
-                    <Link href="/" className={`text-white transition-colors ${isActive ? "text-[#fef08a]" : ""}`} title="Trang chủ">
+                    <Link href="/" className={`text-white transition-colors ${isActive ? "text-[#fef08a]" : ""}`} title={t.home}>
                       <Home className="w-4 h-4 fill-current stroke-current" />
                     </Link>
                   </div>
@@ -499,19 +651,18 @@ export default function Header() {
             })}
           </div>
 
-          {/* Right Action Icons (Search & User Profile) */}
           <div className="flex items-center gap-4 text-white">
             <button
-              onClick={() => router.push("/tin-tuc")}
+              onClick={() => router.push(currentLang === "en" ? "/news" : "/tin-tuc")}
               className="p-1 hover:text-[#fef08a] transition-colors"
-              title="Tìm kiếm"
+              title={currentLang === "en" ? "Search" : "Tìm kiếm"}
             >
               <Search className="w-4 h-4" />
             </button>
             <button
-              onClick={() => router.push("/tuong-tac")}
+              onClick={() => router.push(currentLang === "en" ? "/feedback" : "/tuong-tac")}
               className="p-1 hover:text-[#fef08a] transition-colors"
-              title="Cổng tương tác"
+              title={currentLang === "en" ? "Interactive Portal" : "Cổng tương tác"}
             >
               <User className="w-4 h-4" />
             </button>
@@ -526,26 +677,61 @@ export default function Header() {
             <NationalEmblem className="w-full h-full" />
           </div>
           <span className="text-xs font-black uppercase tracking-wider text-[#fef08a]">
-            UBND XÃ DANG KANG
+            {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
           </span>
         </Link>
 
         <div className="flex items-center gap-3">
           {mounted && (
-            <button
-              onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-              className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white"
-            >
-              {resolvedTheme === "dark" ? (
-                <Sun className="w-4 h-4 text-amber-500" />
-              ) : (
-                <Moon className="w-4 h-4 text-slate-100" />
-              )}
-            </button>
+            <>
+              <button
+                onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white cursor-pointer"
+              >
+                {resolvedTheme === "dark" ? (
+                  <Sun className="w-4 h-4 text-amber-500" />
+                ) : (
+                  <Moon className="w-4 h-4 text-slate-100" />
+                )}
+              </button>
+
+              {/* MOBILE LANG SELECTOR */}
+              <div className="relative">
+                <button
+                  onClick={() => setLangOpen(!langOpen)}
+                  className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white flex items-center gap-1 cursor-pointer"
+                  title={t.selectLanguage}
+                >
+                  <Globe className="w-4 h-4 text-white" />
+                  <span className="uppercase text-xs font-bold">{currentLang}</span>
+                </button>
+                {langOpen && (
+                  <div className="absolute right-0 mt-1 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl py-1 min-w-[120px] z-50 text-slate-900 dark:text-slate-100">
+                    {(languagesData && languagesData.length > 0 ? languagesData : [
+                      { code: "vi", name: "Tiếng Việt" },
+                      { code: "en", name: "Tiếng Anh" }
+                    ]).map((lang: any) => (
+                      <button
+                        key={lang.code}
+                        onClick={() => {
+                          handleLanguageChange(lang.code)
+                          setLangOpen(false)
+                        }}
+                        className={`w-full text-left px-3 py-2 text-xs font-bold transition-colors flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-900 cursor-pointer ${
+                          currentLang === lang.code ? "text-[#cc0000] dark:text-red-400 bg-red-50/50 dark:bg-red-950/20" : ""
+                        }`}
+                      >
+                        {lang.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </>
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 rounded-md bg-[#a80000] border border-[#880000] text-white hover:bg-[#880000] dark:bg-red-900 dark:border-red-800 transition-colors"
+            className="p-1.5 rounded-md bg-[#a80000] border border-[#880000] text-white hover:bg-[#880000] dark:bg-red-900 dark:border-red-800 transition-colors cursor-pointer"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -555,18 +741,17 @@ export default function Header() {
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 bg-black/60 z-50 transition-opacity backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
-          {/* Mobile Drawer Content */}
           <div
             className="absolute top-0 right-0 w-[280px] h-full bg-[#cc0000] dark:bg-slate-950 border-l border-[#a80000] dark:border-slate-800 shadow-2xl p-5 flex flex-col gap-6 text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/20 pb-4">
               <span className="text-sm font-bold text-[#fef08a] uppercase tracking-wider">
-                DANH MỤC TRANG
+                {t.sitemapTitle}
               </span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-full bg-[#a80000] border border-[#880000] hover:bg-[#880000] dark:bg-slate-900 dark:border-slate-800 text-white"
+                className="p-1.5 rounded-full bg-[#a80000] border border-[#880000] hover:bg-[#880000] dark:bg-slate-900 dark:border-slate-800 text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -575,12 +760,12 @@ export default function Header() {
             <form onSubmit={handleSearch} className="relative w-full">
               <input
                 type="text"
-                placeholder="Tìm kiếm nhanh..."
+                placeholder={t.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-[#a80000] dark:bg-slate-900 border border-[#880000] dark:border-slate-800 rounded-lg py-2 pl-3 pr-9 text-xs text-white placeholder-white/70 focus:outline-none focus:border-white"
               />
-              <button type="submit" className="absolute right-2.5 top-2.5 text-white/75">
+              <button type="submit" className="absolute right-2.5 top-2.5 text-white/75 cursor-pointer">
                 <Search className="w-4 h-4" />
               </button>
             </form>
@@ -597,7 +782,7 @@ export default function Header() {
                       <>
                         <button
                           onClick={() => toggleDropdown(item.name)}
-                          className={`flex items-center justify-between text-left text-sm uppercase tracking-wide py-1 border-b border-white/10 hover:text-[#fef08a] ${isActive ? "text-[#fef08a] font-bold" : "text-white/80"
+                          className={`flex items-center justify-between text-left text-sm uppercase tracking-wide py-1 border-b border-white/10 hover:text-[#fef08a] cursor-pointer ${isActive ? "text-[#fef08a] font-bold" : "text-white/80"
                             }`}
                         >
                           {item.name}
@@ -635,7 +820,7 @@ export default function Header() {
 
             <div className="mt-auto border-t border-white/25 pt-4 text-center">
               <span className="text-[10px] text-white/70 font-mono block">
-                {getConfigValue("hotline", "Đường dây nóng: 0262.3812.345")}
+                {t.hotline}: {getConfigValue("hotline", "0262.3812.345")}
               </span>
               <span className="text-[10px] text-white/70 font-mono block mt-1">
                 © 2026 {getConfigValue("unit_name", "UBND XÃ DANG KANG")}

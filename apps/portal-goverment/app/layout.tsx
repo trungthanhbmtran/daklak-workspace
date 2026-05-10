@@ -7,6 +7,7 @@ import Header from "@/components/header"
 import Footer from "@/components/footer"
 import ZoomController from "@/components/zoom-controller"
 import { cn } from "@/lib/utils"
+import { cookies } from "next/headers"
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 
@@ -21,14 +22,17 @@ export const metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const cookieStore = await cookies()
+  const lang = cookieStore.get("lang")?.value || "vi"
+
   return (
     <html
-      lang="vi"
+      lang={lang}
       suppressHydrationWarning
       className={cn("antialiased", "font-sans", inter.className)}
     >
