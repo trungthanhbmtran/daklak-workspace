@@ -336,14 +336,27 @@ export default function Header() {
     const roots = horizontalMenus.filter(
       (m: any) => !m.parentId || !horizontalMenus.some((p: any) => p.id === m.parentId)
     )
+    const getMenuNameTranslated = (m: any) => {
+      if (!m) return ""
+      let trans = m.translations
+      if (typeof trans === "string" && trans.trim().startsWith("{")) {
+        try {
+          trans = JSON.parse(trans)
+        } catch (e) {}
+      }
+      if (currentLang === "en" && trans?.en?.name) {
+        return trans.en.name
+      }
+      return m.name
+    }
 
     return roots.map((root: any) => {
       const children = horizontalMenus.filter((m: any) => m.parentId === root.id)
       return {
-        name: root.name,
+        name: getMenuNameTranslated(root),
         path: resolveMenuLink(root),
         children: children.length > 0
-          ? children.map((c: any) => ({ name: c.name, path: resolveMenuLink(c) }))
+          ? children.map((c: any) => ({ name: getMenuNameTranslated(c), path: resolveMenuLink(c) }))
           : undefined
       }
     })

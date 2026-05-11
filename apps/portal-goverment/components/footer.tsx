@@ -240,8 +240,22 @@ export default function Footer() {
     )
     footerMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
+    const getMenuNameTranslated = (m: any) => {
+      if (!m) return ""
+      let trans = m.translations
+      if (typeof trans === "string" && trans.trim().startsWith("{")) {
+        try {
+          trans = JSON.parse(trans)
+        } catch (e) {}
+      }
+      if (currentLang === "en" && trans?.en?.name) {
+        return trans.en.name
+      }
+      return m.name
+    }
+
     return footerMenus.length > 0
-      ? footerMenus.map((m: any) => ({ name: m.name, path: resolveMenuLink(m) }))
+      ? footerMenus.map((m: any) => ({ name: getMenuNameTranslated(m), path: resolveMenuLink(m) }))
       : [
         { name: ft.home, path: "/" },
         { name: ft.about, path: "/gioi-thieu" },
