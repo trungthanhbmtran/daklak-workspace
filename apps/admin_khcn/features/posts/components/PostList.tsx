@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle, Globe, X, Send } from "lucide-react";
+import { Search, Plus, Edit, Trash2, FileText, CheckCircle2, Clock, EyeOff, Image as ImageIcon, Loader2, AlertCircle, Globe, X, Send, Star, Eye, TrendingUp, BarChart3 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { postsApi } from "../api";
+import { categoryApi } from "@/features/system-admin/categories/api";
 import { Post, PostStatus } from "../types";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
@@ -31,14 +32,27 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
+  const [sortBy, setSortBy] = useState("createdAt");
+  const [sortOrder, setSortOrder] = useState("desc");
+
+  // Tải danh sách chuyên mục động từ API
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await categoryApi.fetchAll();
+      return res || [];
+    }
+  });
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["posts", searchTerm, statusFilter, categoryFilter],
+    queryKey: ["posts", searchTerm, statusFilter, categoryFilter, sortBy, sortOrder],
     queryFn: async () => {
       const params = {
         search: searchTerm || undefined,
         status: statusFilter === "ALL" ? undefined : statusFilter,
         categoryId: categoryFilter === "ALL" ? undefined : categoryFilter,
+        sortBy,
+        sortOrder,
       };
       const res = await postsApi.getPosts(params);
       return {
@@ -75,13 +89,60 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   });
 
 
-  const posts = data?.items || [];
+  const posts = (data?.items || []) as Post[];
+  const totalPostsCount = posts.length;
+  const publishedCount = posts.filter((p: Post) => p.status === 'PUBLISHED').length;
+  const totalViewsCount = posts.reduce((sum: number, p: Post) => sum + (p.viewCount || 0), 0);
+  const featuredCount = posts.filter((p: Post) => p.isFeatured).length;
 
   return (
     <div className="flex flex-col gap-6">
+      {/* CMS Quick Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="p-5 border bg-white shadow-sm hover:shadow-md transition-shadow rounded-xl flex items-center justify-between">
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tổng bài viết</p>
+            <p className="text-2xl font-extrabold text-slate-800 mt-1">{totalPostsCount}</p>
+          </div>
+          <div className="bg-blue-50 p-3 rounded-xl border border-blue-100 text-blue-600">
+            <FileText className="h-6 w-6" />
+          </div>
+        </Card>
+
+        <Card className="p-5 border bg-white shadow-sm hover:shadow-md transition-shadow rounded-xl flex items-center justify-between">
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Đã xuất bản</p>
+            <p className="text-2xl font-extrabold text-emerald-600 mt-1">{publishedCount}</p>
+          </div>
+          <div className="bg-emerald-50 p-3 rounded-xl border border-emerald-100 text-emerald-600">
+            <CheckCircle2 className="h-6 w-6" />
+          </div>
+        </Card>
+
+        <Card className="p-5 border bg-white shadow-sm hover:shadow-md transition-shadow rounded-xl flex items-center justify-between">
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tổng lượt xem</p>
+            <p className="text-2xl font-extrabold text-indigo-600 mt-1">{totalViewsCount.toLocaleString('vi-VN')}</p>
+          </div>
+          <div className="bg-indigo-50 p-3 rounded-xl border border-indigo-100 text-indigo-600">
+            <BarChart3 className="h-6 w-6" />
+          </div>
+        </Card>
+
+        <Card className="p-5 border bg-white shadow-sm hover:shadow-md transition-shadow rounded-xl flex items-center justify-between">
+          <div>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Nổi bật (Featured)</p>
+            <p className="text-2xl font-extrabold text-amber-500 mt-1">{featuredCount}</p>
+          </div>
+          <div className="bg-amber-50 p-3 rounded-xl border border-amber-100 text-amber-500">
+            <Star className="h-6 w-6 fill-amber-500 text-amber-500" />
+          </div>
+        </Card>
+      </div>
+
       {/* Bộ lọc & Công cụ */}
-      <Card className="p-4 bg-card border shadow-sm flex flex-col sm:flex-row gap-4 justify-between items-center rounded-xl">
-        <div className="flex flex-1 w-full flex-col sm:flex-row gap-3">
+      <Card className="p-4 bg-card border shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center rounded-xl">
+        <div className="flex flex-1 w-full flex-col sm:flex-row flex-wrap gap-3">
           <div className="relative w-full sm:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -105,7 +166,6 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
               <SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
               <SelectItem value="UNPUBLISHED">Đã gỡ bài</SelectItem>
             </SelectContent>
-
           </Select>
 
           <Select value={categoryFilter} onValueChange={setCategoryFilter}>
@@ -114,12 +174,31 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="ALL">Tất cả chuyên mục</SelectItem>
-              {/* Thêm API fetch categories nếu cần list động */}
+              {categories?.map((cat: any) => (
+                <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {/* Sắp xếp động */}
+          <Select value={`${sortBy}-${sortOrder}`} onValueChange={(val) => {
+            const [by, order] = val.split("-");
+            setSortBy(by);
+            setSortOrder(order);
+          }}>
+            <SelectTrigger className="w-full sm:w-[200px] h-10 bg-background">
+              <SelectValue placeholder="Sắp xếp theo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="createdAt-desc">Mới nhất trước</SelectItem>
+              <SelectItem value="createdAt-asc">Cũ nhất trước</SelectItem>
+              <SelectItem value="viewCount-desc">Lượt xem nhiều nhất</SelectItem>
+              <SelectItem value="publishedAt-desc">Ngày xuất bản mới nhất</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <Button onClick={onNavigateToCreate} className="w-full sm:w-auto h-10 px-6 shadow-sm">
+        <Button onClick={onNavigateToCreate} className="w-full lg:w-auto h-10 px-6 shadow-sm bg-blue-600 hover:bg-blue-700 text-white font-semibold">
           <Plus className="h-4 w-4 mr-2" /> Viết bài mới
         </Button>
       </Card>
@@ -192,11 +271,21 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             )}
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground text-[14px] line-clamp-2 leading-snug group-hover:text-primary transition-colors cursor-pointer" onClick={() => onNavigateToEdit(post.id)}>
-                              {post.title}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground mt-1 font-mono flex items-center gap-2">
-                              ID: {post.id?.substring(0, 8)}...
+                            <div className="flex items-center gap-2">
+                              <p className="font-semibold text-foreground text-[14px] line-clamp-2 leading-snug group-hover:text-primary transition-colors cursor-pointer" onClick={() => onNavigateToEdit(post.id)}>
+                                {post.title}
+                              </p>
+                              {post.isFeatured && (
+                                <span className="bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-0.5 shrink-0" title="Bài viết nổi bật">
+                                  <Star className="h-3 w-3 fill-amber-500 text-amber-500" /> Nổi bật
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-muted-foreground mt-1.5 font-mono flex items-center gap-3">
+                              <span className="flex items-center gap-1">ID: {post.id?.substring(0, 8)}...</span>
+                              <span className="flex items-center gap-1 font-sans text-slate-500 font-bold bg-slate-100 px-1.5 py-0.5 rounded text-[10px]">
+                                <Eye className="h-3.5 w-3.5 text-slate-500" /> {post.viewCount || 0} lượt xem
+                              </span>
                               {(() => {
                                 let translationsObj = {};
                                 try {

@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Param,
   Query,
   Inject,
@@ -36,5 +37,10 @@ export class PublicPostsController implements OnModuleInit {
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return firstValueFrom(this.postService.getPost({ id }));
+  }
+
+  @Post(':id/view')
+  async incrementView(@Param('id') id: string) {
+    return firstValueFrom(this.postService.incrementViewCount({ id }));
   }
 }

@@ -34,9 +34,15 @@ export class PostsService implements OnModuleInit {
   private lexicalToHtml(jsonString: string): string {
     if (!jsonString) return '';
 
+    const trimmed = jsonString.trim();
+    // Nếu là HTML nguyên bản (bắt đầu bằng < hoặc chứa thẻ HTML điển hình), trả về nguyên trạng
+    if (trimmed.startsWith('<') || trimmed.includes('<html') || trimmed.includes('<div') || trimmed.includes('<p') || trimmed.includes('<section')) {
+      return jsonString;
+    }
+
     try {
       // Nếu không phải JSON (văn bản thuần), trả về chính nó bọc trong thẻ p
-      if (!jsonString.trim().startsWith('{')) return `<p>${jsonString}</p>`;
+      if (!trimmed.startsWith('{')) return `<p>${jsonString}</p>`;
 
       const data = JSON.parse(jsonString);
       if (!data.root || !data.root.children) return '';
@@ -413,7 +419,7 @@ export class PostsService implements OnModuleInit {
   }
 
   async findAll(query: any) {
-    const { authorId, categoryId, search, status, lang } = query;
+    const { authorId, categoryId, search, status, lang, isFeatured, sortBy, sortOrder } = query;
     const page = Number(query.page) > 0 ? Number(query.page) : 1;
     const limit = Number(query.limit) > 0 ? Number(query.limit) : 10;
     const skip = (page - 1) * limit;
@@ -428,13 +434,22 @@ export class PostsService implements OnModuleInit {
     if (authorId) where.authorId = authorId;
     if (categoryId) where.categoryId = categoryId;
     if (status) where.status = status;
+    if (isFeatured !== undefined && isFeatured !== '') {
+      where.isFeatured = isFeatured === 'true' || isFeatured === true;
+    }
+
+    // Dynamic sorting
+    let orderBy: any = { createdAt: 'desc' };
+    if (sortBy) {
+      orderBy = { [sortBy]: sortOrder || 'desc' };
+    }
 
     const [items, total] = await Promise.all([
       this.prisma.post.findMany({
         where,
         skip,
         take: limit,
-        orderBy: { createdAt: 'desc' },
+        orderBy,
         include: {
           tags: true,
           category: true,
@@ -595,6 +610,15 @@ export class PostsService implements OnModuleInit {
     });
 
     return newTrans;
+  }
+
+  async incrementViewCount(id: string) {
+    const post = await this.prisma.post.findUnique({ where: { id } });
+    if (!post) throw new NotFoundException('Post not found');
+    return this.prisma.post.update({
+      where: { id },
+      data: { viewCount: { increment: 1 } },
+    });
   }
 }
 

@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class PortalMenuService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
     let translations = {};
@@ -48,8 +48,8 @@ export class PortalMenuService {
     return this.prisma.portalMenu.findMany({
       where,
       orderBy: { order: 'asc' },
-      include: { 
-        children: { 
+      include: {
+        children: {
           orderBy: { order: 'asc' },
           include: {
             children: {
@@ -61,7 +61,7 @@ export class PortalMenuService {
               }
             }
           }
-        } 
+        }
       },
     });
   }
@@ -89,6 +89,13 @@ export class PortalMenuService {
       }
     }
 
+    if (updateData.parentId === '') {
+      updateData.parentId = null;
+    }
+    if (updateData.referenceId === '') {
+      updateData.referenceId = null;
+    }
+
     if (updateData.translations && typeof updateData.translations === 'string') {
       try {
         updateData.translations = JSON.parse(updateData.translations);
@@ -97,7 +104,7 @@ export class PortalMenuService {
         delete updateData.translations;
       }
     }
-    
+
     return this.prisma.portalMenu.update({
       where: { id },
       data: updateData,

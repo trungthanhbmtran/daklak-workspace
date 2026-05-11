@@ -120,6 +120,12 @@ export class PostsController {
     return { data: items };
   }
 
+  @GrpcMethod('PostService', 'IncrementViewCount')
+  async incrementViewCount(data: { id: string }) {
+    const result = await this.postsService.incrementViewCount(data.id);
+    return { data: sanitizePost(result) };
+  }
+
   @MessagePattern('translation_response')
   async handleTranslationResponse(@Payload() payload: any) {
     try {

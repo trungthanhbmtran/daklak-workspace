@@ -30,6 +30,7 @@ service PostService {
   rpc SetCategoryForPost(SetCategoryForPostRequest) returns (common.DeleteResponse) {}
   rpc GetPostBySlug(GetPostBySlugRequest) returns (Post) {}
   rpc GetPostsByCategorySlug(GetPostsByCategorySlugRequest) returns (ListPostsResponse) {}
+  rpc IncrementViewCount(GetPostRequest) returns (PostResponse) {}
 }
 
 
@@ -129,6 +130,10 @@ message ListPostsRequest {
   string search = 4;
   string categoryId = 5;
   string category = 6;
+  string status = 7;
+  string isFeatured = 8;
+  string sortBy = 9;
+  string sortOrder = 10;
 }
 
 message DataListPost {
@@ -147,6 +152,8 @@ message DataListPost {
   string categoryId = 14;
   category.Category category = 15;
   string translations = 16;
+  int32 viewCount = 17;
+  string publishedAt = 18;
 }
 
 message ListPostsResponse {

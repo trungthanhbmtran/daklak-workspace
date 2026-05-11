@@ -58,6 +58,7 @@ export interface Post {
   autoModerationStatus?: string;
   autoModerationNote?: string;
   isFeatured: boolean;
+  viewCount?: number;
   isNotification: boolean;
   tags?: string[];
   translations?: Record<string, { title?: string; description?: string; content?: string; contentJson?: any }>;
