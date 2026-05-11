@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { PortalMenu } from "@/features/posts/types";
+import { PortalMenu, Post } from "@/features/posts/types";
 import { CategoryItem } from "@/features/system-admin/categories/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -11,8 +11,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Settings2, Sparkles, Loader2 } from "lucide-react";
+import { Settings2, Sparkles, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { categoryApi } from "@/features/system-admin/categories/api";
+import { postsApi } from "../../api";
 
 interface EditMenuModalProps {
   isOpen: boolean;
@@ -27,6 +30,30 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const [editingMenu, setEditingMenu] = useState<Partial<PortalMenu> | null>(null);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
   const [isTranslating, setIsTranslating] = useState(false);
+  const [postSearch, setPostSearch] = useState("");
+
+  // Tải danh sách chuyên mục động từ API
+  const { data: dynamicCategories } = useQuery({
+    queryKey: ["categories-for-menu"],
+    queryFn: async () => {
+      const res = await categoryApi.fetchAll();
+      return res || [];
+    },
+    enabled: isOpen,
+  });
+
+  // Tải danh sách bài viết động từ API
+  const { data: dynamicPostsRes } = useQuery({
+    queryKey: ["posts-for-menu"],
+    queryFn: async () => {
+      const res = await postsApi.getPosts({ page: 1, limit: 100 });
+      return res?.data || [];
+    },
+    enabled: isOpen,
+  });
+
+  const dynamicCategoriesList = dynamicCategories || [];
+  const dynamicPosts = (dynamicPostsRes || []) as Post[];
 
   useEffect(() => {
     if (menu) {
@@ -35,6 +62,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
       setEditingMenu(null);
     }
     setActiveLangTab("vi");
+    setPostSearch("");
   }, [menu, isOpen]);
 
   if (!editingMenu) return null;
@@ -329,10 +357,11 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="NONE">--- Chọn chuyên mục ---</SelectItem>
-                  <SelectItem value="dang-uy">Tin hoạt động Đảng Ủy</SelectItem>
-                  <SelectItem value="hdnd">Tin Hội đồng nhân dân</SelectItem>
-                  <SelectItem value="ubnd">Tin Ủy ban nhân dân</SelectItem>
-                  <SelectItem value="kinh-te">Kinh tế - Xã hội / Đời sống</SelectItem>
+                  {dynamicCategoriesList.map((cat: any) => (
+                    <SelectItem key={cat.id || cat.slug} value={cat.slug || cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -359,34 +388,69 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 <SelectContent>
                   <SelectItem value="NONE">--- Chọn trang hệ thống ---</SelectItem>
                   <SelectItem value="gioi-thieu">Giới thiệu chung</SelectItem>
-                  <SelectItem value="lien-he">Liên hệ / Bản đồ</SelectItem>
+                  <SelectItem value="lien-he">Liên hệ & Bản đồ</SelectItem>
                   <SelectItem value="thu-tuc">Thủ tục hành chính (Một cửa)</SelectItem>
-                  <SelectItem value="tuong-tac">Hỏi đáp & Góp ý kiến</SelectItem>
-                  <SelectItem value="van-ban">Văn bản pháp quy / Chỉ đạo</SelectItem>
+                  <SelectItem value="tuong-tac">Hỏi đáp & Góp ý ý kiến</SelectItem>
+                  <SelectItem value="van-ban">Văn bản pháp quy & Quyết định công bố</SelectItem>
+                  <SelectItem value="cong-khai-tai-chinh">Công khai tài chính (Bản PDF ký số)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
           {editingMenu.type === "POST" && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="postIdInput" className="text-right font-bold text-sm text-slate-700">
-                ID Bài viết
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label className="text-right font-bold text-sm text-slate-700 mt-2">
+                Bài viết / Trang tĩnh
               </Label>
-              <Input
-                id="postIdInput"
-                className="col-span-3 font-mono text-sm rounded-lg"
-                placeholder="Nhập ID bài viết (ví dụ: 1, 2, 101...)"
-                value={editingMenu.referenceId || ""}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  setEditingMenu({
-                    ...editingMenu,
-                    referenceId: val || undefined,
-                    link: val ? `/tin-tuc/${val}` : ""
-                  });
-                }}
-              />
+              <div className="col-span-3 space-y-2">
+                {/* Thanh tìm kiếm bài viết nhanh */}
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                  <Input
+                    className="pl-9 rounded-lg text-xs"
+                    placeholder="Tìm kiếm bài viết..."
+                    value={postSearch}
+                    onChange={(e) => setPostSearch(e.target.value)}
+                  />
+                </div>
+                
+                <Select
+                  value={editingMenu.referenceId || "NONE"}
+                  onValueChange={(val) => {
+                    setEditingMenu({
+                      ...editingMenu,
+                      referenceId: val === "NONE" ? undefined : val,
+                      link: val === "NONE" ? "" : `/tin-tuc/${val}`
+                    });
+                  }}
+                >
+                  <SelectTrigger className="rounded-lg text-xs">
+                    <SelectValue placeholder="Chọn bài viết từ danh sách..." />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[220px]">
+                    <SelectItem value="NONE">--- Chọn bài viết ---</SelectItem>
+                    {dynamicPosts
+                      .filter((p) => {
+                        if (!postSearch) return true;
+                        return p.title.toLowerCase().includes(postSearch.toLowerCase());
+                      })
+                      .map((p) => (
+                        <SelectItem key={p.id} value={p.id} className="text-xs">
+                          <span className="font-semibold block text-slate-700 max-w-[280px] truncate">
+                            {p.title}
+                          </span>
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                
+                {editingMenu.referenceId && (
+                  <p className="text-[11px] text-muted-foreground bg-slate-50 border px-2 py-1 rounded-md font-mono truncate">
+                    ID liên kết: {editingMenu.referenceId}
+                  </p>
+                )}
+              </div>
             </div>
           )}
 

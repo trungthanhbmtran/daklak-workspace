@@ -289,8 +289,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                               {(() => {
                                 let translationsObj = {};
                                 try {
-                                  translationsObj = typeof post.translations === 'string' 
-                                    ? JSON.parse(post.translations) 
+                                  translationsObj = typeof post.translations === 'string'
+                                    ? JSON.parse(post.translations)
                                     : (post.translations || {});
                                 } catch (e) {
                                   translationsObj = {};
