@@ -309,20 +309,103 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </Select>
           </div>
 
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="link" className="text-right font-bold text-sm text-slate-700">
-              Đường dẫn / ID
-            </Label>
-            <Input
-              id="link"
-              className="col-span-3 font-mono text-sm rounded-lg"
-              placeholder="/tin-tuc hoặc ID bài viết"
-              value={editingMenu.link || ""}
-              onChange={(e) =>
-                setEditingMenu({ ...editingMenu, link: e.target.value })
-              }
-            />
-          </div>
+          {editingMenu.type === "CATEGORY" && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="categorySelect" className="text-right font-bold text-sm text-slate-700">
+                Chuyên mục
+              </Label>
+              <Select
+                value={editingMenu.referenceId || "NONE"}
+                onValueChange={(val) => {
+                  setEditingMenu({
+                    ...editingMenu,
+                    referenceId: val === "NONE" ? undefined : val,
+                    link: val === "NONE" ? "" : `/tin-tuc?category=${val}`
+                  });
+                }}
+              >
+                <SelectTrigger id="categorySelect" className="col-span-3 rounded-lg">
+                  <SelectValue placeholder="Chọn chuyên mục bài viết..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">--- Chọn chuyên mục ---</SelectItem>
+                  <SelectItem value="dang-uy">Tin hoạt động Đảng Ủy</SelectItem>
+                  <SelectItem value="hdnd">Tin Hội đồng nhân dân</SelectItem>
+                  <SelectItem value="ubnd">Tin Ủy ban nhân dân</SelectItem>
+                  <SelectItem value="kinh-te">Kinh tế - Xã hội / Đời sống</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {editingMenu.type === "STATIC_PAGE" && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="staticPageSelect" className="text-right font-bold text-sm text-slate-700">
+                Trang hệ thống
+              </Label>
+              <Select
+                value={editingMenu.referenceId || "NONE"}
+                onValueChange={(val) => {
+                  setEditingMenu({
+                    ...editingMenu,
+                    referenceId: val === "NONE" ? undefined : val,
+                    link: val === "NONE" ? "" : `/${val}`
+                  });
+                }}
+              >
+                <SelectTrigger id="staticPageSelect" className="col-span-3 rounded-lg">
+                  <SelectValue placeholder="Chọn trang hệ thống..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="NONE">--- Chọn trang hệ thống ---</SelectItem>
+                  <SelectItem value="gioi-thieu">Giới thiệu chung</SelectItem>
+                  <SelectItem value="lien-he">Liên hệ / Bản đồ</SelectItem>
+                  <SelectItem value="thu-tuc">Thủ tục hành chính (Một cửa)</SelectItem>
+                  <SelectItem value="tuong-tac">Hỏi đáp & Góp ý kiến</SelectItem>
+                  <SelectItem value="van-ban">Văn bản pháp quy / Chỉ đạo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {editingMenu.type === "POST" && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="postIdInput" className="text-right font-bold text-sm text-slate-700">
+                ID Bài viết
+              </Label>
+              <Input
+                id="postIdInput"
+                className="col-span-3 font-mono text-sm rounded-lg"
+                placeholder="Nhập ID bài viết (ví dụ: 1, 2, 101...)"
+                value={editingMenu.referenceId || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setEditingMenu({
+                    ...editingMenu,
+                    referenceId: val || undefined,
+                    link: val ? `/tin-tuc/${val}` : ""
+                  });
+                }}
+              />
+            </div>
+          )}
+
+          {editingMenu.type === "URL" && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="link" className="text-right font-bold text-sm text-slate-700">
+                Đường dẫn liên kết
+              </Label>
+              <Input
+                id="link"
+                className="col-span-3 font-mono text-sm rounded-lg"
+                placeholder="Ví dụ: / hoặc https://chinhphu.vn"
+                value={editingMenu.link || ""}
+                onChange={(e) =>
+                  setEditingMenu({ ...editingMenu, link: e.target.value, referenceId: undefined })
+                }
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="parentId" className="text-right font-bold text-sm text-slate-700">

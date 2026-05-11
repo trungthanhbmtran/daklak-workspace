@@ -253,6 +253,48 @@ export default function Header() {
     return () => clearInterval(timer)
   }, [mounted, currentLang, t.days])
 
+  // Helper to dynamically resolve CMS Menu links based on standard CMS types
+  const resolveMenuLink = React.useCallback((item: any) => {
+    if (!item) return "/"
+    const type = (item.type || "URL").toUpperCase()
+    const refId = item.referenceId
+    const directLink = item.link
+
+    if (type === "CATEGORY") {
+      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
+      return refId ? `${basePath}?category=${refId}` : (directLink || basePath)
+    }
+
+    if (type === "POST") {
+      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
+      return refId ? `${basePath}/${refId}` : (directLink || basePath)
+    }
+
+    if (type === "STATIC_PAGE") {
+      const pageCode = (refId || directLink || "").toLowerCase().replace(/^\//, "")
+      const pageMap: Record<string, { vi: string, en: string }> = {
+        aboutus: { vi: "/gioi-thieu", en: "/aboutus" },
+        "gioi-thieu": { vi: "/gioi-thieu", en: "/aboutus" },
+        contact: { vi: "/lien-he", en: "/contact" },
+        "lien-he": { vi: "/lien-he", en: "/contact" },
+        procedures: { vi: "/thu-tuc", en: "/procedures" },
+        "thu-tuc": { vi: "/thu-tuc", en: "/procedures" },
+        feedback: { vi: "/tuong-tac", en: "/feedback" },
+        "tuong-tac": { vi: "/tuong-tac", en: "/feedback" },
+        documents: { vi: "/van-ban", en: "/documents" },
+        "van-ban": { vi: "/van-ban", en: "/documents" },
+      }
+      
+      const mapped = pageMap[pageCode]
+      if (mapped) {
+        return currentLang === "en" ? mapped.en : mapped.vi
+      }
+      return directLink || "/"
+    }
+
+    return directLink || "/"
+  }, [currentLang])
+
   // 7. Memoize and translate menu items
   const menuItems: MenuItem[] = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
@@ -299,13 +341,13 @@ export default function Header() {
       const children = horizontalMenus.filter((m: any) => m.parentId === root.id)
       return {
         name: root.name,
-        path: root.link || "/",
+        path: resolveMenuLink(root),
         children: children.length > 0
-          ? children.map((c: any) => ({ name: c.name, path: c.link || "/" }))
+          ? children.map((c: any) => ({ name: c.name, path: resolveMenuLink(c) }))
           : undefined
       }
     })
-  }, [menusData, currentLang, t])
+  }, [menusData, currentLang, t, resolveMenuLink])
 
   const { data: positionsData } = useQuery({
     queryKey: ["public-categories", "BANNER_POSITION"],

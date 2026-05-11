@@ -180,6 +180,48 @@ export default function Footer() {
     return () => clearInterval(interval)
   }, [])
 
+  // Helper to dynamically resolve CMS Menu links based on standard CMS types
+  const resolveMenuLink = React.useCallback((item: any) => {
+    if (!item) return "/"
+    const type = (item.type || "URL").toUpperCase()
+    const refId = item.referenceId
+    const directLink = item.link
+
+    if (type === "CATEGORY") {
+      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
+      return refId ? `${basePath}?category=${refId}` : (directLink || basePath)
+    }
+
+    if (type === "POST") {
+      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
+      return refId ? `${basePath}/${refId}` : (directLink || basePath)
+    }
+
+    if (type === "STATIC_PAGE") {
+      const pageCode = (refId || directLink || "").toLowerCase().replace(/^\//, "")
+      const pageMap: Record<string, { vi: string, en: string }> = {
+        aboutus: { vi: "/gioi-thieu", en: "/aboutus" },
+        "gioi-thieu": { vi: "/gioi-thieu", en: "/aboutus" },
+        contact: { vi: "/lien-he", en: "/contact" },
+        "lien-he": { vi: "/lien-he", en: "/contact" },
+        procedures: { vi: "/thu-tuc", en: "/procedures" },
+        "thu-tuc": { vi: "/thu-tuc", en: "/procedures" },
+        feedback: { vi: "/tuong-tac", en: "/feedback" },
+        "tuong-tac": { vi: "/tuong-tac", en: "/feedback" },
+        documents: { vi: "/van-ban", en: "/documents" },
+        "van-ban": { vi: "/van-ban", en: "/documents" },
+      }
+      
+      const mapped = pageMap[pageCode]
+      if (mapped) {
+        return currentLang === "en" ? mapped.en : mapped.vi
+      }
+      return directLink || "/"
+    }
+
+    return directLink || "/"
+  }, [currentLang])
+
   // 6. Localize and memoize sitemap items
   const mainLinks = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
@@ -199,7 +241,7 @@ export default function Footer() {
     footerMenus.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
 
     return footerMenus.length > 0
-      ? footerMenus.map((m: any) => ({ name: m.name, path: m.link || "/" }))
+      ? footerMenus.map((m: any) => ({ name: m.name, path: resolveMenuLink(m) }))
       : [
         { name: ft.home, path: "/" },
         { name: ft.about, path: "/gioi-thieu" },
@@ -209,7 +251,7 @@ export default function Footer() {
         { name: ft.feedback, path: "/tuong-tac" },
         { name: ft.contact, path: "/lien-he" }
       ]
-  }, [menusData, ft])
+  }, [menusData, ft, resolveMenuLink, currentLang])
 
   // 7. Localize external government reference portals
   const govLinks = React.useMemo(() => {
