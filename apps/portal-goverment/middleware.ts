@@ -4,49 +4,36 @@ import type { NextRequest } from "next/server"
 export function middleware(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl
 
-  // 1. Determine the preferred language
-  let lang = "vi" // Default locale
+  // Define supported locales
+  const locales = ["vi", "en"]
 
-  // Priority 1: Query parameter ?lang=
-  const queryLang = searchParams.get("lang")
-  if (queryLang === "vi" || queryLang === "en") {
-    lang = queryLang
-  } else {
-    // Priority 2: Cookie 'lang'
-    const cookieLang = request.cookies.get("lang")?.value
-    if (cookieLang === "vi" || cookieLang === "en") {
-      lang = cookieLang
-    } else {
-      // Priority 3: Accept-Language Header
-      const acceptLang = request.headers.get("accept-language") || ""
-      if (acceptLang.toLowerCase().includes("en")) {
-        lang = "en"
-      }
-    }
+  // Check if pathname starts with a locale
+  const pathnameHasLocale = locales.some(
+    (locale) => pathname === `/${locale}` || pathname.startsWith(`/${locale}/`)
+  )
+
+  if (pathnameHasLocale) {
+    return NextResponse.next()
   }
 
-  // 2. Perform Redirection to remove ?lang query param if present, keeping URLs beautiful and clean
-  if (queryLang) {
-    const redirectUrl = new URL(pathname, request.url)
-    searchParams.forEach((value, key) => {
-      if (key !== "lang") {
-        redirectUrl.searchParams.set(key, value)
-      }
-    })
-    const response = NextResponse.redirect(redirectUrl)
-    response.cookies.set("lang", lang, { path: "/", maxAge: 31536000, sameSite: "lax" })
-    return response
+  // Redirect if pathname does not have locale prefix
+  let targetLang = "vi"
+
+  // Check if the path belongs to known English pages
+  const enSlugs = ["aboutus", "news", "documents", "procedures", "feedback", "contact"]
+  const pathFirstSegment = pathname.split("/").filter(Boolean)[0] || ""
+
+  if (enSlugs.includes(pathFirstSegment.toLowerCase())) {
+    targetLang = "en"
   }
 
-  // 3. Set cookie if missing or different, then proceed
-  const response = NextResponse.next()
-  const existingCookie = request.cookies.get("lang")?.value
+  // Construct target redirect URL
+  const redirectUrl = new URL(`/${targetLang}${pathname}`, request.url)
+  searchParams.forEach((value, key) => {
+    redirectUrl.searchParams.set(key, value)
+  })
 
-  if (existingCookie !== lang) {
-    response.cookies.set("lang", lang, { path: "/", maxAge: 31536000, sameSite: "lax" })
-  }
-
-  return response
+  return NextResponse.redirect(redirectUrl)
 }
 
 export const config = {

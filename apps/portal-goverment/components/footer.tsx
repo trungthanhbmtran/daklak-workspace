@@ -104,13 +104,13 @@ export default function Footer() {
     setMounted(true)
   }, [])
 
-  // 3. Resolve the active language client-side
+  // 3. Resolve the active language client-side based on pathname segment
   const currentLang = React.useMemo(() => {
-    if (!mounted) return "vi"
-    const cookieLang = getCookie("lang")
-    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    if (!pathname) return "vi"
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "en") return "en"
     return "vi"
-  }, [mounted])
+  }, [pathname])
 
   const ft = footerTranslations[currentLang] || footerTranslations.vi
 
@@ -182,57 +182,65 @@ export default function Footer() {
 
   // Helper to dynamically resolve CMS Menu links based on standard CMS types
   const resolveMenuLink = React.useCallback((item: any) => {
-    if (!item) return "/"
+    if (!item) return `/${currentLang}`
     const type = (item.type || "URL").toUpperCase()
     const refId = item.referenceId
     const directLink = item.link
 
     if (type === "CATEGORY") {
-      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
-      return refId ? `${basePath}?category=${refId}` : (directLink || basePath)
+      const basePath = currentLang === "en" ? "/en/news" : "/vi/tin-tuc"
+      return refId ? `${basePath}?category=${refId}` : (directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : basePath)
     }
 
     if (type === "POST") {
-      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
-      return refId ? `${basePath}/${refId}` : (directLink || basePath)
+      const basePath = currentLang === "en" ? "/en/news" : "/vi/tin-tuc"
+      return refId ? `${basePath}/${refId}` : (directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : basePath)
     }
 
     if (type === "STATIC_PAGE") {
       const pageCode = (refId || directLink || "").toLowerCase().replace(/^\//, "")
       const pageMap: Record<string, { vi: string, en: string }> = {
-        aboutus: { vi: "/gioi-thieu", en: "/aboutus" },
-        "gioi-thieu": { vi: "/gioi-thieu", en: "/aboutus" },
-        contact: { vi: "/lien-he", en: "/contact" },
-        "lien-he": { vi: "/lien-he", en: "/contact" },
-        procedures: { vi: "/thu-tuc", en: "/procedures" },
-        "thu-tuc": { vi: "/thu-tuc", en: "/procedures" },
-        feedback: { vi: "/tuong-tac", en: "/feedback" },
-        "tuong-tac": { vi: "/tuong-tac", en: "/feedback" },
-        documents: { vi: "/van-ban", en: "/documents" },
-        "van-ban": { vi: "/van-ban", en: "/documents" },
+        aboutus: { vi: "/vi/gioi-thieu", en: "/en/aboutus" },
+        "gioi-thieu": { vi: "/vi/gioi-thieu", en: "/en/aboutus" },
+        contact: { vi: "/vi/lien-he", en: "/en/contact" },
+        "lien-he": { vi: "/vi/lien-he", en: "/en/contact" },
+        procedures: { vi: "/vi/thu-tuc", en: "/en/procedures" },
+        "thu-tuc": { vi: "/vi/thu-tuc", en: "/en/procedures" },
+        feedback: { vi: "/vi/tuong-tac", en: "/en/feedback" },
+        "tuong-tac": { vi: "/vi/tuong-tac", en: "/en/feedback" },
+        documents: { vi: "/vi/van-ban", en: "/en/documents" },
+        "van-ban": { vi: "/vi/van-ban", en: "/en/documents" },
       }
       
       const mapped = pageMap[pageCode]
       if (mapped) {
         return currentLang === "en" ? mapped.en : mapped.vi
       }
-      return directLink || "/"
+      return directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : `/${currentLang}`
     }
 
-    return directLink || "/"
+    if (directLink) {
+      if (directLink.startsWith("http") || directLink.startsWith("/vi/") || directLink.startsWith("/en/")) {
+        return directLink
+      }
+      const cleanLink = directLink.startsWith("/") ? directLink : `/${directLink}`
+      return `/${currentLang}${cleanLink}`
+    }
+
+    return `/${currentLang}`
   }, [currentLang])
 
   // 6. Localize and memoize sitemap items
   const mainLinks = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
       return [
-        { name: ft.home, path: "/" },
-        { name: ft.about, path: currentLang === "en" ? "/aboutus" : "/gioi-thieu" },
-        { name: ft.news, path: currentLang === "en" ? "/news" : "/tin-tuc" },
-        { name: ft.documents, path: currentLang === "en" ? "/documents" : "/van-ban" },
-        { name: ft.procedures, path: currentLang === "en" ? "/procedures" : "/thu-tuc" },
-        { name: ft.feedback, path: currentLang === "en" ? "/feedback" : "/tuong-tac" },
-        { name: ft.contact, path: currentLang === "en" ? "/contact" : "/lien-he" }
+        { name: ft.home, path: `/${currentLang}` },
+        { name: ft.about, path: currentLang === "en" ? "/en/aboutus" : "/vi/gioi-thieu" },
+        { name: ft.news, path: currentLang === "en" ? "/en/news" : "/vi/tin-tuc" },
+        { name: ft.documents, path: currentLang === "en" ? "/en/documents" : "/vi/van-ban" },
+        { name: ft.procedures, path: currentLang === "en" ? "/en/procedures" : "/vi/thu-tuc" },
+        { name: ft.feedback, path: currentLang === "en" ? "/en/feedback" : "/vi/tuong-tac" },
+        { name: ft.contact, path: currentLang === "en" ? "/en/contact" : "/vi/lien-he" }
       ]
     }
     const footerMenus = menusData.data.filter(
@@ -257,13 +265,13 @@ export default function Footer() {
     return footerMenus.length > 0
       ? footerMenus.map((m: any) => ({ name: getMenuNameTranslated(m), path: resolveMenuLink(m) }))
       : [
-        { name: ft.home, path: "/" },
-        { name: ft.about, path: "/gioi-thieu" },
-        { name: ft.news, path: "/tin-tuc" },
-        { name: ft.documents, path: "/van-ban" },
-        { name: ft.procedures, path: "/thu-tuc" },
-        { name: ft.feedback, path: "/tuong-tac" },
-        { name: ft.contact, path: "/lien-he" }
+        { name: ft.home, path: `/${currentLang}` },
+        { name: ft.about, path: currentLang === "en" ? "/en/aboutus" : "/vi/gioi-thieu" },
+        { name: ft.news, path: currentLang === "en" ? "/en/news" : "/vi/tin-tuc" },
+        { name: ft.documents, path: currentLang === "en" ? "/en/documents" : "/vi/van-ban" },
+        { name: ft.procedures, path: currentLang === "en" ? "/en/procedures" : "/vi/thu-tuc" },
+        { name: ft.feedback, path: currentLang === "en" ? "/en/feedback" : "/vi/tuong-tac" },
+        { name: ft.contact, path: currentLang === "en" ? "/en/contact" : "/vi/lien-he" }
       ]
   }, [menusData, ft, resolveMenuLink, currentLang])
 

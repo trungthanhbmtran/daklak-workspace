@@ -181,13 +181,13 @@ export default function Header() {
   const [dateTimeStr, setDateTimeStr] = React.useState("")
   const [langOpen, setLangOpen] = React.useState(false)
 
-  // 3. Resolve the active language client-side
+  // 3. Resolve the active language client-side based on pathname segment
   const currentLang = React.useMemo(() => {
-    if (!mounted) return "vi"
-    const cookieLang = getCookie("lang")
-    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    if (!pathname) return "vi"
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "en") return "en"
     return "vi"
-  }, [mounted])
+  }, [pathname])
 
   const t = translations[currentLang] || translations.vi
 
@@ -255,74 +255,82 @@ export default function Header() {
 
   // Helper to dynamically resolve CMS Menu links based on standard CMS types
   const resolveMenuLink = React.useCallback((item: any) => {
-    if (!item) return "/"
+    if (!item) return `/${currentLang}`
     const type = (item.type || "URL").toUpperCase()
     const refId = item.referenceId
     const directLink = item.link
 
     if (type === "CATEGORY") {
-      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
-      return refId ? `${basePath}?category=${refId}` : (directLink || basePath)
+      const basePath = currentLang === "en" ? "/en/news" : "/vi/tin-tuc"
+      return refId ? `${basePath}?category=${refId}` : (directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : basePath)
     }
 
     if (type === "POST") {
-      const basePath = currentLang === "en" ? "/news" : "/tin-tuc"
-      return refId ? `${basePath}/${refId}` : (directLink || basePath)
+      const basePath = currentLang === "en" ? "/en/news" : "/vi/tin-tuc"
+      return refId ? `${basePath}/${refId}` : (directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : basePath)
     }
 
     if (type === "STATIC_PAGE") {
       const pageCode = (refId || directLink || "").toLowerCase().replace(/^\//, "")
       const pageMap: Record<string, { vi: string, en: string }> = {
-        aboutus: { vi: "/gioi-thieu", en: "/aboutus" },
-        "gioi-thieu": { vi: "/gioi-thieu", en: "/aboutus" },
-        contact: { vi: "/lien-he", en: "/contact" },
-        "lien-he": { vi: "/lien-he", en: "/contact" },
-        procedures: { vi: "/thu-tuc", en: "/procedures" },
-        "thu-tuc": { vi: "/thu-tuc", en: "/procedures" },
-        feedback: { vi: "/tuong-tac", en: "/feedback" },
-        "tuong-tac": { vi: "/tuong-tac", en: "/feedback" },
-        documents: { vi: "/van-ban", en: "/documents" },
-        "van-ban": { vi: "/van-ban", en: "/documents" },
+        aboutus: { vi: "/vi/gioi-thieu", en: "/en/aboutus" },
+        "gioi-thieu": { vi: "/vi/gioi-thieu", en: "/en/aboutus" },
+        contact: { vi: "/vi/lien-he", en: "/en/contact" },
+        "lien-he": { vi: "/vi/lien-he", en: "/en/contact" },
+        procedures: { vi: "/vi/thu-tuc", en: "/en/procedures" },
+        "thu-tuc": { vi: "/vi/thu-tuc", en: "/en/procedures" },
+        feedback: { vi: "/vi/tuong-tac", en: "/en/feedback" },
+        "tuong-tac": { vi: "/vi/tuong-tac", en: "/en/feedback" },
+        documents: { vi: "/vi/van-ban", en: "/en/documents" },
+        "van-ban": { vi: "/vi/van-ban", en: "/en/documents" },
       }
       
       const mapped = pageMap[pageCode]
       if (mapped) {
         return currentLang === "en" ? mapped.en : mapped.vi
       }
-      return directLink || "/"
+      return directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : `/${currentLang}`
     }
 
-    return directLink || "/"
+    if (directLink) {
+      if (directLink.startsWith("http") || directLink.startsWith("/vi/") || directLink.startsWith("/en/")) {
+        return directLink
+      }
+      const cleanLink = directLink.startsWith("/") ? directLink : `/${directLink}`
+      return `/${currentLang}${cleanLink}`
+    }
+
+    return `/${currentLang}`
   }, [currentLang])
 
   // 7. Memoize and translate menu items
   const menuItems: MenuItem[] = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
       return [
-        { name: t.home, path: "/" },
+        { name: t.home, path: `/${currentLang}` },
         {
           name: t.about,
-          path: "/gioi-thieu",
+          path: currentLang === "en" ? "/en/aboutus" : "/vi/gioi-thieu",
           children: [
-            { name: currentLang === "en" ? "Overview" : "Giới thiệu chung", path: "/gioi-thieu#chung" },
-            { name: currentLang === "en" ? "Organizational Structure" : "Cơ cấu tổ chức", path: "/gioi-thieu#co-cau" },
-            { name: currentLang === "en" ? "Leadership Info" : "Thông tin lãnh đạo", path: "/gioi-thieu#lanh-dao" }
+            { name: currentLang === "en" ? "Overview" : "Giới thiệu chung", path: currentLang === "en" ? "/en/aboutus#chung" : "/vi/gioi-thieu#chung" },
+            { name: currentLang === "en" ? "Organizational Structure" : "Cơ cấu tổ chức", path: currentLang === "en" ? "/en/aboutus#co-cau" : "/vi/gioi-thieu#co-cau" },
+            { name: currentLang === "en" ? "Leadership Info" : "Thông tin lãnh đạo", path: currentLang === "en" ? "/en/aboutus#lanh-dao" : "/vi/gioi-thieu#lanh-dao" }
           ]
         },
         {
           name: t.news,
-          path: "/tin-tuc",
+          path: currentLang === "en" ? "/en/news" : "/vi/tin-tuc",
           children: [
-            { name: currentLang === "en" ? "Party Activity" : "Tin hoạt động Đảng Ủy", path: "/tin-tuc?category=dang-uy" },
-            { name: currentLang === "en" ? "People's Council" : "Tin Hội đồng nhân dân", path: "/tin-tuc?category=hdnd" },
-            { name: currentLang === "en" ? "People's Committee" : "Tin Ủy ban nhân dân", path: "/tin-tuc?category=ubnd" },
-            { name: currentLang === "en" ? "Socio-Economic" : "Kinh tế - Xã hội", path: "/tin-tuc?category=kinh-te" }
+            { name: currentLang === "en" ? "Party Activity" : "Tin hoạt động Đảng Ủy", path: currentLang === "en" ? "/en/news?category=dang-uy" : "/vi/tin-tuc?category=dang-uy" },
+            { name: currentLang === "en" ? "People's Council" : "Tin Hội đồng nhân dân", path: currentLang === "en" ? "/en/news?category=hdnd" : "/vi/tin-tuc?category=hdnd" },
+            { name: currentLang === "en" ? "People's Committee" : "Tin Ủy ban nhân dân", path: currentLang === "en" ? "/en/news?category=ubnd" : "/vi/tin-tuc?category=ubnd" },
+            { name: currentLang === "en" ? "Socio-Economic" : "Kinh tế - Xã hội", path: currentLang === "en" ? "/en/news?category=kinh-te" : "/vi/tin-tuc?category=kinh-te" }
           ]
         },
-        { name: t.documents, path: "/van-ban" },
-        { name: t.procedures, path: "/thu-tuc" },
-        { name: t.feedback, path: "/tuong-tac" },
-        { name: t.contact, path: "/lien-he" }
+        { name: t.documents, path: currentLang === "en" ? "/en/documents" : "/vi/van-ban" },
+        { name: t.procedures, path: currentLang === "en" ? "/en/procedures" : "/vi/thu-tuc" },
+        { name: t.feedback, path: currentLang === "en" ? "/en/feedback" : "/vi/tuong-tac" },
+        { name: t.contact, path: currentLang === "en" ? "/en/contact" : "/vi/lien-he" }
       ]
     }
 
@@ -446,17 +454,54 @@ export default function Header() {
     return () => clearInterval(interval)
   }, [shouldTopSlide, topBanners.length])
 
-  // 9. Process URL mapping on language change
-  const handleLanguageChange = (langCode: string) => {
-    document.cookie = `lang=${langCode}; path=/; max-age=31536000; SameSite=Lax`
-    window.location.reload()
+  // 9. Process URL mapping on language change by rewriting path locale prefix
+  const handleLanguageChange = (targetLang: string) => {
+    if (!pathname) {
+      router.push(`/${targetLang}`)
+      return
+    }
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "vi" || segments[0] === "en") {
+      segments[0] = targetLang
+    } else {
+      segments.unshift(targetLang)
+    }
+
+    // Map known system slugs between Vietnamese and English
+    const vnToEnMap: Record<string, string> = {
+      "gioi-thieu": "aboutus",
+      "lien-he": "contact",
+      "thu-tuc": "procedures",
+      "tin-tuc": "news",
+      "tuong-tac": "feedback",
+      "van-ban": "documents"
+    }
+    const enToVnMap: Record<string, string> = {
+      aboutus: "gioi-thieu",
+      contact: "lien-he",
+      procedures: "thu-tuc",
+      news: "tin-tuc",
+      feedback: "tuong-tac",
+      documents: "van-ban"
+    }
+
+    if (segments[1]) {
+      const currentSlug = segments[1].toLowerCase()
+      if (targetLang === "en" && vnToEnMap[currentSlug]) {
+        segments[1] = vnToEnMap[currentSlug]
+      } else if (targetLang === "vi" && enToVnMap[currentSlug]) {
+        segments[1] = enToVnMap[currentSlug]
+      }
+    }
+
+    router.push("/" + segments.join("/"))
   }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
-      const targetSearchPath = "/tin-tuc"
-      router.push(`${targetSearchPath}?search=${encodeURIComponent(searchQuery.trim())}`)
+      const basePath = currentLang === "en" ? "/en/news" : "/vi/tin-tuc"
+      router.push(`${basePath}?search=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery("")
     }
   }

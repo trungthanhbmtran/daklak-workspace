@@ -24,21 +24,12 @@ apiClient.interceptors.request.use(
   (config) => {
     let lang = "vi";
     if (typeof window !== "undefined") {
-      // Prioritize cookie set by Next.js middleware, fall back to URL analysis
-      const cookieLang = getCookie("lang");
-      if (cookieLang === "vi" || cookieLang === "en") {
-        lang = cookieLang;
+      const pathname = window.location.pathname;
+      const segments = pathname.split("/").filter(Boolean);
+      if (segments[0] === "en") {
+        lang = "en";
       } else {
-        const pathname = window.location.pathname;
-        const searchParams = new URLSearchParams(window.location.search);
-        const isEn = pathname.startsWith("/aboutus") ||
-                     pathname.startsWith("/news") ||
-                     pathname.startsWith("/documents") ||
-                     pathname.startsWith("/procedures") ||
-                     pathname.startsWith("/feedback") ||
-                     pathname.startsWith("/contact") ||
-                     searchParams.get("lang") === "en";
-        lang = isEn ? "en" : "vi";
+        lang = "vi";
       }
     }
 
