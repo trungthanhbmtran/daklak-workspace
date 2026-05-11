@@ -30,7 +30,28 @@ const COMMUNE_ZONES = [
   { id: "BM", name: "Buôn Êđê (Khu bảo tồn văn hóa truyền thống)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 người", center: { x: 78, y: 72 } }
 ]
 
+// Client-side cookie getter helper
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]*)"))
+  return match ? decodeURIComponent(match[2]) : null
+}
+
 export default function ContactPage() {
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Resolve active language client-side
+  const currentLang = React.useMemo(() => {
+    if (!mounted) return "vi"
+    const cookieLang = getCookie("lang")
+    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    return "vi"
+  }, [mounted])
+
   const { data: portalConfigData } = useQuery({
     queryKey: ["public-portal-configs"],
     queryFn: async () => {
@@ -46,19 +67,40 @@ export default function ContactPage() {
   })
 
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === code);
-    if (!found) return fallback;
-    if (code === "citizen_schedule") {
-      return found.description || found.name || fallback;
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    if (!found) return fallback
+
+    if (found.description && found.description.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(found.description)
+        if (parsed && typeof parsed === "object") {
+          const trans = parsed.translations || parsed
+          if (trans[currentLang]) {
+            return trans[currentLang]
+          }
+          if (trans.vi) {
+            return trans.vi
+          }
+        }
+      } catch (e) {
+        // Fallback if not valid JSON
+      }
     }
-    return found.name || fallback;
-  }, [portalConfigData]);
+
+    if (code === "citizen_schedule") {
+      return found.description || found.name || fallback
+    }
+
+    return found.name || fallback
+  }, [portalConfigData, currentLang])
 
   const [activeZone, setActiveZone] = React.useState<typeof COMMUNE_ZONES[0] | null>(null)
 
   React.useEffect(() => {
     setActiveZone(COMMUNE_ZONES[2] || null)
   }, [])
+
+  const [mapType, setMapType] = React.useState<"vector" | "image">("vector")
 
   // Form submission state
   const [fullName, setFullName] = React.useState("")
@@ -88,11 +130,11 @@ export default function ContactPage() {
       <div className="flex items-center gap-1.5 text-xs text-slate-400 font-semibold uppercase tracking-wider">
         <Link href="/" className="hover:text-[#b91c1c] flex items-center gap-1">
           <Home className="w-3.5 h-3.5" />
-          Trang chủ
+          {currentLang === "en" ? "Home" : "Trang chủ"}
         </Link>
         <ChevronRight className="w-3.5 h-3.5" />
         <span className="text-slate-600 dark:text-slate-300">
-          Thông tin liên hệ
+          {currentLang === "en" ? "Contact Information" : "Thông tin liên hệ"}
         </span>
       </div>
 
@@ -107,7 +149,7 @@ export default function ContactPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
               <Building2 className="w-5 h-5 text-[#b91c1c]" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-                THÔNG TIN TRỤ SỞ CHÍNH
+                {currentLang === "en" ? "HEADQUARTERS INFORMATION" : "THÔNG TIN TRỤ SỞ CHÍNH"}
               </h3>
             </div>
 
@@ -115,29 +157,29 @@ export default function ContactPage() {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <span>
-                  {getConfigValue("address", "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}
+                  {getConfigValue("address", currentLang === "en" ? "Village 6, Dang Kang commune, Krong Bong district, Dak Lak province" : "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-                <a href={`tel:${getConfigValue("hotline", "Điện thoại: 0262.3812.345").replace(/[^\d]/g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
-                  {getConfigValue("hotline", "Điện thoại: 0262.3812.345")}
+                <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
+                  {(currentLang === "en" ? "Phone: " : "Điện thoại: ") + getConfigValue("hotline", "0262.3812.345")}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                <a href={`mailto:${getConfigValue("email", "Email: xadangkang@krongbong.daklak.gov.vn").replace(/.*:\s*/, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
-                  {getConfigValue("email", "Email: xadangkang@krongbong.daklak.gov.vn")}
+                <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
+                  {"Email: " + getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}
                 </a>
               </div>
               <div className="flex items-start gap-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 font-medium text-slate-500">
                 <Clock className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <div className="flex flex-col gap-1">
                   <span className="text-slate-850 dark:text-slate-300 font-bold">
-                    Thời gian tiếp nhận công dân trực tiếp:
+                    {currentLang === "en" ? "Direct citizen reception hours:" : "Thời gian tiếp nhận công dân trực tiếp:"}
                   </span>
                   <span className="whitespace-pre-line text-slate-600 dark:text-slate-400">
-                    {getConfigValue("citizen_schedule", "Lịch tiếp công dân mặc định")}
+                    {getConfigValue("citizen_schedule", currentLang === "en" ? "Every Thursday • 08:00 - 11:30" : "Thứ 5 hàng tuần • 08:00 - 11:30")}
                   </span>
                 </div>
               </div>
@@ -149,7 +191,7 @@ export default function ContactPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
               <Mail className="w-5 h-5 text-[#b91c1c]" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-                {getConfigValue("contact_form_title", "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG")}
+                {getConfigValue("contact_form_title", currentLang === "en" ? "SEND FEEDBACK / COMMENTS TO OFFICE" : "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG")}
               </h3>
             </div>
 
@@ -157,12 +199,12 @@ export default function ContactPage() {
               <form onSubmit={handleContactSubmit} className="flex flex-col gap-4 text-xs font-semibold">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    Họ và tên *
+                    {currentLang === "en" ? "Full name *" : "Họ và tên *"}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Nhập họ tên của bạn..."
+                    placeholder={currentLang === "en" ? "Enter your full name..." : "Nhập họ tên của bạn..."}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -171,12 +213,12 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    Email liên hệ *
+                    {currentLang === "en" ? "Contact email *" : "Email liên hệ *"}
                   </label>
                   <input
                     type="email"
                     required
-                    placeholder="Nhập email của bạn..."
+                    placeholder={currentLang === "en" ? "Enter your email..." : "Nhập email của bạn..."}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -185,11 +227,11 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    Tiêu đề ý kiến
+                    {currentLang === "en" ? "Feedback title" : "Tiêu đề ý kiến"}
                   </label>
                   <input
                     type="text"
-                    placeholder="Chủ đề góp ý..."
+                    placeholder={currentLang === "en" ? "Feedback subject..." : "Chủ đề góp ý..."}
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white"
@@ -198,12 +240,12 @@ export default function ContactPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-slate-400 font-bold uppercase tracking-wider">
-                    Nội dung thư góp ý *
+                    {currentLang === "en" ? "Feedback message content *" : "Nội dung thư góp ý *"}
                   </label>
                   <textarea
                     required
                     rows={4}
-                    placeholder="Gõ nội dung tin nhắn gửi đến ban biên tập..."
+                    placeholder={currentLang === "en" ? "Type the message content to send to editors..." : "Gõ nội dung tin nhắn gửi đến ban biên tập..."}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors dark:bg-slate-950 dark:border-slate-800 dark:text-white leading-relaxed"
@@ -215,7 +257,7 @@ export default function ContactPage() {
                   className="w-full mt-2 bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-bold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
                 >
                   <Send className="w-4 h-4 text-[#fef08a] dark:text-[#b91c1c]" />
-                  GỬI THƯ GÓP Ý
+                  {currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý"}
                 </button>
               </form>
             ) : (
@@ -223,17 +265,17 @@ export default function ContactPage() {
                 <CheckCircle2 className="w-12 h-12 text-emerald-500" />
                 <div className="flex flex-col gap-1">
                   <h4 className="text-sm font-black text-slate-850 uppercase">
-                    ĐÃ GỬI THƯ THÀNH CÔNG!
+                    {currentLang === "en" ? "MESSAGE SENT SUCCESSFULLY!" : "ĐÃ GỬI THƯ THÀNH CÔNG!"}
                   </h4>
                   <p className="text-slate-500 font-medium leading-relaxed">
-                    {getConfigValue("contact_form_success_desc", "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
+                    {getConfigValue("contact_form_success_desc", currentLang === "en" ? "Dang Kang commune clerical department has received your comment and will respond as soon as possible via email." : "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
                   </p>
                 </div>
                 <button
                   onClick={resetContactForm}
                   className="bg-slate-900 text-white hover:bg-slate-800 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all shadow"
                 >
-                  Gửi thêm tin nhắn mới
+                  {currentLang === "en" ? "Send another message" : "Gửi thêm tin nhắn mới"}
                 </button>
               </div>
             )}
@@ -245,79 +287,121 @@ export default function ContactPage() {
         <div className="lg:col-span-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4 sm:gap-5 h-full">
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
             <MapIcon className="w-5 h-5 text-[#b91c1c]" />
-            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-              {getConfigValue("contact_map_title", "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG")}
+            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide flex-1">
+              {getConfigValue("contact_map_title", currentLang === "en" ? "DANG KANG COMMUNE ADMINISTRATIVE SUBDIVISION MAP" : "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG")}
             </h3>
           </div>
 
-          <p className="text-[11px] text-slate-400 font-semibold leading-normal">
-            Bản đồ vẽ tay vector mô phỏng diện tích 8 phân khu thôn, buôn của địa bàn xã Dang Kang. Click chuột vào bất kỳ phân vùng nào trên bản đồ để xem thống kê nhanh số liệu địa giới:
-          </p>
+          {getConfigValue("map_url", "") && (
+            <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-950 rounded-xl self-start">
+              <button
+                type="button"
+                onClick={() => setMapType("vector")}
+                className={`text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg transition-all ${mapType === "vector"
+                  ? "bg-white dark:bg-slate-800 text-[#b91c1c] dark:text-white shadow"
+                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  }`}
+              >
+                {currentLang === "en" ? "Interactive Subdivision" : "Bản đồ tương tác"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMapType("image")}
+                className={`text-[10px] font-black uppercase tracking-wider px-3 py-2 rounded-lg transition-all ${mapType === "image"
+                  ? "bg-white dark:bg-slate-800 text-[#b91c1c] dark:text-white shadow"
+                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  }`}
+              >
+                {currentLang === "en" ? "Detailed Map" : "Bản đồ địa giới"}
+              </button>
+            </div>
+          )}
 
-          {/* Interactive SVG Rendering */}
-          <div className="w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850 relative">
-            <svg
-              viewBox="0 0 100 100"
-              className="w-full max-w-[340px] h-auto drop-shadow-md"
-            >
-              {COMMUNE_ZONES.map((zone) => {
-                const isActive = activeZone?.id === zone.id
-                return (
-                  <path
-                    key={zone.id}
-                    d={zone.path}
-                    className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${isActive
-                      ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg"
-                      : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
-                      }`}
-                    onClick={() => setActiveZone(zone)}
-                  />
-                )
-              })}
-
-              {/* Display dynamic abbreviation tags directly on the map for high premium design feel */}
-              {COMMUNE_ZONES.map((zone) => (
-                <text
-                  key={`tag-${zone.id}`}
-                  x={zone.center.x}
-                  y={zone.center.y}
-                  fontSize="4"
-                  fontWeight="bold"
-                  textAnchor="middle"
-                  className={`pointer-events-none transition-colors ${activeZone?.id === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
-                    }`}
-                >
-                  {zone.id}
-                </text>
-              ))}
-            </svg>
-          </div>
-
-          {/* Selected Zone specs */}
-          {activeZone && (
-            <div className="bg-slate-50 dark:bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex flex-col gap-3.5 animate-fade-in text-xs">
-              <div className="flex items-center gap-2 border-b border-slate-200/50 dark:border-slate-800/60 pb-2">
-                <Info className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
-                <span className="font-extrabold text-[#b91c1c] dark:text-[#fbc02d] uppercase tracking-wide">
-                  CHI TIẾT: {activeZone.name}
-                </span>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 font-semibold text-slate-600 dark:text-slate-400">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-widest">
-                    Diện tích ước tính
-                  </span>
-                  <span className="text-slate-850 dark:text-slate-200 font-bold text-xs sm:text-sm">{activeZone.area}</span>
-                </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-slate-400 uppercase tracking-widest">
-                    Quy mô dân cư
-                  </span>
-                  <span className="text-slate-850 dark:text-slate-200 font-bold text-xs sm:text-sm">{activeZone.pop}</span>
-                </div>
+          {mapType === "image" && getConfigValue("map_url", "") ? (
+            <div className="flex flex-col gap-4">
+              <p className="text-[11px] text-slate-400 font-semibold leading-normal">
+                {currentLang === "en" ? "Commune detailed administrative boundaries map uploaded by the department. Hover or pinch to view details:" : "Bản đồ ranh giới chi tiết địa giới hành chính xã Dang Kang được cơ quan tải lên:"}
+              </p>
+              <div className="w-full relative aspect-square sm:aspect-video rounded-xl border border-slate-150 overflow-hidden shadow-inner bg-slate-50 dark:bg-slate-950 dark:border-slate-800 flex items-center justify-center p-2 group">
+                <img
+                  src={getConfigValue("map_url", "")}
+                  alt="Commune administrative map"
+                  className="max-h-full max-w-full object-contain rounded-lg transition-all duration-500 hover:scale-[1.03]"
+                />
               </div>
             </div>
+          ) : (
+            <>
+              <p className="text-[11px] text-slate-400 font-semibold leading-normal">
+                {currentLang === "en" ? "Interactive vector map simulating 8 village subdivisions of Dang Kang Commune. Click on any zone to view quick demographic statistics:" : "Bản đồ vẽ tay vector mô phỏng diện tích 8 phân khu thôn, buôn của địa bàn xã Dang Kang. Click chuột vào bất kỳ phân vùng nào trên bản đồ để xem thống kê nhanh số liệu địa giới:"}
+              </p>
+
+              {/* Interactive SVG Rendering */}
+              <div className="w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850 relative">
+                <svg
+                  viewBox="0 0 100 100"
+                  className="w-full max-w-[340px] h-auto drop-shadow-md"
+                >
+                  {COMMUNE_ZONES.map((zone) => {
+                    const isActive = activeZone?.id === zone.id
+                    return (
+                      <path
+                        key={zone.id}
+                        d={zone.path}
+                        className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${isActive
+                          ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg"
+                          : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
+                          }`}
+                        onClick={() => setActiveZone(zone)}
+                      />
+                    )
+                  })}
+
+                  {/* Display dynamic abbreviation tags directly on the map for high premium design feel */}
+                  {COMMUNE_ZONES.map((zone) => (
+                    <text
+                      key={`tag-${zone.id}`}
+                      x={zone.center.x}
+                      y={zone.center.y}
+                      fontSize="4"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      className={`pointer-events-none transition-colors ${activeZone?.id === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
+                        }`}
+                    >
+                      {zone.id}
+                    </text>
+                  ))}
+                </svg>
+              </div>
+
+              {/* Selected Zone specs */}
+              {activeZone && (
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 sm:p-5 rounded-xl border border-slate-100 dark:border-slate-800/80 flex flex-col gap-3.5 animate-fade-in text-xs">
+                  <div className="flex items-center gap-2 border-b border-slate-200/50 dark:border-slate-800/60 pb-2">
+                    <Info className="w-4 h-4 text-[#b91c1c] dark:text-[#fbc02d]" />
+                    <span className="font-extrabold text-[#b91c1c] dark:text-[#fbc02d] uppercase tracking-wide">
+                      {(currentLang === "en" ? "DETAIL: " : "CHI TIẾT: ") + activeZone.name}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4 font-semibold text-slate-600 dark:text-slate-400">
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-widest">
+                        {currentLang === "en" ? "Estimated area" : "Diện tích ước tính"}
+                      </span>
+                      <span className="text-slate-850 dark:text-slate-200 font-bold text-xs sm:text-sm">{activeZone.area}</span>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[10px] text-slate-400 uppercase tracking-widest">
+                        {currentLang === "en" ? "Population size" : "Quy mô dân cư"}
+                      </span>
+                      <span className="text-slate-850 dark:text-slate-200 font-bold text-xs sm:text-sm">{activeZone.pop}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
         </div>

@@ -122,7 +122,7 @@ function BannerItemContent({ banner }: { banner: any }) {
       <div
         style={getBannerBackgroundStyle(styles)}
         className={`w-full h-full text-white py-5 px-6 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${styles.alignment === "center" ? "text-center md:items-center justify-center" :
-            styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
+          styles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
           }`}
       >
         {/* Intricate Gold Borders */}
@@ -140,7 +140,7 @@ function BannerItemContent({ banner }: { banner: any }) {
           <span
             style={{ color: styles.titleColor }}
             className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${styles.alignment === "center" ? "justify-center" :
-                styles.alignment === "right" ? "justify-end" : "justify-start"
+              styles.alignment === "right" ? "justify-end" : "justify-start"
               }`}
           >
             <span>⭐</span> {banner.name}
@@ -432,11 +432,37 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     staleTime: 5 * 60 * 1000,
   })
 
+  const getConfigValue = React.useCallback((code: string, fallback: string) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    if (!found) return fallback
+
+    if (found.description && found.description.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(found.description)
+        if (parsed && typeof parsed === "object") {
+          const trans = parsed.translations || parsed
+          if (trans[currentLang]) {
+            return trans[currentLang]
+          }
+          if (trans.vi) {
+            return trans.vi
+          }
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+
+    if (code === "citizen_schedule") {
+      return found.description || found.name || fallback
+    }
+
+    return found.name || fallback
+  }, [portalConfigData, currentLang])
+
   const getScheduleValue = React.useCallback((fallback: string) => {
-    const found = (portalConfigData || []).find((c: any) => c.code === "citizen_schedule");
-    if (!found) return fallback;
-    return found.description || found.name || fallback;
-  }, [portalConfigData]);
+    return getConfigValue("citizen_schedule", fallback)
+  }, [getConfigValue])
 
   const menuItems = React.useMemo(() => {
     if (!menusData?.data || menusData.data.length === 0) {
@@ -610,8 +636,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
     return [
       {
         title: currentLang === "en" ? "Online Public Services" : "Dịch vụ công trực tuyến",
-        description: currentLang === "en" 
-          ? "Submit files online directly, streamlining administrative procedures, fast 24/7." 
+        description: currentLang === "en"
+          ? "Submit files online directly, streamlining administrative procedures, fast 24/7."
           : "Nộp hồ sơ trực tuyến trực tiếp, tinh giản thủ tục hành chính, nộp nhanh 24/7.",
         borderColor: "border-l-blue-600 dark:border-l-blue-500",
         iconBg: "bg-blue-50 dark:bg-blue-950/45 text-blue-600 dark:text-blue-400",
@@ -781,7 +807,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
           <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col gap-3 shadow-sm justify-between">
             <div>
               <div className="bg-[#cc0000] text-white py-2 px-3 rounded font-bold text-xs uppercase tracking-wide text-center mb-2 shadow-sm">
-                Danh mục chuyên mục
+                {currentLang === "en" ? "Categories" : "Danh mục chuyên mục"}
               </div>
               <div className="flex flex-col">
                 {menuItems.map((item: any, idx: number) => (
@@ -800,8 +826,12 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
             </div>
 
             <div className="bg-slate-50 dark:bg-slate-950/40 p-2 rounded text-center border border-slate-100 dark:border-slate-800">
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-extrabold block uppercase tracking-wide">ĐƯỜNG DÂY NÓNG UBND XÃ</span>
-              <a href="tel:02623812345" className="text-sm text-[#cc0000] dark:text-red-400 font-black tracking-widest mt-0.5 block font-mono">0262.3812.345</a>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400 font-extrabold block uppercase tracking-wide">
+                {currentLang === "en" ? "COMMUNE HOTLINE" : "ĐƯỜNG DÂY NÓNG UBND XÃ"}
+              </span>
+              <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="text-sm text-[#cc0000] dark:text-red-400 font-black tracking-widest mt-0.5 block font-mono">
+                {getConfigValue("hotline", "0262.3812.345")}
+              </a>
             </div>
           </div>
 
@@ -880,7 +910,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               <div className="border-b border-amber-200/60 dark:border-slate-800 pb-2 mb-3 z-10 flex items-center gap-1.5">
                 <Volume2 className="w-4 h-4 text-[#cc0000]" />
                 <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
-                  Thông báo hành chính
+                  {currentLang === "en" ? "Administrative Announcements" : "Thông báo hành chính"}
                 </span>
               </div>
 
@@ -941,8 +971,12 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 <Clock className="w-4 h-4" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-wide">LỊCH TIẾP CÔNG DÂN</span>
-                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-0.5 truncate">{getScheduleValue("Thứ 5 hàng tuần • 08:00 - 11:30")}</span>
+                <span className="text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-wide">
+                  {currentLang === "en" ? "CITIZEN RECEPTION" : "LỊCH TIẾP CÔNG DÂN"}
+                </span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-0.5 truncate">
+                  {getScheduleValue(currentLang === "en" ? "Every Thursday • 08:00 - 11:30" : "Thứ 5 hàng tuần • 08:00 - 11:30")}
+                </span>
               </div>
             </div>
 
@@ -1640,41 +1674,6 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* Dynamic Banner Slot - Phía dưới (Footer / Bottom) */}
       <PortalBannerSlot position="bottom" banners={bannersData?.data || []} />
-
-      {/* 9. Horizontal Decorative Patriotic Sea/Island Promotion Banner 2 */}
-      <div className="w-full bg-gradient-to-r from-blue-900 via-sky-800 to-teal-800 text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-sky-300/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
-        {/* Intricate Gold Borders */}
-        <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-sky-300/40 to-transparent" />
-
-        {/* Lighthouse/Map styling overlay */}
-        <div className="absolute right-12 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none select-none z-0">
-          <svg className="w-40 h-40 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1">
-            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-          </svg>
-        </div>
-
-        <div className="z-10 flex flex-col gap-1">
-          <span className="text-[#ffde59] text-xs font-black tracking-widest uppercase flex items-center justify-center md:justify-start gap-1.5 drop-shadow-sm">
-            <span>⚓</span> BẢO VỆ CHỦ QUYỀN BIỂN ĐẢO QUÊ HƯƠNG VIỆT NAM
-          </span>
-          <h3 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase text-sky-50 drop-shadow">
-            &quot;HOÀNG SA - TRƯỜNG SA LÀ CỦA VIỆT NAM • QUYẾT TÂM GIỮ VỮNG BIÊN CƯƠNG TOÀN VẸN LÃNH THỔ!&quot;
-          </h3>
-        </div>
-        <div className="z-10 shrink-0">
-          <a
-            href="https://dichvucong.gov.vn"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 bg-white hover:bg-slate-100 text-blue-900 text-xs font-black tracking-wider uppercase px-4 py-2.5 rounded shadow-md border border-white transition-all transform hover:scale-105"
-          >
-            Nền tảng một cửa Quốc Gia
-            <ExternalLink className="w-4 h-4 text-blue-900" />
-          </a>
-        </div>
-      </div>
-
     </div>
   )
 }

@@ -24,12 +24,14 @@ import {
   FileText,
   Eye,
   Columns,
-  Languages
+  Languages,
+  Map as MapIcon
 } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
 
 export default function PortalConfigPage() {
   const [logoUrl, setLogoUrl] = useState("");
+  const [mapUrl, setMapUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const [languages, setLanguages] = useState<any[]>([]);
@@ -55,6 +57,7 @@ export default function PortalConfigPage() {
   }>>({});
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const mapInputRef = useRef<HTMLInputElement>(null);
 
   // 1. Fetch registered active languages from Category module
   useEffect(() => {
@@ -96,6 +99,7 @@ export default function PortalConfigPage() {
       const respCat: any = dbCategories.find((c: any) => c.code === "responsible_person");
       const scheduleCat: any = dbCategories.find((c: any) => c.code === "citizen_schedule");
       const logoCat: any = dbCategories.find((c: any) => c.code === "logo_url");
+      const mapCat: any = dbCategories.find((c: any) => c.code === "map_url");
       const licenseCat: any = dbCategories.find((c: any) => c.code === "license_info");
       const faxCat: any = dbCategories.find((c: any) => c.code === "fax");
       const emailCat: any = dbCategories.find((c: any) => c.code === "email");
@@ -108,6 +112,7 @@ export default function PortalConfigPage() {
 
       // Set global fields
       if (logoCat) setLogoUrl(logoCat.name);
+      if (mapCat) setMapUrl(mapCat.name);
 
       const activeLangs = languages.length > 0 ? languages.map(l => l.code) : ["vi", "en"];
       const newTranslations: typeof configTranslations = {};
@@ -227,8 +232,24 @@ export default function PortalConfigPage() {
     }
   });
 
-  // Dynamic active logo selection
+  const {
+    isUploading: isUploadingMap,
+    previewUrl: previewMapUrl,
+    handleImageUpload: handleMapUpload,
+    removeImage: removeMapImage
+  } = useImageUpload({
+    onSuccess: (fileId) => {
+      setMapUrl(`/api/v1/admin/media/download/${fileId}`);
+      toast.success("Tải bản đồ hành chính thành công!");
+    },
+    onRemove: () => {
+      setMapUrl("");
+    }
+  });
+
+  // Dynamic active selection
   const activeLogo = previewUrl || logoUrl;
+  const activeMap = previewMapUrl || mapUrl;
 
   const resolveLogoUrl = (url: string) => {
     if (!url) return "";
@@ -325,6 +346,11 @@ export default function PortalConfigPage() {
           code: "logo_url",
           name: logoUrl || "",
           description: "Đường dẫn ảnh logo cơ quan"
+        },
+        {
+          code: "map_url",
+          name: mapUrl || "",
+          description: "Đường dẫn ảnh bản đồ hành chính đơn vị"
         },
         {
           code: "fax",
@@ -927,6 +953,74 @@ export default function PortalConfigPage() {
                 >
                   <UploadCloud className="w-3.5 h-3.5 mr-1.5" />
                   Chọn tệp ảnh logo
+                </Button>
+                <p className="text-[10px] text-slate-400 mt-2">Dạng tệp hỗ trợ: PNG, JPG, WEBP. Dung lượng tối đa: 2MB.</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* BẢN ĐỒ HÀNH CHÍNH CONFIG */}
+          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+            <CardHeader className="bg-slate-50/50 border-b">
+              <div className="flex items-center gap-2.5">
+                <MapIcon className="w-4 h-4 text-indigo-600" />
+                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
+                  Bản đồ hành chính đơn vị
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-6 flex flex-col items-center gap-5">
+              <div className="relative w-full aspect-video rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner group">
+                {activeMap ? (
+                  <>
+                    <img src={resolveLogoUrl(activeMap)} alt="Administrative map preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        removeMapImage();
+                        setMapUrl("");
+                      }}
+                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1"
+                    >
+                      <X className="w-4 h-4" /> Gỡ bản đồ
+                    </button>
+                  </>
+                ) : isUploadingMap ? (
+                  <div className="flex flex-col items-center justify-center gap-1.5 text-indigo-600">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="text-[10px] font-bold animate-pulse">Đang tải...</span>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => mapInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors gap-1.5 p-4"
+                  >
+                    <UploadCloud className="w-8 h-8" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Tải lên Bản đồ</span>
+                  </button>
+                )}
+              </div>
+
+              <input
+                type="file"
+                ref={mapInputRef}
+                accept="image/*"
+                className="hidden"
+                onChange={handleMapUpload}
+              />
+
+              <div className="text-center w-full">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => mapInputRef.current?.click()}
+                  disabled={isUploadingMap}
+                  className="rounded-lg text-xs font-bold uppercase text-indigo-600 border-indigo-200 hover:bg-indigo-50 w-full"
+                >
+                  <UploadCloud className="w-3.5 h-3.5 mr-1.5" />
+                  Chọn tệp ảnh bản đồ
                 </Button>
                 <p className="text-[10px] text-slate-400 mt-2">Dạng tệp hỗ trợ: PNG, JPG, WEBP. Dung lượng tối đa: 2MB.</p>
               </div>
