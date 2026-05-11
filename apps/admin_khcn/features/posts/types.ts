@@ -104,7 +104,7 @@ export interface PortalMenu {
   parentId?: string | null;
   isActive: boolean;
   target: string;
-  type: 'URL' | 'CATEGORY' | 'POST' | 'STATIC_PAGE';
+  type: 'URL' | 'CATEGORY' | 'POST' | 'STATIC_PAGE' | 'UNIT';
   referenceId?: string;
   position: 'HORIZONTAL' | 'VERTICAL' | 'FOOTER';
   createdAt: string;

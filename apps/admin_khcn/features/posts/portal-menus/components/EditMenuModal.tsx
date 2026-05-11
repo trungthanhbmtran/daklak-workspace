@@ -15,6 +15,7 @@ import { Settings2, Sparkles, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { categoryApi } from "@/features/system-admin/categories/api";
+import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
 
 interface EditMenuModalProps {
@@ -52,8 +53,30 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
     enabled: isOpen,
   });
 
+  // Tải danh sách đơn vị từ CSDL Đơn vị (HRM)
+  const { data: dynamicUnitsRes } = useQuery({
+    queryKey: ["organization-units-for-menu"],
+    queryFn: async () => {
+      const res = await organizationApi.getTree();
+      // Hàm đệ quy làm phẳng danh sách các Đơn vị
+      const flattenUnits = (nodes: any[]): any[] => {
+        let result: any[] = [];
+        for (const node of nodes) {
+          result.push({ id: node.id, name: node.name, code: node.code });
+          if (node.children && node.children.length > 0) {
+            result = result.concat(flattenUnits(node.children));
+          }
+        }
+        return result;
+      };
+      return flattenUnits(res || []);
+    },
+    enabled: isOpen,
+  });
+
   const dynamicCategoriesList = dynamicCategories || [];
   const dynamicPosts = (dynamicPostsRes || []) as Post[];
+  const dynamicUnitsList = dynamicUnitsRes || [];
 
   useEffect(() => {
     if (menu) {
@@ -309,9 +332,10 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="URL">Đường dẫn tự do (URL)</SelectItem>
-                <SelectItem value="CATEGORY">Liên kết Chuyên mục</SelectItem>
-                <SelectItem value="POST">Liên kết Bài viết</SelectItem>
-                <SelectItem value="STATIC_PAGE">Trang tĩnh hệ thống</SelectItem>
+                <SelectItem value="CATEGORY">Tin tức (Chuyên mục bài viết)</SelectItem>
+                <SelectItem value="POST">Trang tĩnh tự thiết kế (Bài viết)</SelectItem>
+                <SelectItem value="UNIT">Giới thiệu đơn vị (CSDL Đơn vị)</SelectItem>
+                <SelectItem value="STATIC_PAGE">Trang hệ thống</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -393,6 +417,36 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                   <SelectItem value="tuong-tac">Hỏi đáp & Góp ý ý kiến</SelectItem>
                   <SelectItem value="van-ban">Văn bản pháp quy & Quyết định công bố</SelectItem>
                   <SelectItem value="cong-khai-tai-chinh">Công khai tài chính (Bản PDF ký số)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {editingMenu.type === "UNIT" && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="unitSelect" className="text-right font-bold text-sm text-slate-700">
+                Chọn Đơn vị
+              </Label>
+              <Select
+                value={editingMenu.referenceId || "NONE"}
+                onValueChange={(val) => {
+                  setEditingMenu({
+                    ...editingMenu,
+                    referenceId: val === "NONE" ? undefined : val,
+                    link: val === "NONE" ? "" : `/gioi-thieu-don-vi/${val}`
+                  });
+                }}
+              >
+                <SelectTrigger id="unitSelect" className="col-span-3 rounded-lg">
+                  <SelectValue placeholder="Chọn đơn vị giới thiệu từ CSDL Đơn vị..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-[240px]">
+                  <SelectItem value="NONE">--- Chọn đơn vị ---</SelectItem>
+                  {dynamicUnitsList.map((unit: any) => (
+                    <SelectItem key={unit.id} value={unit.id.toString()}>
+                      {unit.name} ({unit.code})
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
