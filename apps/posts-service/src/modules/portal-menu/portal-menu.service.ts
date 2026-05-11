@@ -67,7 +67,28 @@ export class PortalMenuService {
   }
 
   async update(id: string, data: any) {
-    const updateData = { ...data };
+    const allowedFields = [
+      'name',
+      'description',
+      'translations',
+      'icon',
+      'link',
+      'order',
+      'parentId',
+      'isActive',
+      'target',
+      'type',
+      'referenceId',
+      'position',
+    ];
+
+    const updateData: any = {};
+    for (const key of allowedFields) {
+      if (data[key] !== undefined) {
+        updateData[key] = data[key];
+      }
+    }
+
     if (updateData.translations && typeof updateData.translations === 'string') {
       try {
         updateData.translations = JSON.parse(updateData.translations);
