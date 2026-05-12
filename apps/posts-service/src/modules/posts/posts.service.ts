@@ -645,31 +645,63 @@ export class PostsService implements OnModuleInit {
     });
     if (!post) return;
 
-    // Lấy bản dịch hiện tại
+    // Lấy bản dịch của phiên bản hiện tại (mainVersionRef) để tránh race condition khi cập nhật nhiều trường đồng thời
     const existingTrans = await this.prisma.postTranslation.findFirst({
-      where: { postId, langCode },
+      where: { 
+        postId, 
+        langCode,
+        mainVersionRef: post.currentVersion
+      },
       orderBy: { version: 'desc' }
     });
 
-    const nextTransVersion = existingTrans ? existingTrans.version + 1 : 1;
-
-    // Tạo bản dịch mới
-    const newTrans = await this.prisma.postTranslation.create({
-      data: {
-        postId,
-        langCode,
-        title: data.title || (existingTrans?.title || post.title),
-        slug: data.slug || (data.title ? this.generateSlug(data.title) : (existingTrans?.slug || this.generateSlug(existingTrans?.title || post.title))),
-        description: data.description || existingTrans?.description || "",
-        content: data.content || existingTrans?.content || post.content,
-        contentHtml: this.lexicalToHtml(data.content || existingTrans?.content || post.content || ''),
-        version: nextTransVersion,
-        mainVersionRef: post.currentVersion,
-        isPublished: post.status === PostStatus.PUBLISHED
+    if (existingTrans) {
+      // Nếu đã có bản dịch cho phiên bản hiện tại, chỉ cập nhật các trường được truyền vào
+      const updateData: any = {};
+      if (data.title !== undefined) {
+        updateData.title = data.title;
+        updateData.slug = data.slug ?? this.generateSlug(data.title);
       }
-    });
+      if (data.description !== undefined) {
+        updateData.description = data.description;
+      }
+      if (data.content !== undefined) {
+        updateData.content = data.content;
+        updateData.contentHtml = this.lexicalToHtml(data.content);
+      }
+      
+      const updated = await this.prisma.postTranslation.update({
+        where: { id: existingTrans.id },
+        data: updateData
+      });
+      console.log(`[PostsService] Updated existing translation for post ${postId} (${langCode}) in-place`);
+      return updated;
+    } else {
+      // Nếu chưa có bản dịch cho phiên bản hiện tại, lấy bản dịch gần nhất trước đó để kế thừa các trường khác
+      const lastTrans = await this.prisma.postTranslation.findFirst({
+        where: { postId, langCode },
+        orderBy: { version: 'desc' }
+      });
 
-    return newTrans;
+      const nextTransVersion = lastTrans ? lastTrans.version + 1 : 1;
+
+      const newTrans = await this.prisma.postTranslation.create({
+        data: {
+          postId,
+          langCode,
+          title: data.title ?? lastTrans?.title ?? post.title,
+          slug: data.slug ?? this.generateSlug(data.title ?? lastTrans?.title ?? post.title),
+          description: data.description ?? lastTrans?.description ?? "",
+          content: data.content ?? lastTrans?.content ?? post.content,
+          contentHtml: this.lexicalToHtml(data.content ?? lastTrans?.content ?? post.content ?? ''),
+          version: nextTransVersion,
+          mainVersionRef: post.currentVersion,
+          isPublished: post.status === PostStatus.PUBLISHED
+        }
+      });
+      console.log(`[PostsService] Created new translation version ${nextTransVersion} for post ${postId} (${langCode})`);
+      return newTrans;
+    }
   }
 
   async incrementViewCount(id: string) {
