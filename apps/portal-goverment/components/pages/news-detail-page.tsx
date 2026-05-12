@@ -29,6 +29,48 @@ const getCookie = (name: string): string | null => {
   return match ? decodeURIComponent(match[2]) : null
 }
 
+function lexicalToHtml(jsonString: string): string {
+  if (!jsonString) return "";
+  const trimmed = jsonString.trim();
+  // If it starts with an HTML tag, treat it as raw HTML
+  if (trimmed.startsWith("<") || trimmed.includes("<html") || trimmed.includes("<div") || trimmed.includes("<p")) {
+    return jsonString;
+  }
+  try {
+    if (!trimmed.startsWith("{")) return `<p>${jsonString}</p>`;
+    const data = JSON.parse(jsonString);
+    if (!data.root || !data.root.children) return "";
+
+    const renderNode = (node: any): string => {
+      if (node.type === "text") {
+        let text = node.text || "";
+        if (node.format & 1) text = `<strong>${text}</strong>`;
+        if (node.format & 2) text = `<em>${text}</em>`;
+        if (node.format & 8) text = `<span style="text-decoration: underline;">${text}</span>`;
+        if (node.format & 16) text = `<strike>${text}</strike>`;
+        return text;
+      }
+      if (node.children) {
+        const childrenHtml = node.children.map((child: any) => renderNode(child)).join("");
+        switch (node.type) {
+          case "paragraph": return `<p>${childrenHtml}</p>`;
+          case "list": return node.tag === "ol" ? `<ol>${childrenHtml}</ol>` : `<ul>${childrenHtml}</ul>`;
+          case "listitem": return `<li>${childrenHtml}</li>`;
+          case "heading": return `<${node.tag}>${childrenHtml}</${node.tag}>`;
+          case "quote": return `<blockquote>${childrenHtml}</blockquote>`;
+          case "link": return `<a href="${node.url}">${childrenHtml}</a>`;
+          default: return childrenHtml;
+        }
+      }
+      return "";
+    };
+
+    return data.root.children.map((node: any) => renderNode(node)).join("");
+  } catch (e) {
+    return jsonString;
+  }
+}
+
 const ALL_NEWS = [
   {
     id: 1,
@@ -224,7 +266,7 @@ export default function NewsDetailPage({ id }: Props) {
 
   if (dbPost) {
     let title = dbPost.title;
-    let content = dbPost.contentHtml || "";
+    let content = dbPost.contentHtml || lexicalToHtml(dbPost.content || "");
     let excerpt = dbPost.description || "";
 
     let translationsObj = dbPost.translations || {};
@@ -238,7 +280,7 @@ export default function NewsDetailPage({ id }: Props) {
 
     if (currentLang === "en" && translationsObj.en) {
       title = translationsObj.en.title || title;
-      content = translationsObj.en.contentHtml || "";
+      content = translationsObj.en.contentHtml || lexicalToHtml(translationsObj.en.content || "");
       excerpt = translationsObj.en.description || excerpt;
     }
 

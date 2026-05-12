@@ -198,6 +198,7 @@ export class PostsService implements OnModuleInit {
         title: rest.title,
         description: rest.description,
         content: rest.content,
+        contentHtml: this.lexicalToHtml(rest.content || ''),
         thumbnail: rest.thumbnail,
         authorId: rest.authorId || rest.actorId || '1', // Default to '1' if not provided
         categoryId: rest.categoryId,
@@ -234,6 +235,7 @@ export class PostsService implements OnModuleInit {
             slug: t.slug || this.generateSlug(t.title || post.title),
             description: t.description || (isAuto ? "" : post.description),
             content: t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content),
+            contentHtml: this.lexicalToHtml(t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content)),
             version: 1,
             mainVersionRef: 1,
             isPublished: post.status === PostStatus.PUBLISHED
@@ -329,6 +331,7 @@ export class PostsService implements OnModuleInit {
         title: rest.title,
         description: rest.description,
         content: rest.content,
+        contentHtml: this.lexicalToHtml(rest.content || ''),
         thumbnail: rest.thumbnail,
         categoryId: rest.categoryId,
         isFeatured: rest.isFeatured,
@@ -375,6 +378,7 @@ export class PostsService implements OnModuleInit {
               slug: t.slug || this.generateSlug(t.title || existingTrans?.title || updatedPost.title),
               description: t.description || existingTrans?.description || (isAuto ? "" : updatedPost.description),
               content: t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content)),
+              contentHtml: this.lexicalToHtml(t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content))),
               version: existingTrans ? existingTrans.version + 1 : 1,
               mainVersionRef: nextVersion,
               isPublished: updatedPost.status === PostStatus.PUBLISHED
