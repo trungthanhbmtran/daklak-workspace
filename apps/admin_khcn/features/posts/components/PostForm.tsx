@@ -8,10 +8,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
   Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText, AlertCircle, CheckCircle2, Sparkles,
-  Code, FileCode, LayoutTemplate, Eye, Database, Plus, ArrowRight, Layers, Layout, Search
+  Code, FileCode, LayoutTemplate, Eye
 } from "lucide-react";
 import { toast } from "sonner";
-import { organizationApi } from "@/features/system-admin/organization/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -144,116 +143,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const [editorModes, setEditorModes] = useState<Record<string, 'WYSIWYG' | 'HTML' | 'UPLOAD'>>({
     vi: 'WYSIWYG'
   });
-
-  // --- INTEGRATOR DYNAMIC STATES ---
-  const [dbSourceType, setDbSourceType] = useState<"UNIT" | "CATEGORY" | "POST" | "NONE">("NONE");
-  const [dbSearchQuery, setDbSearchQuery] = useState("");
-  const [selectedDbItemId, setSelectedDbItemId] = useState("");
-  const [selectedDbTemplate, setSelectedDbTemplate] = useState<"DYNAMIC_TAG" | "PRE_RENDERED_HTML">("DYNAMIC_TAG");
-
-  // Fetch dynamic organization tree
-  const { data: orgTree } = useQuery({
-    queryKey: ["org-tree-designer"],
-    queryFn: async () => {
-      return await organizationApi.getTree();
-    },
-    enabled: dbSourceType === "UNIT"
-  });
-
-  // Fetch dynamic posts
-  const { data: allPostsRes } = useQuery({
-    queryKey: ["all-posts-designer"],
-    queryFn: async () => {
-      const res = await postsApi.getPosts({ limit: 100 });
-      return res.data;
-    },
-    enabled: dbSourceType === "POST"
-  });
-
-  const flattenUnits = (nodes: any[]): any[] => {
-    let result: any[] = [];
-    const traverse = (node: any) => {
-      result.push({ id: node.id, name: node.name, code: node.code });
-      if (node.children && node.children.length > 0) {
-        node.children.forEach((child: any) => traverse(child));
-      }
-    };
-    if (nodes) {
-      nodes.forEach((node) => traverse(node));
-    }
-    return result;
-  };
-
-  const dynamicUnits = orgTree ? flattenUnits(orgTree) : [];
-
-  const handleInsertDbSnippet = (fieldValue: string, setFieldValue: (val: string) => void) => {
-    if (!selectedDbItemId) {
-      toast.error("Vui lòng chọn một mục từ Cơ sở dữ liệu!");
-      return;
-    }
-
-    let snippet = "";
-    if (dbSourceType === "UNIT") {
-      const unit = dynamicUnits.find(u => u.id.toString() === selectedDbItemId);
-      const unitName = unit ? unit.name : "Đơn vị hành chính";
-      const unitCode = unit ? unit.code : "CODE";
-
-      if (selectedDbTemplate === "DYNAMIC_TAG") {
-        snippet = `\n<div class="cms-dynamic-unit-container" data-unit-id="${selectedDbItemId}">\n  <!-- Client-side javascript will dynamically render details of unit ${selectedDbItemId} here -->\n  <div style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; font-style: italic; color: #64748b; text-align: center;">Đang tải thông tin Đơn vị: ${unitName}...</div>\n</div>\n`;
-      } else {
-        snippet = `\n<div style="font-family: system-ui, sans-serif; background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); margin: 20px 0;">
-  <div style="display: flex; align-items: center; gap: 16px; border-bottom: 2px solid #3b82f6; padding-bottom: 12px; margin-bottom: 16px;">
-    <div style="background: #eff6ff; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #3b82f6; font-weight: bold; font-size: 20px;">🏛️</div>
-    <div>
-      <h3 style="margin: 0; font-size: 1.25rem; font-weight: 700; color: #1e3a8a;">${unitName}</h3>
-      <span style="font-size: 0.75rem; background: #f1f5f9; color: #475569; padding: 2px 8px; border-radius: 4px; font-family: monospace;">Mã đơn vị: ${unitCode}</span>
-    </div>
-  </div>
-  <p style="font-size: 0.9rem; color: #475569; margin: 0; line-height: 1.6;">Để biết thêm thông tin chi tiết hoặc liên hệ làm việc, xin vui lòng gửi yêu cầu thông qua mục tương tác trực tuyến trên Cổng thông tin.</p>
-</div>\n`;
-      }
-    } 
-    else if (dbSourceType === "CATEGORY") {
-      const cat = categories?.find((c: any) => c.slug === selectedDbItemId || c.id === selectedDbItemId);
-      const catName = cat ? cat.name : "Chuyên mục tin tức";
-      const catSlug = cat ? (cat.slug || cat.id) : selectedDbItemId;
-
-      if (selectedDbTemplate === "DYNAMIC_TAG") {
-        snippet = `\n<div class="cms-dynamic-category-grid" data-category-slug="${catSlug}">\n  <!-- Client-side javascript will dynamically pull latest posts from category ${catSlug} -->\n  <div style="padding: 24px; border: 1px dashed #cbd5e1; border-radius: 12px; text-align: center; color: #64748b;">\n    <p style="margin: 0; font-weight: bold;">[Dữ liệu động: Danh sách bài viết thuộc Chuyên mục "${catName}"]</p>\n    <p style="margin: 4px 0 0 0; font-size: 0.8rem; font-style: italic;">Hệ thống client sẽ tự động kết xuất danh sách bài viết thời gian thực tại đây.</p>\n  </div>\n</div>\n`;
-      } else {
-        snippet = `\n<div style="background: linear-gradient(to right, #eff6ff, #f3f4f6); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 0 8px 8px 0; margin: 20px 0;">
-  <span style="font-size: 0.75rem; font-weight: bold; text-transform: uppercase; color: #2563eb; letter-spacing: 0.05em;">Chuyên mục liên kết</span>
-  <h4 style="margin: 4px 0 0 0; font-size: 1.1rem; color: #1e293b; font-weight: 700;">Xem thêm các bài viết cùng chuyên mục: <a href="/tin-tuc?category=${catSlug}" style="color: #2563eb; text-decoration: underline;">${catName}</a></h4>
-</div>\n`;
-      }
-    }
-    else if (dbSourceType === "POST") {
-      const post = allPostsRes?.find((p: any) => p.id === selectedDbItemId);
-      const postTitle = post ? post.title : "Bài viết tiêu biểu";
-      const postDesc = post ? (post.description || "Bấm xem chi tiết nội dung bài viết.") : "";
-      const postSlug = post ? post.slug : selectedDbItemId;
-
-      if (selectedDbTemplate === "DYNAMIC_TAG") {
-        snippet = `\n<div class="cms-dynamic-post-embed" data-post-id="${selectedDbItemId}">\n  <!-- Client-side javascript will dynamically render post ${selectedDbItemId} details -->\n  <div style="padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; color: #64748b;">Đang tải bài viết liên kết...</div>\n</div>\n`;
-      } else {
-        snippet = `\n<div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white; margin: 24px 0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);">
-  <div style="padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
-    <div>
-      <span style="font-size: 0.7rem; background: #eff6ff; color: #2563eb; padding: 2px 8px; border-radius: 4px; font-weight: bold;">BÀI VIẾT TIÊU BIỂU</span>
-      <h3 style="margin: 8px 0; font-size: 1.15rem; font-weight: bold; color: #0f172a; line-height: 1.4;">${postTitle}</h3>
-      <p style="margin: 0 0 16px 0; font-size: 0.85rem; color: #475569; line-height: 1.5; line-clamp: 2; overflow: hidden;">${postDesc}</p>
-    </div>
-    <a href="/tin-tuc/${postSlug}" style="align-self: flex-start; font-size: 0.8rem; font-weight: bold; color: #2563eb; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">Xem chi tiết bài viết <span style="font-size: 12px;">➔</span></a>
-  </div>
-</div>\n`;
-      }
-    }
-
-    if (snippet) {
-      setFieldValue(fieldValue + snippet);
-      toast.success("Đã chèn mã cấu trúc dữ liệu động thành công!");
-    }
-  };
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema) as any,
@@ -654,134 +543,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                                   </div>
                                 </div>
 
-                                <div className="p-4 bg-blue-50/50 rounded-xl border border-blue-100 flex flex-col gap-4">
-                                  <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-xs font-extrabold text-blue-700 uppercase tracking-wider">
-                                      <Database className="h-4 w-4 text-blue-600" /> Tích hợp Dữ liệu Động (Dynamic Database Integrator)
-                                    </div>
-                                    <Badge variant="outline" className="text-[10px] bg-blue-100 border-blue-200 text-blue-800 font-bold uppercase">
-                                      Premium CMS
-                                    </Badge>
-                                  </div>
-
-                                  <div className="flex flex-wrap gap-2">
-                                    <Button
-                                      type="button"
-                                      variant={dbSourceType === "UNIT" ? "default" : "outline"}
-                                      size="sm"
-                                      className={`text-xs font-semibold gap-1.5 h-8 ${dbSourceType === "UNIT" ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
-                                      onClick={() => {
-                                        setDbSourceType("UNIT");
-                                        setSelectedDbItemId("");
-                                      }}
-                                    >
-                                      🏢 CSDL Đơn vị Hành chính
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant={dbSourceType === "CATEGORY" ? "default" : "outline"}
-                                      size="sm"
-                                      className={`text-xs font-semibold gap-1.5 h-8 ${dbSourceType === "CATEGORY" ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
-                                      onClick={() => {
-                                        setDbSourceType("CATEGORY");
-                                        setSelectedDbItemId("");
-                                      }}
-                                    >
-                                      📰 CSDL Chuyên mục Bài viết
-                                    </Button>
-                                    <Button
-                                      type="button"
-                                      variant={dbSourceType === "POST" ? "default" : "outline"}
-                                      size="sm"
-                                      className={`text-xs font-semibold gap-1.5 h-8 ${dbSourceType === "POST" ? "bg-blue-600 hover:bg-blue-700 text-white" : ""}`}
-                                      onClick={() => {
-                                        setDbSourceType("POST");
-                                        setSelectedDbItemId("");
-                                      }}
-                                    >
-                                      📝 CSDL Danh sách Bài viết
-                                    </Button>
-                                    {dbSourceType !== "NONE" && (
-                                      <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-xs h-8 text-rose-500 hover:text-rose-600 hover:bg-rose-50"
-                                        onClick={() => {
-                                          setDbSourceType("NONE");
-                                          setSelectedDbItemId("");
-                                        }}
-                                      >
-                                        Đóng bộ lọc
-                                      </Button>
-                                    )}
-                                  </div>
-
-                                  {dbSourceType !== "NONE" && (
-                                    <div className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm space-y-4">
-                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-1.5">
-                                          <label className="text-xs font-bold text-slate-600">Bước 1: Chọn mục dữ liệu cụ thể</label>
-                                          <Select value={selectedDbItemId} onValueChange={setSelectedDbItemId}>
-                                            <SelectTrigger className="text-xs h-9 bg-slate-50">
-                                              <SelectValue placeholder={`Chọn mục từ ${dbSourceType === "UNIT" ? "Danh sách Đơn vị" : dbSourceType === "CATEGORY" ? "Chuyên mục" : "Bài viết"}`} />
-                                            </SelectTrigger>
-                                            <SelectContent className="max-h-60">
-                                              {dbSourceType === "UNIT" && dynamicUnits.map((u: any) => (
-                                                <SelectItem key={u.id} value={u.id.toString()} className="text-xs">
-                                                  {u.name} ({u.code})
-                                                </SelectItem>
-                                              ))}
-                                              {dbSourceType === "CATEGORY" && categories?.map((c: any) => (
-                                                <SelectItem key={c.id} value={c.slug || c.id} className="text-xs">
-                                                  {c.name}
-                                                </SelectItem>
-                                              ))}
-                                              {dbSourceType === "POST" && allPostsRes?.map((p: any) => (
-                                                <SelectItem key={p.id} value={p.id} className="text-xs">
-                                                  {p.title}
-                                                </SelectItem>
-                                              ))}
-                                            </SelectContent>
-                                          </Select>
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                          <label className="text-xs font-bold text-slate-600">Bước 2: Chọn Cơ chế Kết xuất</label>
-                                          <div className="grid grid-cols-2 gap-2">
-                                            <button
-                                              type="button"
-                                              onClick={() => setSelectedDbTemplate("DYNAMIC_TAG")}
-                                              className={`p-2 rounded-md border text-center text-xs font-medium transition-all ${selectedDbTemplate === "DYNAMIC_TAG" ? "border-blue-500 bg-blue-50 text-blue-700 font-bold" : "bg-slate-50 hover:bg-slate-100"}`}
-                                            >
-                                              Thẻ Động client-side
-                                              <p className="text-[9px] text-muted-foreground font-normal mt-0.5">Tự cập nhật real-time</p>
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() => setSelectedDbTemplate("PRE_RENDERED_HTML")}
-                                              className={`p-2 rounded-md border text-center text-xs font-medium transition-all ${selectedDbTemplate === "PRE_RENDERED_HTML" ? "border-blue-500 bg-blue-50 text-blue-700 font-bold" : "bg-slate-50 hover:bg-slate-100"}`}
-                                            >
-                                              HTML tĩnh dựng sẵn
-                                              <p className="text-[9px] text-muted-foreground font-normal mt-0.5">Chèn CSS thiết kế đẹp</p>
-                                            </button>
-                                          </div>
-                                        </div>
-                                      </div>
-
-                                      <div className="flex justify-end pt-2 border-t">
-                                        <Button
-                                          type="button"
-                                          onClick={() => handleInsertDbSnippet(field.value || "", field.onChange)}
-                                          className="bg-blue-600 hover:bg-blue-700 text-xs font-bold shadow-md shadow-blue-100"
-                                        >
-                                          <Plus className="h-3.5 w-3.5 mr-1" /> Chèn mã HTML Động vào cuối bài
-                                        </Button>
-                                      </div>
-                                    </div>
-                                  )}
-                                </div>
-
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                   <div className="space-y-2">
                                     <label className="text-xs font-bold text-slate-500 uppercase">Trình thiết kế mã nguồn HTML</label>
@@ -808,7 +569,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                               </div>
                             );
                           }
-                          
+
                           // Mode: UPLOAD
                           return (
                             <div className="space-y-4">

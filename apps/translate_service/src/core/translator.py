@@ -45,7 +45,61 @@ class SmartTranslator:
             
         return result_text
 
-    def _translate_lexical_recursive(self, data, dest, db, is_unsupported=False):
+    def _translate_single_text_block(self, text: str, target_lang: str, db, is_unsupported: bool) -> str:
+        if not text or not text.strip():
+            return text
+        try:
+            # 1. Áp dụng Glossary trước khi dịch (Cực kỳ quan trọng cho Ede và ngôn ngữ khác)
+            processed_text = self._apply_glossary(text, target_lang, db)
+            
+            if is_unsupported:
+                # Nếu ngôn ngữ không hỗ trợ AI, chỉ dùng Glossary hoặc đánh dấu
+                if processed_text == text:
+                    return f"[Chưa có bản dịch Ê-đê] {text}"
+                else:
+                    return processed_text
+            else:
+                # 2. Gửi sang AI với cơ chế thử lại
+                ai_dest_lang = self.lang_mapping.get(target_lang, target_lang)
+                translated = ""
+                for attempt in range(2):
+                    try:
+                        translated = self.ai.translate(processed_text, dest=ai_dest_lang).text
+                        break
+                    except Exception:
+                        if attempt == 1: 
+                            translated = f"[Lỗi dịch AI] {processed_text}"
+                if not translated:
+                    translated = f"[AI chưa dịch] {text}"
+                return translated
+        except Exception as e:
+            print(f"Error in _translate_single_text_block: {e}")
+            return text
+
+    def translate_only_text_tags(self, text: str, target_lang: str, db, is_unsupported: bool) -> str:
+        if not text:
+            return text
+            
+        pattern = re.compile(r'(<text\b[^>]*>)(.*?)(</text>)', re.DOTALL)
+        
+        # Check if there are any <text> tags
+        if not pattern.search(text):
+            # Fallback to translating the whole text if no <text> tags are present
+            return self._translate_single_text_block(text, target_lang, db, is_unsupported)
+
+        def replace_match(match):
+            open_tag = match.group(1)
+            content = match.group(2)
+            close_tag = match.group(3)
+            
+            if content.strip():
+                translated_content = self._translate_single_text_block(content, target_lang, db, is_unsupported)
+                return f"{open_tag}{translated_content}{close_tag}"
+            return match.group(0)
+            
+        return pattern.sub(replace_match, text)
+
+    def _translate_lexical_recursive(self, data, target_lang, db, is_unsupported=False):
         """Duyệt cây JSON của Lexical và chỉ dịch các node text"""
         if isinstance(data, dict):
             # Nếu là node văn bản của Lexical
@@ -53,37 +107,18 @@ class SmartTranslator:
                 original_text = data['text']
                 if original_text and original_text.strip():
                     try:
-                        # 1. Áp dụng Glossary trước khi dịch (Cực kỳ quan trọng cho Ede)
-                        processed_text = self._apply_glossary(original_text, dest, db)
-                        
-                        if is_unsupported:
-                            # Nếu ngôn ngữ không hỗ trợ AI, chỉ dùng Glossary hoặc đánh dấu
-                            if processed_text == original_text:
-                                data['text'] = f"[Chưa có bản dịch Ê-đê] {original_text}"
-                            else:
-                                data['text'] = processed_text
-                        else:
-                            # 2. Gửi sang AI với cơ chế thử lại
-                            translated = ""
-                            for attempt in range(2):
-                                try:
-                                    translated = self.ai.translate(processed_text, dest=dest).text
-                                    break
-                                except Exception:
-                                    if attempt == 1: 
-                                        translated = f"[Lỗi dịch AI] {processed_text}"
-                            data['text'] = translated
+                        data['text'] = self.translate_only_text_tags(original_text, target_lang, db, is_unsupported)
                     except Exception as e:
                         print(f"Error translating lexical text node: {e}")
             
             # Duyệt tiếp các thuộc tính khác (đặc biệt là 'children')
             for key, value in data.items():
                 if isinstance(value, (dict, list)):
-                    self._translate_lexical_recursive(value, dest, db, is_unsupported)
+                    self._translate_lexical_recursive(value, target_lang, db, is_unsupported)
                     
         elif isinstance(data, list):
             for item in data:
-                self._translate_lexical_recursive(item, dest, db, is_unsupported)
+                self._translate_lexical_recursive(item, target_lang, db, is_unsupported)
         
         return data
 
@@ -129,30 +164,13 @@ class SmartTranslator:
                     json_data = json.loads(stripped_text)
                     if isinstance(json_data, dict) and 'root' in json_data:
                         is_lexical = True
-                        translated_obj = self._translate_lexical_recursive(json_data, ai_dest_lang, db, is_unsupported)
+                        translated_obj = self._translate_lexical_recursive(json_data, original_lang, db, is_unsupported)
                         translated_text = json.dumps(translated_obj, ensure_ascii=False)
             except Exception:
                 is_lexical = False
 
             if not is_lexical:
-                # 1. Áp dụng Glossary trước
-                processed_text = self._apply_glossary(text, original_lang, db)
-                
-                if is_unsupported:
-                    if processed_text == text:
-                        translated_text = f"[Dịch {original_lang}] {text}"
-                    else:
-                        translated_text = processed_text
-                else:
-                    # 2. Gửi sang AI
-                    try:
-                        result = self.ai.translate(processed_text, dest=ai_dest_lang)
-                        translated_text = result.text
-                        if translated_text == text:
-                             translated_text = f"[AI chưa dịch] {text}"
-                    except Exception as e:
-                        print(f"Lỗi AI: {e}")
-                        translated_text = f"[Lỗi kết nối AI] {text}"
+                translated_text = self.translate_only_text_tags(text, original_lang, db, is_unsupported)
 
             # 3. Tự học: Lưu vào database
             new_entry = TranslationDictionary(

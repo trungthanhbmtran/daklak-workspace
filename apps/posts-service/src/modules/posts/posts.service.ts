@@ -81,6 +81,62 @@ export class PostsService implements OnModuleInit {
     }
   }
 
+  /**
+   * Translates only the content inside <text>...</text> tags in a string using a provided translate function.
+   * If no <text> tags are present, it falls back to translating the entire string block.
+   */
+  public async translateOnlyTextTags(text: string, translateFn: (s: string) => Promise<string>): Promise<string> {
+    if (!text) return text;
+
+    const pattern = /(<text\b[^>]*>)(.*?)(<\/text>)/gs;
+    const matches = [...text.matchAll(pattern)];
+
+    if (matches.length === 0) {
+      // Fallback to translating the whole string block if no <text> tags are found
+      return translateFn(text);
+    }
+
+    let result = text;
+    // Replace each match individually so we can do async translation
+    for (const match of matches) {
+      const fullMatch = match[0];
+      const openTag = match[1];
+      const content = match[2];
+      const closeTag = match[3];
+
+      if (content.trim()) {
+        const translatedContent = await translateFn(content);
+        result = result.replace(fullMatch, `${openTag}${translatedContent}${closeTag}`);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Recursively traverses Lexical JSON tree and translates any text node using translateOnlyTextTags.
+   */
+  public async translateLexicalRecursive(data: any, translateFn: (s: string) => Promise<string>): Promise<any> {
+    if (!data) return data;
+
+    if (Array.isArray(data)) {
+      for (let i = 0; i < data.length; i++) {
+        data[i] = await this.translateLexicalRecursive(data[i], translateFn);
+      }
+    } else if (typeof data === 'object') {
+      if (data.type === 'text' && typeof data.text === 'string') {
+        data.text = await this.translateOnlyTextTags(data.text, translateFn);
+      }
+
+      for (const key of Object.keys(data)) {
+        if (typeof data[key] === 'object' && data[key] !== null) {
+          data[key] = await this.translateLexicalRecursive(data[key], translateFn);
+        }
+      }
+    }
+
+    return data;
+  }
+
   private async getTargetLanguages(): Promise<string[]> {
     try {
       // Gọi gRPC sang user-service để lấy danh mục ngôn ngữ
