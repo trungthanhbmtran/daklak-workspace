@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { Calendar, Search, ArrowRight, Home, ChevronRight } from "lucide-react"
 
 // Client-side cookie getter helper
@@ -242,12 +242,14 @@ function NewsListPageContent() {
     setMounted(true)
   }, [])
 
+  const pathname = usePathname()
+
   const currentLang = React.useMemo(() => {
-    if (!mounted) return "vi"
-    const cookieLang = getCookie("lang")
-    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    if (!pathname) return "vi"
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "en") return "en"
     return "vi"
-  }, [mounted])
+  }, [pathname])
 
   const t = newsPageTranslations[currentLang] || newsPageTranslations.vi
 

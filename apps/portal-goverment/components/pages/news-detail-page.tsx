@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { usePublicPostBySlug, usePublicPostById } from "@/hooks/usePublicData"
 import { resolveMediaUrl } from "@/lib/utils"
 import {
@@ -197,12 +197,14 @@ export default function NewsDetailPage({ id }: Props) {
     setMounted(true)
   }, [])
 
+  const pathname = usePathname()
+
   const currentLang = React.useMemo(() => {
-    if (!mounted) return "vi"
-    const cookieLang = getCookie("lang")
-    if (cookieLang === "vi" || cookieLang === "en") return cookieLang
+    if (!pathname) return "vi"
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "en") return "en"
     return "vi"
-  }, [mounted])
+  }, [pathname])
 
   const t = translations[currentLang] || translations.vi
   const newsList = currentLang === "en" ? ALL_NEWS_EN : ALL_NEWS
