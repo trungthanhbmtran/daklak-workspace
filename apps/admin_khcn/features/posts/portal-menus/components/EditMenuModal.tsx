@@ -465,7 +465,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                     setEditingMenu({
                       ...editingMenu,
                       referenceId: val === "NONE" ? undefined : val,
-                      link: val === "NONE" ? "" : `/tin-tuc/${val}`
+                      link: val === "NONE" ? "" : `/trang/${val}`
                     });
                   }}
                 >

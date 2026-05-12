@@ -623,46 +623,99 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
               </CardHeader>
               <CardContent className="p-5 space-y-4">
                 {isEdit && editId ? (
-                  <div className="space-y-3">
-                    <p className="text-xs text-muted-foreground">
-                      Sao chép đường dẫn tương ứng để dán vào trường <strong>Đường dẫn tự do (URL)</strong> trong cấu hình Menu:
+                  <div className="space-y-4">
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Tùy thuộc vào mục đích sử dụng, hãy sao chép đường dẫn tương ứng dưới đây để gán vào Menu:
                     </p>
-                    <div className="space-y-2">
-                      <div className="flex flex-col gap-1 bg-slate-50 p-2.5 rounded-lg border text-xs">
-                        <span className="font-bold text-slate-700">Tiếng Việt</span>
-                        <div className="flex items-center justify-between gap-2 mt-1">
-                          <code className="text-[11px] font-mono text-blue-600 break-all">/tin-tuc/{editId}</code>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-slate-500 hover:text-blue-600 shrink-0"
-                            onClick={() => {
-                              void navigator.clipboard.writeText(`/tin-tuc/${editId}`);
-                              toast.success("Đã sao chép đường dẫn tiếng Việt!");
-                            }}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
+
+                    <div className="space-y-3">
+                      <div className="border-t pt-3 first:border-0 first:pt-0">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 block mb-2">
+                          1. Dạng Trang tĩnh CMS (Giới thiệu, Liên hệ...)
+                        </span>
+                        <div className="space-y-2">
+                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-slate-700">Tiếng Việt</span>
+                            <div className="flex items-center justify-between gap-2 mt-0.5">
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/trang/{editId}</code>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                onClick={() => {
+                                  void navigator.clipboard.writeText(`/trang/${editId}`);
+                                  toast.success("Đã sao chép đường dẫn trang tĩnh tiếng Việt!");
+                                }}
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-slate-700">Tiếng Anh (English)</span>
+                            <div className="flex items-center justify-between gap-2 mt-0.5">
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/page/{editId}</code>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                onClick={() => {
+                                  void navigator.clipboard.writeText(`/en/page/${editId}`);
+                                  toast.success("Đã sao chép đường dẫn trang tĩnh tiếng Anh!");
+                                }}
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex flex-col gap-1 bg-slate-50 p-2.5 rounded-lg border text-xs">
-                        <span className="font-bold text-slate-700">Tiếng Anh (English)</span>
-                        <div className="flex items-center justify-between gap-2 mt-1">
-                          <code className="text-[11px] font-mono text-blue-600 break-all">/en/news/{editId}</code>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-slate-500 hover:text-blue-600 shrink-0"
-                            onClick={() => {
-                              void navigator.clipboard.writeText(`/en/news/${editId}`);
-                              toast.success("Đã sao chép đường dẫn tiếng Anh!");
-                            }}
-                          >
-                            <Copy className="h-3.5 w-3.5" />
-                          </Button>
+                      <div className="border-t pt-3">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-2">
+                          2. Dạng Tin tức / Bài viết thông thường
+                        </span>
+                        <div className="space-y-2">
+                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-slate-700">Tiếng Việt</span>
+                            <div className="flex items-center justify-between gap-2 mt-0.5">
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/tin-tuc/{editId}</code>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                onClick={() => {
+                                  void navigator.clipboard.writeText(`/tin-tuc/${editId}`);
+                                  toast.success("Đã sao chép đường dẫn tin tức tiếng Việt!");
+                                }}
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                            <span className="font-semibold text-slate-700">Tiếng Anh (English)</span>
+                            <div className="flex items-center justify-between gap-2 mt-0.5">
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/news/{editId}</code>
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
+                                onClick={() => {
+                                  void navigator.clipboard.writeText(`/en/news/${editId}`);
+                                  toast.success("Đã sao chép đường dẫn tin tức tiếng Anh!");
+                                }}
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>

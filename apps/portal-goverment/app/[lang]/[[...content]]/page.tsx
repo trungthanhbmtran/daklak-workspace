@@ -32,6 +32,8 @@ const SLUG_MAPPING: Record<string, React.ComponentType<any>> = {
 const DETAIL_MAPPING: Record<string, React.ComponentType<{ id: string }>> = {
   "tin-tuc": NewsDetailPage,
   "news": NewsDetailPage,
+  "trang": NewsDetailPage,
+  "page": NewsDetailPage,
 }
 
 // ISR configuration

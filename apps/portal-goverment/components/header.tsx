@@ -266,8 +266,22 @@ export default function Header() {
     }
 
     if (type === "POST") {
-      const basePath = currentLang === "en" ? "/en/news" : "/vi/tin-tuc"
-      return refId ? `${basePath}/${refId}` : (directLink ? (directLink.startsWith("http") ? directLink : `/${currentLang}${directLink}`) : basePath)
+      const basePath = currentLang === "en" ? "/en/page" : "/vi/trang"
+      if (refId) return `${basePath}/${refId}`
+      if (directLink) {
+        if (directLink.startsWith("http")) return directLink
+        let clean = directLink
+          .replace(/^\/vi\/tin-tuc\//, "/vi/trang/")
+          .replace(/^\/en\/news\//, "/en/page/")
+          .replace(/^\/tin-tuc\//, "/trang/")
+          .replace(/^\/news\//, "/page/")
+        if (clean.startsWith("/vi/") || clean.startsWith("/en/")) {
+          return clean
+        }
+        const prefix = clean.startsWith("/") ? "" : "/"
+        return `/${currentLang}${prefix}${clean}`
+      }
+      return basePath
     }
 
     if (type === "STATIC_PAGE") {
