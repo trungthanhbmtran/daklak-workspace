@@ -82,6 +82,7 @@ export const ConsultationScalarFieldEnum = {
   title: 'title',
   description: 'description',
   documentId: 'documentId',
+  fileId: 'fileId',
   deadline: 'deadline',
   status: 'status',
   issuerId: 'issuerId',
@@ -252,6 +253,7 @@ export const ConsultationOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   documentId: 'documentId',
+  fileId: 'fileId',
   status: 'status',
   issuerId: 'issuerId',
   issuerName: 'issuerName'

@@ -5,8 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter 
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useDocuments } from "../hooks/useDocuments";
 import { organizationApi } from "@/features/system-admin/organization/api";
-import { 
-  Loader2, Save, MessageSquareShare, Calendar, 
+import {
+  Loader2, Save, MessageSquareShare, Calendar,
   ShieldAlert, Building2, Search, Check, X
 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -94,7 +94,7 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
         ...values,
         documentId: finalDocumentId
       });
-      
+
       onClose();
       form.reset();
       setSelectedFile(null);
@@ -176,9 +176,9 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
                   <FormLabel className="text-xs font-black uppercase text-muted-foreground tracking-widest flex items-center gap-2">
                     <FileUp className="h-3.5 w-3.5 text-primary" /> Tệp dự thảo lấy ý kiến
                   </FormLabel>
-                  
+
                   {!selectedFile ? (
-                    <div 
+                    <div
                       onClick={() => document.getElementById("consult-file-upload")?.click()}
                       className="border-2 border-dashed border-primary/20 rounded-2xl p-6 flex flex-col items-center justify-center gap-2 bg-primary/5 hover:bg-primary/10 transition-colors cursor-pointer group"
                     >
@@ -198,10 +198,10 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
                         <p className="text-sm font-bold text-emerald-900 truncate">{selectedFile.name}</p>
                         <p className="text-[10px] font-mono text-emerald-600">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                       </div>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="icon" 
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
                         onClick={() => setSelectedFile(null)}
                         className="rounded-full text-emerald-600 hover:bg-emerald-100"
                       >
@@ -281,8 +281,8 @@ export function ConsultationCreateModal({ isOpen, onClose, documentId }: Consult
                           onClick={() => toggleUnit(u.id)}
                           className={cn(
                             "flex items-center gap-3 p-3 rounded-xl mb-1 cursor-pointer transition-all border",
-                            isSelected 
-                              ? "bg-primary text-primary-foreground border-primary shadow-md" 
+                            isSelected
+                              ? "bg-primary text-primary-foreground border-primary shadow-md"
                               : "bg-background border-transparent hover:border-primary/20 hover:bg-primary/5"
                           )}
                         >

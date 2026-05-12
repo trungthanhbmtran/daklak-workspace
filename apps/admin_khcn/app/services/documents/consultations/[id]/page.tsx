@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  MessageSquareShare, Clock, Calendar, Download, 
+import {
+  MessageSquareShare, Clock, Calendar, Download,
   Users, CheckCircle2, ChevronLeft, ArrowRight,
   Info, BarChart3, AlertCircle
 } from "lucide-react";
@@ -19,14 +19,14 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
   const resolvedParams = React.use(params);
   const consultationId = resolvedParams.id;
   const { useGetConsultation } = useDocuments();
-  
+
   // Lấy chi tiết bằng cách gọi API GetConsultation trực tiếp
   const { data: consultation, isLoading } = useGetConsultation(consultationId);
   const { useListResponses } = useDocuments();
   const { data: responses, isLoading: isLoadingResponses } = useListResponses(consultationId);
 
   if (isLoading) return <div className="p-10 text-center text-muted-foreground animate-pulse">Đang tải thông tin chi tiết...</div>;
-  
+
   if (!consultation) return (
     <div className="p-10 text-center space-y-4">
       <AlertCircle className="h-12 w-12 text-destructive mx-auto" />
@@ -75,11 +75,11 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
               <TabsTrigger value="internal" className="rounded-lg font-bold px-6">Phản hồi đơn vị ({responses?.length || 0})</TabsTrigger>
               <TabsTrigger value="info" className="rounded-lg font-bold px-6">Thông tin chung</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="moderation" className="mt-0">
               <PublicCommentModeration consultationId={consultationId} />
             </TabsContent>
-            
+
             <TabsContent value="internal" className="mt-0">
               <Card className="border-none shadow-sm rounded-2xl overflow-hidden">
                 <CardHeader className="bg-muted/10 border-b">
@@ -177,14 +177,14 @@ export default function ConsultationDetailPage({ params }: { params: Promise<{ i
               </div>
               <Progress value={progress} className="h-3 bg-white/20 border border-white/10" />
               <div className="grid grid-cols-2 gap-2 pt-2">
-                 <div className="bg-white/10 p-3 rounded-2xl border border-white/5">
-                    <p className="text-[9px] font-black uppercase opacity-60">Đã xong</p>
-                    <p className="text-lg font-black">{consultation.totalResponses}</p>
-                 </div>
-                 <div className="bg-white/10 p-3 rounded-2xl border border-white/5">
-                    <p className="text-[9px] font-black uppercase opacity-60">Còn lại</p>
-                    <p className="text-lg font-black">{consultation.totalUnits - consultation.totalResponses}</p>
-                 </div>
+                <div className="bg-white/10 p-3 rounded-2xl border border-white/5">
+                  <p className="text-[9px] font-black uppercase opacity-60">Đã xong</p>
+                  <p className="text-lg font-black">{consultation.totalResponses}</p>
+                </div>
+                <div className="bg-white/10 p-3 rounded-2xl border border-white/5">
+                  <p className="text-[9px] font-black uppercase opacity-60">Còn lại</p>
+                  <p className="text-lg font-black">{consultation.totalUnits - consultation.totalResponses}</p>
+                </div>
               </div>
             </CardContent>
           </Card>

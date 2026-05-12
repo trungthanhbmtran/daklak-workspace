@@ -236,6 +236,8 @@ export const PostScalarFieldEnum = {
   isTranslated: 'isTranslated',
   isCommentAllowed: 'isCommentAllowed',
   isDeleted: 'isDeleted',
+  linkType: 'linkType',
+  customUrl: 'customUrl',
   publishedAt: 'publishedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -476,6 +478,8 @@ export const PostOrderByRelevanceFieldEnum = {
   thumbnail: 'thumbnail',
   authorId: 'authorId',
   status: 'status',
+  linkType: 'linkType',
+  customUrl: 'customUrl',
   categoryId: 'categoryId'
 } as const
 

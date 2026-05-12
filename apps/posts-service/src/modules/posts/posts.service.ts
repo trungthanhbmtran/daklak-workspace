@@ -15,7 +15,7 @@ export class PostsService implements OnModuleInit {
     private workflowService: WorkflowService,
     @Inject('TRANSLATE_MQ_CLIENT') private mqClient: ClientProxy,
     @Inject('CATEGORY_PACKAGE') private client: ClientGrpc,
-  ) { 
+  ) {
     console.log('[PostsService] Constructor called');
   }
 

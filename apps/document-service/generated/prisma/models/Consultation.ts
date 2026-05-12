@@ -29,6 +29,7 @@ export type ConsultationMinAggregateOutputType = {
   title: string | null
   description: string | null
   documentId: string | null
+  fileId: string | null
   deadline: Date | null
   status: string | null
   issuerId: string | null
@@ -43,6 +44,7 @@ export type ConsultationMaxAggregateOutputType = {
   title: string | null
   description: string | null
   documentId: string | null
+  fileId: string | null
   deadline: Date | null
   status: string | null
   issuerId: string | null
@@ -57,6 +59,7 @@ export type ConsultationCountAggregateOutputType = {
   title: number
   description: number
   documentId: number
+  fileId: number
   deadline: number
   status: number
   issuerId: number
@@ -73,6 +76,7 @@ export type ConsultationMinAggregateInputType = {
   title?: true
   description?: true
   documentId?: true
+  fileId?: true
   deadline?: true
   status?: true
   issuerId?: true
@@ -87,6 +91,7 @@ export type ConsultationMaxAggregateInputType = {
   title?: true
   description?: true
   documentId?: true
+  fileId?: true
   deadline?: true
   status?: true
   issuerId?: true
@@ -101,6 +106,7 @@ export type ConsultationCountAggregateInputType = {
   title?: true
   description?: true
   documentId?: true
+  fileId?: true
   deadline?: true
   status?: true
   issuerId?: true
@@ -188,6 +194,7 @@ export type ConsultationGroupByOutputType = {
   title: string
   description: string | null
   documentId: string | null
+  fileId: string | null
   deadline: Date
   status: string
   issuerId: string | null
@@ -223,6 +230,7 @@ export type ConsultationWhereInput = {
   title?: Prisma.StringFilter<"Consultation"> | string
   description?: Prisma.StringNullableFilter<"Consultation"> | string | null
   documentId?: Prisma.StringNullableFilter<"Consultation"> | string | null
+  fileId?: Prisma.StringNullableFilter<"Consultation"> | string | null
   deadline?: Prisma.DateTimeFilter<"Consultation"> | Date | string
   status?: Prisma.StringFilter<"Consultation"> | string
   issuerId?: Prisma.StringNullableFilter<"Consultation"> | string | null
@@ -239,6 +247,7 @@ export type ConsultationOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   documentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileId?: Prisma.SortOrderInput | Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   issuerId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -259,6 +268,7 @@ export type ConsultationWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"Consultation"> | string
   description?: Prisma.StringNullableFilter<"Consultation"> | string | null
   documentId?: Prisma.StringNullableFilter<"Consultation"> | string | null
+  fileId?: Prisma.StringNullableFilter<"Consultation"> | string | null
   deadline?: Prisma.DateTimeFilter<"Consultation"> | Date | string
   status?: Prisma.StringFilter<"Consultation"> | string
   issuerId?: Prisma.StringNullableFilter<"Consultation"> | string | null
@@ -275,6 +285,7 @@ export type ConsultationOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   documentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  fileId?: Prisma.SortOrderInput | Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   issuerId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -295,6 +306,7 @@ export type ConsultationScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"Consultation"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"Consultation"> | string | null
   documentId?: Prisma.StringNullableWithAggregatesFilter<"Consultation"> | string | null
+  fileId?: Prisma.StringNullableWithAggregatesFilter<"Consultation"> | string | null
   deadline?: Prisma.DateTimeWithAggregatesFilter<"Consultation"> | Date | string
   status?: Prisma.StringWithAggregatesFilter<"Consultation"> | string
   issuerId?: Prisma.StringNullableWithAggregatesFilter<"Consultation"> | string | null
@@ -309,6 +321,7 @@ export type ConsultationCreateInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -325,6 +338,7 @@ export type ConsultationUncheckedCreateInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -341,6 +355,7 @@ export type ConsultationUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -357,6 +372,7 @@ export type ConsultationUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -373,6 +389,7 @@ export type ConsultationCreateManyInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -387,6 +404,7 @@ export type ConsultationUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -401,6 +419,7 @@ export type ConsultationUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -421,6 +440,7 @@ export type ConsultationCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
+  fileId?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   issuerId?: Prisma.SortOrder
@@ -435,6 +455,7 @@ export type ConsultationMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
+  fileId?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   issuerId?: Prisma.SortOrder
@@ -449,6 +470,7 @@ export type ConsultationMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   description?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
+  fileId?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
   issuerId?: Prisma.SortOrder
@@ -512,6 +534,7 @@ export type ConsultationCreateWithoutPublicCommentsInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -527,6 +550,7 @@ export type ConsultationUncheckedCreateWithoutPublicCommentsInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -558,6 +582,7 @@ export type ConsultationUpdateWithoutPublicCommentsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -573,6 +598,7 @@ export type ConsultationUncheckedUpdateWithoutPublicCommentsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -588,6 +614,7 @@ export type ConsultationCreateWithoutResponsesInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -603,6 +630,7 @@ export type ConsultationUncheckedCreateWithoutResponsesInput = {
   title: string
   description?: string | null
   documentId?: string | null
+  fileId?: string | null
   deadline: Date | string
   status?: string
   issuerId?: string | null
@@ -634,6 +662,7 @@ export type ConsultationUpdateWithoutResponsesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -649,6 +678,7 @@ export type ConsultationUncheckedUpdateWithoutResponsesInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  fileId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   deadline?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   issuerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -704,6 +734,7 @@ export type ConsultationSelect<ExtArgs extends runtime.Types.Extensions.Internal
   title?: boolean
   description?: boolean
   documentId?: boolean
+  fileId?: boolean
   deadline?: boolean
   status?: boolean
   issuerId?: boolean
@@ -723,6 +754,7 @@ export type ConsultationSelectScalar = {
   title?: boolean
   description?: boolean
   documentId?: boolean
+  fileId?: boolean
   deadline?: boolean
   status?: boolean
   issuerId?: boolean
@@ -732,7 +764,7 @@ export type ConsultationSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ConsultationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "documentId" | "deadline" | "status" | "issuerId" | "issuerName" | "isUrgent" | "createdAt" | "updatedAt", ExtArgs["result"]["consultation"]>
+export type ConsultationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "documentId" | "fileId" | "deadline" | "status" | "issuerId" | "issuerName" | "isUrgent" | "createdAt" | "updatedAt", ExtArgs["result"]["consultation"]>
 export type ConsultationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   responses?: boolean | Prisma.Consultation$responsesArgs<ExtArgs>
   publicComments?: boolean | Prisma.Consultation$publicCommentsArgs<ExtArgs>
@@ -750,6 +782,7 @@ export type $ConsultationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     title: string
     description: string | null
     documentId: string | null
+    fileId: string | null
     deadline: Date
     status: string
     issuerId: string | null
@@ -1132,6 +1165,7 @@ export interface ConsultationFieldRefs {
   readonly title: Prisma.FieldRef<"Consultation", 'String'>
   readonly description: Prisma.FieldRef<"Consultation", 'String'>
   readonly documentId: Prisma.FieldRef<"Consultation", 'String'>
+  readonly fileId: Prisma.FieldRef<"Consultation", 'String'>
   readonly deadline: Prisma.FieldRef<"Consultation", 'DateTime'>
   readonly status: Prisma.FieldRef<"Consultation", 'String'>
   readonly issuerId: Prisma.FieldRef<"Consultation", 'String'>

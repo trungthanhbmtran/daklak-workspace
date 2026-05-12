@@ -7,7 +7,7 @@ export class ConsultationService {
   constructor(
     private prisma: PrismaService,
     private workflowService: WorkflowService,
-  ) {}
+  ) { }
 
   async create(data: any) {
     const { targetUnitIds, ...rest } = data;
@@ -152,10 +152,12 @@ export class ConsultationService {
       include: { consultation: { select: { title: true } } }
     });
 
-    return { data: comments.map(c => ({
-      ...this.mapPublicCommentToProto(c),
-      draftTitle: c.consultation?.title || "N/A"
-    })) };
+    return {
+      data: comments.map(c => ({
+        ...this.mapPublicCommentToProto(c),
+        draftTitle: c.consultation?.title || "N/A"
+      }))
+    };
   }
 
   async moderateComment(data: { id: string, status: string, userId: string }) {

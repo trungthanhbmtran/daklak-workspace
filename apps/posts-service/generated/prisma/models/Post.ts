@@ -53,6 +53,8 @@ export type PostMinAggregateOutputType = {
   isTranslated: boolean | null
   isCommentAllowed: boolean | null
   isDeleted: boolean | null
+  linkType: string | null
+  customUrl: string | null
   publishedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -77,6 +79,8 @@ export type PostMaxAggregateOutputType = {
   isTranslated: boolean | null
   isCommentAllowed: boolean | null
   isDeleted: boolean | null
+  linkType: string | null
+  customUrl: string | null
   publishedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -101,6 +105,8 @@ export type PostCountAggregateOutputType = {
   isTranslated: number
   isCommentAllowed: number
   isDeleted: number
+  linkType: number
+  customUrl: number
   publishedAt: number
   createdAt: number
   updatedAt: number
@@ -137,6 +143,8 @@ export type PostMinAggregateInputType = {
   isTranslated?: true
   isCommentAllowed?: true
   isDeleted?: true
+  linkType?: true
+  customUrl?: true
   publishedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -161,6 +169,8 @@ export type PostMaxAggregateInputType = {
   isTranslated?: true
   isCommentAllowed?: true
   isDeleted?: true
+  linkType?: true
+  customUrl?: true
   publishedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -185,6 +195,8 @@ export type PostCountAggregateInputType = {
   isTranslated?: true
   isCommentAllowed?: true
   isDeleted?: true
+  linkType?: true
+  customUrl?: true
   publishedAt?: true
   createdAt?: true
   updatedAt?: true
@@ -296,6 +308,8 @@ export type PostGroupByOutputType = {
   isTranslated: boolean
   isCommentAllowed: boolean
   isDeleted: boolean
+  linkType: string | null
+  customUrl: string | null
   publishedAt: Date | null
   createdAt: Date
   updatedAt: Date
@@ -343,6 +357,8 @@ export type PostWhereInput = {
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   isCommentAllowed?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
+  linkType?: Prisma.StringNullableFilter<"Post"> | string | null
+  customUrl?: Prisma.StringNullableFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -374,6 +390,8 @@ export type PostOrderByWithRelationInput = {
   isTranslated?: Prisma.SortOrder
   isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  linkType?: Prisma.SortOrderInput | Prisma.SortOrder
+  customUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -409,6 +427,8 @@ export type PostWhereUniqueInput = Prisma.AtLeast<{
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   isCommentAllowed?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
+  linkType?: Prisma.StringNullableFilter<"Post"> | string | null
+  customUrl?: Prisma.StringNullableFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -440,6 +460,8 @@ export type PostOrderByWithAggregationInput = {
   isTranslated?: Prisma.SortOrder
   isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  linkType?: Prisma.SortOrderInput | Prisma.SortOrder
+  customUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   publishedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -472,6 +494,8 @@ export type PostScalarWhereWithAggregatesInput = {
   isTranslated?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   isCommentAllowed?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolWithAggregatesFilter<"Post"> | boolean
+  linkType?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
+  customUrl?: Prisma.StringNullableWithAggregatesFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Post"> | Date | string
@@ -496,6 +520,8 @@ export type PostCreateInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -526,6 +552,8 @@ export type PostUncheckedCreateInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -556,6 +584,8 @@ export type PostUpdateInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -586,6 +616,8 @@ export type PostUncheckedUpdateInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -616,6 +648,8 @@ export type PostCreateManyInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -640,6 +674,8 @@ export type PostUpdateManyMutationInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -663,6 +699,8 @@ export type PostUncheckedUpdateManyInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -708,6 +746,8 @@ export type PostCountOrderByAggregateInput = {
   isTranslated?: Prisma.SortOrder
   isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  linkType?: Prisma.SortOrder
+  customUrl?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -737,6 +777,8 @@ export type PostMaxOrderByAggregateInput = {
   isTranslated?: Prisma.SortOrder
   isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  linkType?: Prisma.SortOrder
+  customUrl?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -761,6 +803,8 @@ export type PostMinOrderByAggregateInput = {
   isTranslated?: Prisma.SortOrder
   isCommentAllowed?: Prisma.SortOrder
   isDeleted?: Prisma.SortOrder
+  linkType?: Prisma.SortOrder
+  customUrl?: Prisma.SortOrder
   publishedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -947,6 +991,8 @@ export type PostCreateWithoutCategoryInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -976,6 +1022,8 @@ export type PostUncheckedCreateWithoutCategoryInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1034,6 +1082,8 @@ export type PostScalarWhereInput = {
   isTranslated?: Prisma.BoolFilter<"Post"> | boolean
   isCommentAllowed?: Prisma.BoolFilter<"Post"> | boolean
   isDeleted?: Prisma.BoolFilter<"Post"> | boolean
+  linkType?: Prisma.StringNullableFilter<"Post"> | string | null
+  customUrl?: Prisma.StringNullableFilter<"Post"> | string | null
   publishedAt?: Prisma.DateTimeNullableFilter<"Post"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Post"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Post"> | Date | string
@@ -1058,6 +1108,8 @@ export type PostCreateWithoutCommentsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1087,6 +1139,8 @@ export type PostUncheckedCreateWithoutCommentsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1132,6 +1186,8 @@ export type PostUpdateWithoutCommentsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1161,6 +1217,8 @@ export type PostUncheckedUpdateWithoutCommentsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1190,6 +1248,8 @@ export type PostCreateWithoutTagsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1219,6 +1279,8 @@ export type PostUncheckedCreateWithoutTagsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1269,6 +1331,8 @@ export type PostCreateWithoutVersionsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1298,6 +1362,8 @@ export type PostUncheckedCreateWithoutVersionsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1343,6 +1409,8 @@ export type PostUpdateWithoutVersionsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1372,6 +1440,8 @@ export type PostUncheckedUpdateWithoutVersionsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1401,6 +1471,8 @@ export type PostCreateWithoutModerationLogsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1430,6 +1502,8 @@ export type PostUncheckedCreateWithoutModerationLogsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1475,6 +1549,8 @@ export type PostUpdateWithoutModerationLogsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1504,6 +1580,8 @@ export type PostUncheckedUpdateWithoutModerationLogsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1533,6 +1611,8 @@ export type PostCreateWithoutAuditLogsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1562,6 +1642,8 @@ export type PostUncheckedCreateWithoutAuditLogsInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1607,6 +1689,8 @@ export type PostUpdateWithoutAuditLogsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1636,6 +1720,8 @@ export type PostUncheckedUpdateWithoutAuditLogsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1665,6 +1751,8 @@ export type PostCreateWithoutTranslations_relInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1694,6 +1782,8 @@ export type PostUncheckedCreateWithoutTranslations_relInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1739,6 +1829,8 @@ export type PostUpdateWithoutTranslations_relInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1768,6 +1860,8 @@ export type PostUncheckedUpdateWithoutTranslations_relInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1797,6 +1891,8 @@ export type PostCreateManyCategoryInput = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: string | null
+  customUrl?: string | null
   publishedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1820,6 +1916,8 @@ export type PostUpdateWithoutCategoryInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1849,6 +1947,8 @@ export type PostUncheckedUpdateWithoutCategoryInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1878,6 +1978,8 @@ export type PostUncheckedUpdateManyWithoutCategoryInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1901,6 +2003,8 @@ export type PostUpdateWithoutTagsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1930,6 +2034,8 @@ export type PostUncheckedUpdateWithoutTagsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1959,6 +2065,8 @@ export type PostUncheckedUpdateManyWithoutTagsInput = {
   isTranslated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isCommentAllowed?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  linkType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   publishedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2059,6 +2167,8 @@ export type PostSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: boolean
+  customUrl?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2093,6 +2203,8 @@ export type PostSelectScalar = {
   isTranslated?: boolean
   isCommentAllowed?: boolean
   isDeleted?: boolean
+  linkType?: boolean
+  customUrl?: boolean
   publishedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -2100,7 +2212,7 @@ export type PostSelectScalar = {
   categoryId?: boolean
 }
 
-export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentHtml" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isCommentAllowed" | "isDeleted" | "publishedAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
+export type PostOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "content" | "contentHtml" | "slug" | "thumbnail" | "authorId" | "status" | "currentVersion" | "isFeatured" | "isNotification" | "viewCount" | "isTranslated" | "isCommentAllowed" | "isDeleted" | "linkType" | "customUrl" | "publishedAt" | "createdAt" | "updatedAt" | "deletedAt" | "categoryId", ExtArgs["result"]["post"]>
 export type PostInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   category?: boolean | Prisma.Post$categoryArgs<ExtArgs>
   tags?: boolean | Prisma.Post$tagsArgs<ExtArgs>
@@ -2140,6 +2252,8 @@ export type $PostPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     isTranslated: boolean
     isCommentAllowed: boolean
     isDeleted: boolean
+    linkType: string | null
+    customUrl: string | null
     publishedAt: Date | null
     createdAt: Date
     updatedAt: Date
@@ -2537,6 +2651,8 @@ export interface PostFieldRefs {
   readonly isTranslated: Prisma.FieldRef<"Post", 'Boolean'>
   readonly isCommentAllowed: Prisma.FieldRef<"Post", 'Boolean'>
   readonly isDeleted: Prisma.FieldRef<"Post", 'Boolean'>
+  readonly linkType: Prisma.FieldRef<"Post", 'String'>
+  readonly customUrl: Prisma.FieldRef<"Post", 'String'>
   readonly publishedAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Post", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Post", 'DateTime'>
