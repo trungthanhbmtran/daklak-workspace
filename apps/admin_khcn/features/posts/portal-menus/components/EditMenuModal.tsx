@@ -315,23 +315,37 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
               Loại liên kết
             </Label>
             <Select
-              value={editingMenu.type}
-              onValueChange={(v) =>
-                setEditingMenu({
-                  ...editingMenu,
-                  type: v as PortalMenu["type"],
-                })
+              value={
+                editingMenu.type === "STATIC_PAGE" && editingMenu.referenceId === "van-ban"
+                  ? "DOCUMENTS"
+                  : editingMenu.type
               }
+              onValueChange={(v) => {
+                if (v === "DOCUMENTS") {
+                  setEditingMenu({
+                    ...editingMenu,
+                    type: "STATIC_PAGE",
+                    referenceId: "van-ban",
+                    link: "/van-ban",
+                  });
+                } else {
+                  setEditingMenu({
+                    ...editingMenu,
+                    type: v as any,
+                    referenceId: undefined,
+                    link: "",
+                  });
+                }
+              }}
             >
               <SelectTrigger className="col-span-3 rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="URL">Đường dẫn tự do (URL)</SelectItem>
-                <SelectItem value="CATEGORY">Tin tức (Chuyên mục bài viết)</SelectItem>
-                <SelectItem value="STATIC_PAGE">Trang hệ thống</SelectItem>
                 <SelectItem value="POST">Bài viết / Trang tĩnh CMS</SelectItem>
-                <SelectItem value="UNIT">Đơn vị giới thiệu</SelectItem>
+                <SelectItem value="CATEGORY">Chuyên mục bài viết (Cây chuyên mục)</SelectItem>
+                <SelectItem value="DOCUMENTS">Hệ thống Văn bản pháp quy</SelectItem>
+                <SelectItem value="URL">Đường dẫn tự do (URL)</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -389,32 +403,12 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
 
           {editingMenu.type === "STATIC_PAGE" && (
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="staticPageSelect" className="text-right font-bold text-sm text-slate-700">
-                Trang hệ thống
+              <Label className="text-right font-bold text-sm text-slate-700">
+                Cấu hình hệ thống
               </Label>
-              <Select
-                value={editingMenu.referenceId || "NONE"}
-                onValueChange={(val) => {
-                  setEditingMenu({
-                    ...editingMenu,
-                    referenceId: val === "NONE" ? undefined : val,
-                    link: val === "NONE" ? "" : `/${val}`
-                  });
-                }}
-              >
-                <SelectTrigger id="staticPageSelect" className="col-span-3 rounded-lg">
-                  <SelectValue placeholder="Chọn trang hệ thống..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="NONE">--- Chọn trang hệ thống ---</SelectItem>
-                  <SelectItem value="gioi-thieu">Giới thiệu chung</SelectItem>
-                  <SelectItem value="lien-he">Liên hệ & Bản đồ</SelectItem>
-                  <SelectItem value="thu-tuc">Thủ tục hành chính (Một cửa)</SelectItem>
-                  <SelectItem value="tuong-tac">Hỏi đáp & Góp ý ý kiến</SelectItem>
-                  <SelectItem value="van-ban">Văn bản pháp quy & Quyết định công bố</SelectItem>
-                  <SelectItem value="cong-khai-tai-chinh">Công khai tài chính (Bản PDF ký số)</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="col-span-3 bg-blue-50/50 border border-blue-100 p-3 rounded-lg text-xs text-blue-700">
+                Tự động liên kết đến phân hệ <strong>Hệ thống quản lý Văn bản pháp quy & Quyết định công bố</strong> của Cổng thông tin (Đường dẫn: <code>/van-ban</code>).
+              </div>
             </div>
           )}
 
