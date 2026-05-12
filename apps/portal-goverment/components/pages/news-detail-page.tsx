@@ -222,7 +222,7 @@ export default function NewsDetailPage({ id }: Props) {
 
   if (dbPost) {
     let title = dbPost.title;
-    let content = dbPost.content;
+    let content = dbPost.contentHtml || "";
     let excerpt = dbPost.description || "";
 
     let translationsObj = dbPost.translations || {};
@@ -236,7 +236,7 @@ export default function NewsDetailPage({ id }: Props) {
 
     if (currentLang === "en" && translationsObj.en) {
       title = translationsObj.en.title || title;
-      content = translationsObj.en.content || content;
+      content = translationsObj.en.contentHtml || "";
       excerpt = translationsObj.en.description || excerpt;
     }
 
