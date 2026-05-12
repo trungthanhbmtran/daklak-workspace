@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Save, ArrowLeft, ImagePlus, Globe, Tag, Send,
   Loader2, X, UploadCloud, Maximize2, Star, Bell, FileText, AlertCircle, CheckCircle2, Sparkles,
-  Code, FileCode, LayoutTemplate, Eye
+  Copy, Link2
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -73,62 +73,6 @@ const postSchema = z.object({
   })).default({}),
 });
 
-const HTML_PRESETS = [
-  {
-    name: "Bài viết Giới thiệu dự án KH&CN",
-    description: "Layout hiện đại với Header gradient, hộp mục tiêu chính và chia 2 cột đặc điểm.",
-    html: `<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 24px; color: #1e293b; line-height: 1.75;">
-  <div style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: white; padding: 48px 32px; border-radius: 16px; margin-bottom: 32px; text-align: center; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.15);">
-    <h1 style="margin: 0; font-size: 2.25rem; font-weight: 800; letter-spacing: -0.025em; line-height: 1.25;">TÊN DỰ ÁN KHOA HỌC & CÔNG NGHỆ</h1>
-    <p style="margin-top: 12px; font-size: 1.125rem; opacity: 0.9; font-weight: 400;">Ứng dụng chuyển đổi số và nâng tầm giá trị nông nghiệp bền vững</p>
-  </div>
-  
-  <h2 style="font-size: 1.5rem; color: #0f172a; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; margin-top: 32px; font-weight: 700;">1. Mục tiêu và sứ mệnh</h2>
-  <p>Dự án tập trung vào việc nghiên cứu ứng dụng công nghệ thông minh, tối ưu hóa giao thông và bảo vệ môi trường khu vực đô thị và nông nghiệp công nghệ cao Tây Nguyên.</p>
-  
-  <div style="display: grid; grid-template-columns: 1fr; gap: 16px; margin: 32px 0;">
-    <div style="background-color: #f8fafc; padding: 24px; border-radius: 12px; border-left: 4px solid #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h3 style="margin-top: 0; margin-bottom: 8px; color: #1e3a8a; font-size: 1.15rem; font-weight: 700;">Tối ưu vận hành thực tế</h3>
-      <p style="margin-bottom: 0; font-size: 0.95rem; color: #475569;">Giảm thiểu chi phí quản lý vận hành hạ tầng lên tới 30% thông qua các thuật toán AI phân tích dữ liệu lớn.</p>
-    </div>
-    <div style="background-color: #f8fafc; padding: 24px; border-radius: 12px; border-left: 4px solid #10b981; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <h3 style="margin-top: 0; margin-bottom: 8px; color: #065f46; font-size: 1.15rem; font-weight: 700;">Thân thiện và phát triển xanh</h3>
-      <p style="margin-bottom: 0; font-size: 0.95rem; color: #475569;">Theo dõi sát sao chỉ số chất lượng không khí, chất lượng đất đai thời gian thực, chủ động đưa ra cảnh báo chính xác.</p>
-    </div>
-  </div>
-</div>`
-  },
-  {
-    name: "Báo cáo khoa học & Học thuật",
-    description: "Được định dạng chuẩn văn bản nghiên cứu, có Tóm tắt (Abstract), Bảng số liệu và Kết luận.",
-    html: `<div style="font-family: 'Times New Roman', Times, serif; max-width: 800px; margin: 0 auto; padding: 32px; line-height: 1.6; color: #111827; background-color: #fff; border: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
-  <div style="text-align: center; margin-bottom: 40px;">
-    <h1 style="font-size: 24px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; color: #111;">BÁO CÁO KẾT QUẢ NGHIÊN CỨU KHOA HỌC</h1>
-    <p style="font-style: italic; margin-top: 8px; font-size: 16px; color: #4b5563;">Đề tài: Thử nghiệm công nghệ IoT trong theo dõi nông canh tự động</p>
-    <p style="margin-top: 4px; font-size: 14px; color: #6b7280;">Tác giả: Ban quản lý nông nghiệp số & Sở KH&CN</p>
-  </div>
-  
-  <div style="background: #f9fafb; padding: 20px; border: 1px dashed #d1d5db; margin-bottom: 32px; border-radius: 6px;">
-    <strong style="font-size: 15px; color: #111;">TÓM TẮT NỘI DUNG (ABSTRACT):</strong>
-    <p style="margin: 8px 0 0 0; text-align: justify; font-size: 14px; color: #374151;">Bài báo cáo này trình bày kết quả thực nghiệm mô hình cảm biến đo độ ẩm và dưỡng chất trong đất trồng trọt tại tỉnh Đắk Lắk. Kết quả phân tích liên tục trong 6 tháng cho thấy hiệu quả tiết kiệm nước tưới đạt 42% đồng thời nâng cao chất lượng hạt cà phê.</p>
-  </div>
-  
-  <h2 style="font-size: 18px; font-weight: bold; margin-top: 28px; border-bottom: 1px solid #111; padding-bottom: 4px;">I. ĐẶT VẤN ĐỀ</h2>
-  <p style="text-align: justify; text-indent: 30px; margin-bottom: 16px;">Phát triển nông nghiệp bền vững thích ứng biến đổi khí hậu là ưu tiên hàng đầu tại khu vực Tây Nguyên. Việc quản lý tài nguyên nước tưới hiệu quả giữ vai trò sống còn...</p>
-</div>`
-  },
-  {
-    name: "Bản tin xu hướng & Tin nhanh công nghệ",
-    description: "Layout thiết kế tạp chí hiện đại, có nhãn chuyên mục rực rỡ, thích hợp cho các tin tức truyền thông.",
-    html: `<div style="font-family: system-ui, -apple-system, sans-serif; max-width: 800px; margin: 0 auto; padding: 24px; color: #334155; line-height: 1.8;">
-  <span style="background-color: #eff6ff; color: #1d4ed8; padding: 6px 16px; border-radius: 9999px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: inline-block;">Xu hướng Công nghệ</span>
-  <h1 style="color: #0f172a; font-size: 2rem; font-weight: 800; margin-top: 16px; margin-bottom: 24px; letter-spacing: -0.025em; line-height: 1.3;">Tương Lai Của Trí Tuệ Nhân Tạo Trong Cuộc Sống Thường Nhật</h1>
-  
-  <p style="font-size: 1.125rem; color: #475569; font-style: italic; border-left: 4px solid #3b82f6; padding-left: 18px; margin: 28px 0; line-height: 1.6;">"Sự kết hợp giữa AI và các thiết bị IoT gia dụng đang tạo ra một cuộc cách mạng tiện ích chưa từng có cho người dùng."</p>
-  <p>Các nghiên cứu mới nhất chỉ ra rằng thị trường nhà thông minh tích hợp trí tuệ nhân tạo sẽ tăng trưởng vượt bậc với tỉ số kép hàng năm CAGR lên tới 24% trong giai đoạn tới...</p>
-</div>`
-  }
-];
 
 type PostFormValues = z.infer<typeof postSchema>;
 
@@ -138,11 +82,6 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   const [tagInput, setTagInput] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = !!editId;
-
-  // Trạng thái chế độ soạn thảo cho từng ngôn ngữ: 'WYSIWYG' | 'HTML' | 'UPLOAD'
-  const [editorModes, setEditorModes] = useState<Record<string, 'WYSIWYG' | 'HTML' | 'UPLOAD'>>({
-    vi: 'WYSIWYG'
-  });
 
   const form = useForm<PostFormValues>({
     resolver: zodResolver(postSchema) as any,
@@ -485,139 +424,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     <div className="pt-4 border-t space-y-4">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-3">
                         <Label className="font-bold text-base text-slate-800">Nội dung chi tiết (TIẾNG VIỆT)</Label>
-                        <div className="flex bg-muted p-1 rounded-lg text-xs font-semibold gap-1 self-start sm:self-auto">
-                          <button
-                            type="button"
-                            onClick={() => setEditorModes(prev => ({ ...prev, vi: 'WYSIWYG' }))}
-                            className={`px-3 py-1.5 rounded-md transition-all ${editorModes['vi'] === 'WYSIWYG' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-muted-foreground hover:text-slate-800'}`}
-                          >
-                            WYSIWYG
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditorModes(prev => ({ ...prev, vi: 'HTML' }))}
-                            className={`px-3 py-1.5 rounded-md transition-all ${editorModes['vi'] === 'HTML' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-muted-foreground hover:text-slate-800'}`}
-                          >
-                            Mã HTML Tĩnh
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setEditorModes(prev => ({ ...prev, vi: 'UPLOAD' }))}
-                            className={`px-3 py-1.5 rounded-md transition-all ${editorModes['vi'] === 'UPLOAD' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-muted-foreground hover:text-slate-800'}`}
-                          >
-                            Tải file HTML
-                          </button>
-                        </div>
                       </div>
 
                       <Controller
                         control={form.control}
                         name="content"
-                        render={({ field }) => {
-                          const mode = editorModes['vi'] || 'WYSIWYG';
-                          if (mode === 'WYSIWYG') {
-                            return <LexicalEditorDynamic key={`vi-wysiwyg-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />;
-                          }
-                          if (mode === 'HTML') {
-                            return (
-                              <div className="space-y-4">
-                                <div className="p-4 bg-slate-50 rounded-xl border border-dashed flex flex-col gap-3">
-                                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                    <LayoutTemplate className="h-4 w-4 text-blue-500" /> Chọn bố cục thiết kế nhanh (Presets)
-                                  </div>
-                                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                    {HTML_PRESETS.map((preset, idx) => (
-                                      <button
-                                        key={idx}
-                                        type="button"
-                                        onClick={() => {
-                                          field.onChange(preset.html);
-                                          toast.success(`Đã áp dụng mẫu thiết kế: ${preset.name}`);
-                                        }}
-                                        className="text-left p-3 rounded-lg border bg-white hover:border-blue-400 hover:shadow-sm transition-all group"
-                                      >
-                                        <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600">{preset.name}</p>
-                                        <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{preset.description}</p>
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <label className="text-xs font-bold text-slate-500 uppercase">Trình thiết kế mã nguồn HTML</label>
-                                    <Textarea
-                                      placeholder="Hãy nhập hoặc thiết kế mã HTML tĩnh của bạn ở đây..."
-                                      className="font-mono text-xs min-h-[400px] bg-slate-900 text-slate-200 focus-visible:ring-blue-500 p-4 border-slate-700 leading-relaxed"
-                                      value={field.value || ""}
-                                      onChange={(e) => field.onChange(e.target.value)}
-                                    />
-                                  </div>
-                                  <div className="space-y-2 flex flex-col">
-                                    <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1.5">
-                                      <Eye className="h-3.5 w-3.5 text-blue-500" /> Xem thử giao diện thực tế (Live Preview)
-                                    </label>
-                                    <div className="flex-1 min-h-[400px] border rounded-md bg-white p-4 overflow-auto prose max-w-none">
-                                      {field.value ? (
-                                        <div dangerouslySetInnerHTML={{ __html: field.value }} />
-                                      ) : (
-                                        <div className="h-full flex items-center justify-center text-xs text-muted-foreground italic">Chưa có nội dung để hiển thị preview</div>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            );
-                          }
-
-                          // Mode: UPLOAD
-                          return (
-                            <div className="space-y-4">
-                              <input
-                                type="file"
-                                accept=".html,text/html"
-                                className="hidden"
-                                id="html-file-picker-vi"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file) {
-                                    const reader = new FileReader();
-                                    reader.onload = (evt) => {
-                                      const text = evt.target?.result as string;
-                                      field.onChange(text);
-                                      toast.success(`Đã tải lên trang tĩnh HTML từ file ${file.name}`);
-                                    };
-                                    reader.readAsText(file);
-                                  }
-                                }}
-                              />
-                              <div
-                                onClick={() => document.getElementById('html-file-picker-vi')?.click()}
-                                className="aspect-video max-h-[220px] border-2 border-dashed border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
-                              >
-                                <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
-                                  <UploadCloud className="h-6 w-6 text-slate-400" />
-                                </div>
-                                <span className="text-sm font-bold text-slate-700">Tải lên file trang tĩnh HTML (.html)</span>
-                                <span className="text-xs text-muted-foreground mt-1">Hệ thống sẽ đọc trực tiếp mã nguồn file để hiển thị làm trang bài viết</span>
-                              </div>
-
-                              {field.value && (
-                                <div className="border rounded-xl p-4 bg-slate-50 space-y-3">
-                                  <div className="flex items-center justify-between">
-                                    <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                      <FileCode className="h-4 w-4 text-emerald-600" /> Trang tĩnh đã tải lên ({Math.round(field.value.length / 1024)} KB)
-                                    </p>
-                                    <Button type="button" variant="ghost" size="sm" className="text-destructive text-xs h-7 hover:bg-rose-50" onClick={() => field.onChange("")}>Xóa trang</Button>
-                                  </div>
-                                  <div className="max-h-[300px] border rounded bg-white p-4 overflow-auto prose max-w-none text-sm">
-                                    <div dangerouslySetInnerHTML={{ __html: field.value }} />
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                          );
-                        }}
+                        render={({ field }) => (
+                          <LexicalEditorDynamic key={`vi-wysiwyg-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />
+                        )}
                       />
                       {form.formState.errors.content && <p className="text-xs text-destructive font-medium">{form.formState.errors.content.message}</p>}
                     </div>
@@ -701,139 +515,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                       <div className="pt-4 border-t border-blue-100/50 space-y-4">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-3">
                           <Label className="font-bold text-base text-blue-700">Nội dung chi tiết ({lang.code.toUpperCase()})</Label>
-                          <div className="flex bg-blue-50/50 p-1 rounded-lg text-xs font-semibold gap-1 self-start sm:self-auto border border-blue-100/30">
-                            <button
-                              type="button"
-                              onClick={() => setEditorModes(prev => ({ ...prev, [lang.code]: 'WYSIWYG' }))}
-                              className={`px-3 py-1.5 rounded-md transition-all ${editorModes[lang.code] === 'WYSIWYG' || !editorModes[lang.code] ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-blue-600/60 hover:text-blue-800'}`}
-                            >
-                              WYSIWYG
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditorModes(prev => ({ ...prev, [lang.code]: 'HTML' }))}
-                              className={`px-3 py-1.5 rounded-md transition-all ${editorModes[lang.code] === 'HTML' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-blue-600/60 hover:text-blue-800'}`}
-                            >
-                              Mã HTML Tĩnh
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditorModes(prev => ({ ...prev, [lang.code]: 'UPLOAD' }))}
-                              className={`px-3 py-1.5 rounded-md transition-all ${editorModes[lang.code] === 'UPLOAD' ? 'bg-white shadow-sm text-blue-600 font-bold' : 'text-blue-600/60 hover:text-blue-800'}`}
-                            >
-                              Tải file HTML
-                            </button>
-                          </div>
                         </div>
 
                         <Controller
                           control={form.control}
                           name={`translations.${lang.code}.content`}
-                          render={({ field }) => {
-                            const mode = editorModes[lang.code] || 'WYSIWYG';
-                            if (mode === 'WYSIWYG') {
-                              return <LexicalEditorDynamic key={`${lang.code}-wysiwyg-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />;
-                            }
-                            if (mode === 'HTML') {
-                              return (
-                                <div className="space-y-4">
-                                  <div className="p-4 bg-slate-50 rounded-xl border border-dashed flex flex-col gap-3">
-                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                                      <LayoutTemplate className="h-4 w-4 text-blue-500" /> Chọn bố cục thiết kế nhanh (Presets - {lang.name})
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                      {HTML_PRESETS.map((preset, idx) => (
-                                        <button
-                                          key={idx}
-                                          type="button"
-                                          onClick={() => {
-                                            field.onChange(preset.html);
-                                            toast.success(`Đã áp dụng mẫu thiết kế cho phiên bản ${lang.name}`);
-                                          }}
-                                          className="text-left p-3 rounded-lg border bg-white hover:border-blue-400 hover:shadow-sm transition-all group"
-                                        >
-                                          <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600">{preset.name}</p>
-                                          <p className="text-[10px] text-muted-foreground mt-1 line-clamp-2 leading-relaxed">{preset.description}</p>
-                                        </button>
-                                      ))}
-                                    </div>
-                                  </div>
-
-                                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                      <label className="text-xs font-bold text-slate-500 uppercase">Trình thiết kế mã nguồn HTML ({lang.code.toUpperCase()})</label>
-                                      <Textarea
-                                        placeholder="Hãy nhập hoặc thiết kế mã HTML tĩnh của bạn ở đây..."
-                                        className="font-mono text-xs min-h-[400px] bg-slate-900 text-slate-200 focus-visible:ring-blue-500 p-4 border-slate-700 leading-relaxed"
-                                        value={field.value || ""}
-                                        onChange={(e) => field.onChange(e.target.value)}
-                                      />
-                                    </div>
-                                    <div className="space-y-2 flex flex-col">
-                                      <label className="text-xs font-bold text-slate-500 uppercase flex items-center gap-1.5">
-                                        <Eye className="h-3.5 w-3.5 text-blue-500" /> Xem thử giao diện thực tế (Live Preview)
-                                      </label>
-                                      <div className="flex-1 min-h-[400px] border rounded-md bg-white p-4 overflow-auto prose max-w-none">
-                                        {field.value ? (
-                                          <div dangerouslySetInnerHTML={{ __html: field.value }} />
-                                        ) : (
-                                          <div className="h-full flex items-center justify-center text-xs text-muted-foreground italic">Chưa có nội dung để hiển thị preview</div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            }
-
-                            // Mode: UPLOAD
-                            return (
-                              <div className="space-y-4">
-                                <input
-                                  type="file"
-                                  accept=".html,text/html"
-                                  className="hidden"
-                                  id={`html-file-picker-${lang.code}`}
-                                  onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                      const reader = new FileReader();
-                                      reader.onload = (evt) => {
-                                        const text = evt.target?.result as string;
-                                        field.onChange(text);
-                                        toast.success(`Đã tải lên trang tĩnh HTML từ file ${file.name}`);
-                                      };
-                                      reader.readAsText(file);
-                                    }
-                                  }}
-                                />
-                                <div
-                                  onClick={() => document.getElementById(`html-file-picker-${lang.code}`)?.click()}
-                                  className="aspect-video max-h-[220px] border-2 border-dashed border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
-                                >
-                                  <div className="bg-white p-3 rounded-full shadow-sm group-hover:scale-110 transition-transform mb-2">
-                                    <UploadCloud className="h-6 w-6 text-slate-400" />
-                                  </div>
-                                  <span className="text-sm font-bold text-slate-700">Tải lên file trang tĩnh HTML ({lang.name})</span>
-                                  <span className="text-xs text-muted-foreground mt-1">Hệ thống sẽ đọc trực tiếp mã nguồn file để hiển thị làm trang bài viết</span>
-                                </div>
-
-                                {field.value && (
-                                  <div className="border rounded-xl p-4 bg-slate-50 space-y-3">
-                                    <div className="flex items-center justify-between">
-                                      <p className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                                        <FileCode className="h-4 w-4 text-emerald-600" /> Trang tĩnh đã tải lên ({Math.round(field.value.length / 1024)} KB)
-                                      </p>
-                                      <Button type="button" variant="ghost" size="sm" className="text-destructive text-xs h-7 hover:bg-rose-50" onClick={() => field.onChange("")}>Xóa trang</Button>
-                                    </div>
-                                    <div className="max-h-[300px] border rounded bg-white p-4 overflow-auto prose max-w-none text-sm">
-                                      <div dangerouslySetInnerHTML={{ __html: field.value }} />
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            );
-                          }}
+                          render={({ field }) => (
+                            <LexicalEditorDynamic key={`${lang.code}-wysiwyg-${field.value ? 'has-val' : 'empty'}`} value={field.value || ""} onChange={field.onChange} />
+                          )}
                         />
                       </div>
                     </TabsContent>
@@ -923,6 +612,66 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                     </div>
                   )} />
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="shadow-sm">
+              <CardHeader className="py-3 px-5 border-b bg-slate-50/80">
+                <CardTitle className="text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                  <Link2 className="h-4 w-4 text-blue-600" /> Đường dẫn cấu hình Menu
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-5 space-y-4">
+                {isEdit && editId ? (
+                  <div className="space-y-3">
+                    <p className="text-xs text-muted-foreground">
+                      Sao chép đường dẫn tương ứng để dán vào trường <strong>Đường dẫn tự do (URL)</strong> trong cấu hình Menu:
+                    </p>
+                    <div className="space-y-2">
+                      <div className="flex flex-col gap-1 bg-slate-50 p-2.5 rounded-lg border text-xs">
+                        <span className="font-bold text-slate-700">Tiếng Việt</span>
+                        <div className="flex items-center justify-between gap-2 mt-1">
+                          <code className="text-[11px] font-mono text-blue-600 break-all">/tin-tuc/{editId}</code>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-slate-500 hover:text-blue-600 shrink-0"
+                            onClick={() => {
+                              void navigator.clipboard.writeText(`/tin-tuc/${editId}`);
+                              toast.success("Đã sao chép đường dẫn tiếng Việt!");
+                            }}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-1 bg-slate-50 p-2.5 rounded-lg border text-xs">
+                        <span className="font-bold text-slate-700">Tiếng Anh (English)</span>
+                        <div className="flex items-center justify-between gap-2 mt-1">
+                          <code className="text-[11px] font-mono text-blue-600 break-all">/en/news/{editId}</code>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-slate-500 hover:text-blue-600 shrink-0"
+                            onClick={() => {
+                              void navigator.clipboard.writeText(`/en/news/${editId}`);
+                              toast.success("Đã sao chép đường dẫn tiếng Anh!");
+                            }}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground italic text-center py-2">
+                    Đường dẫn liên kết cấu hình Menu sẽ khả dụng sau khi lưu bài viết lần đầu.
+                  </p>
+                )}
               </CardContent>
             </Card>
 
