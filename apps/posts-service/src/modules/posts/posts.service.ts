@@ -659,7 +659,7 @@ export class PostsService implements OnModuleInit {
         postId,
         langCode,
         title: data.title || (existingTrans?.title || post.title),
-        slug: data.slug || existingTrans?.slug || this.generateSlug(data.title || existingTrans?.title || post.title),
+        slug: data.slug || (data.title ? this.generateSlug(data.title) : (existingTrans?.slug || this.generateSlug(existingTrans?.title || post.title))),
         description: data.description || existingTrans?.description || "",
         content: data.content || existingTrans?.content || post.content,
         contentHtml: this.lexicalToHtml(data.content || existingTrans?.content || post.content || ''),
