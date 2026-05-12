@@ -276,6 +276,9 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
 
   if (isFetching) return <div className="p-20 text-center"><Loader2 className="animate-spin mx-auto h-8 w-8" /></div>;
 
+  const currentSlug = form.watch("slug") || editId || "";
+  const currentEnSlug = (form.watch("translations.en.slug") as any) || currentSlug;
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="max-w-[1400px] mx-auto space-y-6 pb-20">
@@ -637,14 +640,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
                             <span className="font-semibold text-slate-700">Tiếng Việt</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/trang/{editId}</code>
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/trang/{currentSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
                                 onClick={() => {
-                                  void navigator.clipboard.writeText(`/trang/${editId}`);
+                                  void navigator.clipboard.writeText(`/trang/${currentSlug}`);
                                   toast.success("Đã sao chép đường dẫn trang tĩnh tiếng Việt!");
                                 }}
                               >
@@ -656,14 +659,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
                             <span className="font-semibold text-slate-700">Tiếng Anh (English)</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/page/{editId}</code>
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/page/{currentEnSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
                                 onClick={() => {
-                                  void navigator.clipboard.writeText(`/en/page/${editId}`);
+                                  void navigator.clipboard.writeText(`/en/page/${currentEnSlug}`);
                                   toast.success("Đã sao chép đường dẫn trang tĩnh tiếng Anh!");
                                 }}
                               >
@@ -682,14 +685,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
                             <span className="font-semibold text-slate-700">Tiếng Việt</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/tin-tuc/{editId}</code>
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/tin-tuc/{currentSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
                                 onClick={() => {
-                                  void navigator.clipboard.writeText(`/tin-tuc/${editId}`);
+                                  void navigator.clipboard.writeText(`/tin-tuc/${currentSlug}`);
                                   toast.success("Đã sao chép đường dẫn tin tức tiếng Việt!");
                                 }}
                               >
@@ -701,14 +704,14 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
                           <div className="flex flex-col gap-1 bg-slate-50 p-2 rounded border border-slate-100 text-xs">
                             <span className="font-semibold text-slate-700">Tiếng Anh (English)</span>
                             <div className="flex items-center justify-between gap-2 mt-0.5">
-                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/news/{editId}</code>
+                              <code className="text-[11px] font-mono text-slate-600 break-all">/en/news/{currentEnSlug}</code>
                               <Button
                                 type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-6 w-6 text-slate-400 hover:text-blue-600 shrink-0"
                                 onClick={() => {
-                                  void navigator.clipboard.writeText(`/en/news/${editId}`);
+                                  void navigator.clipboard.writeText(`/en/news/${currentEnSlug}`);
                                   toast.success("Đã sao chép đường dẫn tin tức tiếng Anh!");
                                 }}
                               >

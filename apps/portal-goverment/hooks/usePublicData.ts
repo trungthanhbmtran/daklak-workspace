@@ -22,6 +22,17 @@ export function usePublicPostBySlug(slug: string) {
   });
 }
 
+export function usePublicPostById(id: string) {
+  return useQuery({
+    queryKey: ["public-post-id", id],
+    queryFn: async () => {
+      const response = await apiClient.get(`/public/posts/${id}`);
+      return response;
+    },
+    enabled: !!id,
+  });
+}
+
 export function usePublicPortalMenus() {
   return useQuery({
     queryKey: ["public-portal-menus"],

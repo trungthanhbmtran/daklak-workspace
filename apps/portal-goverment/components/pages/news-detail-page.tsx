@@ -3,6 +3,8 @@
 import * as React from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { usePublicPostBySlug, usePublicPostById } from "@/hooks/usePublicData"
+import { resolveMediaUrl } from "@/lib/utils"
 import {
   Calendar,
   User,
@@ -205,12 +207,59 @@ export default function NewsDetailPage({ id }: Props) {
   const t = translations[currentLang] || translations.vi
   const newsList = currentLang === "en" ? ALL_NEWS_EN : ALL_NEWS
 
-  const articleId = parseInt(id) || 1
-  const article = newsList.find(n => n.id === articleId) || newsList[0]
+  const isNumericId = /^\d+$/.test(id);
+  const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id);
+  const isDatabaseId = isNumericId || isUuid;
+
+  const slugQuery = usePublicPostBySlug(isDatabaseId ? "" : id);
+  const idQuery = usePublicPostById(isDatabaseId ? id : "");
+
+  const dbPostRaw = slugQuery.data || idQuery.data;
+  const dbPost = dbPostRaw?.data || dbPostRaw;
+
+  const articleId = parseInt(id) || 1;
+  let article = newsList.find((n: any) => n.id === articleId || n.slug === id) || newsList[0];
+
+  if (dbPost) {
+    let title = dbPost.title;
+    let content = dbPost.content;
+    let excerpt = dbPost.description || "";
+
+    let translationsObj = dbPost.translations || {};
+    if (typeof translationsObj === "string") {
+      try {
+        translationsObj = JSON.parse(translationsObj);
+      } catch (e) {
+        translationsObj = {};
+      }
+    }
+
+    if (currentLang === "en" && translationsObj.en) {
+      title = translationsObj.en.title || title;
+      content = translationsObj.en.content || content;
+      excerpt = translationsObj.en.description || excerpt;
+    }
+
+    const postDate = dbPost.publishedAt || dbPost.createdAt;
+    const formattedDate = postDate ? new Date(postDate).toLocaleDateString("vi-VN") : "12/05/2026";
+
+    article = {
+      id: dbPost.id,
+      title: title || "",
+      excerpt: excerpt || "",
+      image: resolveMediaUrl(dbPost.thumbnail) || "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+      date: formattedDate,
+      category: "ubnd",
+      categoryName: currentLang === "en" ? "People's Committee" : "Ủy ban nhân dân",
+      readTime: currentLang === "en" ? "4 min read" : "4 phút đọc",
+      author: "Phòng Biên tập - VP UBND",
+      content: content || ""
+    };
+  }
 
   if (!article) return null
 
-  const otherNews = newsList.filter(n => n.id !== article.id).slice(0, 3)
+  const otherNews = newsList.filter((n: any) => n.id !== articleId && n.slug !== id).slice(0, 3)
 
   const handlePrint = () => {
     window.print()
@@ -357,11 +406,15 @@ export default function NewsDetailPage({ id }: Props) {
           {/* Article Main Content Body */}
           <div className="px-4 sm:px-6 md:px-8 py-5 sm:py-8">
             <div className={`prose dark:prose-invert max-w-none text-slate-700 dark:text-slate-350 ${getFontSizeClass()} flex flex-col gap-5`}>
-              {article.content.map((para, idx) => (
-                <p key={idx} className="indent-4 text-justify font-medium leading-relaxed">
-                  {para}
-                </p>
-              ))}
+              {typeof article.content === "string" ? (
+                <div dangerouslySetInnerHTML={{ __html: article.content }} className="w-full text-justify leading-relaxed" />
+              ) : (
+                article.content.map((para, idx) => (
+                  <p key={idx} className="indent-4 text-justify font-medium leading-relaxed">
+                    {para}
+                  </p>
+                ))
+              )}
             </div>
 
             {/* Bottom Signature / Footer */}

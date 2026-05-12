@@ -460,7 +460,18 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 </div>
 
                 <Select
-                  value={editingMenu.referenceId || "NONE"}
+                  value={
+                    dynamicPosts.find(
+                      (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
+                    )
+                      ? (dynamicPosts.find(
+                          (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
+                        )?.slug ||
+                        dynamicPosts.find(
+                          (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
+                        )?.id)
+                      : (editingMenu.referenceId || "NONE")
+                  }
                   onValueChange={(val) => {
                     setEditingMenu({
                       ...editingMenu,
@@ -480,7 +491,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                         return p.title.toLowerCase().includes(postSearch.toLowerCase());
                       })
                       .map((p) => (
-                        <SelectItem key={p.id} value={p.id} className="text-xs">
+                        <SelectItem key={p.id} value={p.slug || p.id} className="text-xs">
                           <span className="font-semibold block text-slate-700 max-w-[280px] truncate">
                             {p.title}
                           </span>
@@ -491,7 +502,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
 
                 {editingMenu.referenceId && (
                   <p className="text-[11px] text-muted-foreground bg-slate-50 border px-2 py-1 rounded-md font-mono truncate">
-                    ID liên kết: {editingMenu.referenceId}
+                    Slug liên kết: {editingMenu.referenceId}
                   </p>
                 )}
               </div>
