@@ -330,6 +330,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 <SelectItem value="URL">Đường dẫn tự do (URL)</SelectItem>
                 <SelectItem value="CATEGORY">Tin tức (Chuyên mục bài viết)</SelectItem>
                 <SelectItem value="STATIC_PAGE">Trang hệ thống</SelectItem>
+                <SelectItem value="POST">Bài viết / Trang tĩnh CMS</SelectItem>
+                <SelectItem value="UNIT">Đơn vị giới thiệu</SelectItem>
               </SelectContent>
             </Select>
           </div>
