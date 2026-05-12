@@ -136,11 +136,12 @@ class SmartTranslator:
         # 2. Chỉ chuẩn hóa "nội bộ" để AI hiểu (không làm thay đổi dữ liệu gốc)
         ai_dest_lang = self.lang_mapping.get(original_lang, original_lang)
         
-        db = SessionLocal()
+        db = None
         text_hash = self._get_hash(text, original_lang)
-
+        
+        # 1. Tra cứu từ điển (exact match) trước với cơ chế chống crash DB
         try:
-            # 1. Tra cứu từ điển (exact match) trước
+            db = SessionLocal()
             record = db.query(TranslationDictionary).filter_by(hash=text_hash).first()
             if record:
                 # Nếu cache là bản dịch lỗi (vẫn còn tiếng Việt), thì xóa để dịch lại
@@ -151,7 +152,11 @@ class SmartTranslator:
                     record.usage_count += 1
                     db.commit()
                     return record.translated_text
+        except Exception as db_err:
+            print(f"Lỗi kết nối/truy vấn DB khi tra từ điển: {db_err}")
+            # Tiếp tục dịch trực tiếp không qua DB cache
 
+        try:
             # 2. Xử lý dịch thuật
             translated_text = ""
             
@@ -172,19 +177,28 @@ class SmartTranslator:
             if not is_lexical:
                 translated_text = self.translate_only_text_tags(text, original_lang, db, is_unsupported)
 
-            # 3. Tự học: Lưu vào database
-            new_entry = TranslationDictionary(
-                source_text=text,
-                translated_text=translated_text,
-                target_lang=original_lang,
-                hash=text_hash
-            )
-            db.add(new_entry)
-            db.commit()
+            # 3. Tự học: Lưu vào database nếu DB khả dụng
+            if db:
+                try:
+                    new_entry = TranslationDictionary(
+                        source_text=text,
+                        translated_text=translated_text,
+                        target_lang=original_lang,
+                        hash=text_hash
+                    )
+                    db.add(new_entry)
+                    db.commit()
+                except Exception as db_save_err:
+                    print(f"Lỗi lưu bản dịch vào DB: {db_save_err}")
+            
             return translated_text
 
         except Exception as e:
             print(f"Lỗi Translator: {e}")
             return f"[Lỗi hệ thống] {text}"
         finally:
-            db.close()
+            if db:
+                try:
+                    db.close()
+                except Exception:
+                    pass
