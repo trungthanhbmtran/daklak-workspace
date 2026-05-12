@@ -110,6 +110,6 @@ export const postsApi = {
 
   // Translation
   translate: (text: string, targetLang: string) =>
-    apiClient.post("/translate", { text, targetLang }).then((res: any) => res.data),
+    apiClient.post("/admin/translate", { text, targetLang }).then((res: any) => res.data),
 
 };
