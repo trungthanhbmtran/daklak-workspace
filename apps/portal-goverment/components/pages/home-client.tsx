@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
 import { resolveMediaUrl } from "@/lib/utils"
@@ -332,12 +333,14 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialPortalMenus, initialPosts, initialBanners }: HomeClientProps) {
-  const [currentLang, setCurrentLang] = React.useState("vi")
+  const pathname = usePathname()
 
-  React.useEffect(() => {
-    const lang = getCookie("lang") || "vi"
-    setCurrentLang(lang)
-  }, [])
+  const currentLang = React.useMemo(() => {
+    if (!pathname) return "vi"
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "en") return "en"
+    return "vi"
+  }, [pathname])
 
   const [currentSlide, setCurrentSlide] = React.useState(0)
   const [pollVoted, setPollVoted] = React.useState(false)
