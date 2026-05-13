@@ -22,7 +22,9 @@ import {
   Type,
   Workflow,
   FileText,
-  X
+  X,
+  Code,
+  Copy
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +32,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { LexicalEditor } from "@/features/posts/components/editor/LexicalEditor";
+import { toast } from "sonner";
 
 interface Widget {
   id: string;
@@ -54,6 +57,43 @@ interface PageBuilderProps {
   layout: Row[];
   onChange: (layout: Row[]) => void;
   languages: any[];
+}
+
+function lexicalToHtml(jsonString: string): string {
+  if (!jsonString) return "";
+  try {
+    const data = JSON.parse(jsonString);
+    if (!data.root || !data.root.children) return "";
+
+    const renderNode = (node: any): string => {
+      if (node.type === "text") {
+        let text = node.text || "";
+        if (node.format & 1) text = `<strong>${text}</strong>`;
+        if (node.format & 2) text = `<em>${text}</em>`;
+        if (node.format & 8) text = `<span style="text-decoration: underline;">${text}</span>`;
+        if (node.format & 16) text = `<strike>${text}</strike>`;
+        return text;
+      }
+
+      if (node.children) {
+        const childrenHtml = node.children.map((child: any) => renderNode(child)).join("");
+
+        switch (node.type) {
+          case "paragraph": return `<p class="mb-3">${childrenHtml}</p>`;
+          case "list": return node.tag === "ol" ? `<ol class="list-decimal pl-5 mb-3">${childrenHtml}</ol>` : `<ul class="list-disc pl-5 mb-3">${childrenHtml}</ul>`;
+          case "listitem": return `<li>${childrenHtml}</li>`;
+          case "heading": return `<${node.tag} class="font-bold text-lg mb-2">${childrenHtml}</${node.tag}>`;
+          case "quote": return `<blockquote class="border-l-4 border-slate-300 pl-4 italic mb-3">${childrenHtml}</blockquote>`;
+          case "link": return `<a href="${node.url}" class="text-blue-600 underline" target="_blank" rel="noopener noreferrer">${childrenHtml}</a>`;
+          default: return childrenHtml;
+        }
+      }
+      return "";
+    };
+    return data.root.children.map((child: any) => renderNode(child)).join("");
+  } catch (e) {
+    return jsonString;
+  }
 }
 
 export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
@@ -587,18 +627,78 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
                 {/* Specific Widget Editors */}
                 {currentWidget.type === "LEXICAL_RICH_TEXT" && (
-                  <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-850">
-                    <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
-                      Nội dung Rich Text soạn thảo
-                    </Label>
-                    <div className="rounded-xl overflow-hidden min-h-[300px]">
-                      <LexicalEditor
-                        value={currentWidget.content?.[activeLang] || ""}
-                        onChange={(lexicalJson) => updateWidgetContent(currentWidget.id, lexicalJson)}
-                        placeholder="Bắt đầu viết nội dung trang của bạn ở đây..."
-                        minHeight="280px"
-                      />
-                    </div>
+                  <div className="space-y-3 pt-3 border-t border-slate-100 dark:border-slate-850">
+                    <Tabs defaultValue="editor" className="w-full">
+                      <TabsList className="grid grid-cols-3 bg-slate-100 dark:bg-slate-950 p-1 rounded-lg">
+                        <TabsTrigger value="editor" className="text-[10px] font-bold">
+                          <Type className="w-3.5 h-3.5 mr-1" /> Biên tập
+                        </TabsTrigger>
+                        <TabsTrigger value="preview" className="text-[10px] font-bold">
+                          <Eye className="w-3.5 h-3.5 mr-1" /> Xem trước
+                        </TabsTrigger>
+                        <TabsTrigger value="json" className="text-[10px] font-bold">
+                          <Code className="w-3.5 h-3.5 mr-1" /> JSON AST
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="editor" className="space-y-2 mt-3 animate-fade-in">
+                        <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
+                          Nội dung Rich Text soạn thảo
+                        </Label>
+                        <div className="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 min-h-[300px]">
+                          <LexicalEditor
+                            value={currentWidget.content?.[activeLang] || ""}
+                            onChange={(lexicalJson) => updateWidgetContent(currentWidget.id, lexicalJson)}
+                            placeholder="Bắt đầu viết nội dung trang của bạn ở đây..."
+                            minHeight="280px"
+                          />
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="preview" className="mt-3 animate-fade-in space-y-2">
+                        <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
+                          Bản xem trước hiển thị Portal (Xuất HTML)
+                        </Label>
+                        <div className="p-4 rounded-xl border border-slate-150 dark:border-slate-850 bg-slate-50 dark:bg-slate-950 max-h-[400px] overflow-y-auto prose prose-sm dark:prose-invert">
+                          {currentWidget.content?.[activeLang] ? (
+                            <div 
+                              className="text-slate-700 dark:text-slate-300 leading-relaxed text-justify font-medium"
+                              dangerouslySetInnerHTML={{ __html: lexicalToHtml(currentWidget.content[activeLang]) }} 
+                            />
+                          ) : (
+                            <p className="text-slate-400 italic text-[11px]">Chưa có nội dung soạn thảo để xuất bản.</p>
+                          )}
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="json" className="mt-3 animate-fade-in space-y-2">
+                        <div className="flex justify-between items-center">
+                          <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
+                            Cấu trúc Cây trạng thái (editorState AST)
+                          </Label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const jsonStr = currentWidget.content?.[activeLang] || "";
+                              if (jsonStr) {
+                                navigator.clipboard.writeText(jsonStr);
+                                toast.success("Đã sao chép cấu trúc JSON AST!");
+                              }
+                            }}
+                            className="h-6 text-[9px] text-[#b91c1c] font-bold hover:bg-slate-100"
+                          >
+                            <Copy className="w-3 h-3 mr-1" /> Sao chép JSON
+                          </Button>
+                        </div>
+                        <pre className="p-3.5 rounded-xl bg-slate-950 text-emerald-400 font-mono text-[9px] max-h-[350px] overflow-auto border border-emerald-950/20 shadow-inner">
+                          {currentWidget.content?.[activeLang] 
+                            ? JSON.stringify(JSON.parse(currentWidget.content[activeLang]), null, 2)
+                            : "{}"
+                          }
+                        </pre>
+                      </TabsContent>
+                    </Tabs>
                   </div>
                 )}
 
