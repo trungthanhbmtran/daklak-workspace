@@ -252,7 +252,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 animate-fade-in">
       
       {/* LEFT PANEL: Layout Builder Canvas */}
-      <div className="xl:col-span-8 space-y-6">
+      <div className="xl:col-span-8 max-w-7xl w-full space-y-6">
         
         {/* Layout templates picker */}
         <Card className="border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl">
@@ -336,8 +336,13 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           </CardContent>
         </Card>
 
-        {/* Builder rows rendering */}
-        <div className="space-y-5">
+        {/* Builder rows rendering with portal-accurate viewport bounds */}
+        <div className="border border-slate-200 dark:border-slate-800/80 p-4 sm:p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 w-full space-y-8 shadow-inner relative pt-10">
+          <div className="absolute top-3.5 left-4 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 select-none animate-pulse">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+            Khung hiển thị thực tế trên Portal (1280px Max)
+          </div>
+
           {layout.length === 0 ? (
             <div className="text-center py-16 border-2 border-dashed rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-3">
               <div className="w-12 h-12 rounded-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center text-slate-400">
@@ -394,7 +399,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                 </div>
 
                 {/* Columns content boxes */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
                   {row.columns.map((col) => (
                     <div 
                       key={col.id} 
