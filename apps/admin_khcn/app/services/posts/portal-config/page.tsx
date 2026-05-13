@@ -25,9 +25,137 @@ import {
   Eye,
   Columns,
   Languages,
-  Map as MapIcon
+  Map as MapIcon,
+  Workflow,
+  UserSquare2,
+  CalendarDays
 } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
+
+// -------------------------------------------------------------
+// DỮ LIỆU MẶC ĐỊNH CHO CÁC THÀNH PHẦN (FALLBACKS)
+// -------------------------------------------------------------
+const DEFAULT_ORG_SECTIONS_VI = [
+  {
+    title: "ĐẢNG ỦY XÃ",
+    desc: "Cơ quan lãnh đạo toàn diện mọi hoạt động chính trị, kinh tế, xã hội, an ninh quốc phòng tại địa phương.",
+    details: ["Bí thư Đảng ủy xã", "Phó Bí thư Thường trực Đảng ủy", "Ủy viên Ban Thường vụ Đảng ủy", "Các Chi bộ trực thuộc thôn, buôn, trường học"]
+  },
+  {
+    title: "HỘI ĐỒNG NHÂN DÂN",
+    desc: "Cơ quan quyền lực nhà nước ở địa phương, đại diện cho ý chí, nguyện vọng và quyền làm chủ của nhân dân.",
+    details: ["Chủ tịch Hội đồng nhân dân", "Phó Chủ tịch HĐND xã", "Ban Pháp chế HĐND", "Ban Kinh tế - Xã hội HĐND"]
+  },
+  {
+    title: "ỦY BAN NHÂN DÂN",
+    desc: "Cơ quan chấp hành của Hội đồng nhân dân, cơ quan hành chính nhà nước ở địa phương, quản lý điều hành toàn diện.",
+    details: ["Chủ tịch Ủy ban nhân dân", "Các Phó Chủ tịch UBND xã", "Bộ phận Tiếp nhận & Trả kết quả (Một cửa)", "Công chức Chuyên môn nghiệp vụ"]
+  },
+  {
+    title: "ỦY BAN MTTQ & ĐOÀN THỂ",
+    desc: "Tập hợp lực lượng đại đoàn kết toàn dân tộc, phối hợp cùng chính quyền tổ chức thực hiện các phong trào thi đua.",
+    details: ["Ủy ban Mặt trận Tổ quốc xã", "Hội Liên hiệp Phụ nữ xã", "Đoàn Thanh niên Cộng sản Hồ Chí Minh", "Hội Nông dân & Hội Cựu chiến binh"]
+  }
+];
+
+const DEFAULT_ORG_SECTIONS_EN = [
+  {
+    title: "COMMUNE PARTY COMMITTEE",
+    desc: "The comprehensive leadership body for all political, economic, social, national security, and defense activities in the locality.",
+    details: ["Party Committee Secretary", "Permanent Deputy Secretary", "Standing Committee Members", "Affiliated Party cells in villages and schools"]
+  },
+  {
+    title: "PEOPLE'S COUNCIL",
+    desc: "The local state power body representing the will, aspirations, and mastery rights of the citizens.",
+    details: ["Chairman of People's Council", "Vice Chairman of People's Council", "Legal Affairs Committee", "Economic and Social Affairs Committee"]
+  },
+  {
+    title: "PEOPLE'S COMMITTEE",
+    desc: "The executive branch of the People's Council, acting as the local administrative state organ to manage comprehensive operations.",
+    details: ["Chairman of People's Committee", "Vice Chairmen of People's Committee", "One-stop Reception & Result Return Department", "Specialized Professional Officials"]
+  },
+  {
+    title: "FATHERLAND FRONT & ASSOCIATIONS",
+    desc: "Rallying the great national unity block, collaborating with authorities to organize emulation movements.",
+    details: ["Commune Fatherland Front Committee", "Women's Union", "Youth Union", "Farmers' Association & Veterans' Association"]
+  }
+];
+
+const DEFAULT_LEADERS_VI = [
+  {
+    name: "Nguyễn Văn Hồng",
+    role: "Bí thư Đảng ủy - Chủ tịch HĐND xã",
+    responsibility: "Chịu trách nhiệm lãnh đạo toàn diện công tác Đảng, công tác chính trị tư tưởng; chỉ đạo toàn bộ hoạt động giám sát, ban hành nghị quyết phát triển của Hội đồng nhân dân xã.",
+    phone: "0914.281.xxx",
+    email: "nvhong@krongbong.daklak.gov.vn",
+    room: "Phòng 201 - Tầng 2, Trụ sở UBND xã"
+  },
+  {
+    name: "Trần Quốc Tuấn",
+    role: "Phó Bí thư Đảng ủy - Chủ tịch UBND xã",
+    responsibility: "Lãnh đạo, chỉ đạo toàn diện công tác quản lý điều hành hành chính nhà nước; trực tiếp chỉ đạo quy hoạch phát triển kinh tế, thu chi ngân sách, cải cách thủ tục hành chính.",
+    phone: "0905.112.xxx",
+    email: "tqtuan@krongbong.daklak.gov.vn",
+    room: "Phòng 102 - Tầng 1, Trụ sở UBND xã"
+  },
+  {
+    name: "H'Yen Knul",
+    role: "Phó Chủ tịch UBND xã",
+    responsibility: "Phụ trách khối Văn hóa - Xã hội, Y tế, Giáo dục; trực tiếp chỉ đạo thực hiện các chính sách an sinh xã hội, giảm nghèo bền vững và công tác dân tộc thiểu số địa bàn.",
+    phone: "0983.475.xxx",
+    email: "hyenknul@krongbong.daklak.gov.vn",
+    room: "Phòng 104 - Tầng 1, Trụ sở UBND xã"
+  }
+];
+
+const DEFAULT_LEADERS_EN = [
+  {
+    name: "Nguyen Van Hong",
+    role: "Party Secretary - Chairman of People's Council",
+    responsibility: "Responsible for the comprehensive leadership of Party affairs and political-ideological education; directs all inspection activities and issues development resolutions for the People's Council.",
+    phone: "0914.281.xxx",
+    email: "nvhong@krongbong.daklak.gov.vn",
+    room: "Room 201 - 2nd Floor, Commune HQ"
+  },
+  {
+    name: "Tran Quoc Tuan",
+    role: "Deputy Party Secretary - Chairman of People's Committee",
+    responsibility: "Leads and comprehensively directs the administrative management of local government; directly oversees economic development planning, budget revenues/expenditures, and administrative procedural reform.",
+    phone: "0905.112.xxx",
+    email: "tqtuan@krongbong.daklak.gov.vn",
+    room: "Room 102 - 1st Floor, Commune HQ"
+  },
+  {
+    name: "H'Yen Knul",
+    role: "Vice Chairwoman of People's Committee",
+    responsibility: "In charge of Culture - Social affairs, Healthcare, and Education; directly oversees social security policies, sustainable poverty reduction, and ethnic minority affairs in the area.",
+    phone: "0983.475.xxx",
+    email: "hyenknul@krongbong.daklak.gov.vn",
+    room: "Room 104 - 1st Floor, Commune HQ"
+  }
+];
+
+const DEFAULT_COMMUNE_ZONES_VI = [
+  { id: "T1", name: "Thôn 1 (Khu vực phía Tây Bắc)", path: "M 10,10 L 45,10 L 40,40 L 10,35 Z", area: "125 ha", pop: "780 người", center: { x: 25, y: 22 } },
+  { id: "T2", name: "Thôn 2 (Khu vực sông Krông Ana)", path: "M 45,10 L 85,15 L 75,45 L 40,40 Z", area: "240 ha", pop: "1,120 người", center: { x: 62, y: 26 } },
+  { id: "T3", name: "Thôn 3 (Khu vực Trung tâm Hành chính)", path: "M 10,35 L 40,40 L 35,65 L 8,60 Z", area: "95 ha", pop: "950 người", center: { x: 23, y: 50 } },
+  { id: "T4", name: "Thôn 4 (Khu quy hoạch cà phê)", path: "M 40,40 L 75,45 L 70,70 L 35,65 Z", area: "180 ha", pop: "840 người", center: { x: 55, y: 54 } },
+  { id: "T5", name: "Thôn 5 (Khu vực lâm nghiệp)", path: "M 8,60 L 35,65 L 30,95 L 5,90 Z", area: "320 ha", pop: "650 người", center: { x: 19, y: 78 } },
+  { id: "T6", name: "Thôn 6 (Khu vực Đền thờ - Núi Chư Yang Sin)", path: "M 35,65 L 70,70 L 65,95 L 30,95 Z", area: "450 ha", pop: "1,030 người", center: { x: 50, y: 80 } },
+  { id: "BE", name: "Buôn Êga (Đồng bào Êđê sinh sống)", path: "M 75,15 L 98,18 L 92,55 L 75,45 Z", area: "580 ha", pop: "920 người", center: { x: 86, y: 32 } },
+  { id: "BM", name: "Buôn Êđê (Khu bảo tồn văn hóa truyền thống)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 người", center: { x: 78, y: 72 } }
+];
+
+const DEFAULT_COMMUNE_ZONES_EN = [
+  { id: "T1", name: "Village 1 (Northwest area)", path: "M 10,10 L 45,10 L 40,40 L 10,35 Z", area: "125 ha", pop: "780 people", center: { x: 25, y: 22 } },
+  { id: "T2", name: "Village 2 (Krong Ana river area)", path: "M 45,10 L 85,15 L 75,45 L 40,40 Z", area: "240 ha", pop: "1,120 people", center: { x: 62, y: 26 } },
+  { id: "T3", name: "Village 3 (Administrative Center area)", path: "M 10,35 L 40,40 L 35,65 L 8,60 Z", area: "95 ha", pop: "950 people", center: { x: 23, y: 50 } },
+  { id: "T4", name: "Village 4 (Coffee planning zone)", path: "M 40,40 L 75,45 L 70,70 L 35,65 Z", area: "180 ha", pop: "840 people", center: { x: 55, y: 54 } },
+  { id: "T5", name: "Village 5 (Forestry zone)", path: "M 8,60 L 35,65 L 30,95 L 5,90 Z", area: "320 ha", pop: "650 people", center: { x: 19, y: 78 } },
+  { id: "T6", name: "Village 6 (Temple - Chu Yang Sin mountain area)", path: "M 35,65 L 70,70 L 65,95 L 30,95 Z", area: "450 ha", pop: "1,030 people", center: { x: 50, y: 80 } },
+  { id: "BE", name: "Buon Ega (Ede ethnic community)", path: "M 75,15 L 98,18 L 92,55 L 75,45 Z", area: "580 ha", pop: "920 people", center: { x: 86, y: 32 } },
+  { id: "BM", name: "Buon Ede (Traditional cultural preservation zone)", path: "M 75,45 L 92,55 L 85,95 L 65,95 L 70,70 Z", area: "462 ha", pop: "572 people", center: { x: 78, y: 72 } }
+];
 
 export default function PortalConfigPage() {
   const [logoUrl, setLogoUrl] = useState("");
@@ -36,6 +164,7 @@ export default function PortalConfigPage() {
 
   const [languages, setLanguages] = useState<any[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
+  const [activeConfigTab, setActiveConfigTab] = useState<string>("general");
   const [isCompareMode, setIsCompareMode] = useState<boolean>(false);
 
   const [configTranslations, setConfigTranslations] = useState<Record<string, {
@@ -54,7 +183,26 @@ export default function PortalConfigPage() {
     hotline: string;
     fax: string;
     email: string;
+    aboutHistory: string;
+    aboutArea: string;
+    aboutPopulation: string;
+    aboutSubdivisions: string;
+    aboutStandard: string;
   }>>({});
+
+  // States cho các danh sách cấu hình động phức tạp
+  const [orgSections, setOrgSections] = useState<Record<string, any[]>>({
+    vi: DEFAULT_ORG_SECTIONS_VI,
+    en: DEFAULT_ORG_SECTIONS_EN
+  });
+  const [leaders, setLeaders] = useState<Record<string, any[]>>({
+    vi: DEFAULT_LEADERS_VI,
+    en: DEFAULT_LEADERS_EN
+  });
+  const [communeZones, setCommuneZones] = useState<Record<string, any[]>>({
+    vi: DEFAULT_COMMUNE_ZONES_VI,
+    en: DEFAULT_COMMUNE_ZONES_EN
+  });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mapInputRef = useRef<HTMLInputElement>(null);
@@ -110,6 +258,18 @@ export default function PortalConfigPage() {
       const footerPortalTitleCat: any = dbCategories.find((c: any) => c.code === "footer_portal_title");
       const footerPortalSubtitleCat: any = dbCategories.find((c: any) => c.code === "footer_portal_subtitle");
 
+      // Các chỉ số giới thiệu mới
+      const aboutHistoryCat: any = dbCategories.find((c: any) => c.code === "about_history");
+      const aboutAreaCat: any = dbCategories.find((c: any) => c.code === "about_area");
+      const aboutPopulationCat: any = dbCategories.find((c: any) => c.code === "about_population");
+      const aboutSubdivisionsCat: any = dbCategories.find((c: any) => c.code === "about_subdivisions");
+      const aboutStandardCat: any = dbCategories.find((c: any) => c.code === "about_standard");
+
+      // Cấu hình danh sách mảng
+      const orgSectionsCat: any = dbCategories.find((c: any) => c.code === "about_org_sections");
+      const leadersCat: any = dbCategories.find((c: any) => c.code === "about_leaders");
+      const communeZonesCat: any = dbCategories.find((c: any) => c.code === "commune_zones");
+
       // Set global fields
       if (logoCat) setLogoUrl(logoCat.name);
       if (mapCat) setMapUrl(mapCat.name);
@@ -133,7 +293,12 @@ export default function PortalConfigPage() {
           footerPortalSubtitle: "",
           hotline: "",
           fax: "",
-          email: ""
+          email: "",
+          aboutHistory: "",
+          aboutArea: "",
+          aboutPopulation: "",
+          aboutSubdivisions: "",
+          aboutStandard: "",
         };
       });
 
@@ -187,10 +352,47 @@ export default function PortalConfigPage() {
           hotline: extractField(hotlineCat, langCode),
           fax: extractField(faxCat, langCode),
           email: extractField(emailCat, langCode),
+          // Chỉ số mới
+          aboutHistory: extractField(aboutHistoryCat, langCode),
+          aboutArea: extractField(aboutAreaCat, langCode),
+          aboutPopulation: extractField(aboutPopulationCat, langCode),
+          aboutSubdivisions: extractField(aboutSubdivisionsCat, langCode),
+          aboutStandard: extractField(aboutStandardCat, langCode),
         };
       });
 
       setConfigTranslations(newTranslations);
+
+      // Giải mã cấu hình danh sách dạng array
+      const parseListField = (cat: any, fallback: Record<string, any[]>) => {
+        if (!cat || !cat.description) return fallback;
+        try {
+          const parsed = JSON.parse(cat.description);
+          const result: Record<string, any[]> = { ...fallback };
+          activeLangs.forEach(langCode => {
+            const val = parsed[langCode];
+            if (val) {
+              if (typeof val === 'string') {
+                try {
+                  result[langCode] = JSON.parse(val);
+                } catch (e) {
+                  console.error("Failed to parse inner JSON list", e);
+                }
+              } else if (Array.isArray(val)) {
+                result[langCode] = val;
+              }
+            }
+          });
+          return result;
+        } catch (e) {
+          console.error("Failed to parse list config", e);
+          return fallback;
+        }
+      };
+
+      setOrgSections(parseListField(orgSectionsCat, { vi: DEFAULT_ORG_SECTIONS_VI, en: DEFAULT_ORG_SECTIONS_EN }));
+      setLeaders(parseListField(leadersCat, { vi: DEFAULT_LEADERS_VI, en: DEFAULT_LEADERS_EN }));
+      setCommuneZones(parseListField(communeZonesCat, { vi: DEFAULT_COMMUNE_ZONES_VI, en: DEFAULT_COMMUNE_ZONES_EN }));
     }
   }, [dbCategories, languages]);
 
@@ -209,7 +411,15 @@ export default function PortalConfigPage() {
         contactFormSuccessDesc: "",
         contactMapTitle: "",
         footerPortalTitle: "",
-        footerPortalSubtitle: ""
+        footerPortalSubtitle: "",
+        hotline: "",
+        fax: "",
+        email: "",
+        aboutHistory: "",
+        aboutArea: "",
+        aboutPopulation: "",
+        aboutSubdivisions: "",
+        aboutStandard: "",
       };
       return {
         ...prev,
@@ -336,7 +546,6 @@ export default function PortalConfigPage() {
           name: configTranslations["vi"]?.footerPortalSubtitle || "Tiếp nhận giải quyết thủ tục hành chính một cửa hiện đại, nhanh chóng",
           description: buildTranslationsJson(lang => configTranslations[lang]?.footerPortalSubtitle)
         },
-        // Global non-translatable configurations
         {
           code: "hotline",
           name: configTranslations["vi"]?.hotline || "0262.3812.345",
@@ -361,6 +570,48 @@ export default function PortalConfigPage() {
           code: "email",
           name: configTranslations["vi"]?.email || "xadangkang@krongbong.daklak.gov.vn",
           description: buildTranslationsJson(lang => configTranslations[lang]?.email)
+        },
+        // Mới: Vị trí địa lý & Thống kê
+        {
+          code: "about_history",
+          name: "Vị trí địa lý và Lịch sử xã",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutHistory)
+        },
+        {
+          code: "about_area",
+          name: "Chỉ số: Diện tích tự nhiên",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutArea)
+        },
+        {
+          code: "about_population",
+          name: "Chỉ số: Dân số hiện tại",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutPopulation)
+        },
+        {
+          code: "about_subdivisions",
+          name: "Chỉ số: Đơn vị hành chính",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutSubdivisions)
+        },
+        {
+          code: "about_standard",
+          name: "Chỉ số: Chuẩn nông thôn mới",
+          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutStandard)
+        },
+        // Mới: Mảng danh sách cấu trúc phức tạp
+        {
+          code: "about_org_sections",
+          name: "Sơ đồ bộ máy hành chính xã",
+          description: buildTranslationsJson(lang => JSON.stringify(orgSections[lang] || []))
+        },
+        {
+          code: "about_leaders",
+          name: "Thông tin Lãnh đạo chủ chốt xã",
+          description: buildTranslationsJson(lang => JSON.stringify(leaders[lang] || []))
+        },
+        {
+          code: "commune_zones",
+          name: "Bản đồ phân vùng 8 thôn buôn xã Dang Kang",
+          description: buildTranslationsJson(lang => JSON.stringify(communeZones[lang] || []))
         }
       ];
 
@@ -695,7 +946,7 @@ export default function PortalConfigPage() {
               Đường dây nóng (Hotline) - Nhập đầy đủ nội dung hiển thị
             </Label>
             <Input
-              placeholder={langCode === 'vi' ? "Ví dụ: Điện thoại: 0262.3812.345 hoặc Đường dây nóng: 0262.3812.345" : "e.g., Hotline: 0262.3812.345"}
+              placeholder={langCode === 'vi' ? "Ví dụ: Điện thoại: 0262.3812.345" : "e.g., Hotline: 0262.3812.345"}
               className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold"
               value={trans.hotline || ""}
               onChange={(e) => updateTranslationField(langCode, "hotline", e.target.value)}
@@ -726,6 +977,395 @@ export default function PortalConfigPage() {
                 onChange={(e) => updateTranslationField(langCode, "email", e.target.value)}
               />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  // -------------------------------------------------------------
+  // THÀNH PHẦN QUẢN LÝ ĐỘNG CHO TRANG GIỚI THIỆU & PHÂN VÙNG BẢN ĐỒ
+  // -------------------------------------------------------------
+  const renderHistoryCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || { aboutHistory: "" };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Tổng quan Địa lý & Lịch sử
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Văn bản thuyết minh chi tiết
+            </Label>
+            <Textarea
+              rows={8}
+              placeholder={langCode === 'vi' ? "Nhập nội dung lịch sử địa lý tổng quan..." : "Enter geographical & historical overview..."}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold leading-relaxed"
+              value={trans.aboutHistory || ""}
+              onChange={(e) => updateTranslationField(langCode, "aboutHistory", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderStatsCard = (langCode: string, labelPrefix = "") => {
+    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
+    const trans = configTranslations[langCode] || {
+      aboutArea: "",
+      aboutPopulation: "",
+      aboutSubdivisions: "",
+      aboutStandard: ""
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                Chỉ số Thống kê Tổng quan (Trang giới thiệu)
+              </CardTitle>
+            </div>
+            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
+              {lang.name} {labelPrefix}
+            </span>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Diện tích tự nhiên (e.g. 2,452.8 Ha)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: 2,452.8 Ha" : "e.g., 2,452.8 Ha"}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
+              value={trans.aboutArea || ""}
+              onChange={(e) => updateTranslationField(langCode, "aboutArea", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Dân số hiện tại (e.g. 6,842 người)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: 6,842 người" : "e.g., 6,842 people"}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
+              value={trans.aboutPopulation || ""}
+              onChange={(e) => updateTranslationField(langCode, "aboutPopulation", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Đơn vị hành chính (e.g. 8 Thôn, Buôn)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: 8 Thôn, Buôn" : "e.g., 8 Villages / Hamlets"}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
+              value={trans.aboutSubdivisions || ""}
+              onChange={(e) => updateTranslationField(langCode, "aboutSubdivisions", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+              Chuẩn nông thôn mới (e.g. Đạt 19/19)
+            </Label>
+            <Input
+              placeholder={langCode === 'vi' ? "Ví dụ: Đạt 19/19 Tiêu chí" : "e.g., Achieved 19/19"}
+              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
+              value={trans.aboutStandard || ""}
+              onChange={(e) => updateTranslationField(langCode, "aboutStandard", e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderOrgSectionsEditor = (langCode: string, labelPrefix = "") => {
+    const list = orgSections[langCode] || [];
+
+    const handleAddField = () => {
+      const newList = [...list, { title: "CƠ QUAN MỚI", desc: "Mô tả...", details: ["Thành phần 1"] }];
+      setOrgSections(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    const handleUpdateField = (index: number, key: string, value: any) => {
+      const newList = list.map((item, idx) => {
+        if (idx === index) {
+          return { ...item, [key]: value };
+        }
+        return item;
+      });
+      setOrgSections(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    const handleRemoveField = (index: number) => {
+      const newList = list.filter((_, idx) => idx !== index);
+      setOrgSections(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5 flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Workflow className="w-4 h-4 text-indigo-600" />
+            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Sơ đồ Bộ máy hành chính ({langCode.toUpperCase()})
+            </CardTitle>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddField}
+            className="rounded-lg text-[10px] font-black uppercase py-1 px-2.5 h-7 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+          >
+            + Thêm nhóm/khối
+          </Button>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          {list.length === 0 ? (
+            <p className="text-xs font-semibold text-slate-400 italic text-center py-4">Chưa có dữ liệu sơ đồ bộ máy.</p>
+          ) : (
+            list.map((item, index) => (
+              <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                <button
+                  type="button"
+                  onClick={() => handleRemoveField(index)}
+                  className="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 gap-3 pr-6">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Tên cơ quan / Nhóm bộ máy</Label>
+                    <Input
+                      value={item.title || ""}
+                      onChange={(e) => handleUpdateField(index, "title", e.target.value)}
+                      className="bg-white text-xs font-extrabold text-slate-800"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Chức năng, vai trò tóm tắt</Label>
+                    <Textarea
+                      value={item.desc || ""}
+                      onChange={(e) => handleUpdateField(index, "desc", e.target.value)}
+                      className="bg-white text-xs font-semibold leading-relaxed"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Các phòng ban / chức danh liên quan (Mỗi dòng một mục)</Label>
+                    <Textarea
+                      value={Array.isArray(item.details) ? item.details.join("\n") : ""}
+                      onChange={(e) => handleUpdateField(index, "details", e.target.value.split("\n").filter((l: string) => l.trim() !== ""))}
+                      className="bg-white text-xs font-semibold leading-relaxed font-mono"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderLeadersEditor = (langCode: string, labelPrefix = "") => {
+    const list = leaders[langCode] || [];
+
+    const handleAddField = () => {
+      const newList = [...list, { name: "Họ và tên", role: "Chức vụ", responsibility: "Nhiệm vụ phụ trách...", phone: "09xx.xxx.xxx", email: "...", room: "Phòng..." }];
+      setLeaders(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    const handleUpdateField = (index: number, key: string, value: any) => {
+      const newList = list.map((item, idx) => {
+        if (idx === index) {
+          return { ...item, [key]: value };
+        }
+        return item;
+      });
+      setLeaders(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    const handleRemoveField = (index: number) => {
+      const newList = list.filter((_, idx) => idx !== index);
+      setLeaders(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5 flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserSquare2 className="w-4 h-4 text-indigo-600" />
+            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Danh sách Lãnh đạo chủ chốt ({langCode.toUpperCase()})
+            </CardTitle>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={handleAddField}
+            className="rounded-lg text-[10px] font-black uppercase py-1 px-2.5 h-7 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
+          >
+            + Thêm lãnh đạo
+          </Button>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          {list.length === 0 ? (
+            <p className="text-xs font-semibold text-slate-400 italic text-center py-4">Chưa có thông tin lãnh đạo.</p>
+          ) : (
+            list.map((item, index) => (
+              <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
+                <button
+                  type="button"
+                  onClick={() => handleRemoveField(index)}
+                  className="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors p-1"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-6">
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Họ và tên</Label>
+                    <Input
+                      value={item.name || ""}
+                      onChange={(e) => handleUpdateField(index, "name", e.target.value)}
+                      className="bg-white text-xs font-bold text-slate-900"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Chức danh / Chức vụ</Label>
+                    <Input
+                      value={item.role || ""}
+                      onChange={(e) => handleUpdateField(index, "role", e.target.value)}
+                      className="bg-white text-xs font-bold text-[#b91c1c]"
+                    />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Phạm vi trách nhiệm / Nhiệm vụ phụ trách</Label>
+                    <Textarea
+                      value={item.responsibility || ""}
+                      onChange={(e) => handleUpdateField(index, "responsibility", e.target.value)}
+                      className="bg-white text-xs font-semibold leading-relaxed"
+                      rows={2}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Nơi làm việc / Số phòng</Label>
+                    <Input
+                      value={item.room || ""}
+                      onChange={(e) => handleUpdateField(index, "room", e.target.value)}
+                      className="bg-white text-xs font-semibold"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Điện thoại liên hệ</Label>
+                    <Input
+                      value={item.phone || ""}
+                      onChange={(e) => handleUpdateField(index, "phone", e.target.value)}
+                      className="bg-white text-xs font-semibold font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1 sm:col-span-2">
+                    <Label className="text-[10px] font-black text-slate-500 uppercase">Thư điện tử công vụ (Email)</Label>
+                    <Input
+                      value={item.email || ""}
+                      onChange={(e) => handleUpdateField(index, "email", e.target.value)}
+                      className="bg-white text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+    );
+  };
+
+  const renderCommuneZonesEditor = (langCode: string, labelPrefix = "") => {
+    const list = communeZones[langCode] || [];
+
+    const handleUpdateField = (index: number, key: string, value: any) => {
+      const newList = list.map((item, idx) => {
+        if (idx === index) {
+          return { ...item, [key]: value };
+        }
+        return item;
+      });
+      setCommuneZones(prev => ({ ...prev, [langCode]: newList }));
+    };
+
+    return (
+      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
+        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+          <div className="flex items-center gap-2">
+            <MapIcon className="w-4 h-4 text-indigo-600" />
+            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+              Cấu hình phân vùng Thôn Buôn ({langCode.toUpperCase()})
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5 space-y-4">
+          <p className="text-[11px] text-slate-400 font-semibold leading-normal pb-2 border-b">
+            Chỉnh sửa các thông số mô phỏng hiển thị ranh giới địa lý hành chính (8 phân vùng vector SVG) trên cổng thông tin.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {list.map((item, index) => (
+              <div key={item.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5 relative">
+                <span className="absolute top-2.5 right-3 text-[10px] font-mono font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                  Phân vùng: {item.id}
+                </span>
+                <div className="space-y-1.5">
+                  <Label className="text-[9px] font-black text-slate-500 uppercase">Tên khu vực / Thôn / Buôn</Label>
+                  <Input
+                    value={item.name || ""}
+                    onChange={(e) => handleUpdateField(index, "name", e.target.value)}
+                    className="bg-white text-xs font-bold"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-[9px] font-black text-slate-500 uppercase">Diện tích</Label>
+                    <Input
+                      value={item.area || ""}
+                      onChange={(e) => handleUpdateField(index, "area", e.target.value)}
+                      className="bg-white text-xs font-semibold"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-[9px] font-black text-slate-500 uppercase">Quy mô dân cư</Label>
+                    <Input
+                      value={item.pop || ""}
+                      onChange={(e) => handleUpdateField(index, "pop", e.target.value)}
+                      className="bg-white text-xs font-semibold"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
@@ -763,7 +1403,7 @@ export default function PortalConfigPage() {
             </h1>
           </div>
           <p className="text-sm text-slate-500 font-medium">
-            Quản lý thông tin nhận diện cơ quan, bản quyền, đường dây nóng, và lịch tiếp công dân đa ngôn ngữ.
+            Quản lý thông tin nhận diện cơ quan, bản quyền, đường dây nóng, trang giới thiệu, cơ cấu tổ chức và sơ đồ ranh giới rập khuôn đa ngôn ngữ.
           </p>
         </div>
         <Button
@@ -799,7 +1439,6 @@ export default function PortalConfigPage() {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              {/* Single Language Tabs (only active when compare mode is disabled) */}
               <Tabs
                 value={activeLangTab}
                 onValueChange={(val) => {
@@ -821,7 +1460,6 @@ export default function PortalConfigPage() {
                 </TabsList>
               </Tabs>
 
-              {/* Compare Mode Switch Button */}
               <Button
                 type="button"
                 variant={isCompareMode ? "default" : "outline"}
@@ -838,54 +1476,136 @@ export default function PortalConfigPage() {
             </div>
           </div>
 
-          {/* CARD 1: BRANDING & IDENTITIES (2 LEVELS) */}
-          {isCompareMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderBrandingCard("vi", "(Bản gốc)")}
-              {renderBrandingCard("en", "(Bản dịch)")}
+          {/* CONFIGURATION SECTIONS TABS */}
+          <div className="flex border-b border-slate-200 gap-1.5 overflow-x-auto pb-px">
+            {[
+              { id: "general", label: "Cấu hình chung", icon: Settings },
+              { id: "about", label: "Trang giới thiệu", icon: FileText },
+              { id: "zones", label: "Bản đồ phân vùng", icon: MapIcon }
+            ].map(tab => {
+              const TabIcon = tab.icon;
+              const isActive = activeConfigTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveConfigTab(tab.id)}
+                  className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 select-none ${
+                    isActive
+                      ? "border-indigo-600 text-indigo-600 font-extrabold"
+                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-350"
+                  }`}
+                >
+                  <TabIcon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* TAB 1: CẤU HÌNH CHUNG PORTAL */}
+          {activeConfigTab === "general" && (
+            <div className="space-y-6 animate-fade-in">
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderBrandingCard("vi", "(Bản gốc)")}
+                  {renderBrandingCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderBrandingCard(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderScheduleCard("vi", "(Bản gốc)")}
+                  {renderScheduleCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderScheduleCard(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderAddressLicenseCard("vi", "(Bản gốc)")}
+                  {renderAddressLicenseCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderAddressLicenseCard(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderCustomLabelsCard("vi", "(Bản gốc)")}
+                  {renderCustomLabelsCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderCustomLabelsCard(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderContactDetailsCard("vi", "(Bản gốc)")}
+                  {renderContactDetailsCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderContactDetailsCard(activeLangTab)
+              )}
             </div>
-          ) : (
-            renderBrandingCard(activeLangTab)
           )}
 
-          {/* CARD 2: CITIZEN RECEPTION SCHEDULE */}
-          {isCompareMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderScheduleCard("vi", "(Bản gốc)")}
-              {renderScheduleCard("en", "(Bản dịch)")}
+          {/* TAB 2: CẤU HÌNH TRANG GIỚI THIỆU */}
+          {activeConfigTab === "about" && (
+            <div className="space-y-6 animate-fade-in">
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderHistoryCard("vi", "(Bản gốc)")}
+                  {renderHistoryCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderHistoryCard(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderStatsCard("vi", "(Bản gốc)")}
+                  {renderStatsCard("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderStatsCard(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderOrgSectionsEditor("vi", "(Bản gốc)")}
+                  {renderOrgSectionsEditor("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderOrgSectionsEditor(activeLangTab)
+              )}
+
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderLeadersEditor("vi", "(Bản gốc)")}
+                  {renderLeadersEditor("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderLeadersEditor(activeLangTab)
+              )}
             </div>
-          ) : (
-            renderScheduleCard(activeLangTab)
           )}
 
-          {/* CARD 3: EXTENDED FOOTER INFO */}
-          {isCompareMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderAddressLicenseCard("vi", "(Bản gốc)")}
-              {renderAddressLicenseCard("en", "(Bản dịch)")}
+          {/* TAB 3: BẢN ĐỒ PHÂN VÙNG THÔN BUÔN */}
+          {activeConfigTab === "zones" && (
+            <div className="space-y-6 animate-fade-in">
+              {isCompareMode ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {renderCommuneZonesEditor("vi", "(Bản gốc)")}
+                  {renderCommuneZonesEditor("en", "(Bản dịch)")}
+                </div>
+              ) : (
+                renderCommuneZonesEditor(activeLangTab)
+              )}
             </div>
-          ) : (
-            renderAddressLicenseCard(activeLangTab)
-          )}
-
-          {/* CARD 4: CUSTOM PORTAL LABELS */}
-          {isCompareMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderCustomLabelsCard("vi", "(Bản gốc)")}
-              {renderCustomLabelsCard("en", "(Bản dịch)")}
-            </div>
-          ) : (
-            renderCustomLabelsCard(activeLangTab)
-          )}
-
-          {/* CARD 5: CONTACT INFORMATION */}
-          {isCompareMode ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderContactDetailsCard("vi", "(Bản gốc)")}
-              {renderContactDetailsCard("en", "(Bản dịch)")}
-            </div>
-          ) : (
-            renderContactDetailsCard(activeLangTab)
           )}
         </div>
 

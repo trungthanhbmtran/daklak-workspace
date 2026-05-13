@@ -1,6 +1,9 @@
 "use client"
 
 import * as React from "react"
+import { usePathname } from "next/navigation"
+import { useQuery } from "@tanstack/react-query"
+import apiClient from "@/lib/axiosInstance"
 import {
   Building2,
   MapPin,
@@ -16,8 +19,63 @@ import {
   CalendarDays
 } from "lucide-react"
 
-export default function AboutPage() {
-  const orgSections = [
+// -------------------------------------------------------------
+// TRANSLATION RESOURCE DICTIONARY
+// -------------------------------------------------------------
+const translations = {
+  vi: {
+    pageTitle: "GIỚI THIỆU CHUNG & CƠ CẤU TỔ CHỨC",
+    pageSubtitle: "Tìm hiểu về lịch sử địa lý, bộ máy vận hành hành chính của xã Dang Kang, huyện Krông Bông",
+    historyTitle: "Tổng quan Địa lý & Lịch sử",
+    statsArea: "Diện tích tự nhiên",
+    statsPop: "Dân số hiện tại",
+    statsUnits: "Đơn vị hành chính",
+    statsNTM: "Chuẩn nông thôn mới",
+    orgTitle: "Sơ đồ Bộ máy hành chính xã Dang Kang",
+    orgSubtitle: "Sơ đồ vận hành liên thông, đảm bảo tính thống nhất chỉ đạo từ cấp Đảng ủy đến giám sát của HĐND xã và điều hành hành chính thực thi nhiệm vụ chuyên môn của UBND xã:",
+    leaderTitle: "Thông tin Lãnh đạo chủ chốt",
+    leaderSubtitle: "Danh sách cán bộ lãnh đạo phụ trách, điều hành, có lịch tiếp nhận phản ánh, kiến nghị trực tiếp từ nhân dân:",
+    responsibility: "Phạm vi trách nhiệm",
+    workRoom: "Nơi làm việc",
+    phone: "Di động",
+    email: "Thư điện tử",
+    east: "Phía Đông giáp xã Hòa Lễ",
+    west: "Phía Tây giáp xã Cư Kty",
+    south: "Phía Nam giáp dãy núi Chư Yang Sin",
+    north: "Phía Bắc giáp sông Krông Ana",
+    loading: "Đang nạp thông tin giới thiệu...",
+  },
+  en: {
+    pageTitle: "GENERAL INTRODUCTION & ORGANIZATION STRUCTURE",
+    pageSubtitle: "Learn about the geographic history and administrative system of Dang Kang commune, Krong Bong district",
+    historyTitle: "Geographic & Historical Overview",
+    statsArea: "Natural Area",
+    statsPop: "Current Population",
+    statsUnits: "Administrative Units",
+    statsNTM: "New Rural Standards",
+    orgTitle: "Administrative Machinery of Dang Kang Commune",
+    orgSubtitle: "Interconnected operational diagram ensuring unified command from the Party Committee down to the supervision of the People's Council and administration of professional duties of the People's Committee:",
+    leaderTitle: "Key Leadership Information",
+    leaderSubtitle: "List of leading officials in charge of operations, with fixed hours for direct public feedback and petitions:",
+    responsibility: "Scope of Responsibility",
+    workRoom: "Office Location",
+    phone: "Mobile Phone",
+    email: "E-mail Address",
+    east: "East borders Hoa Le commune",
+    west: "West borders Cu Kty commune",
+    south: "South borders Chu Yang Sin mountain range",
+    north: "North borders Krong Ana river",
+    loading: "Loading introduction details...",
+  }
+}
+
+const DEFAULT_HISTORY_TEXT = {
+  vi: "Xã Dang Kang là một đơn vị hành chính cấp xã nằm ở phía Tây Bắc của huyện Krông Bông, tỉnh Đắk Lắk. Với tổng diện tích đất tự nhiên hơn 2.450 ha, xã sở hữu vị trí địa lý kết nối giao thương nông sản quan trọng của huyện:\n\nĐịa hình của xã chủ yếu là các thung lũng xen lẫn đồi bát úp đặc trưng của vùng Tây Nguyên, đất đai trù phú phù hợp canh tác nông sản hàng hóa giá trị cao như cà phê, sầu riêng, cao su và lúa nước 2 vụ. Dân số toàn xã đạt khoảng 6.800 người với 8 dân tộc anh em cùng sinh sống hòa hợp, tạo nên bản sắc văn hóa vùng miền phong phú, đậm đà bản sắc.",
+  en: "Dang Kang commune is a commune-level administrative unit located in the Northwest of Krong Bong district, Dak Lak province. With a total natural land area of more than 2,450 hectares, the commune holds an important trade position for local agricultural products:\n\nThe terrain of the commune mainly consists of valleys mixed with low hills characteristic of the Central Highlands, with fertile land suitable for cultivating high-value commercial crops such as coffee, durian, rubber, and double-crop wet rice. The commune's total population is about 6,800 people, with 8 ethnic groups living harmoniously, creating a rich and vibrant regional cultural identity."
+}
+
+const DEFAULT_ORG_SECTIONS = {
+  vi: [
     {
       title: "ĐẢNG ỦY XÃ",
       desc: "Cơ quan lãnh đạo toàn diện mọi hoạt động chính trị, kinh tế, xã hội, an ninh quốc phòng tại địa phương.",
@@ -38,9 +96,33 @@ export default function AboutPage() {
       desc: "Tập hợp lực lượng đại đoàn kết toàn dân tộc, phối hợp cùng chính quyền tổ chức thực hiện các phong trào thi đua.",
       details: ["Ủy ban Mặt trận Tổ quốc xã", "Hội Liên hiệp Phụ nữ xã", "Đoàn Thanh niên Cộng sản Hồ Chí Minh", "Hội Nông dân & Hội Cựu chiến binh"]
     }
+  ],
+  en: [
+    {
+      title: "COMMUNE PARTY COMMITTEE",
+      desc: "The comprehensive leadership body for all political, economic, social, national security, and defense activities in the locality.",
+      details: ["Party Committee Secretary", "Permanent Deputy Secretary", "Standing Committee Members", "Affiliated Party cells in villages and schools"]
+    },
+    {
+      title: "PEOPLE'S COUNCIL",
+      desc: "The local state power body representing the will, aspirations, and mastery rights of the citizens.",
+      details: ["Chairman of People's Council", "Vice Chairman of People's Council", "Legal Affairs Committee", "Economic and Social Affairs Committee"]
+    },
+    {
+      title: "PEOPLE'S COMMITTEE",
+      desc: "The executive branch of the People's Council, acting as the local administrative state organ to manage comprehensive operations.",
+      details: ["Chairman of People's Committee", "Vice Chairmen of People's Committee", "One-stop Reception & Result Return Department", "Specialized Professional Officials"]
+    },
+    {
+      title: "FATHERLAND FRONT & ASSOCIATIONS",
+      desc: "Rallying the great national unity block, collaborating with authorities to organize emulation movements.",
+      details: ["Commune Fatherland Front Committee", "Women's Union", "Youth Union", "Farmers' Association & Veterans' Association"]
+    }
   ]
+}
 
-  const detailLeaders = [
+const DEFAULT_LEADERS = {
+  vi: [
     {
       name: "Nguyễn Văn Hồng",
       role: "Bí thư Đảng ủy - Chủ tịch HĐND xã",
@@ -65,7 +147,130 @@ export default function AboutPage() {
       email: "hyenknul@krongbong.daklak.gov.vn",
       room: "Phòng 104 - Tầng 1, Trụ sở UBND xã"
     }
+  ],
+  en: [
+    {
+      name: "Nguyen Van Hong",
+      role: "Party Secretary - Chairman of People's Council",
+      responsibility: "Responsible for the comprehensive leadership of Party affairs and political-ideological education; directs all inspection activities and issues development resolutions for the People's Council.",
+      phone: "0914.281.xxx",
+      email: "nvhong@krongbong.daklak.gov.vn",
+      room: "Room 201 - 2nd Floor, Commune HQ"
+    },
+    {
+      name: "Tran Quoc Tuan",
+      role: "Deputy Party Secretary - Chairman of People's Committee",
+      responsibility: "Leads and comprehensively directs the administrative management of local government; directly oversees economic development planning, budget revenues/expenditures, and administrative procedural reform.",
+      phone: "0905.112.xxx",
+      email: "tqtuan@krongbong.daklak.gov.vn",
+      room: "Room 102 - 1st Floor, Commune HQ"
+    },
+    {
+      name: "H'Yen Knul",
+      role: "Vice Chairwoman of People's Committee",
+      responsibility: "In charge of Culture - Social affairs, Healthcare, and Education; directly oversees social security policies, sustainable poverty reduction, and ethnic minority affairs in the area.",
+      phone: "0983.475.xxx",
+      email: "hyenknul@krongbong.daklak.gov.vn",
+      room: "Room 104 - 1st Floor, Commune HQ"
+    }
   ]
+}
+
+export default function AboutPage() {
+  const pathname = usePathname()
+
+  // Resolve current active locale (vi / en)
+  const currentLang = React.useMemo(() => {
+    if (!pathname) return "vi"
+    const segments = pathname.split("/").filter(Boolean)
+    if (segments[0] === "en") return "en"
+    return "vi"
+  }, [pathname])
+
+  const t = translations[currentLang] || translations.vi
+
+  // Query configurations dynamically
+  const { data: portalConfigData } = useQuery({
+    queryKey: ["public-portal-configs"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/portal-configs")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        console.error("Failed to fetch portal configurations", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  // Localized configuration fetchers
+  const getConfigValue = React.useCallback((code: string, fallback: string) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    if (!found) return fallback
+
+    if (found.description && found.description.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(found.description)
+        if (parsed && typeof parsed === "object") {
+          const trans = parsed.translations || parsed
+          if (trans[currentLang]) {
+            return trans[currentLang]
+          }
+          if (trans.vi) {
+            return trans.vi
+          }
+        }
+      } catch (e) {
+        // Parse issue fallback
+      }
+    }
+    return found.name || fallback
+  }, [portalConfigData, currentLang])
+
+  const getConfigObject = React.useCallback((code: string, fallback: any) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    if (!found) return fallback
+
+    if (found.description && found.description.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(found.description)
+        if (parsed && typeof parsed === "object") {
+          const trans = parsed.translations || parsed
+          const val = trans[currentLang] || trans.vi
+          if (val) {
+            if (typeof val === "string") {
+              try {
+                return JSON.parse(val)
+              } catch (e) {
+                console.error("Inner array parse issue", e)
+              }
+            } else if (Array.isArray(val)) {
+              return val
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Outer translation list parse issue", e)
+      }
+    }
+    return fallback
+  }, [portalConfigData, currentLang])
+
+  // Resolve dynamic values
+  const historyText = getConfigValue("about_history", DEFAULT_HISTORY_TEXT[currentLang])
+  const areaStat = getConfigValue("about_area", "2,452.8 Ha")
+  const popStat = getConfigValue("about_population", currentLang === "vi" ? "6.842 người" : "6,842 people")
+  const subdivisionsStat = getConfigValue("about_subdivisions", currentLang === "vi" ? "8 Thôn, Buôn" : "8 Villages / Hamlets")
+  const standardStat = getConfigValue("about_standard", currentLang === "vi" ? "Đạt 19/19 Tiêu chí" : "Achieved 19/19 Criteria")
+
+  const orgSections = getConfigObject("about_org_sections", DEFAULT_ORG_SECTIONS[currentLang])
+  const detailLeaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang])
+
+  // Split historyText by double newlines for paragraph separation
+  const historyParagraphs = React.useMemo(() => {
+    return historyText.split("\n\n").filter(Boolean)
+  }, [historyText])
 
   return (
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-14 animate-fade-in select-none">
@@ -73,10 +278,10 @@ export default function AboutPage() {
       {/* Page Title Header banner */}
       <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-[#b91c1c] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
         <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-white uppercase tracking-wide">
-          GIỚI THIỆU CHUNG & CƠ CẤU TỔ CHỨC
+          {t.pageTitle}
         </h2>
         <p className="text-xs text-slate-400 mt-1 font-medium">
-          Tìm hiểu về lịch sử địa lý, bộ máy vận hành hành chính của xã Dang Kang, huyện Krông Bông
+          {t.pageSubtitle}
         </p>
       </div>
 
@@ -86,23 +291,24 @@ export default function AboutPage() {
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
             <History className="w-5 h-5 text-[#b91c1c]" />
             <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-              Tổng quan Địa lý & Lịch sử
+              {t.historyTitle}
             </h3>
           </div>
 
           <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-semibold flex flex-col gap-4">
-            <p>
-              Xã Dang Kang là một đơn vị hành chính cấp xã nằm ở phía Tây Bắc của huyện Krông Bông, tỉnh Đắk Lắk. Với tổng diện tích đất tự nhiên hơn 2.450 ha, xã sở hữu vị trí địa lý kết nối giao thương nông sản quan trọng của huyện:
-            </p>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 bg-slate-100/50 dark:bg-slate-900/40 p-3.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200/50 dark:border-slate-800/50 my-1 font-medium text-slate-600 dark:text-slate-400">
-              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Đông giáp xã Hòa Lễ</li>
-              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Tây giáp xã Cư Kty</li>
-              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Nam giáp dãy núi Chư Yang Sin</li>
-              <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> Phía Bắc giáp sông Krông Ana</li>
-            </ul>
-            <p>
-              Địa hình của xã chủ yếu là các thung lũng xen lẫn đồi bát úp đặc trưng của vùng Tây Nguyên, đất đai trù phú phù hợp canh tác nông sản hàng hóa giá trị cao như cà phê, sầu riêng, cao su và lúa nước 2 vụ. Dân số toàn xã đạt khoảng 6.800 người với 8 dân tộc anh em cùng sinh sống hòa hợp, tạo nên bản sắc văn hóa vùng miền phong phú, đậm đà bản sắc.
-            </p>
+            {historyParagraphs.map((paragraph: string, index: number) => (
+              <React.Fragment key={index}>
+                <p>{paragraph}</p>
+                {index === 0 && (
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 bg-slate-100/50 dark:bg-slate-900/40 p-3.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200/50 dark:border-slate-800/50 my-1 font-medium text-slate-600 dark:text-slate-400">
+                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.east}</li>
+                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.west}</li>
+                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.south}</li>
+                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.north}</li>
+                  </ul>
+                )}
+              </React.Fragment>
+            ))}
           </div>
         </div>
 
@@ -113,9 +319,9 @@ export default function AboutPage() {
               <Building2 className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              Diện tích tự nhiên
+              {t.statsArea}
             </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">2,452.8 Ha</span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{areaStat}</span>
           </div>
 
           <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
@@ -123,9 +329,9 @@ export default function AboutPage() {
               <Users2 className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              Dân số hiện tại
+              {t.statsPop}
             </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">6,842 người</span>
+            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{popStat}</span>
           </div>
 
           <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
@@ -133,10 +339,10 @@ export default function AboutPage() {
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              Đơn vị hành chính
+              {t.statsUnits}
             </span>
             <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
-              8 Thôn, Buôn
+              {subdivisionsStat}
             </span>
           </div>
 
@@ -145,10 +351,10 @@ export default function AboutPage() {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              Chuẩn nông thôn mới
+              {t.statsNTM}
             </span>
             <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
-              Đạt 19/19 Tiêu chí
+              {standardStat}
             </span>
           </div>
         </div>
@@ -159,18 +365,18 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <Workflow className="w-5 h-5 text-[#b91c1c]" />
           <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-            Sơ đồ Bộ máy hành chính xã Dang Kang
+            {t.orgTitle}
           </h3>
         </div>
 
         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
-          Sơ đồ vận hành liên thông, đảm bảo tính thống nhất chỉ đạo từ cấp Đảng ủy đến giám sát của HĐND xã và điều hành hành chính thực thi nhiệm vụ chuyên môn của UBND xã:
+          {t.orgSubtitle}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-          {orgSections.map((section) => (
+          {orgSections.map((section: any, index: number) => (
             <div
-              key={section.title}
+              key={section.title || index}
               className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4 group hover:border-[#b91c1c] hover:shadow-md transition-all"
             >
               <div className="flex flex-col">
@@ -178,7 +384,7 @@ export default function AboutPage() {
                 <p className="text-[11px] text-slate-400 font-semibold leading-relaxed mt-1">{section.desc}</p>
               </div>
               <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 flex flex-col gap-2">
-                {section.details.map((item, idx) => (
+                {Array.isArray(section.details) && section.details.map((item: string, idx: number) => (
                   <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
                     <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     <span>{item}</span>
@@ -195,27 +401,27 @@ export default function AboutPage() {
         <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
           <UserSquare2 className="w-5 h-5 text-[#b91c1c]" />
           <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-            Thông tin Lãnh đạo chủ chốt
+            {t.leaderTitle}
           </h3>
         </div>
 
         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
-          Danh sách cán bộ lãnh đạo phụ trách, điều hành, có lịch tiếp nhận phản ánh, kiến nghị trực tiếp từ nhân dân:
+          {t.leaderSubtitle}
         </p>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-2">
-          {detailLeaders.map((leader) => (
+          {detailLeaders.map((leader: any, index: number) => (
             <div
-              key={leader.name}
+              key={leader.name || index}
               className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden flex flex-col"
             >
               <div className="p-4 sm:p-5 border-b border-slate-150 dark:border-slate-850 flex items-center gap-2.5 sm:gap-3 bg-slate-50/50 dark:bg-slate-950/45 shrink-0">
                 <div className="w-12 h-12 rounded-full bg-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] flex items-center justify-center font-bold text-lg shadow-inner">
-                  {leader.name.split(' ').pop()?.[0]}
+                  {(leader.name || "A").split(' ').pop()?.[0]}
                 </div>
-                <div className="flex flex-col">
-                  <h4 className="text-sm font-black text-slate-900 dark:text-white">{leader.name}</h4>
-                  <span className="text-[10px] text-[#b91c1c] dark:text-[#fbc02d] font-bold uppercase tracking-wider">{leader.role}</span>
+                <div className="flex flex-col min-w-0">
+                  <h4 className="text-sm font-black text-slate-900 dark:text-white truncate">{leader.name}</h4>
+                  <span className="text-[10px] text-[#b91c1c] dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate">{leader.role}</span>
                 </div>
               </div>
 
@@ -223,7 +429,7 @@ export default function AboutPage() {
                 <div className="flex flex-col gap-1.5 flex-1">
                   <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
                     <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                    Phạm vi trách nhiệm
+                    {t.responsibility}
                   </span>
                   <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
                     {leader.responsibility}
@@ -233,15 +439,15 @@ export default function AboutPage() {
                 <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 flex flex-col gap-2.5 font-medium text-slate-600 dark:text-slate-400">
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>Nơi làm việc: {leader.room}</span>
+                    <span>{t.workRoom}: {leader.room}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                    <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">Di động: {leader.phone}</a>
+                    <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">{t.phone}: {leader.phone}</a>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                    <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">Thư điện tử: {leader.email}</a>
+                    <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">{t.email}: {leader.email}</a>
                   </div>
                 </div>
               </div>

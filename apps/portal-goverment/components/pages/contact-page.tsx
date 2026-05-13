@@ -94,11 +94,61 @@ export default function ContactPage() {
     return found.name || fallback
   }, [portalConfigData, currentLang])
 
-  const [activeZone, setActiveZone] = React.useState<typeof COMMUNE_ZONES[0] | null>(null)
+  const getConfigObject = React.useCallback((code: string, fallback: any) => {
+    const found = (portalConfigData || []).find((c: any) => c.code === code)
+    if (!found) return fallback
 
-  React.useEffect(() => {
-    setActiveZone(COMMUNE_ZONES[2] || null)
-  }, [])
+    if (found.description && found.description.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(found.description)
+        if (parsed && typeof parsed === "object") {
+          const trans = parsed.translations || parsed
+          const val = trans[currentLang] || trans.vi
+          if (val) {
+            if (typeof val === "string") {
+              try {
+                return JSON.parse(val)
+              } catch (e) {
+                console.error("Inner array parse issue", e)
+              }
+            } else if (Array.isArray(val)) {
+              return val
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Outer translation list parse issue", e)
+      }
+    }
+    return fallback
+  }, [portalConfigData, currentLang])
+
+  // Resolve dynamic commune zones
+  const activeCommuneZones = React.useMemo(() => {
+    const cmsZones = getConfigObject("commune_zones", [])
+    if (!Array.isArray(cmsZones) || cmsZones.length === 0) {
+      return COMMUNE_ZONES
+    }
+    // Merge CMS custom properties into the static vector path templates
+    return COMMUNE_ZONES.map(staticZone => {
+      const cmsZone = cmsZones.find((z: any) => z.id === staticZone.id)
+      if (cmsZone) {
+        return {
+          ...staticZone,
+          name: cmsZone.name || staticZone.name,
+          area: cmsZone.area || staticZone.area,
+          pop: cmsZone.pop || staticZone.pop
+        }
+      }
+      return staticZone
+    })
+  }, [portalConfigData, currentLang, getConfigObject])
+
+  const [selectedZoneId, setSelectedZoneId] = React.useState<string>("T3")
+
+  const activeZone = React.useMemo(() => {
+    return activeCommuneZones.find(z => z.id === selectedZoneId) || activeCommuneZones[2] || null
+  }, [activeCommuneZones, selectedZoneId])
 
   const [mapType, setMapType] = React.useState<"vector" | "image">("vector")
 
@@ -342,7 +392,7 @@ export default function ContactPage() {
                   viewBox="0 0 100 100"
                   className="w-full max-w-[340px] h-auto drop-shadow-md"
                 >
-                  {COMMUNE_ZONES.map((zone) => {
+                  {activeCommuneZones.map((zone) => {
                     const isActive = activeZone?.id === zone.id
                     return (
                       <path
@@ -352,13 +402,13 @@ export default function ContactPage() {
                           ? "fill-[#b91c1c] opacity-95 scale-[1.01] drop-shadow-lg"
                           : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
                           }`}
-                        onClick={() => setActiveZone(zone)}
+                        onClick={() => setSelectedZoneId(zone.id)}
                       />
                     )
                   })}
 
                   {/* Display dynamic abbreviation tags directly on the map for high premium design feel */}
-                  {COMMUNE_ZONES.map((zone) => (
+                  {activeCommuneZones.map((zone) => (
                     <text
                       key={`tag-${zone.id}`}
                       x={zone.center.x}
