@@ -44,7 +44,7 @@ const footerTranslations = {
     privacy: "Chính sách bảo mật",
     sitemapLink: "Bản đồ trang web",
     copyright: "Bản quyền © 2026 Trang thông tin điện tử Ủy ban nhân dân xã Dang Kang. Phát triển trên nền tảng Portal Hành chính 4.0.",
-    
+
     home: "Trang chủ",
     about: "Giới thiệu",
     news: "Tin tức",
@@ -52,7 +52,7 @@ const footerTranslations = {
     procedures: "Thủ tục hành chính",
     feedback: "Hỏi đáp & Góp ý",
     contact: "Liên hệ",
-    
+
     addressLabel: "Địa chỉ:",
     hotlineLabel: "Điện thoại:",
     faxLabel: "Fax:",
@@ -76,7 +76,7 @@ const footerTranslations = {
     privacy: "Privacy Policy",
     sitemapLink: "Sitemap",
     copyright: "Copyright © 2026 Web Portal of Dang Kang People's Committee. Developed on Administrative Portal 4.0 Platform.",
-    
+
     home: "Home",
     about: "About Us",
     news: "News",
@@ -84,7 +84,7 @@ const footerTranslations = {
     procedures: "Procedures",
     feedback: "Q&A & Feedback",
     contact: "Contact",
-    
+
     addressLabel: "Address:",
     hotlineLabel: "Phone:",
     faxLabel: "Fax:",
@@ -225,7 +225,7 @@ export default function Footer() {
         documents: { vi: "/vi/van-ban", en: "/en/documents" },
         "van-ban": { vi: "/vi/van-ban", en: "/en/documents" },
       }
-      
+
       const mapped = pageMap[pageCode]
       if (mapped) {
         return currentLang === "en" ? mapped.en : mapped.vi
@@ -268,7 +268,7 @@ export default function Footer() {
       if (typeof trans === "string" && trans.trim().startsWith("{")) {
         try {
           trans = JSON.parse(trans)
-        } catch (e) {}
+        } catch (e) { }
       }
       if (currentLang === "en" && trans?.en?.name) {
         return trans.en.name

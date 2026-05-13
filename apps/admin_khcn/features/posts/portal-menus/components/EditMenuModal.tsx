@@ -465,8 +465,8 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                       (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
                     )
                       ? (dynamicPosts.find(
-                          (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
-                        )?.slug ||
+                        (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
+                      )?.slug ||
                         dynamicPosts.find(
                           (p) => p.slug === editingMenu.referenceId || p.id === editingMenu.referenceId
                         )?.id)

@@ -1,6 +1,7 @@
 import pika
 import json
 import os
+import concurrent.futures
 from core.translator import SmartTranslator
 
 translator = SmartTranslator()
@@ -31,35 +32,54 @@ def start_mq_worker():
         
         print(f"[*] Đang dịch bài viết: {post_id} sang {target_lang}")
         
-        for field in fields_to_translate:
+        def translate_field(field):
             text_to_translate = data.get(field)
             if not text_to_translate or not str(text_to_translate).strip():
-                continue
+                return None
                 
             print(f"  - Đang dịch trường '{field}'...")
             
             # Dịch nội dung
             translated = translator.translate(str(text_to_translate), target_lang)
-            
-            # Gửi kết quả ngược lại cho posts_service qua queue 'translation_response'
-            response_data = {
-                "postId": post_id,
-                "targetLang": target_lang,
-                "translatedText": translated,
-                "field": field
+            return field, translated
+
+        # Sử dụng ThreadPoolExecutor để dịch song song các trường
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            future_to_field = {
+                executor.submit(translate_field, field): field 
+                for field in fields_to_translate
             }
             
-            # Publish tới queue phản hồi
-            channel.queue_declare(queue='translation_response', durable=False)
-            channel.basic_publish(
-                exchange='',
-                routing_key='translation_response',
-                body=json.dumps({
-                    "pattern": "translation_response",
-                    "data": response_data
-                })
-            )
-            print(f"  [v] Đã dịch xong trường '{field}'")
+            for future in concurrent.futures.as_completed(future_to_field):
+                field = future_to_field[future]
+                try:
+                    result = future.result()
+                    if result is None:
+                        continue
+                        
+                    _, translated = result
+                    
+                    # Gửi kết quả ngược lại cho posts_service qua queue 'translation_response'
+                    response_data = {
+                        "postId": post_id,
+                        "targetLang": target_lang,
+                        "translatedText": translated,
+                        "field": field
+                    }
+                    
+                    # Publish tới queue phản hồi
+                    channel.queue_declare(queue='translation_response', durable=False)
+                    channel.basic_publish(
+                        exchange='',
+                        routing_key='translation_response',
+                        body=json.dumps({
+                            "pattern": "translation_response",
+                            "data": response_data
+                        })
+                    )
+                    print(f"  [v] Đã dịch xong trường '{field}'")
+                except Exception as exc:
+                    print(f"  [x] Lỗi khi dịch trường '{field}': {exc}")
 
         print(f"[v] Hoàn thành dịch toàn bộ bài viết: {post_id}")
         

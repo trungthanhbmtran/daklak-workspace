@@ -298,7 +298,7 @@ export default function Header() {
         documents: { vi: "/vi/van-ban", en: "/en/documents" },
         "van-ban": { vi: "/vi/van-ban", en: "/en/documents" },
       }
-      
+
       const mapped = pageMap[pageCode]
       if (mapped) {
         return currentLang === "en" ? mapped.en : mapped.vi
@@ -364,7 +364,7 @@ export default function Header() {
       if (typeof trans === "string" && trans.trim().startsWith("{")) {
         try {
           trans = JSON.parse(trans)
-        } catch (e) {}
+        } catch (e) { }
       }
       if (currentLang === "en" && trans?.en?.name) {
         return trans.en.name

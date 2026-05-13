@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+import concurrent.futures
 from googletrans import Translator
 from sqlalchemy.orm import Session
 from database.models import TranslationDictionary, Glossary
@@ -125,10 +126,14 @@ class SmartTranslator:
             
             # Chia nhỏ lô thành 25 cụm từ để tránh quá tải payload API
             batch_size = 25
+            batches = []
             for i in range(0, len(uncached_texts), batch_size):
-                sub_orig = uncached_texts[i:i+batch_size]
-                sub_processed = processed_texts[i:i+batch_size]
+                batches.append((
+                    uncached_texts[i:i+batch_size],
+                    processed_texts[i:i+batch_size]
+                ))
                 
+            def process_batch(sub_orig, sub_processed):
                 translated_results = []
                 try:
                     # Gửi danh sách 25 từ trong duy nhất 1 yêu cầu mạng (Giảm 25 lần kết nối mạng)
@@ -138,19 +143,29 @@ class SmartTranslator:
                     else:
                         translated_results = [results.text]
                 except Exception as e:
-                    print(f"Error in batch translation call (sub-batch {i}): {e}")
+                    print(f"Error in batch translation call: {e}")
                     # Nếu lỗi luồng batch, thử lại từng từ nhỏ lẻ
                     for p in sub_processed:
                         try:
                             translated_results.append(self.ai.translate(p, dest=ai_dest_lang).text)
                         except Exception:
                             translated_results.append(f"[Lỗi dịch AI] {p}")
+                return sub_orig, translated_results
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                futures = [executor.submit(process_batch, b[0], b[1]) for b in batches]
                 
-                # Áp kết quả dịch vào bản đồ trả về
-                for idx, orig_text in enumerate(sub_orig):
-                    translated = translated_results[idx] if idx < len(translated_results) else f"[AI chưa dịch] {orig_text}"
-                    result_map[orig_text] = translated
-                    translations_to_save.append((orig_text, translated))
+                for future in concurrent.futures.as_completed(futures):
+                    try:
+                        sub_orig, translated_results = future.result()
+                        # Áp kết quả dịch vào bản đồ trả về
+                        for idx, orig_text in enumerate(sub_orig):
+                            translated = translated_results[idx] if idx < len(translated_results) else f"[AI chưa dịch] {orig_text}"
+                            result_map[orig_text] = translated
+                            translations_to_save.append((orig_text, translated))
+                    except Exception as e:
+                        print(f"Error processing a translation batch: {e}")
+                    
                     
         # Lưu đống bản dịch mới vào DB một lần để học máy tự động
         if db and translations_to_save:
