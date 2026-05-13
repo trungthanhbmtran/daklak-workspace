@@ -110,6 +110,7 @@ export default function ImageComponent({
             </div>
           ) : (
             <Button 
+              type="button"
               size="sm" 
               onClick={(e) => { e.preventDefault(); handleUploadToServer(); }}
               disabled={isUploading}

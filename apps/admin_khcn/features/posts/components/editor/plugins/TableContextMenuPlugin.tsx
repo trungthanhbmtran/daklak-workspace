@@ -88,6 +88,7 @@ export function TableContextMenuPlugin() {
 
   const MenuItem = ({ icon: Icon, label, onClick, disabled, isDestructive }: any) => (
     <button
+      type="button"
       disabled={disabled}
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
       className={cn(

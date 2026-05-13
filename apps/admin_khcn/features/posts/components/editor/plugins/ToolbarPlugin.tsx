@@ -42,6 +42,7 @@ const ToolbarIconButton = forwardRef<HTMLButtonElement, any>(
   ({ icon: Icon, onClick, isActive = false, className, title, ...props }, ref) => (
     <Button
       ref={ref}
+      type="button"
       variant={isActive ? "secondary" : "ghost"}
       size="icon"
       title={title}
@@ -260,7 +261,7 @@ const ColorAndLinkPlugin = () => {
         <PopoverContent className="w-[280px] p-3 shadow-xl rounded-xl" align="start">
           <div className="text-xs font-semibold mb-2 text-slate-500 uppercase">Màu chữ</div>
           <div className="grid grid-cols-10 gap-1">
-            {COLORS.map((color) => (<button key={`text-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ color: color })} title={color} />))}
+            {COLORS.map((color) => (<button type="button" key={`text-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ color: color })} title={color} />))}
           </div>
         </PopoverContent>
       </Popover>
@@ -270,10 +271,10 @@ const ColorAndLinkPlugin = () => {
         <PopoverContent className="w-[280px] p-3 shadow-xl rounded-xl" align="start">
           <div className="flex justify-between items-center mb-2">
             <span className="text-xs font-semibold text-slate-500 uppercase">Màu nền</span>
-            <button className="text-[10px] text-blue-600 hover:underline" onClick={() => applyStyleText({ "background-color": "transparent" })}>Xóa nền</button>
+            <button type="button" className="text-[10px] text-blue-600 hover:underline" onClick={() => applyStyleText({ "background-color": "transparent" })}>Xóa nền</button>
           </div>
           <div className="grid grid-cols-10 gap-1">
-            {COLORS.map((color) => (<button key={`bg-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ "background-color": color })} title={color} />))}
+            {COLORS.map((color) => (<button type="button" key={`bg-${color}`} className="w-5 h-5 rounded-sm border hover:scale-110" style={{ backgroundColor: color }} onClick={() => applyStyleText({ "background-color": color })} title={color} />))}
           </div>
         </PopoverContent>
       </Popover>
@@ -293,8 +294,8 @@ const ColorAndLinkPlugin = () => {
               <Label htmlFor="target-blank" className="text-xs text-slate-600 font-medium cursor-pointer">Mở trong Tab mới</Label>
             </div>
             <div className="flex justify-end gap-2 mt-1">
-              {isLink && (<Button variant="ghost" size="sm" className="h-8 text-xs text-red-600 hover:bg-red-50" onClick={removeLink}><Unlink className="h-3.5 w-3.5 mr-1" /> Gỡ Link</Button>)}
-              <Button size="sm" className="h-8 px-4 text-xs bg-blue-600 hover:bg-blue-700 text-white" onClick={insertLink}>Áp dụng</Button>
+              {isLink && (<Button type="button" variant="ghost" size="sm" className="h-8 text-xs text-red-600 hover:bg-red-50" onClick={removeLink}><Unlink className="h-3.5 w-3.5 mr-1" /> Gỡ Link</Button>)}
+              <Button type="button" size="sm" className="h-8 px-4 text-xs bg-blue-600 hover:bg-blue-700 text-white" onClick={insertLink}>Áp dụng</Button>
             </div>
           </div>
         </PopoverContent>
@@ -379,12 +380,12 @@ const InsertMediaPlugin = () => {
             <span className="text-xs font-bold text-slate-700 uppercase">Chèn Hình Ảnh</span>
             <div className="flex gap-2">
               <Input placeholder="Dán link (https://...)" className="h-8 text-xs" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} onKeyDown={(e) => e.key === "Enter" && editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src: imageUrl, altText: "Img" })} />
-              <Button size="sm" className="h-8 bg-emerald-600 text-xs text-white" onClick={() => { editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src: imageUrl, altText: "Img" }); setIsImageOpen(false);}}>Chèn</Button>
+              <Button type="button" size="sm" className="h-8 bg-emerald-600 text-xs text-white" onClick={() => { editor.dispatchCommand(INSERT_IMAGE_COMMAND, { src: imageUrl, altText: "Img" }); setIsImageOpen(false);}}>Chèn</Button>
             </div>
             <div className="relative flex items-center py-1">
               <div className="grow border-t"></div><span className="mx-2 text-[10px] text-slate-400 uppercase">Hoặc</span><div className="grow border-t"></div>
             </div>
-            <Button variant="outline" size="sm" className="h-8 text-xs text-slate-600" onClick={() => imageInputRef.current?.click()}>
+            <Button type="button" variant="outline" size="sm" className="h-8 text-xs text-slate-600" onClick={() => imageInputRef.current?.click()}>
               <Upload className="h-3.5 w-3.5 mr-2 text-emerald-600" /> Tải lên từ máy
             </Button>
           </div>

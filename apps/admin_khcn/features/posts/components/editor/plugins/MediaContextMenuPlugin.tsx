@@ -187,6 +187,7 @@ export function MediaContextMenuPlugin() {
 
   const MenuItem = ({ icon: Icon, label, onClick, isDestructive }: any) => (
     <button
+      type="button"
       onClick={(e) => { e.preventDefault(); e.stopPropagation(); onClick(); }}
       className={cn(
         "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground",
@@ -301,8 +302,8 @@ export function MediaContextMenuPlugin() {
           </div>
           
           <DialogFooter>
-            <Button variant="outline" size="sm" onClick={() => setIsDialogOpen(false)}>Hủy</Button>
-            <Button size="sm" onClick={handleSaveProperties} className="bg-blue-600 hover:bg-blue-700">Lưu thay đổi</Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => setIsDialogOpen(false)}>Hủy</Button>
+            <Button type="button" size="sm" onClick={handleSaveProperties} className="bg-blue-600 hover:bg-blue-700">Lưu thay đổi</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
