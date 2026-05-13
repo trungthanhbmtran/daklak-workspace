@@ -656,108 +656,106 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
         </div>
 
         {/* Pagination Bar */}
-        {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 dark:bg-slate-950/20">
-            {/* Info */}
-            <div className="text-xs font-bold text-slate-400 dark:text-slate-500">
-              Hiển thị từ{" "}
-              <span className="text-slate-700 dark:text-slate-300">
-                {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
-              </span>{" "}
-              đến{" "}
-              <span className="text-slate-700 dark:text-slate-300">
-                {Math.min(page * pageSize, totalItems)}
-              </span>{" "}
-              trong tổng số{" "}
-              <span className="text-slate-700 dark:text-slate-300">{totalItems}</span>{" "}
-              bài viết
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 dark:bg-slate-950/20">
+          {/* Info */}
+          <div className="text-xs font-bold text-slate-400 dark:text-slate-500">
+            Hiển thị từ{" "}
+            <span className="text-slate-700 dark:text-slate-300">
+              {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
+            </span>{" "}
+            đến{" "}
+            <span className="text-slate-700 dark:text-slate-300">
+              {Math.min(page * pageSize, totalItems)}
+            </span>{" "}
+            trong tổng số{" "}
+            <span className="text-slate-700 dark:text-slate-300">{totalItems}</span>{" "}
+            bài viết
+          </div>
+
+          {/* Controls */}
+          <div className="flex flex-wrap items-center gap-4.5">
+            {/* Page Size Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">Số hàng:</span>
+              <Select
+                value={String(pageSize)}
+                onValueChange={(val) => {
+                  setPageSize(Number(val));
+                  setPage(1); // Reset to first page
+                }}
+              >
+                <SelectTrigger className="h-8 w-[70px] rounded-lg text-xs font-extrabold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl min-w-[70px]">
+                  <SelectItem value="5" className="text-xs font-bold">5</SelectItem>
+                  <SelectItem value="10" className="text-xs font-bold">10</SelectItem>
+                  <SelectItem value="20" className="text-xs font-bold">20</SelectItem>
+                  <SelectItem value="50" className="text-xs font-bold">50</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
-            {/* Controls */}
-            <div className="flex flex-wrap items-center gap-4.5">
-              {/* Page Size Selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">Số hàng:</span>
-                <Select
-                  value={String(pageSize)}
-                  onValueChange={(val) => {
-                    setPageSize(Number(val));
-                    setPage(1); // Reset to first page
-                  }}
-                >
-                  <SelectTrigger className="h-8 w-[70px] rounded-lg text-xs font-extrabold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl min-w-[70px]">
-                    <SelectItem value="5" className="text-xs font-bold">5</SelectItem>
-                    <SelectItem value="10" className="text-xs font-bold">10</SelectItem>
-                    <SelectItem value="20" className="text-xs font-bold">20</SelectItem>
-                    <SelectItem value="50" className="text-xs font-bold">50</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            {/* Navigation buttons */}
+            <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-950/40 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/20">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                disabled={page === 1}
+                onClick={() => setPage(1)}
+                title="Trang đầu"
+              >
+                <ChevronsLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                disabled={page === 1}
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                title="Trang trước"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
 
-              {/* Navigation buttons */}
-              <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-950/40 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/20">
+              {getPageNumbers().map((pNum) => (
                 <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
-                  disabled={page === 1}
-                  onClick={() => setPage(1)}
-                  title="Trang đầu"
+                  key={pNum}
+                  variant={page === pNum ? "default" : "ghost"}
+                  className={`h-7 px-3 text-xs font-extrabold rounded-lg ${page === pNum
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
+                    : "text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-850"
+                    }`}
+                  onClick={() => setPage(pNum)}
                 >
-                  <ChevronsLeft className="h-4 w-4" />
+                  {pNum}
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  title="Trang trước"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
+              ))}
 
-                {getPageNumbers().map((pNum) => (
-                  <Button
-                    key={pNum}
-                    variant={page === pNum ? "default" : "ghost"}
-                    className={`h-7 px-3 text-xs font-extrabold rounded-lg ${page === pNum
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
-                      : "text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-850"
-                      }`}
-                    onClick={() => setPage(pNum)}
-                  >
-                    {pNum}
-                  </Button>
-                ))}
-
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  title="Trang sau"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
-                  disabled={page === totalPages}
-                  onClick={() => setPage(totalPages)}
-                  title="Trang cuối"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                disabled={page === totalPages || totalPages === 0}
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                title="Trang sau"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                disabled={page === totalPages || totalPages === 0}
+                onClick={() => setPage(totalPages)}
+                title="Trang cuối"
+              >
+                <ChevronsRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
-        )}
+        </div>
       </Card>
     </div>
   );
