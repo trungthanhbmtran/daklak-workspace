@@ -17,6 +17,7 @@ import { useQuery } from "@tanstack/react-query";
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
+import apiClient from "@/lib/axiosInstance";
 
 interface EditMenuModalProps {
   isOpen: boolean;
@@ -77,6 +78,32 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const dynamicCategoriesList = dynamicCategories || [];
   const dynamicPosts = (dynamicPostsRes || []) as Post[];
   const dynamicUnitsList = dynamicUnitsRes || [];
+
+  // Tải danh sách trang thiết kế trực quan từ portal-configs
+  const { data: portalConfigsForMenu } = useQuery({
+    queryKey: ["portal-configs-for-menu"],
+    queryFn: async () => {
+      try {
+        const res = await apiClient.get("/portal-configs");
+        return Array.isArray(res?.data) ? res.data : [];
+      } catch (e) {
+        console.error("Failed to fetch configs for menu", e);
+        return [];
+      }
+    },
+    enabled: isOpen,
+  });
+
+  const customPageList = React.useMemo(() => {
+    const found = (portalConfigsForMenu || []).find((c: any) => c.code === "custom_page_list");
+    if (!found || !found.description) return [];
+    try {
+      return JSON.parse(found.description);
+    } catch (e) {
+      console.error("Failed to parse custom page list for menu", e);
+      return [];
+    }
+  }, [portalConfigsForMenu]);
 
   useEffect(() => {
     if (menu) {
@@ -316,9 +343,11 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </Label>
             <Select
               value={
-                editingMenu.type === "STATIC_PAGE" && editingMenu.referenceId === "van-ban"
-                  ? "DOCUMENTS"
-                  : editingMenu.type
+                editingMenu.link?.startsWith("/tuy-bien/")
+                  ? "CUSTOM_PAGE"
+                  : (editingMenu.type === "STATIC_PAGE" && editingMenu.referenceId === "van-ban")
+                    ? "DOCUMENTS"
+                    : editingMenu.type
               }
               onValueChange={(v) => {
                 if (v === "DOCUMENTS") {
@@ -327,6 +356,13 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                     type: "STATIC_PAGE",
                     referenceId: "van-ban",
                     link: "/van-ban",
+                  });
+                } else if (v === "CUSTOM_PAGE") {
+                  setEditingMenu({
+                    ...editingMenu,
+                    type: "URL",
+                    referenceId: "",
+                    link: "/tuy-bien/",
                   });
                 } else {
                   setEditingMenu({
@@ -345,6 +381,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
                 <SelectItem value="POST">Bài viết / Trang tĩnh CMS</SelectItem>
                 <SelectItem value="CATEGORY">Chuyên mục bài viết (Cây chuyên mục)</SelectItem>
                 <SelectItem value="DOCUMENTS">Hệ thống Văn bản pháp quy</SelectItem>
+                <SelectItem value="CUSTOM_PAGE">Trang thiết kế trực quan (Visual Page)</SelectItem>
                 <SelectItem value="URL">Đường dẫn tự do (URL)</SelectItem>
               </SelectContent>
             </Select>
@@ -509,7 +546,38 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
             </div>
           )}
 
-          {editingMenu.type === "URL" && (
+          {editingMenu.type === "URL" && editingMenu.link?.startsWith("/tuy-bien/") && (
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="customPageSelect" className="text-right font-bold text-sm text-slate-700">
+                Trang thiết kế
+              </Label>
+              <Select
+                value={editingMenu.link.replace("/tuy-bien/", "") || "NONE"}
+                onValueChange={(val) => {
+                  setEditingMenu({
+                    ...editingMenu,
+                    type: "URL",
+                    referenceId: val === "NONE" ? undefined : val,
+                    link: val === "NONE" ? "/tuy-bien/" : `/tuy-bien/${val}`
+                  });
+                }}
+              >
+                <SelectTrigger id="customPageSelect" className="col-span-3 rounded-lg">
+                  <SelectValue placeholder="Chọn trang đã thiết kế trực quan..." />
+                </SelectTrigger>
+                <SelectContent className="max-h-[220px]">
+                  <SelectItem value="NONE">--- Chọn trang ---</SelectItem>
+                  {customPageList.map((p: any) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.title?.vi || p.title || p.id} ({p.id})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {editingMenu.type === "URL" && !editingMenu.link?.startsWith("/tuy-bien/") && (
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="link" className="text-right font-bold text-sm text-slate-700">
                 Đường dẫn liên kết

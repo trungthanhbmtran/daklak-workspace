@@ -10,6 +10,7 @@ import NewsPage from "@/components/pages/news-page"
 import InteractionsPage from "@/components/pages/feedback-page"
 import DocumentsPage from "@/components/pages/documents-page"
 import NewsDetailPage from "@/components/pages/news-detail-page"
+import CustomBuilderPage from "@/components/pages/custom-builder-page"
 
 const SLUG_MAPPING: Record<string, React.ComponentType<any>> = {
   // English Routes
@@ -34,6 +35,7 @@ const DETAIL_MAPPING: Record<string, React.ComponentType<{ id: string }>> = {
   "news": NewsDetailPage,
   "trang": NewsDetailPage,
   "page": NewsDetailPage,
+  "tuy-bien": CustomBuilderPage,
 }
 
 // ISR configuration
