@@ -390,7 +390,7 @@ export default function ContactPage() {
               <div className="w-full flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850 relative">
                 <svg
                   viewBox="0 0 100 100"
-                  className="w-full max-w-[340px] h-auto drop-shadow-md"
+                  className="w-full max-w-[480px] h-auto drop-shadow-md"
                 >
                   {activeCommuneZones.map((zone) => {
                     const isActive = activeZone?.id === zone.id

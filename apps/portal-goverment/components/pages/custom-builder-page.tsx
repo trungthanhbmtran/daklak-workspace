@@ -141,7 +141,7 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
 
       {/* DYNAMIC CONTENTS */}
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6">
-        <DynamicPageRenderer layoutSchema={layoutSchema} />
+        <DynamicPageRenderer layoutSchema={layoutSchema} currentLang={currentLang} />
       </div>
     </div>
   )

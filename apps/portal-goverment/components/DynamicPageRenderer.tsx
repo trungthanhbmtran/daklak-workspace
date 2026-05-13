@@ -521,8 +521,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                               : "Bản đồ tương tác 8 thôn, buôn của địa bàn xã Dang Kang. Click vào phân vùng để xem chi tiết:"}
                           </p>
 
-                          <div className="w-full flex flex-col sm:flex-row gap-5 items-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850">
-                            <div className="flex-1 max-w-[200px] relative">
+                          <div className="w-full flex flex-col sm:flex-row gap-6 items-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850">
+                            <div className="flex-1 w-full max-w-[420px] relative">
                               <svg viewBox="0 0 100 100" className="w-full h-auto drop-shadow-md">
                                 {activeCommuneZones.map((zone) => {
                                   const isActive = activeZone?.id === zone.id
