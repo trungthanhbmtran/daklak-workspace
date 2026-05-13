@@ -337,7 +337,7 @@ export default function PortalPageBuilderPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6 select-none">
+    <div className="space-y-6 w-full p-4 sm:p-6 select-none">
       
       {/* HEADER BANNER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl shadow-md border-l-4 border-indigo-500 text-white">
@@ -380,9 +380,9 @@ export default function PortalPageBuilderPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: PAGES LIST SIDEBAR */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-3 xl:col-span-2 space-y-4">
           <div className="flex items-center justify-between border-b pb-2">
             <div className="flex items-center gap-2">
               <FileCode className="w-4.5 h-4.5 text-indigo-600" />
@@ -472,7 +472,7 @@ export default function PortalPageBuilderPage() {
         </div>
 
         {/* RIGHT COLUMN: CURRENT PAGE EDITOR */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-9 xl:col-span-10 space-y-4">
           {selectedPageMeta && (
             <>
               {/* STATUS & OVERVIEW CARD */}
