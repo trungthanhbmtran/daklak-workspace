@@ -1,24 +1,24 @@
 "use client";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Search, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  FileText, 
-  CheckCircle2, 
-  Clock, 
-  EyeOff, 
-  Image as ImageIcon, 
-  Loader2, 
-  AlertCircle, 
-  Globe, 
-  X, 
-  Send, 
-  Star, 
-  Eye, 
-  TrendingUp, 
+import {
+  Search,
+  Plus,
+  Edit,
+  Trash2,
+  FileText,
+  CheckCircle2,
+  Clock,
+  EyeOff,
+  Image as ImageIcon,
+  Loader2,
+  AlertCircle,
+  Globe,
+  X,
+  Send,
+  Star,
+  Eye,
+  TrendingUp,
   BarChart3,
   Calendar,
   User,
@@ -41,61 +41,61 @@ import { vi } from "date-fns/locale";
 import { toast } from "sonner";
 
 const STATUS_CONFIG: Record<PostStatus, { label: string; bg: string; text: string; dot: string; icon: React.ComponentType<{ className?: string }> }> = {
-  DRAFT: { 
-    label: "Bản nháp", 
-    bg: "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800", 
-    text: "text-slate-600 dark:text-slate-400", 
-    dot: "bg-slate-400", 
-    icon: FileText 
+  DRAFT: {
+    label: "Bản nháp",
+    bg: "bg-slate-50 dark:bg-slate-950/40 border-slate-200 dark:border-slate-800",
+    text: "text-slate-600 dark:text-slate-400",
+    dot: "bg-slate-400",
+    icon: FileText
   },
-  SUBMITTED: { 
-    label: "Chờ duyệt", 
-    bg: "bg-amber-50 dark:bg-amber-950/20 border-amber-100/50 dark:border-amber-900/30", 
-    text: "text-amber-700 dark:text-amber-400", 
-    dot: "bg-amber-500", 
-    icon: Clock 
+  SUBMITTED: {
+    label: "Chờ duyệt",
+    bg: "bg-amber-50 dark:bg-amber-950/20 border-amber-100/50 dark:border-amber-900/30",
+    text: "text-amber-700 dark:text-amber-400",
+    dot: "bg-amber-500",
+    icon: Clock
   },
-  UNDER_REVIEW: { 
-    label: "Đang thẩm định", 
-    bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-100/50 dark:border-blue-900/30", 
-    text: "text-blue-700 dark:text-blue-400", 
-    dot: "bg-blue-500", 
-    icon: Search 
+  UNDER_REVIEW: {
+    label: "Đang thẩm định",
+    bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-100/50 dark:border-blue-900/30",
+    text: "text-blue-700 dark:text-blue-400",
+    dot: "bg-blue-500",
+    icon: Search
   },
-  APPROVED: { 
-    label: "Đã phê duyệt", 
-    bg: "bg-indigo-50 dark:bg-indigo-950/20 border-indigo-100/50 dark:border-indigo-900/30", 
-    text: "text-indigo-700 dark:text-indigo-400", 
-    dot: "bg-indigo-500", 
-    icon: CheckCircle2 
+  APPROVED: {
+    label: "Đã phê duyệt",
+    bg: "bg-indigo-50 dark:bg-indigo-950/20 border-indigo-100/50 dark:border-indigo-900/30",
+    text: "text-indigo-700 dark:text-indigo-400",
+    dot: "bg-indigo-500",
+    icon: CheckCircle2
   },
-  REJECTED: { 
-    label: "Từ chối", 
-    bg: "bg-rose-50 dark:bg-rose-950/20 border-rose-100/50 dark:border-rose-900/30", 
-    text: "text-rose-700 dark:text-rose-400", 
-    dot: "bg-rose-500", 
-    icon: X 
+  REJECTED: {
+    label: "Từ chối",
+    bg: "bg-rose-50 dark:bg-rose-950/20 border-rose-100/50 dark:border-rose-900/30",
+    text: "text-rose-700 dark:text-rose-400",
+    dot: "bg-rose-500",
+    icon: X
   },
-  PUBLISHED: { 
-    label: "Đã xuất bản", 
-    bg: "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100/50 dark:border-emerald-900/30", 
-    text: "text-emerald-700 dark:text-emerald-400", 
-    dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse", 
-    icon: CheckCircle2 
+  PUBLISHED: {
+    label: "Đã xuất bản",
+    bg: "bg-emerald-50 dark:bg-emerald-950/20 border-emerald-100/50 dark:border-emerald-900/30",
+    text: "text-emerald-700 dark:text-emerald-400",
+    dot: "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse",
+    icon: CheckCircle2
   },
-  UNPUBLISHED: { 
-    label: "Đã gỡ bài", 
-    bg: "bg-orange-50 dark:bg-orange-950/20 border-orange-100/50 dark:border-orange-900/30", 
-    text: "text-orange-700 dark:text-orange-400", 
-    dot: "bg-orange-500", 
-    icon: EyeOff 
+  UNPUBLISHED: {
+    label: "Đã gỡ bài",
+    bg: "bg-orange-50 dark:bg-orange-950/20 border-orange-100/50 dark:border-orange-900/30",
+    text: "text-orange-700 dark:text-orange-400",
+    dot: "bg-orange-500",
+    icon: EyeOff
   },
-  ARCHIVED: { 
-    label: "Lưu trữ", 
-    bg: "bg-gray-50 dark:bg-gray-950/40 border-gray-200 dark:border-gray-800", 
-    text: "text-gray-600 dark:text-gray-400", 
-    dot: "bg-gray-400", 
-    icon: FileText 
+  ARCHIVED: {
+    label: "Lưu trữ",
+    bg: "bg-gray-50 dark:bg-gray-950/40 border-gray-200 dark:border-gray-800",
+    text: "text-gray-600 dark:text-gray-400",
+    dot: "bg-gray-400",
+    icon: FileText
   },
 };
 
@@ -109,19 +109,28 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Tải danh sách chuyên mục động từ API
-  const { data: categories } = useQuery({
-    queryKey: ["categories"],
+  // Tải danh sách danh mục dùng chung từ API (cho trạng thái bài viết)
+  const { data: systemCategories } = useQuery({
+    queryKey: ["system-categories"],
     queryFn: async () => {
       const res = await categoryApi.fetchAll();
       return res || [];
     }
   });
 
-  const postStatusCategories = categories?.filter((c: any) => c.group === "POST_STATUS" && c.active === 1) || [];
+  // Tải danh sách chuyên mục bài viết (Post Categories)
+  const { data: postCategories } = useQuery({
+    queryKey: ["post-categories"],
+    queryFn: async () => {
+      const res = await postsApi.getCategories();
+      return res?.data || [];
+    }
+  });
+
+  const postStatusCategories = systemCategories?.filter((c: any) => c.group === "POST_STATUS" && c.active === 1) || [];
 
   const getStatusLabel = (status: PostStatus) => {
-    const matched = categories?.find((c: any) => c.group === "POST_STATUS" && c.code === status);
+    const matched = systemCategories?.find((c: any) => c.group === "POST_STATUS" && c.code === status);
     return matched ? matched.name : (STATUS_CONFIG[status]?.label || status);
   };
 
@@ -225,7 +234,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
-      
+
       {/* CMS Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Card 1 */}
@@ -344,7 +353,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
             </SelectTrigger>
             <SelectContent className="rounded-xl">
               <SelectItem value="ALL" className="text-xs font-semibold">Tất cả chuyên mục</SelectItem>
-              {categories?.map((cat: any) => (
+              {postCategories?.map((cat: any) => (
                 <SelectItem key={cat.id} value={cat.id} className="text-xs font-semibold">{cat.name}</SelectItem>
               ))}
             </SelectContent>
@@ -369,8 +378,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
           </Select>
         </div>
 
-        <Button 
-          onClick={onNavigateToCreate} 
+        <Button
+          onClick={onNavigateToCreate}
           className="w-full lg:w-auto h-10 px-6 shadow-sm bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold uppercase text-[11px] tracking-wide rounded-xl transition-all duration-300 hover:shadow-indigo-500/10 hover:shadow-lg"
         >
           <Plus className="h-4 w-4 mr-2 stroke-[3px]" /> Viết bài mới
@@ -423,7 +432,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
 
                   return (
                     <tr key={post.id} className="hover:bg-slate-50/30 dark:hover:bg-slate-950/20 transition-colors group">
-                      
+
                       {/* Cột 1: Thumbnail & Chi tiết bài viết */}
                       <td className="px-6 py-4.5 align-middle">
                         <div className="flex items-center gap-4.5">
@@ -449,7 +458,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                           {/* Chi tiết */}
                           <div className="space-y-1.5 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span 
+                              <span
                                 onClick={() => onNavigateToEdit(post.id)}
                                 className="font-bold text-slate-800 dark:text-slate-100 text-xs sm:text-sm line-clamp-2 leading-snug hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                               >
@@ -466,9 +475,9 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                               <span className="font-mono bg-slate-50 dark:bg-slate-950 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-850">
                                 ID: {post.id?.substring(0, 8)}
                               </span>
-                              
+
                               <span className="flex items-center gap-1 font-sans text-slate-500 bg-slate-100 dark:bg-slate-950 dark:border dark:border-slate-850 px-2 py-0.5 rounded-lg text-[9.5px]">
-                                <Eye className="h-3.5 w-3.5 text-slate-400 shrink-0" /> 
+                                <Eye className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                                 {post.viewCount || 0} lượt xem
                               </span>
 
@@ -517,11 +526,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
 
                           {/* Automated Moderation Badge */}
                           {post.autoModerationStatus && (
-                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9.5px] font-bold ${
-                              post.autoModerationStatus === 'SAFE'
-                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10'
-                                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/10'
-                            }`}>
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9.5px] font-bold ${post.autoModerationStatus === 'SAFE'
+                              ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/10'
+                              : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/10'
+                              }`}>
                               <AlertCircle className="h-3 w-3 shrink-0" />
                               {post.autoModerationStatus === 'SAFE' ? 'AI An toàn' : 'AI Nghi ngờ'}
                             </span>
@@ -556,10 +564,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                         <div className="flex items-center justify-end gap-1.5">
                           {/* Workflow Actions */}
                           {post.status === 'DRAFT' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40 hover:bg-blue-50 dark:hover:bg-blue-950/30" 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/40 hover:bg-blue-50 dark:hover:bg-blue-950/30"
                               onClick={() => workflowMutation.mutate({ id: post.id, action: 'submit' })}
                             >
                               <Send className="h-3 w-3 mr-1 shrink-0" /> Gửi duyệt
@@ -568,18 +576,18 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
 
                           {(post.status === 'SUBMITTED' || post.status === 'UNDER_REVIEW') && (
                             <div className="flex items-center gap-1">
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30" 
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40 hover:bg-emerald-50 dark:hover:bg-emerald-950/30"
                                 onClick={() => workflowMutation.mutate({ id: post.id, action: 'approve' })}
                               >
                                 <CheckCircle2 className="h-3 w-3 mr-1 shrink-0" /> Duyệt
                               </Button>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30" 
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                                 onClick={() => {
                                   const note = prompt("Nhập lý do từ chối:");
                                   if (note) workflowMutation.mutate({ id: post.id, action: 'reject', note });
@@ -591,10 +599,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                           )}
 
                           {post.status === 'APPROVED' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/30" 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-900/40 hover:bg-indigo-50 dark:hover:bg-indigo-950/30"
                               onClick={() => workflowMutation.mutate({ id: post.id, action: 'publish' })}
                             >
                               <Globe className="h-3 w-3 mr-1 shrink-0" /> Xuất bản
@@ -602,10 +610,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                           )}
 
                           {post.status === 'PUBLISHED' && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-950/30" 
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-900/40 hover:bg-orange-50 dark:hover:bg-orange-950/30"
                               onClick={() => workflowMutation.mutate({ id: post.id, action: 'unpublish' })}
                             >
                               <EyeOff className="h-3 w-3 mr-1 shrink-0" /> Gỡ bài
@@ -614,11 +622,11 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
 
                           <div className="w-px h-4 bg-slate-200 dark:bg-slate-800 mx-1.5" />
 
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-8.5 w-8.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors" 
-                            onClick={() => onNavigateToEdit(post.id)} 
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8.5 w-8.5 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 rounded-lg transition-colors"
+                            onClick={() => onNavigateToEdit(post.id)}
                             title="Sửa bài viết"
                           >
                             <Edit className="h-4 w-4" />
@@ -716,11 +724,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                   <Button
                     key={pNum}
                     variant={page === pNum ? "default" : "ghost"}
-                    className={`h-7 px-3 text-xs font-extrabold rounded-lg ${
-                      page === pNum
-                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
-                        : "text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-850"
-                    }`}
+                    className={`h-7 px-3 text-xs font-extrabold rounded-lg ${page === pNum
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
+                      : "text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-850"
+                      }`}
                     onClick={() => setPage(pNum)}
                   >
                     {pNum}
