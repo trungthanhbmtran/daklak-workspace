@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   FileText,
   Newspaper,
+  Layers,
   type LucideIcon,
 } from "lucide-react";
 import { menuApi, type MenuNode } from "@/features/system-admin/menus/api";
@@ -156,6 +157,14 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
         href: `${config.basePath}/portal-config`,
         icon: ICON_MAP["settings-outline"] || Settings2,
         order: 6,
+      });
+    }
+    if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/portal-page-builder"))) {
+      menuItems.push({
+        name: "Trình tạo trang trực quan",
+        href: `${config.basePath}/portal-page-builder`,
+        icon: Layers,
+        order: 7,
       });
     }
   }
