@@ -24,22 +24,26 @@ export default function PortalPageBuilderPage() {
   const [customAboutLayout, setCustomAboutLayout] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  // 1. Fetch languages to pass down to page builder
-  const { data: dbLanguages } = useQuery({
-    queryKey: ["languages"],
-    queryFn: async () => {
-      try {
-        const res: any = await apiClient.get("/languages");
-        return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-      } catch (e) {
-        console.error("Error fetching languages", e);
-        return [];
-      }
-    }
-  });
+  const [languages, setLanguages] = useState<any[]>([]);
 
-  const activeLangs = dbLanguages && dbLanguages.length > 0 
-    ? dbLanguages 
+  // 1. Fetch registered active languages from Category module
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const res: any = await apiClient.get("/categories");
+        const all = Array.isArray(res?.data) ? res.data : [];
+        const langs = all.filter((c: any) => c.group === "LANGUAGE" && c.active === 1);
+        setLanguages(langs.length > 0 ? langs : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }]);
+      } catch (error) {
+        console.error("Error fetching languages", error);
+        setLanguages([{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }]);
+      }
+    };
+    fetchLanguages();
+  }, []);
+
+  const activeLangs = languages.length > 0 
+    ? languages 
     : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
   // 2. Fetch existing portal configurations
