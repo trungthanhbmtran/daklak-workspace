@@ -4,6 +4,7 @@ import * as React from "react"
 import { usePathname } from "next/navigation"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { DynamicPageRenderer } from "@/components/DynamicPageRenderer"
 import {
   Building2,
   MapPin,
@@ -267,10 +268,31 @@ export default function AboutPage() {
   const orgSections = getConfigObject("about_org_sections", DEFAULT_ORG_SECTIONS[currentLang])
   const detailLeaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang])
 
+  const useCustomAboutLayout = getConfigValue("use_custom_about_layout", "false") === "true"
+  const customAboutLayout = getConfigObject("custom_about_layout", [])
+
   // Split historyText by double newlines for paragraph separation
   const historyParagraphs = React.useMemo(() => {
     return historyText.split("\n\n").filter(Boolean)
   }, [historyText])
+
+  if (useCustomAboutLayout && Array.isArray(customAboutLayout) && customAboutLayout.length > 0) {
+    return (
+      <div className="flex flex-col gap-6 sm:gap-10 md:gap-14 animate-fade-in select-none">
+        {/* Page Title Header banner */}
+        <div className="w-full bg-gradient-to-r from-slate-900 to-slate-800 border-l-4 border-[#b91c1c] p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm">
+          <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-black text-white uppercase tracking-wide">
+            {t.pageTitle}
+          </h2>
+          <p className="text-xs text-slate-400 mt-1 font-medium">
+            {t.pageSubtitle}
+          </p>
+        </div>
+
+        <DynamicPageRenderer layoutSchema={customAboutLayout} currentLang={currentLang} />
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-14 animate-fade-in select-none">

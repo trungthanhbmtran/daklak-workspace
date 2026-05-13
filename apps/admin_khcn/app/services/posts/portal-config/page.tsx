@@ -28,9 +28,11 @@ import {
   Map as MapIcon,
   Workflow,
   UserSquare2,
-  CalendarDays
+  CalendarDays,
+  Layout
 } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
+import { PageBuilder } from "./PageBuilder";
 
 // -------------------------------------------------------------
 // DỮ LIỆU MẶC ĐỊNH CHO CÁC THÀNH PHẦN (FALLBACKS)
@@ -204,6 +206,9 @@ export default function PortalConfigPage() {
     en: DEFAULT_COMMUNE_ZONES_EN
   });
 
+  const [useCustomAboutLayout, setUseCustomAboutLayout] = useState<boolean>(false);
+  const [customAboutLayout, setCustomAboutLayout] = useState<any[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mapInputRef = useRef<HTMLInputElement>(null);
 
@@ -269,10 +274,29 @@ export default function PortalConfigPage() {
       const orgSectionsCat: any = dbCategories.find((c: any) => c.code === "about_org_sections");
       const leadersCat: any = dbCategories.find((c: any) => c.code === "about_leaders");
       const communeZonesCat: any = dbCategories.find((c: any) => c.code === "commune_zones");
+      const useCustomAboutLayoutCat: any = dbCategories.find((c: any) => c.code === "use_custom_about_layout");
+      const customAboutLayoutCat: any = dbCategories.find((c: any) => c.code === "custom_about_layout");
 
       // Set global fields
       if (logoCat) setLogoUrl(logoCat.name);
       if (mapCat) setMapUrl(mapCat.name);
+
+      if (useCustomAboutLayoutCat) {
+        setUseCustomAboutLayout(useCustomAboutLayoutCat.name === "true");
+      } else {
+        setUseCustomAboutLayout(false);
+      }
+
+      if (customAboutLayoutCat && customAboutLayoutCat.description) {
+        try {
+          setCustomAboutLayout(JSON.parse(customAboutLayoutCat.description));
+        } catch (e) {
+          console.error("Failed to parse custom page layout", e);
+          setCustomAboutLayout([]);
+        }
+      } else {
+        setCustomAboutLayout([]);
+      }
 
       const activeLangs = languages.length > 0 ? languages.map(l => l.code) : ["vi", "en"];
       const newTranslations: typeof configTranslations = {};
@@ -612,6 +636,16 @@ export default function PortalConfigPage() {
           code: "commune_zones",
           name: "Bản đồ phân vùng 8 thôn buôn xã Dang Kang",
           description: buildTranslationsJson(lang => JSON.stringify(communeZones[lang] || []))
+        },
+        {
+          code: "use_custom_about_layout",
+          name: useCustomAboutLayout ? "true" : "false",
+          description: "Sử dụng thiết kế trang giới thiệu trực quan"
+        },
+        {
+          code: "custom_about_layout",
+          name: "Cấu trúc layout trang giới thiệu thiết kế trực quan",
+          description: JSON.stringify(customAboutLayout)
         }
       ];
 
@@ -1481,7 +1515,8 @@ export default function PortalConfigPage() {
             {[
               { id: "general", label: "Cấu hình chung", icon: Settings },
               { id: "about", label: "Trang giới thiệu", icon: FileText },
-              { id: "zones", label: "Bản đồ phân vùng", icon: MapIcon }
+              { id: "zones", label: "Bản đồ phân vùng", icon: MapIcon },
+              { id: "pagebuilder", label: "Thiết kế Trang trực quan", icon: Layout }
             ].map(tab => {
               const TabIcon = tab.icon;
               const isActive = activeConfigTab === tab.id;
@@ -1605,6 +1640,52 @@ export default function PortalConfigPage() {
               ) : (
                 renderCommuneZonesEditor(activeLangTab)
               )}
+            </div>
+          )}
+
+          {/* TAB 4: VISUAL PAGE BUILDER */}
+          {activeConfigTab === "pagebuilder" && (
+            <div className="space-y-6 animate-fade-in pb-10">
+              <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden bg-white dark:bg-slate-900">
+                <CardHeader className="bg-slate-50/50 dark:bg-slate-950/40 border-b py-4 px-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <Layout className="w-4 h-4 text-indigo-600" />
+                      <CardTitle className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">
+                        Kích hoạt Layout thiết kế trực quan cho trang Giới thiệu (About Page)
+                      </CardTitle>
+                    </div>
+                    
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setUseCustomAboutLayout(!useCustomAboutLayout)}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
+                          useCustomAboutLayout ? "bg-indigo-600" : "bg-slate-200 dark:bg-slate-800"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            useCustomAboutLayout ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                        {useCustomAboutLayout ? "ĐANG BẬT" : "ĐANG TẮT"}
+                      </span>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5 text-xs text-slate-500 dark:text-slate-400 leading-relaxed bg-slate-50/10 dark:bg-slate-950/20">
+                  Khi **BẬT** chức năng này, Cổng thông tin (Portal) sẽ bỏ qua bố cục mặc định của Trang giới thiệu và tự động nạp cấu trúc hàng, cột, khối văn bản và widget mà bạn thiết kế bên dưới. Nếu **TẮT**, Cổng thông tin sẽ hiển thị theo bố cục chuẩn mặc định.
+                </CardContent>
+              </Card>
+
+              <PageBuilder
+                layout={customAboutLayout}
+                onChange={setCustomAboutLayout}
+                languages={activeLangs}
+              />
             </div>
           )}
         </div>
