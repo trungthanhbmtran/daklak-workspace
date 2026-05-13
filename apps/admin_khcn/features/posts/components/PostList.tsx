@@ -22,7 +22,11 @@ import {
   BarChart3,
   Calendar,
   User,
-  ArrowUpDown
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -102,6 +106,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
 
   // Tải danh sách chuyên mục động từ API
   const { data: categories } = useQuery({
@@ -120,7 +126,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   };
 
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ["posts", searchTerm, statusFilter, categoryFilter, sortBy, sortOrder],
+    queryKey: ["posts", searchTerm, statusFilter, categoryFilter, sortBy, sortOrder, page, pageSize],
     queryFn: async () => {
       const params = {
         search: searchTerm || undefined,
@@ -128,6 +134,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
         categoryId: categoryFilter === "ALL" ? undefined : categoryFilter,
         sortBy,
         sortOrder,
+        page,
+        limit: pageSize,
       };
       const res = await postsApi.getPosts(params);
       return {
@@ -195,6 +203,25 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const featuredCount = statsPosts.filter((p: Post) => p.isFeatured).length;
   const submittedCount = statsPosts.filter((p: Post) => p.status === 'SUBMITTED' || p.status === 'UNDER_REVIEW').length;
   const draftCount = statsPosts.filter((p: Post) => p.status === 'DRAFT').length;
+
+  const totalItems = data?.meta?.total || 0;
+  const totalPages = data?.meta?.totalPages || 1;
+
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPageButtons = 5;
+    let startPage = Math.max(1, page - 2);
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+
+    if (endPage - startPage + 1 < maxPageButtons) {
+      startPage = Math.max(1, endPage - maxPageButtons + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    return pages;
+  };
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
@@ -279,11 +306,14 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
               placeholder="Tìm theo tiêu đề bài viết..."
               className="pl-9 h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 focus-visible:ring-blue-500/20 rounded-xl text-xs font-semibold"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
             />
           </div>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setPage(1); }}>
             <SelectTrigger className="w-full sm:w-[160px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
@@ -308,7 +338,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
             </SelectContent>
           </Select>
 
-          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <Select value={categoryFilter} onValueChange={(val) => { setCategoryFilter(val); setPage(1); }}>
             <SelectTrigger className="w-full sm:w-[180px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">
               <SelectValue placeholder="Chuyên mục" />
             </SelectTrigger>
@@ -325,6 +355,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
             const [by, order] = val.split("-");
             setSortBy(by);
             setSortOrder(order);
+            setPage(1);
           }}>
             <SelectTrigger className="w-full sm:w-[200px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">
               <SelectValue placeholder="Sắp xếp theo" />
@@ -615,6 +646,111 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Bar */}
+        {totalPages > 1 && (
+          <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-850 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 dark:bg-slate-950/20">
+            {/* Info */}
+            <div className="text-xs font-bold text-slate-400 dark:text-slate-500">
+              Hiển thị từ{" "}
+              <span className="text-slate-700 dark:text-slate-300">
+                {totalItems === 0 ? 0 : (page - 1) * pageSize + 1}
+              </span>{" "}
+              đến{" "}
+              <span className="text-slate-700 dark:text-slate-300">
+                {Math.min(page * pageSize, totalItems)}
+              </span>{" "}
+              trong tổng số{" "}
+              <span className="text-slate-700 dark:text-slate-300">{totalItems}</span>{" "}
+              bài viết
+            </div>
+
+            {/* Controls */}
+            <div className="flex flex-wrap items-center gap-4.5">
+              {/* Page Size Selector */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-400 dark:text-slate-500 whitespace-nowrap">Số hàng:</span>
+                <Select
+                  value={String(pageSize)}
+                  onValueChange={(val) => {
+                    setPageSize(Number(val));
+                    setPage(1); // Reset to first page
+                  }}
+                >
+                  <SelectTrigger className="h-8 w-[70px] rounded-lg text-xs font-extrabold border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-none">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl min-w-[70px]">
+                    <SelectItem value="5" className="text-xs font-bold">5</SelectItem>
+                    <SelectItem value="10" className="text-xs font-bold">10</SelectItem>
+                    <SelectItem value="20" className="text-xs font-bold">20</SelectItem>
+                    <SelectItem value="50" className="text-xs font-bold">50</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-950/40 p-1 rounded-xl border border-slate-200/40 dark:border-slate-800/20">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                  disabled={page === 1}
+                  onClick={() => setPage(1)}
+                  title="Trang đầu"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                  disabled={page === 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  title="Trang trước"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {getPageNumbers().map((pNum) => (
+                  <Button
+                    key={pNum}
+                    variant={page === pNum ? "default" : "ghost"}
+                    className={`h-7 px-3 text-xs font-extrabold rounded-lg ${
+                      page === pNum
+                        ? "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm"
+                        : "text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-850"
+                    }`}
+                    onClick={() => setPage(pNum)}
+                  >
+                    {pNum}
+                  </Button>
+                ))}
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                  disabled={page === totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  title="Trang sau"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 rounded-lg text-slate-500 hover:text-blue-600 dark:hover:text-blue-400 disabled:opacity-30 disabled:hover:text-slate-500"
+                  disabled={page === totalPages}
+                  onClick={() => setPage(totalPages)}
+                  title="Trang cuối"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );
