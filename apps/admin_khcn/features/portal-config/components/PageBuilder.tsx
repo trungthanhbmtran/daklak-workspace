@@ -90,6 +90,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [activeLang, setActiveLang] = useState<string>("vi");
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("toolbox");
+  const [dragOverColId, setDragOverColId] = useState<string | null>(null);
 
   // Layout structures templates
   const addRow = (type: "12" | "6-6" | "7-5" | "8-4" | "4-4-4") => {
@@ -623,7 +624,21 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                   {row.columns.map((col) => (
                     <div 
                       key={col.id} 
-                      className={`${col.colSpan} border-2 border-dashed border-slate-200 dark:border-slate-800/80 rounded-xl p-4 min-h-[140px] bg-slate-50/20 dark:bg-slate-950/20 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between`}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setDragOverColId(col.id);
+                      }}
+                      onDragLeave={() => setDragOverColId(null)}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        setDragOverColId(null);
+                        const widgetType = e.dataTransfer.getData("text/plain") as Widget["type"];
+                        if (widgetType) {
+                          addWidget(row.rowId, col.id, widgetType);
+                          toast.success(`Đã kéo khối ${widgetType} vào phân vùng thành công!`);
+                        }
+                      }}
+                      className={`${col.colSpan} border-2 ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/40 ring-4 ring-indigo-500/20 dark:bg-indigo-950/40" : "border-dashed border-slate-200 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-950/20"} rounded-xl p-4 min-h-[140px] hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex flex-col justify-between`}
                     >
                       {/* Column widgets list */}
                       <div className="space-y-4">
@@ -1227,7 +1242,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
       </div>
 
       {/* RIGHT PANEL: Toolbox (Kho CSDL) & Customizer Tabs */}
-      <div className={`transition-all duration-500 ${isLexicalActive ? 'xl:col-span-8 order-1 xl:order-2 max-w-7xl' : 'xl:col-span-4 order-2'}`}>
+      <div className={`transition-all duration-500 sticky top-6 h-[calc(100vh-140px)] overflow-y-auto pr-2 ${isLexicalActive ? 'xl:col-span-8 order-1 xl:order-2 max-w-7xl' : 'xl:col-span-4 order-2'}`}>
         <Tabs defaultValue="toolbox" value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === "toolbox") setSelectedWidgetId(null); }}>
           <TabsList className="w-full grid grid-cols-2 mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-12">
             <TabsTrigger value="toolbox" className="font-extrabold text-xs gap-2 flex items-center rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all">
@@ -1254,7 +1269,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                         Kho Module CSDL
                       </CardTitle>
                       <p className="text-[11px] text-indigo-200 font-medium">
-                        Kéo hoặc bấm chọn để nạp vào trang
+                        Bấm chọn hoặc kéo thả khối vào vị trí
                       </p>
                     </div>
                   </div>
@@ -1262,12 +1277,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     11 Khối
                   </span>
                 </div>
+                <div className="mt-2 text-[10px] bg-indigo-500/20 border border-indigo-400/30 text-indigo-200 px-3 py-1.5 rounded-xl font-bold flex items-center gap-1.5">
+                  <span className="animate-pulse">💡</span> Kéo khối thả vào phân vùng bất kỳ trên Canvas bên trái hoặc bấm để nạp tự động.
+                </div>
               </CardHeader>
               <CardContent className="p-4 bg-indigo-50/10 dark:bg-indigo-950/10 space-y-3">
                 {/* Card 1: Org */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "ORG_SECTIONS_DIRECTORY")}
                   onClick={() => addDataSourceAsRow("ORG_SECTIONS_DIRECTORY")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1282,15 +1302,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 2: Leaders */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "LEADERSHIP_LIST")}
                   onClick={() => addDataSourceAsRow("LEADERSHIP_LIST")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1305,15 +1327,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 3: Featured News */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "FEATURED_NEWS")}
                   onClick={() => addDataSourceAsRow("FEATURED_NEWS")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1328,15 +1352,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 4: Legal Documents */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "LEGAL_DOCUMENTS")}
                   onClick={() => addDataSourceAsRow("LEGAL_DOCUMENTS")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1351,15 +1377,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 5: Public Services */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "PUBLIC_SERVICES")}
                   onClick={() => addDataSourceAsRow("PUBLIC_SERVICES")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1374,15 +1402,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 6: Map */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "COMMUNE_INTERACTIVE_MAP")}
                   onClick={() => addDataSourceAsRow("COMMUNE_INTERACTIVE_MAP")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1397,15 +1427,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 7: Gallery */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "PHOTO_VIDEO_GALLERY")}
                   onClick={() => addDataSourceAsRow("PHOTO_VIDEO_GALLERY")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1420,15 +1452,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 8: Banners */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "HERO_SLIDER")}
                   onClick={() => addDataSourceAsRow("HERO_SLIDER")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1443,15 +1477,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 9: FAQ */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "FAQ_ACCORDION")}
                   onClick={() => addDataSourceAsRow("FAQ_ACCORDION")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1466,15 +1502,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 10: Contact */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "CONTACT_INFO_SIDEBAR")}
                   onClick={() => addDataSourceAsRow("CONTACT_INFO_SIDEBAR")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1489,15 +1527,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
 
                 {/* Card 11: Lexical */}
                 <div 
+                  draggable={true}
+                  onDragStart={(e) => e.dataTransfer.setData("text/plain", "LEXICAL_RICH_TEXT")}
                   onClick={() => addDataSourceAsRow("LEXICAL_RICH_TEXT")}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm bg-gradient-to-br from-indigo-50/50 to-white dark:from-indigo-950/20 dark:to-slate-900"
+                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-grab active:cursor-grabbing transition-all group flex flex-col justify-between shadow-sm bg-gradient-to-br from-indigo-50/50 to-white dark:from-indigo-950/20 dark:to-slate-900"
                 >
                   <div>
                     <div className="flex items-center gap-2.5 mb-1.5">
@@ -1512,7 +1552,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </p>
                   </div>
                   <div className="mt-3 pt-2 border-t border-indigo-100 dark:border-indigo-900/40 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
-                    <span>+ Nạp vào trang</span>
+                    <span>+ Nạp vào trang / Kéo thả</span>
                     <span className="group-hover:translate-x-0.5 transition-transform">→</span>
                   </div>
                 </div>
@@ -1521,7 +1561,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           </TabsContent>
 
           <TabsContent value="customizer" className="m-0 animate-fade-in">
-            <Card className="border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden bg-white dark:bg-slate-900 rounded-2xl sticky top-24">
+            <Card className="border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden bg-white dark:bg-slate-900 rounded-2xl">
               <CardHeader className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-800 p-5 text-white">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
