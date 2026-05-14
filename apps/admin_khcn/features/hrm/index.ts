@@ -11,3 +11,6 @@ export {
   useHrmEmployee,
   useInvalidateHrmEmployees,
 } from "./hooks/useHrmEmployees";
+
+export { HrmDashboardClient } from "./components/HrmDashboardClient";
+export { EmployeeListClient } from "./components/EmployeeListClient";

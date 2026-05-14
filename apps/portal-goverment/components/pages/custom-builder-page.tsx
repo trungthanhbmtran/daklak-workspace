@@ -82,34 +82,34 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <p className="text-xs font-semibold text-slate-500 animate-pulse">
-          {currentLang === "vi" ? "Đang tải trang..." : "Loading page..."}
+      <div className="flex flex-col items-center justify-center min-h-[500px] gap-3">
+        <Loader2 className="w-8 h-8 animate-spin text-red-600" />
+        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest animate-pulse">
+          {currentLang === "vi" ? "Đang nạp cấu hình trang..." : "Loading page structure..."}
         </p>
       </div>
     )
   }
 
   // If page does not exist or layout schema is missing
-  if (!layoutSchema) {
+  if (!layoutSchema || layoutSchema.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-16 text-center space-y-4">
-        <div className="inline-flex p-4 bg-amber-50 text-amber-600 rounded-full">
-          <FileText className="w-8 h-8" />
+      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-5 animate-fade-in">
+        <div className="inline-flex p-5 bg-amber-50 text-amber-600 rounded-full shadow-inner border border-amber-100">
+          <FileText className="w-10 h-10" />
         </div>
-        <h1 className="text-xl font-black text-slate-800">
+        <h1 className="text-xl sm:text-2xl font-black text-slate-800 uppercase tracking-tight">
           {currentLang === "vi" ? "Trang chưa được thiết kế" : "Page Not Designed Yet"}
         </h1>
-        <p className="text-sm text-slate-500 max-w-md mx-auto">
+        <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
           {currentLang === "vi" 
-            ? "Trang này hiện chưa có nội dung thiết kế trực quan từ bảng quản trị CMS. Vui lòng liên hệ quản trị viên để thiết kế."
-            : "This page does not have any visual design layout from CMS dashboard yet. Please contact your administrator."}
+            ? "Trang này hiện chưa có bố cục thiết kế từ hệ thống quản trị Page Builder. Quản trị viên có thể sử dụng công cụ kéo thả để phân chia khối và cập nhật nội dung."
+            : "This page does not have any visual layout configuration from CMS dashboard yet. Please contact administrator to build the page structure."}
         </p>
         <div className="pt-4">
           <Link 
             href={`/${currentLang}`}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-all"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold hover:bg-red-700 shadow-md hover:shadow-lg transition-all"
           >
             <ArrowLeft className="w-4 h-4" />
             {currentLang === "vi" ? "Quay lại Trang chủ" : "Back to Home"}
@@ -120,12 +120,15 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/40 pb-16">
-      {/* BREADCRUMBS & HEADER SECTION */}
-      <div className="bg-white border-b shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 py-5 sm:px-6">
+    <div className="min-h-screen bg-slate-50/50 pb-20 animate-fade-in">
+      {/* BANNER HEADER SECTION */}
+      <div className="bg-white border-b border-slate-200 shadow-xs relative overflow-hidden">
+        {/* Top Accent line representing Daklak/National motif */}
+        <div className="h-1 bg-gradient-to-r from-red-600 via-yellow-400 to-red-600 w-full" />
+        
+        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 relative z-10">
           <nav className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2.5">
-            <Link href={`/${currentLang}`} className="hover:text-blue-600 flex items-center gap-1 transition-colors">
+            <Link href={`/${currentLang}`} className="hover:text-red-600 flex items-center gap-1 transition-colors">
               <Home className="w-3.5 h-3.5" />
               {currentLang === "vi" ? "Trang chủ" : "Home"}
             </Link>
@@ -133,13 +136,16 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
             <span className="text-slate-600 truncate">{pageTitle}</span>
           </nav>
           
-          <h1 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight uppercase">
+          <h1 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight uppercase">
             {pageTitle}
           </h1>
         </div>
+        
+        {/* Subtle background gradient pattern */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-red-50/40 to-transparent pointer-events-none" />
       </div>
 
-      {/* DYNAMIC CONTENTS */}
+      {/* DYNAMIC CONTENT CONTAINER */}
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6">
         <DynamicPageRenderer layoutSchema={layoutSchema} currentLang={currentLang} />
       </div>
