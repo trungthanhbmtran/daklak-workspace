@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
 import { PageBuilder } from "./PageBuilder";
+import { PortalLivePreview } from "./PortalLivePreview";
 
 interface CustomPageMeta {
   id: string;
@@ -41,6 +42,8 @@ interface CustomPageMeta {
 export function PortalPageBuilderClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [languages, setLanguages] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"builder" | "preview">("builder");
+  const [previewLang, setPreviewLang] = useState<string>("vi");
   
   // Custom pages list management state
   const [pagesList, setPagesList] = useState<CustomPageMeta[]>([]);
@@ -541,23 +544,90 @@ export function PortalPageBuilderClient() {
                 </CardContent>
               </Card>
 
-              {/* EDITOR CANVAS */}
+              {/* EDITOR CANVAS OR LIVE PREVIEW */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-3 gap-3">
                   <div className="flex items-center gap-2">
                     <Settings2 className="w-4 h-4 text-indigo-600 shrink-0" />
                     <h2 className="text-xs sm:text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                      Không gian thiết kế cấu trúc trang & Widgets
+                      Không gian thiết kế & Xem trước giao diện
                     </h2>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("builder")}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${
+                          activeTab === "builder" 
+                            ? "bg-indigo-600 text-white shadow-sm" 
+                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
+                        }`}
+                      >
+                        <Layout className="w-3.5 h-3.5" />
+                        Thiết kế Layout & Widget
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("preview")}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-black transition-all flex items-center gap-1.5 ${
+                          activeTab === "preview" 
+                            ? "bg-emerald-600 text-white shadow-sm" 
+                            : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white"
+                        }`}
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        Xem trước Giao diện Portal
+                      </button>
+                    </div>
+
+                    {activeTab === "preview" && (
+                      <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+                        {activeLangs.map(l => (
+                          <button
+                            key={l.code}
+                            type="button"
+                            onClick={() => setPreviewLang(l.code)}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase transition-all ${
+                              previewLang === l.code 
+                                ? "bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-sm" 
+                                : "text-slate-400 hover:text-slate-600"
+                            }`}
+                          >
+                            {l.code}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <PageBuilder
-                  layout={currentLayout}
-                  onChange={setCurrentLayout}
-                  languages={activeLangs}
-                />
+                {activeTab === "builder" ? (
+                  <PageBuilder
+                    layout={currentLayout}
+                    onChange={setCurrentLayout}
+                    languages={activeLangs}
+                  />
+                ) : (
+                  <div className="p-6 bg-slate-100 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner min-h-[500px]">
+                    <div className="mb-4 flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <span className="text-[11px] font-black uppercase text-slate-700 dark:text-slate-300">
+                          Chế độ Live Portal Preview (Pixel-Perfect)
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        Ngôn ngữ hiển thị: <strong className="text-emerald-600 uppercase font-black">{previewLang}</strong>
+                      </span>
+                    </div>
+
+                    <PortalLivePreview layoutSchema={currentLayout} currentLang={previewLang} />
+                  </div>
+                )}
               </div>
+
             </>
           )}
         </div>
