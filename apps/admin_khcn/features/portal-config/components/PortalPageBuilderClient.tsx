@@ -382,7 +382,7 @@ export function PortalPageBuilderClient() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT COLUMN: PAGES LIST SIDEBAR */}
-        <div className="lg:col-span-3 xl:col-span-2 space-y-4">
+        <div className="lg:col-span-3 xl:col-span-2 space-y-4 lg:sticky lg:top-6">
           <div className="flex items-center justify-between border-b pb-2">
             <div className="flex items-center gap-2">
               <FileCode className="w-4.5 h-4.5 text-indigo-600" />
@@ -399,7 +399,7 @@ export function PortalPageBuilderClient() {
             </Button>
           </div>
 
-          <div className="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+          <div className="space-y-2 h-[calc(100vh-220px)] overflow-y-auto pr-1">
             {pagesList.map((p) => {
               const isSelected = p.id === selectedPageId;
               return (
