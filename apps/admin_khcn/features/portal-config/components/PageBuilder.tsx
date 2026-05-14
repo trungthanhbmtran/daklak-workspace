@@ -24,7 +24,14 @@ import {
   FileText,
   X,
   Code,
-  Copy
+  Copy,
+  Images,
+  Newspaper,
+  Landmark,
+  FolderOpen,
+  HelpCircle,
+  ExternalLink,
+  Film
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,7 +43,7 @@ import { toast } from "sonner";
 
 interface Widget {
   id: string;
-  type: "LEXICAL_RICH_TEXT" | "STATISTICS_GRID" | "LEADERSHIP_LIST" | "ORG_SECTIONS_DIRECTORY" | "COMMUNE_INTERACTIVE_MAP" | "CONTACT_INFO_SIDEBAR" | "CONTACT_FORM";
+  type: "LEXICAL_RICH_TEXT" | "STATISTICS_GRID" | "LEADERSHIP_LIST" | "ORG_SECTIONS_DIRECTORY" | "COMMUNE_INTERACTIVE_MAP" | "CONTACT_INFO_SIDEBAR" | "CONTACT_FORM" | "HERO_SLIDER" | "FEATURED_NEWS" | "PUBLIC_SERVICES" | "LEGAL_DOCUMENTS" | "PHOTO_VIDEO_GALLERY" | "FAQ_ACCORDION" | "EXTERNAL_LINKS";
   title: Record<string, string>;
   content?: Record<string, string>; // Lexical state JSON per language
   data?: any;
@@ -144,6 +151,27 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     } else if (widgetType === "CONTACT_FORM") {
       defaultTitle.vi = "Biểu mẫu gửi góp ý";
       defaultTitle.en = "Feedback Comment Form";
+    } else if (widgetType === "HERO_SLIDER") {
+      defaultTitle.vi = "Trình chiếu Banners & Slogan";
+      defaultTitle.en = "Hero Banner Slider";
+    } else if (widgetType === "FEATURED_NEWS") {
+      defaultTitle.vi = "Tin tức nổi bật mới nhất";
+      defaultTitle.en = "Featured Latest News";
+    } else if (widgetType === "PUBLIC_SERVICES") {
+      defaultTitle.vi = "Dịch vụ công & Tra cứu hồ sơ";
+      defaultTitle.en = "Public Services & Lookup";
+    } else if (widgetType === "LEGAL_DOCUMENTS") {
+      defaultTitle.vi = "Văn bản chỉ đạo điều hành";
+      defaultTitle.en = "Legal Documents";
+    } else if (widgetType === "PHOTO_VIDEO_GALLERY") {
+      defaultTitle.vi = "Thư viện Hình ảnh & Video";
+      defaultTitle.en = "Photo & Video Gallery";
+    } else if (widgetType === "FAQ_ACCORDION") {
+      defaultTitle.vi = "Hỏi đáp trực tuyến (FAQ)";
+      defaultTitle.en = "Online FAQ";
+    } else if (widgetType === "EXTERNAL_LINKS") {
+      defaultTitle.vi = "Liên kết website & Đối tác";
+      defaultTitle.en = "External Links";
     }
 
     const newWidget: Widget = {
@@ -250,12 +278,13 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   };
 
   const currentWidget = getSelectedWidget();
+  const isLexicalActive = currentWidget?.type === "LEXICAL_RICH_TEXT";
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 animate-fade-in">
       
       {/* LEFT PANEL: Layout Builder Canvas */}
-      <div className="xl:col-span-8 max-w-7xl w-full space-y-6">
+      <div className={`w-full space-y-6 transition-all duration-500 ${isLexicalActive ? 'xl:col-span-4 order-2 xl:order-1' : 'xl:col-span-8 order-1 max-w-7xl'}`}>
         
         {/* Layout templates picker */}
         <Card className="border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl">
@@ -443,9 +472,16 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                                     {widget.type === "COMMUNE_INTERACTIVE_MAP" && <Map className="w-4 h-4" />}
                                     {widget.type === "CONTACT_INFO_SIDEBAR" && <PhoneCall className="w-4 h-4" />}
                                     {widget.type === "CONTACT_FORM" && <FileText className="w-4 h-4" />}
+                                    {widget.type === "HERO_SLIDER" && <Images className="w-4 h-4" />}
+                                    {widget.type === "FEATURED_NEWS" && <Newspaper className="w-4 h-4" />}
+                                    {widget.type === "PUBLIC_SERVICES" && <Landmark className="w-4 h-4" />}
+                                    {widget.type === "LEGAL_DOCUMENTS" && <FolderOpen className="w-4 h-4" />}
+                                    {widget.type === "PHOTO_VIDEO_GALLERY" && <Film className="w-4 h-4" />}
+                                    {widget.type === "FAQ_ACCORDION" && <HelpCircle className="w-4 h-4" />}
+                                    {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
                                   </div>
                                   <div className="flex flex-col min-w-0">
-                                    <span className="text-[10px] text-slate-400 font-extrabold uppercase leading-tight">
+                                    <span className="text-[10px] text-slate-400 font-extrabold uppercase leading-tight truncate">
                                       {widget.type}
                                     </span>
                                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate mt-0.5">
@@ -529,6 +565,62 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                         >
                           + Form Góp ý
                         </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "HERO_SLIDER")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Trình chiếu Banner
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "FEATURED_NEWS")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Tin nổi bật
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "PUBLIC_SERVICES")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Dịch vụ công
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "LEGAL_DOCUMENTS")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Văn bản pháp quy
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "PHOTO_VIDEO_GALLERY")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Thư viện Ảnh/Video
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "FAQ_ACCORDION")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Hỏi đáp FAQ
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => addWidget(row.rowId, col.id, "EXTERNAL_LINKS")}
+                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
+                        >
+                          + Liên kết website
+                        </Button>
                       </div>
                     </div>
                   ))}
@@ -540,7 +632,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
       </div>
 
       {/* RIGHT PANEL: Selected Widget Customizer Properties */}
-      <div className="xl:col-span-4">
+      <div className={`transition-all duration-500 ${isLexicalActive ? 'xl:col-span-8 order-1 xl:order-2 max-w-7xl' : 'xl:col-span-4 order-2'}`}>
         <Card className="border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl sticky top-24">
           <CardHeader className="bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-850 p-4">
             <div className="flex items-center gap-2">
@@ -591,15 +683,18 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                 {/* Specific Widget Editors */}
                 {currentWidget.type === "LEXICAL_RICH_TEXT" && (
                   <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-850">
-                    <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
-                      Nội dung Rich Text soạn thảo
-                    </Label>
-                    <div className="rounded-xl overflow-hidden min-h-[300px]">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
+                        Nội dung Rich Text soạn thảo
+                      </Label>
+                      <span className="text-[10px] text-[#b91c1c] dark:text-[#fbc02d] font-bold animate-pulse">✨ Chế độ thiết kế toàn cảnh</span>
+                    </div>
+                    <div className="rounded-xl overflow-hidden min-h-[450px] border border-slate-200 dark:border-slate-800 shadow-inner bg-white dark:bg-slate-950">
                       <LexicalEditor
                         value={currentWidget.content?.[activeLang] || ""}
                         onChange={(lexicalJson) => updateWidgetContent(currentWidget.id, lexicalJson)}
                         placeholder="Bắt đầu viết nội dung trang của bạn ở đây..."
-                        minHeight="280px"
+                        minHeight="420px"
                       />
                     </div>
                   </div>
@@ -655,7 +750,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                       <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu liên hệ đồng bộ
                     </h5>
                     <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Nhúng khối thông tin địa chỉ, email, hotline của trụ sở cơ quan cùng lịch trực tiếp công dân của ban cán sự.
+                      Nhúng khối thông tin địa chỉ, email, hotline của trụ sở cơ cơ quan cùng lịch trực tiếp công dân của ban cán sự.
                     </p>
                   </div>
                 )}
@@ -667,6 +762,83 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </h5>
                     <p className="text-[10px] text-slate-500 leading-normal font-medium">
                       Tự động tải biểu mẫu và hòm thư phản ánh ý kiến, kiến nghị trực tiếp từ công dân để gửi đến ban biên tập cơ quan.
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "HERO_SLIDER" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-amber-50/20 border border-amber-100/40">
+                    <h5 className="font-extrabold text-amber-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu Banners đồng bộ
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Tự động tải danh sách các Banners và Slogan chính được cấu hình trong hệ thống để hiển thị trình chiếu tự động (Slider) sang trọng trên trang.
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "FEATURED_NEWS" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-blue-50/20 border border-blue-100/40">
+                    <h5 className="font-extrabold text-blue-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Tin tức nổi bật tự động nạp
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Hiển thị danh sách các bài viết mới nhất và nổi bật nhất từ các chuyên mục Tin tức, Thông báo, Xây dựng, Nông nghiệp với hiệu ứng thẻ sang trọng.
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "PUBLIC_SERVICES" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-emerald-50/20 border border-emerald-100/40">
+                    <h5 className="font-extrabold text-emerald-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Danh mục Dịch vụ công & Tra cứu
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Tích hợp nhanh các tiện ích nộp hồ sơ trực tuyến, tra cứu tiến độ giải quyết thủ tục một cửa và gửi phản ánh kiến nghị công dân.
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "LEGAL_DOCUMENTS" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-purple-50/20 border border-purple-100/40">
+                    <h5 className="font-extrabold text-purple-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Hệ thống Văn bản chỉ đạo
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Nạp tự động danh sách các văn bản pháp quy, quyết định, chỉ đạo điều hành mới nhất của cơ quan quản lý nhà nước.
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "PHOTO_VIDEO_GALLERY" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-rose-50/20 border border-rose-100/40">
+                    <h5 className="font-extrabold text-rose-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Thư viện Truyền thông
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Hiển thị album ảnh hoạt động và các video clip tuyên truyền trực quan sinh động với chế độ xem phóng to (Lightbox).
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "FAQ_ACCORDION" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-cyan-50/20 border border-cyan-100/40">
+                    <h5 className="font-extrabold text-cyan-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Hỏi đáp trực tuyến (FAQ)
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Nạp các câu hỏi thường gặp và giải đáp pháp luật từ cổng tương tác công dân dưới dạng danh sách mở rộng (Accordion).
+                    </p>
+                  </div>
+                )}
+
+                {currentWidget.type === "EXTERNAL_LINKS" && (
+                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-slate-50 border border-slate-150">
+                    <h5 className="font-extrabold text-slate-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
+                      <CheckCircle2 className="w-3.5 h-3.5" /> Liên kết ban ngành đối tác
+                    </h5>
+                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                      Hiển thị băng chuyền (Carousel) các logo và đường dẫn liên kết đến các cơ quan, bộ ban ngành và cổng dịch vụ công quốc gia.
                     </p>
                   </div>
                 )}

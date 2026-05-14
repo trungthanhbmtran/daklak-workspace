@@ -1,8 +1,10 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
+import { resolveMediaUrl } from "@/lib/utils"
 import {
   Building2,
   MapPin,
@@ -20,7 +22,23 @@ import {
   ChevronRight,
   Send,
   Clock,
-  Home
+  Home,
+  Images,
+  Newspaper,
+  Landmark,
+  FolderOpen,
+  Film,
+  HelpCircle,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  ArrowRight,
+  Star,
+  AlertCircle,
+  Play,
+  FileSearch,
+  MessageSquare
 } from "lucide-react"
 
 // Pure SVG interactive styled outline representing Dang Kang Commune subdivision zones
@@ -137,6 +155,414 @@ const DEFAULT_LEADERS = {
   ]
 }
 
+// Helper to extract localized text fields safely
+const getLocalizedField = (obj: any, baseField: string, lang: string): string => {
+  if (!obj) return ""
+  if (lang === "en") {
+    const enValue = obj[baseField + "En"] || obj[baseField + "_en"]
+    if (enValue) return enValue
+  }
+  return obj[baseField] || ""
+}
+
+// ----------------------------------------------------------------------
+// NEW SUB-COMPONENTS FOR PORTAL BLOCKS
+// ----------------------------------------------------------------------
+function HeroSliderWidget({ banners, currentLang }: { banners: any[], currentLang: string }) {
+  const [activeIdx, setActiveIdx] = React.useState(0)
+  const displayBanners = React.useMemo(() => {
+    if (banners && banners.length > 0) {
+      return banners.filter(b => b.status !== false).slice(0, 5)
+    }
+    return [
+      {
+        id: "mock-1",
+        name: currentLang === "en" ? "WELCOME TO DANG KANG COMMUNE PORTAL" : "CHÀO MỪNG ĐẾN VỚI CỔNG THÔNG TIN XÃ DANG KANG",
+        description: currentLang === "en" ? "Solidarity - Innovation - Rapid & Sustainable Development" : "Đoàn kết - Đổi mới - Phát triển nhanh và bền vững",
+        imageUrl: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=1200&q=80",
+        customUrl: "/gioi-thieu"
+      },
+      {
+        id: "mock-2",
+        name: currentLang === "en" ? "NATIONAL DIGITAL TRANSFORMATION" : "ĐẨY MẠNH CHUYỂN ĐỔI SỐ QUỐC GIA",
+        description: currentLang === "en" ? "Serving citizens and enterprises with integrity and professionalism" : "Phục vụ người dân và doanh nghiệp minh bạch, chuyên nghiệp",
+        imageUrl: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=1200&q=80",
+        customUrl: "/thu-tuc"
+      }
+    ]
+  }, [banners, currentLang])
+
+  React.useEffect(() => {
+    if (displayBanners.length <= 1) return
+    const timer = setInterval(() => {
+      setActiveIdx(prev => (prev + 1) % displayBanners.length)
+    }, 6000)
+    return () => clearInterval(timer)
+  }, [displayBanners.length])
+
+  if (displayBanners.length === 0) return null
+
+  return (
+    <div className="relative w-full h-64 sm:h-80 md:h-96 rounded-2xl overflow-hidden shadow-lg border border-slate-200/20 group select-none bg-slate-900">
+      {displayBanners.map((banner: any, idx: number) => {
+        const isActive = idx === activeIdx
+        return (
+          <div
+            key={banner.id || idx}
+            className={`absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center ${
+              isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+            }`}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10" />
+            <img
+              src={resolveMediaUrl(banner.imageUrl)}
+              alt={banner.name}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 z-20 flex flex-col justify-center p-6 sm:p-10 md:p-14 max-w-3xl">
+              <span className="text-amber-400 font-extrabold text-xs sm:text-sm tracking-widest uppercase mb-2 flex items-center gap-1.5 drop-shadow">
+                <Star className="w-4 h-4 fill-amber-400" /> {currentLang === "en" ? "Featured Campaign" : "Chiến dịch trọng điểm"}
+              </span>
+              <h2 className="text-xl sm:text-3xl md:text-4xl font-black text-white leading-tight uppercase drop-shadow-md">
+                {banner.name}
+              </h2>
+              {banner.description && (
+                <p className="text-slate-200 font-medium text-xs sm:text-base mt-3 line-clamp-2 max-w-xl drop-shadow">
+                  &quot;{banner.description}&quot;
+                </p>
+              )}
+              <div className="mt-6">
+                <Link
+                  href={banner.customUrl || "/tin-tuc"}
+                  className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-5 py-3 rounded-xl shadow-md transition-all transform hover:scale-105"
+                >
+                  {currentLang === "en" ? "Explore Details" : "Xem chi tiết"}
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        )
+      })}
+
+      {/* Carousel dots */}
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-2 bg-black/40 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
+        {displayBanners.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setActiveIdx(idx)}
+            className={`w-2.5 h-2.5 rounded-full transition-all ${idx === activeIdx ? "bg-amber-400 w-6" : "bg-white/50 hover:bg-white"}`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function FeaturedNewsWidget({ posts, currentLang }: { posts: any[], currentLang: string }) {
+  const displayPosts = React.useMemo(() => {
+    if (posts && posts.length > 0) {
+      return posts.slice(0, 4)
+    }
+    return [
+      {
+        id: "news-1",
+        title: currentLang === "en" ? "Implementation of sustainable agricultural programs in Dang Kang" : "Triển khai chương trình phát triển nông nghiệp bền vững tại xã Dang Kang",
+        description: currentLang === "en" ? "Supporting local farmers with high-yield coffee and pepper cultivation techniques." : "Hỗ trợ bà con nông dân kỹ thuật canh tác cà phê và hồ tiêu đạt năng suất cao.",
+        thumbnail: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+        publishedAt: new Date().toISOString()
+      },
+      {
+        id: "news-2",
+        title: currentLang === "en" ? "Notice on registration of one-stop administrative records via digital portal" : "Thông báo về việc đăng ký hồ sơ hành chính một cửa qua cổng điện tử",
+        description: currentLang === "en" ? "Streamlining paperwork verification and reducing physical waiting queues." : "Tối ưu hóa quy trình xác minh giấy tờ và giảm bớt thời gian chờ đợi tại trụ sở.",
+        thumbnail: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80",
+        publishedAt: new Date(Date.now() - 86400000).toISOString()
+      }
+    ]
+  }, [posts, currentLang])
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {displayPosts.map((post: any) => {
+        const title = getLocalizedField(post, "title", currentLang) || post.title || ""
+        const excerpt = getLocalizedField(post, "description", currentLang) || post.description || ""
+        const dateStr = post.publishedAt ? new Date(post.publishedAt).toLocaleDateString(currentLang === "en" ? "en-US" : "vi-VN") : "14/05/2026"
+
+        return (
+          <Link
+            key={post.id}
+            href={`/tin-tuc/${post.slug || post.id}`}
+            className="group bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-2xl overflow-hidden shadow-sm hover:shadow-md hover:border-red-500/50 transition-all flex flex-col sm:flex-row"
+          >
+            <div className="sm:w-2/5 h-48 sm:h-auto relative overflow-hidden bg-slate-200 dark:bg-slate-800 shrink-0">
+              <img
+                src={post.thumbnail ? resolveMediaUrl(post.thumbnail) : "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80"}
+                alt={title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute top-2 left-2 bg-red-600 text-white font-extrabold text-[9px] px-2 py-1 rounded shadow uppercase tracking-wider">
+                {currentLang === "en" ? "News" : "Tin tức"}
+              </div>
+            </div>
+            <div className="p-4 sm:p-5 flex flex-col justify-between flex-1">
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {dateStr}
+                </span>
+                <h4 className="font-bold text-slate-900 dark:text-white leading-snug group-hover:text-red-600 transition-colors line-clamp-2 text-xs sm:text-sm">
+                  {title}
+                </h4>
+                <p className="text-slate-500 dark:text-slate-400 text-[11px] leading-relaxed line-clamp-2">
+                  {excerpt}
+                </p>
+              </div>
+              <div className="mt-4 flex items-center gap-1 text-[11px] font-black text-red-600 dark:text-amber-400 group-hover:translate-x-1 transition-transform">
+                <span>{currentLang === "en" ? "Read more" : "Đọc tiếp"}</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </div>
+            </div>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
+function PublicServicesWidget({ currentLang }: { currentLang: string }) {
+  const services = [
+    {
+      title: currentLang === "en" ? "Online Public Services" : "Dịch vụ công trực tuyến",
+      desc: currentLang === "en" ? "Submit administrative procedural dossiers online 24/7." : "Nộp hồ sơ thủ tục hành chính trực tuyến 24/7.",
+      icon: FileText,
+      link: "/thu-tuc",
+      color: "text-blue-600 bg-blue-50 border-blue-200 dark:bg-blue-950/30 dark:border-blue-900"
+    },
+    {
+      title: currentLang === "en" ? "Dossier Status Lookup" : "Tra cứu hồ sơ một cửa",
+      desc: currentLang === "en" ? "Check the handling progress of submitted documents." : "Kiểm tra tiến độ giải quyết hồ sơ đã nộp.",
+      icon: FileSearch,
+      link: "/thu-tuc#tra-cuu",
+      color: "text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-950/30 dark:border-emerald-900"
+    },
+    {
+      title: currentLang === "en" ? "Citizen Feedback" : "Phản ánh kiến nghị",
+      desc: currentLang === "en" ? "Submit formal recommendations and service evaluations." : "Gửi ý kiến đóng góp và đánh giá thái độ phục vụ.",
+      icon: MessageSquare,
+      link: "/tuong-tac",
+      color: "text-amber-600 bg-amber-50 border-amber-200 dark:bg-amber-950/30 dark:border-amber-900"
+    },
+    {
+      title: currentLang === "en" ? "Legal Assistance" : "Hỏi đáp pháp luật",
+      desc: currentLang === "en" ? "Get authoritative legal explanations regarding land and civil status." : "Giải đáp thắc mắc về đất đai, hộ tịch, quy hoạch.",
+      icon: ShieldCheck,
+      link: "/tuong-tac#gui-cau-hoi",
+      color: "text-purple-600 bg-purple-50 border-purple-200 dark:bg-purple-950/30 dark:border-purple-900"
+    }
+  ]
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {services.map((svc, idx) => {
+        const Icon = svc.icon
+        return (
+          <Link
+            key={idx}
+            href={svc.link}
+            className={`p-5 rounded-2xl border transition-all hover:scale-[102%] hover:shadow-md flex flex-col justify-between gap-4 ${svc.color}`}
+          >
+            <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
+              <Icon className="w-5 h-5" />
+            </div>
+            <div>
+              <h5 className="font-extrabold text-slate-900 dark:text-white uppercase text-xs tracking-wide">
+                {svc.title}
+              </h5>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-medium leading-relaxed">
+                {svc.desc}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 font-black text-[10px] tracking-wider uppercase opacity-80">
+              <span>{currentLang === "en" ? "Access Feature" : "Truy cập ngay"}</span>
+              <ArrowRight className="w-3 h-3" />
+            </div>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
+function LegalDocumentsWidget({ posts, currentLang }: { posts: any[], currentLang: string }) {
+  const docs = React.useMemo(() => {
+    if (posts && posts.length > 0) {
+      return posts.filter((p: any) => p.category?.slug === "van-ban" || p.category?.name?.toLowerCase().includes("văn bản")).slice(0, 5)
+    }
+    return [
+      { id: "doc-1", title: currentLang === "en" ? "Resolution on communal economic targets for 2026" : "Nghị quyết về chỉ tiêu phát triển kinh tế - xã hội xã Dang Kang năm 2026", codeNum: "12/NQ-HĐND", dateStr: "10/01/2026" },
+      { id: "doc-2", title: currentLang === "en" ? "Decision promulgating regulations on one-stop office workflow" : "Quyết định ban hành quy chế hoạt động của bộ phận một cửa cấp xã", codeNum: "45/QĐ-UBND", dateStr: "15/02/2026" },
+      { id: "doc-3", title: currentLang === "en" ? "Plan for disease prevention in livestock and poultry" : "Kế hoạch phòng chống dịch bệnh gia súc, gia cầm trên địa bàn xã", codeNum: "08/KH-UBND", dateStr: "22/03/2026" }
+    ]
+  }, [posts, currentLang])
+
+  return (
+    <div className="space-y-3">
+      {docs.map((doc: any, idx: number) => {
+        const title = getLocalizedField(doc, "title", currentLang) || doc.title || ""
+        const codeNum = doc.codeNum || "QĐ/UBND"
+        const dateStr = doc.dateStr || (doc.publishedAt ? new Date(doc.publishedAt).toLocaleDateString() : "14/05/2026")
+
+        return (
+          <div
+            key={doc.id || idx}
+            className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 rounded-xl flex items-center justify-between gap-4 hover:border-red-500 transition-colors"
+          >
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="w-8 h-8 rounded bg-red-100 dark:bg-red-950/40 text-red-600 flex items-center justify-center shrink-0 font-extrabold text-xs">
+                <FolderOpen className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded font-black tracking-wider">
+                    {codeNum}
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                    <Clock className="w-3 h-3" /> {dateStr}
+                  </span>
+                </div>
+                <h5 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white mt-1 leading-snug truncate">
+                  {title}
+                </h5>
+              </div>
+            </div>
+
+            <Link
+              href={`/van-ban/${doc.slug || doc.id}`}
+              className="inline-flex items-center justify-center font-extrabold text-[10px] tracking-wider uppercase border border-red-200 hover:bg-red-50 hover:text-red-600 dark:border-red-900/40 dark:text-slate-200 dark:hover:text-red-400 px-3 py-1.5 rounded-lg shrink-0 transition-colors shadow-sm bg-white dark:bg-slate-900"
+            >
+              {currentLang === "en" ? "View Doc" : "Xem văn bản"}
+            </Link>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function MediaGalleryWidget({ posts, currentLang }: { posts: any[], currentLang: string }) {
+  const mediaItems = [
+    { title: "Hội nghị tổng kết phong trào thi đua toàn dân đoàn kết", img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80", type: "photo" },
+    { title: "Ra quân dọn dẹp vệ sinh môi trường đường làng ngõ xóm", img: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80", type: "photo" },
+    { title: "Phóng sự: Nông dân Dang Kang vươn lên làm giàu từ cây tiêu", img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80", type: "video" },
+    { title: "Hướng dẫn thực hiện dịch vụ công trực tuyến mức độ 4", img: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80", type: "video" }
+  ]
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {mediaItems.map((item, idx) => (
+        <div key={idx} className="group relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200 dark:border-slate-800 aspect-video shadow-sm">
+          <img
+            src={item.img}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-80 group-hover:opacity-100"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-3 flex flex-col justify-end">
+            <div className="flex items-center gap-1.5 mb-1 text-[9px] font-black uppercase tracking-wider text-amber-400">
+              {item.type === "video" ? <Play className="w-3 h-3 fill-amber-400" /> : <Images className="w-3 h-3" />}
+              <span>{item.type === "video" ? "Video Clip" : "Album Ảnh"}</span>
+            </div>
+            <h5 className="text-white text-xs font-bold line-clamp-2 leading-snug drop-shadow">
+              {item.title}
+            </h5>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function FaqAccordionWidget({ questions, currentLang }: { questions: any[], currentLang: string }) {
+  const [expandedIdx, setExpandedIdx] = React.useState<number | null>(0)
+  const displayQa = React.useMemo(() => {
+    if (questions && questions.length > 0) {
+      return questions.slice(0, 5)
+    }
+    return [
+      { q: currentLang === "en" ? "What documents are required to register birth registration for newborn?" : "Thủ tục đăng ký khai sinh cho trẻ sơ sinh cần chuẩn bị những giấy tờ gì?", a: currentLang === "en" ? "Parents need to bring Certificate of Birth from hospital, marriage certificate, and identity cards to commune one-stop desk." : "Cha mẹ cần mang theo Giấy chứng sinh của bệnh viện, Giấy đăng ký kết hôn và CCCD đến bộ phận một cửa UBND xã để được giải quyết ngay." },
+      { q: currentLang === "en" ? "How many days does it take to process land use right transfer?" : "Thời gian giải quyết thủ tục chuyển nhượng quyền sử dụng đất là bao lâu?", a: currentLang === "en" ? "According to regulations, standard verification takes 10-15 working days from valid dossier submission." : "Theo quy định, thời gian thẩm định hồ sơ chuẩn là từ 10-15 ngày làm việc kể từ khi nhận đủ hồ sơ hợp lệ." },
+      { q: currentLang === "en" ? "What is the schedule for commune leadership direct citizen reception?" : "Lịch tiếp công dân trực tiếp của lãnh đạo UBND xã vào ngày nào?", a: currentLang === "en" ? "Commune chairman directly receives citizens every Thursday morning from 08:00 to 11:30 at Room 102." : "Chủ tịch UBND xã trực tiếp tiếp công dân định kỳ vào sáng Thứ 5 hàng tuần từ 08:00 đến 11:30 tại Phòng 102 trụ sở." }
+    ]
+  }, [questions, currentLang])
+
+  return (
+    <div className="space-y-3">
+      {displayQa.map((qa: any, idx: number) => {
+        const isExpanded = expandedIdx === idx
+        const qText = getLocalizedField(qa, "title", currentLang) || qa.q || ""
+        const aText = getLocalizedField(qa, "answerContent", currentLang) || qa.a || ""
+
+        return (
+          <div
+            key={idx}
+            className="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-950 transition-all"
+          >
+            <button
+              onClick={() => setExpandedIdx(isExpanded ? null : idx)}
+              className="w-full p-4 text-left font-bold text-xs sm:text-sm text-slate-900 dark:text-white flex items-center justify-between gap-4 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <HelpCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span className="truncate">{qText}</span>
+              </div>
+              {isExpanded ? <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" /> : <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />}
+            </button>
+
+            {isExpanded && (
+              <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 text-xs sm:text-sm leading-relaxed font-medium animate-fade-in">
+                {aText}
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ExternalLinksWidget({ currentLang }: { currentLang: string }) {
+  const links = [
+    { title: "Cổng Dịch vụ công Quốc gia", url: "https://dichvucong.gov.vn", logo: "🏛️" },
+    { title: "Cổng thông tin Chính phủ", url: "https://chinhphu.vn", logo: "🇻🇳" },
+    { title: "UBND Tỉnh Đắk Lắk", url: "https://daklak.gov.vn", logo: "🐘" },
+    { title: "Huyện Krông Bông", url: "https://krongbong.daklak.gov.vn", logo: "🌲" }
+  ]
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+      {links.map((lnk, idx) => (
+        <a
+          key={idx}
+          href={lnk.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 flex items-center gap-3 group hover:border-red-500 hover:shadow-sm transition-all"
+        >
+          <span className="text-2xl shrink-0 p-2 bg-white dark:bg-slate-900 rounded-lg shadow-sm">{lnk.logo}</span>
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text-xs font-bold text-slate-900 dark:text-white truncate group-hover:text-red-600 transition-colors">
+              {lnk.title}
+            </span>
+            <span className="text-[10px] text-slate-400 font-medium truncate flex items-center gap-1 mt-0.5">
+              <span>{lnk.url.replace("https://", "")}</span>
+              <ExternalLink className="w-2.5 h-2.5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            </span>
+          </div>
+        </a>
+      ))}
+    </div>
+  )
+}
+
 // ----------------------------------------------------------------------
 // RECURSIVE LEXICAL RENDERER
 // ----------------------------------------------------------------------
@@ -229,6 +655,46 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
         return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
       } catch (e) {
         console.error("Failed to fetch portal configurations in renderer", e)
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  // Fetch Banners & Posts for dynamic new widgets
+  const { data: bannersData } = useQuery({
+    queryKey: ["public-banners"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/banners")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: postsData } = useQuery({
+    queryKey: ["public-posts"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/posts")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: questionsData } = useQuery({
+    queryKey: ["public-questions", currentLang],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/interactions/questions?limit=10")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
         return []
       }
     },
@@ -349,6 +815,10 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     return null
   }
 
+  const bannersList = Array.isArray(bannersData) ? bannersData : (bannersData?.data || [])
+  const postsList = Array.isArray(postsData) ? postsData : (postsData?.data || [])
+  const questionsList = Array.isArray(questionsData) ? questionsData : (questionsData?.data || [])
+
   return (
     <div className="space-y-8 animate-fade-in">
       {layoutSchema.map((row: any, rIdx: number) => (
@@ -379,6 +849,41 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                         <div className="prose prose-sm dark:prose-invert max-w-none">
                           {renderLexicalRichText(widget.content?.[currentLang] || widget.content?.vi)}
                         </div>
+                      )}
+
+                      {/* HERO SLIDER WIDGET */}
+                      {widget.type === "HERO_SLIDER" && (
+                        <HeroSliderWidget banners={bannersList} currentLang={currentLang} />
+                      )}
+
+                      {/* FEATURED NEWS WIDGET */}
+                      {widget.type === "FEATURED_NEWS" && (
+                        <FeaturedNewsWidget posts={postsList} currentLang={currentLang} />
+                      )}
+
+                      {/* PUBLIC SERVICES WIDGET */}
+                      {widget.type === "PUBLIC_SERVICES" && (
+                        <PublicServicesWidget currentLang={currentLang} />
+                      )}
+
+                      {/* LEGAL DOCUMENTS WIDGET */}
+                      {widget.type === "LEGAL_DOCUMENTS" && (
+                        <LegalDocumentsWidget posts={postsList} currentLang={currentLang} />
+                      )}
+
+                      {/* PHOTO & VIDEO GALLERY WIDGET */}
+                      {widget.type === "PHOTO_VIDEO_GALLERY" && (
+                        <MediaGalleryWidget posts={postsList} currentLang={currentLang} />
+                      )}
+
+                      {/* FAQ ACCORDION WIDGET */}
+                      {widget.type === "FAQ_ACCORDION" && (
+                        <FaqAccordionWidget questions={questionsList} currentLang={currentLang} />
+                      )}
+
+                      {/* EXTERNAL LINKS WIDGET */}
+                      {widget.type === "EXTERNAL_LINKS" && (
+                        <ExternalLinksWidget currentLang={currentLang} />
                       )}
 
                       {/* STATISTICS GRID WIDGET */}
