@@ -34,7 +34,8 @@ import {
   FolderOpen,
   HelpCircle,
   ExternalLink,
-  Film
+  Film,
+  Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -202,6 +203,81 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
     onChange(newLayout);
     setSelectedWidgetId(newWidget.id);
+  };
+
+  const addDataSourceAsRow = (widgetType: Widget["type"]) => {
+    const timestamp = Date.now();
+    
+    // Default dynamic properties depending on type
+    const defaultTitle: Record<string, string> = { vi: "", en: "" };
+    let defaultContent: Record<string, string> = { vi: "", en: "" };
+
+    if (widgetType === "LEXICAL_RICH_TEXT") {
+      defaultTitle.vi = "Khối nội dung văn bản";
+      defaultTitle.en = "Rich Text block";
+    } else if (widgetType === "STATISTICS_GRID") {
+      defaultTitle.vi = "Số liệu thống kê nhanh";
+      defaultTitle.en = "Demographics Stats";
+    } else if (widgetType === "LEADERSHIP_LIST") {
+      defaultTitle.vi = "Danh sách cán bộ lãnh đạo";
+      defaultTitle.en = "Key Leading Officers";
+    } else if (widgetType === "ORG_SECTIONS_DIRECTORY") {
+      defaultTitle.vi = "Sơ đồ bộ máy tổ chức";
+      defaultTitle.en = "Organizational Directory";
+    } else if (widgetType === "COMMUNE_INTERACTIVE_MAP") {
+      defaultTitle.vi = "Bản đồ phân vùng thôn buôn";
+      defaultTitle.en = "Administrative Vector Map";
+    } else if (widgetType === "CONTACT_INFO_SIDEBAR") {
+      defaultTitle.vi = "Thông tin liên hệ & lịch tiếp dân";
+      defaultTitle.en = "Office contact details & schedule";
+    } else if (widgetType === "CONTACT_FORM") {
+      defaultTitle.vi = "Biểu mẫu gửi góp ý";
+      defaultTitle.en = "Feedback Comment Form";
+    } else if (widgetType === "HERO_SLIDER") {
+      defaultTitle.vi = "Trình chiếu Banners & Slogan";
+      defaultTitle.en = "Hero Banner Slider";
+    } else if (widgetType === "FEATURED_NEWS") {
+      defaultTitle.vi = "Tin tức nổi bật mới nhất";
+      defaultTitle.en = "Featured Latest News";
+    } else if (widgetType === "PUBLIC_SERVICES") {
+      defaultTitle.vi = "Dịch vụ công & Tra cứu hồ sơ";
+      defaultTitle.en = "Public Services & Lookup";
+    } else if (widgetType === "LEGAL_DOCUMENTS") {
+      defaultTitle.vi = "Văn bản chỉ đạo điều hành";
+      defaultTitle.en = "Legal Documents";
+    } else if (widgetType === "PHOTO_VIDEO_GALLERY") {
+      defaultTitle.vi = "Thư viện Hình ảnh & Video";
+      defaultTitle.en = "Photo & Video Gallery";
+    } else if (widgetType === "FAQ_ACCORDION") {
+      defaultTitle.vi = "Hỏi đáp trực tuyến (FAQ)";
+      defaultTitle.en = "Online FAQ";
+    } else if (widgetType === "EXTERNAL_LINKS") {
+      defaultTitle.vi = "Liên kết website & Đối tác";
+      defaultTitle.en = "External Links";
+    }
+
+    const newWidget: Widget = {
+      id: `widget-${timestamp}`,
+      type: widgetType,
+      title: defaultTitle,
+      content: defaultContent,
+      data: {}
+    };
+
+    const newRow: Row = {
+      rowId: `row-${timestamp}`,
+      columns: [
+        {
+          id: `col-${timestamp}-1`,
+          colSpan: "lg:col-span-12",
+          widgets: [newWidget]
+        }
+      ]
+    };
+
+    onChange([...layout, newRow]);
+    setSelectedWidgetId(newWidget.id);
+    toast.success(`Đã nạp ${defaultTitle.vi || widgetType} vào trang!`);
   };
 
   const deleteWidget = (rowId: string, colId: string, widgetId: string) => {
@@ -405,6 +481,287 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
       {/* LEFT PANEL: Layout Builder Canvas */}
       <div className={`w-full space-y-6 transition-all duration-500 ${isLexicalActive ? 'xl:col-span-4 order-2 xl:order-1' : 'xl:col-span-8 order-1 max-w-7xl'}`}>
         
+        {/* DATA SOURCES & DATABASES REPOSITORY */}
+        <Card className="border border-indigo-200 dark:border-indigo-900/50 shadow-md overflow-hidden bg-white dark:bg-slate-900 rounded-2xl">
+          <CardHeader className="bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-950 p-4 text-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 bg-white/10 rounded-xl">
+                  <Database className="w-5 h-5 text-indigo-300" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-black tracking-wide text-white uppercase">
+                    Kho Nguồn Dữ liệu & Modules CSDL Cổng thông tin
+                  </CardTitle>
+                  <p className="text-[11px] text-indigo-200 font-medium">
+                    Bấm chọn nguồn dữ liệu dưới đây để nạp trực tiếp vào giao diện chung
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] bg-indigo-500/30 text-indigo-200 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider border border-indigo-400/20">
+                11 Nguồn Dữ Liệu
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="p-4 bg-indigo-50/10 dark:bg-indigo-950/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {/* Card 1: Org */}
+              <div 
+                onClick={() => addDataSourceAsRow("ORG_SECTIONS_DIRECTORY")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-red-100 dark:bg-red-950/50 text-red-600 flex items-center justify-center font-bold">🏛️</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Cơ cấu Tổ chức</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Sơ đồ bộ máy & Đơn vị trực thuộc</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Nạp danh bạ các phòng ban, ban ngành, đơn vị trực thuộc từ hệ thống quản lý tổ chức.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 2: Leaders */}
+              <div 
+                onClick={() => addDataSourceAsRow("LEADERSHIP_LIST")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-950/50 text-indigo-600 flex items-center justify-center font-bold">👥</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Cán bộ Lãnh đạo</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Nhân sự & Lịch trực tiếp dân</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Nạp danh sách lãnh đạo, ban giám đốc và thông tin lịch tiếp công dân từ CSDL Nhân sự.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 3: Featured News */}
+              <div 
+                onClick={() => addDataSourceAsRow("FEATURED_NEWS")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center font-bold">📰</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Tin bài Nổi bật</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Tin tức, hoạt động, thông báo</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Tự động nạp tin tức hoạt động mới nhất từ các chuyên mục tin tức của cơ quan.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 4: Legal Documents */}
+              <div 
+                onClick={() => addDataSourceAsRow("LEGAL_DOCUMENTS")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-950/50 text-purple-600 flex items-center justify-center font-bold">📜</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Văn bản Pháp quy</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Chỉ thị, Quyết định, Điều hành</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Nạp hệ thống văn bản chỉ đạo điều hành, quyết định, nghị quyết mới ban hành.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 5: Public Services */}
+              <div 
+                onClick={() => addDataSourceAsRow("PUBLIC_SERVICES")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600 flex items-center justify-center font-bold">⚖️</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Dịch vụ Công</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Nộp hồ sơ & Tra cứu thủ tục</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Cổng kết nối nộp hồ sơ trực tuyến, tra cứu tiến độ xử lý thủ tục hành chính.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 6: Map */}
+              <div 
+                onClick={() => addDataSourceAsRow("COMMUNE_INTERACTIVE_MAP")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-orange-100 dark:bg-orange-950/50 text-orange-600 flex items-center justify-center font-bold">🗺️</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Bản đồ Ranh giới</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Bản đồ quy hoạch & Thôn buôn</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Bản đồ tương tác các khu vực hành chính, địa giới các thôn buôn trực thuộc.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 7: Gallery */}
+              <div 
+                onClick={() => addDataSourceAsRow("PHOTO_VIDEO_GALLERY")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-rose-100 dark:bg-rose-950/50 text-rose-600 flex items-center justify-center font-bold">🖼️</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Thư viện Media</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Album ảnh & Video hoạt động</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Trình diễn các phóng sự ảnh, tư liệu video tuyên truyền của cơ quan.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 8: Banners */}
+              <div 
+                onClick={() => addDataSourceAsRow("HERO_SLIDER")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/50 text-amber-600 flex items-center justify-center font-bold">✨</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Banners Trình chiếu</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Slider hình ảnh nổi bật</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Trình diễn băng chuyền (slider) các sự kiện lớn và slogan trung tâm.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 9: FAQ */}
+              <div 
+                onClick={() => addDataSourceAsRow("FAQ_ACCORDION")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-cyan-100 dark:bg-cyan-950/50 text-cyan-600 flex items-center justify-center font-bold">💬</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">CSDL Hỏi đáp & FAQ</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Giải đáp thắc mắc công dân</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Các câu hỏi thường gặp và giải đáp trực tuyến từ bộ phận chuyên trách.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 10: Contact */}
+              <div 
+                onClick={() => addDataSourceAsRow("CONTACT_INFO_SIDEBAR")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-950/50 text-blue-600 flex items-center justify-center font-bold">📞</div>
+                    <div>
+                      <h6 className="font-black text-xs text-slate-800 dark:text-white group-hover:text-indigo-600 transition-colors">Thông tin Liên hệ</h6>
+                      <p className="text-[10px] text-slate-400 font-medium">Địa chỉ, Hotline, Tiếp dân</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Niêm yết thông tin đường dây nóng, trụ sở và lịch tiếp công dân định kỳ.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+              {/* Card 11: Lexical */}
+              <div 
+                onClick={() => addDataSourceAsRow("LEXICAL_RICH_TEXT")}
+                className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-500 hover:ring-2 hover:ring-indigo-500/20 cursor-pointer transition-all group flex flex-col justify-between shadow-sm col-span-1 sm:col-span-2 lg:col-span-1 bg-gradient-to-br from-indigo-50/50 to-white dark:from-indigo-950/20 dark:to-slate-900"
+              >
+                <div>
+                  <div className="flex items-center gap-2.5 mb-1.5">
+                    <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold">✍️</div>
+                    <div>
+                      <h6 className="font-black text-xs text-indigo-950 dark:text-white group-hover:text-indigo-600 transition-colors">Soạn thảo Tự do (Rich Text)</h6>
+                      <p className="text-[10px] text-indigo-600/70 font-bold">Lexical Editor toàn cảnh</p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal mt-2 line-clamp-2">
+                    Thêm khối soạn thảo nội dung tự do với hình ảnh, định dạng văn bản nâng cao.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-indigo-100 dark:border-indigo-900/40 flex items-center justify-between text-[10px] font-bold text-indigo-600 dark:text-indigo-400">
+                  <span>+ Nạp vào trang</span>
+                  <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                </div>
+              </div>
+
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Layout templates picker */}
         <Card className="border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl">
           <CardHeader className="bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-850 p-4">
