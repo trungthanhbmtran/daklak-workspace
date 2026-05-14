@@ -752,50 +752,59 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
       {/* RIGHT PANEL: Selected Widget Customizer Properties */}
       <div className={`transition-all duration-500 ${isLexicalActive ? 'xl:col-span-8 order-1 xl:order-2 max-w-7xl' : 'xl:col-span-4 order-2'}`}>
-        <Card className="border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl sticky top-24">
-          <CardHeader className="bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-850 p-4">
-            <div className="flex items-center gap-2">
-              <Settings2 className="w-5 h-5 text-[#b91c1c] dark:text-[#fbc02d]" />
-              <div>
-                <CardTitle className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wide">
-                  Thuộc tính Widget
-                </CardTitle>
-                <p className="text-[10px] text-slate-400 font-medium">Thiết lập tham số cấu hình hiển thị khối</p>
+        <Card className="border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden bg-white dark:bg-slate-900 rounded-2xl sticky top-24">
+          <CardHeader className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border-b border-slate-800 p-5 text-white">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 rounded-xl">
+                  <Settings2 className="w-5 h-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-black uppercase tracking-wider text-white">
+                    Bảng điều khiển & Cấu hình Dữ liệu
+                  </CardTitle>
+                  <p className="text-[11px] text-indigo-200/70 font-medium mt-0.5">
+                    Tùy chỉnh thông số hiển thị và nguồn dữ liệu động
+                  </p>
+                </div>
               </div>
+              {currentWidget && (
+                <span className="text-[10px] font-mono bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 px-3 py-1 rounded-full font-bold uppercase tracking-wider">
+                  {currentWidget.type}
+                </span>
+              )}
             </div>
           </CardHeader>
 
           <CardContent className="p-5">
             {!currentWidget ? (
-              <div className="text-center py-16 text-slate-400 space-y-2">
-                <Sparkles className="w-8 h-8 text-slate-300 mx-auto animate-pulse" />
-                <p className="text-[10px] font-extrabold uppercase tracking-widest">Chưa chọn khối nào</p>
-                <p className="text-[9.5px] text-slate-400 leading-normal">Bấm chọn một khối Widget ở Canvas bên trái để tiến hành cấu hình chi tiết nội dung.</p>
+              <div className="text-center py-20 px-6 space-y-4">
+                <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-400 border border-slate-200 dark:border-slate-700 shadow-inner">
+                  <Sparkles className="w-8 h-8 animate-pulse text-indigo-500" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-xs font-black uppercase text-slate-700 dark:text-slate-300 tracking-wider">Chưa chọn khối nội dung</h4>
+                  <p className="text-xs text-slate-400 max-w-xs mx-auto leading-relaxed">
+                    Hãy bấm chọn một khối Widget ở không gian thiết kế bên trái để kích hoạt bảng điều khiển chi tiết.
+                  </p>
+                </div>
               </div>
             ) : (
               <div className="space-y-6 animate-fade-in text-xs">
                 
-                {/* Meta details */}
-                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-100 dark:border-slate-850">
-                  <div className="w-8 h-8 rounded bg-white dark:bg-slate-800 flex items-center justify-center text-[#b91c1c] font-black text-xs shadow-inner">
-                    {currentWidget.type[0]}
-                  </div>
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-[8px] font-black uppercase text-[#b91c1c] dark:text-[#fbc02d] tracking-widest">Loại thành phần</span>
-                    <span className="text-xs font-black text-slate-800 dark:text-white mt-0.5">{currentWidget.type}</span>
-                  </div>
-                </div>
-
                 {/* Title edit field */}
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] text-slate-400 dark:text-slate-500 font-extrabold uppercase tracking-widest">
-                    Tiêu đề khối hiển thị ({activeLang.toUpperCase()})
-                  </Label>
+                <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-150 dark:border-slate-800/80 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-[10px] text-slate-500 dark:text-slate-400 font-black uppercase tracking-widest">
+                      Tiêu đề khối hiển thị ({activeLang.toUpperCase()})
+                    </Label>
+                    <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold">Bắt buộc</span>
+                  </div>
                   <Input
                     value={currentWidget.title[activeLang] || ""}
                     onChange={(e) => updateWidgetTitle(currentWidget.id, e.target.value)}
-                    placeholder="Nhập tiêu đề khối..."
-                    className="h-10 text-xs font-semibold rounded-lg dark:bg-slate-950"
+                    placeholder="Nhập tiêu đề khối (Ví dụ: Tin tức nổi bật, Cơ cấu tổ chức...)"
+                    className="h-11 text-xs font-bold rounded-xl border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500 dark:bg-slate-900"
                   />
                 </div>
 
@@ -820,34 +829,35 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                 )}
 
                 {currentWidget.type === "STATISTICS_GRID" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-emerald-50/20 border border-emerald-100/40">
-                    <h5 className="font-extrabold text-[#15803d] uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu tích hợp tự động
+                  <div className="space-y-3 p-4 rounded-xl bg-emerald-50/50 border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/30">
+                    <h5 className="font-black text-[#15803d] dark:text-emerald-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Dữ liệu tích hợp tự động
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Khối này sẽ tự động nạp các chỉ số thống kê từ các trường **Diện tích tự nhiên**, **Dân số hiện tại**, **Số thôn buôn** đã được cấu hình trong mục *Trang giới thiệu* và xuất ra dưới dạng lưới thẻ thiết kế sang trọng.
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                      Khối này sẽ tự động nạp các chỉ số thống kê từ các trường <strong className="text-emerald-700 dark:text-emerald-400">Diện tích tự nhiên</strong>, <strong className="text-emerald-700 dark:text-emerald-400">Dân số hiện tại</strong>, <strong className="text-emerald-700 dark:text-emerald-400">Số thôn buôn</strong> đã được cấu hình trong mục Trang giới thiệu và xuất ra dưới dạng lưới thẻ thiết kế sang trọng.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "LEADERSHIP_LIST" && (
                   <div className="space-y-4 pt-4 border-t border-slate-150 dark:border-slate-850">
-                    <div className="flex items-center justify-between">
-                      <h5 className="font-extrabold text-indigo-800 dark:text-[#fbc02d] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Chọn cán bộ lãnh đạo từ cơ sở dữ liệu
-                      </h5>
-                      <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-black text-slate-600 dark:text-slate-300">
-                        Đã chọn: {(currentWidget.data?.selectedLeaderIds || []).length}
-                      </span>
+                    <div className="flex flex-col gap-1 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/30 p-4 rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-black text-indigo-900 dark:text-indigo-300 uppercase text-xs tracking-wider flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> Chọn Lãnh đạo từ CSDL Nhân sự
+                        </h5>
+                        <span className="text-[10px] bg-indigo-600 text-white px-2.5 py-1 rounded-full font-black shadow-sm">
+                          Đã chọn: {(currentWidget.data?.selectedLeaderIds || []).length}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                        Bấm vào nút <strong className="text-indigo-600">Chọn / Bỏ chọn</strong> ở mỗi cán bộ dưới đây để đưa vào danh sách xuất hiện trên Cổng thông tin.
+                      </p>
                     </div>
 
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Bấm chọn danh sách cán bộ, lãnh đạo cơ quan từ hệ thống nhân sự (HRM) dưới đây. Thông tin và lịch tiếp dân sẽ được đồng bộ và hiển thị theo đúng danh sách bạn cấu hình.
-                    </p>
-
-                    <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 shadow-inner">
+                    <div className="max-h-[380px] overflow-y-auto space-y-2.5 p-2.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner pr-2">
                       {allEmployees.length === 0 ? (
-                        <div className="text-center py-6 text-slate-400 text-[10px] italic">
+                        <div className="text-center py-10 text-slate-400 text-xs italic">
                           Đang tải cơ sở dữ liệu cán bộ nhân sự...
                         </div>
                       ) : (
@@ -860,62 +870,64 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                             <div
                               key={emp.id}
                               onClick={() => toggleSelectLeader(currentWidget.id, emp)}
-                              className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all ${
+                              className={`p-3.5 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-all shadow-sm ${
                                 isSelected 
-                                  ? "bg-indigo-50 border-indigo-300 text-indigo-900 dark:bg-indigo-950/30 dark:border-indigo-800 dark:text-white font-extrabold shadow-sm" 
-                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                                  ? "bg-white border-indigo-500 ring-2 ring-indigo-500/20 text-indigo-950 dark:bg-slate-900 dark:border-indigo-500 dark:text-white" 
+                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 opacity-70 hover:opacity-100"
                               }`}
                             >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className={`w-4 h-4 rounded flex items-center justify-center border text-[9px] ${
-                                  isSelected ? "bg-indigo-600 border-indigo-600 text-white font-black" : "border-slate-300 bg-slate-100 dark:bg-slate-800"
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-colors ${
+                                  isSelected ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/20" : "bg-slate-100 text-slate-400 dark:bg-slate-800"
                                 }`}>
-                                  {isSelected && "✓"}
+                                  {isSelected ? "✓" : fullName[0]}
                                 </div>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-bold truncate">{fullName}</span>
-                                  <span className="text-[9px] text-slate-400 font-medium truncate">{roleName}</span>
+                                <div className="flex flex-col min-w-0 space-y-0.5">
+                                  <span className={`font-black truncate ${isSelected ? "text-indigo-900 dark:text-indigo-300" : "text-slate-800 dark:text-slate-200"}`}>
+                                    {fullName}
+                                  </span>
+                                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
+                                    {roleName} • <span className="font-mono text-[10px] text-slate-400">{emp.employeeCode || `ID: ${emp.id}`}</span>
+                                  </span>
                                 </div>
                               </div>
-                              <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
-                                {emp.employeeCode || `ID: ${emp.id}`}
-                              </span>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant={isSelected ? "default" : "outline"}
+                                className={`h-7 text-[10px] font-bold rounded-lg px-2.5 shrink-0 transition-all ${
+                                  isSelected ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-800" : ""
+                                }`}
+                              >
+                                {isSelected ? "Đã chọn (Bỏ)" : "+ Chọn"}
+                              </Button>
                             </div>
                           );
                         })
                       )}
-                    </div>
-
-                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5">
-                      <Workflow className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div className="flex flex-col gap-0.5 text-[10px]">
-                        <span className="font-black text-amber-900 dark:text-amber-400 uppercase tracking-wide">Tùy biến tổ chức hiển thị</span>
-                        <span className="text-slate-600 dark:text-slate-400 leading-normal">
-                          Danh sách cán bộ sẽ xuất hiện trên Portal chính xác theo thứ tự và cấu hình lựa chọn của bạn trong danh sách trên.
-                        </span>
-                      </div>
                     </div>
                   </div>
                 )}
 
                 {currentWidget.type === "ORG_SECTIONS_DIRECTORY" && (
                   <div className="space-y-4 pt-4 border-t border-slate-150 dark:border-slate-850">
-                    <div className="flex items-center justify-between">
-                      <h5 className="font-extrabold text-[#b91c1c] dark:text-[#fbc02d] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Chọn đơn vị / cơ cấu từ cơ sở dữ liệu
-                      </h5>
-                      <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-black text-slate-600 dark:text-slate-300">
-                        Đã chọn: {(currentWidget.data?.selectedUnitIds || []).length}
-                      </span>
+                    <div className="flex flex-col gap-1 bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/30 p-4 rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-black text-red-900 dark:text-red-300 uppercase text-xs tracking-wider flex items-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-red-600 dark:text-red-400" /> Chọn Đơn vị / Phòng ban từ CSDL
+                        </h5>
+                        <span className="text-[10px] bg-red-600 text-white px-2.5 py-1 rounded-full font-black shadow-sm">
+                          Đã chọn: {(currentWidget.data?.selectedUnitIds || []).length}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mt-1">
+                        Lựa chọn các phòng ban, đơn vị trực thuộc từ CSDL tổ chức. Sơ đồ sẽ hiển thị tự động trên trang theo các đơn vị được chọn.
+                      </p>
                     </div>
 
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Bấm chọn các đơn vị / cơ cấu tổ chức dưới đây từ CSDL tổ chức. Bạn có thể tự do lựa chọn và tổ chức sơ đồ hiển thị trên trang theo ý muốn.
-                    </p>
-
-                    <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 shadow-inner">
+                    <div className="max-h-[380px] overflow-y-auto space-y-2.5 p-2.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner pr-2">
                       {allOrgUnits.length === 0 ? (
-                        <div className="text-center py-6 text-slate-400 text-[10px] italic">
+                        <div className="text-center py-10 text-slate-400 text-xs italic">
                           Đang tải cơ sở dữ liệu tổ chức...
                         </div>
                       ) : (
@@ -925,151 +937,151 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                             <div
                               key={unit.id}
                               onClick={() => toggleSelectUnit(currentWidget.id, unit)}
-                              className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all ${
+                              className={`p-3.5 rounded-xl border text-xs cursor-pointer flex items-center justify-between transition-all shadow-sm ${
                                 isSelected 
-                                  ? "bg-red-50 border-red-300 text-red-900 dark:bg-red-950/30 dark:border-red-800 dark:text-white font-extrabold shadow-sm" 
-                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                                  ? "bg-white border-red-500 ring-2 ring-red-500/20 text-red-950 dark:bg-slate-900 dark:border-red-500 dark:text-white" 
+                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 opacity-70 hover:opacity-100"
                               }`}
                             >
-                              <div className="flex items-center gap-2 min-w-0">
-                                <div className={`w-4 h-4 rounded flex items-center justify-center border text-[9px] ${
-                                  isSelected ? "bg-red-600 border-red-600 text-white font-black" : "border-slate-300 bg-slate-100 dark:bg-slate-800"
+                              <div className="flex items-center gap-3 min-w-0">
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs shrink-0 transition-colors ${
+                                  isSelected ? "bg-red-600 text-white shadow-md shadow-red-600/20" : "bg-slate-100 text-slate-400 dark:bg-slate-800"
                                 }`}>
-                                  {isSelected && "✓"}
+                                  {isSelected ? "✓" : "🏛"}
                                 </div>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="font-bold truncate">{unit.name}</span>
-                                  {unit.typeName && (
-                                    <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName}</span>
-                                  )}
+                                <div className="flex flex-col min-w-0 space-y-0.5">
+                                  <span className={`font-black truncate ${isSelected ? "text-red-900 dark:text-red-300" : "text-slate-800 dark:text-slate-200"}`}>
+                                    {unit.name}
+                                  </span>
+                                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium truncate">
+                                    Mã: <span className="font-mono text-slate-600 dark:text-slate-400">{unit.code || `ID: ${unit.id}`}</span>
+                                    {unit.typeName && ` • Loại: ${unit.typeName}`}
+                                  </span>
                                 </div>
                               </div>
-                              <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
-                                {unit.code || `ID: ${unit.id}`}
-                              </span>
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant={isSelected ? "default" : "outline"}
+                                className={`h-7 text-[10px] font-bold rounded-lg px-2.5 shrink-0 transition-all ${
+                                  isSelected ? "bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100 dark:bg-rose-950/40 dark:border-rose-800" : ""
+                                }`}
+                              >
+                                {isSelected ? "Đã chọn (Bỏ)" : "+ Chọn"}
+                              </Button>
                             </div>
                           );
                         })
                       )}
                     </div>
-
-                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5">
-                      <Workflow className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                      <div className="flex flex-col gap-0.5 text-[10px]">
-                        <span className="font-black text-amber-900 dark:text-amber-400 uppercase tracking-wide">Sắp xếp và Tùy biến hiển thị</span>
-                        <span className="text-slate-600 dark:text-slate-400 leading-normal">
-                          Các đơn vị được chọn sẽ đồng bộ ngay lập tức ra Cổng thông tin (Portal) theo sơ đồ tổ chức bạn mong muốn.
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 )}
 
                 {currentWidget.type === "COMMUNE_INTERACTIVE_MAP" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-orange-50/20 border border-orange-100/40">
-                    <h5 className="font-extrabold text-orange-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Bản đồ tương tác vector
+                  <div className="space-y-3 p-4 rounded-xl bg-orange-50/50 border border-orange-100 dark:bg-orange-950/20 dark:border-orange-900/30">
+                    <h5 className="font-black text-orange-800 dark:text-orange-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-orange-600" /> Bản đồ tương tác vector
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Kích hoạt bản vẽ ranh giới vector tương tác của 8 phân khu thôn buôn xã Dang Kang. Người xem trên Portal có thể click chọn từng thôn để hiển thị thông số chi tiết.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "CONTACT_INFO_SIDEBAR" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-blue-50/20 border border-blue-100/40">
-                    <h5 className="font-extrabold text-blue-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu liên hệ đồng bộ
+                  <div className="space-y-3 p-4 rounded-xl bg-blue-50/50 border border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/30">
+                    <h5 className="font-black text-blue-800 dark:text-blue-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600" /> Dữ liệu liên hệ đồng bộ
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Nhúng khối thông tin địa chỉ, email, hotline của trụ sở cơ cơ quan cùng lịch trực tiếp công dân của ban cán sự.
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                      Nhúng khối thông tin địa chỉ, email, hotline của trụ sở cơ quan cùng lịch trực tiếp công dân của ban cán sự.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "CONTACT_FORM" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-slate-50 border border-slate-150">
-                    <h5 className="font-extrabold text-slate-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Biểu mẫu hòm thư góp ý
+                  <div className="space-y-3 p-4 rounded-xl bg-slate-50 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                    <h5 className="font-black text-slate-800 dark:text-slate-200 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-slate-600" /> Biểu mẫu hòm thư góp ý
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Tự động tải biểu mẫu và hòm thư phản ánh ý kiến, kiến nghị trực tiếp từ công dân để gửi đến ban biên tập cơ quan.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "HERO_SLIDER" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-amber-50/20 border border-amber-100/40">
-                    <h5 className="font-extrabold text-amber-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu Banners đồng bộ
+                  <div className="space-y-3 p-4 rounded-xl bg-amber-50/50 border border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/30">
+                    <h5 className="font-black text-amber-800 dark:text-amber-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-amber-600" /> Dữ liệu Banners đồng bộ
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Tự động tải danh sách các Banners và Slogan chính được cấu hình trong hệ thống để hiển thị trình chiếu tự động (Slider) sang trọng trên trang.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "FEATURED_NEWS" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-blue-50/20 border border-blue-100/40">
-                    <h5 className="font-extrabold text-blue-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Tin tức nổi bật tự động nạp
+                  <div className="space-y-3 p-4 rounded-xl bg-blue-50/50 border border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/30">
+                    <h5 className="font-black text-blue-800 dark:text-blue-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-blue-600" /> Tin tức nổi bật tự động nạp
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Hiển thị danh sách các bài viết mới nhất và nổi bật nhất từ các chuyên mục Tin tức, Thông báo, Xây dựng, Nông nghiệp với hiệu ứng thẻ sang trọng.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "PUBLIC_SERVICES" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-emerald-50/20 border border-emerald-100/40">
-                    <h5 className="font-extrabold text-emerald-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Danh mục Dịch vụ công & Tra cứu
+                  <div className="space-y-3 p-4 rounded-xl bg-emerald-50/50 border border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/30">
+                    <h5 className="font-black text-emerald-800 dark:text-emerald-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Danh mục Dịch vụ công & Tra cứu
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Tích hợp nhanh các tiện ích nộp hồ sơ trực tuyến, tra cứu tiến độ giải quyết thủ tục một cửa và gửi phản ánh kiến nghị công dân.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "LEGAL_DOCUMENTS" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-purple-50/20 border border-purple-100/40">
-                    <h5 className="font-extrabold text-purple-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Hệ thống Văn bản chỉ đạo
+                  <div className="space-y-3 p-4 rounded-xl bg-purple-50/50 border border-purple-100 dark:bg-purple-950/20 dark:border-purple-900/30">
+                    <h5 className="font-black text-purple-800 dark:text-purple-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-purple-600" /> Hệ thống Văn bản chỉ đạo
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Nạp tự động danh sách các văn bản pháp quy, quyết định, chỉ đạo điều hành mới nhất của cơ quan quản lý nhà nước.
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "PHOTO_VIDEO_GALLERY" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-rose-50/20 border border-rose-100/40">
-                    <h5 className="font-extrabold text-rose-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Thư viện Truyền thông
+                  <div className="space-y-3 p-4 rounded-xl bg-rose-50/50 border border-rose-100 dark:bg-rose-950/20 dark:border-rose-900/30">
+                    <h5 className="font-black text-rose-800 dark:text-rose-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-rose-600" /> Thư viện Truyền thông
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Hiển thị album ảnh hoạt động và các video clip tuyên truyền trực quan sinh động với chế độ xem phóng to (Lightbox).
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "FAQ_ACCORDION" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-cyan-50/20 border border-cyan-100/40">
-                    <h5 className="font-extrabold text-cyan-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Hỏi đáp trực tuyến (FAQ)
+                  <div className="space-y-3 p-4 rounded-xl bg-cyan-50/50 border border-cyan-100 dark:bg-cyan-950/20 dark:border-cyan-900/30">
+                    <h5 className="font-black text-cyan-800 dark:text-cyan-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-cyan-600" /> Hỏi đáp trực tuyến (FAQ)
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Nạp các câu hỏi thường gặp và giải đáp pháp luật từ cổng tương tác công dân dưới dạng danh sách mở rộng (Accordion).
                     </p>
                   </div>
                 )}
 
                 {currentWidget.type === "EXTERNAL_LINKS" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-slate-50 border border-slate-150">
-                    <h5 className="font-extrabold text-slate-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Liên kết ban ngành đối tác
+                  <div className="space-y-3 p-4 rounded-xl bg-slate-50 border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                    <h5 className="font-black text-slate-800 dark:text-slate-200 uppercase text-xs tracking-wider flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 text-slate-600" /> Liên kết ban ngành đối tác
                     </h5>
-                    <p className="text-[10px] text-slate-500 leading-normal font-medium">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
                       Hiển thị băng chuyền (Carousel) các logo và đường dẫn liên kết đến các cơ quan, bộ ban ngành và cổng dịch vụ công quốc gia.
                     </p>
                   </div>
