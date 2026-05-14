@@ -942,7 +942,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                       {/* ORG SECTIONS DIRECTORY WIDGET */}
                       {widget.type === "ORG_SECTIONS_DIRECTORY" && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {getConfigObject("about_org_sections", DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"]).map((section: any, idx: number) => (
+                          {(widget.data?.selectedUnits && widget.data.selectedUnits.length > 0 ? widget.data.selectedUnits : getConfigObject("about_org_sections", DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"])).map((section: any, idx: number) => (
                             <div
                               key={section.title || idx}
                               className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3 group hover:border-[#b91c1c] transition-all"
@@ -971,7 +971,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                       {/* LEADERSHIP LIST WIDGET */}
                       {widget.type === "LEADERSHIP_LIST" && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"]).map((leader: any, idx: number) => (
+                          {(widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0 ? widget.data.selectedLeaders : getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])).map((leader: any, idx: number) => (
                             <div
                               key={leader.name || idx}
                               className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"

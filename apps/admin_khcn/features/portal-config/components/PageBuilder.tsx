@@ -1,7 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
+import { useQuery } from "@tanstack/react-query";
+import { organizationApi } from "@/features/system-admin/organization/api";
+import { hrmApi } from "@/features/hrm/api";
+import {  
   MoveUp, 
   MoveDown, 
   Trash2, 
@@ -264,6 +267,25 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     onChange(newLayout);
   };
 
+  const updateWidgetData = (widgetId: string, newData: any) => {
+    const newLayout = layout.map(row => ({
+      ...row,
+      columns: row.columns.map(col => ({
+        ...col,
+        widgets: col.widgets.map(w => {
+          if (w.id === widgetId) {
+            return {
+              ...w,
+              data: newData
+            };
+          }
+          return w;
+        })
+      }))
+    }));
+    onChange(newLayout);
+  };
+
   // Find currently selected widget object
   const getSelectedWidget = (): Widget | null => {
     if (!selectedWidgetId) return null;
@@ -275,6 +297,103 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
       }
     }
     return null;
+  };
+
+  // Fetch Organization Units Tree
+  const { data: orgTree } = useQuery({
+    queryKey: ["organizations-tree"],
+    queryFn: () => organizationApi.getTree(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Flatten org tree for easy checkbox selection
+  const flattenOrgNodes = (nodes: any[] = []): any[] => {
+    let list: any[] = [];
+    nodes.forEach(node => {
+      list.push(node);
+      if (node.children && node.children.length > 0) {
+        list = list.concat(flattenOrgNodes(node.children));
+      }
+    });
+    return list;
+  };
+
+  const allOrgUnits = flattenOrgNodes(orgTree || []);
+
+  // Fetch HRM Employees / Leaders
+  const { data: hrmEmployeesRes } = useQuery({
+    queryKey: ["hrm-employees-list"],
+    queryFn: () => hrmApi.list({ pageSize: 50 }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const allEmployees = hrmEmployeesRes?.data || [];
+
+  const toggleSelectUnit = (widgetId: string, unit: any) => {
+    const w = getSelectedWidget();
+    if (!w || w.id !== widgetId) return;
+
+    const currentIds = w.data?.selectedUnitIds || [];
+    let newIds: number[];
+    let newUnits: any[];
+
+    if (currentIds.includes(unit.id)) {
+      newIds = currentIds.filter((id: number) => id !== unit.id);
+      newUnits = (w.data?.selectedUnits || []).filter((u: any) => u.id !== unit.id);
+    } else {
+      newIds = [...currentIds, unit.id];
+      const newUnitObj = {
+        id: unit.id,
+        title: unit.name,
+        code: unit.code || "",
+        typeName: unit.typeName || "Cơ quan hành chính",
+        desc: `Bộ phận trực thuộc phụ trách điều hành, quản lý lĩnh vực ${unit.name} theo quy chế hoạt động của đơn vị.`,
+        details: ["Cấp trưởng phụ trách chung", "Cấp phó theo dõi chuyên môn", "Cán bộ chuyên trách nghiệp vụ"]
+      };
+      newUnits = [...(w.data?.selectedUnits || []), newUnitObj];
+    }
+
+    updateWidgetData(widgetId, {
+      ...(w.data || {}),
+      selectedUnitIds: newIds,
+      selectedUnits: newUnits
+    });
+  };
+
+  const toggleSelectLeader = (widgetId: string, emp: any) => {
+    const w = getSelectedWidget();
+    if (!w || w.id !== widgetId) return;
+
+    const currentIds = w.data?.selectedLeaderIds || [];
+    let newIds: number[];
+    let newLeaders: any[];
+
+    if (currentIds.includes(emp.id)) {
+      newIds = currentIds.filter((id: number) => id !== emp.id);
+      newLeaders = (w.data?.selectedLeaders || []).filter((l: any) => l.id !== emp.id);
+    } else {
+      newIds = [...currentIds, emp.id];
+      const fullName = `${emp.lastname || ""} ${emp.firstname || ""}`.trim() || "Cán bộ lãnh đạo";
+      const jobTitleName = emp.jobTitle?.name || emp.jobTitleName || "Cán bộ phụ trách";
+      const deptName = emp.department?.name || emp.departmentName || "UBND Xã";
+      
+      const newLeaderObj = {
+        id: emp.id,
+        name: fullName,
+        role: jobTitleName,
+        responsibility: `Chịu trách nhiệm phụ trách chung và điều hành các hoạt động thuộc lĩnh vực phân công tại ${deptName}. Trực tiếp xử lý đơn thư và tiếp dân theo quy chế.`,
+        schedule: ["Sáng Thứ 3 hàng tuần", "Sáng Thứ 5 hàng tuần"],
+        contact: emp.phone || emp.email || "0262.385.1234",
+        department: deptName
+      };
+      newLeaders = [...(w.data?.selectedLeaders || []), newLeaderObj];
+    }
+
+    updateWidgetData(widgetId, {
+      ...(w.data || {}),
+      selectedLeaderIds: newIds,
+      selectedLeaders: newLeaders
+    });
   };
 
   const currentWidget = getSelectedWidget();
@@ -712,24 +831,137 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                 )}
 
                 {currentWidget.type === "LEADERSHIP_LIST" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-indigo-50/20 border border-indigo-100/40">
-                    <h5 className="font-extrabold text-indigo-800 uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu tích hợp tự động
-                    </h5>
+                  <div className="space-y-4 pt-4 border-t border-slate-150 dark:border-slate-850">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-extrabold text-indigo-800 dark:text-[#fbc02d] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Chọn cán bộ lãnh đạo từ cơ sở dữ liệu
+                      </h5>
+                      <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-black text-slate-600 dark:text-slate-300">
+                        Đã chọn: {(currentWidget.data?.selectedLeaderIds || []).length}
+                      </span>
+                    </div>
+
                     <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Tự động tải danh sách cán bộ, chức danh, lịch tiếp dân và thông tin phòng ban làm việc được cập nhật tại tab **Trang giới thiệu sang Cán bộ lãnh đạo**.
+                      Bấm chọn danh sách cán bộ, lãnh đạo cơ quan từ hệ thống nhân sự (HRM) dưới đây. Thông tin và lịch tiếp dân sẽ được đồng bộ và hiển thị theo đúng danh sách bạn cấu hình.
                     </p>
+
+                    <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 shadow-inner">
+                      {allEmployees.length === 0 ? (
+                        <div className="text-center py-6 text-slate-400 text-[10px] italic">
+                          Đang tải cơ sở dữ liệu cán bộ nhân sự...
+                        </div>
+                      ) : (
+                        allEmployees.map((emp: any) => {
+                          const isSelected = (currentWidget.data?.selectedLeaderIds || []).includes(emp.id);
+                          const fullName = `${emp.lastname || ""} ${emp.firstname || ""}`.trim() || "Cán bộ lãnh đạo";
+                          const roleName = emp.jobTitle?.name || emp.jobTitleName || "Cán bộ phụ trách";
+                          
+                          return (
+                            <div
+                              key={emp.id}
+                              onClick={() => toggleSelectLeader(currentWidget.id, emp)}
+                              className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all ${
+                                isSelected 
+                                  ? "bg-indigo-50 border-indigo-300 text-indigo-900 dark:bg-indigo-950/30 dark:border-indigo-800 dark:text-white font-extrabold shadow-sm" 
+                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className={`w-4 h-4 rounded flex items-center justify-center border text-[9px] ${
+                                  isSelected ? "bg-indigo-600 border-indigo-600 text-white font-black" : "border-slate-300 bg-slate-100 dark:bg-slate-800"
+                                }`}>
+                                  {isSelected && "✓"}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold truncate">{fullName}</span>
+                                  <span className="text-[9px] text-slate-400 font-medium truncate">{roleName}</span>
+                                </div>
+                              </div>
+                              <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
+                                {emp.employeeCode || `ID: ${emp.id}`}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5">
+                      <Workflow className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="flex flex-col gap-0.5 text-[10px]">
+                        <span className="font-black text-amber-900 dark:text-amber-400 uppercase tracking-wide">Tùy biến tổ chức hiển thị</span>
+                        <span className="text-slate-600 dark:text-slate-400 leading-normal">
+                          Danh sách cán bộ sẽ xuất hiện trên Portal chính xác theo thứ tự và cấu hình lựa chọn của bạn trong danh sách trên.
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {currentWidget.type === "ORG_SECTIONS_DIRECTORY" && (
-                  <div className="space-y-3 pt-4 border-t border-slate-150 dark:border-slate-850 p-3 rounded-xl bg-[#b91c1c]/5 border border-[#b91c1c]/10">
-                    <h5 className="font-extrabold text-[#b91c1c] uppercase text-[9px] tracking-wider flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Dữ liệu tích hợp tự động
-                    </h5>
+                  <div className="space-y-4 pt-4 border-t border-slate-150 dark:border-slate-850">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-extrabold text-[#b91c1c] dark:text-[#fbc02d] uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Chọn đơn vị / cơ cấu từ cơ sở dữ liệu
+                      </h5>
+                      <span className="text-[9px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-black text-slate-600 dark:text-slate-300">
+                        Đã chọn: {(currentWidget.data?.selectedUnitIds || []).length}
+                      </span>
+                    </div>
+
                     <p className="text-[10px] text-slate-500 leading-normal font-medium">
-                      Nạp sơ đồ bộ máy hành chính (Đảng ủy, HĐND, UBND, Đoàn thể...) được đồng bộ từ cấu hình danh sách tab **Trang giới thiệu**.
+                      Bấm chọn các đơn vị / cơ cấu tổ chức dưới đây từ CSDL tổ chức. Bạn có thể tự do lựa chọn và tổ chức sơ đồ hiển thị trên trang theo ý muốn.
                     </p>
+
+                    <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 shadow-inner">
+                      {allOrgUnits.length === 0 ? (
+                        <div className="text-center py-6 text-slate-400 text-[10px] italic">
+                          Đang tải cơ sở dữ liệu tổ chức...
+                        </div>
+                      ) : (
+                        allOrgUnits.map((unit: any) => {
+                          const isSelected = (currentWidget.data?.selectedUnitIds || []).includes(unit.id);
+                          return (
+                            <div
+                              key={unit.id}
+                              onClick={() => toggleSelectUnit(currentWidget.id, unit)}
+                              className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all ${
+                                isSelected 
+                                  ? "bg-red-50 border-red-300 text-red-900 dark:bg-red-950/30 dark:border-red-800 dark:text-white font-extrabold shadow-sm" 
+                                  : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className={`w-4 h-4 rounded flex items-center justify-center border text-[9px] ${
+                                  isSelected ? "bg-red-600 border-red-600 text-white font-black" : "border-slate-300 bg-slate-100 dark:bg-slate-800"
+                                }`}>
+                                  {isSelected && "✓"}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                  <span className="font-bold truncate">{unit.name}</span>
+                                  {unit.typeName && (
+                                    <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName}</span>
+                                  )}
+                                </div>
+                              </div>
+                              <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
+                                {unit.code || `ID: ${unit.id}`}
+                              </span>
+                            </div>
+                          );
+                        })
+                      )}
+                    </div>
+
+                    <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 rounded-xl flex items-start gap-2.5">
+                      <Workflow className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <div className="flex flex-col gap-0.5 text-[10px]">
+                        <span className="font-black text-amber-900 dark:text-amber-400 uppercase tracking-wide">Sắp xếp và Tùy biến hiển thị</span>
+                        <span className="text-slate-600 dark:text-slate-400 leading-normal">
+                          Các đơn vị được chọn sẽ đồng bộ ngay lập tức ra Cổng thông tin (Portal) theo sơ đồ tổ chức bạn mong muốn.
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 )}
 
