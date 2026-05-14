@@ -41,12 +41,12 @@ interface CustomPageMeta {
 export function PortalPageBuilderClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [languages, setLanguages] = useState<any[]>([]);
-  
+
   // Custom pages list management state
   const [pagesList, setPagesList] = useState<CustomPageMeta[]>([]);
   const [selectedPageId, setSelectedPageId] = useState<string>("about-page");
   const [currentLayout, setCurrentLayout] = useState<any[]>([]);
-  
+
   // Dialog state for adding/editing page metadata
   const [isPageModalOpen, setIsPageModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"ADD" | "EDIT">("ADD");
@@ -71,8 +71,8 @@ export function PortalPageBuilderClient() {
     fetchLanguages();
   }, []);
 
-  const activeLangs = languages.length > 0 
-    ? languages 
+  const activeLangs = languages.length > 0
+    ? languages
     : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
   // 2. Fetch existing portal configurations
@@ -95,7 +95,7 @@ export function PortalPageBuilderClient() {
       // Find pages metadata list key
       const listConfig = dbConfigs.find((c: any) => c.code === "custom_page_list");
       let parsedPages: CustomPageMeta[] = [];
-      
+
       if (listConfig && listConfig.description) {
         try {
           parsedPages = JSON.parse(listConfig.description);
@@ -133,7 +133,7 @@ export function PortalPageBuilderClient() {
       // Compatibility fallback: 'about-page' can load from 'custom_about_layout' if standard layout does not exist
       const layoutCode = currentId === "about-page" ? "custom_about_layout" : `custom_page_layout_${currentId}`;
       const layoutConfig = dbConfigs.find((c: any) => c.code === layoutCode);
-      
+
       if (layoutConfig && layoutConfig.description) {
         try {
           setCurrentLayout(JSON.parse(layoutConfig.description));
@@ -239,7 +239,7 @@ export function PortalPageBuilderClient() {
       setPagesList(updatedList);
       setIsPageModalOpen(false);
       setSelectedPageId(cleanId);
-      
+
       // Save empty layout for this new page
       await handleSaveLayout(cleanId, [], updatedList);
     } else {
@@ -295,7 +295,7 @@ export function PortalPageBuilderClient() {
       }
 
       toast.success("Đã xóa trang tùy chỉnh thành công!");
-      
+
       // Select first page
       if (selectedPageId === pageId) {
         setSelectedPageId(updatedList[0]?.id || "about-page");
@@ -338,7 +338,7 @@ export function PortalPageBuilderClient() {
 
   return (
     <div className="space-y-6 w-full p-4 sm:p-6 select-none animate-fade-in">
-      
+
       {/* HEADER BANNER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 rounded-2xl shadow-md border-l-4 border-indigo-500 text-white">
         <div className="space-y-1">
@@ -406,11 +406,10 @@ export function PortalPageBuilderClient() {
                 <div
                   key={p.id}
                   onClick={() => setSelectedPageId(p.id)}
-                  className={`group relative flex flex-col p-3.5 rounded-xl border transition-all cursor-pointer select-none ${
-                    isSelected
+                  className={`group relative flex flex-col p-3.5 rounded-xl border transition-all cursor-pointer select-none ${isSelected
                       ? "bg-indigo-50/50 border-indigo-200 shadow-sm"
                       : "bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-1 min-w-0">
@@ -434,7 +433,7 @@ export function PortalPageBuilderClient() {
                       >
                         <Edit2 className="w-3 h-3" />
                       </button>
-                      
+
                       {p.id !== "about-page" && p.id !== "contact-page" && (
                         <button
                           type="button"
@@ -456,12 +455,11 @@ export function PortalPageBuilderClient() {
                       <Languages className="w-3 h-3" />
                       {p.title.en}
                     </span>
-                    
-                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${
-                      p.isActive 
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-100" 
+
+                    <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-full ${p.isActive
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-100"
                         : "bg-slate-100 text-slate-500 border border-slate-200"
-                    }`}>
+                      }`}>
                       {p.isActive ? "Bật" : "Tắt"}
                     </span>
                   </div>
@@ -492,7 +490,7 @@ export function PortalPageBuilderClient() {
                         </CardDescription>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 shrink-0 bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-250">
                       <button
                         type="button"
@@ -506,14 +504,12 @@ export function PortalPageBuilderClient() {
                           setPagesList(updatedList);
                           handleSaveLayout(selectedPageId, currentLayout, updatedList);
                         }}
-                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                          selectedPageMeta.isActive ? "bg-emerald-600" : "bg-slate-200"
-                        }`}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${selectedPageMeta.isActive ? "bg-emerald-600" : "bg-slate-200"
+                          }`}
                       >
                         <span
-                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                            selectedPageMeta.isActive ? "translate-x-6" : "translate-x-1"
-                          }`}
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${selectedPageMeta.isActive ? "translate-x-6" : "translate-x-1"
+                            }`}
                         />
                       </button>
                       <span className={`text-[10px] font-black uppercase ${selectedPageMeta.isActive ? "text-emerald-600" : "text-slate-500"}`}>
@@ -526,7 +522,7 @@ export function PortalPageBuilderClient() {
                   <div className="flex items-start gap-2.5">
                     <Info className="w-4.5 h-4.5 text-indigo-600 shrink-0 mt-0.5" />
                     <p className="font-semibold text-[11px]">
-                      {selectedPageMeta.isActive 
+                      {selectedPageMeta.isActive
                         ? `Trang thiết kế đã được KÍCH HOẠT. Bạn có thể gắn đường dẫn "/tuy-bien/${selectedPageMeta.id}" vào các mục Menu chính để người dân truy cập.`
                         : `Trang thiết kế này đang tạm khóa. Khi người dùng truy cập link "/tuy-bien/${selectedPageMeta.id}", trang sẽ báo lỗi không tìm thấy.`
                       }
@@ -552,11 +548,13 @@ export function PortalPageBuilderClient() {
                   </div>
                 </div>
 
-                <PageBuilder
-                  layout={currentLayout}
-                  onChange={setCurrentLayout}
-                  languages={activeLangs}
-                />
+                <div className="h-[calc(100vh-320px)] overflow-y-auto pr-2 border border-slate-200 rounded-2xl bg-slate-50/50 p-4 shadow-inner">
+                  <PageBuilder
+                    layout={currentLayout}
+                    onChange={setCurrentLayout}
+                    languages={activeLangs}
+                  />
+                </div>
               </div>
 
             </>
@@ -632,14 +630,12 @@ export function PortalPageBuilderClient() {
               <button
                 type="button"
                 onClick={() => setModalIsActive(!modalIsActive)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${
-                  modalIsActive ? "bg-emerald-600" : "bg-slate-200"
-                }`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${modalIsActive ? "bg-emerald-600" : "bg-slate-200"
+                  }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                    modalIsActive ? "translate-x-6" : "translate-x-1"
-                  }`}
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${modalIsActive ? "translate-x-6" : "translate-x-1"
+                    }`}
                 />
               </button>
             </div>
@@ -658,7 +654,7 @@ export function PortalPageBuilderClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
     </div>
   );
 }
