@@ -548,13 +548,11 @@ export function PortalPageBuilderClient() {
                   </div>
                 </div>
 
-                <div className="h-[calc(100vh-320px)] overflow-y-auto pr-2 border border-slate-200 rounded-2xl bg-slate-50/50 p-4 shadow-inner">
-                  <PageBuilder
-                    layout={currentLayout}
-                    onChange={setCurrentLayout}
-                    languages={activeLangs}
-                  />
-                </div>
+                <PageBuilder
+                  layout={currentLayout}
+                  onChange={setCurrentLayout}
+                  languages={activeLangs}
+                />
               </div>
 
             </>
