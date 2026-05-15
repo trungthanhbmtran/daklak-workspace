@@ -155,7 +155,6 @@ const DEFAULT_LEADERS = {
   ]
 }
 
-// Helper to extract localized text fields safely
 const getLocalizedField = (obj: any, baseField: string, lang: string): string => {
   if (!obj) return ""
   if (lang === "en") {
@@ -172,7 +171,8 @@ function HeroSliderWidget({ banners, currentLang, data }: { banners: any[], curr
   const [activeIdx, setActiveIdx] = React.useState(0)
   const displayBanners = React.useMemo(() => {
     if (banners && banners.length > 0) {
-      return banners.filter(b => b.status !== false).slice(0, 5)
+      const activeBanners = banners.filter(b => b.status !== false).slice(0, 5)
+      if (activeBanners.length > 0) return activeBanners
     }
     return [
       {
@@ -271,8 +271,8 @@ function FeaturedNewsWidget({ posts, currentLang, data }: { posts: any[], curren
       )
     }
 
-    // If still empty and it's a mock/fallback case, provide default mocks
-    if (filtered.length === 0 && (!posts || posts.length === 0)) {
+    // If empty (either no posts at all, or none in this category), provide default mocks
+    if (filtered.length === 0) {
       return [
         {
           id: "news-1",
@@ -652,6 +652,27 @@ function renderLexicalNode(node: any, index: number, currentLang: string): React
           {renderChildren()}
         </a>
       )
+    case "quote":
+      return (
+        <blockquote key={index} className="border-l-4 border-red-600/20 dark:border-red-600/40 pl-4 italic my-4 text-slate-600 dark:text-slate-400">
+          {renderChildren()}
+        </blockquote>
+      )
+    case "image":
+      return (
+        <div key={index} className="my-6 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 shadow-sm">
+          <img
+            src={resolveMediaUrl(node.src)}
+            alt={node.altText || ""}
+            className="w-full h-auto object-cover"
+          />
+          {node.caption && (
+            <div className="bg-slate-50 dark:bg-slate-900/50 p-3 text-center text-[11px] font-medium text-slate-500 border-t border-slate-100 dark:border-slate-850">
+              {typeof node.caption === "object" ? node.caption.text : node.caption}
+            </div>
+          )}
+        </div>
+      )
     case "linebreak":
       return <br key={index} />
     default:
@@ -743,7 +764,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
         // Fallback
       }
     }
-    return found.name || fallback
+    return found.description || found.name || fallback
   }, [portalConfigData, currentLang])
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
@@ -840,19 +861,23 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   const postsList = Array.isArray(postsData) ? postsData : (postsData?.data || [])
   const questionsList = Array.isArray(questionsData) ? questionsData : (questionsData?.data || [])
 
+  const finalLayout = Array.isArray(layoutSchema) ? layoutSchema : (layoutSchema && typeof layoutSchema === 'object' && (layoutSchema as any).rows ? (layoutSchema as any).rows : [])
+
+  if (finalLayout.length === 0) return null
+
   return (
-    <div className="space-y-8 animate-fade-in">
-      {layoutSchema.map((row: any, rIdx: number) => (
+    <div className="space-y-8 animate-in fade-in duration-700">
+      {finalLayout.map((row: any, rIdx: number) => (
         <div key={row.rowId || rIdx} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
           {row.columns?.map((col: any, cIdx: number) => (
             <div key={col.id || cIdx} className={col.colSpan || "lg:col-span-12"}>
               <div className="space-y-6">
-                {col.widgets?.map((widget: any) => {
+                {col.widgets?.map((widget: any, wIdx: number) => {
                   const widgetTitle = widget.title?.[currentLang] || widget.title?.vi || ""
 
                   return (
                     <div
-                      key={widget.id}
+                      key={widget.id || wIdx}
                       className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4"
                     >
                       {/* Widget Header Banner */}
