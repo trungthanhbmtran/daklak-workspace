@@ -801,11 +801,11 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                         e.preventDefault();
                         const colRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                         const mouseY = e.clientY - colRect.top;
-                        
+
                         // Calculate index based on children positions
                         const children = Array.from((e.currentTarget as HTMLElement).querySelectorAll('.widget-item-container'));
                         let foundIndex = col.widgets.length;
-                        
+
                         for (let i = 0; i < children.length; i++) {
                           const childRect = children[i].getBoundingClientRect();
                           const childCenterY = childRect.top + childRect.height / 2 - colRect.top;
@@ -814,7 +814,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                             break;
                           }
                         }
-                        
+
                         setDragOverColId(col.id);
                         setDragOverIndex({ colId: col.id, index: foundIndex });
                       }}
@@ -846,7 +846,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           {col.widgets.length === 0 && dragOverColId === col.id && (
                             <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-2" />
                           )}
-                          
+
                           {col.widgets.map((widget, wIdx) => {
                             const isSelected = selectedWidgetId === widget.id;
                             const showDropIndicatorBefore = dragOverIndex?.colId === col.id && dragOverIndex.index === wIdx;
@@ -857,7 +857,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                                 {showDropIndicatorBefore && (
                                   <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-1 z-10" />
                                 )}
-                                
+
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -921,7 +921,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Khung layout trống</span>
                         </div>
                       )}
-                    </div>
                     </div>
                   ))}
                 </div>
