@@ -51,8 +51,20 @@ import {
   GripVertical,
   Briefcase,
   FileSearch,
-  MessageSquare
+  MessageSquare,
+  Monitor,
+  Tablet,
+  Smartphone,
+  Maximize2,
+  PanelLeft,
+  PanelRight,
+  ChevronLeft
 } from "lucide-react";
+import { 
+  ResizableHandle, 
+  ResizablePanel, 
+  ResizablePanelGroup 
+} from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -116,6 +128,9 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCsdl, setSelectedCsdl] = useState<string>("org");
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
+  const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
+  const [showLeftPanel, setShowLeftPanel] = useState(true);
+  const [showRightPanel, setShowRightPanel] = useState(true);
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes(prev => ({ ...prev, [nodeId]: !prev[nodeId] }));
@@ -583,6 +598,8 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     return findWidgetById(selectedWidgetId || "");
   };
 
+  const currentWidget = getSelectedWidget();
+
   // Fetch Organization Units Tree
   const { data: orgTree } = useQuery({
     queryKey: ["organizations-tree"],
@@ -709,98 +726,232 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const isLexicalActive = currentWidget?.type === "LEXICAL_RICH_TEXT";
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 animate-fade-in">
+  return (
+    <div className="flex flex-col h-[calc(100vh-140px)] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-slate-50/50 dark:bg-slate-950/20 animate-fade-in shadow-2xl">
+      
+      {/* BUILDER TOOLBAR */}
+      <div className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between px-4 z-20 shrink-0">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowLeftPanel(!showLeftPanel)}
+            className={`w-9 h-9 rounded-lg transition-colors ${showLeftPanel ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50" : "text-slate-400"}`}
+          >
+            <PanelLeft className="w-4.5 h-4.5" />
+          </Button>
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+          
+          {/* Viewport Toggles */}
+          <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-lg">
+            <button
+              onClick={() => setViewport("desktop")}
+              className={`p-1.5 rounded-md transition-all ${viewport === "desktop" ? "bg-white dark:bg-slate-800 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+              title="Desktop View"
+            >
+              <Monitor className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewport("tablet")}
+              className={`p-1.5 rounded-md transition-all ${viewport === "tablet" ? "bg-white dark:bg-slate-800 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+              title="Tablet View"
+            >
+              <Tablet className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setViewport("mobile")}
+              className={`p-1.5 rounded-md transition-all ${viewport === "mobile" ? "bg-white dark:bg-slate-800 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+              title="Mobile View"
+            >
+              <Smartphone className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
 
-      {/* LEFT PANEL: Layout Builder Canvas */}
-      <div className={`w-full space-y-6 transition-all duration-500 ${isLexicalActive ? 'xl:col-span-4 order-2 xl:order-1' : 'xl:col-span-8 order-1 max-w-7xl'}`}>
+        <div className="flex items-center gap-3">
+          {/* Language toggler */}
+          <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-lg">
+            {languages.map((l) => (
+              <button
+                key={l.code}
+                onClick={() => setActiveLang(l.code)}
+                className={`text-[9px] font-black uppercase px-2.5 py-1.5 rounded-md transition-all ${activeLang === l.code
+                  ? "bg-white dark:bg-slate-800 text-[#b91c1c] dark:text-white shadow-sm"
+                  : "text-slate-400 hover:text-slate-600"
+                  }`}
+              >
+                {l.code}
+              </button>
+            ))}
+          </div>
+          
+          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowRightPanel(!showRightPanel)}
+            className={`w-9 h-9 rounded-lg transition-colors ${showRightPanel ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50" : "text-slate-400"}`}
+          >
+            <PanelRight className="w-4.5 h-4.5" />
+          </Button>
+        </div>
+      </div>
 
-        {/* Layout templates picker */}
-        <Card className="border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden bg-white dark:bg-slate-900 rounded-xl sm:rounded-2xl">
-          <CardHeader className="bg-slate-50/50 dark:bg-slate-950/40 border-b border-slate-100 dark:border-slate-850 p-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <Layout className="w-5 h-5 text-[#b91c1c] dark:text-[#fbc02d]" />
-                <div>
-                  <CardTitle className="text-sm font-black text-slate-800 dark:text-white uppercase tracking-wide">
-                    Thêm hàng cấu trúc mới
-                  </CardTitle>
-                  <p className="text-[10px] text-slate-400 font-medium">Chọn kiểu phân chia tỷ lệ cột cho dòng</p>
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
+        
+        {/* LEFT PANEL: Toolbox */}
+        {showLeftPanel && (
+          <>
+            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-white dark:bg-slate-900 overflow-y-auto">
+              <div className="p-4 space-y-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <Database className="w-4.5 h-4.5 text-indigo-600" />
+                  <h3 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">Kho CSDL Widgets</h3>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { id: "org", label: "Tổ chức", icon: Building2, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950/30" },
+                    { id: "hrm", label: "Cán bộ", icon: Users2, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+                    { id: "news", label: "Tin tức", icon: Newspaper, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+                    { id: "service", label: "Dịch vụ", icon: Landmark, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
+                    { id: "legal", label: "Văn bản", icon: FolderOpen, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+                    { id: "extra", label: "Chức năng", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCsdl(cat.id)}
+                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${selectedCsdl === cat.id
+                        ? `border-indigo-500 ring-2 ring-indigo-500/10 ${cat.bg}`
+                        : "border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                        }`}
+                    >
+                      <cat.icon className={`w-5 h-5 ${selectedCsdl === cat.id ? cat.color : "text-slate-400"}`} />
+                      <span className={`text-[9px] font-black uppercase tracking-tight ${selectedCsdl === cat.id ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>
+                        {cat.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-slate-50/30 dark:bg-slate-950/20 rounded-xl">
+                  <div className="p-2 border-b border-slate-100 dark:border-slate-850 flex items-center gap-2">
+                    <Search className="w-3 h-3 text-slate-400" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Tìm kiếm..."
+                      className="h-6 text-[9px] font-semibold bg-transparent border-none focus-visible:ring-0 p-0 w-full"
+                    />
+                  </div>
+                  <div className="p-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+                    {/* Render Category Items - Original logic preserved */}
+                    {selectedCsdl === "org" && (
+                      <div className="space-y-1">
+                        {(searchQuery.trim() !== "" ? allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())) : allOrgUnits.slice(0, 20)).map((unit: any) => (
+                          <div
+                            key={unit.id}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: unit.name, data: { selectedUnitIds: [unit.id] } }))}
+                            className="p-2 rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-300 cursor-grab active:cursor-grabbing flex items-center gap-2"
+                          >
+                            <div className="w-6 h-6 rounded bg-red-50 dark:bg-red-950/40 text-red-600 flex items-center justify-center shrink-0">
+                              <Building2 className="w-3.5 h-3.5" />
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{unit.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* Add other categories news, hrm, etc... */}
+                    {selectedCsdl === "news" && (
+                      <div className="space-y-2">
+                        {[
+                          { type: "FEATURED_NEWS", title: "Khối tin tức nổi bật", icon: Newspaper, color: "text-blue-600" },
+                          { type: "PHOTO_VIDEO_GALLERY", title: "Thư viện Ảnh & Clip", icon: Film, color: "text-rose-600" },
+                          { type: "HERO_SLIDER", title: "Trình chiếu Banner lớn", icon: Images, color: "text-amber-600" }
+                        ].map((w) => (
+                          <div
+                            key={w.type}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
+                          >
+                            <div className={`w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                              <w.icon className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {/* HRM Category */}
+                    {selectedCsdl === "hrm" && (
+                      <div className="space-y-2">
+                         <div
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", title: "Danh sách lãnh đạo" }))}
+                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 text-indigo-600 flex items-center justify-center shrink-0">
+                              <Users2 className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Cán bộ lãnh đạo</span>
+                          </div>
+                      </div>
+                    )}
+                    {/* Other widgets... (Simplified for now, can be expanded) */}
+                    {["service", "legal", "extra"].includes(selectedCsdl) && (
+                      <div className="py-8 text-center">
+                         <p className="text-[9px] text-slate-400 italic font-medium">Chọn category khác hoặc tìm kiếm...</p>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                <div className="space-y-3">
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Cấu trúc Layout</h4>
+                  <div className="grid grid-cols-1 gap-2">
+                    <Button variant="outline" size="sm" onClick={() => addRow("12")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Columns className="w-3.5 h-3.5" /> 100%</Button>
+                    <Button variant="outline" size="sm" onClick={() => addRow("6-6")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Grid3X3 className="w-3.5 h-3.5" /> 50-50</Button>
+                    <Button variant="outline" size="sm" onClick={() => addRow("8-4")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Layers className="w-3.5 h-3.5" /> 8-4</Button>
+                    <Button variant="outline" size="sm" onClick={() => addRow("4-4-4")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Grid3X3 className="w-3.5 h-3.5" /> 4-4-4</Button>
+                  </div>
                 </div>
               </div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+          </>
+        )}
 
-              {/* Language toggler */}
-              <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-lg self-start">
-                {languages.map((l) => (
-                  <button
-                    key={l.code}
-                    onClick={() => setActiveLang(l.code)}
-                    className={`text-[10px] font-extrabold uppercase px-3 py-1.5 rounded-md transition-all ${activeLang === l.code
-                      ? "bg-white dark:bg-slate-800 text-[#b91c1c] dark:text-white shadow-sm"
-                      : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                      }`}
-                  >
-                    {l.name}
-                  </button>
-                ))}
+        {/* CENTER PANEL: Layout Builder Canvas with Viewport scaling */}
+        <ResizablePanel defaultSize={60} className="bg-slate-100 dark:bg-[#0f172a] relative overflow-hidden flex flex-col items-center">
+          
+          <div className={`w-full max-w-7xl h-full overflow-y-auto custom-scrollbar transition-all duration-500 p-6 flex justify-center ${
+            viewport === "tablet" ? "max-w-[768px]" : viewport === "mobile" ? "max-w-[420px]" : "max-w-full"
+          }`}>
+            
+            <div className={`w-full space-y-6 ${viewport !== "desktop" ? "bg-white dark:bg-slate-900 shadow-2xl rounded-3xl border-8 border-slate-800 dark:border-slate-950 p-4 h-fit" : ""}`}>
+              
+              {/* DEVICE HEADER (Only for Tablet/Mobile) */}
+              {viewport !== "desktop" && (
+                <div className="w-16 h-1 bg-slate-700 dark:bg-slate-800 rounded-full mx-auto mb-6 mt-1" />
+              )}
+
+              {/* Canvas Header */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                   <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest select-none">Vùng thiết kế nội dung thực</span>
+                </div>
+                {layout.length > 0 && (
+                  <Button variant="ghost" size="sm" className="h-6 text-[9px] font-black text-slate-400 hover:text-red-600 uppercase gap-1" onClick={() => { if(confirm("Xóa toàn bộ layout?")) setLayout([]); }}>
+                    <Trash2 className="w-3 h-3" /> Xóa tất cả
+                  </Button>
+                )}
               </div>
-            </div>
-          </CardHeader>
 
-          <CardContent className="p-4 grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-50/20">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => addRow("12")}
-              className="flex items-center gap-1.5 font-bold text-xs justify-start border-slate-200 hover:border-[#b91c1c] hover:bg-red-50/10"
-            >
-              <Columns className="w-4 h-4 text-[#b91c1c] shrink-0" />
-              <span>Cột đơn (100%)</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => addRow("6-6")}
-              className="flex items-center gap-1.5 font-bold text-xs justify-start border-slate-200 hover:border-[#b91c1c] hover:bg-red-50/10"
-            >
-              <Grid3X3 className="w-4 h-4 text-[#b91c1c] shrink-0" />
-              <span>Hai cột (50-50)</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => addRow("7-5")}
-              className="flex items-center gap-1.5 font-bold text-xs justify-start border-slate-200 hover:border-[#b91c1c] hover:bg-red-50/10"
-            >
-              <Columns className="w-4 h-4 rotate-90 text-[#b91c1c] shrink-0" />
-              <span>Hai cột lệch (7-5)</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => addRow("8-4")}
-              className="flex items-center gap-1.5 font-bold text-xs justify-start border-slate-200 hover:border-[#b91c1c] hover:bg-red-50/10"
-            >
-              <Layers className="w-4 h-4 text-[#b91c1c] shrink-0" />
-              <span>Hai cột lệch (8-4)</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => addRow("4-4-4")}
-              className="flex items-center gap-1.5 font-bold text-xs justify-start border-slate-200 hover:border-[#b91c1c] hover:bg-red-50/10"
-            >
-              <Grid3X3 className="w-4 h-4 text-[#b91c1c] shrink-0" />
-              <span>Ba cột (4-4-4)</span>
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Builder rows rendering with portal-accurate viewport bounds */}
-        <div className="border border-slate-200 dark:border-slate-800/80 p-4 sm:p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 w-full space-y-8 shadow-inner relative pt-10">
-          <div className="absolute top-3.5 left-4 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 select-none animate-pulse">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-            Khung hiển thị thực tế trên Portal (1280px Max)
-          </div>
+              {/* Builder rows rendering */}
 
           {layout.length === 0 ? (
             <div className="text-center py-16 border-2 border-dashed rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-3">
@@ -1848,23 +1999,24 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                   </div>
                 </div>
               </div>
-            ) : (
-              <div className="text-center py-20 px-6 border-2 border-dashed rounded-3xl border-slate-200 dark:border-slate-800 flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-300">
-                  <Layout className="w-8 h-8" />
-                </div>
-                <div className="space-y-1">
-                  <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Chưa chọn Hàng thiết kế</h4>
-                  <p className="text-[10px] text-slate-400 font-medium max-w-[200px] mx-auto">
-                    Hãy bấm vào biểu tượng <Settings2 className="w-3 h-3 inline" /> ở đầu mỗi hàng trong trình xây dựng để bắt đầu tùy biến giao diện.
-                  </p>
-                </div>
+                    </TabsContent>
+                  </Tabs>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-20 text-center gap-4 opacity-50 px-6">
+                    <div className="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                       <Settings2 className="w-8 h-8" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">Cấu hình chi tiết</p>
+                      <p className="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">Chọn một Widget hoặc một Hàng trên khu vực thiết kế để thay đổi thuộc tính hiển thị.</p>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
-
+            </ResizablePanel>
+          </>
+        )}
+      </ResizablePanelGroup>
     </div>
   );
-}
+};
