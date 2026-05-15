@@ -35,7 +35,7 @@ export default function CustomBuilderPage({ id }: CustomBuilderPageProps) {
         return []
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   // Get custom page list metadata

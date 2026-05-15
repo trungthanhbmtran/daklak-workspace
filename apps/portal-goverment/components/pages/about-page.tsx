@@ -202,7 +202,7 @@ export default function AboutPage() {
         return []
       }
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   })
 
   // Localized configuration fetchers

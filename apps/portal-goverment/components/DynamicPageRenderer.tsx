@@ -40,6 +40,7 @@ import {
   FileSearch,
   MessageSquare
 } from "lucide-react"
+import * as lucideIcons from "lucide-react"
 
 // Pure SVG interactive styled outline representing Dang Kang Commune subdivision zones
 const COMMUNE_ZONES = [
@@ -743,6 +744,32 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     staleTime: 5 * 60 * 1000,
   })
 
+  const { data: employeesData } = useQuery({
+    queryKey: ["public-employees"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/employees")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
+  const { data: orgUnitsData } = useQuery({
+    queryKey: ["public-org-units"],
+    queryFn: async () => {
+      try {
+        const response: any = await apiClient.get("/public/org-units")
+        return Array.isArray(response?.data) ? response.data : (Array.isArray(response) ? response : [])
+      } catch (e) {
+        return []
+      }
+    },
+    staleTime: 5 * 60 * 1000,
+  })
+
   // Localized configuration fetchers
   const getConfigValue = React.useCallback((code: string, fallback: string) => {
     const found = (portalConfigData || []).find((c: any) => c.code === code)
@@ -860,6 +887,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   const bannersList = Array.isArray(bannersData) ? bannersData : (bannersData?.data || [])
   const postsList = Array.isArray(postsData) ? postsData : (postsData?.data || [])
   const questionsList = Array.isArray(questionsData) ? questionsData : (questionsData?.data || [])
+  const allEmployees = Array.isArray(employeesData) ? employeesData : (employeesData?.data || [])
+  const allOrgUnits = Array.isArray(orgUnitsData) ? orgUnitsData : (orgUnitsData?.data || [])
 
   const finalLayout = Array.isArray(layoutSchema) ? layoutSchema : (layoutSchema && typeof layoutSchema === 'object' && (layoutSchema as any).rows ? (layoutSchema as any).rows : [])
 
@@ -868,20 +897,32 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {finalLayout.map((row: any, rIdx: number) => (
-        <div key={row.rowId || rIdx} className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+        <div 
+          key={row.rowId || rIdx} 
+          className={`grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start transition-all ${row.settings?.paddingTop || 'py-8'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-none'}`}
+          style={{
+            backgroundColor: row.settings?.backgroundColor,
+            backgroundImage: row.settings?.backgroundImage ? `url(${resolveMediaUrl(row.settings.backgroundImage)})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            color: row.settings?.textColor,
+          }}
+        >
           {row.columns?.map((col: any, cIdx: number) => (
             <div key={col.id || cIdx} className={col.colSpan || "lg:col-span-12"}>
               <div className="space-y-6">
                 {col.widgets?.map((widget: any, wIdx: number) => {
                   const widgetTitle = widget.title?.[currentLang] || widget.title?.vi || ""
+                  const showTitle = widget.data?.showTitle ?? true
+                  const isFullWidth = widget.data?.fullWidth ?? false
 
                   return (
                     <div
                       key={widget.id || wIdx}
-                      className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-4"
+                      className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${isFullWidth ? 'p-0 border-none bg-transparent dark:bg-transparent' : 'p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm'} flex flex-col gap-4`}
                     >
                       {/* Widget Header Banner */}
-                      {widgetTitle && (
+                      {widgetTitle && showTitle && (
                         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
                           <span className="w-1.5 h-4 bg-red-600 rounded-sm" />
                           <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -934,54 +975,28 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
                       {/* STATISTICS GRID WIDGET */}
                       {widget.type === "STATISTICS_GRID" && (
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
-                            <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/20 text-red-600 flex items-center justify-center border border-red-100 dark:border-red-900/30">
-                              <Building2 className="w-4 h-4" />
-                            </div>
-                            <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
-                              {currentLang === "en" ? "Natural Area" : "Diện tích tự nhiên"}
-                            </span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
-                              {getConfigValue("about_area", "2,452.8 Ha")}
-                            </span>
-                          </div>
-
-                          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
-                            <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/30">
-                              <Users2 className="w-4 h-4" />
-                            </div>
-                            <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
-                              {currentLang === "en" ? "Current Population" : "Dân số hiện tại"}
-                            </span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
-                              {getConfigValue("about_population", currentLang === "vi" ? "6.842 người" : "6,842 people")}
-                            </span>
-                          </div>
-
-                          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
-                            <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/20 text-sky-600 flex items-center justify-center border border-sky-100 dark:border-sky-900/30">
-                              <FileSpreadsheet className="w-4 h-4" />
-                            </div>
-                            <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
-                              {currentLang === "en" ? "Administrative Units" : "Đơn vị hành chính"}
-                            </span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
-                              {getConfigValue("about_subdivisions", currentLang === "vi" ? "8 Thôn, Buôn" : "8 Villages / Hamlets")}
-                            </span>
-                          </div>
-
-                          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
-                            <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/20 text-amber-600 flex items-center justify-center border border-amber-100 dark:border-amber-900/30">
-                              <ShieldCheck className="w-4 h-4" />
-                            </div>
-                            <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
-                              {currentLang === "en" ? "New Rural Standards" : "Chuẩn nông thôn mới"}
-                            </span>
-                            <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
-                              {getConfigValue("about_standard", currentLang === "vi" ? "Đạt 19/19 Tiêu chí" : "Achieved 19/19 Criteria")}
-                            </span>
-                          </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          {(widget.data?.items || [
+                            { label: currentLang === "en" ? "Natural Area" : "Diện tích tự nhiên", value: getConfigValue("about_area", "2,452.8 Ha"), icon: "Building2", color: "text-red-600" },
+                            { label: currentLang === "en" ? "Population" : "Dân cư", value: getConfigValue("about_population", "6.842"), icon: "Users2", color: "text-blue-600" },
+                            { label: currentLang === "en" ? "Subdivisions" : "Đơn vị hành chính", value: getConfigValue("about_subdivisions", "8 Thôn, Buôn"), icon: "FileSpreadsheet", color: "text-sky-600" },
+                            { label: currentLang === "en" ? "Standards" : "Chuẩn nông thôn mới", value: getConfigValue("about_standard", "Đạt 19/19"), icon: "ShieldCheck", color: "text-amber-600" }
+                          ]).map((item: any, i: number) => {
+                            const Icon = (lucideIcons as any)[item.icon] || Building2
+                            return (
+                              <div key={i} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${item.color || 'text-slate-600'} bg-white dark:bg-slate-900 shadow-sm`}>
+                                  <Icon className="w-4 h-4" />
+                                </div>
+                                <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
+                                  {item.label}
+                                </span>
+                                <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
+                                  {item.value}
+                                </span>
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
 
@@ -1017,51 +1032,115 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                       {/* LEADERSHIP LIST WIDGET */}
                       {widget.type === "LEADERSHIP_LIST" && (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {(widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0 ? widget.data.selectedLeaders : getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])).map((leader: any, idx: number) => (
-                            <div
-                              key={leader.name || idx}
-                              className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
-                            >
-                              <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-100/30 dark:bg-slate-900/40">
-                                <div className="w-9 h-9 rounded-full bg-red-600/10 text-red-600 dark:text-[#fbc02d] flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
-                                  {(leader.name || "A").split(' ').pop()?.[0]}
+                          {(() => {
+                            let leaders = []
+                            if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
+                              leaders = allEmployees.filter((emp: any) => widget.data.selectedEmployeeIds.includes(emp.id)).map((emp: any) => ({
+                                name: getLocalizedField(emp, "fullName", currentLang),
+                                role: getLocalizedField(emp, "roleName", currentLang),
+                                responsibility: getLocalizedField(emp, "jobDescription", currentLang),
+                                phone: emp.phoneNumber || "09xx.xxx.xxx",
+                                email: emp.email || "cán bộ@daklak.gov.vn",
+                                room: emp.officeRoom || "Trụ sở UBND xã"
+                              }))
+                            } else if (widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0) {
+                              leaders = widget.data.selectedLeaders
+                            } else {
+                              leaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])
+                            }
+
+                            return leaders.map((leader: any, idx: number) => (
+                              <div
+                                key={leader.name || idx}
+                                className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
+                              >
+                                <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-100/30 dark:bg-slate-900/40">
+                                  <div className="w-9 h-9 rounded-full bg-red-600/10 text-red-600 dark:text-[#fbc02d] flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
+                                    {(leader.name || "A").split(' ').pop()?.[0]}
+                                  </div>
+                                  <div className="flex flex-col min-w-0">
+                                    <h5 className="text-xs font-black text-slate-900 dark:text-white truncate">{leader.name}</h5>
+                                    <span className="text-[9px] text-red-600 dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate mt-0.5">{leader.role}</span>
+                                  </div>
                                 </div>
-                                <div className="flex flex-col min-w-0">
-                                  <h5 className="text-xs font-black text-slate-900 dark:text-white truncate">{leader.name}</h5>
-                                  <span className="text-[9px] text-red-600 dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate mt-0.5">{leader.role}</span>
+
+                                <div className="p-3.5 flex-1 flex flex-col gap-3 text-[11px]">
+                                  <div className="flex flex-col gap-1 flex-1">
+                                    <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
+                                      <CalendarDays className="w-3 h-3 text-slate-400" />
+                                      {currentLang === "en" ? "Scope of Responsibility" : "Phạm vi trách nhiệm"}
+                                    </span>
+                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
+                                      {leader.responsibility}
+                                    </p>
+                                  </div>
+
+                                  <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5 font-medium text-slate-500 dark:text-slate-400">
+                                    <div className="flex items-center gap-1.5">
+                                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                      <span>{currentLang === "en" ? "Office Location" : "Nơi làm việc"}: {leader.room}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                      <a href={`tel:${leader.phone}`} className="hover:text-red-600">{currentLang === "en" ? "Mobile" : "Di động"}: {leader.phone}</a>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                      <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                      <a href={`mailto:${leader.email}`} className="hover:text-red-600 break-all">{currentLang === "en" ? "E-mail Address" : "Thư điện tử"}: {leader.email}</a>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
-
-                              <div className="p-3.5 flex-1 flex flex-col gap-3 text-[11px]">
-                                <div className="flex flex-col gap-1 flex-1">
-                                  <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
-                                    <CalendarDays className="w-3 h-3 text-slate-400" />
-                                    {currentLang === "en" ? "Scope of Responsibility" : "Phạm vi trách nhiệm"}
-                                  </span>
-                                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
-                                    {leader.responsibility}
-                                  </p>
-                                </div>
-
-                                <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5 font-medium text-slate-500 dark:text-slate-400">
-                                  <div className="flex items-center gap-1.5">
-                                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                    <span>{currentLang === "en" ? "Office Location" : "Nơi làm việc"}: {leader.room}</span>
-                                  </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                    <a href={`tel:${leader.phone}`} className="hover:text-red-600">{currentLang === "en" ? "Mobile" : "Di động"}: {leader.phone}</a>
-                                  </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                    <a href={`mailto:${leader.email}`} className="hover:text-red-600 break-all">{currentLang === "en" ? "E-mail Address" : "Thư điện tử"}: {leader.email}</a>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
+                            ));
+                          })()}
                         </div>
                       )}
+                      {/* ORG SECTIONS DIRECTORY WIDGET */}
+                      {widget.type === "ORG_SECTIONS_DIRECTORY" && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {(() => {
+                            let sections = []
+                            if (Array.isArray(widget.data?.selectedUnitIds) && widget.data.selectedUnitIds.length > 0) {
+                              sections = allOrgUnits.filter((unit: any) => widget.data.selectedUnitIds.includes(unit.id)).map((unit: any) => ({
+                                title: getLocalizedField(unit, "name", currentLang),
+                                desc: getLocalizedField(unit, "description", currentLang),
+                                details: [
+                                  `${currentLang === 'en' ? 'Address' : 'Địa chỉ'}: ${unit.address || 'UBND Xã'}`,
+                                  `${currentLang === 'en' ? 'Email' : 'Email'}: ${unit.email || 'xadangkang@daklak.gov.vn'}`,
+                                ]
+                              }))
+                            } else {
+                              sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"]
+                            }
+
+                            return sections.map((section: any, idx: number) => (
+                              <div
+                                key={section.title || idx}
+                                className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3"
+                              >
+                                <div className="flex flex-col gap-1.5 min-w-0">
+                                  <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase truncate tracking-wide">
+                                    {section.title}
+                                  </h5>
+                                  <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                                    {section.desc}
+                                  </p>
+                                </div>
+                                <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5">
+                                  {Array.isArray(section.details) && section.details.map((item: string, i: number) => (
+                                    <div key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                      <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                                      <span>{item}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+                      )}
+
+
 
                       {/* COMMUNE INTERACTIVE MAP WIDGET */}
                       {widget.type === "COMMUNE_INTERACTIVE_MAP" && (
