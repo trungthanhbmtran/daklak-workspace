@@ -887,9 +887,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                                       {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
                                     </div>
                                     <div className="flex flex-col min-w-0">
-                                      <span className="text-[10px] text-slate-400 font-extrabold uppercase leading-tight truncate">
-                                        {widget.type}
-                                      </span>
                                       <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate mt-0.5">
                                         {widget.title[activeLang] || "Widget chưa đặt tên"}
                                       </span>
@@ -918,121 +915,13 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                         </div>
                       </div>
 
-                      {/* Dropdown/Quick buttons to insert widget inside column */}
-                      <div className="mt-4 pt-3 border-t border-slate-150 dark:border-slate-850 flex flex-wrap gap-1.5">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "LEXICAL_RICH_TEXT")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Văn bản Lexical
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "STATISTICS_GRID")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Thống kê nhanh
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "LEADERSHIP_LIST")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Thẻ Cán bộ
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "ORG_SECTIONS_DIRECTORY")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Cơ cấu tổ chức
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "COMMUNE_INTERACTIVE_MAP")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Bản đồ vector
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "CONTACT_INFO_SIDEBAR")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Lịch tiếp dân
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "CONTACT_FORM")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Form Góp ý
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "HERO_SLIDER")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Trình chiếu Banner
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "FEATURED_NEWS")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Tin nổi bật
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "PUBLIC_SERVICES")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Dịch vụ công
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "LEGAL_DOCUMENTS")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Văn bản pháp quy
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "PHOTO_VIDEO_GALLERY")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Thư viện Ảnh/Video
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "FAQ_ACCORDION")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Hỏi đáp FAQ
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => addWidget(row.rowId, col.id, "EXTERNAL_LINKS")}
-                          className="h-6 px-1.5 text-[8.5px] font-black text-slate-500 hover:text-[#b91c1c] uppercase tracking-wide border border-dashed hover:border-[#b91c1c] rounded-md shrink-0"
-                        >
-                          + Liên kết website
-                        </Button>
-                      </div>
+                      {/* Dropzone base indicator if empty */}
+                      {col.widgets.length === 0 && !dragOverColId && (
+                        <div className="flex-1 flex flex-col items-center justify-center border border-dashed border-slate-200 dark:border-slate-800 rounded-lg py-6 bg-slate-50/10">
+                          <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">Khung layout trống</span>
+                        </div>
+                      )}
+                    </div>
                     </div>
                   ))}
                 </div>
