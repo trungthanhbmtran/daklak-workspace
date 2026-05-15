@@ -95,6 +95,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCsdl, setSelectedCsdl] = useState<string>("org");
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
+  const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes(prev => ({ ...prev, [nodeId]: !prev[nodeId] }));
@@ -730,12 +731,48 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           </CardContent>
         </Card>
 
-        {/* Builder rows rendering with portal-accurate viewport bounds */}
-        <div className="border border-slate-200 dark:border-slate-800/80 p-4 sm:p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 w-full space-y-8 shadow-inner relative pt-10">
-          <div className="absolute top-3.5 left-4 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 select-none animate-pulse">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-            Khung hiển thị thực tế trên Portal (1280px Max)
+        {/* Builder Toolbar */}
+        <div className="flex items-center justify-between mb-4 bg-white dark:bg-slate-900 p-2 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
+              <Button
+                variant={!isPreviewMode ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setIsPreviewMode(false)}
+                className="h-8 gap-1.5 text-xs font-bold px-3"
+              >
+                <Layout className="w-3.5 h-3.5" /> Thống kê
+              </Button>
+              <Button
+                variant={isPreviewMode ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setIsPreviewMode(true)}
+                className="h-8 gap-1.5 text-xs font-bold px-3"
+              >
+                <Eye className="w-3.5 h-3.5" /> Xem trước
+              </Button>
+            </div>
           </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mr-2 flex items-center gap-1.5">
+              <span className={`w-1.5 h-1.5 rounded-full ${isPreviewMode ? "bg-emerald-500" : "bg-indigo-500 animate-pulse"}`} />
+              {isPreviewMode ? "Chế độ xem trước" : "Chế độ thiết kế"}
+            </span>
+            <Button size="sm" className="bg-[#b91c1c] hover:bg-[#991b1b] text-white font-bold text-xs h-8 px-4 rounded-lg shadow-sm">
+              Cập nhật trang
+            </Button>
+          </div>
+        </div>
+
+        {/* Builder rows rendering with portal-accurate viewport bounds */}
+        <div className={`transition-all duration-300 ${isPreviewMode ? "p-0 bg-transparent border-none shadow-none" : "border border-slate-200 dark:border-slate-800/80 p-4 sm:p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-950/20 w-full space-y-8 shadow-inner relative pt-10"}`}>
+          {!isPreviewMode && (
+            <div className="absolute top-3.5 left-4 text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-1.5 select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+              Khung hiển thị thực tế trên Portal (1280px Max)
+            </div>
+          )}
 
           {layout.length === 0 ? (
             <div className="text-center py-16 border-2 border-dashed rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-3">
@@ -748,52 +785,60 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
             layout.map((row, rIdx) => (
               <div
                 key={row.rowId}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 shadow-sm relative group space-y-4 hover:shadow-md transition-all"
+                className={`transition-all relative group ${isPreviewMode 
+                  ? "bg-transparent border-none p-0 mb-0 space-y-0" 
+                  : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 shadow-sm mb-8 space-y-4 hover:border-indigo-400 dark:hover:border-indigo-900/60"
+                }`}
               >
-                {/* Row Header controls */}
-                <div className="flex items-center justify-between border-b dark:border-slate-800/60 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[10px] bg-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] font-black uppercase px-2 py-0.5 rounded tracking-wider">
-                      Hàng {rIdx + 1}
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-semibold uppercase">
-                      ({row.columns.length} Cột phân vùng)
-                    </span>
-                  </div>
+                {!isPreviewMode && (
+                  <>
+                    {/* WordPress-style Row Handle (Top Center) */}
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-0.5 bg-indigo-600 text-white rounded-full px-2.5 py-1 shadow-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-move">
+                      <GripVertical className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-black uppercase tracking-tighter">Hàng {rIdx + 1}</span>
+                    </div>
 
-                  {/* Move, delete buttons */}
-                  <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={rIdx === 0}
-                      onClick={() => moveRow(rIdx, "up")}
-                      className="w-7 h-7 hover:bg-slate-100 text-slate-500 rounded-lg"
-                    >
-                      <MoveUp className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      disabled={rIdx === layout.length - 1}
-                      onClick={() => moveRow(rIdx, "down")}
-                      className="w-7 h-7 hover:bg-slate-100 text-slate-500 rounded-lg"
-                    >
-                      <MoveDown className="w-3.5 h-3.5" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => deleteRow(row.rowId)}
-                      className="w-7 h-7 hover:bg-red-50 hover:text-[#b91c1c] text-slate-400 rounded-lg"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                </div>
+                    {/* Quick row actions (Floating Top Right) */}
+                    <div className="absolute top-2 right-2 flex items-center gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        disabled={rIdx === 0}
+                        onClick={() => moveRow(rIdx, "up")}
+                        className="w-6 h-6 bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-indigo-600 rounded-md"
+                      >
+                        <MoveUp className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        disabled={rIdx === layout.length - 1}
+                        onClick={() => moveRow(rIdx, "down")}
+                        className="w-6 h-6 bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-indigo-600 rounded-md"
+                      >
+                        <MoveDown className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => deleteRow(row.rowId)}
+                        className="w-6 h-6 bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 hover:text-[#b91c1c] rounded-md"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </div>
+
+                    {/* Row Info Label */}
+                    <div className="flex items-center gap-2 mb-2 border-b dark:border-slate-800/60 pb-2">
+                      <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                        Phân vùng hàng ({row.columns.length} cột)
+                      </span>
+                    </div>
+                  </>
+                )}
 
                 {/* Columns content boxes */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
+                <div className={`grid grid-cols-1 lg:grid-cols-12 ${isPreviewMode ? "gap-0" : "gap-6 sm:gap-8"}`}>
                   {row.columns.map((col) => (
                     <div
                       key={col.id}
@@ -832,21 +877,28 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           addWidgetFromDrag(row.rowId, col.id, dragData, dropIndex);
                         }
                       }}
-                      className={`${col.colSpan} border-2 ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/60 ring-4 ring-indigo-500/20 dark:bg-indigo-950/40" : "border-dashed border-slate-200 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-950/20"} rounded-xl p-4 min-h-[140px] hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between`}
+                      className={`${col.colSpan} transition-all relative group/column ${isPreviewMode 
+                        ? "p-0 border-none min-h-0" 
+                        : `border-2 p-4 min-h-[140px] rounded-xl flex flex-col justify-between ${dragOverColId === col.id 
+                          ? "border-indigo-500 bg-indigo-50/60 ring-4 ring-indigo-500/20" 
+                          : "border-dashed border-slate-200 dark:border-slate-800 bg-slate-50/10 hover:border-slate-300 dark:hover:border-slate-700"}`
+                      }`}
                     >
                       {/* Column widgets list */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
-                            Phân khu ({col.colSpan.replace("lg:col-span-", "")}/12 Cột)
-                          </span>
-                        </div>
+                      <div className="space-y-0">
+                        {!isPreviewMode && (
+                          <div className="flex justify-between items-center mb-2 opacity-30 group-hover/column:opacity-100 transition-opacity">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                              <Columns className="w-2.5 h-2.5" />
+                              Cột ({col.colSpan.replace("lg:col-span-", "")}/12)
+                            </span>
+                          </div>
+                        )}
 
                         <div className="relative flex flex-col gap-1">
                           {col.widgets.length === 0 && dragOverColId === col.id && (
                             <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-2" />
                           )}
-
                           {col.widgets.map((widget, wIdx) => {
                             const isSelected = selectedWidgetId === widget.id;
                             const showDropIndicatorBefore = dragOverIndex?.colId === col.id && dragOverIndex.index === wIdx;
@@ -855,59 +907,89 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                             return (
                               <React.Fragment key={widget.id}>
                                 {showDropIndicatorBefore && (
-                                  <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-1 z-10" />
+                                  <div className="relative h-2 flex items-center justify-center my-2">
+                                    <div className="h-0.5 bg-indigo-500 w-full rounded-full" />
+                                    <div className="absolute w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center shadow-md">
+                                      <Plus className="w-3 h-3 text-white" />
+                                    </div>
+                                  </div>
                                 )}
-
+                                
                                 <div
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setSelectedWidgetId(widget.id);
                                   }}
-                                  className={`widget-item-container p-3 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between group/widget ${isSelected
-                                    ? "bg-[#b91c1c]/5 border-[#b91c1c] shadow-sm"
-                                    : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800 hover:border-slate-300"
+                                  className={`widget-item-container transition-all relative group/widget ${isPreviewMode
+                                    ? "p-0 border-none bg-transparent mb-0"
+                                    : `p-3 rounded-lg border text-left cursor-pointer flex items-center justify-between mb-1 ${isSelected
+                                      ? "bg-indigo-50 dark:bg-indigo-950/30 border-indigo-500 ring-1 ring-indigo-500 shadow-sm"
+                                      : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800 hover:border-slate-300"
+                                      }`
                                     }`}
                                 >
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${isSelected ? "bg-[#b91c1c] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-                                      }`}>
-                                      {widget.type === "LEXICAL_RICH_TEXT" && <Type className="w-4 h-4" />}
-                                      {widget.type === "STATISTICS_GRID" && <Grid3X3 className="w-4 h-4" />}
-                                      {widget.type === "LEADERSHIP_LIST" && <UserSquare2 className="w-4 h-4" />}
-                                      {widget.type === "ORG_SECTIONS_DIRECTORY" && <Workflow className="w-4 h-4" />}
-                                      {widget.type === "COMMUNE_INTERACTIVE_MAP" && <Map className="w-4 h-4" />}
-                                      {widget.type === "CONTACT_INFO_SIDEBAR" && <PhoneCall className="w-4 h-4" />}
-                                      {widget.type === "CONTACT_FORM" && <FileText className="w-4 h-4" />}
-                                      {widget.type === "HERO_SLIDER" && <Images className="w-4 h-4" />}
-                                      {widget.type === "FEATURED_NEWS" && <Newspaper className="w-4 h-4" />}
-                                      {widget.type === "PUBLIC_SERVICES" && <Landmark className="w-4 h-4" />}
-                                      {widget.type === "LEGAL_DOCUMENTS" && <FolderOpen className="w-4 h-4" />}
-                                      {widget.type === "PHOTO_VIDEO_GALLERY" && <Film className="w-4 h-4" />}
-                                      {widget.type === "FAQ_ACCORDION" && <HelpCircle className="w-4 h-4" />}
-                                      {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
+                                  {/* Edit/Label indicator for selected widget */}
+                                  {!isPreviewMode && isSelected && (
+                                    <div className="absolute -top-2 left-2 z-10 px-1.5 py-0.5 bg-indigo-600 text-white text-[7px] font-black uppercase rounded shadow-sm">
+                                      Chỉnh sửa
                                     </div>
+                                  )}
+
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    {!isPreviewMode && (
+                                      <div className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${isSelected ? "bg-indigo-600 text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                        }`}>
+                                        {widget.type === "LEXICAL_RICH_TEXT" && <Type className="w-4 h-4" />}
+                                        {widget.type === "STATISTICS_GRID" && <Grid3X3 className="w-4 h-4" />}
+                                        {widget.type === "LEADERSHIP_LIST" && <UserSquare2 className="w-4 h-4" />}
+                                        {widget.type === "ORG_SECTIONS_DIRECTORY" && <Workflow className="w-4 h-4" />}
+                                        {widget.type === "COMMUNE_INTERACTIVE_MAP" && <Map className="w-4 h-4" />}
+                                        {widget.type === "CONTACT_INFO_SIDEBAR" && <PhoneCall className="w-4 h-4" />}
+                                        {widget.type === "CONTACT_FORM" && <FileText className="w-4 h-4" />}
+                                        {widget.type === "HERO_SLIDER" && <Images className="w-4 h-4" />}
+                                        {widget.type === "FEATURED_NEWS" && <Newspaper className="w-4 h-4" />}
+                                        {widget.type === "PUBLIC_SERVICES" && <Landmark className="w-4 h-4" />}
+                                        {widget.type === "LEGAL_DOCUMENTS" && <FolderOpen className="w-4 h-4" />}
+                                        {widget.type === "PHOTO_VIDEO_GALLERY" && <Film className="w-4 h-4" />}
+                                        {widget.type === "FAQ_ACCORDION" && <HelpCircle className="w-4 h-4" />}
+                                        {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
+                                      </div>
+                                    )}
                                     <div className="flex flex-col min-w-0">
-                                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate mt-0.5">
-                                        {widget.title[activeLang] || "Widget chưa đặt tên"}
-                                      </span>
+                                      {isPreviewMode ? (
+                                        <div className="py-8 bg-slate-50 dark:bg-slate-850 rounded-lg flex items-center justify-center text-slate-400 italic text-xs border border-slate-100 dark:border-slate-800">
+                                          Nội dung của {widget.title[activeLang] || widget.type} sẽ hiển thị ở đây
+                                        </div>
+                                      ) : (
+                                        <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
+                                          {widget.title[activeLang] || "Widget chưa đặt tên"}
+                                        </span>
+                                      )}
                                     </div>
                                   </div>
 
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      deleteWidget(row.rowId, col.id, widget.id);
-                                    }}
-                                    className="w-6 h-6 hover:bg-red-50 hover:text-[#b91c1c] text-slate-300 opacity-0 group-hover/widget:opacity-100 transition-opacity rounded"
-                                  >
-                                    <X className="w-3.5 h-3.5" />
-                                  </Button>
+                                  {!isPreviewMode && (
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteWidget(row.rowId, col.id, widget.id);
+                                      }}
+                                      className="w-6 h-6 hover:bg-red-50 hover:text-[#b91c1c] text-slate-300 opacity-0 group-hover/widget:opacity-100 transition-opacity rounded"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </Button>
+                                  )}
                                 </div>
 
                                 {showDropIndicatorAfter && (
-                                  <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-1 z-10" />
+                                  <div className="relative h-2 flex items-center justify-center my-2">
+                                    <div className="h-0.5 bg-indigo-500 w-full rounded-full" />
+                                    <div className="absolute w-4 h-4 bg-indigo-600 rounded-full flex items-center justify-center shadow-md">
+                                      <Plus className="w-3 h-3 text-white" />
+                                    </div>
+                                  </div>
                                 )}
                               </React.Fragment>
                             );
