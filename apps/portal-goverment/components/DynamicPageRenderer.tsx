@@ -899,7 +899,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
       {finalLayout.map((row: any, rIdx: number) => (
         <div
           key={row.rowId || rIdx}
-          className={`transition-all ${row.settings?.paddingTop || 'pt-8'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-xl sm:rounded-2xl'}`}
+          className={`transition-all ${row.settings?.paddingTop || 'pt-8'} ${row.settings?.paddingBottom || 'pb-8'} ${row.settings?.borderRadius || ''}`}
           style={{
             backgroundColor: row.settings?.backgroundColor,
             backgroundImage: row.settings?.backgroundImage ? `url(${resolveMediaUrl(row.settings.backgroundImage)})` : undefined,
@@ -908,7 +908,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
             color: row.settings?.textColor,
           }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+          <div className={`${row.settings?.fullWidth ? 'w-full px-0' : 'container mx-auto px-4 sm:px-6 lg:px-8'}`}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
             {row.columns?.map((col: any, cIdx: number) => (
               <div key={col.id || cIdx} className={col.colSpan || "lg:col-span-12"}>
                 <div className="space-y-6">
@@ -1323,6 +1324,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                 </div>
               </div>
             ))}
+            </div>
           </div>
         </div>
       ))}
