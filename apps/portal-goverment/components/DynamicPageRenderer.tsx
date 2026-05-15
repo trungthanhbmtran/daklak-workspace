@@ -899,7 +899,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
       {finalLayout.map((row: any, rIdx: number) => (
         <div 
           key={row.rowId || rIdx} 
-          className={`grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start transition-all ${row.settings?.paddingTop || 'py-8'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-none'}`}
+          className={`transition-all ${row.settings?.paddingTop || 'pt-8'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-xl sm:rounded-2xl'}`}
           style={{
             backgroundColor: row.settings?.backgroundColor,
             backgroundImage: row.settings?.backgroundImage ? `url(${resolveMediaUrl(row.settings.backgroundImage)})` : undefined,
@@ -908,9 +908,10 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
             color: row.settings?.textColor,
           }}
         >
-          {row.columns?.map((col: any, cIdx: number) => (
-            <div key={col.id || cIdx} className={col.colSpan || "lg:col-span-12"}>
-              <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+            {row.columns?.map((col: any, cIdx: number) => (
+              <div key={col.id || cIdx} className={col.colSpan || "lg:col-span-12"}>
+                <div className="space-y-6">
                 {col.widgets?.map((widget: any, wIdx: number) => {
                   const widgetTitle = widget.title?.[currentLang] || widget.title?.vi || ""
                   const showTitle = widget.data?.showTitle ?? true
@@ -1000,34 +1001,6 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                         </div>
                       )}
 
-                      {/* ORG SECTIONS DIRECTORY WIDGET */}
-                      {widget.type === "ORG_SECTIONS_DIRECTORY" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {(widget.data?.selectedUnits && widget.data.selectedUnits.length > 0 ? widget.data.selectedUnits : getConfigObject("about_org_sections", DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"])).map((section: any, idx: number) => (
-                            <div
-                              key={section.title || idx}
-                              className="bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3 group hover:border-[#b91c1c] transition-all"
-                            >
-                              <div>
-                                <h5 className="text-xs font-black text-red-600 dark:text-[#fbc02d] uppercase tracking-wide">
-                                  {section.title}
-                                </h5>
-                                <p className="text-[10px] text-slate-400 font-semibold leading-relaxed mt-1">
-                                  {section.desc}
-                                </p>
-                              </div>
-                              <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5">
-                                {Array.isArray(section.details) && section.details.map((item: string, i: number) => (
-                                  <div key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                    <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                                    <span>{item}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
 
                       {/* LEADERSHIP LIST WIDGET */}
                       {widget.type === "LEADERSHIP_LIST" && (
@@ -1350,6 +1323,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
               </div>
             </div>
           ))}
+          </div>
         </div>
       ))}
     </div>

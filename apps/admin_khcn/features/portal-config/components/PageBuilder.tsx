@@ -820,7 +820,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                   backgroundPosition: 'center',
                   color: row.settings?.textColor,
                 }}
-                className={`border transition-all relative group space-y-4 ${selectedRowId === row.rowId ? "ring-2 ring-amber-500 border-amber-500 shadow-lg" : "border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"} ${row.settings?.paddingTop || 'p-4'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-xl sm:rounded-2xl'}`}
+                className={`border transition-all relative group space-y-4 ${selectedRowId === row.rowId ? "ring-2 ring-amber-500 border-amber-500 shadow-lg" : "border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"} ${row.settings?.paddingTop || 'pt-8'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-xl sm:rounded-2xl'}`}
               >
                 {/* Row Header controls */}
                 <div className="flex items-center justify-between border-b dark:border-slate-800/60 pb-3">
@@ -1762,36 +1762,36 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     <div className="space-y-2">
                       <Label className="text-[9px] font-bold text-slate-500 uppercase">Đệm trên (Padding Top)</Label>
                       <Select 
-                        value={findRowById(selectedRowId)?.settings?.paddingTop || "py-8"} 
+                        value={findRowById(selectedRowId)?.settings?.paddingTop || "pt-8"} 
                         onValueChange={(val) => updateRowSettings(selectedRowId, { paddingTop: val })}
                       >
                         <SelectTrigger className="h-10 text-xs font-bold">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="py-0">Không có</SelectItem>
-                          <SelectItem value="py-4">Nhỏ (16px)</SelectItem>
-                          <SelectItem value="py-8">Vừa (32px)</SelectItem>
-                          <SelectItem value="py-12">Lớn (48px)</SelectItem>
-                          <SelectItem value="py-20">Rất lớn (80px)</SelectItem>
+                          <SelectItem value="pt-0">Không có</SelectItem>
+                          <SelectItem value="pt-4">Nhỏ (16px)</SelectItem>
+                          <SelectItem value="pt-8">Vừa (32px)</SelectItem>
+                          <SelectItem value="pt-12">Lớn (48px)</SelectItem>
+                          <SelectItem value="pt-20">Rất lớn (80px)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-2">
                       <Label className="text-[9px] font-bold text-slate-500 uppercase">Đệm dưới (Padding Bottom)</Label>
                       <Select 
-                        value={findRowById(selectedRowId)?.settings?.paddingBottom || "py-8"} 
+                        value={findRowById(selectedRowId)?.settings?.paddingBottom || "pb-8"} 
                         onValueChange={(val) => updateRowSettings(selectedRowId, { paddingBottom: val })}
                       >
                         <SelectTrigger className="h-10 text-xs font-bold">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="py-0">Không có</SelectItem>
-                          <SelectItem value="py-4">Nhỏ (16px)</SelectItem>
-                          <SelectItem value="py-8">Vừa (32px)</SelectItem>
-                          <SelectItem value="py-12">Lớn (48px)</SelectItem>
-                          <SelectItem value="py-20">Rất lớn (80px)</SelectItem>
+                          <SelectItem value="pb-0">Không có</SelectItem>
+                          <SelectItem value="pb-4">Nhỏ (16px)</SelectItem>
+                          <SelectItem value="pb-8">Vừa (32px)</SelectItem>
+                          <SelectItem value="pb-12">Lớn (48px)</SelectItem>
+                          <SelectItem value="pb-20">Rất lớn (80px)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
