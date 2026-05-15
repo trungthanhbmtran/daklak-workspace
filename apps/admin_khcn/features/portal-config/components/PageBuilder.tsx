@@ -159,46 +159,83 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
         );
 
       case "FEATURED_NEWS":
+        const newsItems = data.items || [
+          { id: "n1", title: "UBND tỉnh triển khai giải pháp cải cách hành chính 2024", category: data.selectedCategory || "Thời sự", time: "2 giờ trước" },
+          { id: "n2", title: "Hội nghị tập huấn CNTT cho cán bộ cấp xã", category: data.selectedCategory || "Công nghệ", time: "5 giờ trước" },
+          { id: "n3", title: "Đẩy mạnh chuyển đổi số trong nông nghiệp nông thôn", category: data.selectedCategory || "Nông nghiệp", time: "1 ngày trước" },
+          { id: "n4", title: "Phát động phong trào thi đua yêu nước giai đoạn mới", category: data.selectedCategory || "Chính trị", time: "3 ngày trước" }
+        ];
+
         return (
           <div className="space-y-4 w-full">
             <div className="flex items-center justify-between border-b-2 border-blue-600 pb-2">
-              <h3 className="text-sm font-black uppercase text-blue-900 dark:text-blue-300 tracking-tight">
-                {widget.title[activeLang] || "Tin tức nổi bật"}
-              </h3>
+              <div className="flex items-center gap-2">
+                <Newspaper className="w-4 h-4 text-blue-600" />
+                <h3 className="text-sm font-black uppercase text-blue-900 dark:text-blue-300 tracking-tight">
+                  {widget.title[activeLang] || "Tin tức nổi bật"}
+                </h3>
+              </div>
               <span className="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100 transition-colors">Xem tất cả</span>
             </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="flex gap-4 group cursor-pointer">
-                <div className="w-32 h-20 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 relative">
-                  <div className="absolute inset-0 flex items-center justify-center text-slate-300">
-                    <Images className="w-8 h-8" />
-                  </div>
-                </div>
-                <div className="flex flex-col justify-center min-w-0">
-                  <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1">{data.selectedCategory || "Thời sự"}</span>
-                  <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
-                    UBND tỉnh triển khai các giải pháp cấp bách nhằm đẩy mạnh cải cách hành chính và chuyển đổi số năm 2024
-                  </h4>
-                  <span className="text-[9px] text-slate-400 mt-1 flex items-center gap-2">
-                    <Clock className="w-3 h-3" /> 2 giờ trước • Ban biên tập
-                  </span>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {[1, 2].map(i => (
-                  <div key={i} className="flex flex-col gap-2 group cursor-pointer">
-                    <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative">
-                      <div className="absolute inset-0 flex items-center justify-center text-slate-300">
-                        <Images className="w-6 h-6" />
-                      </div>
+            
+            <div className="flex flex-col gap-3">
+              {newsItems.map((item: any, idx: number) => (
+                <div 
+                  key={item.id} 
+                  draggable={!isPreviewMode}
+                  onDragStart={(e) => {
+                    if (!isPreviewMode) {
+                      e.stopPropagation();
+                      e.dataTransfer.setData("application/news-item-index", idx.toString());
+                      e.dataTransfer.setData("application/widget-id", widget.id);
+                    }
+                  }}
+                  onDragOver={(e) => {
+                    if (!isPreviewMode) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }
+                  }}
+                  onDrop={(e) => {
+                    if (!isPreviewMode) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const fromIdx = parseInt(e.dataTransfer.getData("application/news-item-index"));
+                      const sourceWidgetId = e.dataTransfer.getData("application/widget-id");
+                      if (sourceWidgetId === widget.id && fromIdx !== idx) {
+                        reorderWidgetDataArray(widget.id, "items", fromIdx, idx);
+                        toast.success("Đã thay đổi thứ tự tin tức!");
+                      }
+                    }
+                  }}
+                  className={`flex gap-3 p-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl group relative transition-all ${!isPreviewMode ? "cursor-grab active:cursor-grabbing hover:border-blue-400 hover:shadow-md" : ""}`}
+                >
+                  <div className="w-24 h-16 bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden shrink-0 relative">
+                    <div className="absolute inset-0 flex items-center justify-center text-slate-300">
+                      <Images className="w-6 h-6" />
                     </div>
-                    <h4 className="text-[11px] font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight group-hover:text-blue-600">
-                      Hội nghị tập huấn nâng cao năng lực cho cán bộ phụ trách CNTT tại các đơn vị cấp xã
-                    </h4>
                   </div>
-                ))}
-              </div>
+                  <div className="flex flex-col justify-center min-w-0 flex-1">
+                    <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest mb-0.5">{item.category}</span>
+                    <h4 className="text-[11px] font-bold text-slate-900 dark:text-white line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">
+                      {item.title}
+                    </h4>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-[8px] text-slate-400 flex items-center gap-1">
+                        <Clock className="w-2.5 h-2.5" /> {item.time}
+                      </span>
+                      {!isPreviewMode && <GripVertical className="w-3 h-3 text-slate-300 opacity-0 group-hover:opacity-100" />}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+
+            {!isPreviewMode && (
+              <div className="pt-2 flex items-center justify-center border-t border-dashed border-slate-200 mt-2">
+                <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest italic">Kéo thả các thẻ tin để sắp xếp vị trí</span>
+              </div>
+            )}
           </div>
         );
 
@@ -784,6 +821,31 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
             return {
               ...w,
               data: newData
+            };
+          }
+          return w;
+        })
+      }))
+    }));
+    onChange(newLayout);
+  };
+
+  const reorderWidgetDataArray = (widgetId: string, arrayKey: string, fromIndex: number, toIndex: number) => {
+    const newLayout = layout.map(row => ({
+      ...row,
+      columns: row.columns.map(col => ({
+        ...col,
+        widgets: col.widgets.map(w => {
+          if (w.id === widgetId) {
+            const arr = [...(w.data?.[arrayKey] || [])];
+            const [movedItem] = arr.splice(fromIndex, 1);
+            arr.splice(toIndex, 0, movedItem);
+            return {
+              ...w,
+              data: {
+                ...w.data,
+                [arrayKey]: arr
+              }
             };
           }
           return w;
