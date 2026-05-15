@@ -22,6 +22,7 @@ import {
   Eye,
   ArrowUpDown,
   CheckCircle2,
+  CheckCircle,
   Type,
   Workflow,
   FileText,
@@ -47,7 +48,10 @@ import {
   ChevronDown,
   ChevronRight,
   Play,
-  GripVertical
+  GripVertical,
+  Briefcase,
+  FileSearch,
+  MessageSquare
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,7 +91,9 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("toolbox");
   const [dragOverColId, setDragOverColId] = useState<string | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<{ colId: string, index: number } | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [selectedCsdl, setSelectedCsdl] = useState<string>("org");
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
 
   const toggleNode = (nodeId: string) => {
@@ -295,7 +301,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     setSelectedWidgetId(newWidget.id);
   };
 
-  const addWidgetFromDrag = (rowId: string, colId: string, dragData: string) => {
+  const addWidgetFromDrag = (rowId: string, colId: string, dragData: string, index?: number) => {
     try {
       const parsed = JSON.parse(dragData);
       const widgetType = parsed.type as Widget["type"];
@@ -413,7 +419,13 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
             ...row,
             columns: row.columns.map(col => {
               if (col.id === colId) {
-                return { ...col, widgets: [...col.widgets, newWidget] };
+                const newWidgets = [...col.widgets];
+                if (typeof index === 'number') {
+                  newWidgets.splice(index, 0, newWidget);
+                } else {
+                  newWidgets.push(newWidget);
+                }
+                return { ...col, widgets: newWidgets };
               }
               return col;
             })
@@ -787,82 +799,120 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                       key={col.id}
                       onDragOver={(e) => {
                         e.preventDefault();
+                        const colRect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        const mouseY = e.clientY - colRect.top;
+                        
+                        // Calculate index based on children positions
+                        const children = Array.from((e.currentTarget as HTMLElement).querySelectorAll('.widget-item-container'));
+                        let foundIndex = col.widgets.length;
+                        
+                        for (let i = 0; i < children.length; i++) {
+                          const childRect = children[i].getBoundingClientRect();
+                          const childCenterY = childRect.top + childRect.height / 2 - colRect.top;
+                          if (mouseY < childCenterY) {
+                            foundIndex = i;
+                            break;
+                          }
+                        }
+                        
                         setDragOverColId(col.id);
+                        setDragOverIndex({ colId: col.id, index: foundIndex });
                       }}
-                      onDragLeave={() => setDragOverColId(null)}
+                      onDragLeave={() => {
+                        setDragOverColId(null);
+                        setDragOverIndex(null);
+                      }}
                       onDrop={(e) => {
                         e.preventDefault();
+                        const dropIndex = dragOverIndex?.colId === col.id ? dragOverIndex.index : undefined;
                         setDragOverColId(null);
+                        setDragOverIndex(null);
                         const dragData = e.dataTransfer.getData("text/plain");
                         if (dragData) {
-                          addWidgetFromDrag(row.rowId, col.id, dragData);
+                          addWidgetFromDrag(row.rowId, col.id, dragData, dropIndex);
                         }
                       }}
                       className={`${col.colSpan} border-2 ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/60 ring-4 ring-indigo-500/20 dark:bg-indigo-950/40" : "border-dashed border-slate-200 dark:border-slate-800/80 bg-slate-50/20 dark:bg-slate-950/20"} rounded-xl p-4 min-h-[140px] hover:border-slate-300 dark:hover:border-slate-700 transition-all flex flex-col justify-between`}
                     >
                       {/* Column widgets list */}
-                      <div className="space-y-3">
-                        <div className="flex justify-between items-center mb-1">
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center mb-2">
                           <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
                             Phân khu ({col.colSpan.replace("lg:col-span-", "")}/12 Cột)
                           </span>
                         </div>
 
-                        <div className="space-y-2.5">
-                          {col.widgets.map((widget) => {
+                        <div className="relative flex flex-col gap-1">
+                          {col.widgets.length === 0 && dragOverColId === col.id && (
+                            <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-2" />
+                          )}
+                          
+                          {col.widgets.map((widget, wIdx) => {
                             const isSelected = selectedWidgetId === widget.id;
-                            return (
-                              <div
-                                key={widget.id}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedWidgetId(widget.id);
-                                }}
-                                className={`p-3 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between group/widget ${isSelected
-                                  ? "bg-[#b91c1c]/5 border-[#b91c1c] shadow-sm"
-                                  : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800 hover:border-slate-300"
-                                  }`}
-                              >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  <div className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${isSelected ? "bg-[#b91c1c] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-                                    }`}>
-                                    {widget.type === "LEXICAL_RICH_TEXT" && <Type className="w-4 h-4" />}
-                                    {widget.type === "STATISTICS_GRID" && <Grid3X3 className="w-4 h-4" />}
-                                    {widget.type === "LEADERSHIP_LIST" && <UserSquare2 className="w-4 h-4" />}
-                                    {widget.type === "ORG_SECTIONS_DIRECTORY" && <Workflow className="w-4 h-4" />}
-                                    {widget.type === "COMMUNE_INTERACTIVE_MAP" && <Map className="w-4 h-4" />}
-                                    {widget.type === "CONTACT_INFO_SIDEBAR" && <PhoneCall className="w-4 h-4" />}
-                                    {widget.type === "CONTACT_FORM" && <FileText className="w-4 h-4" />}
-                                    {widget.type === "HERO_SLIDER" && <Images className="w-4 h-4" />}
-                                    {widget.type === "FEATURED_NEWS" && <Newspaper className="w-4 h-4" />}
-                                    {widget.type === "PUBLIC_SERVICES" && <Landmark className="w-4 h-4" />}
-                                    {widget.type === "LEGAL_DOCUMENTS" && <FolderOpen className="w-4 h-4" />}
-                                    {widget.type === "PHOTO_VIDEO_GALLERY" && <Film className="w-4 h-4" />}
-                                    {widget.type === "FAQ_ACCORDION" && <HelpCircle className="w-4 h-4" />}
-                                    {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
-                                  </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <span className="text-[10px] text-slate-400 font-extrabold uppercase leading-tight truncate">
-                                      {widget.type}
-                                    </span>
-                                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate mt-0.5">
-                                      {widget.title[activeLang] || "Widget chưa đặt tên"}
-                                    </span>
-                                  </div>
-                                </div>
+                            const showDropIndicatorBefore = dragOverIndex?.colId === col.id && dragOverIndex.index === wIdx;
+                            const showDropIndicatorAfter = dragOverIndex?.colId === col.id && dragOverIndex.index === wIdx + 1 && wIdx === col.widgets.length - 1;
 
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
+                            return (
+                              <React.Fragment key={widget.id}>
+                                {showDropIndicatorBefore && (
+                                  <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-1 z-10" />
+                                )}
+                                
+                                <div
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    deleteWidget(row.rowId, col.id, widget.id);
+                                    setSelectedWidgetId(widget.id);
                                   }}
-                                  className="w-6 h-6 hover:bg-red-50 hover:text-[#b91c1c] text-slate-300 opacity-0 group-hover/widget:opacity-100 transition-opacity rounded"
+                                  className={`widget-item-container p-3 rounded-lg border text-left cursor-pointer transition-all flex items-center justify-between group/widget ${isSelected
+                                    ? "bg-[#b91c1c]/5 border-[#b91c1c] shadow-sm"
+                                    : "bg-white dark:bg-slate-900 border-slate-150 dark:border-slate-800 hover:border-slate-300"
+                                    }`}
                                 >
-                                  <X className="w-3.5 h-3.5" />
-                                </Button>
-                              </div>
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <div className={`w-7 h-7 rounded flex items-center justify-center shrink-0 ${isSelected ? "bg-[#b91c1c] text-white" : "bg-slate-100 dark:bg-slate-800 text-slate-500"
+                                      }`}>
+                                      {widget.type === "LEXICAL_RICH_TEXT" && <Type className="w-4 h-4" />}
+                                      {widget.type === "STATISTICS_GRID" && <Grid3X3 className="w-4 h-4" />}
+                                      {widget.type === "LEADERSHIP_LIST" && <UserSquare2 className="w-4 h-4" />}
+                                      {widget.type === "ORG_SECTIONS_DIRECTORY" && <Workflow className="w-4 h-4" />}
+                                      {widget.type === "COMMUNE_INTERACTIVE_MAP" && <Map className="w-4 h-4" />}
+                                      {widget.type === "CONTACT_INFO_SIDEBAR" && <PhoneCall className="w-4 h-4" />}
+                                      {widget.type === "CONTACT_FORM" && <FileText className="w-4 h-4" />}
+                                      {widget.type === "HERO_SLIDER" && <Images className="w-4 h-4" />}
+                                      {widget.type === "FEATURED_NEWS" && <Newspaper className="w-4 h-4" />}
+                                      {widget.type === "PUBLIC_SERVICES" && <Landmark className="w-4 h-4" />}
+                                      {widget.type === "LEGAL_DOCUMENTS" && <FolderOpen className="w-4 h-4" />}
+                                      {widget.type === "PHOTO_VIDEO_GALLERY" && <Film className="w-4 h-4" />}
+                                      {widget.type === "FAQ_ACCORDION" && <HelpCircle className="w-4 h-4" />}
+                                      {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                      <span className="text-[10px] text-slate-400 font-extrabold uppercase leading-tight truncate">
+                                        {widget.type}
+                                      </span>
+                                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate mt-0.5">
+                                        {widget.title[activeLang] || "Widget chưa đặt tên"}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      deleteWidget(row.rowId, col.id, widget.id);
+                                    }}
+                                    className="w-6 h-6 hover:bg-red-50 hover:text-[#b91c1c] text-slate-300 opacity-0 group-hover/widget:opacity-100 transition-opacity rounded"
+                                  >
+                                    <X className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+
+                                {showDropIndicatorAfter && (
+                                  <div className="h-1 bg-indigo-500 rounded-full w-full animate-pulse my-1 z-10" />
+                                )}
+                              </React.Fragment>
                             );
                           })}
                         </div>
@@ -1013,42 +1063,57 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                 <Sparkles className="w-5 h-5" />
               </div>
               <div className="flex flex-col gap-1 text-xs">
-                <h4 className="font-black text-indigo-950 dark:text-indigo-300 uppercase tracking-wide">Kéo thả dữ liệu trực tiếp</h4>
+                <h4 className="font-black text-indigo-950 dark:text-indigo-300 uppercase tracking-wide">Kéo thả phần tử CSDL</h4>
                 <p className="text-slate-600 dark:text-slate-400 leading-normal">
-                  Danh sách các cơ sở dữ liệu và bản ghi thực tế của Cổng thông tin. Kéo và thả trực tiếp một bản ghi hoặc toàn bộ danh mục vào các cột bên trái để hiển thị ngay lập tức.
+                  Chọn một danh mục dữ liệu bên dưới, sau đó kéo các phần tử cụ thể và thả vào vị trí thiết kế mong muốn trên trang.
                 </p>
               </div>
             </div>
 
-            {/* Tìm kiếm nhanh */}
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Tìm kiếm dữ liệu, phòng ban, cán bộ..."
-                className="pl-9 h-10 bg-white dark:bg-slate-900 text-xs font-semibold rounded-xl border-slate-200 dark:border-slate-800 shadow-sm"
-              />
+            {/* Category Selector */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { id: "org", label: "Tổ chức", icon: Building2, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950/30" },
+                { id: "hrm", label: "Cán bộ", icon: Users2, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+                { id: "news", label: "Tin tức", icon: Newspaper, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+                { id: "service", label: "Dịch vụ", icon: Landmark, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
+                { id: "legal", label: "Văn bản", icon: FolderOpen, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+                { id: "extra", label: "Chức năng", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCsdl(cat.id)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${selectedCsdl === cat.id
+                    ? `border-indigo-500 ring-2 ring-indigo-500/10 ${cat.bg}`
+                    : "border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
+                    }`}
+                >
+                  <cat.icon className={`w-5 h-5 ${selectedCsdl === cat.id ? cat.color : "text-slate-400"}`} />
+                  <span className={`text-[10px] font-black uppercase tracking-tight ${selectedCsdl === cat.id ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>
+                    {cat.label}
+                  </span>
+                </button>
+              ))}
             </div>
 
-            {/* Danh sách các CSDL */}
-            <div className="space-y-4">
-
-              {/* 1. CSDL Cơ cấu Tổ chức */}
-              <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
-                <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-red-100 dark:bg-red-950 flex items-center justify-center text-[#b91c1c] dark:text-[#fbc02d]">
-                      <Building2 className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Đơn vị Tổ chức</span>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-2 max-h-72 overflow-y-auto space-y-1.5">
-                  {searchQuery.trim() !== "" ? (
-                    // Flat list search view
-                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map((unit: any) => (
+            {/* Content for Selected Category */}
+            <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
+              <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Search className="w-3.5 h-3.5 text-slate-400" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Tìm trong danh sách..."
+                    className="h-7 text-[10px] font-semibold bg-transparent border-none focus-visible:ring-0 p-0 w-full"
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="p-2 max-h-[450px] overflow-y-auto custom-scrollbar">
+                {selectedCsdl === "org" && (
+                  <div className="space-y-1">
+                    {searchQuery.trim() !== "" ? (
+                      allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map((unit: any) => (
                         <div
                           key={unit.id}
                           draggable
@@ -1059,235 +1124,147 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                             <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
                             <div className="flex flex-col min-w-0 text-left">
                               <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{unit.name}</span>
-                              <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName || "Cơ cấu tổ chức"}</span>
+                              <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName || "Cơ quan hành chính"}</span>
                             </div>
                           </div>
-                          <span className="text-[9px] font-extrabold uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0">
-                            Kéo thả
-                          </span>
+                          <span className="text-[8px] font-black uppercase text-red-600 bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Kéo</span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    // Hierarchical tree view
-                    <div className="space-y-1">
-                      {(orgTree || []).map((node: any) => (
+                      ))
+                    ) : (
+                      (orgTree || []).map((node: any) => (
                         <OrgTreeItem key={node.id} node={node} isCustomizer={false} />
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* 2. CSDL Cán bộ Lãnh đạo */}
-              <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
-                <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-indigo-100 dark:bg-indigo-950 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                      <Users2 className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Cán bộ Lãnh đạo</span>
+                      ))
+                    )}
                   </div>
-                </CardHeader>
-                <CardContent className="p-2 max-h-56 overflow-y-auto space-y-1.5 divide-y divide-slate-100 dark:divide-slate-800">
-                  {allEmployees.filter((emp: any) => {
-                    const fullName = `${emp.lastname || ""} ${emp.firstname || ""}`.trim().toLowerCase();
-                    return fullName.includes(searchQuery.toLowerCase());
-                  }).map((emp: any) => {
-                    const fullName = `${emp.lastname || ""} ${emp.firstname || ""}`.trim() || "Cán bộ lãnh đạo";
-                    const roleName = emp.jobTitle?.name || emp.jobTitleName || "Cán bộ phụ trách";
-                    return (
-                      <div
-                        key={emp.id}
-                        draggable
-                        onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", item: emp }))}
-                        className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
-                      >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
-                          <div className="flex flex-col min-w-0 text-left">
-                            <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{fullName}</span>
-                            <span className="text-[9px] text-slate-400 font-medium truncate">{roleName}</span>
+                )}
+
+                {selectedCsdl === "hrm" && (
+                  <div className="space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
+                    {allEmployees.filter((emp: any) => {
+                      const fullName = `${emp.lastname || ""} ${emp.firstname || ""}`.trim().toLowerCase();
+                      return fullName.includes(searchQuery.toLowerCase());
+                    }).map((emp: any) => {
+                      const fullName = `${emp.lastname || ""} ${emp.firstname || ""}`.trim() || "Cán bộ lãnh đạo";
+                      const roleName = emp.jobTitle?.name || emp.jobTitleName || "Cán bộ phụ trách";
+                      return (
+                        <div
+                          key={emp.id}
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", item: emp }))}
+                          className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
+                            <div className="flex flex-col min-w-0 text-left">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{fullName}</span>
+                              <span className="text-[9px] text-slate-400 font-medium truncate">{roleName}</span>
+                            </div>
                           </div>
+                          <span className="text-[8px] font-black uppercase text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Kéo</span>
                         </div>
-                        <span className="text-[9px] font-extrabold uppercase text-indigo-600 bg-indigo-50 dark:bg-indigo-950/50 px-1.5 py-0.5 rounded shrink-0">
-                          Kéo thả
-                        </span>
-                      </div>
-                    );
-                  })}
-                </CardContent>
-              </Card>
-
-              {/* 3. CSDL Tin tức & Bài viết */}
-              <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
-                <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                      <Newspaper className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Tin bài & Phân mục</span>
+                      );
+                    })}
                   </div>
-                </CardHeader>
-                <CardContent className="p-2 space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
-                  {[
-                    { id: 1, title: "Tin hoạt động địa phương", desc: "Các tin tức mới nhất về kinh tế xã hội" },
-                    { id: 2, title: "Nông thôn mới & Nông nghiệp", desc: "Chính sách hỗ trợ nông dân, sản phẩm OCOP" },
-                    { id: 3, title: "Cải cách hành chính & Chuyển đổi số", desc: "Đề án 06, thủ tục trực tuyến" },
-                    { id: 4, title: "Phổ biến chính sách pháp luật", desc: "Các thông tư, hướng dẫn mới" }
-                  ].map((cat) => (
-                    <div
-                      key={cat.id}
-                      draggable
-                      onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "FEATURED_NEWS", item: cat }))}
-                      className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
-                        <div className="flex flex-col min-w-0 text-left">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{cat.title}</span>
-                          <span className="text-[9px] text-slate-400 font-medium truncate">{cat.desc}</span>
+                )}
+
+                {selectedCsdl === "news" && (
+                  <div className="space-y-1">
+                    {[
+                      { id: 1, title: "Hoạt động địa phương", icon: Newspaper },
+                      { id: 2, title: "Nông nghiệp & Nông thôn", icon: Briefcase },
+                      { id: 3, title: "Cải cách hành chính", icon: CheckCircle },
+                      { id: 4, title: "Phổ biến pháp luật", icon: FileSearch },
+                    ].map((cat) => (
+                      <div
+                        key={cat.id}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "FEATURED_NEWS", item: cat }))}
+                        className="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <cat.icon className="w-4 h-4 text-blue-500" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{cat.title}</span>
                         </div>
+                        <span className="text-[8px] font-black uppercase text-blue-600 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Kéo</span>
                       </div>
-                      <span className="text-[9px] font-extrabold uppercase text-blue-600 bg-blue-50 dark:bg-blue-950/50 px-1.5 py-0.5 rounded shrink-0">
-                        Kéo thả
-                      </span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* 4. CSDL Dịch vụ công */}
-              <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
-                <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-emerald-100 dark:bg-emerald-950 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                      <Landmark className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Dịch vụ Công</span>
+                    ))}
                   </div>
-                </CardHeader>
-                <CardContent className="p-2 space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
-                  {[
-                    { id: 1, title: "Nộp hồ sơ trực tuyến", desc: "Hệ thống tiếp nhận hồ sơ mức 3, mức 4" },
-                    { id: 2, title: "Tra cứu tiến độ giải quyết", desc: "Tra cứu mã số biên nhận hồ sơ" },
-                    { id: 3, title: "Hòm thư góp ý công dân", desc: "Tiếp nhận phản ánh kiến nghị" },
-                    { id: 4, title: "Đánh giá mức độ hài lòng", desc: "Phiếu khảo sát chất lượng dịch vụ" }
-                  ].map((srv) => (
-                    <div
-                      key={srv.id}
-                      draggable
-                      onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "PUBLIC_SERVICES", item: srv }))}
-                      className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
-                        <div className="flex flex-col min-w-0 text-left">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{srv.title}</span>
-                          <span className="text-[9px] text-slate-400 font-medium truncate">{srv.desc}</span>
+                )}
+
+                {selectedCsdl === "service" && (
+                  <div className="space-y-1">
+                    {[
+                      { id: 1, title: "Thủ tục Trực tuyến", icon: Landmark },
+                      { id: 2, title: "Tra cứu Hồ sơ", icon: Search },
+                      { id: 3, title: "Hòm thư Góp ý", icon: MessageSquare },
+                      { id: 4, title: "Đánh giá Hài lòng", icon: CheckCircle },
+                    ].map((srv) => (
+                      <div
+                        key={srv.id}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "PUBLIC_SERVICES", item: srv }))}
+                        className="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <srv.icon className="w-4 h-4 text-emerald-500" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{srv.title}</span>
                         </div>
+                        <span className="text-[8px] font-black uppercase text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Kéo</span>
                       </div>
-                      <span className="text-[9px] font-extrabold uppercase text-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded shrink-0">
-                        Kéo thả
-                      </span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* 5. CSDL Văn bản Pháp quy */}
-              <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
-                <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded bg-purple-100 dark:bg-purple-950 flex items-center justify-center text-purple-600 dark:text-purple-400">
-                      <FolderOpen className="w-3.5 h-3.5" />
-                    </div>
-                    <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Văn bản Pháp quy</span>
+                    ))}
                   </div>
-                </CardHeader>
-                <CardContent className="p-2 space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
-                  {[
-                    { id: 1, title: "Quyết định quy chế hoạt động", desc: "Quyết định của Chủ tịch UBND xã" },
-                    { id: 2, title: "Chỉ thị phòng chống thiên tai", desc: "Phương án ứng phó biến đổi khí hậu" },
-                    { id: 3, title: "Nghị quyết phát triển kinh tế", desc: "Kế hoạch phân bổ ngân sách năm" }
-                  ].map((doc) => (
-                    <div
-                      key={doc.id}
-                      draggable
-                      onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", item: doc }))}
-                      className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
-                        <div className="flex flex-col min-w-0 text-left">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{doc.title}</span>
-                          <span className="text-[9px] text-slate-400 font-medium truncate">{doc.desc}</span>
+                )}
+
+                {selectedCsdl === "legal" && (
+                  <div className="space-y-1">
+                    {[
+                      { id: 1, title: "Văn bản UBND Xã", icon: FolderOpen },
+                      { id: 2, title: "Quyết định & Chỉ thị", icon: FileSearch },
+                      { id: 3, title: "Nghị quyết HĐND", icon: Newspaper },
+                    ].map((doc) => (
+                      <div
+                        key={doc.id}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", item: doc }))}
+                        className="p-2.5 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <doc.icon className="w-4 h-4 text-purple-500" />
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{doc.title}</span>
                         </div>
+                        <span className="text-[8px] font-black uppercase text-purple-600 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-opacity">Kéo</span>
                       </div>
-                      <span className="text-[9px] font-extrabold uppercase text-purple-600 bg-purple-50 dark:bg-purple-950/50 px-1.5 py-0.5 rounded shrink-0">
-                        Kéo thả
-                      </span>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              {/* Các khối chức năng khác */}
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                <div
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "COMMUNE_INTERACTIVE_MAP" }))}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-orange-500 hover:shadow-sm cursor-grab active:cursor-grabbing flex flex-col gap-1 transition-all group"
-                >
-                  <div className="flex items-center justify-between">
-                    <Map className="w-4 h-4 text-orange-500" />
-                    <span className="text-[8px] font-bold text-orange-600 bg-orange-50 dark:bg-orange-950 px-1.5 py-0.5 rounded">Kéo thả</span>
+                    ))}
                   </div>
-                  <span className="text-xs font-bold text-slate-800 dark:text-white mt-1">Bản đồ GIS Xã</span>
-                  <span className="text-[9px] text-slate-400 leading-tight">Bản đồ 8 thôn buôn</span>
-                </div>
+                )}
 
-                <div
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "PHOTO_VIDEO_GALLERY" }))}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-rose-500 hover:shadow-sm cursor-grab active:cursor-grabbing flex flex-col gap-1 transition-all group"
-                >
-                  <div className="flex items-center justify-between">
-                    <Film className="w-4 h-4 text-rose-500" />
-                    <span className="text-[8px] font-bold text-rose-600 bg-rose-50 dark:bg-rose-950 px-1.5 py-0.5 rounded">Kéo thả</span>
+                {selectedCsdl === "extra" && (
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { type: "COMMUNE_INTERACTIVE_MAP", title: "Bản đồ GIS", icon: Map, color: "text-orange-500", bg: "bg-orange-50" },
+                      { type: "PHOTO_VIDEO_GALLERY", title: "Media/Ảnh", icon: Film, color: "text-rose-500", bg: "bg-rose-50" },
+                      { type: "HERO_SLIDER", title: "Slider Banner", icon: Images, color: "text-amber-500", bg: "bg-amber-50" },
+                      { type: "FAQ_ACCORDION", title: "Hỏi đáp FAQ", icon: HelpCircle, color: "text-cyan-500", bg: "bg-cyan-50" },
+                      { type: "CONTACT_INFO_SIDEBAR", title: "Lịch tiếp dân", icon: PhoneCall, color: "text-blue-500", bg: "bg-blue-50" },
+                      { type: "EXTERNAL_LINKS", title: "Liên kết ngoài", icon: ExternalLink, color: "text-slate-500", bg: "bg-slate-50" },
+                    ].map((item) => (
+                      <div
+                        key={item.type}
+                        draggable
+                        onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: item.type }))}
+                        className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-indigo-400 hover:shadow-sm cursor-grab active:cursor-grabbing transition-all group flex flex-col gap-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <item.icon className={`w-4 h-4 ${item.color}`} />
+                          <span className="text-[7px] font-black uppercase px-1 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">Kéo</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-700 dark:text-slate-200">{item.title}</span>
+                      </div>
+                    ))}
                   </div>
-                  <span className="text-xs font-bold text-slate-800 dark:text-white mt-1">Thư viện Media</span>
-                  <span className="text-[9px] text-slate-400 leading-tight">Album ảnh & video clip</span>
-                </div>
-
-                <div
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "HERO_SLIDER" }))}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-amber-500 hover:shadow-sm cursor-grab active:cursor-grabbing flex flex-col gap-1 transition-all group"
-                >
-                  <div className="flex items-center justify-between">
-                    <Images className="w-4 h-4 text-amber-500" />
-                    <span className="text-[8px] font-bold text-amber-600 bg-amber-50 dark:bg-amber-950 px-1.5 py-0.5 rounded">Kéo thả</span>
-                  </div>
-                  <span className="text-xs font-bold text-slate-800 dark:text-white mt-1">Slider Banners</span>
-                  <span className="text-[9px] text-slate-400 leading-tight">Trình chiếu sự kiện</span>
-                </div>
-
-                <div
-                  draggable
-                  onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "FAQ_ACCORDION" }))}
-                  className="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:border-cyan-500 hover:shadow-sm cursor-grab active:cursor-grabbing flex flex-col gap-1 transition-all group"
-                >
-                  <div className="flex items-center justify-between">
-                    <HelpCircle className="w-4 h-4 text-cyan-500" />
-                    <span className="text-[8px] font-bold text-cyan-600 bg-cyan-50 dark:bg-cyan-950 px-1.5 py-0.5 rounded">Kéo thả</span>
-                  </div>
-                  <span className="text-xs font-bold text-slate-800 dark:text-white mt-1">Hỏi đáp trực tuyến</span>
-                  <span className="text-[9px] text-slate-400 leading-tight">Bộ câu hỏi FAQ</span>
-                </div>
-              </div>
-
-            </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* TAB 2: THUỘC TÍNH WIDGET ĐANG CHỌN */}
