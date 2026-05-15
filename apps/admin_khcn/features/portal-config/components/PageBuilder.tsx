@@ -86,6 +86,18 @@ interface Column {
 interface Row {
   rowId: string;
   columns: Column[];
+  settings?: {
+    backgroundColor?: string;
+    backgroundImage?: string;
+    paddingTop?: string;
+    paddingBottom?: string;
+    textColor?: string;
+    fullWidth?: boolean;
+    gap?: string;
+    borderRadius?: string;
+    borderWidth?: string;
+    borderColor?: string;
+  };
 }
 
 interface PageBuilderProps {
@@ -97,6 +109,7 @@ interface PageBuilderProps {
 export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [activeLang, setActiveLang] = useState<string>("vi");
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
+  const [selectedRowId, setSelectedRowId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>("toolbox");
   const [dragOverColId, setDragOverColId] = useState<string | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<{ colId: string, index: number } | null>(null);
@@ -533,6 +546,25 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     onChange(newLayout);
   };
 
+  const updateRowSettings = (rowId: string, newSettings: any) => {
+    const newLayout = layout.map(row => {
+      if (row.rowId === rowId) {
+        return {
+          ...row,
+          settings: { ...(row.settings || {}), ...newSettings }
+        };
+      }
+      return row;
+    });
+    onChange(newLayout);
+  };
+
+  // Find any row by ID
+  const findRowById = (id: string): Row | null => {
+    if (!id) return null;
+    return layout.find(r => r.rowId === id) || null;
+  };
+
   // Find any widget by ID
   const findWidgetById = (id: string): Widget | null => {
     if (!id) return null;
@@ -781,7 +813,14 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
             layout.map((row, rIdx) => (
               <div
                 key={row.rowId}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl p-4 shadow-sm relative group space-y-4 hover:shadow-md transition-all"
+                style={{
+                  backgroundColor: row.settings?.backgroundColor,
+                  backgroundImage: row.settings?.backgroundImage ? `url(${row.settings.backgroundImage})` : undefined,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  color: row.settings?.textColor,
+                }}
+                className={`border transition-all relative group space-y-4 ${selectedRowId === row.rowId ? "ring-2 ring-amber-500 border-amber-500 shadow-lg" : "border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"} ${row.settings?.paddingTop || 'p-4'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-xl sm:rounded-2xl'}`}
               >
                 {/* Row Header controls */}
                 <div className="flex items-center justify-between border-b dark:border-slate-800/60 pb-3">
@@ -794,8 +833,19 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </span>
                   </div>
 
-                  {/* Move, delete buttons */}
                   <div className="flex items-center gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setSelectedRowId(row.rowId);
+                        setSelectedWidgetId(null);
+                        setActiveTab("design");
+                      }}
+                      className={`w-7 h-7 rounded-lg transition-colors ${selectedRowId === row.rowId ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50" : "hover:bg-slate-100 text-slate-500"}`}
+                    >
+                      <Settings2 className="w-3.5 h-3.5" />
+                    </Button>
                     <Button
                       variant="ghost"
                       size="icon"
@@ -965,15 +1015,26 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
       {/* RIGHT PANEL: Toolbox (Kho CSDL & Nguồn dữ liệu) & Customizer Tabs */}
       <div className={`transition-all duration-500 sticky top-6 h-[calc(100vh-140px)] overflow-y-auto pr-2 ${isLexicalActive ? 'xl:col-span-8 order-1 xl:order-2 max-w-7xl' : 'xl:col-span-4 order-2'}`}>
-        <Tabs defaultValue="toolbox" value={activeTab} onValueChange={(v) => { setActiveTab(v); if (v === "toolbox") setSelectedWidgetId(null); }}>
-          <TabsList className="w-full grid grid-cols-2 mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-12">
+        <Tabs defaultValue="toolbox" value={activeTab} onValueChange={(v) => { 
+          setActiveTab(v); 
+          if (v === "toolbox") { setSelectedWidgetId(null); setSelectedRowId(null); }
+          if (v === "design" && !selectedRowId && layout.length > 0) setSelectedRowId(layout[0].rowId);
+        }}>
+          <TabsList className="w-full grid grid-cols-3 mb-4 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl h-12">
             <TabsTrigger value="toolbox" className="font-extrabold text-xs gap-2 flex items-center justify-center rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm transition-all h-10">
               <Database className="w-4 h-4 text-indigo-500" />
-              <span>Kho CSDL & Dữ liệu</span>
+              <span className="hidden sm:inline">Kho CSDL</span>
+              <span className="sm:hidden">CSDL</span>
             </TabsTrigger>
             <TabsTrigger value="customizer" disabled={!selectedWidgetId} className="font-extrabold text-xs gap-2 flex items-center justify-center rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-[#b91c1c] data-[state=active]:shadow-sm transition-all h-10">
               <Settings2 className="w-4 h-4 text-[#b91c1c]" />
-              <span>Thuộc tính Widget</span>
+              <span className="hidden sm:inline">Cấu hình Widget</span>
+              <span className="sm:hidden">Widget</span>
+            </TabsTrigger>
+            <TabsTrigger value="design" className="font-extrabold text-xs gap-2 flex items-center justify-center rounded-lg data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-amber-600 data-[state=active]:shadow-sm transition-all h-10">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span className="hidden sm:inline">Giao diện</span>
+              <span className="sm:hidden">Theme</span>
             </TabsTrigger>
           </TabsList>
 
@@ -1619,6 +1680,187 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* TAB 3: GIAO DIỆN & TÙY BIẾN LAYOUT */}
+          <TabsContent value="design" className="space-y-6 focus:outline-none pb-10">
+            {selectedRowId ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-950/30 flex items-center justify-center">
+                      <Layout className="w-4.5 h-4.5 text-amber-600" />
+                    </div>
+                    <h4 className="font-black text-slate-800 dark:text-slate-200 uppercase text-xs tracking-wider">Cấu hình Hàng (Section)</h4>
+                  </div>
+                  <span className="text-[9px] font-black bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 uppercase tracking-widest">
+                    ID: {selectedRowId.split('-')[1]}
+                  </span>
+                </div>
+
+                {/* Background Settings */}
+                <div className="space-y-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 shadow-sm">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                    <Images className="w-3.5 h-3.5" /> Màu nền & Hình ảnh
+                  </Label>
+                  
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-bold text-slate-500 uppercase">Màu nền Section</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          type="color" 
+                          value={findRowById(selectedRowId)?.settings?.backgroundColor || "#ffffff"} 
+                          onChange={(e) => updateRowSettings(selectedRowId, { backgroundColor: e.target.value })}
+                          className="w-10 h-10 p-1 rounded-lg border-slate-200 cursor-pointer"
+                        />
+                        <Input 
+                          type="text" 
+                          value={findRowById(selectedRowId)?.settings?.backgroundColor || "#ffffff"} 
+                          onChange={(e) => updateRowSettings(selectedRowId, { backgroundColor: e.target.value })}
+                          className="flex-1 h-10 text-[11px] font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-bold text-slate-500 uppercase">Màu chữ mặc định</Label>
+                      <div className="flex gap-2">
+                        <Input 
+                          type="color" 
+                          value={findRowById(selectedRowId)?.settings?.textColor || "#1e293b"} 
+                          onChange={(e) => updateRowSettings(selectedRowId, { textColor: e.target.value })}
+                          className="w-10 h-10 p-1 rounded-lg border-slate-200 cursor-pointer"
+                        />
+                        <Input 
+                          type="text" 
+                          value={findRowById(selectedRowId)?.settings?.textColor || "#1e293b"} 
+                          onChange={(e) => updateRowSettings(selectedRowId, { textColor: e.target.value })}
+                          className="flex-1 h-10 text-[11px] font-mono font-bold"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-[9px] font-bold text-slate-500 uppercase">URL Hình nền (Tùy chọn)</Label>
+                    <Input 
+                      placeholder="https://example.com/bg.jpg"
+                      value={findRowById(selectedRowId)?.settings?.backgroundImage || ""} 
+                      onChange={(e) => updateRowSettings(selectedRowId, { backgroundImage: e.target.value })}
+                      className="h-10 text-xs font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Spacing Settings */}
+                <div className="space-y-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 shadow-sm">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                    <ArrowUpDown className="w-3.5 h-3.5" /> Khoảng cách (Spacing)
+                  </Label>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-bold text-slate-500 uppercase">Đệm trên (Padding Top)</Label>
+                      <Select 
+                        value={findRowById(selectedRowId)?.settings?.paddingTop || "py-8"} 
+                        onValueChange={(val) => updateRowSettings(selectedRowId, { paddingTop: val })}
+                      >
+                        <SelectTrigger className="h-10 text-xs font-bold">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="py-0">Không có</SelectItem>
+                          <SelectItem value="py-4">Nhỏ (16px)</SelectItem>
+                          <SelectItem value="py-8">Vừa (32px)</SelectItem>
+                          <SelectItem value="py-12">Lớn (48px)</SelectItem>
+                          <SelectItem value="py-20">Rất lớn (80px)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-bold text-slate-500 uppercase">Đệm dưới (Padding Bottom)</Label>
+                      <Select 
+                        value={findRowById(selectedRowId)?.settings?.paddingBottom || "py-8"} 
+                        onValueChange={(val) => updateRowSettings(selectedRowId, { paddingBottom: val })}
+                      >
+                        <SelectTrigger className="h-10 text-xs font-bold">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="py-0">Không có</SelectItem>
+                          <SelectItem value="py-4">Nhỏ (16px)</SelectItem>
+                          <SelectItem value="py-8">Vừa (32px)</SelectItem>
+                          <SelectItem value="py-12">Lớn (48px)</SelectItem>
+                          <SelectItem value="py-20">Rất lớn (80px)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Layout & Structure Settings */}
+                <div className="space-y-4 p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-150 dark:border-slate-850 shadow-sm">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                    <Columns className="w-3.5 h-3.5" /> Bố cục & Cấu trúc
+                  </Label>
+                  
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">Hiển thị tràn màn hình (Full Width)</span>
+                        <span className="text-[9px] text-slate-400">Nội dung sẽ giãn đều ra 2 bên mép trình duyệt</span>
+                      </div>
+                      <input 
+                        type="checkbox" 
+                        checked={findRowById(selectedRowId)?.settings?.fullWidth || false} 
+                        onChange={(e) => updateRowSettings(selectedRowId, { fullWidth: e.target.checked })}
+                        className="w-5 h-5 rounded-md border-slate-300 text-amber-600 focus:ring-amber-500"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-[9px] font-bold text-slate-500 uppercase">Độ bo góc (Border Radius)</Label>
+                      <Select 
+                        value={findRowById(selectedRowId)?.settings?.borderRadius || "rounded-none"} 
+                        onValueChange={(val) => updateRowSettings(selectedRowId, { borderRadius: val })}
+                      >
+                        <SelectTrigger className="h-10 text-xs font-bold">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="rounded-none">Không bo góc</SelectItem>
+                          <SelectItem value="rounded-xl">Bo nhẹ (XL)</SelectItem>
+                          <SelectItem value="rounded-2xl">Bo vừa (2XL)</SelectItem>
+                          <SelectItem value="rounded-3xl">Bo mạnh (3XL)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/60 rounded-2xl flex items-start gap-3">
+                  <Sparkles className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+                  <div className="flex flex-col gap-1 text-[11px]">
+                    <span className="font-black text-indigo-950 dark:text-indigo-300 uppercase tracking-wide">Mẹo thiết kế chuyên nghiệp</span>
+                    <span className="text-slate-600 dark:text-slate-400 leading-normal">
+                      Hãy kết hợp màu nền Section khác nhau (ví dụ: một hàng trắng xen kẽ một hàng xám nhạt) để tạo nhịp điệu và sự phân cấp rõ ràng cho trang Portal của bạn.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-20 px-6 border-2 border-dashed rounded-3xl border-slate-200 dark:border-slate-800 flex flex-col items-center gap-4">
+                <div className="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-300">
+                  <Layout className="w-8 h-8" />
+                </div>
+                <div className="space-y-1">
+                  <h4 className="text-sm font-black text-slate-400 uppercase tracking-wider">Chưa chọn Hàng thiết kế</h4>
+                  <p className="text-[10px] text-slate-400 font-medium max-w-[200px] mx-auto">
+                    Hãy bấm vào biểu tượng <Settings2 className="w-3 h-3 inline" /> ở đầu mỗi hàng trong trình xây dựng để bắt đầu tùy biến giao diện.
+                  </p>
+                </div>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>
