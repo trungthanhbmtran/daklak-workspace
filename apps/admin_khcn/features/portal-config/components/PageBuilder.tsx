@@ -97,6 +97,273 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
   const [isPreviewMode, setIsPreviewMode] = useState<boolean>(false);
 
+  // Realistic Widget Preview Component
+  const WidgetPreview = ({ widget }: { widget: Widget }) => {
+    const data = widget.data || {};
+
+    switch (widget.type) {
+      case "LEADERSHIP_LIST":
+        const leaders = data.selectedLeaders || [];
+        return (
+          <div className="space-y-4 w-full">
+            <h3 className="text-sm font-bold border-l-4 border-red-600 pl-3 uppercase text-slate-800 dark:text-white">
+              {widget.title[activeLang] || "Lãnh đạo đơn vị"}
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {leaders.length > 0 ? leaders.map((leader: any) => (
+                <div key={leader.id} className="flex gap-3 p-3 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-16 h-20 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0 flex items-center justify-center text-slate-400">
+                    <UserSquare2 className="w-8 h-8" />
+                  </div>
+                  <div className="flex flex-col justify-center min-w-0">
+                    <span className="text-xs font-black text-slate-900 dark:text-white truncate uppercase">{leader.name}</span>
+                    <span className="text-[10px] font-bold text-red-600 uppercase mt-0.5 tracking-tight">{leader.role}</span>
+                    <span className="text-[9px] text-slate-500 mt-1 line-clamp-1 italic">{leader.responsibility || "Phụ trách chung"}</span>
+                  </div>
+                </div>
+              )) : (
+                <div className="col-span-2 py-8 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-400">
+                  <UserSquare2 className="w-8 h-8 opacity-20" />
+                  <span className="text-[10px] font-bold uppercase">Chưa chọn nhân sự</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case "ORG_SECTIONS_DIRECTORY":
+        const units = data.selectedUnits || [];
+        return (
+          <div className="space-y-4 w-full">
+            <h3 className="text-sm font-bold border-l-4 border-red-600 pl-3 uppercase text-slate-800 dark:text-white">
+              {widget.title[activeLang] || "Sơ đồ tổ chức"}
+            </h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {units.length > 0 ? units.map((unit: any) => (
+                <div key={unit.id} className="p-3 bg-red-50/50 dark:bg-red-950/20 border border-red-100 dark:border-red-900/40 rounded-xl flex flex-col gap-1 hover:bg-red-50 transition-colors">
+                  <span className="text-[10px] font-black text-red-900 dark:text-red-200 uppercase leading-tight">{unit.title}</span>
+                  <span className="text-[9px] text-red-600/70 font-bold uppercase tracking-tighter">{unit.code || "VPDD"}</span>
+                  <div className="mt-2 pt-2 border-t border-red-200/40 flex justify-between items-center">
+                    <span className="text-[8px] font-black text-slate-400 uppercase">Chi tiết</span>
+                    <ChevronRight className="w-3 h-3 text-red-400" />
+                  </div>
+                </div>
+              )) : (
+                <div className="col-span-3 py-8 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-400">
+                  <Workflow className="w-8 h-8 opacity-20" />
+                  <span className="text-[10px] font-bold uppercase">Chưa chọn đơn vị</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+
+      case "FEATURED_NEWS":
+        return (
+          <div className="space-y-4 w-full">
+            <div className="flex items-center justify-between border-b-2 border-blue-600 pb-2">
+              <h3 className="text-sm font-black uppercase text-blue-900 dark:text-blue-300 tracking-tight">
+                {widget.title[activeLang] || "Tin tức nổi bật"}
+              </h3>
+              <span className="text-[10px] font-black text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded cursor-pointer hover:bg-blue-100 transition-colors">Xem tất cả</span>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="flex gap-4 group cursor-pointer">
+                <div className="w-32 h-20 bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden shrink-0 relative">
+                  <div className="absolute inset-0 flex items-center justify-center text-slate-300">
+                    <Images className="w-8 h-8" />
+                  </div>
+                </div>
+                <div className="flex flex-col justify-center min-w-0">
+                  <span className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-1">{data.selectedCategory || "Thời sự"}</span>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-2 leading-snug group-hover:text-blue-600 transition-colors">
+                    UBND tỉnh triển khai các giải pháp cấp bách nhằm đẩy mạnh cải cách hành chính và chuyển đổi số năm 2024
+                  </h4>
+                  <span className="text-[9px] text-slate-400 mt-1 flex items-center gap-2">
+                    <Clock className="w-3 h-3" /> 2 giờ trước • Ban biên tập
+                  </span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[1, 2].map(i => (
+                  <div key={i} className="flex flex-col gap-2 group cursor-pointer">
+                    <div className="aspect-video bg-slate-100 dark:bg-slate-800 rounded-xl overflow-hidden relative">
+                      <div className="absolute inset-0 flex items-center justify-center text-slate-300">
+                        <Images className="w-6 h-6" />
+                      </div>
+                    </div>
+                    <h4 className="text-[11px] font-bold text-slate-800 dark:text-slate-200 line-clamp-2 leading-tight group-hover:text-blue-600">
+                      Hội nghị tập huấn nâng cao năng lực cho cán bộ phụ trách CNTT tại các đơn vị cấp xã
+                    </h4>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "PUBLIC_SERVICES":
+        return (
+          <div className="w-full p-6 rounded-3xl bg-emerald-600 text-white shadow-xl shadow-emerald-600/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-3xl" />
+            <div className="relative z-10 flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-white/20 rounded-2xl backdrop-blur-md">
+                  <Landmark className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Dịch vụ trực tuyến</span>
+                  <h3 className="text-base font-black uppercase tracking-tight">{data.selectedService || "Cổng hành chính công"}</h3>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                {[
+                  { label: "Nộp hồ sơ", icon: FileText, bg: "bg-white/15" },
+                  { label: "Tra cứu", icon: Search, bg: "bg-white/15" },
+                  { label: "Thủ tục", icon: FolderOpen, bg: "bg-emerald-700/40 shadow-inner" },
+                  { label: "Góp ý", icon: MessageSquare, bg: "bg-emerald-700/40 shadow-inner" }
+                ].map((btn, i) => (
+                  <div key={i} className={`${btn.bg} p-3 rounded-2xl flex flex-col gap-2 hover:bg-white/25 transition-all cursor-pointer group`}>
+                    <btn.icon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-wide">{btn.label}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+
+      case "HERO_SLIDER":
+        return (
+          <div className="w-full aspect-[21/9] bg-slate-900 rounded-2xl overflow-hidden relative group">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+            <div className="absolute inset-0 flex items-center justify-center text-white/10">
+              <Images className="w-24 h-24" />
+            </div>
+            <div className="absolute bottom-6 left-8 right-8 z-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+              <span className="text-[10px] font-black text-amber-400 uppercase tracking-[0.3em] mb-2 block">Chào mừng bạn đến với</span>
+              <h2 className="text-2xl font-black text-white uppercase tracking-tighter leading-none mb-4 max-w-2xl">
+                Cổng thông tin điện tử UBND Xã Krông Na - Huyện Buôn Đôn
+              </h2>
+              <div className="flex gap-3">
+                <div className="h-10 px-6 bg-amber-500 text-black text-[11px] font-black uppercase rounded-full flex items-center justify-center shadow-lg hover:bg-amber-400 transition-colors cursor-pointer">
+                  Tìm hiểu thêm
+                </div>
+                <div className="h-10 px-6 bg-white/10 backdrop-blur-md text-white text-[11px] font-black uppercase rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-colors cursor-pointer">
+                  Dịch vụ công
+                </div>
+              </div>
+            </div>
+            <div className="absolute bottom-6 right-8 flex gap-1.5">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className={`h-1.5 rounded-full transition-all ${i === 1 ? "w-8 bg-amber-500" : "w-1.5 bg-white/40"}`} />
+              ))}
+            </div>
+          </div>
+        );
+
+      case "LEXICAL_RICH_TEXT":
+        return (
+          <div className="w-full prose prose-slate dark:prose-invert max-w-none">
+            <div className="p-6 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase mb-4 tracking-tight border-b pb-3">
+                {widget.title[activeLang] || "Nội dung văn bản"}
+              </h3>
+              <div className="space-y-4">
+                <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+                  Đây là khu vực hiển thị nội dung chi tiết của trang Portal. Các văn bản chỉ đạo, thông báo quan trọng hoặc bài viết giới thiệu sẽ được trình bày tại đây với định dạng văn bản phong phú, hỗ trợ chèn hình ảnh và liên kết.
+                </p>
+                <div className="h-32 bg-slate-50 dark:bg-slate-850 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-300 italic text-[10px]">
+                  Khu vực hiển thị nội dung từ Lexical Editor...
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case "COMMUNE_INTERACTIVE_MAP":
+        return (
+          <div className="w-full p-4 bg-orange-50 dark:bg-orange-950/20 border border-orange-100 dark:border-orange-900/40 rounded-2xl space-y-4">
+            <div className="flex items-center gap-2">
+              <Map className="w-5 h-5 text-orange-600" />
+              <h3 className="text-xs font-black uppercase text-orange-900 dark:text-orange-200">Bản đồ tương tác địa phương</h3>
+            </div>
+            <div className="aspect-video bg-white dark:bg-slate-900 rounded-xl border border-orange-200 shadow-inner flex items-center justify-center relative overflow-hidden">
+               <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#f97316_1px,transparent_1px)] [background-size:16px_16px]" />
+               <span className="text-[10px] font-bold text-orange-400 uppercase tracking-widest z-10">Bản đồ ranh giới Thôn/Buôn</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {[1, 2, 3, 4].map(i => (
+                <div key={i} className="px-3 py-1.5 bg-white dark:bg-slate-800 rounded-lg text-[9px] font-bold text-slate-600 flex justify-between items-center">
+                  <span>Thôn {i}</span>
+                  <div className="w-2 h-2 rounded-full bg-orange-500" />
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case "STATISTICS_GRID":
+        return (
+          <div className="grid grid-cols-2 gap-3 w-full">
+            {[
+              { label: "Dân số", val: "12,450", sub: "Người", color: "bg-blue-600" },
+              { label: "Diện tích", val: "45.2", sub: "km²", color: "bg-emerald-600" },
+              { label: "Hộ nghèo", val: "3.2%", sub: "Tỷ lệ", color: "bg-rose-600" },
+              { label: "Dịch vụ công", val: "98%", sub: "Hài lòng", color: "bg-amber-600" }
+            ].map((s, i) => (
+              <div key={i} className="p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm flex flex-col gap-1 relative overflow-hidden group hover:border-indigo-500 transition-all">
+                <div className={`absolute top-0 right-0 w-12 h-12 ${s.color} opacity-5 -mr-4 -mt-4 rounded-full group-hover:scale-150 transition-transform`} />
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</span>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{s.val}</span>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase">{s.sub}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
+      case "CONTACT_INFO_SIDEBAR":
+        return (
+          <div className="w-full bg-slate-900 text-white rounded-2xl p-5 space-y-4">
+            <div className="flex items-center gap-2 pb-3 border-b border-white/10">
+              <PhoneCall className="w-4 h-4 text-blue-400" />
+              <h3 className="text-[10px] font-black uppercase tracking-widest">Đường dây nóng 24/7</h3>
+            </div>
+            <div className="space-y-3">
+              <div className="flex flex-col">
+                <span className="text-[18px] font-black text-blue-400">0262.385.1234</span>
+                <span className="text-[9px] opacity-60 uppercase font-bold tracking-tight">Trực ban UBND Xã</span>
+              </div>
+              <div className="pt-2 space-y-2">
+                <div className="flex items-center gap-2 text-[10px] font-medium opacity-80">
+                  <Clock className="w-3 h-3 text-emerald-400" />
+                  <span>Sáng: 07:30 - 11:30</span>
+                </div>
+                <div className="flex items-center gap-2 text-[10px] font-medium opacity-80">
+                  <Clock className="w-3 h-3 text-emerald-400" />
+                  <span>Chiều: 13:30 - 17:00</span>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 bg-white/5 rounded-xl border border-white/10 flex flex-col gap-1">
+              <span className="text-[8px] font-black uppercase text-amber-400">Lịch tiếp dân</span>
+              <span className="text-[10px] font-bold leading-tight">Chủ tịch UBND Xã tiếp dân vào sáng Thứ 5 hàng tuần.</span>
+            </div>
+          </div>
+        );
+
+      default:
+        return (
+          <div className="py-12 bg-slate-50 dark:bg-slate-850 rounded-2xl flex flex-col items-center justify-center text-slate-400 italic text-xs border border-dashed border-slate-200 dark:border-slate-800 gap-3">
+            <Database className="w-8 h-8 opacity-20" />
+            <span className="uppercase font-black text-[10px] tracking-widest">Xem trước: {widget.title[activeLang] || widget.type}</span>
+          </div>
+        );
+    }
+  };
+
   const toggleNode = (nodeId: string) => {
     setExpandedNodes(prev => ({ ...prev, [nodeId]: !prev[nodeId] }));
   };
@@ -955,11 +1222,9 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                                         {widget.type === "EXTERNAL_LINKS" && <ExternalLink className="w-4 h-4" />}
                                       </div>
                                     )}
-                                    <div className="flex flex-col min-w-0">
+                                    <div className="flex flex-col min-w-0 flex-1">
                                       {isPreviewMode ? (
-                                        <div className="py-8 bg-slate-50 dark:bg-slate-850 rounded-lg flex items-center justify-center text-slate-400 italic text-xs border border-slate-100 dark:border-slate-800">
-                                          Nội dung của {widget.title[activeLang] || widget.type} sẽ hiển thị ở đây
-                                        </div>
+                                        <WidgetPreview widget={widget} />
                                       ) : (
                                         <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">
                                           {widget.title[activeLang] || "Widget chưa đặt tên"}
