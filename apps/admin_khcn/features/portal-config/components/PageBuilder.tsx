@@ -28,6 +28,7 @@ import {
   X,
   Code,
   Copy,
+  Check,
   Images,
   Newspaper,
   Landmark,
@@ -100,16 +101,15 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
     return (
       <div className="flex flex-col">
-        <div 
+        <div
           draggable={!isCustomizer}
           onDragStart={(e) => {
             if (!isCustomizer) {
               e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", item: node }));
             }
           }}
-          className={`flex items-center gap-1.5 p-1.5 rounded-lg transition-all cursor-pointer group ${
-            isSelected ? "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800" : "hover:bg-slate-50 dark:hover:bg-slate-850"
-          }`}
+          className={`flex items-center gap-1.5 p-1.5 rounded-lg transition-all cursor-pointer group ${isSelected ? "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800" : "hover:bg-slate-50 dark:hover:bg-slate-850"
+            }`}
           onClick={(e) => {
             if (isCustomizer && widgetId) {
               toggleSelectUnit(widgetId, node);
@@ -119,7 +119,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           }}
         >
           {hasChildren ? (
-            <div 
+            <div
               onClick={(e) => { e.stopPropagation(); toggleNode(node.id); }}
               className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
             >
@@ -128,32 +128,31 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           ) : (
             <div className="w-5" />
           )}
-          
+
           <div className="flex items-center gap-2 min-w-0 flex-1">
-             {isCustomizer && (
-                <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
-                  isSelected ? "bg-red-600 border-red-600 text-white" : "border-slate-300 dark:border-slate-700"
+            {isCustomizer && (
+              <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${isSelected ? "bg-red-600 border-red-600 text-white" : "border-slate-300 dark:border-slate-700"
                 }`}>
-                  {isSelected && <Check className="w-2.5 h-2.5" />}
-                </div>
-              )}
-              {!isCustomizer && <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />}
-              
-              <div className="flex flex-col min-w-0 text-left">
-                <span className={`text-[11px] font-bold truncate ${isSelected ? "text-red-900 dark:text-white" : "text-slate-700 dark:text-slate-200"}`}>
-                  {node.name}
-                </span>
-                {node.typeName && <span className="text-[9px] text-slate-400 font-medium">{node.typeName}</span>}
+                {isSelected && <Check className="w-2.5 h-2.5" />}
               </div>
+            )}
+            {!isCustomizer && <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />}
+
+            <div className="flex flex-col min-w-0 text-left">
+              <span className={`text-[11px] font-bold truncate ${isSelected ? "text-red-900 dark:text-white" : "text-slate-700 dark:text-slate-200"}`}>
+                {node.name}
+              </span>
+              {node.typeName && <span className="text-[9px] text-slate-400 font-medium">{node.typeName}</span>}
+            </div>
           </div>
-          
+
           {!isCustomizer && (
-             <span className="text-[9px] font-black uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-               Kéo
-             </span>
+            <span className="text-[9px] font-black uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+              Kéo
+            </span>
           )}
         </div>
-        
+
         {hasChildren && isExpanded && (
           <div className="ml-4 border-l border-slate-100 dark:border-slate-800 pl-2 mt-1 space-y-0.5">
             {node.children.map((child: any) => (
@@ -334,7 +333,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
             setActiveTab("customizer");
             return;
           }
-          
+
           // Fallback for other types that might want to merge in the future
         }
       }
@@ -1071,7 +1070,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
             {/* Danh sách các CSDL */}
             <div className="space-y-4">
-              
+
               {/* 1. CSDL Cơ cấu Tổ chức */}
               <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900 rounded-xl">
                 <CardHeader className="bg-slate-50 dark:bg-slate-950/60 p-3 border-b border-slate-100 dark:border-slate-850 flex flex-row items-center justify-between">
