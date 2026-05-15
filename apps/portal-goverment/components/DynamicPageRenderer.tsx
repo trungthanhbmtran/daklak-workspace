@@ -168,7 +168,7 @@ const getLocalizedField = (obj: any, baseField: string, lang: string): string =>
 // ----------------------------------------------------------------------
 // NEW SUB-COMPONENTS FOR PORTAL BLOCKS
 // ----------------------------------------------------------------------
-function HeroSliderWidget({ banners, currentLang }: { banners: any[], currentLang: string }) {
+function HeroSliderWidget({ banners, currentLang, data }: { banners: any[], currentLang: string, data?: any }) {
   const [activeIdx, setActiveIdx] = React.useState(0)
   const displayBanners = React.useMemo(() => {
     if (banners && banners.length > 0) {
@@ -259,11 +259,21 @@ function HeroSliderWidget({ banners, currentLang }: { banners: any[], currentLan
   )
 }
 
-function FeaturedNewsWidget({ posts, currentLang }: { posts: any[], currentLang: string }) {
+function FeaturedNewsWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
   const displayPosts = React.useMemo(() => {
-    if (posts && posts.length > 0) {
-      return posts.slice(0, 4)
+    let filtered = posts || []
+
+    // Filter by category if selectedCategory is set in data
+    if (data?.selectedCategory) {
+      filtered = filtered.filter((p: any) =>
+        p.category?.slug === data.selectedCategory ||
+        p.category?.code === data.selectedCategory ||
+        p.categoryId === data.selectedCategory
+      )
     }
+
+    // If still empty and it's a mock/fallback case, provide default mocks
+    if (filtered.length === 0 && (!posts || posts.length === 0)) {
     return [
       {
         id: "news-1",
@@ -393,10 +403,19 @@ function PublicServicesWidget({ currentLang }: { currentLang: string }) {
   )
 }
 
-function LegalDocumentsWidget({ posts, currentLang }: { posts: any[], currentLang: string }) {
+function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
   const docs = React.useMemo(() => {
-    if (posts && posts.length > 0) {
-      return posts.filter((p: any) => p.category?.slug === "van-ban" || p.category?.name?.toLowerCase().includes("văn bản")).slice(0, 5)
+    let filtered = posts || []
+    
+    // Filter by specific category or general 'van-ban'
+    if (data?.selectedCategory) {
+       filtered = filtered.filter((p: any) => p.category?.slug === data.selectedCategory)
+    } else {
+       filtered = filtered.filter((p: any) => p.category?.slug === "van-ban" || p.category?.name?.toLowerCase().includes("văn bản"))
+    }
+
+    if (filtered.length > 0) {
+      return filtered.slice(0, data?.limit || 5)
     }
     return [
       { id: "doc-1", title: currentLang === "en" ? "Resolution on communal economic targets for 2026" : "Nghị quyết về chỉ tiêu phát triển kinh tế - xã hội xã Dang Kang năm 2026", codeNum: "12/NQ-HĐND", dateStr: "10/01/2026" },
@@ -449,7 +468,7 @@ function LegalDocumentsWidget({ posts, currentLang }: { posts: any[], currentLan
   )
 }
 
-function MediaGalleryWidget({ posts, currentLang }: { posts: any[], currentLang: string }) {
+function MediaGalleryWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
   const mediaItems = [
     { title: "Hội nghị tổng kết phong trào thi đua toàn dân đoàn kết", img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80", type: "photo" },
     { title: "Ra quân dọn dẹp vệ sinh môi trường đường làng ngõ xóm", img: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80", type: "photo" },
@@ -481,7 +500,7 @@ function MediaGalleryWidget({ posts, currentLang }: { posts: any[], currentLang:
   )
 }
 
-function FaqAccordionWidget({ questions, currentLang }: { questions: any[], currentLang: string }) {
+function FaqAccordionWidget({ questions, currentLang, data }: { questions: any[], currentLang: string, data?: any }) {
   const [expandedIdx, setExpandedIdx] = React.useState<number | null>(0)
   const displayQa = React.useMemo(() => {
     if (questions && questions.length > 0) {
@@ -598,7 +617,7 @@ function renderLexicalNode(node: any, index: number, currentLang: string): React
     case "root":
       return <div key={index} className="space-y-4">{renderChildren()}</div>
     case "paragraph":
-      return <p key={index} className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm font-semibold">{renderChildren()}</p>
+      return <p key={index} className="text-slate-700 dark:text-slate-300 leading-relaxed text-xs sm:text-sm">{renderChildren()}</p>
     case "heading": {
       const Tag = (node.tag || "h2") as any
       const headingClasses: Record<string, string> = {
@@ -615,7 +634,7 @@ function renderLexicalNode(node: any, index: number, currentLang: string): React
     case "list": {
       const Tag = node.tag === "ol" || node.listType === "number" ? "ol" : "ul"
       const listClass = Tag === "ol" ? "list-decimal pl-5 space-y-1.5" : "list-disc pl-5 space-y-1.5"
-      return <Tag key={index} className={`${listClass} text-slate-700 dark:text-slate-300 font-semibold text-xs sm:text-sm`}>{renderChildren()}</Tag>
+      return <Tag key={index} className={`${listClass} text-slate-700 dark:text-slate-300 text-xs sm:text-sm`}>{renderChildren()}</Tag>
     }
     case "listitem":
       return <li key={index} className="leading-relaxed">{renderChildren()}</li>
@@ -805,7 +824,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     } catch (e) {
       // Return raw fallback text split into lines
       return (
-        <div className="text-slate-700 dark:text-slate-300 leading-relaxed font-semibold space-y-3">
+        <div className="text-slate-700 dark:text-slate-300 leading-relaxed space-y-3">
           {rawJson.split("\n\n").map((p, idx) => (
             <p key={idx}>{p}</p>
           ))}
@@ -853,12 +872,12 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
                       {/* HERO SLIDER WIDGET */}
                       {widget.type === "HERO_SLIDER" && (
-                        <HeroSliderWidget banners={bannersList} currentLang={currentLang} />
+                        <HeroSliderWidget banners={bannersList} currentLang={currentLang} data={widget.data} />
                       )}
 
                       {/* FEATURED NEWS WIDGET */}
                       {widget.type === "FEATURED_NEWS" && (
-                        <FeaturedNewsWidget posts={postsList} currentLang={currentLang} />
+                        <FeaturedNewsWidget posts={postsList} currentLang={currentLang} data={widget.data} />
                       )}
 
                       {/* PUBLIC SERVICES WIDGET */}
@@ -868,17 +887,17 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
                       {/* LEGAL DOCUMENTS WIDGET */}
                       {widget.type === "LEGAL_DOCUMENTS" && (
-                        <LegalDocumentsWidget posts={postsList} currentLang={currentLang} />
+                        <LegalDocumentsWidget posts={postsList} currentLang={currentLang} data={widget.data} />
                       )}
 
                       {/* PHOTO & VIDEO GALLERY WIDGET */}
                       {widget.type === "PHOTO_VIDEO_GALLERY" && (
-                        <MediaGalleryWidget posts={postsList} currentLang={currentLang} />
+                        <MediaGalleryWidget posts={postsList} currentLang={currentLang} data={widget.data} />
                       )}
 
                       {/* FAQ ACCORDION WIDGET */}
                       {widget.type === "FAQ_ACCORDION" && (
-                        <FaqAccordionWidget questions={questionsList} currentLang={currentLang} />
+                        <FaqAccordionWidget questions={questionsList} currentLang={currentLang} data={widget.data} />
                       )}
 
                       {/* EXTERNAL LINKS WIDGET */}
