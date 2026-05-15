@@ -42,6 +42,9 @@ import {
   Building2,
   Users2,
   MapPin,
+  MapIcon,
+  FileSpreadsheet,
+  Info,
   Phone,
   Mail,
   Clock,
@@ -131,6 +134,14 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [viewport, setViewport] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [showLeftPanel, setShowLeftPanel] = useState(true);
   const [showRightPanel, setShowRightPanel] = useState(true);
+
+  const paddingMap: Record<string, string> = {
+    'pt-0': 'pt-0', 'pt-4': 'pt-4', 'pt-8': 'pt-8', 'pt-12': 'pt-12', 'pt-16': 'pt-16', 'pt-20': 'pt-20',
+    'pb-0': 'pb-0', 'pb-4': 'pb-4', 'pb-8': 'pb-8', 'pb-12': 'pb-12', 'pb-16': 'pb-16', 'pb-20': 'pb-20'
+  };
+  const roundedMap: Record<string, string> = {
+    'rounded-none': 'rounded-none', 'rounded-xl': 'rounded-xl', 'rounded-2xl': 'rounded-2xl', 'rounded-3xl': 'rounded-3xl', 'rounded-full': 'rounded-full'
+  };
 
   const toggleNode = (nodeId: string) => {
     setExpandedNodes(prev => ({ ...prev, [nodeId]: !prev[nodeId] }));
@@ -731,6 +742,64 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                         </div>
                       </div>
                     )}
+                    {selectedCsdl === "service" && (
+                      <div className="space-y-2">
+                        {[
+                          { type: "PUBLIC_SERVICES", title: "Dịch vụ công", icon: Landmark, color: "text-emerald-600" },
+                          { type: "FAQ_ACCORDION", title: "Hỏi đáp FAQ", icon: HelpCircle, color: "text-amber-600" },
+                          { type: "CONTACT_FORM", title: "Form liên hệ", icon: Mail, color: "text-blue-600" }
+                        ].map((w) => (
+                          <div
+                            key={w.type}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
+                          >
+                            <div className={`w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                              <w.icon className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {selectedCsdl === "legal" && (
+                      <div className="space-y-2">
+                        <div
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", title: "Văn bản pháp quy" }))}
+                          className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 text-purple-600 flex items-center justify-center shrink-0">
+                            <FolderOpen className="w-4 h-4" />
+                          </div>
+                          <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Văn bản & Nghị quyết</span>
+                        </div>
+                      </div>
+                    )}
+                    {selectedCsdl === "extra" && (
+                      <div className="space-y-2">
+                        {[
+                          { type: "LEXICAL_RICH_TEXT", title: "Nội dung văn bản", icon: Type, color: "text-slate-600" },
+                          { type: "COMMUNE_INTERACTIVE_MAP", title: "Bản đồ tương tác", icon: MapIcon, color: "text-red-600" },
+                          { type: "STATISTICS_GRID", title: "Số liệu thống kê", icon: FileSpreadsheet, color: "text-sky-600" },
+                          { type: "CONTACT_INFO_SIDEBAR", title: "Thông tin liên hệ", icon: Info, color: "text-blue-600" },
+                          { type: "EXTERNAL_LINKS", title: "Liên kết ngoài", icon: ExternalLink, color: "text-amber-600" }
+                        ].map((w) => (
+                          <div
+                            key={w.type}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
+                          >
+                            <div className={`w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                              <w.icon className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </Card>
 
@@ -750,92 +819,98 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
         )}
 
         {/* CENTER PANEL: Canvas */}
-        <ResizablePanel defaultSize={60} className="bg-slate-100 dark:bg-[#0f172a] relative overflow-hidden flex flex-col items-center">
-          <div className={`w-full max-w-7xl h-full overflow-y-auto custom-scrollbar transition-all duration-500 p-6 flex justify-center ${viewport === "tablet" ? "max-w-[768px]" : viewport === "mobile" ? "max-w-[420px]" : "max-w-full"
-            }`}>
-            <div className={`w-full space-y-6 ${viewport !== "desktop" ? "bg-white dark:bg-slate-900 shadow-2xl rounded-3xl border-8 border-slate-800 dark:border-slate-950 p-4 h-fit" : ""}`}>
-              {viewport !== "desktop" && <div className="w-16 h-1 bg-slate-700 dark:bg-slate-800 rounded-full mx-auto mb-6 mt-1" />}
-
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest select-none">Vùng thiết kế nội dung</span>
+        <ResizablePanel defaultSize={60} className="bg-slate-100 dark:bg-[#0f172a] relative overflow-hidden flex flex-col items-stretch">
+          <div className="w-full h-full overflow-auto custom-scrollbar transition-all duration-500 p-8">
+            <div className={`mx-auto space-y-8 ${viewport === "tablet" ? "max-w-[768px]" : viewport === "mobile" ? "max-w-[420px]" : "max-w-7xl"
+              } transition-all duration-500`}>
+              {viewport !== "desktop" && (
+                <div className="w-full bg-slate-800 dark:bg-slate-950 rounded-t-3xl p-4 flex items-center justify-center border-b border-slate-700">
+                  <div className="w-16 h-1 bg-slate-600 rounded-full" />
                 </div>
-                {layout.length > 0 && (
-                  <Button variant="ghost" size="sm" className="h-6 text-[9px] font-black text-slate-400 hover:text-red-600 uppercase gap-1" onClick={() => { if (confirm("Xóa toàn bộ layout?")) onChange([]); }}>
-                    <Trash2 className="w-3 h-3" /> Xóa tất cả
-                  </Button>
+              )}
+              <div className={`w-full ${viewport !== "desktop" ? "bg-white dark:bg-slate-900 shadow-2xl rounded-b-3xl border-x-8 border-b-8 border-slate-800 dark:border-slate-950 p-6 min-h-[800px]" : ""}`}>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest select-none">Vùng thiết kế nội dung</span>
+                  </div>
+                  {layout.length > 0 && (
+                    <Button variant="ghost" size="sm" className="h-6 text-[9px] font-black text-slate-400 hover:text-red-600 uppercase gap-1" onClick={() => { if (confirm("Xóa toàn bộ layout?")) onChange([]); }}>
+                      <Trash2 className="w-3 h-3" /> Xóa tất cả
+                    </Button>
+                  )}
+                </div>
+
+                {layout.length === 0 ? (
+                  <div className="text-center py-20 border-2 border-dashed rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-3">
+                    <Layout className="w-10 h-10 text-slate-300" />
+                    <p className="text-xs text-slate-400 font-extrabold uppercase tracking-wide">Trang trống • Hãy thêm hàng để bắt đầu</p>
+                  </div>
+                ) : (
+                  layout.map((row, rIdx) => (
+                    <div
+                      key={row.rowId}
+                      style={{
+                        backgroundColor: row.settings?.backgroundColor,
+                        backgroundImage: row.settings?.backgroundImage ? `url(${row.settings.backgroundImage})` : undefined,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
+                        color: row.settings?.textColor,
+                      }}
+                      className={`border transition-all relative group space-y-4 p-4 ${selectedRowId === row.rowId ? "ring-2 ring-amber-500 border-amber-500 shadow-lg" : "border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"} ${paddingMap[row.settings?.paddingTop] || 'pt-8'} ${paddingMap[row.settings?.paddingBottom] || 'pb-8'} ${roundedMap[row.settings?.borderRadius] || 'rounded-2xl'} ${row.settings?.fullWidth ? "w-full" : ""}`}
+                    >
+                      <div className="flex items-center justify-between border-b dark:border-slate-800/60 pb-3 relative z-10">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] bg-amber-500/10 text-amber-600 font-black uppercase px-2 py-0.5 rounded tracking-wider">Hàng {rIdx + 1}</span>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button variant="ghost" size="icon" onClick={() => { setSelectedRowId(row.rowId); setSelectedWidgetId(null); setActiveTab("design"); }} className={`w-7 h-7 rounded-lg ${selectedRowId === row.rowId ? "bg-amber-100 text-amber-600" : "text-slate-400"}`}><Settings2 className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" disabled={rIdx === 0} onClick={() => moveRow(rIdx, "up")} className="w-7 h-7 text-slate-400"><MoveUp className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" disabled={rIdx === layout.length - 1} onClick={() => moveRow(rIdx, "down")} className="w-7 h-7 text-slate-400"><MoveDown className="w-3.5 h-3.5" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => deleteRow(row.rowId)} className="w-7 h-7 text-slate-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></Button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {row.columns.map((col) => (
+                          <div
+                            key={col.id}
+                            onDragOver={(e) => { e.preventDefault(); setDragOverColId(col.id); }}
+                            onDragLeave={() => setDragOverColId(null)}
+                            onDrop={(e) => { e.preventDefault(); setDragOverColId(null); const dragData = e.dataTransfer.getData("text/plain"); if (dragData) addWidgetFromDrag(row.rowId, col.id, dragData); }}
+                            className={`${col.colSpan} border-2 border-dashed ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/30" : "border-slate-200 dark:border-slate-800/50"} rounded-xl p-3 min-h-[120px] transition-all`}
+                          >
+                            <div className="flex flex-col gap-2">
+                              {col.widgets.map((widget) => (
+                                <div
+                                  key={widget.id}
+                                  onClick={(e) => { e.stopPropagation(); setSelectedWidgetId(widget.id); setSelectedRowId(null); setActiveTab("customizer"); }}
+                                  className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between group/widget relative z-10 ${selectedWidgetId === widget.id ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 shadow-md" : "bg-white dark:bg-slate-900 border-slate-150 hover:border-slate-300"}`}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedWidgetId === widget.id ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"}`}>
+                                      {widget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-4 h-4" /> : <Database className="w-4 h-4" />}
+                                    </div>
+                                    <span className="text-xs font-bold truncate">{widget.title[activeLang] || "Widget"}</span>
+                                  </div>
+                                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deleteWidget(row.rowId, col.id, widget.id); }} className="w-6 h-6 text-slate-300 group-hover/widget:text-red-500"><X className="w-3.5 h-3.5" /></Button>
+                                </div>
+                              ))}
+                              {col.widgets.length === 0 && (
+                                <div className="flex flex-col items-center justify-center py-6 text-slate-300">
+                                  <Plus className="w-5 h-5 mb-1" />
+                                  <span className="text-[8px] font-black uppercase tracking-widest">Kéo Widget vào đây</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))
                 )}
               </div>
-
-              {layout.length === 0 ? (
-                <div className="text-center py-20 border-2 border-dashed rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-3">
-                  <Layout className="w-10 h-10 text-slate-300" />
-                  <p className="text-xs text-slate-400 font-extrabold uppercase tracking-wide">Trang trống • Hãy thêm hàng để bắt đầu</p>
-                </div>
-              ) : (
-                layout.map((row, rIdx) => (
-                  <div
-                    key={row.rowId}
-                    style={{
-                      backgroundColor: row.settings?.backgroundColor,
-                      backgroundImage: row.settings?.backgroundImage ? `url(${row.settings.backgroundImage})` : undefined,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                      color: row.settings?.textColor,
-                    }}
-                    className={`border transition-all relative group space-y-4 p-4 ${selectedRowId === row.rowId ? "ring-2 ring-amber-500 border-amber-500 shadow-lg" : "border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"} ${row.settings?.paddingTop || 'pt-8'} ${row.settings?.paddingBottom || 'pb-8'} ${row.settings?.borderRadius || 'rounded-2xl'}`}
-                  >
-                    <div className="flex items-center justify-between border-b dark:border-slate-800/60 pb-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] bg-amber-500/10 text-amber-600 font-black uppercase px-2 py-0.5 rounded tracking-wider">Hàng {rIdx + 1}</span>
-                      </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" onClick={() => { setSelectedRowId(row.rowId); setSelectedWidgetId(null); setActiveTab("design"); }} className={`w-7 h-7 rounded-lg ${selectedRowId === row.rowId ? "bg-amber-100 text-amber-600" : "text-slate-400"}`}><Settings2 className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" disabled={rIdx === 0} onClick={() => moveRow(rIdx, "up")} className="w-7 h-7 text-slate-400"><MoveUp className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" disabled={rIdx === layout.length - 1} onClick={() => moveRow(rIdx, "down")} className="w-7 h-7 text-slate-400"><MoveDown className="w-3.5 h-3.5" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteRow(row.rowId)} className="w-7 h-7 text-slate-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></Button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                      {row.columns.map((col) => (
-                        <div
-                          key={col.id}
-                          onDragOver={(e) => { e.preventDefault(); setDragOverColId(col.id); }}
-                          onDragLeave={() => setDragOverColId(null)}
-                          onDrop={(e) => { e.preventDefault(); setDragOverColId(null); const dragData = e.dataTransfer.getData("text/plain"); if (dragData) addWidgetFromDrag(row.rowId, col.id, dragData); }}
-                          className={`${col.colSpan} border-2 border-dashed ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/30" : "border-slate-200 dark:border-slate-800/50"} rounded-xl p-3 min-h-[120px] transition-all`}
-                        >
-                          <div className="flex flex-col gap-2">
-                            {col.widgets.map((widget) => (
-                              <div
-                                key={widget.id}
-                                onClick={(e) => { e.stopPropagation(); setSelectedWidgetId(widget.id); setSelectedRowId(null); setActiveTab("customizer"); }}
-                                className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between group/widget ${selectedWidgetId === widget.id ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 shadow-md" : "bg-white dark:bg-slate-900 border-slate-150 hover:border-slate-300"}`}
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedWidgetId === widget.id ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"}`}>
-                                    {widget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-4 h-4" /> : <Database className="w-4 h-4" />}
-                                  </div>
-                                  <span className="text-xs font-bold truncate">{widget.title[activeLang] || "Widget"}</span>
-                                </div>
-                                <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deleteWidget(row.rowId, col.id, widget.id); }} className="w-6 h-6 text-slate-300 group-hover/widget:text-red-500"><X className="w-3.5 h-3.5" /></Button>
-                              </div>
-                            ))}
-                            {col.widgets.length === 0 && (
-                              <div className="flex flex-col items-center justify-center py-6 text-slate-300">
-                                <Plus className="w-5 h-5 mb-1" />
-                                <span className="text-[8px] font-black uppercase tracking-widest">Kéo Widget vào đây</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))
-              )}
             </div>
           </div>
         </ResizablePanel>
