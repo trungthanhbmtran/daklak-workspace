@@ -586,23 +586,48 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     if (!w) return;
 
     const currentIds = w.data?.selectedUnitIds || [];
+    const currentUnits = w.data?.selectedUnits || [];
+
+    // Helper to get all descendants recursively including the node itself
+    const getDescendants = (u: any): any[] => {
+      let list = [u];
+      if (u.children && u.children.length > 0) {
+        u.children.forEach((child: any) => {
+          list = list.concat(getDescendants(child));
+        });
+      }
+      return list;
+    };
+
+    const targetUnits = getDescendants(unit);
+    const targetIds = targetUnits.map(u => u.id);
+    const isSelecting = !currentIds.includes(unit.id);
+
     let newIds: number[];
     let newUnits: any[];
 
-    if (currentIds.includes(unit.id)) {
-      newIds = currentIds.filter((id: number) => id !== unit.id);
-      newUnits = (w.data?.selectedUnits || []).filter((u: any) => u.id !== unit.id);
+    if (isSelecting) {
+      // Add all target units that are not already selected
+      const idsToAdd = targetIds.filter(id => !currentIds.includes(id));
+      newIds = [...currentIds, ...idsToAdd];
+      
+      const unitsToAdd = targetUnits
+        .filter(u => !currentIds.includes(u.id))
+        .map(u => ({
+          id: u.id,
+          title: u.name,
+          code: u.code || "",
+          typeName: u.typeName || "Cơ quan hành chính",
+          desc: `Bộ phận trực thuộc phụ trách điều hành, quản lý lĩnh vực ${u.name} theo quy chế hoạt động của đơn vị.`,
+          details: ["Cấp trưởng phụ trách chung", "Cấp phó theo dõi chuyên môn", "Cán bộ chuyên trách nghiệp vụ"]
+        }));
+      newUnits = [...currentUnits, ...unitsToAdd];
+      toast.success(`Đã chọn ${unit.name} và ${idsToAdd.length - 1} đơn vị cấp dưới`);
     } else {
-      newIds = [...currentIds, unit.id];
-      const newUnitObj = {
-        id: unit.id,
-        title: unit.name,
-        code: unit.code || "",
-        typeName: unit.typeName || "Cơ quan hành chính",
-        desc: `Bộ phận trực thuộc phụ trách điều hành, quản lý lĩnh vực ${unit.name} theo quy chế hoạt động của đơn vị.`,
-        details: ["Cấp trưởng phụ trách chung", "Cấp phó theo dõi chuyên môn", "Cán bộ chuyên trách nghiệp vụ"]
-      };
-      newUnits = [...(w.data?.selectedUnits || []), newUnitObj];
+      // Remove all target units (recursive deselection)
+      newIds = currentIds.filter((id: number) => !targetIds.includes(id));
+      newUnits = currentUnits.filter((u: any) => !targetIds.includes(u.id));
+      toast.info(`Đã bỏ chọn ${unit.name} và các đơn vị cấp dưới`);
     }
 
     updateWidgetData(widgetId, {
