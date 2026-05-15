@@ -87,6 +87,83 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const [activeTab, setActiveTab] = useState<string>("toolbox");
   const [dragOverColId, setDragOverColId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [expandedNodes, setExpandedNodes] = useState<Record<string, boolean>>({});
+
+  const toggleNode = (nodeId: string) => {
+    setExpandedNodes(prev => ({ ...prev, [nodeId]: !prev[nodeId] }));
+  };
+
+  const OrgTreeItem = ({ node, isCustomizer, widgetId }: { node: any, isCustomizer: boolean, widgetId?: string }) => {
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = expandedNodes[node.id];
+    const isSelected = isCustomizer && widgetId && (findWidgetById(widgetId)?.data?.selectedUnitIds || []).includes(node.id);
+
+    return (
+      <div className="flex flex-col">
+        <div 
+          draggable={!isCustomizer}
+          onDragStart={(e) => {
+            if (!isCustomizer) {
+              e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", item: node }));
+            }
+          }}
+          className={`flex items-center gap-1.5 p-1.5 rounded-lg transition-all cursor-pointer group ${
+            isSelected ? "bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800" : "hover:bg-slate-50 dark:hover:bg-slate-850"
+          }`}
+          onClick={(e) => {
+            if (isCustomizer && widgetId) {
+              toggleSelectUnit(widgetId, node);
+            } else if (hasChildren) {
+              toggleNode(node.id);
+            }
+          }}
+        >
+          {hasChildren ? (
+            <div 
+              onClick={(e) => { e.stopPropagation(); toggleNode(node.id); }}
+              className="p-1 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+            >
+              {isExpanded ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            </div>
+          ) : (
+            <div className="w-5" />
+          )}
+          
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+             {isCustomizer && (
+                <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center shrink-0 ${
+                  isSelected ? "bg-red-600 border-red-600 text-white" : "border-slate-300 dark:border-slate-700"
+                }`}>
+                  {isSelected && <Check className="w-2.5 h-2.5" />}
+                </div>
+              )}
+              {!isCustomizer && <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />}
+              
+              <div className="flex flex-col min-w-0 text-left">
+                <span className={`text-[11px] font-bold truncate ${isSelected ? "text-red-900 dark:text-white" : "text-slate-700 dark:text-slate-200"}`}>
+                  {node.name}
+                </span>
+                {node.typeName && <span className="text-[9px] text-slate-400 font-medium">{node.typeName}</span>}
+              </div>
+          </div>
+          
+          {!isCustomizer && (
+             <span className="text-[9px] font-black uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+               Kéo
+             </span>
+          )}
+        </div>
+        
+        {hasChildren && isExpanded && (
+          <div className="ml-4 border-l border-slate-100 dark:border-slate-800 pl-2 mt-1 space-y-0.5">
+            {node.children.map((child: any) => (
+              <OrgTreeItem key={child.id} node={child} isCustomizer={isCustomizer} widgetId={widgetId} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Layout structures templates
   const addRow = (type: "12" | "6-6" | "7-5" | "8-4" | "4-4-4") => {
@@ -224,6 +301,43 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
       const parsed = JSON.parse(dragData);
       const widgetType = parsed.type as Widget["type"];
       const item = parsed.item;
+
+      // Smart Merge: If dragging an individual item into a column that already has a widget of the same type, add it to that widget instead.
+      if (item) {
+        const row = layout.find(r => r.rowId === rowId);
+        const col = row?.columns.find(c => c.id === colId);
+        const existingWidget = col?.widgets.find(w => w.type === widgetType);
+
+        if (existingWidget) {
+          if (widgetType === "LEADERSHIP_LIST") {
+            const currentIds = existingWidget.data?.selectedLeaderIds || [];
+            if (!currentIds.includes(item.id)) {
+              toggleSelectLeader(existingWidget.id, item);
+              toast.success(`Đã thêm ${item.lastname || ""} ${item.firstname || ""} vào danh sách.`);
+            } else {
+              toast.info("Cán bộ này đã có trong danh sách.");
+            }
+            setSelectedWidgetId(existingWidget.id);
+            setActiveTab("customizer");
+            return;
+          }
+
+          if (widgetType === "ORG_SECTIONS_DIRECTORY") {
+            const currentIds = existingWidget.data?.selectedUnitIds || [];
+            if (!currentIds.includes(item.id)) {
+              toggleSelectUnit(existingWidget.id, item);
+              toast.success(`Đã thêm đơn vị ${item.name} vào sơ đồ.`);
+            } else {
+              toast.info("Đơn vị này đã có trong danh sách.");
+            }
+            setSelectedWidgetId(existingWidget.id);
+            setActiveTab("customizer");
+            return;
+          }
+          
+          // Fallback for other types that might want to merge in the future
+        }
+      }
 
       const timestamp = Date.now();
 
@@ -437,17 +551,22 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     onChange(newLayout);
   };
 
-  // Find currently selected widget object
-  const getSelectedWidget = (): Widget | null => {
-    if (!selectedWidgetId) return null;
+  // Find any widget by ID
+  const findWidgetById = (id: string): Widget | null => {
+    if (!id) return null;
     for (const row of layout) {
       for (const col of row.columns) {
         for (const widget of col.widgets) {
-          if (widget.id === selectedWidgetId) return widget;
+          if (widget.id === id) return widget;
         }
       }
     }
     return null;
+  };
+
+  // Find currently selected widget object
+  const getSelectedWidget = (): Widget | null => {
+    return findWidgetById(selectedWidgetId || "");
   };
 
   // Fetch Organization Units Tree
@@ -481,8 +600,8 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   const allEmployees = hrmEmployeesRes?.data || [];
 
   const toggleSelectUnit = (widgetId: string, unit: any) => {
-    const w = getSelectedWidget();
-    if (!w || w.id !== widgetId) return;
+    const w = findWidgetById(widgetId);
+    if (!w) return;
 
     const currentIds = w.data?.selectedUnitIds || [];
     let newIds: number[];
@@ -512,8 +631,8 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   };
 
   const toggleSelectLeader = (widgetId: string, emp: any) => {
-    const w = getSelectedWidget();
-    if (!w || w.id !== widgetId) return;
+    const w = findWidgetById(widgetId);
+    if (!w) return;
 
     const currentIds = w.data?.selectedLeaderIds || [];
     let newIds: number[];
@@ -970,26 +1089,38 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     <GripVertical className="w-3 h-3 text-slate-400" /> Kéo nguyên cụm
                   </div>
                 </CardHeader>
-                <CardContent className="p-2 max-h-56 overflow-y-auto space-y-1.5 divide-y divide-slate-100 dark:divide-slate-800">
-                  {allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map((unit: any) => (
-                    <div
-                      key={unit.id}
-                      draggable
-                      onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", item: unit }))}
-                      className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
-                        <div className="flex flex-col min-w-0 text-left">
-                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{unit.name}</span>
-                          <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName || "Cơ cấu tổ chức"}</span>
+                <CardContent className="p-2 max-h-72 overflow-y-auto space-y-1.5">
+                  {searchQuery.trim() !== "" ? (
+                    // Flat list search view
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())).map((unit: any) => (
+                        <div
+                          key={unit.id}
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", item: unit }))}
+                          className="p-2 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <GripVertical className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 shrink-0" />
+                            <div className="flex flex-col min-w-0 text-left">
+                              <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">{unit.name}</span>
+                              <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName || "Cơ cấu tổ chức"}</span>
+                            </div>
+                          </div>
+                          <span className="text-[9px] font-extrabold uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0">
+                            Kéo thả
+                          </span>
                         </div>
-                      </div>
-                      <span className="text-[9px] font-extrabold uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0">
-                        Kéo thả
-                      </span>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    // Hierarchical tree view
+                    <div className="space-y-1">
+                      {(orgTree || []).map((node: any) => (
+                        <OrgTreeItem key={node.id} node={node} isCustomizer={false} />
+                      ))}
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -1393,41 +1524,17 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           Bấm chọn các đơn vị / cơ cấu tổ chức dưới đây từ CSDL tổ chức. Bạn có thể tự do lựa chọn và tổ chức sơ đồ hiển thị trên trang theo ý muốn.
                         </p>
 
-                        <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 shadow-inner">
+                        <div className="max-h-72 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-850 shadow-inner">
                           {allOrgUnits.length === 0 ? (
                             <div className="text-center py-6 text-slate-400 text-[10px] italic">
                               Đang tải cơ sở dữ liệu tổ chức...
                             </div>
                           ) : (
-                            allOrgUnits.map((unit: any) => {
-                              const isSelected = (currentWidget.data?.selectedUnitIds || []).includes(unit.id);
-                              return (
-                                <div
-                                  key={unit.id}
-                                  onClick={() => toggleSelectUnit(currentWidget.id, unit)}
-                                  className={`p-2.5 rounded-lg border text-xs cursor-pointer flex items-center justify-between transition-all ${isSelected
-                                    ? "bg-red-50 border-red-300 text-red-900 dark:bg-red-950/30 dark:border-red-800 dark:text-white font-extrabold shadow-sm"
-                                    : "bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300"
-                                    }`}
-                                >
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <div className={`w-4 h-4 rounded flex items-center justify-center border text-[9px] ${isSelected ? "bg-red-600 border-red-600 text-white font-black" : "border-slate-300 bg-slate-100 dark:bg-slate-800"
-                                      }`}>
-                                      {isSelected && "✓"}
-                                    </div>
-                                    <div className="flex flex-col min-w-0">
-                                      <span className="font-bold truncate">{unit.name}</span>
-                                      {unit.typeName && (
-                                        <span className="text-[9px] text-slate-400 font-medium truncate">{unit.typeName}</span>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <span className="text-[9px] font-black uppercase text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded shrink-0">
-                                    {unit.code || `ID: ${unit.id}`}
-                                  </span>
-                                </div>
-                              );
-                            })
+                            <div className="space-y-1">
+                              {(orgTree || []).map((node: any) => (
+                                <OrgTreeItem key={node.id} node={node} isCustomizer={true} widgetId={currentWidget.id} />
+                              ))}
+                            </div>
                           )}
                         </div>
 
