@@ -190,7 +190,7 @@ function HeroSliderWidget({ banners, currentLang, data }: { banners: any[], curr
         customUrl: "/thu-tuc"
       }
     ]
-  }, [banners, currentLang])
+  }, [banners, currentLang, data])
 
   React.useEffect(() => {
     if (displayBanners.length <= 1) return
@@ -209,9 +209,8 @@ function HeroSliderWidget({ banners, currentLang, data }: { banners: any[], curr
         return (
           <div
             key={banner.id || idx}
-            className={`absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center ${
-              isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
-            }`}
+            className={`absolute inset-0 transition-all duration-700 ease-in-out flex items-center justify-center ${isActive ? "opacity-100 scale-100 pointer-events-auto" : "opacity-0 scale-95 pointer-events-none"
+              }`}
           >
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent z-10" />
             <img
@@ -274,23 +273,26 @@ function FeaturedNewsWidget({ posts, currentLang, data }: { posts: any[], curren
 
     // If still empty and it's a mock/fallback case, provide default mocks
     if (filtered.length === 0 && (!posts || posts.length === 0)) {
-    return [
-      {
-        id: "news-1",
-        title: currentLang === "en" ? "Implementation of sustainable agricultural programs in Dang Kang" : "Triển khai chương trình phát triển nông nghiệp bền vững tại xã Dang Kang",
-        description: currentLang === "en" ? "Supporting local farmers with high-yield coffee and pepper cultivation techniques." : "Hỗ trợ bà con nông dân kỹ thuật canh tác cà phê và hồ tiêu đạt năng suất cao.",
-        thumbnail: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
-        publishedAt: new Date().toISOString()
-      },
-      {
-        id: "news-2",
-        title: currentLang === "en" ? "Notice on registration of one-stop administrative records via digital portal" : "Thông báo về việc đăng ký hồ sơ hành chính một cửa qua cổng điện tử",
-        description: currentLang === "en" ? "Streamlining paperwork verification and reducing physical waiting queues." : "Tối ưu hóa quy trình xác minh giấy tờ và giảm bớt thời gian chờ đợi tại trụ sở.",
-        thumbnail: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80",
-        publishedAt: new Date(Date.now() - 86400000).toISOString()
-      }
-    ]
-  }, [posts, currentLang])
+      return [
+        {
+          id: "news-1",
+          title: currentLang === "en" ? "Implementation of sustainable agricultural programs in Dang Kang" : "Triển khai chương trình phát triển nông nghiệp bền vững tại xã Dang Kang",
+          description: currentLang === "en" ? "Supporting local farmers with high-yield coffee and pepper cultivation techniques." : "Hỗ trợ bà con nông dân kỹ thuật canh tác cà phê và hồ tiêu đạt năng suất cao.",
+          thumbnail: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80",
+          publishedAt: new Date().toISOString()
+        },
+        {
+          id: "news-2",
+          title: currentLang === "en" ? "Notice on registration of one-stop administrative records via digital portal" : "Thông báo về việc đăng ký hồ sơ hành chính một cửa qua cổng điện tử",
+          description: currentLang === "en" ? "Streamlining paperwork verification and reducing physical waiting queues." : "Tối ưu hóa quy trình xác minh giấy tờ và giảm bớt thời gian chờ đợi tại trụ sở.",
+          thumbnail: "https://images.unsplash.com/photo-1516253593875-bd7ba052fbc5?auto=format&fit=crop&w=600&q=80",
+          publishedAt: new Date(Date.now() - 86400000).toISOString()
+        }
+      ]
+    }
+
+    return filtered.slice(0, data?.limit || 4)
+  }, [posts, currentLang, data])
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -406,12 +408,12 @@ function PublicServicesWidget({ currentLang }: { currentLang: string }) {
 function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
   const docs = React.useMemo(() => {
     let filtered = posts || []
-    
+
     // Filter by specific category or general 'van-ban'
     if (data?.selectedCategory) {
-       filtered = filtered.filter((p: any) => p.category?.slug === data.selectedCategory)
+      filtered = filtered.filter((p: any) => p.category?.slug === data.selectedCategory)
     } else {
-       filtered = filtered.filter((p: any) => p.category?.slug === "van-ban" || p.category?.name?.toLowerCase().includes("văn bản"))
+      filtered = filtered.filter((p: any) => p.category?.slug === "van-ban" || p.category?.name?.toLowerCase().includes("văn bản"))
     }
 
     if (filtered.length > 0) {
@@ -422,7 +424,7 @@ function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], curr
       { id: "doc-2", title: currentLang === "en" ? "Decision promulgating regulations on one-stop office workflow" : "Quyết định ban hành quy chế hoạt động của bộ phận một cửa cấp xã", codeNum: "45/QĐ-UBND", dateStr: "15/02/2026" },
       { id: "doc-3", title: currentLang === "en" ? "Plan for disease prevention in livestock and poultry" : "Kế hoạch phòng chống dịch bệnh gia súc, gia cầm trên địa bàn xã", codeNum: "08/KH-UBND", dateStr: "22/03/2026" }
     ]
-  }, [posts, currentLang])
+  }, [posts, currentLang, data])
 
   return (
     <div className="space-y-3">
@@ -511,7 +513,7 @@ function FaqAccordionWidget({ questions, currentLang, data }: { questions: any[]
       { q: currentLang === "en" ? "How many days does it take to process land use right transfer?" : "Thời gian giải quyết thủ tục chuyển nhượng quyền sử dụng đất là bao lâu?", a: currentLang === "en" ? "According to regulations, standard verification takes 10-15 working days from valid dossier submission." : "Theo quy định, thời gian thẩm định hồ sơ chuẩn là từ 10-15 ngày làm việc kể từ khi nhận đủ hồ sơ hợp lệ." },
       { q: currentLang === "en" ? "What is the schedule for commune leadership direct citizen reception?" : "Lịch tiếp công dân trực tiếp của lãnh đạo UBND xã vào ngày nào?", a: currentLang === "en" ? "Commune chairman directly receives citizens every Thursday morning from 08:00 to 11:30 at Room 102." : "Chủ tịch UBND xã trực tiếp tiếp công dân định kỳ vào sáng Thứ 5 hàng tuần từ 08:00 đến 11:30 tại Phòng 102 trụ sở." }
     ]
-  }, [questions, currentLang])
+  }, [questions, currentLang, data])
 
   return (
     <div className="space-y-3">
