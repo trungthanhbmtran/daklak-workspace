@@ -897,8 +897,8 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       {finalLayout.map((row: any, rIdx: number) => (
-        <div 
-          key={row.rowId || rIdx} 
+        <div
+          key={row.rowId || rIdx}
           className={`transition-all ${row.settings?.paddingTop || 'pt-8'} ${row.settings?.paddingBottom || ''} ${row.settings?.borderRadius || 'rounded-xl sm:rounded-2xl'}`}
           style={{
             backgroundColor: row.settings?.backgroundColor,
@@ -912,417 +912,417 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
             {row.columns?.map((col: any, cIdx: number) => (
               <div key={col.id || cIdx} className={col.colSpan || "lg:col-span-12"}>
                 <div className="space-y-6">
-                {col.widgets?.map((widget: any, wIdx: number) => {
-                  const widgetTitle = widget.title?.[currentLang] || widget.title?.vi || ""
-                  const showTitle = widget.data?.showTitle ?? true
-                  const isFullWidth = widget.data?.fullWidth ?? false
+                  {col.widgets?.map((widget: any, wIdx: number) => {
+                    const widgetTitle = widget.title?.[currentLang] || widget.title?.vi || ""
+                    const showTitle = widget.data?.showTitle ?? true
+                    const isFullWidth = widget.data?.fullWidth ?? false
 
-                  return (
-                    <div
-                      key={widget.id || wIdx}
-                      className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${isFullWidth ? 'p-0 border-none bg-transparent dark:bg-transparent' : 'p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm'} flex flex-col gap-4`}
-                    >
-                      {/* Widget Header Banner */}
-                      {widgetTitle && showTitle && (
-                        <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
-                          <span className="w-1.5 h-4 bg-red-600 rounded-sm" />
-                          <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
-                            {widgetTitle}
-                          </h4>
-                        </div>
-                      )}
+                    return (
+                      <div
+                        key={widget.id || wIdx}
+                        className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 ${isFullWidth ? 'p-0 border-none bg-transparent dark:bg-transparent' : 'p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl shadow-sm'} flex flex-col gap-4`}
+                      >
+                        {/* Widget Header Banner */}
+                        {widgetTitle && showTitle && (
+                          <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
+                            <span className="w-1.5 h-4 bg-red-600 rounded-sm" />
+                            <h4 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wider">
+                              {widgetTitle}
+                            </h4>
+                          </div>
+                        )}
 
-                      {/* LEXICAL RICH TEXT WIDGET */}
-                      {widget.type === "LEXICAL_RICH_TEXT" && (
-                        <div className="prose prose-sm dark:prose-invert max-w-none">
-                          {renderLexicalRichText(widget.content?.[currentLang] || widget.content?.vi)}
-                        </div>
-                      )}
+                        {/* LEXICAL RICH TEXT WIDGET */}
+                        {widget.type === "LEXICAL_RICH_TEXT" && (
+                          <div className="prose prose-sm dark:prose-invert max-w-none">
+                            {renderLexicalRichText(widget.content?.[currentLang] || widget.content?.vi)}
+                          </div>
+                        )}
 
-                      {/* HERO SLIDER WIDGET */}
-                      {widget.type === "HERO_SLIDER" && (
-                        <HeroSliderWidget banners={bannersList} currentLang={currentLang} data={widget.data} />
-                      )}
+                        {/* HERO SLIDER WIDGET */}
+                        {widget.type === "HERO_SLIDER" && (
+                          <HeroSliderWidget banners={bannersList} currentLang={currentLang} data={widget.data} />
+                        )}
 
-                      {/* FEATURED NEWS WIDGET */}
-                      {widget.type === "FEATURED_NEWS" && (
-                        <FeaturedNewsWidget posts={postsList} currentLang={currentLang} data={widget.data} />
-                      )}
+                        {/* FEATURED NEWS WIDGET */}
+                        {widget.type === "FEATURED_NEWS" && (
+                          <FeaturedNewsWidget posts={postsList} currentLang={currentLang} data={widget.data} />
+                        )}
 
-                      {/* PUBLIC SERVICES WIDGET */}
-                      {widget.type === "PUBLIC_SERVICES" && (
-                        <PublicServicesWidget currentLang={currentLang} />
-                      )}
+                        {/* PUBLIC SERVICES WIDGET */}
+                        {widget.type === "PUBLIC_SERVICES" && (
+                          <PublicServicesWidget currentLang={currentLang} />
+                        )}
 
-                      {/* LEGAL DOCUMENTS WIDGET */}
-                      {widget.type === "LEGAL_DOCUMENTS" && (
-                        <LegalDocumentsWidget posts={postsList} currentLang={currentLang} data={widget.data} />
-                      )}
+                        {/* LEGAL DOCUMENTS WIDGET */}
+                        {widget.type === "LEGAL_DOCUMENTS" && (
+                          <LegalDocumentsWidget posts={postsList} currentLang={currentLang} data={widget.data} />
+                        )}
 
-                      {/* PHOTO & VIDEO GALLERY WIDGET */}
-                      {widget.type === "PHOTO_VIDEO_GALLERY" && (
-                        <MediaGalleryWidget posts={postsList} currentLang={currentLang} data={widget.data} />
-                      )}
+                        {/* PHOTO & VIDEO GALLERY WIDGET */}
+                        {widget.type === "PHOTO_VIDEO_GALLERY" && (
+                          <MediaGalleryWidget posts={postsList} currentLang={currentLang} data={widget.data} />
+                        )}
 
-                      {/* FAQ ACCORDION WIDGET */}
-                      {widget.type === "FAQ_ACCORDION" && (
-                        <FaqAccordionWidget questions={questionsList} currentLang={currentLang} data={widget.data} />
-                      )}
+                        {/* FAQ ACCORDION WIDGET */}
+                        {widget.type === "FAQ_ACCORDION" && (
+                          <FaqAccordionWidget questions={questionsList} currentLang={currentLang} data={widget.data} />
+                        )}
 
-                      {/* EXTERNAL LINKS WIDGET */}
-                      {widget.type === "EXTERNAL_LINKS" && (
-                        <ExternalLinksWidget currentLang={currentLang} />
-                      )}
+                        {/* EXTERNAL LINKS WIDGET */}
+                        {widget.type === "EXTERNAL_LINKS" && (
+                          <ExternalLinksWidget currentLang={currentLang} />
+                        )}
 
-                      {/* STATISTICS GRID WIDGET */}
-                      {widget.type === "STATISTICS_GRID" && (
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                          {(widget.data?.items || [
-                            { label: currentLang === "en" ? "Natural Area" : "Diện tích tự nhiên", value: getConfigValue("about_area", "2,452.8 Ha"), icon: "Building2", color: "text-red-600" },
-                            { label: currentLang === "en" ? "Population" : "Dân cư", value: getConfigValue("about_population", "6.842"), icon: "Users2", color: "text-blue-600" },
-                            { label: currentLang === "en" ? "Subdivisions" : "Đơn vị hành chính", value: getConfigValue("about_subdivisions", "8 Thôn, Buôn"), icon: "FileSpreadsheet", color: "text-sky-600" },
-                            { label: currentLang === "en" ? "Standards" : "Chuẩn nông thôn mới", value: getConfigValue("about_standard", "Đạt 19/19"), icon: "ShieldCheck", color: "text-amber-600" }
-                          ]).map((item: any, i: number) => {
-                            const Icon = (lucideIcons as any)[item.icon] || Building2
-                            return (
-                              <div key={i} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
-                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${item.color || 'text-slate-600'} bg-white dark:bg-slate-900 shadow-sm`}>
-                                  <Icon className="w-4 h-4" />
-                                </div>
-                                <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
-                                  {item.label}
-                                </span>
-                                <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
-                                  {item.value}
-                                </span>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
-
-
-                      {/* LEADERSHIP LIST WIDGET */}
-                      {widget.type === "LEADERSHIP_LIST" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {(() => {
-                            let leaders = []
-                            if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
-                              leaders = allEmployees.filter((emp: any) => widget.data.selectedEmployeeIds.includes(emp.id)).map((emp: any) => ({
-                                name: getLocalizedField(emp, "fullName", currentLang),
-                                role: getLocalizedField(emp, "roleName", currentLang),
-                                responsibility: getLocalizedField(emp, "jobDescription", currentLang),
-                                phone: emp.phoneNumber || "09xx.xxx.xxx",
-                                email: emp.email || "cán bộ@daklak.gov.vn",
-                                room: emp.officeRoom || "Trụ sở UBND xã"
-                              }))
-                            } else if (widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0) {
-                              leaders = widget.data.selectedLeaders
-                            } else {
-                              leaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])
-                            }
-
-                            return leaders.map((leader: any, idx: number) => (
-                              <div
-                                key={leader.name || idx}
-                                className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
-                              >
-                                <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-100/30 dark:bg-slate-900/40">
-                                  <div className="w-9 h-9 rounded-full bg-red-600/10 text-red-600 dark:text-[#fbc02d] flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
-                                    {(leader.name || "A").split(' ').pop()?.[0]}
+                        {/* STATISTICS GRID WIDGET */}
+                        {widget.type === "STATISTICS_GRID" && (
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            {(widget.data?.items || [
+                              { label: currentLang === "en" ? "Natural Area" : "Diện tích tự nhiên", value: getConfigValue("about_area", "2,452.8 Ha"), icon: "Building2", color: "text-red-600" },
+                              { label: currentLang === "en" ? "Population" : "Dân cư", value: getConfigValue("about_population", "6.842"), icon: "Users2", color: "text-blue-600" },
+                              { label: currentLang === "en" ? "Subdivisions" : "Đơn vị hành chính", value: getConfigValue("about_subdivisions", "8 Thôn, Buôn"), icon: "FileSpreadsheet", color: "text-sky-600" },
+                              { label: currentLang === "en" ? "Standards" : "Chuẩn nông thôn mới", value: getConfigValue("about_standard", "Đạt 19/19"), icon: "ShieldCheck", color: "text-amber-600" }
+                            ]).map((item: any, i: number) => {
+                              const Icon = (lucideIcons as any)[item.icon] || Building2
+                              return (
+                                <div key={i} className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-850 flex flex-col items-center text-center">
+                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center border ${item.color || 'text-slate-600'} bg-white dark:bg-slate-900 shadow-sm`}>
+                                    <Icon className="w-4 h-4" />
                                   </div>
-                                  <div className="flex flex-col min-w-0">
-                                    <h5 className="text-xs font-black text-slate-900 dark:text-white truncate">{leader.name}</h5>
-                                    <span className="text-[9px] text-red-600 dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate mt-0.5">{leader.role}</span>
-                                  </div>
-                                </div>
-
-                                <div className="p-3.5 flex-1 flex flex-col gap-3 text-[11px]">
-                                  <div className="flex flex-col gap-1 flex-1">
-                                    <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
-                                      <CalendarDays className="w-3 h-3 text-slate-400" />
-                                      {currentLang === "en" ? "Scope of Responsibility" : "Phạm vi trách nhiệm"}
-                                    </span>
-                                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
-                                      {leader.responsibility}
-                                    </p>
-                                  </div>
-
-                                  <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5 font-medium text-slate-500 dark:text-slate-400">
-                                    <div className="flex items-center gap-1.5">
-                                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                      <span>{currentLang === "en" ? "Office Location" : "Nơi làm việc"}: {leader.room}</span>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                      <a href={`tel:${leader.phone}`} className="hover:text-red-600">{currentLang === "en" ? "Mobile" : "Di động"}: {leader.phone}</a>
-                                    </div>
-                                    <div className="flex items-center gap-1.5">
-                                      <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                                      <a href={`mailto:${leader.email}`} className="hover:text-red-600 break-all">{currentLang === "en" ? "E-mail Address" : "Thư điện tử"}: {leader.email}</a>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            ));
-                          })()}
-                        </div>
-                      )}
-                      {/* ORG SECTIONS DIRECTORY WIDGET */}
-                      {widget.type === "ORG_SECTIONS_DIRECTORY" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {(() => {
-                            let sections = []
-                            if (Array.isArray(widget.data?.selectedUnitIds) && widget.data.selectedUnitIds.length > 0) {
-                              sections = allOrgUnits.filter((unit: any) => widget.data.selectedUnitIds.includes(unit.id)).map((unit: any) => ({
-                                title: getLocalizedField(unit, "name", currentLang),
-                                desc: getLocalizedField(unit, "description", currentLang),
-                                details: [
-                                  `${currentLang === 'en' ? 'Address' : 'Địa chỉ'}: ${unit.address || 'UBND Xã'}`,
-                                  `${currentLang === 'en' ? 'Email' : 'Email'}: ${unit.email || 'xadangkang@daklak.gov.vn'}`,
-                                ]
-                              }))
-                            } else {
-                              sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"]
-                            }
-
-                            return sections.map((section: any, idx: number) => (
-                              <div
-                                key={section.title || idx}
-                                className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3"
-                              >
-                                <div className="flex flex-col gap-1.5 min-w-0">
-                                  <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase truncate tracking-wide">
-                                    {section.title}
-                                  </h5>
-                                  <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
-                                    {section.desc}
-                                  </p>
-                                </div>
-                                <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5">
-                                  {Array.isArray(section.details) && section.details.map((item: string, i: number) => (
-                                    <div key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                      <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                                      <span>{item}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ));
-                          })()}
-                        </div>
-                      )}
-
-
-
-                      {/* COMMUNE INTERACTIVE MAP WIDGET */}
-                      {widget.type === "COMMUNE_INTERACTIVE_MAP" && (
-                        <div className="flex flex-col gap-4">
-                          <p className="text-[10px] text-slate-400 font-semibold leading-normal">
-                            {currentLang === "en"
-                              ? "Interactive vector map simulating 8 village subdivisions of Dang Kang Commune. Click on any zone to view stats:"
-                              : "Bản đồ tương tác 8 thôn, buôn của địa bàn xã Dang Kang. Click vào phân vùng để xem chi tiết:"}
-                          </p>
-
-                          <div className="w-full flex flex-col sm:flex-row gap-6 items-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850">
-                            <div className="flex-1 w-full max-w-[420px] relative">
-                              <svg viewBox="0 0 100 100" className="w-full h-auto drop-shadow-md">
-                                {activeCommuneZones.map((zone) => {
-                                  const isActive = activeZone?.id === zone.id
-                                  return (
-                                    <path
-                                      key={zone.id}
-                                      d={zone.path}
-                                      className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${isActive
-                                        ? "fill-red-600 opacity-95 scale-[1.01] drop-shadow-lg"
-                                        : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
-                                        }`}
-                                      onClick={() => setSelectedZoneId(zone.id)}
-                                    />
-                                  )
-                                })}
-
-                                {activeCommuneZones.map((zone) => (
-                                  <text
-                                    key={`tag-${zone.id}`}
-                                    x={zone.center.x}
-                                    y={zone.center.y}
-                                    fontSize="4"
-                                    fontWeight="bold"
-                                    textAnchor="middle"
-                                    className={`pointer-events-none transition-colors ${activeZone?.id === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
-                                      }`}
-                                  >
-                                    {zone.id}
-                                  </text>
-                                ))}
-                              </svg>
-                            </div>
-
-                            {activeZone && (
-                              <div className="flex-1 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-150 dark:border-slate-800/80 flex flex-col gap-2.5 text-[11px] self-stretch justify-center">
-                                <div className="flex items-center gap-1.5 border-b pb-1.5">
-                                  <Info className="w-3.5 h-3.5 text-red-600 dark:text-[#fbc02d]" />
-                                  <span className="font-extrabold text-red-600 dark:text-[#fbc02d] uppercase tracking-wide">
-                                    {activeZone.name}
+                                  <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
+                                    {item.label}
+                                  </span>
+                                  <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
+                                    {item.value}
                                   </span>
                                 </div>
+                              )
+                            })}
+                          </div>
+                        )}
 
-                                <div className="grid grid-cols-2 gap-2 font-semibold text-slate-500 dark:text-slate-400">
-                                  <div className="flex flex-col">
-                                    <span className="text-[8px] text-slate-400 uppercase tracking-widest">{currentLang === "en" ? "Area" : "Diện tích"}</span>
-                                    <span className="text-slate-800 dark:text-slate-200 font-bold">{activeZone.area}</span>
+
+                        {/* LEADERSHIP LIST WIDGET */}
+                        {widget.type === "LEADERSHIP_LIST" && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {(() => {
+                              let leaders = []
+                              if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
+                                leaders = allEmployees.filter((emp: any) => widget.data.selectedEmployeeIds.includes(emp.id)).map((emp: any) => ({
+                                  name: getLocalizedField(emp, "fullName", currentLang),
+                                  role: getLocalizedField(emp, "roleName", currentLang),
+                                  responsibility: getLocalizedField(emp, "jobDescription", currentLang),
+                                  phone: emp.phoneNumber || "09xx.xxx.xxx",
+                                  email: emp.email || "cán bộ@daklak.gov.vn",
+                                  room: emp.officeRoom || "Trụ sở UBND xã"
+                                }))
+                              } else if (widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0) {
+                                leaders = widget.data.selectedLeaders
+                              } else {
+                                leaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])
+                              }
+
+                              return leaders.map((leader: any, idx: number) => (
+                                <div
+                                  key={leader.name || idx}
+                                  className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
+                                >
+                                  <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-100/30 dark:bg-slate-900/40">
+                                    <div className="w-9 h-9 rounded-full bg-red-600/10 text-red-600 dark:text-[#fbc02d] flex items-center justify-center font-bold text-xs shadow-inner shrink-0">
+                                      {(leader.name || "A").split(' ').pop()?.[0]}
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                      <h5 className="text-xs font-black text-slate-900 dark:text-white truncate">{leader.name}</h5>
+                                      <span className="text-[9px] text-red-600 dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate mt-0.5">{leader.role}</span>
+                                    </div>
                                   </div>
-                                  <div className="flex flex-col">
-                                    <span className="text-[8px] text-slate-400 uppercase tracking-widest">{currentLang === "en" ? "Population" : "Dân cư"}</span>
-                                    <span className="text-slate-800 dark:text-slate-200 font-bold">{activeZone.pop}</span>
+
+                                  <div className="p-3.5 flex-1 flex flex-col gap-3 text-[11px]">
+                                    <div className="flex flex-col gap-1 flex-1">
+                                      <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
+                                        <CalendarDays className="w-3 h-3 text-slate-400" />
+                                        {currentLang === "en" ? "Scope of Responsibility" : "Phạm vi trách nhiệm"}
+                                      </span>
+                                      <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
+                                        {leader.responsibility}
+                                      </p>
+                                    </div>
+
+                                    <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5 font-medium text-slate-500 dark:text-slate-400">
+                                      <div className="flex items-center gap-1.5">
+                                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <span>{currentLang === "en" ? "Office Location" : "Nơi làm việc"}: {leader.room}</span>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <a href={`tel:${leader.phone}`} className="hover:text-red-600">{currentLang === "en" ? "Mobile" : "Di động"}: {leader.phone}</a>
+                                      </div>
+                                      <div className="flex items-center gap-1.5">
+                                        <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <a href={`mailto:${leader.email}`} className="hover:text-red-600 break-all">{currentLang === "en" ? "E-mail Address" : "Thư điện tử"}: {leader.email}</a>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
+                              ));
+                            })()}
+                          </div>
+                        )}
+                        {/* ORG SECTIONS DIRECTORY WIDGET */}
+                        {widget.type === "ORG_SECTIONS_DIRECTORY" && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {(() => {
+                              let sections = []
+                              if (Array.isArray(widget.data?.selectedUnitIds) && widget.data.selectedUnitIds.length > 0) {
+                                sections = allOrgUnits.filter((unit: any) => widget.data.selectedUnitIds.includes(unit.id)).map((unit: any) => ({
+                                  title: getLocalizedField(unit, "name", currentLang),
+                                  desc: getLocalizedField(unit, "description", currentLang),
+                                  details: [
+                                    `${currentLang === 'en' ? 'Address' : 'Địa chỉ'}: ${unit.address || 'UBND Xã'}`,
+                                    `${currentLang === 'en' ? 'Email' : 'Email'}: ${unit.email || 'xadangkang@daklak.gov.vn'}`,
+                                  ]
+                                }))
+                              } else {
+                                sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"]
+                              }
+
+                              return sections.map((section: any, idx: number) => (
+                                <div
+                                  key={section.title || idx}
+                                  className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3"
+                                >
+                                  <div className="flex flex-col gap-1.5 min-w-0">
+                                    <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase truncate tracking-wide">
+                                      {section.title}
+                                    </h5>
+                                    <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                                      {section.desc}
+                                    </p>
+                                  </div>
+                                  <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5">
+                                    {Array.isArray(section.details) && section.details.map((item: string, i: number) => (
+                                      <div key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                                        <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                                        <span>{item}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              ));
+                            })()}
+                          </div>
+                        )}
+
+
+
+                        {/* COMMUNE INTERACTIVE MAP WIDGET */}
+                        {widget.type === "COMMUNE_INTERACTIVE_MAP" && (
+                          <div className="flex flex-col gap-4">
+                            <p className="text-[10px] text-slate-400 font-semibold leading-normal">
+                              {currentLang === "en"
+                                ? "Interactive vector map simulating 8 village subdivisions of Dang Kang Commune. Click on any zone to view stats:"
+                                : "Bản đồ tương tác 8 thôn, buôn của địa bàn xã Dang Kang. Click vào phân vùng để xem chi tiết:"}
+                            </p>
+
+                            <div className="w-full flex flex-col sm:flex-row gap-6 items-center bg-slate-50 dark:bg-slate-950 p-4 rounded-xl border border-slate-100 dark:border-slate-850">
+                              <div className="flex-1 w-full max-w-[420px] relative">
+                                <svg viewBox="0 0 100 100" className="w-full h-auto drop-shadow-md">
+                                  {activeCommuneZones.map((zone) => {
+                                    const isActive = activeZone?.id === zone.id
+                                    return (
+                                      <path
+                                        key={zone.id}
+                                        d={zone.path}
+                                        className={`stroke-white dark:stroke-slate-900 stroke-[1.5] cursor-pointer transition-all ${isActive
+                                          ? "fill-red-600 opacity-95 scale-[1.01] drop-shadow-lg"
+                                          : "fill-red-700/20 hover:fill-red-700/40 opacity-80"
+                                          }`}
+                                        onClick={() => setSelectedZoneId(zone.id)}
+                                      />
+                                    )
+                                  })}
+
+                                  {activeCommuneZones.map((zone) => (
+                                    <text
+                                      key={`tag-${zone.id}`}
+                                      x={zone.center.x}
+                                      y={zone.center.y}
+                                      fontSize="4"
+                                      fontWeight="bold"
+                                      textAnchor="middle"
+                                      className={`pointer-events-none transition-colors ${activeZone?.id === zone.id ? "fill-[#fef08a]" : "fill-slate-800 dark:fill-slate-200"
+                                        }`}
+                                    >
+                                      {zone.id}
+                                    </text>
+                                  ))}
+                                </svg>
+                              </div>
+
+                              {activeZone && (
+                                <div className="flex-1 bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-150 dark:border-slate-800/80 flex flex-col gap-2.5 text-[11px] self-stretch justify-center">
+                                  <div className="flex items-center gap-1.5 border-b pb-1.5">
+                                    <Info className="w-3.5 h-3.5 text-red-600 dark:text-[#fbc02d]" />
+                                    <span className="font-extrabold text-red-600 dark:text-[#fbc02d] uppercase tracking-wide">
+                                      {activeZone.name}
+                                    </span>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 gap-2 font-semibold text-slate-500 dark:text-slate-400">
+                                    <div className="flex flex-col">
+                                      <span className="text-[8px] text-slate-400 uppercase tracking-widest">{currentLang === "en" ? "Area" : "Diện tích"}</span>
+                                      <span className="text-slate-800 dark:text-slate-200 font-bold">{activeZone.area}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                      <span className="text-[8px] text-slate-400 uppercase tracking-widest">{currentLang === "en" ? "Population" : "Dân cư"}</span>
+                                      <span className="text-slate-800 dark:text-slate-200 font-bold">{activeZone.pop}</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* CONTACT INFO SIDEBAR WIDGET */}
+                        {widget.type === "CONTACT_INFO_SIDEBAR" && (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                            <div className="space-y-3.5">
+                              <div className="flex items-start gap-2.5">
+                                <MapPin className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Headquarters Address" : "Địa chỉ trụ sở"}</span>
+                                  <span className="leading-relaxed">{getConfigValue("address", "Địa chỉ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-2.5">
+                                <Phone className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Hotline Support" : "Đường dây nóng"}</span>
+                                  <a href={`tel:${getConfigValue("hotline", "0262.3812.345")}`} className="hover:text-red-600">{getConfigValue("hotline", "0262.3812.345")}</a>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-3.5">
+                              <div className="flex items-start gap-2.5">
+                                <Mail className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Official Email" : "Thư điện tử"}</span>
+                                  <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-red-600 break-all">{getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}</a>
+                                </div>
+                              </div>
+
+                              <div className="flex items-start gap-2.5">
+                                <Clock className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Reception Schedule" : "Lịch tiếp công dân"}</span>
+                                  <span className="leading-relaxed">{getConfigValue("citizen_schedule", "Thứ 5 hàng tuần • 08:00 - 11:30")}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* CONTACT FORM WIDGET */}
+                        {widget.type === "CONTACT_FORM" && (
+                          <div className="w-full">
+                            {!submitted ? (
+                              <form onSubmit={handleContactSubmit} className="space-y-4 text-xs">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
+                                      {currentLang === "en" ? "Your full name *" : "Họ và tên của bạn *"}
+                                    </label>
+                                    <input
+                                      required
+                                      type="text"
+                                      placeholder={currentLang === "en" ? "Enter full name..." : "Nhập họ và tên..."}
+                                      value={fullName}
+                                      onChange={(e) => setFullName(e.target.value)}
+                                      className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors"
+                                    />
+                                  </div>
+
+                                  <div className="flex flex-col gap-1">
+                                    <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
+                                      {currentLang === "en" ? "Email Address *" : "Địa chỉ Email của bạn *"}
+                                    </label>
+                                    <input
+                                      required
+                                      type="email"
+                                      placeholder={currentLang === "en" ? "yourname@email.com" : "nhap@email.com"}
+                                      value={email}
+                                      onChange={(e) => setEmail(e.target.value)}
+                                      className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
+                                    {currentLang === "en" ? "Feedback title" : "Tiêu đề ý kiến"}
+                                  </label>
+                                  <input
+                                    type="text"
+                                    placeholder={currentLang === "en" ? "Feedback subject..." : "Chủ đề góp ý..."}
+                                    value={subject}
+                                    onChange={(e) => setSubject(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors"
+                                  />
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                  <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
+                                    {currentLang === "en" ? "Feedback message content *" : "Nội dung thư góp ý *"}
+                                  </label>
+                                  <textarea
+                                    required
+                                    rows={4}
+                                    placeholder={currentLang === "en" ? "Type the message content..." : "Gõ nội dung tin nhắn gửi đến ban biên tập..."}
+                                    value={message}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors leading-relaxed"
+                                  />
+                                </div>
+
+                                <button
+                                  type="submit"
+                                  className="w-full bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-extrabold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
+                                >
+                                  <Send className="w-4 h-4 text-yellow-300 dark:text-red-600 shrink-0" />
+                                  {currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý"}
+                                </button>
+                              </form>
+                            ) : (
+                              <div className="p-5 rounded-xl border border-emerald-100 dark:border-emerald-950 bg-emerald-50/10 flex flex-col gap-4 text-center items-center animate-fade-in text-xs">
+                                <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+                                <div className="flex flex-col gap-1">
+                                  <h5 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase">
+                                    {currentLang === "en" ? "MESSAGE SENT SUCCESSFULLY!" : "ĐÃ GỬI THƯ THÀNH CÔNG!"}
+                                  </h5>
+                                  <p className="text-slate-450 font-medium leading-relaxed">
+                                    {getConfigValue("contact_form_success_desc", currentLang === "en" ? "Dang Kang commune clerical department has received your comment and will respond as soon as possible via email." : "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
+                                  </p>
+                                </div>
+                                <button
+                                  onClick={() => setSubmitted(false)}
+                                  className="bg-slate-900 dark:bg-white dark:text-slate-900 text-white text-[9px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all shadow"
+                                >
+                                  {currentLang === "en" ? "Send another message" : "Gửi thêm tin nhắn mới"}
+                                </button>
                               </div>
                             )}
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {/* CONTACT INFO SIDEBAR WIDGET */}
-                      {widget.type === "CONTACT_INFO_SIDEBAR" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                          <div className="space-y-3.5">
-                            <div className="flex items-start gap-2.5">
-                              <MapPin className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Headquarters Address" : "Địa chỉ trụ sở"}</span>
-                                <span className="leading-relaxed">{getConfigValue("address", "Địa chỉ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-start gap-2.5">
-                              <Phone className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Hotline Support" : "Đường dây nóng"}</span>
-                                <a href={`tel:${getConfigValue("hotline", "0262.3812.345")}`} className="hover:text-red-600">{getConfigValue("hotline", "0262.3812.345")}</a>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-3.5">
-                            <div className="flex items-start gap-2.5">
-                              <Mail className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Official Email" : "Thư điện tử"}</span>
-                                <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-red-600 break-all">{getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}</a>
-                              </div>
-                            </div>
-
-                            <div className="flex items-start gap-2.5">
-                              <Clock className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                              <div className="flex flex-col gap-0.5">
-                                <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Reception Schedule" : "Lịch tiếp công dân"}</span>
-                                <span className="leading-relaxed">{getConfigValue("citizen_schedule", "Thứ 5 hàng tuần • 08:00 - 11:30")}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* CONTACT FORM WIDGET */}
-                      {widget.type === "CONTACT_FORM" && (
-                        <div className="w-full">
-                          {!submitted ? (
-                            <form onSubmit={handleContactSubmit} className="space-y-4 text-xs">
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
-                                    {currentLang === "en" ? "Your full name *" : "Họ và tên của bạn *"}
-                                  </label>
-                                  <input
-                                    required
-                                    type="text"
-                                    placeholder={currentLang === "en" ? "Enter full name..." : "Nhập họ và tên..."}
-                                    value={fullName}
-                                    onChange={(e) => setFullName(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors"
-                                  />
-                                </div>
-
-                                <div className="flex flex-col gap-1">
-                                  <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
-                                    {currentLang === "en" ? "Email Address *" : "Địa chỉ Email của bạn *"}
-                                  </label>
-                                  <input
-                                    required
-                                    type="email"
-                                    placeholder={currentLang === "en" ? "yourname@email.com" : "nhap@email.com"}
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors"
-                                  />
-                                </div>
-                              </div>
-
-                              <div className="flex flex-col gap-1">
-                                <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
-                                  {currentLang === "en" ? "Feedback title" : "Tiêu đề ý kiến"}
-                                </label>
-                                <input
-                                  type="text"
-                                  placeholder={currentLang === "en" ? "Feedback subject..." : "Chủ đề góp ý..."}
-                                  value={subject}
-                                  onChange={(e) => setSubject(e.target.value)}
-                                  className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors"
-                                />
-                              </div>
-
-                              <div className="flex flex-col gap-1">
-                                <label className="text-slate-400 font-extrabold uppercase tracking-wider text-[10px]">
-                                  {currentLang === "en" ? "Feedback message content *" : "Nội dung thư góp ý *"}
-                                </label>
-                                <textarea
-                                  required
-                                  rows={4}
-                                  placeholder={currentLang === "en" ? "Type the message content..." : "Gõ nội dung tin nhắn gửi đến ban biên tập..."}
-                                  value={message}
-                                  onChange={(e) => setMessage(e.target.value)}
-                                  className="w-full bg-slate-50 border border-slate-200 dark:bg-slate-950 dark:border-slate-800 dark:text-white rounded-xl py-2.5 px-3 text-slate-900 focus:outline-none focus:border-red-600 focus:bg-white transition-colors leading-relaxed"
-                                />
-                              </div>
-
-                              <button
-                                type="submit"
-                                className="w-full bg-slate-900 dark:bg-white dark:text-slate-950 text-white font-extrabold tracking-wider py-3 rounded-xl transition-colors uppercase flex items-center justify-center gap-1.5 shadow"
-                              >
-                                <Send className="w-4 h-4 text-yellow-300 dark:text-red-600 shrink-0" />
-                                {currentLang === "en" ? "SEND FEEDBACK" : "GỬI THƯ GÓP Ý"}
-                              </button>
-                            </form>
-                          ) : (
-                            <div className="p-5 rounded-xl border border-emerald-100 dark:border-emerald-950 bg-emerald-50/10 flex flex-col gap-4 text-center items-center animate-fade-in text-xs">
-                              <CheckCircle2 className="w-10 h-10 text-emerald-500" />
-                              <div className="flex flex-col gap-1">
-                                <h5 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase">
-                                  {currentLang === "en" ? "MESSAGE SENT SUCCESSFULLY!" : "ĐÃ GỬI THƯ THÀNH CÔNG!"}
-                                </h5>
-                                <p className="text-slate-450 font-medium leading-relaxed">
-                                  {getConfigValue("contact_form_success_desc", currentLang === "en" ? "Dang Kang commune clerical department has received your comment and will respond as soon as possible via email." : "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
-                                </p>
-                              </div>
-                              <button
-                                onClick={() => setSubmitted(false)}
-                                className="bg-slate-900 dark:bg-white dark:text-slate-900 text-white text-[9px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all shadow"
-                              >
-                                {currentLang === "en" ? "Send another message" : "Gửi thêm tin nhắn mới"}
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                    </div>
-                  )
-                })}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
           </div>
         </div>
       ))}
