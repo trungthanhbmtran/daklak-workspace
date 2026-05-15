@@ -301,43 +301,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
       const widgetType = parsed.type as Widget["type"];
       const item = parsed.item;
 
-      // Smart Merge: If dragging an individual item into a column that already has a widget of the same type, add it to that widget instead.
-      if (item) {
-        const row = layout.find(r => r.rowId === rowId);
-        const col = row?.columns.find(c => c.id === colId);
-        const existingWidget = col?.widgets.find(w => w.type === widgetType);
-
-        if (existingWidget) {
-          if (widgetType === "LEADERSHIP_LIST") {
-            const currentIds = existingWidget.data?.selectedLeaderIds || [];
-            if (!currentIds.includes(item.id)) {
-              toggleSelectLeader(existingWidget.id, item);
-              toast.success(`Đã thêm ${item.lastname || ""} ${item.firstname || ""} vào danh sách.`);
-            } else {
-              toast.info("Cán bộ này đã có trong danh sách.");
-            }
-            setSelectedWidgetId(existingWidget.id);
-            setActiveTab("customizer");
-            return;
-          }
-
-          if (widgetType === "ORG_SECTIONS_DIRECTORY") {
-            const currentIds = existingWidget.data?.selectedUnitIds || [];
-            if (!currentIds.includes(item.id)) {
-              toggleSelectUnit(existingWidget.id, item);
-              toast.success(`Đã thêm đơn vị ${item.name} vào sơ đồ.`);
-            } else {
-              toast.info("Đơn vị này đã có trong danh sách.");
-            }
-            setSelectedWidgetId(existingWidget.id);
-            setActiveTab("customizer");
-            return;
-          }
-
-          // Fallback for other types that might want to merge in the future
-        }
-      }
-
       const timestamp = Date.now();
 
       const defaultTitle: Record<string, string> = { vi: "", en: "" };
@@ -1080,13 +1043,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </div>
                     <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Đơn vị Tổ chức</span>
                   </div>
-                  <div
-                    draggable
-                    onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY" }))}
-                    className="flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-red-50 hover:border-red-200 dark:hover:bg-red-950/40 text-[10px] font-black text-slate-500 hover:text-[#b91c1c] border border-slate-200 dark:border-slate-700 px-2 py-1 rounded cursor-grab active:cursor-grabbing shadow-xs transition-all"
-                  >
-                    <GripVertical className="w-3 h-3 text-slate-400" /> Kéo nguyên cụm
-                  </div>
                 </CardHeader>
                 <CardContent className="p-2 max-h-72 overflow-y-auto space-y-1.5">
                   {searchQuery.trim() !== "" ? (
@@ -1132,13 +1088,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </div>
                     <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Cán bộ Lãnh đạo</span>
                   </div>
-                  <div
-                    draggable
-                    onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST" }))}
-                    className="flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-indigo-50 hover:border-indigo-200 dark:hover:bg-indigo-950/40 text-[10px] font-black text-slate-500 hover:text-indigo-600 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded cursor-grab active:cursor-grabbing shadow-xs transition-all"
-                  >
-                    <GripVertical className="w-3 h-3 text-slate-400" /> Kéo nguyên cụm
-                  </div>
                 </CardHeader>
                 <CardContent className="p-2 max-h-56 overflow-y-auto space-y-1.5 divide-y divide-slate-100 dark:divide-slate-800">
                   {allEmployees.filter((emp: any) => {
@@ -1179,13 +1128,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </div>
                     <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Tin bài & Phân mục</span>
                   </div>
-                  <div
-                    draggable
-                    onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "FEATURED_NEWS" }))}
-                    className="flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-blue-50 hover:border-blue-200 dark:hover:bg-blue-950/40 text-[10px] font-black text-slate-500 hover:text-blue-600 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded cursor-grab active:cursor-grabbing shadow-xs transition-all"
-                  >
-                    <GripVertical className="w-3 h-3 text-slate-400" /> Kéo nguyên cụm
-                  </div>
                 </CardHeader>
                 <CardContent className="p-2 space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
                   {[
@@ -1224,13 +1166,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </div>
                     <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Dịch vụ Công</span>
                   </div>
-                  <div
-                    draggable
-                    onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "PUBLIC_SERVICES" }))}
-                    className="flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-emerald-50 hover:border-emerald-200 dark:hover:bg-emerald-950/40 text-[10px] font-black text-slate-500 hover:text-emerald-600 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded cursor-grab active:cursor-grabbing shadow-xs transition-all"
-                  >
-                    <GripVertical className="w-3 h-3 text-slate-400" /> Kéo nguyên cụm
-                  </div>
                 </CardHeader>
                 <CardContent className="p-2 space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
                   {[
@@ -1268,13 +1203,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                       <FolderOpen className="w-3.5 h-3.5" />
                     </div>
                     <span className="font-black text-xs text-slate-800 dark:text-white uppercase tracking-wide">CSDL Văn bản Pháp quy</span>
-                  </div>
-                  <div
-                    draggable
-                    onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS" }))}
-                    className="flex items-center gap-1 bg-white dark:bg-slate-800 hover:bg-purple-50 hover:border-purple-200 dark:hover:bg-purple-950/40 text-[10px] font-black text-slate-500 hover:text-purple-600 border border-slate-200 dark:border-slate-700 px-2 py-1 rounded cursor-grab active:cursor-grabbing shadow-xs transition-all"
-                  >
-                    <GripVertical className="w-3 h-3 text-slate-400" /> Kéo nguyên cụm
                   </div>
                 </CardHeader>
                 <CardContent className="p-2 space-y-1 divide-y divide-slate-100 dark:divide-slate-800">
