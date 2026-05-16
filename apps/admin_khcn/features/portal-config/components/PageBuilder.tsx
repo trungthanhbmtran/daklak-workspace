@@ -679,19 +679,37 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                   <div className="p-3 max-h-[450px] overflow-y-auto custom-scrollbar space-y-2">
                     {selectedCsdl === "org" && (
                       <div className="space-y-2">
-                        {(searchQuery.trim() !== "" ? allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())) : allOrgUnits.slice(0, 15)).map((unit: any) => (
-                          <div
-                            key={unit.id}
-                            draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: unit.name, item: unit }))}
-                            className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 hover:shadow-sm cursor-grab active:cursor-grabbing flex items-center gap-3 transition-all"
-                          >
-                            <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                              <Building2 className="w-4 h-4" />
-                            </div>
-                            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{unit.name}</span>
+                        <div
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: "Danh mục Đơn vị" }))}
+                          className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-rose-50 dark:bg-slate-950 text-rose-600 flex items-center justify-center shrink-0">
+                            <Building2 className="w-5 h-5" />
                           </div>
-                        ))}
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">Danh bạ Đơn vị</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Hiển thị thông tin các phòng ban</span>
+                          </div>
+                        </div>
+                        
+                        {searchQuery.trim() !== "" && (
+                          <div className="pt-4 border-t border-slate-50 mt-4">
+                            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Kết quả tìm nhanh</p>
+                            {allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 5).map((unit: any) => (
+                              <div
+                                key={unit.id}
+                                onClick={() => {
+                                  // Optionally allow clicking to add? For now just show info.
+                                }}
+                                className="p-2.5 rounded-xl border border-slate-100 bg-slate-50/50 flex items-center gap-2 mb-1.5 opacity-60"
+                              >
+                                <Building2 className="w-3 h-3 text-slate-400" />
+                                <span className="text-[9px] font-bold text-slate-500 truncate">{unit.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     {selectedCsdl === "news" && (
