@@ -284,12 +284,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
               {node.typeName && <span className="text-[9px] text-slate-400 font-medium">{node.typeName}</span>}
             </div>
           </div>
-
-          {!isCustomizer && (
-            <span className="text-[9px] font-black uppercase text-[#b91c1c] bg-red-50 dark:bg-red-950/50 px-1.5 py-0.5 rounded shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-              Kéo
-            </span>
-          )}
         </div>
 
         {hasChildren && isExpanded && (
@@ -303,7 +297,6 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     );
   };
 
-  // Layout structures templates
   const addRow = (type: "12" | "6-6" | "7-5" | "8-4" | "4-4-4") => {
     let columns: Column[] = [];
     const timestamp = Date.now();
@@ -539,26 +532,32 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const flattenOrgNodes = (nodes: any[] = []): any[] => {
-    let list: any[] = [];
-    nodes.forEach(node => {
-      list.push(node);
-      if (node.children && node.children.length > 0) {
-        list = list.concat(flattenOrgNodes(node.children));
-      }
-    });
-    return list;
-  };
-
-  const allOrgUnits = flattenOrgNodes(orgTree || []);
-
-  const { data: hrmEmployeesRes } = useQuery({
-    queryKey: ["hrm-employees-list"],
-    queryFn: () => hrmApi.list({ pageSize: 50 }),
+  const { data: hrmEmployees } = useQuery({
+    queryKey: ["hrm-employees"],
+    queryFn: () => hrmApi.list({ pageSize: 1000 }),
     staleTime: 5 * 60 * 1000,
   });
 
-  const allEmployees = hrmEmployeesRes?.data || [];
+  const flattenOrgTree = (nodes: any[]): any[] => {
+    let result: any[] = [];
+    nodes.forEach(node => {
+      result.push(node);
+      if (node.children && node.children.length > 0) {
+        result = result.concat(flattenOrgTree(node.children));
+      }
+    });
+    return result;
+  };
+
+  const allOrgUnits = React.useMemo(() => 
+    orgTree ? flattenOrgTree(orgTree as any) : [], 
+    [orgTree]
+  );
+  
+  const allEmployees = React.useMemo(() => 
+    hrmEmployees?.data || [], 
+    [hrmEmployees]
+  );
 
   const toggleSelectLeader = (widgetId: string, emp: any) => {
     const w = findWidgetById(widgetId);
@@ -599,628 +598,579 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   return (
     <div className="flex flex-col h-[calc(100vh-180px)] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden bg-white dark:bg-slate-950 animate-fade-in shadow-xl">
 
-      {/* BUILDER TOOLBAR - Glassmorphism style */}
       <div className="h-16 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 z-30 shrink-0">
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowLeftPanel(!showLeftPanel)}
-            className={`w-10 h-10 rounded-xl transition-all ${showLeftPanel ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-slate-400 hover:bg-slate-50"}`}
-          >
+          <Button variant="ghost" size="icon" onClick={() => setShowLeftPanel(!showLeftPanel)} className={`w-10 h-10 rounded-xl transition-all ${showLeftPanel ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-slate-400 hover:bg-slate-50"}`}>
             <PanelLeft className="w-5 h-5" />
           </Button>
           <div className="h-6 w-px bg-slate-100 dark:bg-slate-800 mx-1" />
-
           <div className="flex bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/50">
             {languages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setActiveLang(lang.code)}
-                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeLang === lang.code ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
-              >
+              <button key={lang.code} onClick={() => setActiveLang(lang.code)} className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeLang === lang.code ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}>
                 {lang.code}
               </button>
             ))}
           </div>
         </div>
-
-        <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/50">
-          <Button variant="ghost" size="icon" onClick={() => setViewport("desktop")} className={`w-9 h-9 rounded-xl transition-all ${viewport === "desktop" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}><Monitor className="w-4.5 h-4.5" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => setViewport("tablet")} className={`w-9 h-9 rounded-xl transition-all ${viewport === "tablet" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}><Tablet className="w-4.5 h-4.5" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => setViewport("mobile")} className={`w-9 h-9 rounded-xl transition-all ${viewport === "mobile" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}><Smartphone className="w-4.5 h-4.5" /></Button>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex flex-col items-end mr-2">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giao diện hiện tại</span>
-            <span className="text-[10px] font-bold text-slate-700">{viewport === "desktop" ? "Desktop HD" : viewport === "tablet" ? "Tablet UI" : "Mobile View"}</span>
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setShowRightPanel(!showRightPanel)}
-            className={`w-10 h-10 rounded-xl transition-all ${showRightPanel ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-slate-400 hover:bg-slate-50"}`}
-          >
-            <PanelRight className="w-5 h-5" />
-          </Button>
-        </div>
+        <Button variant="ghost" size="icon" onClick={() => setShowRightPanel(!showRightPanel)} className={`w-10 h-10 rounded-xl transition-all ${showRightPanel ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-slate-400 hover:bg-slate-50"}`}>
+          <PanelRight className="w-5 h-5" />
+        </Button>
       </div>
 
-      <ResizablePanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
-
-        {/* LEFT PANEL: Toolbox */}
+      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
         {showLeftPanel && (
-          <>
-            <ResizablePanel defaultSize={22} minSize={18} maxSize={30} className="bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 overflow-y-auto custom-scrollbar">
-              <div className="p-6 space-y-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2.5 px-1">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                      <Database className="w-4 h-4" />
-                    </div>
-                    <h3 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest">Thư viện Widgets</h3>
+          <ResizablePanel id="toolbox" defaultSize={22} minSize={18} maxSize={30} className="bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 overflow-y-auto custom-scrollbar">
+            <div className="p-6 space-y-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2.5 px-1">
+                  <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                    <Database className="w-4 h-4" />
                   </div>
-
-                  <div className="grid grid-cols-2 gap-2.5">
-                    {[
-                      { id: "org", label: "Tổ chức", icon: Building2, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
-                      { id: "hrm", label: "Nhân sự", icon: Users2, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
-                      { id: "news", label: "Tin tức", icon: Newspaper, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-                      { id: "service", label: "Dịch vụ", icon: Landmark, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-                      { id: "legal", label: "Văn bản", icon: FolderOpen, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
-                      { id: "extra", label: "Mở rộng", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
-                    ].map((cat) => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCsdl(cat.id)}
-                        className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${selectedCsdl === cat.id
-                          ? `border-indigo-500 bg-white shadow-md ring-4 ring-indigo-50`
-                          : "border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:border-slate-200 hover:bg-white"
-                          }`}
-                      >
-                        <cat.icon className={`w-6 h-6 ${selectedCsdl === cat.id ? cat.color : "text-slate-400"}`} />
-                        <span className={`text-[9px] font-black uppercase tracking-tight ${selectedCsdl === cat.id ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>
-                          {cat.label}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
+                  <h3 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest">Thư viện Widgets</h3>
                 </div>
 
-                <div className="space-y-4">
-                  <div className="bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
-                    <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-white/50">
-                      <Search className="w-3.5 h-3.5 text-slate-400" />
-                      <Input
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Tìm Widget..."
-                        className="h-7 text-[10px] font-bold bg-transparent border-none focus-visible:ring-0 p-0 w-full placeholder:text-slate-300 uppercase tracking-widest"
-                      />
-                    </div>
-                    <div className="p-3 max-h-[450px] overflow-y-auto custom-scrollbar space-y-2">
-                      {selectedCsdl === "org" && (
-                        <div className="space-y-2">
-                          {(searchQuery.trim() !== "" ? allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())) : allOrgUnits.slice(0, 15)).map((unit: any) => (
-                            <div
-                              key={unit.id}
-                              draggable
-                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: unit.name, item: unit }))}
-                              className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 hover:shadow-sm cursor-grab active:cursor-grabbing flex items-center gap-3 transition-all"
-                            >
-                              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
-                                <Building2 className="w-4 h-4" />
-                              </div>
-                              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{unit.name}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {selectedCsdl === "news" && (
-                        <div className="space-y-2.5">
-                          {[
-                            { type: "FEATURED_NEWS", title: "Tin tức nổi bật", icon: Newspaper, color: "text-blue-600", desc: "Hiển thị tin mới nhất theo grid" },
-                            { type: "PHOTO_VIDEO_GALLERY", title: "Thư viện Đa phương tiện", icon: Film, color: "text-rose-600", desc: "Carousel ảnh và video clip" },
-                            { type: "HERO_SLIDER", title: "Banner Trình chiếu", icon: Images, color: "text-amber-600", desc: "Ảnh bìa lớn đầu trang" }
-                          ].map((w) => (
-                            <div
-                              key={w.type}
-                              draggable
-                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
-                              className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
-                            >
-                              <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
-                                <w.icon className="w-5 h-5" />
-                              </div>
-                              <div className="flex flex-col min-w-0">
-                                <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
-                                <span className="text-[8px] font-bold text-slate-400 truncate uppercase tracking-widest">{w.desc}</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {selectedCsdl === "hrm" && (
-                        <div className="space-y-2.5">
+                <div className="grid grid-cols-2 gap-2.5">
+                  {[
+                    { id: "org", label: "Tổ chức", icon: Building2, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
+                    { id: "hrm", label: "Nhân sự", icon: Users2, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+                    { id: "news", label: "Tin tức", icon: Newspaper, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+                    { id: "service", label: "Dịch vụ", icon: Landmark, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
+                    { id: "legal", label: "Văn bản", icon: FolderOpen, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+                    { id: "extra", label: "Mở rộng", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+                  ].map((cat) => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCsdl(cat.id)}
+                      className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${selectedCsdl === cat.id
+                        ? `border-indigo-500 bg-white shadow-md ring-4 ring-indigo-50`
+                        : "border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:border-slate-200 hover:bg-white"
+                        }`}
+                    >
+                      <cat.icon className={`w-6 h-6 ${selectedCsdl === cat.id ? cat.color : "text-slate-400"}`} />
+                      <span className={`text-[9px] font-black uppercase tracking-tight ${selectedCsdl === cat.id ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>
+                        {cat.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+                  <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-white/50">
+                    <Search className="w-3.5 h-3.5 text-slate-400" />
+                    <Input
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Tìm Widget..."
+                      className="h-7 text-[10px] font-bold bg-transparent border-none focus-visible:ring-0 p-0 w-full placeholder:text-slate-300 uppercase tracking-widest"
+                    />
+                  </div>
+                  <div className="p-3 max-h-[450px] overflow-y-auto custom-scrollbar space-y-2">
+                    {selectedCsdl === "org" && (
+                      <div className="space-y-2">
+                        {(searchQuery.trim() !== "" ? allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())) : allOrgUnits.slice(0, 15)).map((unit: any) => (
                           <div
+                            key={unit.id}
                             draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", title: "Danh sách lãnh đạo" }))}
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: unit.name, item: unit }))}
+                            className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 hover:shadow-sm cursor-grab active:cursor-grabbing flex items-center gap-3 transition-all"
+                          >
+                            <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                              <Building2 className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{unit.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {selectedCsdl === "news" && (
+                      <div className="space-y-2.5">
+                        {[
+                          { type: "FEATURED_NEWS", title: "Tin tức nổi bật", icon: Newspaper, color: "text-blue-600", desc: "Hiển thị tin mới nhất theo grid" },
+                          { type: "PHOTO_VIDEO_GALLERY", title: "Thư viện Đa phương tiện", icon: Film, color: "text-rose-600", desc: "Carousel ảnh và video clip" },
+                          { type: "HERO_SLIDER", title: "Banner Trình chiếu", icon: Images, color: "text-amber-600", desc: "Ảnh bìa lớn đầu trang" }
+                        ].map((w) => (
+                          <div
+                            key={w.type}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
                             className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
                           >
-                            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-slate-950 text-indigo-600 flex items-center justify-center shrink-0">
-                              <Users2 className="w-5 h-5" />
+                            <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                              <w.icon className="w-5 h-5" />
                             </div>
                             <div className="flex flex-col min-w-0">
-                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Cán bộ lãnh đạo</span>
-                              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Danh sách ban chỉ đạo</span>
+                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                              <span className="text-[8px] font-bold text-slate-400 truncate uppercase tracking-widest">{w.desc}</span>
                             </div>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                    {selectedCsdl === "hrm" && (
+                      <div className="space-y-2.5">
+                        <div
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", title: "Danh sách lãnh đạo" }))}
+                          className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-slate-950 text-indigo-600 flex items-center justify-center shrink-0">
+                            <Users2 className="w-5 h-5" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">Cán bộ lãnh đạo</span>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Danh sách ban chỉ đạo</span>
+                          </div>
                         </div>
-                      )}
-                      {selectedCsdl === "service" && (
-                        <div className="space-y-2.5">
-                          {[
-                            { type: "PUBLIC_SERVICES", title: "Dịch vụ hành chính", icon: Landmark, color: "text-emerald-600" },
-                            { type: "FAQ_ACCORDION", title: "Trung tâm giải đáp", icon: HelpCircle, color: "text-amber-600" },
-                            { type: "CONTACT_FORM", title: "Gửi ý kiến phản hồi", icon: Mail, color: "text-blue-600" }
-                          ].map((w) => (
-                            <div
-                              key={w.type}
-                              draggable
-                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
-                              className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
-                            >
-                              <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
-                                <w.icon className="w-5 h-5" />
-                              </div>
-                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                      {selectedCsdl === "legal" && (
-                        <div className="space-y-2.5">
+                      </div>
+                    )}
+                    {selectedCsdl === "service" && (
+                      <div className="space-y-2.5">
+                        {[
+                          { type: "PUBLIC_SERVICES", title: "Dịch vụ hành chính", icon: Landmark, color: "text-emerald-600" },
+                          { type: "FAQ_ACCORDION", title: "Trung tâm giải đáp", icon: HelpCircle, color: "text-amber-600" },
+                          { type: "CONTACT_FORM", title: "Gửi ý kiến phản hồi", icon: Mail, color: "text-blue-600" }
+                        ].map((w) => (
                           <div
+                            key={w.type}
                             draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", title: "Cơ sở dữ liệu văn bản" }))}
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
                             className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
                           >
-                            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-slate-950 text-purple-600 flex items-center justify-center shrink-0">
-                              <FolderOpen className="w-5 h-5" />
+                            <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                              <w.icon className="w-5 h-5" />
                             </div>
-                            <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Văn bản & Nghị quyết</span>
+                            <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{w.title}</span>
                           </div>
+                        ))}
+                      </div>
+                    )}
+                    {selectedCsdl === "legal" && (
+                      <div className="space-y-2.5">
+                        <div
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", title: "Cơ sở dữ liệu văn bản" }))}
+                          className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                        >
+                          <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-slate-950 text-purple-600 flex items-center justify-center shrink-0">
+                            <FolderOpen className="w-5 h-5" />
+                          </div>
+                          <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">Văn bản & Nghị quyết</span>
                         </div>
-                      )}
-                      {selectedCsdl === "extra" && (
-                        <div className="space-y-2.5">
-                          {[
-                            { type: "LEXICAL_RICH_TEXT", title: "Văn bản tùy biến", icon: Type, color: "text-slate-600" },
-                            { type: "COMMUNE_INTERACTIVE_MAP", title: "Bản đồ hành chính", icon: MapIcon, color: "text-red-600" },
-                            { type: "STATISTICS_GRID", title: "Biểu đồ thống kê", icon: FileSpreadsheet, color: "text-sky-600" },
-                            { type: "CONTACT_INFO_SIDEBAR", title: "Thông tin liên hệ", icon: Info, color: "text-blue-600" },
-                            { type: "EXTERNAL_LINKS", title: "Liên kết hữu ích", icon: ExternalLink, color: "text-amber-600" }
-                          ].map((w) => (
-                            <div
-                              key={w.type}
-                              draggable
-                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
-                              className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
-                            >
-                              <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
-                                <w.icon className="w-5 h-5" />
-                              </div>
-                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                      </div>
+                    )}
+                    {selectedCsdl === "extra" && (
+                      <div className="space-y-2.5">
+                        {[
+                          { type: "LEXICAL_RICH_TEXT", title: "Văn bản tùy biến", icon: Type, color: "text-slate-600" },
+                          { type: "COMMUNE_INTERACTIVE_MAP", title: "Bản đồ hành chính", icon: MapIcon, color: "text-red-600" },
+                          { type: "STATISTICS_GRID", title: "Biểu đồ thống kê", icon: FileSpreadsheet, color: "text-sky-600" },
+                          { type: "CONTACT_INFO_SIDEBAR", title: "Thông tin liên hệ", icon: Info, color: "text-blue-600" },
+                          { type: "EXTERNAL_LINKS", title: "Liên kết hữu ích", icon: ExternalLink, color: "text-amber-600" }
+                        ].map((w) => (
+                          <div
+                            key={w.type}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                            className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                          >
+                            <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                              <w.icon className="w-5 h-5" />
                             </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-2 px-1 mb-1">
-                    <Layout className="w-4 h-4 text-slate-400" />
-                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hệ thống Layout</h4>
-                  </div>
-                  <div className="grid grid-cols-1 gap-2.5">
-                    <Button variant="outline" size="sm" onClick={() => addRow("12")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Columns className="w-4 h-4 text-indigo-500" /> Full Width (12)</Button>
-                    <Button variant="outline" size="sm" onClick={() => addRow("6-6")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Grid3X3 className="w-4 h-4 text-emerald-500" /> Split Half (6-6)</Button>
-                    <Button variant="outline" size="sm" onClick={() => addRow("8-4")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Layers className="w-4 h-4 text-blue-500" /> Sidebar (8-4)</Button>
-                    <Button variant="outline" size="sm" onClick={() => addRow("4-4-4")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Grid3X3 className="w-4 h-4 text-purple-500" /> Triple Grid (4-4-4)</Button>
+                            <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">{w.title}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-          </>
+
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center gap-2 px-1 mb-1">
+                  <Layout className="w-4 h-4 text-slate-400" />
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hệ thống Layout</h4>
+                </div>
+                <div className="grid grid-cols-1 gap-2.5">
+                  <Button variant="outline" size="sm" onClick={() => addRow("12")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Columns className="w-4 h-4 text-indigo-500" /> Full Width (12)</Button>
+                  <Button variant="outline" size="sm" onClick={() => addRow("6-6")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Grid3X3 className="w-4 h-4 text-emerald-500" /> Split Half (6-6)</Button>
+                  <Button variant="outline" size="sm" onClick={() => addRow("8-4")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Layers className="w-4 h-4 text-blue-500" /> Sidebar (8-4)</Button>
+                  <Button variant="outline" size="sm" onClick={() => addRow("4-4-4")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Grid3X3 className="w-4 h-4 text-purple-500" /> Triple Grid (4-4-4)</Button>
+                </div>
+              </div>
+            </div>
+          </ResizablePanel>
         )}
+        {showLeftPanel && <ResizableHandle withHandle />}
 
-        {/* CENTER PANEL: Canvas */}
-        <ResizablePanel defaultSize={58} className="bg-[#f8fafc] dark:bg-[#020617] relative overflow-hidden flex flex-col items-stretch">
-          <div className="w-full h-full overflow-auto custom-scrollbar transition-all duration-500 p-10 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px]">
-            <div className={`mx-auto space-y-12 ${viewport === "tablet" ? "max-w-[768px]" : viewport === "mobile" ? "max-w-[420px]" : "max-w-7xl"
-              } transition-all duration-500`}>
+        <ResizablePanel id="canvas" defaultSize={56 + (!showLeftPanel ? 22 : 0) + (!showRightPanel ? 22 : 0)} className="bg-[#f8fafc] dark:bg-[#020617] relative flex flex-col">
+          {/* CANVAS TOOLBAR */}
+          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-40 flex items-center bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl p-1.5 rounded-[24px] border border-slate-200/60 shadow-2xl shadow-indigo-100/50 dark:shadow-none ring-1 ring-slate-900/5">
+            <div className="flex bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-2xl mr-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewport("desktop")}
+                className={`w-9 h-9 rounded-xl transition-all ${viewport === "desktop" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}
+              >
+                <Monitor className="w-4.5 h-4.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewport("tablet")}
+                className={`w-9 h-9 rounded-xl transition-all ${viewport === "tablet" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}
+              >
+                <Tablet className="w-4.5 h-4.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setViewport("mobile")}
+                className={`w-9 h-9 rounded-xl transition-all ${viewport === "mobile" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}
+              >
+                <Smartphone className="w-4.5 h-4.5" />
+              </Button>
+            </div>
+            <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+            <Button
+              variant="ghost"
+              size="sm"
+              className="px-4 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-xl"
+            >
+              <Eye className="w-4 h-4 mr-2" /> Preview
+            </Button>
+          </div>
 
-              {viewport !== "desktop" && (
-                <div className="w-full bg-slate-900 dark:bg-black rounded-t-[40px] p-5 flex items-center justify-center border-b border-slate-800 shadow-2xl">
-                  <div className="w-20 h-1.5 bg-slate-700 rounded-full" />
-                </div>
-              )}
-
-              <div className={`w-full relative ${viewport !== "desktop" ? "bg-white dark:bg-slate-900 shadow-2xl rounded-b-[40px] border-x-[12px] border-b-[12px] border-slate-900 dark:border-black p-8 min-h-[900px]" : "p-2 min-h-[1000px]"}`}>
-
-                <div className="flex items-center justify-between mb-8 sticky top-0 z-20 bg-[#f8fafc]/80 dark:bg-[#020617]/80 backdrop-blur-sm py-2 px-4 rounded-2xl border border-white/20">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse shadow-lg shadow-indigo-500/50" />
-                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] select-none">Project Canvas • Live Preview</span>
-                  </div>
-                  {layout.length > 0 && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 text-[10px] font-black text-slate-400 hover:text-rose-600 hover:bg-rose-50 uppercase gap-2 px-4 rounded-xl transition-all"
-                      onClick={() => { if (confirm("Cảnh báo: Toàn bộ layout sẽ bị xóa. Tiếp tục?")) onChange([]); }}
-                    >
-                      <Trash2 className="w-4 h-4" /> Reset Layout
-                    </Button>
-                  )}
-                </div>
-
-                {layout.length === 0 ? (
-                  <div className="text-center py-40 border-4 border-dashed rounded-[40px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-6 group transition-all hover:border-indigo-200">
-                    <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-200 dark:text-slate-700 group-hover:scale-110 group-hover:text-indigo-200 transition-all duration-500">
-                      <Plus className="w-12 h-12" />
+          <div className="w-full h-full overflow-auto custom-scrollbar pt-24 pb-40 px-10">
+            <div
+              className={`mx-auto transition-all duration-500 ease-in-out ${viewport === "desktop" ? "max-w-full" : viewport === "tablet" ? "max-w-[768px]" : "max-w-[375px]"
+                } min-h-[800px] bg-white dark:bg-slate-900 shadow-[0_0_100px_rgba(0,0,0,0.03)] dark:shadow-none rounded-[48px] border border-slate-100 dark:border-slate-800 p-12 relative`}
+            >
+              <div className="space-y-12">
+                {layout.map((row, rIdx) => (
+                  <div
+                    key={row.rowId}
+                    onClick={(e) => { e.stopPropagation(); setSelectedRowId(row.rowId); setSelectedWidgetId(null); }}
+                    className={`group relative border-2 border-dashed transition-all duration-300 rounded-[32px] p-8 ${selectedRowId === row.rowId
+                      ? "border-indigo-500 bg-indigo-50/20 shadow-lg ring-4 ring-indigo-50/50"
+                      : "border-slate-100 hover:border-slate-200 hover:bg-slate-50/30"
+                      }`}
+                  >
+                    {/* Row Actions */}
+                    <div className="absolute -left-16 top-1/2 -translate-y-1/2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:translate-x-2">
+                      <Button variant="outline" size="icon" onClick={() => moveRow(rIdx, "up")} className="w-9 h-9 rounded-xl border-slate-200 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 shadow-sm"><MoveUp className="w-4 h-4" /></Button>
+                      <Button variant="outline" size="icon" onClick={() => moveRow(rIdx, "down")} className="w-9 h-9 rounded-xl border-slate-200 bg-white hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 shadow-sm"><MoveDown className="w-4 h-4" /></Button>
+                      <Button variant="outline" size="icon" onClick={() => deleteRow(row.rowId)} className="w-9 h-9 rounded-xl border-slate-200 bg-white hover:bg-red-50 hover:text-red-600 hover:border-red-200 shadow-sm"><Trash2 className="w-4 h-4" /></Button>
                     </div>
-                    <div className="space-y-2">
-                      <p className="text-sm text-slate-400 font-black uppercase tracking-[0.3em]">Canvas rỗng</p>
-                      <p className="text-xs text-slate-300 font-bold uppercase tracking-wider">Hãy kéo thả Widgets hoặc Thêm Hàng để bắt đầu thiết kế</p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-10">
-                    {layout.map((row, rIdx) => (
-                      <div
-                        key={row.rowId}
-                        style={{
-                          backgroundColor: row.settings?.backgroundColor,
-                          backgroundImage: row.settings?.backgroundImage ? `url(${row.settings.backgroundImage})` : undefined,
-                          backgroundSize: 'cover',
-                          backgroundPosition: 'center',
-                          color: row.settings?.textColor,
-                        }}
-                        className={`transition-all relative group shadow-sm hover:shadow-2xl border ${selectedRowId === row.rowId ? "ring-4 ring-indigo-500/20 border-indigo-500 scale-[1.01] z-20" : "border-slate-100 dark:border-slate-800/50 hover:border-indigo-200"} ${row.settings?.paddingTop ? (paddingMap[row.settings.paddingTop] || 'pt-12') : 'pt-12'} ${row.settings?.paddingBottom ? (paddingMap[row.settings.paddingBottom] || 'pb-12') : 'pb-12'} ${row.settings?.borderRadius ? (roundedMap[row.settings.borderRadius] || 'rounded-[32px]') : 'rounded-[32px]'} ${row.settings?.fullWidth ? "w-full" : "max-w-full mx-auto"}`}
-                      >
-                        {/* ROW CONTROLS - Floating glass panel */}
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 translate-y-2 group-hover:translate-y-0">
-                          <div className="px-3 py-1 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest mr-1">Hàng {rIdx + 1}</div>
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedRowId(row.rowId); setSelectedWidgetId(null); setActiveTab("design"); }} className={`w-8 h-8 rounded-xl ${selectedRowId === row.rowId ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:bg-slate-100"}`}><Settings2 className="w-4 h-4" /></Button>
-                          <div className="w-px h-4 bg-slate-100 dark:bg-slate-800 mx-1" />
-                          <Button variant="ghost" size="icon" disabled={rIdx === 0} onClick={() => moveRow(rIdx, "up")} className="w-8 h-8 text-slate-400 hover:bg-slate-100 rounded-xl disabled:opacity-30"><MoveUp className="w-4 h-4" /></Button>
-                          <Button variant="ghost" size="icon" disabled={rIdx === layout.length - 1} onClick={() => moveRow(rIdx, "down")} className="w-8 h-8 text-slate-400 hover:bg-slate-100 rounded-xl disabled:opacity-30"><MoveDown className="w-4 h-4" /></Button>
-                          <div className="w-px h-4 bg-slate-100 dark:bg-slate-800 mx-1" />
-                          <Button variant="ghost" size="icon" onClick={() => deleteRow(row.rowId)} className="w-8 h-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"><Trash2 className="w-4 h-4" /></Button>
-                        </div>
 
-                        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 ${row.settings?.fullWidth ? "px-8" : "px-4"}`}>
-                          {row.columns.map((col) => (
-                            <div
-                              key={col.id}
-                              onDragOver={(e) => { e.preventDefault(); setDragOverColId(col.id); }}
-                              onDragLeave={() => setDragOverColId(null)}
-                              onDrop={(e) => { e.preventDefault(); setDragOverColId(null); const dragData = e.dataTransfer.getData("text/plain"); if (dragData) addWidgetFromDrag(row.rowId, col.id, dragData); }}
-                              className={`${col.colSpan} relative border-2 border-dashed ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/40" : "border-slate-100 dark:border-slate-800/30 hover:border-slate-200"} rounded-2xl p-4 min-h-[160px] transition-all flex flex-col`}
-                            >
-                              <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-30 transition-opacity">
-                                <Layout className="w-10 h-10 text-slate-300" />
-                              </div>
-
-                              <div className="flex flex-col gap-3 flex-1 relative z-10">
-                                {col.widgets.map((widget) => (
-                                  <div
-                                    key={widget.id}
-                                    onClick={(e) => { e.stopPropagation(); setSelectedWidgetId(widget.id); setSelectedRowId(null); setActiveTab("customizer"); }}
-                                    className={`group/widget p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between relative shadow-sm ${selectedWidgetId === widget.id
-                                      ? "border-indigo-500 bg-white ring-4 ring-indigo-50 z-20"
-                                      : "bg-white dark:bg-slate-900 border-slate-100 hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"}`}
-                                  >
-                                    <div className="flex items-center gap-4 min-w-0">
-                                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover/widget:scale-110 ${selectedWidgetId === widget.id ? "bg-indigo-600 text-white" : "bg-slate-50 text-slate-500"}`}>
-                                        {widget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-5 h-5" /> : <Database className="w-5 h-5" />}
-                                      </div>
-                                      <div className="flex flex-col min-w-0">
-                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Widget Configuration</span>
-                                        <span className="text-xs font-black text-slate-800 dark:text-white truncate uppercase tracking-tight">{widget.title[activeLang] || "Unnamed Widget"}</span>
-                                      </div>
+                    <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8`}>
+                      {row.columns.map((col) => (
+                        <div
+                          key={col.id}
+                          onDragOver={(e) => { e.preventDefault(); setDragOverColId(col.id); }}
+                          onDragLeave={() => setDragOverColId(null)}
+                          onDrop={(e) => {
+                            e.preventDefault();
+                            setDragOverColId(null);
+                            const dragData = e.dataTransfer.getData("text/plain");
+                            if (dragData) addWidgetFromDrag(row.rowId, col.id, dragData);
+                          }}
+                          className={`${col.colSpan} border-2 border-dashed transition-all duration-300 rounded-3xl min-h-[160px] relative p-1 ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/50 scale-[1.01]" : "border-slate-100 dark:border-slate-800 bg-slate-50/10"
+                            }`}
+                        >
+                          <div className="flex flex-col gap-4 p-4 h-full">
+                            {col.widgets.map((widget, wIdx) => (
+                              <div
+                                key={widget.id}
+                                onClick={(e) => { e.stopPropagation(); setSelectedWidgetId(widget.id); setSelectedRowId(null); }}
+                                className={`group/widget relative p-6 rounded-2xl border transition-all duration-300 transform hover:scale-[1.02] cursor-pointer ${selectedWidgetId === widget.id
+                                  ? "border-indigo-500 bg-white shadow-xl ring-2 ring-indigo-50"
+                                  : "border-slate-100 bg-white dark:bg-slate-900 hover:border-indigo-200 hover:shadow-md"
+                                  }`}
+                              >
+                                <div className="flex items-center justify-between mb-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                      <Sparkles className="w-4 h-4" />
                                     </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={(e) => { e.stopPropagation(); deleteWidget(row.rowId, col.id, widget.id); }}
-                                      className="w-8 h-8 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl opacity-0 group-hover/widget:opacity-100 transition-all"
-                                    >
-                                      <X className="w-4 h-4" />
-                                    </Button>
-
-                                    {selectedWidgetId === widget.id && (
-                                      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-indigo-600 rounded-full shadow-lg shadow-indigo-500/50" />
-                                    )}
+                                    <div className="flex flex-col">
+                                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{widget.type.replace("_", " ")}</span>
+                                      <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight truncate max-w-[200px]">{widget.title[activeLang] || "Widget chưa đặt tên"}</span>
+                                    </div>
                                   </div>
-                                ))}
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => { e.stopPropagation(); deleteWidget(row.rowId, col.id, widget.id); }}
+                                    className="w-8 h-8 rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover/widget:opacity-100 transition-all"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </Button>
+                                </div>
 
-                                {col.widgets.length === 0 && (
-                                  <div className="flex-1 flex flex-col items-center justify-center py-10 border-2 border-dashed border-slate-50 dark:border-slate-800/20 rounded-xl">
-                                    <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center text-slate-200 mb-2">
-                                      <Plus className="w-5 h-5" />
-                                    </div>
-                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Kéo thả Widget</span>
+                                {widget.type === "LEXICAL_RICH_TEXT" && (
+                                  <div className="mt-2 text-[10px] text-slate-400 line-clamp-3 italic bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    {widget.content?.[activeLang] ? "Nội dung văn bản đã được thiết lập..." : "Chưa có nội dung. Nhấp để chỉnh sửa."}
                                   </div>
                                 )}
                               </div>
-                            </div>
-                          ))}
+                            ))}
+
+                            {col.widgets.length === 0 && (
+                              <div className="flex-1 flex flex-col items-center justify-center py-10 opacity-30 select-none">
+                                <Plus className="w-8 h-8 mb-2 text-slate-300" />
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Thả Widget vào đây</span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                )}
+                ))}
+
+                <button
+                  onClick={() => addRow("12")}
+                  className="w-full py-12 rounded-[40px] border-2 border-dashed border-slate-100 hover:border-indigo-400 hover:bg-indigo-50/20 group transition-all duration-500 flex flex-col items-center justify-center"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-slate-50 group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-xl group-hover:shadow-indigo-100 transition-all flex items-center justify-center mb-4">
+                    <Plus className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-black text-slate-400 group-hover:text-indigo-600 uppercase tracking-[0.2em] transition-colors">Thêm hàng mới</span>
+                </button>
               </div>
             </div>
           </div>
         </ResizablePanel>
 
-        {/* RIGHT PANEL: Customizer */}
+        {showRightPanel && <ResizableHandle withHandle />}
         {showRightPanel && (
-          <>
-            <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-white dark:bg-slate-900 overflow-y-auto custom-scrollbar border-l border-slate-100 dark:border-slate-800 shadow-2xl">
-              <div className="p-6">
-                {(currentWidget || selectedRowId) ? (
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/50">
-                      <TabsTrigger value="customizer" disabled={!currentWidget} className="rounded-xl text-[10px] font-black uppercase tracking-widest py-3 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all">
-                        <Settings2 className="w-3.5 h-3.5 mr-2" />
-                        Widget
-                      </TabsTrigger>
-                      <TabsTrigger value="design" disabled={!selectedRowId} className="rounded-xl text-[10px] font-black uppercase tracking-widest py-3 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all">
-                        <Sparkles className="w-3.5 h-3.5 mr-2" />
-                        Layout
-                      </TabsTrigger>
-                    </TabsList>
+          <ResizablePanel id="customizer" defaultSize={22} minSize={18} maxSize={30} className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl border-l border-slate-200/50 shadow-2xl flex flex-col">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+              {(selectedWidgetId || selectedRowId) ? (
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 p-1.5 h-12 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl mb-8 border border-slate-200/50">
+                    <TabsTrigger value="customizer" className="rounded-xl text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Customizer</TabsTrigger>
+                    <TabsTrigger value="design" className="rounded-xl text-[10px] font-black uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Design</TabsTrigger>
+                  </TabsList>
 
-                    <TabsContent value="customizer" className="space-y-8 mt-0">
-                      {currentWidget && (
-                        <div className="space-y-8 animate-fade-in">
-                          <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
-                              {currentWidget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-6 h-6" /> : <Database className="w-6 h-6" />}
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-0.5">Đang cấu hình</span>
-                              <span className="text-xs font-black text-slate-800 uppercase tracking-tight truncate max-w-[140px]">{currentWidget.title[activeLang] || "Widget"}</span>
-                            </div>
+                  <TabsContent value="customizer" className="space-y-8 mt-0">
+                    {currentWidget && (
+                      <div className="space-y-8 animate-fade-in">
+                        <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center gap-4">
+                          <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                            <Sparkles className="w-6 h-6" />
                           </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-0.5">Hiệu chỉnh Widget</span>
+                            <span className="text-xs font-black text-slate-800 uppercase tracking-tight">{currentWidget.type.replace("_", " ")}</span>
+                          </div>
+                        </div>
 
+                        <div className="space-y-6">
                           <div className="space-y-3">
-                            <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1 flex items-center justify-between">
-                              Tiêu đề hiển thị ({activeLang.toUpperCase()})
-                              <span className="text-[8px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-400">Bắt buộc</span>
-                            </Label>
+                            <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiêu đề hiển thị ({activeLang})</Label>
                             <Input
                               value={currentWidget.title[activeLang] || ""}
                               onChange={(e) => updateWidgetTitle(currentWidget.id, e.target.value)}
-                              placeholder="Ví dụ: Tin nổi bật Dak Lak..."
-                              className="h-12 text-xs font-bold rounded-2xl border-slate-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all bg-slate-50/50"
+                              className="h-12 px-5 rounded-2xl border-slate-100 text-[13px] font-bold bg-white focus:ring-4 focus:ring-indigo-50 transition-all"
+                              placeholder="Nhập tiêu đề cho Widget..."
                             />
                           </div>
 
                           {currentWidget.type === "LEXICAL_RICH_TEXT" && (
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                              <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">Soạn thảo nội dung</Label>
-                              <div className="border border-slate-100 rounded-[28px] overflow-hidden bg-white shadow-sm ring-1 ring-slate-100 min-h-[500px]">
+                            <div className="space-y-3">
+                              <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nội dung văn bản</Label>
+                              <div className="p-1 rounded-3xl border border-slate-100 bg-white shadow-sm overflow-hidden min-h-[400px]">
                                 <LexicalEditor
-                                  value={currentWidget.content?.[activeLang] || ""}
+                                  initialValue={currentWidget.content?.[activeLang]}
                                   onChange={(val) => updateWidgetContent(currentWidget.id, val)}
+                                  placeholder="Bắt đầu nhập nội dung tại đây..."
                                 />
                               </div>
                             </div>
                           )}
 
-                          {currentWidget.type === "ORG_SECTIONS_DIRECTORY" && (
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                              <div className="flex items-center justify-between">
-                                <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">Đơn vị tổ chức</Label>
-                                <span className="text-[9px] font-bold text-indigo-600">Dữ liệu hệ thống</span>
-                              </div>
-                              <div className="max-h-96 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950 rounded-[24px] border border-slate-100 custom-scrollbar shadow-inner">
-                                {(orgTree || []).map((node: any) => (
-                                  <OrgTreeItem key={node.id} node={node} isCustomizer={true} widgetId={currentWidget.id} />
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {currentWidget.type === "LEADERSHIP_LIST" && (
-                            <div className="space-y-4 pt-4 border-t border-slate-100">
-                              <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">Thành viên lãnh đạo</Label>
-                              <div className="max-h-96 overflow-y-auto space-y-2 p-3 bg-slate-50/50 dark:bg-slate-950 rounded-[24px] border border-slate-100 custom-scrollbar shadow-inner">
-                                {allEmployees.map((emp: any) => (
-                                  <div
-                                    key={emp.id}
-                                    onClick={() => toggleSelectLeader(currentWidget.id, emp)}
-                                    className={`p-3 rounded-2xl border text-xs cursor-pointer flex items-center justify-between transition-all group/emp ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id)
-                                      ? "bg-white border-indigo-300 shadow-md ring-2 ring-indigo-50"
-                                      : "bg-white border-slate-100 hover:border-slate-200"
+                          {(currentWidget.type === "ORG_SECTIONS_DIRECTORY" || currentWidget.type === "LEADERSHIP_LIST") && (
+                            <div className="space-y-4">
+                              <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                                <Database className="w-3.5 h-3.5 text-indigo-500" />
+                                Chọn dữ liệu nguồn
+                              </Label>
+                              <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 max-h-[500px] overflow-y-auto custom-scrollbar">
+                                {(currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (orgTree as any) || [] : allEmployees).map((item: any) => (
+                                  currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (
+                                    <OrgTreeItem key={item.id} node={item} isCustomizer={true} widgetId={currentWidget.id} />
+                                  ) : (
+                                    <div
+                                      key={item.id}
+                                      onClick={() => toggleSelectLeader(currentWidget.id, item)}
+                                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer mb-2 ${
+                                        (currentWidget.data?.selectedLeaderIds || []).includes(item.id)
+                                          ? "bg-indigo-50 border-indigo-200"
+                                          : "bg-white border-slate-100 hover:border-indigo-100"
                                       }`}
-                                  >
-                                    <div className="flex items-center gap-3">
-                                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id)
-                                        ? "bg-indigo-600 text-white"
-                                        : "bg-slate-50 text-slate-300 group-hover/emp:bg-slate-100"
-                                        }`}>
-                                        <Users2 className="w-4 h-4" />
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="font-black text-slate-800">{emp.lastname} {emp.firstname}</span>
-                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{emp.position || "Cán bộ"}</span>
-                                      </div>
-                                    </div>
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id)
-                                      ? "bg-indigo-600 border-indigo-600 text-white"
-                                      : "border-slate-100"
+                                    >
+                                      <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 ${
+                                        (currentWidget.data?.selectedLeaderIds || []).includes(item.id)
+                                          ? "bg-indigo-600 border-indigo-600 text-white"
+                                          : "border-slate-300"
                                       }`}>
-                                      {(currentWidget.data?.selectedLeaderIds || []).includes(emp.id) && <Check className="w-3 h-3" />}
+                                        {(currentWidget.data?.selectedLeaderIds || []).includes(item.id) && <Check className="w-3 h-3" />}
+                                      </div>
+                                      <div className="flex flex-col min-w-0">
+                                        <span className="text-[11px] font-bold text-slate-700 truncate">{item.lastname} {item.firstname}</span>
+                                        <span className="text-[9px] text-slate-400 font-medium">{item.jobTitle?.name || "Cán bộ"}</span>
+                                      </div>
                                     </div>
-                                  </div>
+                                  )
                                 ))}
                               </div>
                             </div>
                           )}
                         </div>
-                      )}
-                    </TabsContent>
+                      </div>
+                    )}
+                  </TabsContent>
 
-                    <TabsContent value="design" className="space-y-8 mt-0">
-                      {selectedRowId && (
-                        <div className="space-y-8 animate-fade-in">
-                          <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100 flex items-center gap-4">
-                            <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200">
-                              <Layout className="w-6 h-6" />
-                            </div>
-                            <div className="flex flex-col">
-                              <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Tùy chỉnh Hàng</span>
-                              <span className="text-xs font-black text-slate-800 uppercase tracking-tight">Cấu hình hiển thị Layout</span>
-                            </div>
+                  <TabsContent value="design" className="space-y-8 mt-0">
+                    {selectedRowId && (
+                      <div className="space-y-8 animate-fade-in">
+                        <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100 flex items-center gap-4">
+                          <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200">
+                            <Layout className="w-6 h-6" />
                           </div>
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Tùy chỉnh Hàng</span>
+                            <span className="text-xs font-black text-slate-800 uppercase tracking-tight">Cấu hình hiển thị Layout</span>
+                          </div>
+                        </div>
 
-                          <div className="space-y-6">
-                            <div className="space-y-4 p-5 rounded-[28px] bg-slate-50/50 dark:bg-slate-950 border border-slate-100 shadow-sm">
-                              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
-                                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                                Màu sắc & Chủ đề
-                              </Label>
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Nền hàng</Label>
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="color"
-                                      value={findRowById(selectedRowId)?.settings?.backgroundColor || "#ffffff"}
-                                      onChange={(e) => updateRowSettings(selectedRowId, { backgroundColor: e.target.value })}
-                                      className="h-10 w-full p-1 rounded-xl border-slate-100 cursor-pointer"
-                                    />
-                                  </div>
+                        <div className="space-y-6">
+                          <div className="space-y-4 p-5 rounded-[28px] bg-slate-50/50 dark:bg-slate-950 border border-slate-100 shadow-sm">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                              Màu sắc & Chủ đề
+                            </Label>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Nền hàng</Label>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="color"
+                                    value={findRowById(selectedRowId)?.settings?.backgroundColor || "#ffffff"}
+                                    onChange={(e) => updateRowSettings(selectedRowId, { backgroundColor: e.target.value })}
+                                    className="h-10 w-full p-1 rounded-xl border-slate-100 cursor-pointer"
+                                  />
                                 </div>
-                                <div className="space-y-2">
-                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Màu chữ</Label>
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="color"
-                                      value={findRowById(selectedRowId)?.settings?.textColor || "#000000"}
-                                      onChange={(e) => updateRowSettings(selectedRowId, { textColor: e.target.value })}
-                                      className="h-10 w-full p-1 rounded-xl border-slate-100 cursor-pointer"
-                                    />
-                                  </div>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Màu chữ</Label>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="color"
+                                    value={findRowById(selectedRowId)?.settings?.textColor || "#000000"}
+                                    onChange={(e) => updateRowSettings(selectedRowId, { textColor: e.target.value })}
+                                    className="h-10 w-full p-1 rounded-xl border-slate-100 cursor-pointer"
+                                  />
                                 </div>
-                                <div className="space-y-2 col-span-2">
-                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Ảnh nền hàng (URL)</Label>
-                                  <div className="flex items-center gap-2">
-                                    <Input
-                                      type="text"
-                                      placeholder="https://images.unsplash.com/..."
-                                      value={findRowById(selectedRowId)?.settings?.backgroundImage || ""}
-                                      onChange={(e) => updateRowSettings(selectedRowId, { backgroundImage: e.target.value })}
-                                      className="h-10 w-full px-4 rounded-xl border-slate-100 text-[11px] font-bold bg-white focus:ring-4 focus:ring-indigo-50 transition-all"
-                                    />
-                                  </div>
+                              </div>
+                              <div className="space-y-2 col-span-2">
+                                <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Ảnh nền hàng (URL)</Label>
+                                <div className="flex items-center gap-2">
+                                  <Input
+                                    type="text"
+                                    placeholder="https://images.unsplash.com/..."
+                                    value={findRowById(selectedRowId)?.settings?.backgroundImage || ""}
+                                    onChange={(e) => updateRowSettings(selectedRowId, { backgroundImage: e.target.value })}
+                                    className="h-10 w-full px-4 rounded-xl border-slate-100 text-[11px] font-bold bg-white focus:ring-4 focus:ring-indigo-50 transition-all"
+                                  />
                                 </div>
                               </div>
                             </div>
+                          </div>
 
-                            <div className="space-y-4 p-5 rounded-[28px] bg-slate-50/50 dark:bg-slate-950 border border-slate-100 shadow-sm">
-                              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
-                                <Columns className="w-3.5 h-3.5 text-indigo-500" />
-                                Không gian hiển thị
-                              </Label>
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-2">
-                                    <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Padding Trên</Label>
-                                    <Select value={findRowById(selectedRowId)?.settings?.paddingTop || "pt-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingTop: val })}>
-                                      <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
-                                      <SelectContent className="rounded-xl">
-                                        <SelectItem value="pt-0">Không đệm</SelectItem>
-                                        <SelectItem value="pt-4">Nhỏ (16px)</SelectItem>
-                                        <SelectItem value="pt-8">Vừa (32px)</SelectItem>
-                                        <SelectItem value="pt-12">Lớn (48px)</SelectItem>
-                                        <SelectItem value="pt-20">X-Large (80px)</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                  <div className="space-y-2">
-                                    <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Padding Dưới</Label>
-                                    <Select value={findRowById(selectedRowId)?.settings?.paddingBottom || "pb-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingBottom: val })}>
-                                      <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
-                                      <SelectContent className="rounded-xl">
-                                        <SelectItem value="pb-0">Không đệm</SelectItem>
-                                        <SelectItem value="pb-4">Nhỏ (16px)</SelectItem>
-                                        <SelectItem value="pb-8">Vừa (32px)</SelectItem>
-                                        <SelectItem value="pb-12">Lớn (48px)</SelectItem>
-                                        <SelectItem value="pb-20">X-Large (80px)</SelectItem>
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-
+                          <div className="space-y-4 p-5 rounded-[28px] bg-slate-50/50 dark:bg-slate-950 border border-slate-100 shadow-sm">
+                            <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                              <Columns className="w-3.5 h-3.5 text-indigo-500" />
+                              Không gian hiển thị
+                            </Label>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Độ bo góc (Border Radius)</Label>
-                                  <Select value={findRowById(selectedRowId)?.settings?.borderRadius || "rounded-2xl"} onValueChange={(val) => updateRowSettings(selectedRowId, { borderRadius: val })}>
+                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Padding Trên</Label>
+                                  <Select value={findRowById(selectedRowId)?.settings?.paddingTop || "pt-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingTop: val })}>
                                     <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-xl">
-                                      <SelectItem value="rounded-none">Góc vuông (0px)</SelectItem>
-                                      <SelectItem value="rounded-xl">Hơi bo (12px)</SelectItem>
-                                      <SelectItem value="rounded-2xl">Bo vừa (16px)</SelectItem>
-                                      <SelectItem value="rounded-3xl">Bo mạnh (24px)</SelectItem>
-                                      <SelectItem value="rounded-[40px]">Siêu bo (40px)</SelectItem>
+                                      <SelectItem value="pt-0">Không đệm</SelectItem>
+                                      <SelectItem value="pt-4">Nhỏ (16px)</SelectItem>
+                                      <SelectItem value="pt-8">Vừa (32px)</SelectItem>
+                                      <SelectItem value="pt-12">Lớn (48px)</SelectItem>
+                                      <SelectItem value="pt-20">X-Large (80px)</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
-
-                                <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
-                                  <div className="flex flex-col">
-                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight">Kịch khung (Full Width)</span>
-                                    <span className="text-[8px] font-bold text-slate-400">Cho phép hàng tràn viền màn hình</span>
-                                  </div>
-                                  <button
-                                    onClick={() => updateRowSettings(selectedRowId, { fullWidth: !findRowById(selectedRowId)?.settings?.fullWidth })}
-                                    className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all ${findRowById(selectedRowId)?.settings?.fullWidth ? "bg-indigo-600" : "bg-slate-200"}`}
-                                  >
-                                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-md transition-all ${findRowById(selectedRowId)?.settings?.fullWidth ? "translate-x-6" : "translate-x-1"}`} />
-                                  </button>
+                                <div className="space-y-2">
+                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Padding Dưới</Label>
+                                  <Select value={findRowById(selectedRowId)?.settings?.paddingBottom || "pb-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingBottom: val })}>
+                                    <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-xl">
+                                      <SelectItem value="pb-0">Không đệm</SelectItem>
+                                      <SelectItem value="pb-4">Nhỏ (16px)</SelectItem>
+                                      <SelectItem value="pb-8">Vừa (32px)</SelectItem>
+                                      <SelectItem value="pb-12">Lớn (48px)</SelectItem>
+                                      <SelectItem value="pb-20">X-Large (80px)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
                                 </div>
+                              </div>
+
+                              <div className="space-y-2">
+                                <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Độ bo góc (Border Radius)</Label>
+                                <Select value={findRowById(selectedRowId)?.settings?.borderRadius || "rounded-2xl"} onValueChange={(val) => updateRowSettings(selectedRowId, { borderRadius: val })}>
+                                  <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
+                                  <SelectContent className="rounded-xl">
+                                    <SelectItem value="rounded-none">Góc vuông (0px)</SelectItem>
+                                    <SelectItem value="rounded-xl">Hơi bo (12px)</SelectItem>
+                                    <SelectItem value="rounded-2xl">Bo vừa (16px)</SelectItem>
+                                    <SelectItem value="rounded-3xl">Bo mạnh (24px)</SelectItem>
+                                    <SelectItem value="rounded-[40px]">Siêu bo (40px)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+
+                              <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight">Kịch khung (Full Width)</span>
+                                  <span className="text-[8px] font-bold text-slate-400">Cho phép hàng tràn viền màn hình</span>
+                                </div>
+                                <button
+                                  onClick={() => updateRowSettings(selectedRowId, { fullWidth: !findRowById(selectedRowId)?.settings?.fullWidth })}
+                                  className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all ${findRowById(selectedRowId)?.settings?.fullWidth ? "bg-indigo-600" : "bg-slate-200"}`}
+                                >
+                                  <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-md transition-all ${findRowById(selectedRowId)?.settings?.fullWidth ? "translate-x-6" : "translate-x-1"}`} />
+                                </button>
                               </div>
                             </div>
                           </div>
                         </div>
-                      )}
-                    </TabsContent>
-                  </Tabs>
-                ) : (
-                  <div className="py-40 text-center opacity-20 flex flex-col items-center justify-center space-y-6 select-none grayscale">
-                    <div className="w-24 h-24 bg-slate-100 rounded-[32px] flex items-center justify-center">
-                      <Settings2 className="w-10 h-10 text-slate-400 animate-[spin_10s_linear_infinite]" />
-                    </div>
-                    <div className="space-y-1">
-                      <p className="text-[11px] font-black uppercase tracking-[0.2em]">Chế độ nhàn rỗi</p>
-                      <p className="text-[9px] font-bold uppercase tracking-widest">Chọn Hàng hoặc Widget để cấu hình</p>
-                    </div>
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              ) : (
+                <div className="h-full flex flex-col items-center justify-center text-center opacity-20 grayscale select-none">
+                  <div className="w-24 h-24 bg-slate-100 rounded-[32px] flex items-center justify-center mb-6">
+                    <Settings2 className="w-10 h-10 text-slate-400 animate-[spin_10s_linear_infinite]" />
                   </div>
-                )}
-              </div>
-            </ResizablePanel>
-          </>
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] mb-1">Chế độ nhàn rỗi</p>
+                  <p className="text-[9px] font-bold uppercase tracking-widest">Chọn Hàng hoặc Widget để cấu hình</p>
+                </div>
+              )}
+            </div>
+          </ResizablePanel>
         )}
       </ResizablePanelGroup>
     </div>
