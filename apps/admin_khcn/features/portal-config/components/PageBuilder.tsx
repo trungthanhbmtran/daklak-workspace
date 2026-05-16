@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { hrmApi } from "@/features/hrm/api";
+import apiClient from "@/lib/axiosInstance";
 import {
   MoveUp,
   MoveDown,
@@ -538,6 +539,15 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: allCategories } = useQuery({
+    queryKey: ["portal-categories"],
+    queryFn: async () => {
+      const res: any = await apiClient.get("/categories");
+      return Array.isArray(res?.data) ? res.data : [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const flattenOrgTree = (nodes: any[]): any[] => {
     let result: any[] = [];
     nodes.forEach(node => {
@@ -993,6 +1003,90 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                             </div>
                           )}
 
+                          {(currentWidget.type === "FEATURED_NEWS" || currentWidget.type === "HERO_SLIDER" || currentWidget.type === "PHOTO_VIDEO_GALLERY") && (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Chuyên mục tin tức</Label>
+                                <Select 
+                                  value={currentWidget.data?.categoryId?.toString() || "all"} 
+                                  onValueChange={(val) => updateWidgetData(currentWidget.id, { ...currentWidget.data, categoryId: val === "all" ? null : parseInt(val) })}
+                                >
+                                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-white text-xs font-bold">
+                                    <SelectValue placeholder="Chọn chuyên mục..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-2xl">
+                                    <SelectItem value="all">Tất cả tin tức</SelectItem>
+                                    {(allCategories || []).filter((c: any) => c.group === "NEWS_CATEGORY").map((cat: any) => (
+                                      <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Số lượng hiển thị</Label>
+                                <Input 
+                                  type="number"
+                                  value={currentWidget.data?.limit || 6}
+                                  onChange={(e) => updateWidgetData(currentWidget.id, { ...currentWidget.data, limit: parseInt(e.target.value) })}
+                                  className="h-12 px-5 rounded-2xl border-slate-100 text-[13px] font-bold bg-white"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {currentWidget.type === "LEGAL_DOCUMENTS" && (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nhóm văn bản</Label>
+                                <Select 
+                                  value={currentWidget.data?.groupCode || "all"} 
+                                  onValueChange={(val) => updateWidgetData(currentWidget.id, { ...currentWidget.data, groupCode: val === "all" ? null : val })}
+                                >
+                                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-white text-xs font-bold">
+                                    <SelectValue placeholder="Chọn nhóm văn bản..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-2xl">
+                                    <SelectItem value="all">Tất cả văn bản</SelectItem>
+                                    {(allCategories || []).filter((c: any) => c.group === "LEGAL_DOC_GROUP").map((cat: any) => (
+                                      <SelectItem key={cat.id} value={cat.code}>{cat.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Số lượng hiển thị</Label>
+                                <Input 
+                                  type="number"
+                                  value={currentWidget.data?.limit || 10}
+                                  onChange={(e) => updateWidgetData(currentWidget.id, { ...currentWidget.data, limit: parseInt(e.target.value) })}
+                                  className="h-12 px-5 rounded-2xl border-slate-100 text-[13px] font-bold bg-white"
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {currentWidget.type === "PUBLIC_SERVICES" && (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Lĩnh vực dịch vụ</Label>
+                                <Select 
+                                  value={currentWidget.data?.domainId?.toString() || "all"} 
+                                  onValueChange={(val) => updateWidgetData(currentWidget.id, { ...currentWidget.data, domainId: val === "all" ? null : parseInt(val) })}
+                                >
+                                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-white text-xs font-bold">
+                                    <SelectValue placeholder="Chọn lĩnh vực..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-2xl">
+                                    <SelectItem value="all">Tất cả lĩnh vực</SelectItem>
+                                    {(allCategories || []).filter((c: any) => c.group === "DOMAIN").map((cat: any) => (
+                                      <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          )}
+
                           {(currentWidget.type === "ORG_SECTIONS_DIRECTORY" || currentWidget.type === "LEADERSHIP_LIST") && (
                             <div className="space-y-4">
                               <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -1002,7 +1096,14 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 max-h-[500px] overflow-y-auto custom-scrollbar">
                                 {(currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (orgTree as any) || [] : allEmployees).map((item: any) => (
                                   currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (
-                                    <OrgTreeItem key={item.id} node={item} isCustomizer={true} widgetId={currentWidget.id} />
+                                    <OrgTreeItem 
+                                      key={item.id} 
+                                      node={item} 
+                                      isCustomizer={true} 
+                                      widgetId={currentWidget.id} 
+                                      selectedIds={currentWidget.data?.selectedOrgIds || []}
+                                      onSelect={(ids) => updateWidgetData(currentWidget.id, { ...currentWidget.data, selectedOrgIds: ids })}
+                                    />
                                   ) : (
                                     <div
                                       key={item.id}
@@ -1027,6 +1128,94 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                                     </div>
                                   )
                                 ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {currentWidget.type === "CONTACT_INFO_SIDEBAR" && (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Số điện thoại Hotline</Label>
+                                <Input 
+                                  value={currentWidget.data?.phone || ""}
+                                  onChange={(e) => updateWidgetData(currentWidget.id, { ...currentWidget.data, phone: e.target.value })}
+                                  className="h-12 px-5 rounded-2xl border-slate-100 text-[13px] font-bold bg-white"
+                                  placeholder="Ví dụ: 0262.3812.345"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Email liên hệ</Label>
+                                <Input 
+                                  value={currentWidget.data?.email || ""}
+                                  onChange={(e) => updateWidgetData(currentWidget.id, { ...currentWidget.data, email: e.target.value })}
+                                  className="h-12 px-5 rounded-2xl border-slate-100 text-[13px] font-bold bg-white"
+                                  placeholder="Ví dụ: contact@daklak.gov.vn"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Địa chỉ trụ sở</Label>
+                                <Textarea 
+                                  value={currentWidget.data?.address || ""}
+                                  onChange={(e) => updateWidgetData(currentWidget.id, { ...currentWidget.data, address: e.target.value })}
+                                  className="rounded-2xl border-slate-100 text-[13px] font-bold bg-white"
+                                  placeholder="Nhập địa chỉ đầy đủ..."
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {currentWidget.type === "STATISTICS_GRID" && (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nguồn dữ liệu thống kê</Label>
+                                <Select 
+                                  value={currentWidget.data?.source || "manual"} 
+                                  onValueChange={(val) => updateWidgetData(currentWidget.id, { ...currentWidget.data, source: val })}
+                                >
+                                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-white text-xs font-bold">
+                                    <SelectValue placeholder="Chọn nguồn..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-2xl">
+                                    <SelectItem value="manual">Nhập thủ công</SelectItem>
+                                    <SelectItem value="auto">Tự động từ hệ thống</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100">
+                                <p className="text-[10px] text-amber-700 font-bold leading-relaxed">
+                                  Widget này sẽ hiển thị các chỉ số như: Diện tích, Dân số, Đơn vị hành chính và Chuẩn nông thôn mới được cấu hình trong Cài đặt chung.
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {currentWidget.type === "FAQ_ACCORDION" && (
+                            <div className="space-y-4">
+                              <div className="space-y-2">
+                                <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nhóm câu hỏi thường gặp</Label>
+                                <Select 
+                                  value={currentWidget.data?.categoryId?.toString() || "all"} 
+                                  onValueChange={(val) => updateWidgetData(currentWidget.id, { ...currentWidget.data, categoryId: val === "all" ? null : parseInt(val) })}
+                                >
+                                  <SelectTrigger className="h-12 rounded-2xl border-slate-100 bg-white text-xs font-bold">
+                                    <SelectValue placeholder="Chọn nhóm..." />
+                                  </SelectTrigger>
+                                  <SelectContent className="rounded-2xl">
+                                    <SelectItem value="all">Tất cả câu hỏi</SelectItem>
+                                    {(allCategories || []).filter((c: any) => c.group === "FAQ_CATEGORY").map((cat: any) => (
+                                      <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                          )}
+
+                          {currentWidget.type === "EXTERNAL_LINKS" && (
+                            <div className="space-y-4">
+                              <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Danh sách liên kết</Label>
+                              <div className="p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center">
+                                <p className="text-[10px] text-slate-400 font-bold uppercase">Quản lý tại module Liên kết website</p>
                               </div>
                             </div>
                           )}
@@ -1173,6 +1362,104 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           </ResizablePanel>
         )}
       </ResizablePanelGroup>
+    </div>
+  );
+}
+
+// -------------------------------------------------------------
+// HELPER COMPONENTS
+// -------------------------------------------------------------
+
+function OrgTreeItem({ 
+  node, 
+  isCustomizer, 
+  widgetId, 
+  selectedIds = [], 
+  onSelect 
+}: { 
+  node: any; 
+  isCustomizer?: boolean; 
+  widgetId?: string;
+  selectedIds?: number[];
+  onSelect?: (ids: number[]) => void;
+}) {
+  const [isOpen, setIsOpen] = React.useState(true);
+  const hasChildren = node.children && node.children.length > 0;
+  const isSelected = selectedIds.includes(node.id);
+
+  const getAllChildIds = (item: any): number[] => {
+    let ids = [item.id];
+    if (item.children) {
+      item.children.forEach((c: any) => {
+        ids = [...ids, ...getAllChildIds(c)];
+      });
+    }
+    return ids;
+  };
+
+  const handleToggle = () => {
+    if (!onSelect) return;
+    const allRelatedIds = getAllChildIds(node);
+    let newSelectedIds: number[];
+
+    if (isSelected) {
+      // Deselect this node and all children
+      newSelectedIds = selectedIds.filter(id => !allRelatedIds.includes(id));
+    } else {
+      // Select this node and all children
+      const uniqueNewIds = allRelatedIds.filter(id => !selectedIds.includes(id));
+      newSelectedIds = [...selectedIds, ...uniqueNewIds];
+    }
+    onSelect(newSelectedIds);
+  };
+
+  return (
+    <div className="ml-1">
+      <div 
+        onClick={isCustomizer ? handleToggle : undefined}
+        className={`flex items-center gap-2 py-2 px-2 rounded-xl cursor-pointer transition-all ${
+          isSelected ? "bg-indigo-50/50 border border-indigo-100" : "hover:bg-white/50 border border-transparent"
+        }`}
+      >
+        {hasChildren ? (
+          <button 
+            onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }} 
+            className="w-5 h-5 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-md transition-all"
+          >
+            {isOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+          </button>
+        ) : (
+          <div className="w-5" />
+        )}
+        <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${isSelected ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "bg-slate-100 text-slate-500"}`}>
+          <Building2 className="w-3.5 h-3.5" />
+        </div>
+        <div className="flex flex-col min-w-0 flex-1">
+          <span className={`text-[11px] font-bold truncate ${isSelected ? "text-indigo-700" : "text-slate-700"}`}>{node.name}</span>
+          <span className="text-[9px] text-slate-400 font-medium">{node.code}</span>
+        </div>
+        {isCustomizer && (
+          <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+            isSelected ? "bg-indigo-600 border-indigo-600" : "border-slate-200"
+          }`}>
+             {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+          </div>
+        )}
+      </div>
+      {isOpen && hasChildren && (
+        <div className="ml-3 border-l border-slate-100 dark:border-slate-800 pl-1 mt-1 space-y-1">
+          {node.children.map((child: any) => (
+            <OrgTreeItem 
+              key={child.id} 
+              node={child} 
+              isCustomizer={isCustomizer} 
+              widgetId={widgetId} 
+              selectedIds={selectedIds}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
