@@ -527,13 +527,13 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
 
   const currentWidget = getSelectedWidget();
 
-  const { data: orgTree } = useQuery({
+  const { data: orgTree, isLoading: isLoadingOrgTree } = useQuery({
     queryKey: ["organizations-tree"],
     queryFn: () => organizationApi.getTree(),
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: hrmEmployees } = useQuery({
+  const { data: hrmEmployees, isLoading: isLoadingHrm } = useQuery({
     queryKey: ["hrm-employees"],
     queryFn: () => hrmApi.list({ pageSize: 1000 }),
     staleTime: 5 * 60 * 1000,
@@ -967,7 +967,14 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                   </TabsList>
 
                   <TabsContent value="customizer" className="space-y-8 mt-0">
-                    {currentWidget && (
+                    {!currentWidget ? (
+                      <div className="h-40 flex flex-col items-center justify-center text-center opacity-40 grayscale">
+                        <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mb-3">
+                          <Settings2 className="w-8 h-8 text-slate-400" />
+                        </div>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Dữ liệu Widget không khả dụng</p>
+                      </div>
+                    ) : (
                       <div className="space-y-8 animate-fade-in">
                         <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center gap-4">
                           <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
@@ -983,7 +990,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           <div className="space-y-3">
                             <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tiêu đề hiển thị ({activeLang})</Label>
                             <Input
-                              value={currentWidget.title[activeLang] || ""}
+                              value={typeof currentWidget.title === 'string' ? currentWidget.title : (currentWidget.title?.[activeLang] || "")}
                               onChange={(e) => updateWidgetTitle(currentWidget.id, e.target.value)}
                               className="h-12 px-5 rounded-2xl border-slate-100 text-[13px] font-bold bg-white focus:ring-4 focus:ring-indigo-50 transition-all"
                               placeholder="Nhập tiêu đề cho Widget..."
@@ -995,7 +1002,7 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                               <Label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nội dung văn bản</Label>
                               <div className="p-1 rounded-3xl border border-slate-100 bg-white shadow-sm overflow-hidden min-h-[400px]">
                                 <LexicalEditor
-                                  initialValue={currentWidget.content?.[activeLang]}
+                                  initialValue={typeof currentWidget.content === 'string' ? currentWidget.content : (currentWidget.content?.[activeLang] || "")}
                                   onChange={(val) => updateWidgetContent(currentWidget.id, val)}
                                   placeholder="Bắt đầu nhập nội dung tại đây..."
                                 />
@@ -1094,7 +1101,16 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                                 Chọn dữ liệu nguồn
                               </Label>
                               <div className="bg-slate-50 dark:bg-slate-950 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 max-h-[500px] overflow-y-auto custom-scrollbar">
-                                {(currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (orgTree as any) || [] : allEmployees).map((item: any) => (
+                                {isLoadingOrgTree || isLoadingHrm ? (
+                                  <div className="p-10 flex flex-col items-center justify-center gap-3">
+                                    <Loader2 className="w-6 h-6 text-indigo-500 animate-spin" />
+                                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đang tải dữ liệu...</span>
+                                  </div>
+                                ) : (currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (orgTree as any) || [] : allEmployees).length === 0 ? (
+                                  <div className="p-10 text-center">
+                                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Không có dữ liệu hiển thị</p>
+                                  </div>
+                                ) : (currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (orgTree as any) || [] : allEmployees).map((item: any) => (
                                   currentWidget.type === "ORG_SECTIONS_DIRECTORY" ? (
                                     <OrgTreeItem 
                                       key={item.id} 
@@ -1217,6 +1233,19 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                               <div className="p-4 rounded-2xl bg-slate-50 border border-dashed border-slate-200 text-center">
                                 <p className="text-[10px] text-slate-400 font-bold uppercase">Quản lý tại module Liên kết website</p>
                               </div>
+                            </div>
+                          )}
+
+                          {![
+                            "LEXICAL_RICH_TEXT", "FEATURED_NEWS", "HERO_SLIDER", "PHOTO_VIDEO_GALLERY",
+                            "LEGAL_DOCUMENTS", "PUBLIC_SERVICES", "ORG_SECTIONS_DIRECTORY", "LEADERSHIP_LIST",
+                            "CONTACT_INFO_SIDEBAR", "STATISTICS_GRID", "FAQ_ACCORDION", "EXTERNAL_LINKS"
+                          ].includes(currentWidget.type) && (
+                            <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                              <Settings2 className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">
+                                Widget này hiện chưa hỗ trợ cấu hình nâng cao. <br />Bạn chỉ có thể thay đổi tiêu đề.
+                              </p>
                             </div>
                           )}
                         </div>
