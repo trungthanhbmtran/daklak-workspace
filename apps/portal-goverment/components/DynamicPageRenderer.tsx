@@ -899,7 +899,12 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     'pb-0': 'pb-0', 'pb-4': 'pb-4', 'pb-8': 'pb-8', 'pb-12': 'pb-12', 'pb-16': 'pb-16', 'pb-20': 'pb-20'
   };
   const roundedMap: Record<string, string> = {
-    'rounded-none': 'rounded-none', 'rounded-xl': 'rounded-xl', 'rounded-2xl': 'rounded-2xl', 'rounded-3xl': 'rounded-3xl', 'rounded-full': 'rounded-full'
+    'rounded-none': 'rounded-none',
+    'rounded-xl': 'rounded-xl',
+    'rounded-2xl': 'rounded-2xl',
+    'rounded-3xl': 'rounded-3xl',
+    'rounded-full': 'rounded-full',
+    'rounded-[40px]': 'rounded-[40px]'
   };
 
   return (
@@ -1020,13 +1025,23 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {(() => {
                                   let leaders = []
-                                  if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
+                                  if (Array.isArray(widget.data?.selectedLeaderIds) && widget.data.selectedLeaderIds.length > 0) {
+                                    // Use the IDs from the builder to find the actual employee data
+                                    leaders = allEmployees.filter((emp: any) => widget.data.selectedLeaderIds.includes(emp.id)).map((emp: any) => ({
+                                      name: getLocalizedField(emp, "fullName", currentLang) || `${emp.lastname || ''} ${emp.firstname || ''}`.trim(),
+                                      role: getLocalizedField(emp, "roleName", currentLang) || emp.jobTitle?.name || emp.jobTitleName || "Cán bộ",
+                                      responsibility: getLocalizedField(emp, "jobDescription", currentLang) || `Chịu trách nhiệm phụ trách chung và điều hành các hoạt động tại cơ quan.`,
+                                      phone: emp.phoneNumber || emp.phone || "09xx.xxx.xxx",
+                                      email: emp.email || "canbo@daklak.gov.vn",
+                                      room: emp.officeRoom || "Trụ sở UBND xã"
+                                    }))
+                                  } else if (Array.isArray(widget.data?.selectedEmployeeIds) && widget.data.selectedEmployeeIds.length > 0) {
                                     leaders = allEmployees.filter((emp: any) => widget.data.selectedEmployeeIds.includes(emp.id)).map((emp: any) => ({
                                       name: getLocalizedField(emp, "fullName", currentLang),
                                       role: getLocalizedField(emp, "roleName", currentLang),
                                       responsibility: getLocalizedField(emp, "jobDescription", currentLang),
                                       phone: emp.phoneNumber || "09xx.xxx.xxx",
-                                      email: emp.email || "cán bộ@daklak.gov.vn",
+                                      email: emp.email || "canbo@daklak.gov.vn",
                                       room: emp.officeRoom || "Trụ sở UBND xã"
                                     }))
                                   } else if (widget.data?.selectedLeaders && widget.data.selectedLeaders.length > 0) {

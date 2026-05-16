@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { GripVerticalIcon } from "lucide-react"
 import * as ResizablePrimitive from "react-resizable-panels"
 
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils"
 function ResizablePanelGroup({
   className,
   ...props
-}: ResizablePrimitive.GroupProps) {
+}: React.ComponentProps<typeof ResizablePrimitive.Group>) {
   return (
     <ResizablePrimitive.Group
       data-slot="resizable-panel-group"

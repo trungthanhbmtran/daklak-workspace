@@ -597,26 +597,27 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-slate-50/50 dark:bg-slate-950/20 animate-fade-in shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-180px)] border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden bg-white dark:bg-slate-950 animate-fade-in shadow-xl">
 
-      {/* BUILDER TOOLBAR */}
-      <div className="h-14 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between px-4 z-20 shrink-0">
-        <div className="flex items-center gap-2">
+      {/* BUILDER TOOLBAR - Glassmorphism style */}
+      <div className="h-16 border-b border-slate-100 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex items-center justify-between px-6 z-30 shrink-0">
+        <div className="flex items-center gap-4">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowLeftPanel(!showLeftPanel)}
-            className={`w-9 h-9 rounded-lg transition-colors ${showLeftPanel ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50" : "text-slate-400"}`}
+            className={`w-10 h-10 rounded-xl transition-all ${showLeftPanel ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-slate-400 hover:bg-slate-50"}`}
           >
-            <PanelLeft className="w-4.5 h-4.5" />
+            <PanelLeft className="w-5 h-5" />
           </Button>
-          <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-          <div className="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+          <div className="h-6 w-px bg-slate-100 dark:bg-slate-800 mx-1" />
+
+          <div className="flex bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/50">
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => setActiveLang(lang.code)}
-                className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${activeLang === lang.code ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeLang === lang.code ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
               >
                 {lang.code}
               </button>
@@ -624,192 +625,211 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
           </div>
         </div>
 
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-          <Button variant="ghost" size="icon" onClick={() => setViewport("desktop")} className={`w-8 h-8 rounded-lg transition-all ${viewport === "desktop" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400"}`}><Monitor className="w-4 h-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => setViewport("tablet")} className={`w-8 h-8 rounded-lg transition-all ${viewport === "tablet" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400"}`}><Tablet className="w-4 h-4" /></Button>
-          <Button variant="ghost" size="icon" onClick={() => setViewport("mobile")} className={`w-8 h-8 rounded-lg transition-all ${viewport === "mobile" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400"}`}><Smartphone className="w-4 h-4" /></Button>
+        <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/50">
+          <Button variant="ghost" size="icon" onClick={() => setViewport("desktop")} className={`w-9 h-9 rounded-xl transition-all ${viewport === "desktop" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}><Monitor className="w-4.5 h-4.5" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => setViewport("tablet")} className={`w-9 h-9 rounded-xl transition-all ${viewport === "tablet" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}><Tablet className="w-4.5 h-4.5" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => setViewport("mobile")} className={`w-9 h-9 rounded-xl transition-all ${viewport === "mobile" ? "bg-white dark:bg-slate-700 text-indigo-600 shadow-sm" : "text-slate-400 hover:bg-white/50"}`}><Smartphone className="w-4.5 h-4.5" /></Button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <div className="hidden md:flex flex-col items-end mr-2">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Giao diện hiện tại</span>
+            <span className="text-[10px] font-bold text-slate-700">{viewport === "desktop" ? "Desktop HD" : viewport === "tablet" ? "Tablet UI" : "Mobile View"}</span>
+          </div>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setShowRightPanel(!showRightPanel)}
-            className={`w-9 h-9 rounded-lg transition-colors ${showRightPanel ? "bg-indigo-50 text-indigo-600 dark:bg-indigo-950/50" : "text-slate-400"}`}
+            className={`w-10 h-10 rounded-xl transition-all ${showRightPanel ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "text-slate-400 hover:bg-slate-50"}`}
           >
-            <PanelRight className="w-4.5 h-4.5" />
+            <PanelRight className="w-5 h-5" />
           </Button>
         </div>
       </div>
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
+      <ResizablePanelGroup orientation="horizontal" className="flex-1 overflow-hidden">
 
         {/* LEFT PANEL: Toolbox */}
         {showLeftPanel && (
           <>
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-white dark:bg-slate-900 overflow-y-auto">
-              <div className="p-4 space-y-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <Database className="w-4.5 h-4.5 text-indigo-600" />
-                  <h3 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-wider">Kho CSDL Widgets</h3>
+            <ResizablePanel defaultSize={22} minSize={18} maxSize={30} className="bg-white dark:bg-slate-900 border-r border-slate-100 dark:border-slate-800 overflow-y-auto custom-scrollbar">
+              <div className="p-6 space-y-8">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2.5 px-1">
+                    <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <Database className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-[11px] font-black text-slate-800 dark:text-white uppercase tracking-widest">Thư viện Widgets</h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2.5">
+                    {[
+                      { id: "org", label: "Tổ chức", icon: Building2, color: "text-rose-600", bg: "bg-rose-50 dark:bg-rose-950/30" },
+                      { id: "hrm", label: "Nhân sự", icon: Users2, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
+                      { id: "news", label: "Tin tức", icon: Newspaper, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
+                      { id: "service", label: "Dịch vụ", icon: Landmark, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
+                      { id: "legal", label: "Văn bản", icon: FolderOpen, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
+                      { id: "extra", label: "Mở rộng", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
+                    ].map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setSelectedCsdl(cat.id)}
+                        className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${selectedCsdl === cat.id
+                          ? `border-indigo-500 bg-white shadow-md ring-4 ring-indigo-50`
+                          : "border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 hover:border-slate-200 hover:bg-white"
+                          }`}
+                      >
+                        <cat.icon className={`w-6 h-6 ${selectedCsdl === cat.id ? cat.color : "text-slate-400"}`} />
+                        <span className={`text-[9px] font-black uppercase tracking-tight ${selectedCsdl === cat.id ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>
+                          {cat.label}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: "org", label: "Tổ chức", icon: Building2, color: "text-red-600", bg: "bg-red-50 dark:bg-red-950/30" },
-                    { id: "hrm", label: "Cán bộ", icon: Users2, color: "text-indigo-600", bg: "bg-indigo-50 dark:bg-indigo-950/30" },
-                    { id: "news", label: "Tin tức", icon: Newspaper, color: "text-blue-600", bg: "bg-blue-50 dark:bg-blue-950/30" },
-                    { id: "service", label: "Dịch vụ", icon: Landmark, color: "text-emerald-600", bg: "bg-emerald-50 dark:bg-emerald-950/30" },
-                    { id: "legal", label: "Văn bản", icon: FolderOpen, color: "text-purple-600", bg: "bg-purple-50 dark:bg-purple-950/30" },
-                    { id: "extra", label: "Chức năng", icon: Sparkles, color: "text-amber-600", bg: "bg-amber-50 dark:bg-amber-950/30" },
-                  ].map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => setSelectedCsdl(cat.id)}
-                      className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all ${selectedCsdl === cat.id
-                        ? `border-indigo-500 ring-2 ring-indigo-500/10 ${cat.bg}`
-                        : "border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-slate-300"
-                        }`}
-                    >
-                      <cat.icon className={`w-5 h-5 ${selectedCsdl === cat.id ? cat.color : "text-slate-400"}`} />
-                      <span className={`text-[9px] font-black uppercase tracking-tight ${selectedCsdl === cat.id ? "text-slate-900 dark:text-white" : "text-slate-500"}`}>
-                        {cat.label}
-                      </span>
-                    </button>
-                  ))}
+                <div className="space-y-4">
+                  <div className="bg-slate-50 dark:bg-slate-950/50 rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+                    <div className="p-3 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-white/50">
+                      <Search className="w-3.5 h-3.5 text-slate-400" />
+                      <Input
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Tìm Widget..."
+                        className="h-7 text-[10px] font-bold bg-transparent border-none focus-visible:ring-0 p-0 w-full placeholder:text-slate-300 uppercase tracking-widest"
+                      />
+                    </div>
+                    <div className="p-3 max-h-[450px] overflow-y-auto custom-scrollbar space-y-2">
+                      {selectedCsdl === "org" && (
+                        <div className="space-y-2">
+                          {(searchQuery.trim() !== "" ? allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())) : allOrgUnits.slice(0, 15)).map((unit: any) => (
+                            <div
+                              key={unit.id}
+                              draggable
+                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: unit.name, item: unit }))}
+                              className="p-3 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 hover:shadow-sm cursor-grab active:cursor-grabbing flex items-center gap-3 transition-all"
+                            >
+                              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+                                <Building2 className="w-4 h-4" />
+                              </div>
+                              <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{unit.name}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {selectedCsdl === "news" && (
+                        <div className="space-y-2.5">
+                          {[
+                            { type: "FEATURED_NEWS", title: "Tin tức nổi bật", icon: Newspaper, color: "text-blue-600", desc: "Hiển thị tin mới nhất theo grid" },
+                            { type: "PHOTO_VIDEO_GALLERY", title: "Thư viện Đa phương tiện", icon: Film, color: "text-rose-600", desc: "Carousel ảnh và video clip" },
+                            { type: "HERO_SLIDER", title: "Banner Trình chiếu", icon: Images, color: "text-amber-600", desc: "Ảnh bìa lớn đầu trang" }
+                          ].map((w) => (
+                            <div
+                              key={w.type}
+                              draggable
+                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                              className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                            >
+                              <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                                <w.icon className="w-5 h-5" />
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                                <span className="text-[8px] font-bold text-slate-400 truncate uppercase tracking-widest">{w.desc}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {selectedCsdl === "hrm" && (
+                        <div className="space-y-2.5">
+                          <div
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", title: "Danh sách lãnh đạo" }))}
+                            className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-slate-950 text-indigo-600 flex items-center justify-center shrink-0">
+                              <Users2 className="w-5 h-5" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Cán bộ lãnh đạo</span>
+                              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Danh sách ban chỉ đạo</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {selectedCsdl === "service" && (
+                        <div className="space-y-2.5">
+                          {[
+                            { type: "PUBLIC_SERVICES", title: "Dịch vụ hành chính", icon: Landmark, color: "text-emerald-600" },
+                            { type: "FAQ_ACCORDION", title: "Trung tâm giải đáp", icon: HelpCircle, color: "text-amber-600" },
+                            { type: "CONTACT_FORM", title: "Gửi ý kiến phản hồi", icon: Mail, color: "text-blue-600" }
+                          ].map((w) => (
+                            <div
+                              key={w.type}
+                              draggable
+                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                              className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                            >
+                              <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                                <w.icon className="w-5 h-5" />
+                              </div>
+                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {selectedCsdl === "legal" && (
+                        <div className="space-y-2.5">
+                          <div
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", title: "Cơ sở dữ liệu văn bản" }))}
+                            className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                          >
+                            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-slate-950 text-purple-600 flex items-center justify-center shrink-0">
+                              <FolderOpen className="w-5 h-5" />
+                            </div>
+                            <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Văn bản & Nghị quyết</span>
+                          </div>
+                        </div>
+                      )}
+                      {selectedCsdl === "extra" && (
+                        <div className="space-y-2.5">
+                          {[
+                            { type: "LEXICAL_RICH_TEXT", title: "Văn bản tùy biến", icon: Type, color: "text-slate-600" },
+                            { type: "COMMUNE_INTERACTIVE_MAP", title: "Bản đồ hành chính", icon: MapIcon, color: "text-red-600" },
+                            { type: "STATISTICS_GRID", title: "Biểu đồ thống kê", icon: FileSpreadsheet, color: "text-sky-600" },
+                            { type: "CONTACT_INFO_SIDEBAR", title: "Thông tin liên hệ", icon: Info, color: "text-blue-600" },
+                            { type: "EXTERNAL_LINKS", title: "Liên kết hữu ích", icon: ExternalLink, color: "text-amber-600" }
+                          ].map((w) => (
+                            <div
+                              key={w.type}
+                              draggable
+                              onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
+                              className="p-3 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-4"
+                            >
+                              <div className={`w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform`}>
+                                <w.icon className="w-5 h-5" />
+                              </div>
+                              <span className="text-[10px] font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
-                <Card className="border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-slate-50/30 dark:bg-slate-950/20 rounded-xl">
-                  <div className="p-2 border-b border-slate-100 dark:border-slate-850 flex items-center gap-2">
-                    <Search className="w-3 h-3 text-slate-400" />
-                    <Input
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Tìm kiếm..."
-                      className="h-6 text-[9px] font-semibold bg-transparent border-none focus-visible:ring-0 p-0 w-full"
-                    />
+                <div className="space-y-4 pt-4 border-t border-slate-100">
+                  <div className="flex items-center gap-2 px-1 mb-1">
+                    <Layout className="w-4 h-4 text-slate-400" />
+                    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hệ thống Layout</h4>
                   </div>
-                  <div className="p-2 max-h-[400px] overflow-y-auto custom-scrollbar">
-                    {selectedCsdl === "org" && (
-                      <div className="space-y-1">
-                        {(searchQuery.trim() !== "" ? allOrgUnits.filter((u: any) => u.name.toLowerCase().includes(searchQuery.toLowerCase())) : allOrgUnits.slice(0, 20)).map((unit: any) => (
-                          <div
-                            key={unit.id}
-                            draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "ORG_SECTIONS_DIRECTORY", title: unit.name, item: unit }))}
-                            className="p-2 rounded-lg border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-300 cursor-grab active:cursor-grabbing flex items-center gap-2"
-                          >
-                            <div className="w-6 h-6 rounded bg-red-50 dark:bg-red-950/40 text-red-600 flex items-center justify-center shrink-0">
-                              <Building2 className="w-3.5 h-3.5" />
-                            </div>
-                            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 truncate">{unit.name}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {selectedCsdl === "news" && (
-                      <div className="space-y-2">
-                        {[
-                          { type: "FEATURED_NEWS", title: "Tin tức nổi bật", icon: Newspaper, color: "text-blue-600" },
-                          { type: "PHOTO_VIDEO_GALLERY", title: "Thư viện Ảnh & Clip", icon: Film, color: "text-rose-600" },
-                          { type: "HERO_SLIDER", title: "Banner Slider", icon: Images, color: "text-amber-600" }
-                        ].map((w) => (
-                          <div
-                            key={w.type}
-                            draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
-                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
-                          >
-                            <div className={`w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                              <w.icon className="w-4 h-4" />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {selectedCsdl === "hrm" && (
-                      <div className="space-y-2">
-                        <div
-                          draggable
-                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEADERSHIP_LIST", title: "Danh sách lãnh đạo" }))}
-                          className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 text-indigo-600 flex items-center justify-center shrink-0">
-                            <Users2 className="w-4 h-4" />
-                          </div>
-                          <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Cán bộ lãnh đạo</span>
-                        </div>
-                      </div>
-                    )}
-                    {selectedCsdl === "service" && (
-                      <div className="space-y-2">
-                        {[
-                          { type: "PUBLIC_SERVICES", title: "Dịch vụ công", icon: Landmark, color: "text-emerald-600" },
-                          { type: "FAQ_ACCORDION", title: "Hỏi đáp FAQ", icon: HelpCircle, color: "text-amber-600" },
-                          { type: "CONTACT_FORM", title: "Form liên hệ", icon: Mail, color: "text-blue-600" }
-                        ].map((w) => (
-                          <div
-                            key={w.type}
-                            draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
-                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
-                          >
-                            <div className={`w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                              <w.icon className="w-4 h-4" />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                    {selectedCsdl === "legal" && (
-                      <div className="space-y-2">
-                        <div
-                          draggable
-                          onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: "LEGAL_DOCUMENTS", title: "Văn bản pháp quy" }))}
-                          className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
-                        >
-                          <div className="w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 text-purple-600 flex items-center justify-center shrink-0">
-                            <FolderOpen className="w-4 h-4" />
-                          </div>
-                          <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">Văn bản & Nghị quyết</span>
-                        </div>
-                      </div>
-                    )}
-                    {selectedCsdl === "extra" && (
-                      <div className="space-y-2">
-                        {[
-                          { type: "LEXICAL_RICH_TEXT", title: "Nội dung văn bản", icon: Type, color: "text-slate-600" },
-                          { type: "COMMUNE_INTERACTIVE_MAP", title: "Bản đồ tương tác", icon: MapIcon, color: "text-red-600" },
-                          { type: "STATISTICS_GRID", title: "Số liệu thống kê", icon: FileSpreadsheet, color: "text-sky-600" },
-                          { type: "CONTACT_INFO_SIDEBAR", title: "Thông tin liên hệ", icon: Info, color: "text-blue-600" },
-                          { type: "EXTERNAL_LINKS", title: "Liên kết ngoài", icon: ExternalLink, color: "text-amber-600" }
-                        ].map((w) => (
-                          <div
-                            key={w.type}
-                            draggable
-                            onDragStart={(e) => e.dataTransfer.setData("text/plain", JSON.stringify({ type: w.type, title: w.title }))}
-                            className="p-2.5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-400 group cursor-grab active:cursor-grabbing transition-all flex items-center gap-3"
-                          >
-                            <div className={`w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-950 ${w.color} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                              <w.icon className="w-4 h-4" />
-                            </div>
-                            <span className="text-[10px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">{w.title}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </Card>
-
-                <div className="space-y-3">
-                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Cấu trúc Layout</h4>
-                  <div className="grid grid-cols-1 gap-2">
-                    <Button variant="outline" size="sm" onClick={() => addRow("12")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Columns className="w-3.5 h-3.5" /> 100%</Button>
-                    <Button variant="outline" size="sm" onClick={() => addRow("6-6")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Grid3X3 className="w-3.5 h-3.5" /> 50-50</Button>
-                    <Button variant="outline" size="sm" onClick={() => addRow("8-4")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Layers className="w-3.5 h-3.5" /> 8-4</Button>
-                    <Button variant="outline" size="sm" onClick={() => addRow("4-4-4")} className="h-8 justify-start text-[10px] font-bold border-slate-200 hover:border-indigo-500 gap-2"><Grid3X3 className="w-3.5 h-3.5" /> 4-4-4</Button>
+                  <div className="grid grid-cols-1 gap-2.5">
+                    <Button variant="outline" size="sm" onClick={() => addRow("12")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Columns className="w-4 h-4 text-indigo-500" /> Full Width (12)</Button>
+                    <Button variant="outline" size="sm" onClick={() => addRow("6-6")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Grid3X3 className="w-4 h-4 text-emerald-500" /> Split Half (6-6)</Button>
+                    <Button variant="outline" size="sm" onClick={() => addRow("8-4")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Layers className="w-4 h-4 text-blue-500" /> Sidebar (8-4)</Button>
+                    <Button variant="outline" size="sm" onClick={() => addRow("4-4-4")} className="h-11 justify-start text-[10px] font-black uppercase tracking-wider border-slate-100 hover:border-indigo-500 hover:bg-indigo-50/30 gap-3 px-4 rounded-2xl transition-all shadow-sm"><Grid3X3 className="w-4 h-4 text-purple-500" /> Triple Grid (4-4-4)</Button>
                   </div>
                 </div>
               </div>
@@ -819,96 +839,132 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
         )}
 
         {/* CENTER PANEL: Canvas */}
-        <ResizablePanel defaultSize={60} className="bg-slate-100 dark:bg-[#0f172a] relative overflow-hidden flex flex-col items-stretch">
-          <div className="w-full h-full overflow-auto custom-scrollbar transition-all duration-500 p-8">
-            <div className={`mx-auto space-y-8 ${viewport === "tablet" ? "max-w-[768px]" : viewport === "mobile" ? "max-w-[420px]" : "max-w-7xl"
+        <ResizablePanel defaultSize={58} className="bg-[#f8fafc] dark:bg-[#020617] relative overflow-hidden flex flex-col items-stretch">
+          <div className="w-full h-full overflow-auto custom-scrollbar transition-all duration-500 p-10 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px]">
+            <div className={`mx-auto space-y-12 ${viewport === "tablet" ? "max-w-[768px]" : viewport === "mobile" ? "max-w-[420px]" : "max-w-7xl"
               } transition-all duration-500`}>
+
               {viewport !== "desktop" && (
-                <div className="w-full bg-slate-800 dark:bg-slate-950 rounded-t-3xl p-4 flex items-center justify-center border-b border-slate-700">
-                  <div className="w-16 h-1 bg-slate-600 rounded-full" />
+                <div className="w-full bg-slate-900 dark:bg-black rounded-t-[40px] p-5 flex items-center justify-center border-b border-slate-800 shadow-2xl">
+                  <div className="w-20 h-1.5 bg-slate-700 rounded-full" />
                 </div>
               )}
-              <div className={`w-full ${viewport !== "desktop" ? "bg-white dark:bg-slate-900 shadow-2xl rounded-b-3xl border-x-8 border-b-8 border-slate-800 dark:border-slate-950 p-6 min-h-[800px]" : ""}`}>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest select-none">Vùng thiết kế nội dung</span>
+              <div className={`w-full relative ${viewport !== "desktop" ? "bg-white dark:bg-slate-900 shadow-2xl rounded-b-[40px] border-x-[12px] border-b-[12px] border-slate-900 dark:border-black p-8 min-h-[900px]" : "p-2 min-h-[1000px]"}`}>
+
+                <div className="flex items-center justify-between mb-8 sticky top-0 z-20 bg-[#f8fafc]/80 dark:bg-[#020617]/80 backdrop-blur-sm py-2 px-4 rounded-2xl border border-white/20">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 rounded-full bg-indigo-500 animate-pulse shadow-lg shadow-indigo-500/50" />
+                    <span className="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] select-none">Project Canvas • Live Preview</span>
                   </div>
                   {layout.length > 0 && (
-                    <Button variant="ghost" size="sm" className="h-6 text-[9px] font-black text-slate-400 hover:text-red-600 uppercase gap-1" onClick={() => { if (confirm("Xóa toàn bộ layout?")) onChange([]); }}>
-                      <Trash2 className="w-3 h-3" /> Xóa tất cả
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 text-[10px] font-black text-slate-400 hover:text-rose-600 hover:bg-rose-50 uppercase gap-2 px-4 rounded-xl transition-all"
+                      onClick={() => { if (confirm("Cảnh báo: Toàn bộ layout sẽ bị xóa. Tiếp tục?")) onChange([]); }}
+                    >
+                      <Trash2 className="w-4 h-4" /> Reset Layout
                     </Button>
                   )}
                 </div>
 
                 {layout.length === 0 ? (
-                  <div className="text-center py-20 border-2 border-dashed rounded-2xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-3">
-                    <Layout className="w-10 h-10 text-slate-300" />
-                    <p className="text-xs text-slate-400 font-extrabold uppercase tracking-wide">Trang trống • Hãy thêm hàng để bắt đầu</p>
+                  <div className="text-center py-40 border-4 border-dashed rounded-[40px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-inner flex flex-col items-center justify-center gap-6 group transition-all hover:border-indigo-200">
+                    <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-200 dark:text-slate-700 group-hover:scale-110 group-hover:text-indigo-200 transition-all duration-500">
+                      <Plus className="w-12 h-12" />
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-sm text-slate-400 font-black uppercase tracking-[0.3em]">Canvas rỗng</p>
+                      <p className="text-xs text-slate-300 font-bold uppercase tracking-wider">Hãy kéo thả Widgets hoặc Thêm Hàng để bắt đầu thiết kế</p>
+                    </div>
                   </div>
                 ) : (
-                  layout.map((row, rIdx) => (
-                    <div
-                      key={row.rowId}
-                      style={{
-                        backgroundColor: row.settings?.backgroundColor,
-                        backgroundImage: row.settings?.backgroundImage ? `url(${row.settings.backgroundImage})` : undefined,
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        color: row.settings?.textColor,
-                      }}
-                      className={`border transition-all relative group space-y-4 p-4 ${selectedRowId === row.rowId ? "ring-2 ring-amber-500 border-amber-500 shadow-lg" : "border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md"} ${paddingMap[row.settings?.paddingTop] || 'pt-8'} ${paddingMap[row.settings?.paddingBottom] || 'pb-8'} ${roundedMap[row.settings?.borderRadius] || 'rounded-2xl'} ${row.settings?.fullWidth ? "w-full" : ""}`}
-                    >
-                      <div className="flex items-center justify-between border-b dark:border-slate-800/60 pb-3 relative z-10">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] bg-amber-500/10 text-amber-600 font-black uppercase px-2 py-0.5 rounded tracking-wider">Hàng {rIdx + 1}</span>
+                  <div className="space-y-10">
+                    {layout.map((row, rIdx) => (
+                      <div
+                        key={row.rowId}
+                        style={{
+                          backgroundColor: row.settings?.backgroundColor,
+                          backgroundImage: row.settings?.backgroundImage ? `url(${row.settings.backgroundImage})` : undefined,
+                          backgroundSize: 'cover',
+                          backgroundPosition: 'center',
+                          color: row.settings?.textColor,
+                        }}
+                        className={`transition-all relative group shadow-sm hover:shadow-2xl border ${selectedRowId === row.rowId ? "ring-4 ring-indigo-500/20 border-indigo-500 scale-[1.01] z-20" : "border-slate-100 dark:border-slate-800/50 hover:border-indigo-200"} ${row.settings?.paddingTop ? (paddingMap[row.settings.paddingTop] || 'pt-12') : 'pt-12'} ${row.settings?.paddingBottom ? (paddingMap[row.settings.paddingBottom] || 'pb-12') : 'pb-12'} ${row.settings?.borderRadius ? (roundedMap[row.settings.borderRadius] || 'rounded-[32px]') : 'rounded-[32px]'} ${row.settings?.fullWidth ? "w-full" : "max-w-full mx-auto"}`}
+                      >
+                        {/* ROW CONTROLS - Floating glass panel */}
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 p-1.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl opacity-0 group-hover:opacity-100 transition-all duration-300 z-30 translate-y-2 group-hover:translate-y-0">
+                          <div className="px-3 py-1 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest mr-1">Hàng {rIdx + 1}</div>
+                          <Button variant="ghost" size="icon" onClick={() => { setSelectedRowId(row.rowId); setSelectedWidgetId(null); setActiveTab("design"); }} className={`w-8 h-8 rounded-xl ${selectedRowId === row.rowId ? "bg-indigo-100 text-indigo-600" : "text-slate-400 hover:bg-slate-100"}`}><Settings2 className="w-4 h-4" /></Button>
+                          <div className="w-px h-4 bg-slate-100 dark:bg-slate-800 mx-1" />
+                          <Button variant="ghost" size="icon" disabled={rIdx === 0} onClick={() => moveRow(rIdx, "up")} className="w-8 h-8 text-slate-400 hover:bg-slate-100 rounded-xl disabled:opacity-30"><MoveUp className="w-4 h-4" /></Button>
+                          <Button variant="ghost" size="icon" disabled={rIdx === layout.length - 1} onClick={() => moveRow(rIdx, "down")} className="w-8 h-8 text-slate-400 hover:bg-slate-100 rounded-xl disabled:opacity-30"><MoveDown className="w-4 h-4" /></Button>
+                          <div className="w-px h-4 bg-slate-100 dark:bg-slate-800 mx-1" />
+                          <Button variant="ghost" size="icon" onClick={() => deleteRow(row.rowId)} className="w-8 h-8 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl"><Trash2 className="w-4 h-4" /></Button>
                         </div>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" onClick={() => { setSelectedRowId(row.rowId); setSelectedWidgetId(null); setActiveTab("design"); }} className={`w-7 h-7 rounded-lg ${selectedRowId === row.rowId ? "bg-amber-100 text-amber-600" : "text-slate-400"}`}><Settings2 className="w-3.5 h-3.5" /></Button>
-                          <Button variant="ghost" size="icon" disabled={rIdx === 0} onClick={() => moveRow(rIdx, "up")} className="w-7 h-7 text-slate-400"><MoveUp className="w-3.5 h-3.5" /></Button>
-                          <Button variant="ghost" size="icon" disabled={rIdx === layout.length - 1} onClick={() => moveRow(rIdx, "down")} className="w-7 h-7 text-slate-400"><MoveDown className="w-3.5 h-3.5" /></Button>
-                          <Button variant="ghost" size="icon" onClick={() => deleteRow(row.rowId)} className="w-7 h-7 text-slate-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></Button>
-                        </div>
-                      </div>
 
-                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        {row.columns.map((col) => (
-                          <div
-                            key={col.id}
-                            onDragOver={(e) => { e.preventDefault(); setDragOverColId(col.id); }}
-                            onDragLeave={() => setDragOverColId(null)}
-                            onDrop={(e) => { e.preventDefault(); setDragOverColId(null); const dragData = e.dataTransfer.getData("text/plain"); if (dragData) addWidgetFromDrag(row.rowId, col.id, dragData); }}
-                            className={`${col.colSpan} border-2 border-dashed ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/30" : "border-slate-200 dark:border-slate-800/50"} rounded-xl p-3 min-h-[120px] transition-all`}
-                          >
-                            <div className="flex flex-col gap-2">
-                              {col.widgets.map((widget) => (
-                                <div
-                                  key={widget.id}
-                                  onClick={(e) => { e.stopPropagation(); setSelectedWidgetId(widget.id); setSelectedRowId(null); setActiveTab("customizer"); }}
-                                  className={`p-3 rounded-lg border cursor-pointer transition-all flex items-center justify-between group/widget relative z-10 ${selectedWidgetId === widget.id ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-950/20 shadow-md" : "bg-white dark:bg-slate-900 border-slate-150 hover:border-slate-300"}`}
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${selectedWidgetId === widget.id ? "bg-indigo-600 text-white" : "bg-slate-100 text-slate-500"}`}>
-                                      {widget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-4 h-4" /> : <Database className="w-4 h-4" />}
+                        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-8 ${row.settings?.fullWidth ? "px-8" : "px-4"}`}>
+                          {row.columns.map((col) => (
+                            <div
+                              key={col.id}
+                              onDragOver={(e) => { e.preventDefault(); setDragOverColId(col.id); }}
+                              onDragLeave={() => setDragOverColId(null)}
+                              onDrop={(e) => { e.preventDefault(); setDragOverColId(null); const dragData = e.dataTransfer.getData("text/plain"); if (dragData) addWidgetFromDrag(row.rowId, col.id, dragData); }}
+                              className={`${col.colSpan} relative border-2 border-dashed ${dragOverColId === col.id ? "border-indigo-500 bg-indigo-50/40" : "border-slate-100 dark:border-slate-800/30 hover:border-slate-200"} rounded-2xl p-4 min-h-[160px] transition-all flex flex-col`}
+                            >
+                              <div className="absolute top-2 right-2 opacity-10 group-hover:opacity-30 transition-opacity">
+                                <Layout className="w-10 h-10 text-slate-300" />
+                              </div>
+
+                              <div className="flex flex-col gap-3 flex-1 relative z-10">
+                                {col.widgets.map((widget) => (
+                                  <div
+                                    key={widget.id}
+                                    onClick={(e) => { e.stopPropagation(); setSelectedWidgetId(widget.id); setSelectedRowId(null); setActiveTab("customizer"); }}
+                                    className={`group/widget p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between relative shadow-sm ${selectedWidgetId === widget.id
+                                      ? "border-indigo-500 bg-white ring-4 ring-indigo-50 z-20"
+                                      : "bg-white dark:bg-slate-900 border-slate-100 hover:border-indigo-200 hover:shadow-md hover:-translate-y-0.5"}`}
+                                  >
+                                    <div className="flex items-center gap-4 min-w-0">
+                                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-sm transition-transform group-hover/widget:scale-110 ${selectedWidgetId === widget.id ? "bg-indigo-600 text-white" : "bg-slate-50 text-slate-500"}`}>
+                                        {widget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-5 h-5" /> : <Database className="w-5 h-5" />}
+                                      </div>
+                                      <div className="flex flex-col min-w-0">
+                                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-0.5">Widget Configuration</span>
+                                        <span className="text-xs font-black text-slate-800 dark:text-white truncate uppercase tracking-tight">{widget.title[activeLang] || "Unnamed Widget"}</span>
+                                      </div>
                                     </div>
-                                    <span className="text-xs font-bold truncate">{widget.title[activeLang] || "Widget"}</span>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => { e.stopPropagation(); deleteWidget(row.rowId, col.id, widget.id); }}
+                                      className="w-8 h-8 text-slate-300 hover:text-rose-600 hover:bg-rose-50 rounded-xl opacity-0 group-hover/widget:opacity-100 transition-all"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </Button>
+
+                                    {selectedWidgetId === widget.id && (
+                                      <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-indigo-600 rounded-full shadow-lg shadow-indigo-500/50" />
+                                    )}
                                   </div>
-                                  <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); deleteWidget(row.rowId, col.id, widget.id); }} className="w-6 h-6 text-slate-300 group-hover/widget:text-red-500"><X className="w-3.5 h-3.5" /></Button>
-                                </div>
-                              ))}
-                              {col.widgets.length === 0 && (
-                                <div className="flex flex-col items-center justify-center py-6 text-slate-300">
-                                  <Plus className="w-5 h-5 mb-1" />
-                                  <span className="text-[8px] font-black uppercase tracking-widest">Kéo Widget vào đây</span>
-                                </div>
-                              )}
+                                ))}
+
+                                {col.widgets.length === 0 && (
+                                  <div className="flex-1 flex flex-col items-center justify-center py-10 border-2 border-dashed border-slate-50 dark:border-slate-800/20 rounded-xl">
+                                    <div className="w-10 h-10 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center text-slate-200 mb-2">
+                                      <Plus className="w-5 h-5" />
+                                    </div>
+                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">Kéo thả Widget</span>
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
@@ -919,32 +975,51 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
         {showRightPanel && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-white dark:bg-slate-900 overflow-y-auto">
-              <div className="p-4">
+            <ResizablePanel defaultSize={20} minSize={15} maxSize={30} className="bg-white dark:bg-slate-900 overflow-y-auto custom-scrollbar border-l border-slate-100 dark:border-slate-800 shadow-2xl">
+              <div className="p-6">
                 {(currentWidget || selectedRowId) ? (
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                      <TabsTrigger value="customizer" disabled={!currentWidget} className="rounded-lg text-[10px] font-black uppercase tracking-wider py-2">Widget</TabsTrigger>
-                      <TabsTrigger value="design" disabled={!selectedRowId} className="rounded-lg text-[10px] font-black uppercase tracking-wider py-2">Layout</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-2xl border border-slate-200/50">
+                      <TabsTrigger value="customizer" disabled={!currentWidget} className="rounded-xl text-[10px] font-black uppercase tracking-widest py-3 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all">
+                        <Settings2 className="w-3.5 h-3.5 mr-2" />
+                        Widget
+                      </TabsTrigger>
+                      <TabsTrigger value="design" disabled={!selectedRowId} className="rounded-xl text-[10px] font-black uppercase tracking-widest py-3 data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-md transition-all">
+                        <Sparkles className="w-3.5 h-3.5 mr-2" />
+                        Layout
+                      </TabsTrigger>
                     </TabsList>
 
-                    <TabsContent value="customizer" className="space-y-6">
+                    <TabsContent value="customizer" className="space-y-8 mt-0">
                       {currentWidget && (
-                        <div className="space-y-6 animate-fade-in">
-                          <div className="space-y-1.5">
-                            <Label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Tiêu đề Widget ({activeLang.toUpperCase()})</Label>
+                        <div className="space-y-8 animate-fade-in">
+                          <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100 flex items-center gap-4">
+                            <div className="w-12 h-12 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                              {currentWidget.type === "LEXICAL_RICH_TEXT" ? <Type className="w-6 h-6" /> : <Database className="w-6 h-6" />}
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-0.5">Đang cấu hình</span>
+                              <span className="text-xs font-black text-slate-800 uppercase tracking-tight truncate max-w-[140px]">{currentWidget.title[activeLang] || "Widget"}</span>
+                            </div>
+                          </div>
+
+                          <div className="space-y-3">
+                            <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1 flex items-center justify-between">
+                              Tiêu đề hiển thị ({activeLang.toUpperCase()})
+                              <span className="text-[8px] bg-slate-100 px-2 py-0.5 rounded-full text-slate-400">Bắt buộc</span>
+                            </Label>
                             <Input
                               value={currentWidget.title[activeLang] || ""}
                               onChange={(e) => updateWidgetTitle(currentWidget.id, e.target.value)}
-                              placeholder="Nhập tiêu đề..."
-                              className="h-10 text-xs font-semibold"
+                              placeholder="Ví dụ: Tin nổi bật Dak Lak..."
+                              className="h-12 text-xs font-bold rounded-2xl border-slate-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all bg-slate-50/50"
                             />
                           </div>
 
                           {currentWidget.type === "LEXICAL_RICH_TEXT" && (
-                            <div className="space-y-2">
-                              <Label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Nội dung Rich Text</Label>
-                              <div className="border rounded-xl overflow-hidden bg-white dark:bg-slate-950 min-h-[400px]">
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                              <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">Soạn thảo nội dung</Label>
+                              <div className="border border-slate-100 rounded-[28px] overflow-hidden bg-white shadow-sm ring-1 ring-slate-100 min-h-[500px]">
                                 <LexicalEditor
                                   value={currentWidget.content?.[activeLang] || ""}
                                   onChange={(val) => updateWidgetContent(currentWidget.id, val)}
@@ -954,9 +1029,12 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           )}
 
                           {currentWidget.type === "ORG_SECTIONS_DIRECTORY" && (
-                            <div className="space-y-4 pt-4 border-t border-slate-150">
-                              <Label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Chọn đơn vị tổ chức</Label>
-                              <div className="max-h-72 overflow-y-auto p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border">
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                              <div className="flex items-center justify-between">
+                                <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">Đơn vị tổ chức</Label>
+                                <span className="text-[9px] font-bold text-indigo-600">Dữ liệu hệ thống</span>
+                              </div>
+                              <div className="max-h-96 overflow-y-auto p-4 bg-slate-50/50 dark:bg-slate-950 rounded-[24px] border border-slate-100 custom-scrollbar shadow-inner">
                                 {(orgTree || []).map((node: any) => (
                                   <OrgTreeItem key={node.id} node={node} isCustomizer={true} widgetId={currentWidget.id} />
                                 ))}
@@ -965,19 +1043,36 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                           )}
 
                           {currentWidget.type === "LEADERSHIP_LIST" && (
-                            <div className="space-y-4 pt-4 border-t border-slate-150">
-                              <Label className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">Chọn cán bộ lãnh đạo</Label>
-                              <div className="max-h-72 overflow-y-auto space-y-1 p-2 bg-slate-50 dark:bg-slate-950 rounded-xl border">
+                            <div className="space-y-4 pt-4 border-t border-slate-100">
+                              <Label className="text-[10px] text-slate-400 font-black uppercase tracking-widest px-1">Thành viên lãnh đạo</Label>
+                              <div className="max-h-96 overflow-y-auto space-y-2 p-3 bg-slate-50/50 dark:bg-slate-950 rounded-[24px] border border-slate-100 custom-scrollbar shadow-inner">
                                 {allEmployees.map((emp: any) => (
                                   <div
                                     key={emp.id}
                                     onClick={() => toggleSelectLeader(currentWidget.id, emp)}
-                                    className={`p-2 rounded-lg border text-xs cursor-pointer flex items-center gap-2 ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id) ? "bg-indigo-50 border-indigo-200" : "bg-white border-slate-100"}`}
+                                    className={`p-3 rounded-2xl border text-xs cursor-pointer flex items-center justify-between transition-all group/emp ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id)
+                                      ? "bg-white border-indigo-300 shadow-md ring-2 ring-indigo-50"
+                                      : "bg-white border-slate-100 hover:border-slate-200"
+                                      }`}
                                   >
-                                    <div className={`w-3.5 h-3.5 rounded border flex items-center justify-center ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id) ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300"}`}>
-                                      {(currentWidget.data?.selectedLeaderIds || []).includes(emp.id) && <Check className="w-2.5 h-2.5" />}
+                                    <div className="flex items-center gap-3">
+                                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id)
+                                        ? "bg-indigo-600 text-white"
+                                        : "bg-slate-50 text-slate-300 group-hover/emp:bg-slate-100"
+                                        }`}>
+                                        <Users2 className="w-4 h-4" />
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="font-black text-slate-800">{emp.lastname} {emp.firstname}</span>
+                                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{emp.position || "Cán bộ"}</span>
+                                      </div>
                                     </div>
-                                    <span className="font-bold">{emp.lastname} {emp.firstname}</span>
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${(currentWidget.data?.selectedLeaderIds || []).includes(emp.id)
+                                      ? "bg-indigo-600 border-indigo-600 text-white"
+                                      : "border-slate-100"
+                                      }`}>
+                                      {(currentWidget.data?.selectedLeaderIds || []).includes(emp.id) && <Check className="w-3 h-3" />}
+                                    </div>
                                   </div>
                                 ))}
                               </div>
@@ -987,49 +1082,124 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                       )}
                     </TabsContent>
 
-                    <TabsContent value="design" className="space-y-6">
+                    <TabsContent value="design" className="space-y-8 mt-0">
                       {selectedRowId && (
-                        <div className="space-y-6 animate-fade-in">
-                          <div className="space-y-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100">
-                            <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Nền & Màu sắc</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1.5">
-                                <Label className="text-[9px] font-bold text-slate-500 uppercase">Màu nền</Label>
-                                <Input type="color" value={findRowById(selectedRowId)?.settings?.backgroundColor || "#ffffff"} onChange={(e) => updateRowSettings(selectedRowId, { backgroundColor: e.target.value })} className="h-10 p-1" />
-                              </div>
-                              <div className="space-y-1.5">
-                                <Label className="text-[9px] font-bold text-slate-500 uppercase">Màu chữ</Label>
-                                <Input type="color" value={findRowById(selectedRowId)?.settings?.textColor || "#000000"} onChange={(e) => updateRowSettings(selectedRowId, { textColor: e.target.value })} className="h-10 p-1" />
-                              </div>
+                        <div className="space-y-8 animate-fade-in">
+                          <div className="p-5 bg-amber-50/50 rounded-2xl border border-amber-100 flex items-center gap-4">
+                            <div className="w-12 h-12 bg-amber-500 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200">
+                              <Layout className="w-6 h-6" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-0.5">Tùy chỉnh Hàng</span>
+                              <span className="text-xs font-black text-slate-800 uppercase tracking-tight">Cấu hình hiển thị Layout</span>
                             </div>
                           </div>
 
-                          <div className="space-y-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-100">
-                            <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Khoảng cách</Label>
-                            <div className="grid grid-cols-2 gap-3">
-                              <div className="space-y-1.5">
-                                <Label className="text-[9px] font-bold text-slate-500 uppercase">Đệm trên</Label>
-                                <Select value={findRowById(selectedRowId)?.settings?.paddingTop || "pt-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingTop: val })}>
-                                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pt-0">0px</SelectItem>
-                                    <SelectItem value="pt-4">16px</SelectItem>
-                                    <SelectItem value="pt-8">32px</SelectItem>
-                                    <SelectItem value="pt-12">48px</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                          <div className="space-y-6">
+                            <div className="space-y-4 p-5 rounded-[28px] bg-slate-50/50 dark:bg-slate-950 border border-slate-100 shadow-sm">
+                              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                                Màu sắc & Chủ đề
+                              </Label>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Nền hàng</Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="color"
+                                      value={findRowById(selectedRowId)?.settings?.backgroundColor || "#ffffff"}
+                                      onChange={(e) => updateRowSettings(selectedRowId, { backgroundColor: e.target.value })}
+                                      className="h-10 w-full p-1 rounded-xl border-slate-100 cursor-pointer"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-2">
+                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Màu chữ</Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="color"
+                                      value={findRowById(selectedRowId)?.settings?.textColor || "#000000"}
+                                      onChange={(e) => updateRowSettings(selectedRowId, { textColor: e.target.value })}
+                                      className="h-10 w-full p-1 rounded-xl border-slate-100 cursor-pointer"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="space-y-2 col-span-2">
+                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Ảnh nền hàng (URL)</Label>
+                                  <div className="flex items-center gap-2">
+                                    <Input
+                                      type="text"
+                                      placeholder="https://images.unsplash.com/..."
+                                      value={findRowById(selectedRowId)?.settings?.backgroundImage || ""}
+                                      onChange={(e) => updateRowSettings(selectedRowId, { backgroundImage: e.target.value })}
+                                      className="h-10 w-full px-4 rounded-xl border-slate-100 text-[11px] font-bold bg-white focus:ring-4 focus:ring-indigo-50 transition-all"
+                                    />
+                                  </div>
+                                </div>
                               </div>
-                              <div className="space-y-1.5">
-                                <Label className="text-[9px] font-bold text-slate-500 uppercase">Đệm dưới</Label>
-                                <Select value={findRowById(selectedRowId)?.settings?.paddingBottom || "pb-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingBottom: val })}>
-                                  <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="pb-0">0px</SelectItem>
-                                    <SelectItem value="pb-4">16px</SelectItem>
-                                    <SelectItem value="pb-8">32px</SelectItem>
-                                    <SelectItem value="pb-12">48px</SelectItem>
-                                  </SelectContent>
-                                </Select>
+                            </div>
+
+                            <div className="space-y-4 p-5 rounded-[28px] bg-slate-50/50 dark:bg-slate-950 border border-slate-100 shadow-sm">
+                              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest flex items-center gap-2">
+                                <Columns className="w-3.5 h-3.5 text-indigo-500" />
+                                Không gian hiển thị
+                              </Label>
+                              <div className="space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="space-y-2">
+                                    <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Padding Trên</Label>
+                                    <Select value={findRowById(selectedRowId)?.settings?.paddingTop || "pt-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingTop: val })}>
+                                      <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
+                                      <SelectContent className="rounded-xl">
+                                        <SelectItem value="pt-0">Không đệm</SelectItem>
+                                        <SelectItem value="pt-4">Nhỏ (16px)</SelectItem>
+                                        <SelectItem value="pt-8">Vừa (32px)</SelectItem>
+                                        <SelectItem value="pt-12">Lớn (48px)</SelectItem>
+                                        <SelectItem value="pt-20">X-Large (80px)</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                  <div className="space-y-2">
+                                    <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Padding Dưới</Label>
+                                    <Select value={findRowById(selectedRowId)?.settings?.paddingBottom || "pb-8"} onValueChange={(val) => updateRowSettings(selectedRowId, { paddingBottom: val })}>
+                                      <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
+                                      <SelectContent className="rounded-xl">
+                                        <SelectItem value="pb-0">Không đệm</SelectItem>
+                                        <SelectItem value="pb-4">Nhỏ (16px)</SelectItem>
+                                        <SelectItem value="pb-8">Vừa (32px)</SelectItem>
+                                        <SelectItem value="pb-12">Lớn (48px)</SelectItem>
+                                        <SelectItem value="pb-20">X-Large (80px)</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-tight">Độ bo góc (Border Radius)</Label>
+                                  <Select value={findRowById(selectedRowId)?.settings?.borderRadius || "rounded-2xl"} onValueChange={(val) => updateRowSettings(selectedRowId, { borderRadius: val })}>
+                                    <SelectTrigger className="h-10 text-xs font-bold rounded-xl bg-white"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-xl">
+                                      <SelectItem value="rounded-none">Góc vuông (0px)</SelectItem>
+                                      <SelectItem value="rounded-xl">Hơi bo (12px)</SelectItem>
+                                      <SelectItem value="rounded-2xl">Bo vừa (16px)</SelectItem>
+                                      <SelectItem value="rounded-3xl">Bo mạnh (24px)</SelectItem>
+                                      <SelectItem value="rounded-[40px]">Siêu bo (40px)</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+
+                                <div className="flex items-center justify-between p-3 bg-white rounded-2xl border border-slate-100">
+                                  <div className="flex flex-col">
+                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-tight">Kịch khung (Full Width)</span>
+                                    <span className="text-[8px] font-bold text-slate-400">Cho phép hàng tràn viền màn hình</span>
+                                  </div>
+                                  <button
+                                    onClick={() => updateRowSettings(selectedRowId, { fullWidth: !findRowById(selectedRowId)?.settings?.fullWidth })}
+                                    className={`relative inline-flex h-5 w-10 items-center rounded-full transition-all ${findRowById(selectedRowId)?.settings?.fullWidth ? "bg-indigo-600" : "bg-slate-200"}`}
+                                  >
+                                    <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-md transition-all ${findRowById(selectedRowId)?.settings?.fullWidth ? "translate-x-6" : "translate-x-1"}`} />
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -1038,9 +1208,14 @@ export function PageBuilder({ layout, onChange, languages }: PageBuilderProps) {
                     </TabsContent>
                   </Tabs>
                 ) : (
-                  <div className="py-20 text-center opacity-30">
-                    <Settings2 className="w-12 h-12 mx-auto mb-4" />
-                    <p className="text-[10px] font-black uppercase tracking-widest">Chọn thành phần để cấu hình</p>
+                  <div className="py-40 text-center opacity-20 flex flex-col items-center justify-center space-y-6 select-none grayscale">
+                    <div className="w-24 h-24 bg-slate-100 rounded-[32px] flex items-center justify-center">
+                      <Settings2 className="w-10 h-10 text-slate-400 animate-[spin_10s_linear_infinite]" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-black uppercase tracking-[0.2em]">Chế độ nhàn rỗi</p>
+                      <p className="text-[9px] font-bold uppercase tracking-widest">Chọn Hàng hoặc Widget để cấu hình</p>
+                    </div>
                   </div>
                 )}
               </div>
