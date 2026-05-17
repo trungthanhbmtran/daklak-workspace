@@ -28,10 +28,9 @@ export const EditorCanvas: React.FC = () => {
 
   // Evaluate width based on active viewport
   const viewportWidthClass = cn(
-    "h-full mx-auto transition-all duration-500 bg-slate-50 dark:bg-slate-950 p-6 overflow-y-auto min-h-[720px] rounded-3xl shadow-inner border border-slate-100 dark:border-slate-900/60 shrink-0",
-    viewport === "desktop" ? "w-full min-w-[1024px] max-w-[1280px]" : "",
-    viewport === "tablet" ? "w-[768px] border-x-8 border-slate-200 dark:border-slate-800" : "",
-    viewport === "mobile" ? "w-[375px] border-x-[12px] border-t-[20px] border-slate-200 dark:border-slate-800 rounded-[36px]" : ""
+    "w-full h-full mx-auto transition-all duration-500 bg-slate-50 dark:bg-slate-950 p-6 overflow-y-auto min-h-[720px] rounded-3xl shadow-inner border border-slate-100 dark:border-slate-900/60",
+    viewport === "tablet" ? "max-w-[768px] border-x-8 border-slate-200 dark:border-slate-800" : "",
+    viewport === "mobile" ? "max-w-[375px] border-x-[12px] border-t-[20px] border-slate-200 dark:border-slate-800 rounded-[36px]" : ""
   );
 
   if (layout.length === 0) {
@@ -51,7 +50,7 @@ export const EditorCanvas: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 h-full p-8 bg-slate-100/30 dark:bg-slate-950/20 overflow-auto flex flex-col items-center">
+    <div className="flex-1 h-full p-8 bg-slate-100/30 dark:bg-slate-950/20 overflow-hidden flex flex-col">
       <div className={viewportWidthClass}>
         <div className="space-y-8 pb-32">
           {layout.map((row, rowIdx) => {

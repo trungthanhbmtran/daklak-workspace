@@ -16,18 +16,13 @@ import {
 } from "@/components/ui/select";
 import { Settings, Sparkles, Wand2, Languages, Loader2, ArrowRight, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 
 // Auto-initialize registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {
   initializeBlockRegistry();
 }
 
-interface RightPropertiesProps {
-  className?: string;
-}
-
-export const RightProperties: React.FC<RightPropertiesProps> = ({ className }) => {
+export const RightProperties: React.FC = () => {
   const {
     layout,
     selectedRowId,
@@ -140,7 +135,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({ className }) =
     const settings = selectedRow.settings || {};
 
     return (
-      <aside className={cn("w-full h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 overflow-y-auto p-5 space-y-6 select-none animate-fade-in", className)}>
+      <aside className="w-80 h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 overflow-y-auto p-5 space-y-6 select-none animate-fade-in">
         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
           <Settings className="w-4.5 h-4.5 text-slate-500" />
           <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Cấu hình Section</h4>
@@ -257,7 +252,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({ className }) =
     const titleVal = widget.title?.[activeLang] || "";
 
     return (
-      <aside className={cn("w-full h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none animate-fade-in", className)}>
+      <aside className="w-80 h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none animate-fade-in">
         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 p-5 shrink-0 bg-slate-50/50 dark:bg-slate-950/20">
           <Settings className="w-4.5 h-4.5 text-slate-500" />
           <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Cấu hình Widget</h4>
@@ -334,7 +329,7 @@ export const RightProperties: React.FC<RightPropertiesProps> = ({ className }) =
 
   // 4. Default state
   return (
-    <aside className={cn("w-full h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 items-center justify-center p-6 text-center select-none animate-fade-in", className)}>
+    <aside className="w-80 h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 items-center justify-center p-6 text-center select-none animate-fade-in">
       <div className="w-12 h-12 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 shadow-inner mb-4">
         <Settings className="w-5 h-5" />
       </div>

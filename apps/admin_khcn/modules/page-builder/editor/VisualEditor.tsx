@@ -25,7 +25,6 @@ import {
   Redo
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 // Auto-initialize block registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {
@@ -106,7 +105,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
       };
 
       addWidget(targetRowId, targetColId, newWidget);
-    } 
+    }
     // Case B: Moving an existing widget within the canvas
     else {
       const { blockId, rowId: sourceRowId, colId: sourceColId } = activeData;
@@ -304,40 +303,11 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
       {/* 2. MIDDLE visual sandbox workspace */}
       <div className="flex-1 flex overflow-hidden w-full relative">
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <ResizablePanelGroup orientation="horizontal" className="w-full h-full flex">
-            {showLeftPanel ? (
-              <ResizablePanel 
-                defaultSize={20} 
-                minSize={15} 
-                maxSize={30}
-                className="h-full flex flex-col"
-              >
-                <LeftSidebar className="w-full h-full border-r-0" />
-              </ResizablePanel>
-            ) : null}
+          {showLeftPanel && <LeftSidebar />}
 
-            {showLeftPanel && <ResizableHandle withHandle />}
+          <EditorCanvas />
 
-            <ResizablePanel 
-              defaultSize={showLeftPanel && showRightPanel ? 60 : showLeftPanel || showRightPanel ? 80 : 100}
-              className="h-full flex flex-col"
-            >
-              <EditorCanvas />
-            </ResizablePanel>
-
-            {showRightPanel && <ResizableHandle withHandle />}
-
-            {showRightPanel ? (
-              <ResizablePanel 
-                defaultSize={20} 
-                minSize={15} 
-                maxSize={30}
-                className="h-full flex flex-col"
-              >
-                <RightProperties className="w-full h-full border-l-0" />
-              </ResizablePanel>
-            ) : null}
-          </ResizablePanelGroup>
+          {showRightPanel && <RightProperties />}
         </DndContext>
       </div>
     </div>
