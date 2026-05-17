@@ -1,5 +1,19 @@
 import { BlockRegistry } from "../core/registry";
-import { AlignLeft, Newspaper, BarChart3, Users, Network } from "lucide-react";
+import {
+  AlignLeft,
+  Newspaper,
+  BarChart3,
+  Users,
+  Network,
+  Sliders,
+  FileText,
+  FolderOpen,
+  Images,
+  HelpCircle,
+  Link2,
+  Map,
+  Phone
+} from "lucide-react";
 
 // 1. Rich Text Block
 import { RichTextDataSchema } from "./rich-text/rich-text.schema";
@@ -25,6 +39,40 @@ import { LeadershipEditor } from "./leadership/leadership.editor";
 import { DirectoryDataSchema } from "./directory/directory.schema";
 import { DirectoryRender } from "./directory/directory.render";
 import { DirectoryEditor } from "./directory/directory.editor";
+
+// 6. Custom Widgets
+import {
+  HeroSliderDataSchema,
+  PublicServicesDataSchema,
+  LegalDocumentsDataSchema,
+  MediaGalleryDataSchema,
+  FaqAccordionDataSchema,
+  ExternalLinksDataSchema,
+  CommuneMapDataSchema,
+  ContactInfoDataSchema
+} from "./custom-widgets/custom-widgets.schema";
+
+import {
+  HeroSliderRender,
+  PublicServicesRender,
+  LegalDocumentsRender,
+  MediaGalleryRender,
+  FaqAccordionRender,
+  ExternalLinksRender,
+  CommuneInteractiveMapRender,
+  ContactInfoSidebarRender
+} from "./custom-widgets/custom-widgets.render";
+
+import {
+  HeroSliderEditor,
+  PublicServicesEditor,
+  LegalDocumentsEditor,
+  MediaGalleryEditor,
+  FaqAccordionEditor,
+  ExternalLinksEditor,
+  CommuneInteractiveMapEditor,
+  ContactInfoSidebarEditor
+} from "./custom-widgets/custom-widgets.editor";
 
 /**
  * Initializes and registers all Visual Editor CMS Block Modules.
@@ -97,4 +145,101 @@ export function initializeBlockRegistry(): void {
     editor: DirectoryEditor as any,
     defaultData: { selectedUnitIds: [], selectedUnits: [], displayStyle: "tree" },
   });
+
+  // 6. Hero Banner Slider
+  BlockRegistry.registerBlock({
+    type: "HERO_SLIDER",
+    name: { vi: "Trình chiếu ảnh nổi bật", en: "Hero Image Slider" },
+    icon: Sliders,
+    category: "data",
+    schema: HeroSliderDataSchema,
+    renderer: HeroSliderRender as any,
+    editor: HeroSliderEditor as any,
+    defaultData: { limit: 5 },
+  });
+
+  // 7. Public Services
+  BlockRegistry.registerBlock({
+    type: "PUBLIC_SERVICES",
+    name: { vi: "Dịch vụ công trực tuyến", en: "Public Services Grid" },
+    icon: FileText,
+    category: "data",
+    schema: PublicServicesDataSchema,
+    renderer: PublicServicesRender as any,
+    editor: PublicServicesEditor as any,
+    defaultData: {},
+  });
+
+  // 8. Legal Documents
+  BlockRegistry.registerBlock({
+    type: "LEGAL_DOCUMENTS",
+    name: { vi: "Văn bản pháp quy", en: "Legal Documents List" },
+    icon: FolderOpen,
+    category: "data",
+    schema: LegalDocumentsDataSchema,
+    renderer: LegalDocumentsRender as any,
+    editor: LegalDocumentsEditor as any,
+    defaultData: { selectedCategory: null, limit: 5 },
+  });
+
+  // 9. Photo & Video Gallery
+  BlockRegistry.registerBlock({
+    type: "PHOTO_VIDEO_GALLERY",
+    name: { vi: "Thư viện đa phương tiện", en: "Media Gallery Grid" },
+    icon: Images,
+    category: "data",
+    schema: MediaGalleryDataSchema,
+    renderer: MediaGalleryRender as any,
+    editor: MediaGalleryEditor as any,
+    defaultData: { limit: 4 },
+  });
+
+  // 10. FAQ Accordion
+  BlockRegistry.registerBlock({
+    type: "FAQ_ACCORDION",
+    name: { vi: "Hỏi đáp công dân", en: "Citizen FAQ Accordion" },
+    icon: HelpCircle,
+    category: "data",
+    schema: FaqAccordionDataSchema,
+    renderer: FaqAccordionRender as any,
+    editor: FaqAccordionEditor as any,
+    defaultData: { limit: 5 },
+  });
+
+  // 11. External Useful Links
+  BlockRegistry.registerBlock({
+    type: "EXTERNAL_LINKS",
+    name: { vi: "Liên kết liên kết", en: "External Links Directory" },
+    icon: Link2,
+    category: "data",
+    schema: ExternalLinksDataSchema,
+    renderer: ExternalLinksRender as any,
+    editor: ExternalLinksEditor as any,
+    defaultData: {},
+  });
+
+  // 12. Interactive Commune Map
+  BlockRegistry.registerBlock({
+    type: "COMMUNE_INTERACTIVE_MAP",
+    name: { vi: "Bản đồ hành chính tương tác", en: "Interactive Commune Map" },
+    icon: Map,
+    category: "data",
+    schema: CommuneMapDataSchema,
+    renderer: CommuneInteractiveMapRender as any,
+    editor: CommuneInteractiveMapEditor as any,
+    defaultData: { defaultZoneId: "T3" },
+  });
+
+  // 13. Contact Info Sidebar
+  BlockRegistry.registerBlock({
+    type: "CONTACT_INFO_SIDEBAR",
+    name: { vi: "Thông tin liên hệ", en: "Contact Info Sidebar" },
+    icon: Phone,
+    category: "data",
+    schema: ContactInfoDataSchema,
+    renderer: ContactInfoSidebarRender as any,
+    editor: ContactInfoSidebarEditor as any,
+    defaultData: {},
+  });
 }
+
