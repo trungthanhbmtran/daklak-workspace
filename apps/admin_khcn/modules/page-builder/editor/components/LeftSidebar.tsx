@@ -7,13 +7,18 @@ import { StructureTree } from "./StructureTree";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, LayoutGrid, Layers, Columns, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Auto-initialize registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {
   initializeBlockRegistry();
 }
 
-export const LeftSidebar: React.FC = () => {
+interface LeftSidebarProps {
+  className?: string;
+}
+
+export const LeftSidebar: React.FC<LeftSidebarProps> = ({ className }) => {
   const [activeTab, setActiveTab] = React.useState<"library" | "structure">("library");
   const [search, setSearch] = React.useState("");
 
@@ -41,7 +46,7 @@ export const LeftSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-80 h-full border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none animate-fade-in">
+    <aside className={cn("w-full h-full border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none animate-fade-in", className)}>
       {/* Sidebar Header Tab Switcher */}
       <div className="flex border-b border-slate-100 dark:border-slate-800 p-2 gap-1.5 shrink-0 bg-slate-50/50 dark:bg-slate-950/20">
         <button

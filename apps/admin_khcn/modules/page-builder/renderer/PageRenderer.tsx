@@ -10,10 +10,10 @@ interface PageRendererProps {
   className?: string;
 }
 
-export const PageRenderer: React.FC<PageRendererProps> = ({ 
-  layout = [], 
-  activeLang = "vi", 
-  className 
+export const PageRenderer: React.FC<PageRendererProps> = ({
+  layout = [],
+  activeLang = "vi",
+  className
 }) => {
   if (!Array.isArray(layout) || layout.length === 0) {
     return (
@@ -33,18 +33,18 @@ export const PageRenderer: React.FC<PageRendererProps> = ({
       {layout.map((row) => (
         <SectionRenderer key={row.rowId} row={row}>
           {row.columns.map((col) => (
-            <div 
-              key={col.id} 
+            <div
+              key={col.id}
               className={cn(
-                "flex flex-col gap-6", 
-                col.colSpan || "col-span-12"
+                "col-span-12 flex flex-col gap-6",
+                col.colSpan || "lg:col-span-12"
               )}
             >
               {col.widgets.map((widget) => (
-                <BlockRenderer 
-                  key={widget.id} 
-                  widget={widget} 
-                  activeLang={activeLang} 
+                <BlockRenderer
+                  key={widget.id}
+                  widget={widget}
+                  activeLang={activeLang}
                 />
               ))}
             </div>

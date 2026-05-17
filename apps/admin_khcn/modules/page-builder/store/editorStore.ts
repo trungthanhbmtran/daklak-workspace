@@ -22,7 +22,7 @@ export interface EditorStore {
   // --- Core Lifecycle ---
   initStore: (layout: Row[], languages: PageLanguage[]) => void;
   setLayout: (newLayout: Row[]) => void;
-  
+
   // --- Interface Controls ---
   setActiveLang: (lang: string) => void;
   setSelectedWidgetId: (id: string | null) => void;
@@ -42,8 +42,7 @@ export interface EditorStore {
   deleteRow: (rowId: string) => void;
   moveRow: (index: number, direction: "up" | "down") => void;
   updateRowSettings: (rowId: string, settings: Partial<SectionSettings>) => void;
-  updateColumnColSpan: (rowId: string, colId: string, colSpan: string) => void;
-  
+
   // --- Widget Mutations ---
   addWidget: (rowId: string, colId: string, widget: Widget, index?: number) => void;
   deleteWidget: (rowId: string, colId: string, widgetId: string) => void;
@@ -218,24 +217,6 @@ export const useEditorStore = create<EditorStore>((set, get) => {
       get().setLayout(updated);
     },
 
-    updateColumnColSpan: (rowId, colId, colSpan) => {
-      const updated = get().layout.map((row) => {
-        if (row.rowId === rowId) {
-          return {
-            ...row,
-            columns: row.columns.map((col) => {
-              if (col.id === colId) {
-                return { ...col, colSpan };
-              }
-              return col;
-            }),
-          };
-        }
-        return row;
-      });
-      get().setLayout(updated);
-    },
-
     // --- Widget Mutations ---
     addWidget: (rowId, colId, widget, index) => {
       const updated = get().layout.map((row) => {
@@ -327,7 +308,7 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           }),
         })),
       }));
-      
+
       set({ layout: updated });
     },
 
