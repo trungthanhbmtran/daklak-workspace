@@ -26,9 +26,11 @@ import {
   Tablet,
   Smartphone,
   ChevronRight,
-  Globe
+  Globe,
+  Columns
 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
@@ -56,6 +58,7 @@ export function PortalPageBuilderClient() {
   const [pagesList, setPagesList] = useState<CustomPageMeta[]>([]);
   const [selectedPageId, setSelectedPageId] = useState<string>("about-page");
   const [currentLayout, setCurrentLayout] = useState<any[]>([]);
+  const [showPagesSidebar, setShowPagesSidebar] = useState(true);
 
   // Dialog state for adding/editing page metadata
   const [isPageModalOpen, setIsPageModalOpen] = useState(false);
@@ -351,6 +354,19 @@ export function PortalPageBuilderClient() {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Administrative Design Suite</span>
             </div>
           </div>
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowPagesSidebar(!showPagesSidebar)}
+            className={cn(
+              "w-10 h-10 rounded-2xl border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all",
+              showPagesSidebar ? "bg-slate-50 dark:bg-slate-800 border-indigo-200 dark:border-indigo-800 text-indigo-650 dark:text-indigo-400 shadow-sm" : "text-slate-500"
+            )}
+            title={showPagesSidebar ? "Ẩn thanh quản lý trang" : "Hiện thanh quản lý trang"}
+          >
+            <Columns className={cn("w-4.5 h-4.5 transition-transform duration-300", !showPagesSidebar && "rotate-180")} />
+          </Button>
         </div>
 
         <div className="flex items-center gap-4">
@@ -391,7 +407,10 @@ export function PortalPageBuilderClient() {
       <main className="flex-1 flex overflow-hidden">
         
         {/* LEFT SIDEBAR: Pages List */}
-        <aside className="w-80 border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex flex-col z-30 shrink-0">
+        <aside className={cn(
+          "border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex flex-col z-30 shrink-0 transition-all duration-300",
+          showPagesSidebar ? "w-80" : "w-0 overflow-hidden border-r-0"
+        )}>
           <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/30">
             <div className="flex items-center gap-2">
               <FileCode className="w-4 h-4 text-slate-400" />
