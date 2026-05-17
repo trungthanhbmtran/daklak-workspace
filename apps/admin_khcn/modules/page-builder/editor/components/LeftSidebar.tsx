@@ -66,7 +66,7 @@ export const LeftSidebar: React.FC = () => {
 
       {/* Main Sidebar Contents */}
       {activeTab === "library" ? (
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
           {/* Row Sections creators */}
           <div className="space-y-3">
             <Label className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-0.5 flex items-center gap-1">
@@ -168,7 +168,7 @@ export const LeftSidebar: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
           <StructureTree />
         </div>
       )}
