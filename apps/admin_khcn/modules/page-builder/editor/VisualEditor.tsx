@@ -65,14 +65,18 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
   } = useEditorStore();
 
   // 1. Initialize store state
+  const isInitialized = React.useRef(false);
   React.useEffect(() => {
-    initStore(initialLayout, languages);
+    if (!isInitialized.current) {
+      initStore(initialLayout, languages);
+      isInitialized.current = true;
+    }
   }, [initialLayout, languages, initStore]);
 
   // 2. Synchronize layout mutations back to external database onChange handlers
   React.useEffect(() => {
-    // Only invoke callback if layout is initialized to prevent blank resets
-    if (layout.length > 0) {
+    // Only invoke callback if we have completed initialization
+    if (isInitialized.current) {
       onChange(layout);
     }
   }, [layout, onChange]);
