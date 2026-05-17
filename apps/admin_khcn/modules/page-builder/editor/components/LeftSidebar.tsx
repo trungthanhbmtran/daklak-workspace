@@ -41,7 +41,7 @@ export const LeftSidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-80 h-full border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 select-none animate-fade-in">
+    <aside className="w-80 h-full border-r border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 animate-fade-in">
       {/* Sidebar Header Tab Switcher */}
       <div className="flex border-b border-slate-100 dark:border-slate-800 p-2 gap-1.5 shrink-0 bg-slate-50/50 dark:bg-slate-950/20">
         <button

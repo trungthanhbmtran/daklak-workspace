@@ -156,7 +156,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden select-none">
+    <div className="w-full h-full flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
       {/* 1. TOP UTILITY TOOLBAR PANEL */}
       <header className="h-16 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between px-6 shrink-0 z-30 shadow-sm">
         {/* Left Side: Brand Logo, Lang selector */}
