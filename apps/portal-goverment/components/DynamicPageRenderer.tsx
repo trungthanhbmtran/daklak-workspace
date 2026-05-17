@@ -1030,10 +1030,10 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                         <Icon className="w-4 h-4" />
                                       </div>
                                       <span className="text-[9px] text-slate-400 font-extrabold uppercase mt-2 tracking-wide">
-                                        {item.label}
+                                        {typeof item.label === "object" && item.label ? (item.label[currentLang] || item.label.vi || "") : item.label}
                                       </span>
                                       <span className="text-sm font-black text-slate-900 dark:text-white mt-1">
-                                        {item.value}
+                                        {typeof item.value === "object" && item.value ? (item.value[currentLang] || item.value.vi || "") : item.value}
                                       </span>
                                     </div>
                                   )
