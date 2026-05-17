@@ -30,11 +30,56 @@ interface LexicalEditorProps {
   minHeight?: string;
 }
 
+function isLexicalJson(str: string): boolean {
+  if (!str) return false;
+  try {
+    const parsed = JSON.parse(str);
+    return parsed && typeof parsed === "object" && "root" in parsed;
+  } catch (e) {
+    return false;
+  }
+}
+
+function convertPlainTextToLexicalJson(text: string): string {
+  return JSON.stringify({
+    root: {
+      children: [
+        {
+          children: [
+            {
+              detail: 0,
+              format: 0,
+              mode: "normal",
+              style: "",
+              text: text || "",
+              type: "text",
+              version: 1
+            }
+          ],
+          direction: "ltr",
+          format: "",
+          indent: 0,
+          type: "paragraph",
+          version: 1
+        }
+      ],
+      direction: "ltr",
+      format: "",
+      indent: 0,
+      type: "root",
+      version: 1
+    }
+  });
+}
+
 export function LexicalEditor({ value, onChange, placeholder = "Nhập nội dung...", minHeight = "500px" }: LexicalEditorProps) {
+  // Đảm bảo value luôn là chuỗi Lexical JSON hợp lệ
+  const safeValue = isLexicalJson(value) ? value : convertPlainTextToLexicalJson(value);
+
   // Cấu hình khởi tạo với giá trị ban đầu nếu có
   const config = {
     ...initialConfig,
-    editorState: value ? value : undefined,
+    editorState: safeValue ? safeValue : undefined,
   };
 
   return (
