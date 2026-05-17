@@ -497,7 +497,7 @@ export function PortalPageBuilderClient() {
 
         {/* CONTENT AREA: Page Builder */}
         <div className="flex-1 overflow-hidden flex flex-col relative">
-          <div className="flex-1 bg-[#f8fafc] dark:bg-[#020617]">
+          <div className="flex-1 bg-[#f8fafc] dark:bg-[#020617] flex flex-col h-full overflow-hidden relative">
             <PageBuilder 
               key={selectedPageId}
               layout={currentLayout}
