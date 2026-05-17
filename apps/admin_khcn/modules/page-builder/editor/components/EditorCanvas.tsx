@@ -28,14 +28,14 @@ export const EditorCanvas: React.FC = () => {
 
   // Evaluate width based on active viewport
   const viewportWidthClass = cn(
-    "w-full h-full mx-auto transition-all duration-500 bg-slate-50 dark:bg-slate-950 p-6 overflow-y-auto min-h-[720px] rounded-3xl shadow-inner border border-slate-100 dark:border-slate-900/60 custom-scrollbar",
+    "w-full h-full mx-auto transition-all duration-500 bg-slate-50 dark:bg-slate-950 p-6 overflow-y-auto min-h-[720px] rounded-3xl shadow-inner border border-slate-100 dark:border-slate-900/60",
     viewport === "tablet" ? "max-w-[768px] border-x-8 border-slate-200 dark:border-slate-800" : "",
     viewport === "mobile" ? "max-w-[375px] border-x-[12px] border-t-[20px] border-slate-200 dark:border-slate-800 rounded-[36px]" : ""
   );
 
   if (layout.length === 0) {
     return (
-      <div className="flex-1 h-full p-8 bg-slate-100/30 dark:bg-slate-950/20 overflow-y-auto flex items-center justify-center custom-scrollbar">
+      <div className="flex-1 h-full p-8 bg-slate-100/30 dark:bg-slate-950/20 overflow-y-auto flex items-center justify-center">
         <div className="text-center p-10 max-w-sm rounded-3xl border border-slate-150 dark:border-slate-900 bg-white dark:bg-slate-950 shadow-xl flex flex-col items-center gap-4 py-12">
           <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 flex items-center justify-center shadow-inner">
             <Compass className="w-6 h-6 animate-pulse" />
@@ -122,7 +122,14 @@ export const EditorCanvas: React.FC = () => {
                         col.widgets.map((widget, wIdx) => {
                           const isWidgetSelected = selectedWidgetId === widget.id;
                           const blockConfig = BlockRegistry.getBlock(widget.type);
-                          const title = widget.title?.[activeLang] || blockConfig?.name?.vi || "Chưa đặt tên";
+                          
+                          // Safe Widget Title evaluation
+                          const title = (() => {
+                            const rawTitle = widget.title as any;
+                            if (!rawTitle) return blockConfig?.name?.vi || "Chưa đặt tên";
+                            if (typeof rawTitle === "string") return rawTitle;
+                            return rawTitle[activeLang] || rawTitle.vi || blockConfig?.name?.vi || "Chưa đặt tên";
+                          })();
 
                           return (
                             <DraggableBlock

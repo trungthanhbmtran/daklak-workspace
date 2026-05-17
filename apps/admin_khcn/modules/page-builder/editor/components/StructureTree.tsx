@@ -9,6 +9,7 @@ export const StructureTree: React.FC = () => {
     layout,
     selectedRowId,
     selectedWidgetId,
+    activeLang,
     setSelectedRowId,
     setSelectedWidgetId,
     deleteRow,
@@ -66,6 +67,7 @@ export const StructureTree: React.FC = () => {
                 {/* Row Control actions */}
                 <div className="flex items-center gap-0.5 shrink-0 opacity-80 group-hover:opacity-100">
                   <Button
+                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => moveRow(rowIdx, "up")}
@@ -75,6 +77,7 @@ export const StructureTree: React.FC = () => {
                     <ArrowUp className="w-3.5 h-3.5" />
                   </Button>
                   <Button
+                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => moveRow(rowIdx, "down")}
@@ -84,6 +87,7 @@ export const StructureTree: React.FC = () => {
                     <ArrowDown className="w-3.5 h-3.5" />
                   </Button>
                   <Button
+                     type="button"
                     variant="ghost"
                     size="icon"
                     onClick={() => deleteRow(row.rowId)}
@@ -96,57 +100,68 @@ export const StructureTree: React.FC = () => {
 
               {/* Columns Nesting */}
               <div className="mt-2 pl-3 border-l border-slate-200 dark:border-slate-800 space-y-2">
-                {row.columns.map((col, colIdx) => (
-                  <div key={col.id} className="space-y-1.5">
-                    <div className="flex items-center gap-1.5 py-1 text-[9px] font-black uppercase text-slate-400 tracking-wide select-none">
-                      <Building2 className="w-3 h-3 text-slate-350" />
-                      Cột {colIdx + 1} ({col.colSpan.split("-").pop()} phần)
-                    </div>
-
-                    {/* Widgets inside column */}
-                    {col.widgets.length > 0 && (
-                      <div className="pl-3.5 space-y-1">
-                        {col.widgets.map((widget) => {
-                          const isWidgetSelected = selectedWidgetId === widget.id;
-                          const blockConfig = BlockRegistry.getBlock(widget.type);
-                          const icon = blockConfig?.icon || AlignLeft;
-                          const title = widget.title?.vi || blockConfig?.name?.vi || "Chưa đặt tên";
-
-                          return (
-                            <div
-                              key={widget.id}
-                              className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
-                                isWidgetSelected
-                                  ? "bg-white dark:bg-slate-950 border-indigo-200 dark:border-indigo-800 shadow-sm"
-                                  : "bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-900 hover:border-indigo-100 dark:hover:border-slate-800"
-                              }`}
-                            >
-                              <div
-                                onClick={() => setSelectedWidgetId(widget.id)}
-                                className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
-                              >
-                                {React.createElement(icon, {
-                                  className: `w-3.5 h-3.5 shrink-0 ${isWidgetSelected ? "text-indigo-600" : "text-slate-400"}`
-                                })}
-                                <span className={`text-[10px] font-bold truncate leading-tight ${isWidgetSelected ? "text-indigo-600" : "text-slate-600 dark:text-slate-400"}`}>
-                                  {title}
-                                </span>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => deleteWidget(row.rowId, col.id, widget.id)}
-                                className="w-5 h-5 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 shrink-0"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </Button>
-                            </div>
-                          );
-                        })}
+                {row.columns.map((col, colIdx) => {
+                  const colSpanVal = col.colSpan && col.colSpan.includes("-") ? col.colSpan.split("-").pop() : "12";
+                  return (
+                    <div key={col.id} className="space-y-1.5">
+                      <div className="flex items-center gap-1.5 py-1 text-[9px] font-black uppercase text-slate-400 tracking-wide select-none">
+                        <Building2 className="w-3 h-3 text-slate-350" />
+                        Cột {colIdx + 1} ({colSpanVal} phần)
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {/* Widgets inside column */}
+                      {col.widgets.length > 0 && (
+                        <div className="pl-3.5 space-y-1">
+                          {col.widgets.map((widget) => {
+                            const isWidgetSelected = selectedWidgetId === widget.id;
+                            const blockConfig = BlockRegistry.getBlock(widget.type);
+                            const icon = blockConfig?.icon || AlignLeft;
+                            
+                            // Safe Widget Title evaluation
+                            const title = (() => {
+                              const rawTitle = widget.title as any;
+                              if (!rawTitle) return blockConfig?.name?.vi || "Chưa đặt tên";
+                              if (typeof rawTitle === "string") return rawTitle;
+                              return rawTitle[activeLang] || rawTitle.vi || blockConfig?.name?.vi || "Chưa đặt tên";
+                            })();
+
+                            return (
+                              <div
+                                key={widget.id}
+                                className={`flex items-center justify-between p-2 rounded-xl border transition-all ${
+                                  isWidgetSelected
+                                    ? "bg-white dark:bg-slate-950 border-indigo-200 dark:border-indigo-800 shadow-sm"
+                                    : "bg-white dark:bg-slate-950 border-slate-100 dark:border-slate-900 hover:border-indigo-100 dark:hover:border-slate-800"
+                                }`}
+                              >
+                                <div
+                                  onClick={() => setSelectedWidgetId(widget.id)}
+                                  className="flex items-center gap-2 cursor-pointer flex-1 min-w-0"
+                                >
+                                  {React.createElement(icon, {
+                                    className: `w-3.5 h-3.5 shrink-0 ${isWidgetSelected ? "text-indigo-600" : "text-slate-400"}`
+                                  })}
+                                  <span className={`text-[10px] font-bold truncate leading-tight ${isWidgetSelected ? "text-indigo-600" : "text-slate-600 dark:text-slate-400"}`}>
+                                    {title}
+                                  </span>
+                                </div>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => deleteWidget(row.rowId, col.id, widget.id)}
+                                  className="w-5 h-5 rounded-md text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 shrink-0"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </Button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           );

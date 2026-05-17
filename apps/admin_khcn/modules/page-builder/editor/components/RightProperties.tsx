@@ -135,7 +135,7 @@ export const RightProperties: React.FC = () => {
     const settings = selectedRow.settings || {};
 
     return (
-      <aside className="w-80 h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 overflow-y-auto custom-scrollbar p-5 space-y-6 select-none animate-fade-in">
+      <aside className="w-80 h-full border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-col shrink-0 overflow-y-auto p-5 space-y-6 select-none animate-fade-in">
         <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
           <Settings className="w-4.5 h-4.5 text-slate-500" />
           <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Cấu hình Section</h4>
@@ -258,7 +258,7 @@ export const RightProperties: React.FC = () => {
           <h4 className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight">Cấu hình Widget</h4>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
           {/* Multilingual properties */}
           <div className="space-y-4">
             <div className="space-y-2">
