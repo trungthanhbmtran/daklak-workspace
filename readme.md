@@ -25,6 +25,7 @@ Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông
 ## 3. Deploy thủ công (Manual)
 Nếu muốn deploy thủ công trên server:
 ```bash
+
 # Pull images mới nhất
 
 docker compose -f docker-compose.prod.yml pull
@@ -34,7 +35,6 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm user-servic
 docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate
-
 docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
 
