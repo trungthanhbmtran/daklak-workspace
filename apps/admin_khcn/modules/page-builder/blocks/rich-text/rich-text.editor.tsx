@@ -23,6 +23,7 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({ widget, activeLa
         </Label>
         <div className="p-1.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden min-h-[420px]">
           <LexicalEditor
+            key={`${widget.id}-${activeLang}`}
             value={content}
             onChange={(val) => updateWidgetContent(widget.id, val)}
             placeholder="Bắt đầu nhập hoặc chèn liên kết, hình ảnh tại đây..."
