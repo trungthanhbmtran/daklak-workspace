@@ -14,18 +14,19 @@ import {
   MapPin,
   Phone,
   Mail,
-  HelpCircle,
+  CalendarDays,
+  ArrowRight,
   Link2,
   Info,
-  CalendarDays,
-  ArrowRight
+  HelpCircle
 } from "lucide-react";
 
-// Mock helper to resolve image urls
-const resolveMediaUrl = (url: string | null) => {
-  if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return url;
+// Lucide icon mapping dictionary for public services
+const iconMap: Record<string, any> = {
+  FileText: FileText,
+  FileSearch: FileSearch,
+  MessageSquare: MessageSquare,
+  ShieldCheck: ShieldCheck,
 };
 
 // ----------------------------------------------------------------------
@@ -77,7 +78,6 @@ export const HeroSliderRender: React.FC<{ widget: Widget; activeLang: string }> 
         </div>
       </div>
 
-      {/* Slide indicators preview */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-1.5 bg-black/40 px-2 py-1 rounded-full backdrop-blur-sm border border-white/10">
         {displayBanners.map((_, idx) => (
           <div
@@ -95,51 +95,68 @@ export const HeroSliderRender: React.FC<{ widget: Widget; activeLang: string }> 
 // ----------------------------------------------------------------------
 export const PublicServicesRender: React.FC<{ widget: Widget; activeLang: string }> = ({ widget, activeLang }) => {
   const currentLang = activeLang;
-  const services = [
+
+  // Read customizable items from widget data, fallback to beautiful defaults if empty
+  const defaultServices = [
     {
       title: currentLang === "en" ? "Online Public Services" : "Dịch vụ công trực tuyến",
       desc: currentLang === "en" ? "Submit administrative procedural dossiers online 24/7." : "Nộp hồ sơ thủ tục hành chính trực tuyến 24/7.",
-      icon: FileText,
+      url: "#",
+      iconName: "FileText",
       color: "text-blue-600 bg-blue-50/50 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/50"
     },
     {
       title: currentLang === "en" ? "Dossier Status Lookup" : "Tra cứu hồ sơ một cửa",
       desc: currentLang === "en" ? "Check the handling progress of submitted documents." : "Kiểm tra tiến độ giải quyết hồ sơ đã nộp.",
-      icon: FileSearch,
+      url: "#",
+      iconName: "FileSearch",
       color: "text-emerald-600 bg-emerald-50/50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50"
     },
     {
       title: currentLang === "en" ? "Citizen Feedback" : "Phản ánh kiến nghị",
       desc: currentLang === "en" ? "Submit formal recommendations and service evaluations." : "Gửi ý kiến đóng góp và đánh giá thái độ phục vụ.",
-      icon: MessageSquare,
+      url: "#",
+      iconName: "MessageSquare",
       color: "text-amber-600 bg-amber-50/50 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/50"
     },
     {
       title: currentLang === "en" ? "Legal Assistance" : "Hỏi đáp pháp luật",
       desc: currentLang === "en" ? "Get authoritative legal explanations regarding land and civil status." : "Giải đáp thắc mắc về đất đai, hộ tịch, quy hoạch.",
-      icon: ShieldCheck,
+      url: "#",
+      iconName: "ShieldCheck",
       color: "text-purple-600 bg-purple-50/50 border-purple-100 dark:bg-purple-950/20 dark:border-purple-900/50"
     }
   ];
 
+  const customItems = widget.data?.items;
+  const displayItems = Array.isArray(customItems) && customItems.length > 0 ? customItems : defaultServices;
+
+  const colors = [
+    "text-blue-600 bg-blue-50/50 border-blue-100 dark:bg-blue-950/20 dark:border-blue-900/50",
+    "text-emerald-600 bg-emerald-50/50 border-emerald-100 dark:bg-emerald-950/20 dark:border-emerald-900/50",
+    "text-amber-600 bg-amber-50/50 border-amber-100 dark:bg-amber-950/20 dark:border-amber-900/50",
+    "text-purple-600 bg-purple-50/50 border-purple-100 dark:bg-purple-950/20 dark:border-purple-900/50",
+  ];
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-      {services.map((svc, idx) => {
-        const Icon = svc.icon;
+      {displayItems.map((svc, idx) => {
+        const IconComponent = iconMap[svc.iconName] || FileText;
+        const colorStyle = svc.color || colors[idx % colors.length];
         return (
           <div
             key={idx}
-            className={`p-4 rounded-2xl border transition-all hover:-translate-y-0.5 shadow-sm flex flex-col justify-between gap-4 ${svc.color}`}
+            className={`p-4 rounded-2xl border transition-all hover:-translate-y-0.5 shadow-sm flex flex-col justify-between gap-4 ${colorStyle}`}
           >
             <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-900 shadow-sm flex items-center justify-center">
-              <Icon className="w-4.5 h-4.5" />
+              <IconComponent className="w-4.5 h-4.5" />
             </div>
             <div>
-              <h5 className="font-extrabold text-slate-800 dark:text-white uppercase text-[10px] tracking-wide">
-                {svc.title}
+              <h5 className="font-extrabold text-slate-800 dark:text-white uppercase text-[10px] tracking-wide truncate">
+                {svc.title || (currentLang === "en" ? "Service Title" : "Tiêu đề dịch vụ")}
               </h5>
               <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 font-medium leading-relaxed line-clamp-2">
-                {svc.desc}
+                {svc.desc || (currentLang === "en" ? "Service Description goes here." : "Mô tả chi tiết dịch vụ công.")}
               </p>
             </div>
             <div className="flex items-center gap-1 font-black text-[9px] tracking-wider uppercase opacity-80">
@@ -289,38 +306,44 @@ export const FaqAccordionRender: React.FC<{ widget: Widget; activeLang: string }
 // ----------------------------------------------------------------------
 export const ExternalLinksRender: React.FC<{ widget: Widget; activeLang: string }> = ({ widget, activeLang }) => {
   const currentLang = activeLang;
-  const links = [
+
+  const defaultLinks = [
     { title: currentLang === "en" ? "National Public Service" : "Cổng Dịch vụ công Quốc gia", url: "#" },
     { title: currentLang === "en" ? "Dak Lak Province Portal" : "Cổng TTĐT Tỉnh Đắk Lắk", url: "#" },
     { title: currentLang === "en" ? "District People Committee" : "UBND Huyện Krông Bông", url: "#" },
     { title: currentLang === "en" ? "Ministry of Science & Tech" : "Bộ Khoa học và Công nghệ", url: "#" }
   ];
 
+  const customLinks = widget.data?.items;
+  const displayLinks = Array.isArray(customLinks) && customLinks.length > 0 ? customLinks : defaultLinks;
+
   return (
     <div className="grid grid-cols-2 gap-3">
-      {links.map((link, idx) => (
-        <div
+      {displayLinks.map((link, idx) => (
+        <a
           key={idx}
+          href={link.url || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
           className="p-3 rounded-xl border border-slate-150 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between text-slate-700 dark:text-slate-350 hover:border-red-500 hover:text-red-600 dark:hover:text-red-400 transition-colors shadow-sm cursor-pointer"
         >
           <div className="flex items-center gap-2 min-w-0">
             <Link2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="text-[10px] font-black uppercase truncate tracking-wide">{link.title}</span>
+            <span className="text-[10px] font-black uppercase truncate tracking-wide">{link.title || (currentLang === "en" ? "Link" : "Liên kết")}</span>
           </div>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-        </div>
+        </a>
       ))}
     </div>
   );
 };
 
 // ----------------------------------------------------------------------
-// 7. COMMUNE INTERACTIVE MAP RENDERER (SVG MAP WITH INTERACTIVITY)
+// 7. COMMUNE INTERACTIVE MAP RENDERER
 // ----------------------------------------------------------------------
 export const CommuneInteractiveMapRender: React.FC<{ widget: Widget; activeLang: string }> = ({ widget, activeLang }) => {
   const currentLang = activeLang;
 
-  // Dang Kang 8 villages mock zone database
   const zones = [
     { id: "T1", name: currentLang === "en" ? "Village 1 - Dang Kang" : "Thôn 1 - Xã Dang Kang", area: "312.4 Ha", pop: "845 người", path: "M10,20 L40,15 L45,35 L15,40 Z", center: { x: 26, y: 28 } },
     { id: "T2", name: currentLang === "en" ? "Village 2 - Dang Kang" : "Thôn 2 - Xã Dang Kang", area: "245.8 Ha", pop: "712 người", path: "M40,15 L70,10 L75,28 L45,35 Z", center: { x: 57, y: 22 } },
@@ -414,13 +437,18 @@ export const CommuneInteractiveMapRender: React.FC<{ widget: Widget; activeLang:
 export const ContactInfoSidebarRender: React.FC<{ widget: Widget; activeLang: string }> = ({ widget, activeLang }) => {
   const currentLang = activeLang;
 
+  const address = widget.data?.address ?? "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk";
+  const hotline = widget.data?.hotline ?? "0262.3683.123";
+  const email = widget.data?.email ?? "ubnddangkang@krongbong.daklak.gov.vn";
+  const workingHours = widget.data?.workingHours ?? (currentLang === "en" ? "Mon - Fri (7:30 AM - 11:30 AM | 1:30 PM - 5:00 PM)" : "Thứ 2 - Thứ 6 (Sáng 7:30 - 11:30 | Chiều 13:30 - 17:00)");
+
   return (
     <div className="bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-4 rounded-2xl flex flex-col gap-4 text-[10px] font-semibold text-slate-700 dark:text-slate-350">
       <div className="flex items-start gap-2.5">
         <MapPin className="w-4.5 h-4.5 text-red-600 shrink-0 mt-0.5" />
         <div className="flex flex-col gap-0.5">
           <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Headquarters Address" : "Địa chỉ trụ sở"}</span>
-          <span className="leading-relaxed">Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk</span>
+          <span className="leading-relaxed">{address}</span>
         </div>
       </div>
 
@@ -428,7 +456,7 @@ export const ContactInfoSidebarRender: React.FC<{ widget: Widget; activeLang: st
         <Phone className="w-4.5 h-4.5 text-red-600 shrink-0 mt-0.5" />
         <div className="flex flex-col gap-0.5">
           <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Hotline Support" : "Đường dây nóng"}</span>
-          <span className="font-bold text-red-600 hover:text-red-700 cursor-pointer">0262.3683.123</span>
+          <span className="font-bold text-red-600 hover:text-red-700 cursor-pointer">{hotline}</span>
         </div>
       </div>
 
@@ -436,7 +464,7 @@ export const ContactInfoSidebarRender: React.FC<{ widget: Widget; activeLang: st
         <Mail className="w-4.5 h-4.5 text-red-600 shrink-0 mt-0.5" />
         <div className="flex flex-col gap-0.5">
           <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Official E-mail" : "Hộp thư công vụ"}</span>
-          <span className="hover:text-red-600 cursor-pointer">ubnddangkang@krongbong.daklak.gov.vn</span>
+          <span className="hover:text-red-600 cursor-pointer">{email}</span>
         </div>
       </div>
 
@@ -444,7 +472,7 @@ export const ContactInfoSidebarRender: React.FC<{ widget: Widget; activeLang: st
         <CalendarDays className="w-4.5 h-4.5 text-slate-400 shrink-0 mt-0.5" />
         <div className="flex flex-col gap-0.5">
           <span className="text-[8px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Working Hours" : "Thời gian làm việc"}</span>
-          <span className="leading-relaxed">{currentLang === "en" ? "Mon - Fri (7:30 AM - 11:30 AM | 1:30 PM - 5:00 PM)" : "Thứ 2 - Thứ 6 (Sáng 7:30 - 11:30 | Chiều 13:30 - 17:00)"}</span>
+          <span className="leading-relaxed">{workingHours}</span>
         </div>
       </div>
     </div>

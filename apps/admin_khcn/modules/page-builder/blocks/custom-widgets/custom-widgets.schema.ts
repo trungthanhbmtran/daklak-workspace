@@ -7,7 +7,16 @@ export const HeroSliderDataSchema = z.object({
 export type HeroSliderData = z.infer<typeof HeroSliderDataSchema>;
 
 // 2. Public Services
-export const PublicServicesDataSchema = z.object({});
+export const PublicServiceItemSchema = z.object({
+  title: z.string().default(""),
+  desc: z.string().default(""),
+  url: z.string().default(""),
+  iconName: z.string().default("FileText"), // FileText, FileSearch, MessageSquare, ShieldCheck
+});
+
+export const PublicServicesDataSchema = z.object({
+  items: z.array(PublicServiceItemSchema).optional(),
+});
 export type PublicServicesData = z.infer<typeof PublicServicesDataSchema>;
 
 // 3. Legal Documents
@@ -30,7 +39,14 @@ export const FaqAccordionDataSchema = z.object({
 export type FaqAccordionData = z.infer<typeof FaqAccordionDataSchema>;
 
 // 6. External Links
-export const ExternalLinksDataSchema = z.object({});
+export const ExternalLinkItemSchema = z.object({
+  title: z.string().default(""),
+  url: z.string().default(""),
+});
+
+export const ExternalLinksDataSchema = z.object({
+  items: z.array(ExternalLinkItemSchema).optional(),
+});
 export type ExternalLinksData = z.infer<typeof ExternalLinksDataSchema>;
 
 // 7. Commune Interactive Map
@@ -40,5 +56,10 @@ export const CommuneMapDataSchema = z.object({
 export type CommuneMapData = z.infer<typeof CommuneMapDataSchema>;
 
 // 8. Contact Info Sidebar
-export const ContactInfoDataSchema = z.object({});
+export const ContactInfoDataSchema = z.object({
+  address: z.string().default("Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk").optional(),
+  hotline: z.string().default("0262.3683.123").optional(),
+  email: z.string().default("ubnddangkang@krongbong.daklak.gov.vn").optional(),
+  workingHours: z.string().default("Thứ 2 - Thứ 6 (Sáng 7:30 - 11:30 | Chiều 13:30 - 17:00)").optional(),
+});
 export type ContactInfoData = z.infer<typeof ContactInfoDataSchema>;

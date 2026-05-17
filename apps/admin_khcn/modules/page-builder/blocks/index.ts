@@ -239,7 +239,12 @@ export function initializeBlockRegistry(): void {
     schema: ContactInfoDataSchema,
     renderer: ContactInfoSidebarRender as any,
     editor: ContactInfoSidebarEditor as any,
-    defaultData: {},
+    defaultData: {
+      address: "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk",
+      hotline: "0262.3683.123",
+      email: "ubnddangkang@krongbong.daklak.gov.vn",
+      workingHours: "Thứ 2 - Thứ 6 (Sáng 7:30 - 11:30 | Chiều 13:30 - 17:00)",
+    },
   });
 }
 
