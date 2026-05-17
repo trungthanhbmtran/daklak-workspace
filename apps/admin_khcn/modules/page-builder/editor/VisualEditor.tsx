@@ -1,5 +1,6 @@
 import React from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
+import { toast } from "sonner";
 import { useEditorStore } from "../store/editorStore";
 import { BlockRegistry } from "../core/registry";
 import { initializeBlockRegistry } from "../blocks";
@@ -83,79 +84,101 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
 
   // 3. Handle Drag & Drop ends
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
+    try {
+      const { active, over } = event;
+      if (!over) return;
 
-    const activeData = active.data.current;
-    const overData = over.data.current;
+      const activeData = active.data.current;
+      const overData = over.data.current;
 
-    if (!activeData || !overData) return;
+      if (!activeData || !overData) return;
 
-    const targetRowId = overData.rowId;
-    const targetColId = overData.colId;
+      const targetRowId = overData.rowId;
+      const targetColId = overData.colId;
 
-    // Case A: Dragging a template card from LeftSidebar (adds new widget)
-    if (activeData.isTemplate) {
-      const blockType = activeData.blockType;
-      const blockConfig = BlockRegistry.getBlock(blockType);
-      if (!blockConfig) return;
+      if (!targetRowId || !targetColId) {
+        toast.warning("Bạn đã nhấn chồng!");
+        return;
+      }
 
-      const newWidget = {
-        id: `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type: blockType,
-        title: { vi: blockConfig.name.vi, en: blockConfig.name.en },
-        data: JSON.parse(JSON.stringify(blockConfig.defaultData)),
-        settings: {},
-      };
+      // Check if target column already has a widget
+      const targetRow = layout.find((r) => r.rowId === targetRowId);
+      const targetCol = targetRow?.columns.find((c) => c.id === targetColId);
+      const hasExistingWidget = targetCol && targetCol.widgets.length > 0;
 
-      addWidget(targetRowId, targetColId, newWidget);
-    }
-    // Case B: Moving an existing widget within the canvas
-    else {
-      const { blockId, rowId: sourceRowId, colId: sourceColId } = activeData;
+      if (hasExistingWidget) {
+        toast.warning("Bạn đã nhấn chồng!");
+        return; // Prevent crash / duplicate stacking
+      }
 
-      // Ensure block is moved to a different column or row location
-      if (sourceRowId !== targetRowId || sourceColId !== targetColId) {
-        const sourceRow = layout.find((r) => r.rowId === sourceRowId);
-        const sourceCol = sourceRow?.columns.find((c) => c.id === sourceColId);
-        const widget = sourceCol?.widgets.find((w) => w.id === blockId);
+      // Case A: Dragging a template card from LeftSidebar (adds new widget)
+      if (activeData.isTemplate) {
+        const blockType = activeData.blockType;
+        const blockConfig = BlockRegistry.getBlock(blockType);
+        if (!blockConfig) return;
 
-        if (widget) {
-          // Remove widget from source column
-          const updatedLayoutWithDelete = layout.map((row) => {
-            if (row.rowId === sourceRowId) {
-              return {
-                ...row,
-                columns: row.columns.map((col) => {
-                  if (col.id === sourceColId) {
-                    return { ...col, widgets: col.widgets.filter((w) => w.id !== blockId) };
-                  }
-                  return col;
-                }),
-              };
-            }
-            return row;
-          });
+        const newWidget = {
+          id: `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type: blockType,
+          title: { vi: blockConfig.name.vi, en: blockConfig.name.en },
+          data: JSON.parse(JSON.stringify(blockConfig.defaultData)),
+          settings: {},
+        };
 
-          // Insert widget into target column
-          const finalLayout = updatedLayoutWithDelete.map((row) => {
-            if (row.rowId === targetRowId) {
-              return {
-                ...row,
-                columns: row.columns.map((col) => {
-                  if (col.id === targetColId) {
-                    return { ...col, widgets: [...col.widgets, widget] };
-                  }
-                  return col;
-                }),
-              };
-            }
-            return row;
-          });
+        addWidget(targetRowId, targetColId, newWidget);
+        toast.success("Đã thêm widget mới thành công!");
+      }
+      // Case B: Moving an existing widget within the canvas
+      else {
+        const { blockId, rowId: sourceRowId, colId: sourceColId } = activeData;
 
-          setLayout(finalLayout);
+        // Ensure block is moved to a different column or row location
+        if (sourceRowId !== targetRowId || sourceColId !== targetColId) {
+          const sourceRow = layout.find((r) => r.rowId === sourceRowId);
+          const sourceCol = sourceRow?.columns.find((c) => c.id === sourceColId);
+          const widget = sourceCol?.widgets.find((w) => w.id === blockId);
+
+          if (widget) {
+            // Remove widget from source column
+            const updatedLayoutWithDelete = layout.map((row) => {
+              if (row.rowId === sourceRowId) {
+                return {
+                  ...row,
+                  columns: row.columns.map((col) => {
+                    if (col.id === sourceColId) {
+                      return { ...col, widgets: col.widgets.filter((w) => w.id !== blockId) };
+                    }
+                    return col;
+                  }),
+                };
+              }
+              return row;
+            });
+
+            // Insert widget into target column
+            const finalLayout = updatedLayoutWithDelete.map((row) => {
+              if (row.rowId === targetRowId) {
+                return {
+                  ...row,
+                  columns: row.columns.map((col) => {
+                    if (col.id === targetColId) {
+                      return { ...col, widgets: [...col.widgets, widget] };
+                    }
+                    return col;
+                  }),
+                };
+              }
+              return row;
+            });
+
+            setLayout(finalLayout);
+            toast.success("Đã di chuyển vị trí widget thành công!");
+          }
         }
       }
+    } catch (error) {
+      console.error("Drag and drop handler error caught safely:", error);
+      toast.warning("Bạn đã nhấn chồng!");
     }
   };
 
