@@ -22,6 +22,39 @@ if (BlockRegistry.getAllBlocks().length === 0) {
   initializeBlockRegistry();
 }
 
+// Pure utilities to parse and serialize responsive Tailwind grid spans
+const parseColSpan = (colSpanStr: string) => {
+  const parts = colSpanStr.split(" ");
+  let mobile = 12;
+  let tablet = 12;
+  let desktop = 12;
+
+  parts.forEach((p) => {
+    if (p.startsWith("lg:col-span-")) {
+      desktop = parseInt(p.replace("lg:col-span-", "")) || 12;
+    } else if (p.startsWith("md:col-span-")) {
+      tablet = parseInt(p.replace("md:col-span-", "")) || 12;
+    } else if (p.startsWith("col-span-") && !p.includes(":")) {
+      mobile = parseInt(p.replace("col-span-", "")) || 12;
+    }
+  });
+
+  // Safe defaults for unconfigured viewports
+  if (!colSpanStr.includes("md:col-span-")) {
+    tablet = desktop;
+  }
+  if (!colSpanStr.includes("col-span-") || (colSpanStr.includes("col-span-") && colSpanStr.indexOf("col-span-") !== colSpanStr.indexOf(" col-span-") && !colSpanStr.startsWith("col-span-"))) {
+    // If no specific prefix-less col-span exists, mobile collapses to full width
+    mobile = 12;
+  }
+
+  return { desktop, tablet, mobile };
+};
+
+const serializeColSpan = (desktop: number, tablet: number, mobile: number) => {
+  return `col-span-${mobile} md:col-span-${tablet} lg:col-span-${desktop}`;
+};
+
 export const RightProperties: React.FC = () => {
   const {
     layout,
@@ -30,6 +63,7 @@ export const RightProperties: React.FC = () => {
     activeLang,
     activeTab,
     updateRowSettings,
+    updateColumnColSpan,
     updateWidgetTitle,
     updateWidgetData,
     deleteRow,
@@ -226,6 +260,108 @@ export const RightProperties: React.FC = () => {
               checked={!!settings.fullWidth}
               onCheckedChange={(checked) => updateRowSettings(selectedRow.rowId, { fullWidth: checked })}
             />
+          </div>
+        </div>
+
+        {/* Responsive Column Layout Config */}
+        <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+          <Label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-0.5 flex items-center gap-1.5">
+            <Settings className="w-3.5 h-3.5" /> Bố cục cột Responsive
+          </Label>
+
+          <div className="space-y-4 divide-y divide-slate-50 dark:divide-slate-900">
+            {selectedRow.columns.map((col, colIdx) => {
+              const { desktop, tablet, mobile } = parseColSpan(col.colSpan);
+
+              const handleColWidthChange = (device: "desktop" | "tablet" | "mobile", span: number) => {
+                const newDesktop = device === "desktop" ? span : desktop;
+                const newTablet = device === "tablet" ? span : tablet;
+                const newMobile = device === "mobile" ? span : mobile;
+                const serialized = serializeColSpan(newDesktop, newTablet, newMobile);
+                updateColumnColSpan(selectedRow.rowId, col.id, serialized);
+              };
+
+              return (
+                <div key={col.id} className={`space-y-3 ${colIdx > 0 ? "pt-4 border-t border-slate-50 dark:border-slate-900" : ""}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-350">
+                      Cột #{colIdx + 1}
+                    </span>
+                    <span className="text-[8px] text-slate-400 font-bold bg-slate-50 dark:bg-slate-900 px-2 py-0.5 rounded-lg border border-slate-100 dark:border-slate-800">
+                      {col.widgets.length} widgets
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Desktop Width selector */}
+                    <div className="space-y-1">
+                      <Label className="text-[8px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-wider text-center block">
+                        Máy tính
+                      </Label>
+                      <Select
+                        value={desktop.toString()}
+                        onValueChange={(val) => handleColWidthChange("desktop", parseInt(val))}
+                      >
+                        <SelectTrigger className="h-8 rounded-lg border-slate-100 dark:border-slate-800 text-[10px] font-bold bg-white dark:bg-slate-900 px-2.5">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
+                          {Array.from({ length: 12 }).map((_, i) => (
+                            <SelectItem key={i} value={(i + 1).toString()} className="text-[10px]">
+                              {i + 1}/12
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Tablet Width selector */}
+                    <div className="space-y-1">
+                      <Label className="text-[8px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-wider text-center block">
+                        M.tính bảng
+                      </Label>
+                      <Select
+                        value={tablet.toString()}
+                        onValueChange={(val) => handleColWidthChange("tablet", parseInt(val))}
+                      >
+                        <SelectTrigger className="h-8 rounded-lg border-slate-100 dark:border-slate-800 text-[10px] font-bold bg-white dark:bg-slate-900 px-2.5">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
+                          {Array.from({ length: 12 }).map((_, i) => (
+                            <SelectItem key={i} value={(i + 1).toString()} className="text-[10px]">
+                              {i + 1}/12
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Mobile Width selector */}
+                    <div className="space-y-1">
+                      <Label className="text-[8px] font-black text-slate-455 dark:text-slate-500 uppercase tracking-wider text-center block">
+                        Điện thoại
+                      </Label>
+                      <Select
+                        value={mobile.toString()}
+                        onValueChange={(val) => handleColWidthChange("mobile", parseInt(val))}
+                      >
+                        <SelectTrigger className="h-8 rounded-lg border-slate-100 dark:border-slate-800 text-[10px] font-bold bg-white dark:bg-slate-900 px-2.5">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-100 dark:border-slate-800">
+                          {Array.from({ length: 12 }).map((_, i) => (
+                            <SelectItem key={i} value={(i + 1).toString()} className="text-[10px]">
+                              {i + 1}/12
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 

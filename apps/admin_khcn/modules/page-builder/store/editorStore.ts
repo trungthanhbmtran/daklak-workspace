@@ -42,6 +42,7 @@ export interface EditorStore {
   deleteRow: (rowId: string) => void;
   moveRow: (index: number, direction: "up" | "down") => void;
   updateRowSettings: (rowId: string, settings: Partial<SectionSettings>) => void;
+  updateColumnColSpan: (rowId: string, colId: string, colSpan: string) => void;
   
   // --- Widget Mutations ---
   addWidget: (rowId: string, colId: string, widget: Widget, index?: number) => void;
@@ -210,6 +211,24 @@ export const useEditorStore = create<EditorStore>((set, get) => {
           return {
             ...row,
             settings: { ...(row.settings || {}), ...newSettings },
+          };
+        }
+        return row;
+      });
+      get().setLayout(updated);
+    },
+
+    updateColumnColSpan: (rowId, colId, colSpan) => {
+      const updated = get().layout.map((row) => {
+        if (row.rowId === rowId) {
+          return {
+            ...row,
+            columns: row.columns.map((col) => {
+              if (col.id === colId) {
+                return { ...col, colSpan };
+              }
+              return col;
+            }),
           };
         }
         return row;

@@ -36,8 +36,8 @@ export const PageRenderer: React.FC<PageRendererProps> = ({
             <div 
               key={col.id} 
               className={cn(
-                "col-span-12 flex flex-col gap-6", 
-                col.colSpan || "lg:col-span-12"
+                "flex flex-col gap-6", 
+                col.colSpan || "col-span-12"
               )}
             >
               {col.widgets.map((widget) => (

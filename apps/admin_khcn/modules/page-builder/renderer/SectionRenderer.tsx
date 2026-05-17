@@ -37,7 +37,7 @@ export const SectionRenderer: React.FC<SectionRendererProps> = ({ row, children 
     >
       <div 
         className={cn(
-          "grid grid-cols-1 lg:grid-cols-12",
+          "grid grid-cols-12",
           settings.gap || "gap-6"
         )}
       >
