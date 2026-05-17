@@ -210,9 +210,14 @@ export default function AboutPage() {
     const found = (portalConfigData || []).find((c: any) => c.code === code)
     if (!found) return fallback
 
-    if (found.description && found.description.trim().startsWith("{")) {
+    if (found.name === "true" || found.name === "false") {
+      return found.name
+    }
+
+    const trimmed = found.description ? found.description.trim() : ""
+    if (trimmed.startsWith("{")) {
       try {
-        const parsed = JSON.parse(found.description)
+        const parsed = JSON.parse(trimmed)
         if (parsed && typeof parsed === "object") {
           const trans = parsed.translations || parsed
           if (trans[currentLang]) {
@@ -226,35 +231,51 @@ export default function AboutPage() {
         // Parse issue fallback
       }
     }
-    return found.name || fallback
+    return found.description || found.name || fallback
   }, [portalConfigData, currentLang])
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
     const found = (portalConfigData || []).find((c: any) => c.code === code)
-    if (!found) return fallback
+    if (!found || !found.description) return fallback
 
-    if (found.description && found.description.trim().startsWith("{")) {
+    const trimmed = found.description.trim()
+    if (!trimmed) return fallback
+
+    // 1. JSON Array (starts with '[')
+    if (trimmed.startsWith("[")) {
       try {
-        const parsed = JSON.parse(found.description)
+        return JSON.parse(trimmed)
+      } catch (e) {
+        console.error(`Failed to parse array portal config ${code}:`, e)
+        return fallback
+      }
+    }
+
+    // 2. JSON Object (starts with '{')
+    if (trimmed.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(trimmed)
         if (parsed && typeof parsed === "object") {
           const trans = parsed.translations || parsed
-          const val = trans[currentLang] || trans.vi
-          if (val) {
+          const val = trans[currentLang] || trans.vi || trans.en
+          if (val !== undefined && val !== null) {
             if (typeof val === "string") {
               try {
                 return JSON.parse(val)
               } catch (e) {
-                console.error("Inner array parse issue", e)
+                return val
               }
-            } else if (Array.isArray(val)) {
-              return val
             }
+            return val
           }
+          return parsed
         }
       } catch (e) {
-        console.error("Outer translation list parse issue", e)
+        console.error(`Failed to parse object portal config ${code}:`, e)
+        return fallback
       }
     }
+
     return fallback
   }, [portalConfigData, currentLang])
 

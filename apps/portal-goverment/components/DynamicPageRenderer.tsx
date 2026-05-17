@@ -775,9 +775,14 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
     const found = (portalConfigData || []).find((c: any) => c.code === code)
     if (!found) return fallback
 
-    if (found.description && found.description.trim().startsWith("{")) {
+    if (found.name === "true" || found.name === "false") {
+      return found.name
+    }
+
+    const trimmed = found.description ? found.description.trim() : ""
+    if (trimmed.startsWith("{")) {
       try {
-        const parsed = JSON.parse(found.description)
+        const parsed = JSON.parse(trimmed)
         if (parsed && typeof parsed === "object") {
           const trans = parsed.translations || parsed
           if (trans[currentLang]) {
@@ -796,30 +801,46 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
   const getConfigObject = React.useCallback((code: string, fallback: any) => {
     const found = (portalConfigData || []).find((c: any) => c.code === code)
-    if (!found) return fallback
+    if (!found || !found.description) return fallback
 
-    if (found.description && found.description.trim().startsWith("{")) {
+    const trimmed = found.description.trim()
+    if (!trimmed) return fallback
+
+    // 1. JSON Array (starts with '[')
+    if (trimmed.startsWith("[")) {
       try {
-        const parsed = JSON.parse(found.description)
+        return JSON.parse(trimmed)
+      } catch (e) {
+        console.error(`Failed to parse array portal config ${code}:`, e)
+        return fallback
+      }
+    }
+
+    // 2. JSON Object (starts with '{')
+    if (trimmed.startsWith("{")) {
+      try {
+        const parsed = JSON.parse(trimmed)
         if (parsed && typeof parsed === "object") {
           const trans = parsed.translations || parsed
-          const val = trans[currentLang] || trans.vi
-          if (val) {
+          const val = trans[currentLang] || trans.vi || trans.en
+          if (val !== undefined && val !== null) {
             if (typeof val === "string") {
               try {
                 return JSON.parse(val)
               } catch (e) {
-                console.error("Inner array parse issue", e)
+                return val
               }
-            } else if (Array.isArray(val)) {
-              return val
             }
+            return val
           }
+          return parsed
         }
       } catch (e) {
-        console.error("Outer translation list parse issue", e)
+        console.error(`Failed to parse object portal config ${code}:`, e)
+        return fallback
       }
     }
+
     return fallback
   }, [portalConfigData, currentLang])
 
@@ -1050,9 +1071,9 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                     leaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang as "vi" | "en" || "vi"])
                                   }
 
-                                  return leaders.map((leader: any, idx: number) => (
+                                  return Array.isArray(leaders) ? leaders.map((leader: any, idx: number) => (
                                     <div
-                                      key={leader.name || idx}
+                                      key={leader?.name || idx}
                                       className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl overflow-hidden flex flex-col"
                                     >
                                       <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center gap-2.5 bg-slate-100/30 dark:bg-slate-900/40">
@@ -1092,7 +1113,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                         </div>
                                       </div>
                                     </div>
-                                  ));
+                                  )) : null;
                                 })()}
                               </div>
                             )}
@@ -1115,9 +1136,9 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                     sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"]
                                   }
 
-                                  return sections.map((section: any, idx: number) => (
+                                  return Array.isArray(sections) ? sections.map((section: any, idx: number) => (
                                     <div
-                                      key={section.title || idx}
+                                      key={section?.title || idx}
                                       className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3"
                                     >
                                       <div className="flex flex-col gap-1.5 min-w-0">
@@ -1137,7 +1158,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                         ))}
                                       </div>
                                     </div>
-                                  ));
+                                  )) : null;
                                 })()}
                               </div>
                             )}
