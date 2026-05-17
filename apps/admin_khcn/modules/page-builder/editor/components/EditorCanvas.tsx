@@ -98,7 +98,7 @@ export const EditorCanvas: React.FC = () => {
                 {/* Grid columns */}
                 <div
                   className={cn(
-                    "grid grid-cols-1 lg:grid-cols-12",
+                    viewport === "desktop" ? "grid grid-cols-1 lg:grid-cols-12" : "grid grid-cols-1",
                     settings.gap || "gap-6"
                   )}
                 >
@@ -109,7 +109,7 @@ export const EditorCanvas: React.FC = () => {
                       rowId={row.rowId}
                       className={cn(
                         "col-span-12 min-h-[100px] rounded-2xl border-2 border-dashed border-slate-100 dark:border-slate-850 p-3 transition-colors flex flex-col gap-5",
-                        col.colSpan || "lg:col-span-12"
+                        viewport === "desktop" ? (col.colSpan || "lg:col-span-12") : "col-span-12"
                       )}
                     >
                       {col.widgets.length === 0 ? (

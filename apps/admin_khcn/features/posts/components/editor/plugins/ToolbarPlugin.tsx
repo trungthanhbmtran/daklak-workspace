@@ -94,7 +94,7 @@ const BlockFormatPlugin = () => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
           const anchorNode = selection.anchor.getNode();
-          const element = anchorNode.getKey() === "root" ? anchorNode : anchorNode.getTopLevelElementOrThrow();
+          const element = anchorNode.getKey() === "root" ? anchorNode : anchorNode.getTopLevelElement();
           if (element !== null) setBlockType($isHeadingNode(element) ? element.getTag() : element.getType());
         }
       });
@@ -314,7 +314,7 @@ const AlignmentAndListPlugin = () => {
         const selection = $getSelection();
         if ($isRangeSelection(selection)) {
           const anchorNode = selection.anchor.getNode();
-          const element = anchorNode.getKey() === "root" ? anchorNode : anchorNode.getTopLevelElementOrThrow();
+          const element = anchorNode.getKey() === "root" ? anchorNode : anchorNode.getTopLevelElement();
           if (element !== null) setIsList({ bullet: element.getType() === "bullet", number: element.getType() === "number" });
         }
       });
