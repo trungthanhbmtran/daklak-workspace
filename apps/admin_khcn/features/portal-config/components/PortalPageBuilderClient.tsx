@@ -32,7 +32,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
-import { PageBuilder } from "./PageBuilder";
+import dynamic from "next/dynamic";
+
+const PageBuilder = dynamic(
+  () => import("./PageBuilder").then((mod) => mod.PageBuilder),
+  { ssr: false }
+);
 
 interface CustomPageMeta {
   id: string;
