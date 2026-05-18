@@ -36,4 +36,26 @@ export class PublicDocumentsController implements OnModuleInit {
   async getDossierByCode(@Param('code') code: string) {
     return firstValueFrom(this.documentService.GetDossier({ code }));
   }
+
+  @Get()
+  async listDocuments(@Query() query: any) {
+    const req: any = {
+      page: parseInt(query.page) || 1,
+      limit: parseInt(query.limit) || 10,
+      search: query.search || "",
+    };
+    req.isPublic = true;
+    if (query.typeId) req.typeId = query.typeId;
+    if (query.fieldId) req.fieldId = query.fieldId;
+    if (query.status) req.status = query.status;
+    if (query.fiscalYear) req.fiscalYear = parseInt(query.fiscalYear.toString());
+    if (query.transparencyCategory) req.transparencyCategory = query.transparencyCategory;
+    return firstValueFrom(this.documentService.ListDocuments(req));
+  }
+
+  @Get(':id')
+  async getDocument(@Param('id') id: string) {
+    return firstValueFrom(this.documentService.GetDocument({ id }));
+  }
 }
+

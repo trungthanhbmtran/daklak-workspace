@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePublicDocuments } from "@/hooks/usePublicData"
 import {
   FileText,
   Search,
@@ -24,158 +25,12 @@ const getCookie = (name: string): string | null => {
   return match ? decodeURIComponent(match[2]) : null
 }
 
-const MOCK_DOCUMENTS = [
-  {
-    id: "01",
-    code: "04-NQ/ĐU",
-    title: "Nghị quyết của Đảng ủy xã Dang Kang về tăng cường chỉ đạo xây dựng nông thôn mới kiểu mẫu năm 2026",
-    signer: "Nguyễn Văn Hồng",
-    signDate: "28/04/2026",
-    type: "nghi-quyet",
-    typeName: "Nghị quyết",
-    org: "dang-uy",
-    orgName: "Đảng ủy xã",
-    sector: "kinh-te",
-    sectorName: "Kinh tế - Đầu tư",
-    summary: "Nghị quyết đề ra mục tiêu dốc toàn lực hệ thống chính trị và vận động nhân dân hoàn thành các hạng mục tiêu chí nâng cao, bê tông hóa liên thôn, chuyển giao trồng trọt sầu riêng xuất khẩu trong quý III năm 2026."
-  },
-  {
-    id: "02",
-    code: "12/QĐ-UBND",
-    title: "Quyết định phê duyệt kế hoạch đấu thầu mua sắm trang thiết bị bộ phận Một cửa hiện đại UBND xã",
-    signer: "Trần Quốc Tuấn",
-    signDate: "22/04/2026",
-    type: "quyet-dinh",
-    typeName: "Quyết định",
-    org: "ubnd",
-    orgName: "Ủy ban nhân dân",
-    sector: "noi-vu",
-    sectorName: "Nội vụ - Hành chính",
-    summary: "Quyết định phê duyệt nguồn vốn 450 triệu đồng trích từ ngân sách thường xuyên để lắp đặt máy lấy số tự động, màn hình cảm ứng tra cứu thủ tục, camera giám sát phục vụ người dân tại sảnh một cửa xã."
-  },
-  {
-    id: "03",
-    code: "18-NQ/HĐND",
-    title: "Nghị quyết phê chuẩn phân bổ quyết toán ngân sách thu chi địa phương năm tài khóa 2025",
-    signer: "Nguyễn Văn Hồng",
-    signDate: "15/04/2026",
-    type: "nghi-quyet",
-    typeName: "Nghị quyết",
-    org: "hdnd",
-    orgName: "Hội đồng nhân dân",
-    sector: "tai-chinh",
-    sectorName: "Tài chính - Ngân sách",
-    summary: "Nghị quyết thông qua kết quả báo cáo thẩm tra số liệu tổng quyết toán thu ngân sách nội địa vượt 12.4% chỉ tiêu giao, phê duyệt chuyển nguồn kết dư sang mục tiêu đầu tư cơ sở hạ tầng thôn buôn khó khăn."
-  },
-  {
-    id: "04",
-    code: "45/TB-UBND",
-    title: "Thông báo về việc treo cờ Tổ quốc và nghỉ lễ kỷ niệm Ngày Giải phóng miền Nam 30/4 và Quốc tế Lao động 1/5",
-    signer: "Trần Quốc Tuấn",
-    signDate: "20/04/2026",
-    type: "thong-bao",
-    typeName: "Thông báo",
-    org: "ubnd",
-    orgName: "Ủy ban nhân dân",
-    sector: "noi-vu",
-    sectorName: "Nội vụ - Hành chính",
-    summary: "Thông báo hướng dẫn toàn thể cán bộ công chức, hộ dân treo cờ tổ quốc từ ngày 29/4 đến hết ngày 2/5/2026. Bố trí lịch trực chỉ huy an ninh sẵn sàng chiến đấu cấp xã trong thời gian nghỉ lễ."
-  },
-  {
-    id: "05",
-    code: "02/KH-UBND",
-    title: "Kế hoạch mở chiến dịch ra quân phun hóa chất diệt muỗi, phòng ngừa bệnh Sốt xuất huyết diện rộng",
-    signer: "H'Yen Knul",
-    signDate: "18/04/2026",
-    type: "ke-hoach",
-    typeName: "Kế hoạch",
-    org: "ubnd",
-    orgName: "Ủy ban nhân dân",
-    sector: "y-te",
-    sectorName: "Y tế - Giáo dục",
-    summary: "Kế hoạch chi tiết phối hợp cùng Trung tâm Y tế huyện tổ chức phun sương hóa chất dập dịch tại Thôn 2, Thôn 6 và Buôn Êga; cấp phát miễn phí thuốc diệt lăng quăng cho hộ gia đình."
-  }
-]
-
-const MOCK_DOCUMENTS_EN = [
-  {
-    id: "01",
-    code: "04-NQ/ĐU",
-    title: "Resolution of the Dang Kang Commune Party Committee on Strengthening Leadership to Build Model New Rural Area in 2026",
-    signer: "Nguyen Van Hong",
-    signDate: "28/04/2026",
-    type: "nghi-quyet",
-    typeName: "Resolution",
-    org: "dang-uy",
-    orgName: "Party Committee",
-    sector: "kinh-te",
-    sectorName: "Economy - Investment",
-    summary: "The resolution sets out the goal of mobilizing the entire political system and residents to complete the upgraded criteria categories, pave inter-village concrete roads, and transfer durian cultivation for official export in the third quarter of 2026."
-  },
-  {
-    id: "02",
-    code: "12/QĐ-UBND",
-    title: "Decision Approving Procurement Plan of Equipment for the Modern One-Gate Division of the Commune People's Committee",
-    signer: "Tran Quoc Tuan",
-    signDate: "22/04/2026",
-    type: "quyet-dinh",
-    typeName: "Decision",
-    org: "ubnd",
-    orgName: "People's Committee",
-    sector: "noi-vu",
-    sectorName: "Internal Affairs - Administration",
-    summary: "The decision approves a funding of 450 million VND from the regular budget to install automatic numbering machines, touch screens for looking up procedures, and security cameras to serve the citizens at the selt-service lobby."
-  },
-  {
-    id: "03",
-    code: "18-NQ/HĐND",
-    title: "Resolution Approving the Final Statement of the Local Revenue and Expenditure Budget for Fiscal Year 2025",
-    signer: "Nguyen Van Hong",
-    signDate: "15/04/2026",
-    type: "nghi-quyet",
-    typeName: "Resolution",
-    org: "hdnd",
-    orgName: "People's Council",
-    sector: "tai-chinh",
-    sectorName: "Finance - Budget",
-    summary: "The resolution approves the audit report showing local tax collection exceeded the target by 12.4%, and approves transferring surplus funds to infrastructure investment in highly difficult villages."
-  },
-  {
-    id: "04",
-    code: "45/TB-UBND",
-    title: "Notice on Raising the National Flag and Holidays on Southern Liberation Day (April 30) and International Labor Day (May 1)",
-    signer: "Tran Quoc Tuan",
-    signDate: "20/04/2026",
-    type: "thong-bao",
-    typeName: "Notice",
-    org: "ubnd",
-    orgName: "People's Committee",
-    sector: "noi-vu",
-    sectorName: "Internal Affairs - Administration",
-    summary: "The notice guides all civil servants and households to hang the national flag from April 29 to May 2, 2026, and to organize security shifts in the commune during the holidays."
-  },
-  {
-    id: "05",
-    code: "02/KH-UBND",
-    title: "Plan to Open a Campaign to Spray Larvicide and Disinfectants to Prevent Dengue Fever on a Large Scale",
-    signer: "H'Yen Knul",
-    signDate: "18/04/2026",
-    type: "ke-hoach",
-    typeName: "Plan",
-    org: "ubnd",
-    orgName: "People's Committee",
-    sector: "y-te",
-    sectorName: "Health - Education",
-    summary: "Detailed plan to coordinate with the District Health Center to spray chemical mist in Village 2, Village 6, and Êga Village, and distribute free larvicide tablets to households."
-  }
-]
-
 const documentsPageTranslations = {
   vi: {
     home: "Trang chủ",
     breadcrumb: "Văn bản pháp quy",
     title: "CƠ SỞ DỮ LIỆU VĂN BẢN ĐỊA PHƯƠNG",
-    subtitle: "Tìm kiếm, tra cứu các Nghị quyết, Quyết định chỉ đạo điều hành của xã Dang Kang",
+    subtitle: "Tìm kiếm, tra cứu các Nghị quyết, Quyết định chỉ đạo điều hành",
     placeholder: "Nhập số hiệu văn bản hoặc từ khóa...",
     typeLabel: "Loại văn bản",
     orgLabel: "Cơ quan ban hành",
@@ -211,7 +66,7 @@ const documentsPageTranslations = {
     home: "Home",
     breadcrumb: "Legal Documents",
     title: "LOCAL LEGAL DOCUMENT DATABASE",
-    subtitle: "Search and look up Resolutions and Decisions for direction and administration of Dang Kang Commune",
+    subtitle: "Search and look up Resolutions and Decisions for direction and administration",
     placeholder: "Enter document number or keyword...",
     typeLabel: "Document Type",
     orgLabel: "Issuing Agency",
@@ -279,20 +134,45 @@ export default function DocumentsPage() {
     { label: t.ubnd, value: "ubnd" }
   ], [t])
 
-  const documentsList = currentLang === "en" ? MOCK_DOCUMENTS_EN : MOCK_DOCUMENTS
+  const { data: dbDocumentsData } = usePublicDocuments()
 
-  const [selectedDoc, setSelectedDoc] = React.useState<typeof documentsList[0] | null>(null)
+  const [selectedDoc, setSelectedDoc] = React.useState<any | null>(null)
+
 
   const filteredDocs = React.useMemo(() => {
-    return documentsList.filter(doc => {
+    if (!dbDocumentsData?.data) return [];
+    return dbDocumentsData.data.map((doc: any) => ({
+      id: doc.id,
+      code: doc.documentNumber || doc.notation || "",
+      title: doc.abstract || "",
+      signer: doc.signerName || "",
+      signDate: doc.issueDate ? new Date(doc.issueDate).toLocaleDateString("vi-VN") : "",
+      type: doc.typeId ? doc.typeId.toLowerCase().replace(/_/g, "-") : "",
+      typeName: doc.typeId || "Văn bản",
+      org: doc.issuingAuthorityId ? doc.issuingAuthorityId.toLowerCase() : "",
+      orgName: doc.issuerName || "",
+      summary: doc.content || doc.abstract || "",
+      fileId: doc.fileId || ""
+    })).filter((doc: any) => {
       const matchesSearch = !searchQuery.trim() ||
         doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         doc.code.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesType = activeType === "all" || doc.type === activeType
-      const matchesOrg = activeOrg === "all" || doc.org === activeOrg
+      
+      // Normalize type matching
+      let matchesType = activeType === "all"
+      if (!matchesType && doc.type) {
+        matchesType = doc.type === activeType || doc.type.includes(activeType)
+      }
+      
+      // Normalize org matching
+      let matchesOrg = activeOrg === "all"
+      if (!matchesOrg && doc.org) {
+        matchesOrg = doc.org === activeOrg || doc.org.includes(activeOrg)
+      }
+      
       return matchesSearch && matchesType && matchesOrg
     })
-  }, [documentsList, searchQuery, activeType, activeOrg])
+  }, [dbDocumentsData, searchQuery, activeType, activeOrg])
 
   return (
     <div className="flex flex-col gap-6 sm:gap-8 animate-fade-in select-none">
@@ -399,7 +279,7 @@ export default function DocumentsPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80 font-medium">
               {filteredDocs.length > 0 ? (
-                filteredDocs.map((doc) => (
+                filteredDocs.map((doc: any) => (
                   <tr
                     key={doc.id}
                     className="hover:bg-slate-50/50 dark:hover:bg-slate-950/40 transition-colors"

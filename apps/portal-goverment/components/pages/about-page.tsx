@@ -280,14 +280,14 @@ export default function AboutPage() {
   }, [portalConfigData, currentLang])
 
   // Resolve dynamic values
-  const historyText = getConfigValue("about_history", DEFAULT_HISTORY_TEXT[currentLang])
-  const areaStat = getConfigValue("about_area", "2,452.8 Ha")
-  const popStat = getConfigValue("about_population", currentLang === "vi" ? "6.842 người" : "6,842 people")
-  const subdivisionsStat = getConfigValue("about_subdivisions", currentLang === "vi" ? "8 Thôn, Buôn" : "8 Villages / Hamlets")
-  const standardStat = getConfigValue("about_standard", currentLang === "vi" ? "Đạt 19/19 Tiêu chí" : "Achieved 19/19 Criteria")
+  const historyText = getConfigValue("about_history", "")
+  const areaStat = getConfigValue("about_area", "")
+  const popStat = getConfigValue("about_population", "")
+  const subdivisionsStat = getConfigValue("about_subdivisions", "")
+  const standardStat = getConfigValue("about_standard", "")
 
-  const orgSections = getConfigObject("about_org_sections", DEFAULT_ORG_SECTIONS[currentLang])
-  const detailLeaders = getConfigObject("about_leaders", DEFAULT_LEADERS[currentLang])
+  const orgSections = getConfigObject("about_org_sections", [])
+  const detailLeaders = getConfigObject("about_leaders", [])
 
   const useCustomAboutLayout = getConfigValue("use_custom_about_layout", "false") === "true"
   const customAboutLayout = getConfigObject("custom_about_layout", [])
@@ -329,175 +329,187 @@ export default function AboutPage() {
       </div>
 
       {/* Section 1: Giới thiệu chung (#chung) */}
-      <section id="chung" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start">
-        <div className="lg:col-span-7 flex flex-col gap-5">
+      {historyText && (
+        <section id="chung" className="scroll-mt-24 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-10 items-start">
+          <div className="lg:col-span-7 flex flex-col gap-5">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+              <History className="w-5 h-5 text-[#b91c1c]" />
+              <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
+                {t.historyTitle}
+              </h3>
+            </div>
+
+            <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-semibold flex flex-col gap-4">
+              {historyParagraphs.map((paragraph: string, index: number) => (
+                <React.Fragment key={index}>
+                  <p>{paragraph}</p>
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+
+          {/* Demographic statistics sidebar */}
+          <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+            {areaStat && (
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
+                <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/20 text-[#b91c1c] flex items-center justify-center border border-red-100 dark:border-red-900/30">
+                  <Building2 className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
+                  {t.statsArea}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{areaStat}</span>
+              </div>
+            )}
+
+            {popStat && (
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
+                <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/30">
+                  <Users2 className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
+                  {t.statsPop}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{popStat}</span>
+              </div>
+            )}
+
+            {subdivisionsStat && (
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
+                <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/20 text-sky-600 flex items-center justify-center border border-sky-100 dark:border-sky-900/30">
+                  <FileSpreadsheet className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
+                  {t.statsUnits}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
+                  {subdivisionsStat}
+                </span>
+              </div>
+            )}
+
+            {standardStat && (
+              <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-600 flex items-center justify-center border border-amber-100 dark:border-amber-900/30">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
+                  {t.statsNTM}
+                </span>
+                <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
+                  {standardStat}
+                </span>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* Section 2: Cơ cấu tổ chức (#co-cau) */}
+      {orgSections && orgSections.length > 0 && (
+        <section id="co-cau" className="scroll-mt-24 flex flex-col gap-5">
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-            <History className="w-5 h-5 text-[#b91c1c]" />
+            <Workflow className="w-5 h-5 text-[#b91c1c]" />
             <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-              {t.historyTitle}
+              {t.orgTitle}
             </h3>
           </div>
 
-          <div className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-semibold flex flex-col gap-4">
-            {historyParagraphs.map((paragraph: string, index: number) => (
-              <React.Fragment key={index}>
-                <p>{paragraph}</p>
-                {index === 0 && (
-                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 bg-slate-100/50 dark:bg-slate-900/40 p-3.5 sm:p-4 rounded-lg sm:rounded-xl border border-slate-200/50 dark:border-slate-800/50 my-1 font-medium text-slate-600 dark:text-slate-400">
-                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.east}</li>
-                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.west}</li>
-                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.south}</li>
-                    <li className="flex gap-2"><MapPin className="w-4 h-4 text-[#b91c1c] shrink-0" /> {t.north}</li>
-                  </ul>
-                )}
-              </React.Fragment>
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
+            {t.orgSubtitle}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+            {orgSections.map((section: any, index: number) => (
+              <div
+                key={section.title || index}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4 group hover:border-[#b91c1c] hover:shadow-md transition-all"
+              >
+                <div className="flex flex-col">
+                  <h4 className="text-xs sm:text-sm font-black text-[#b91c1c] dark:text-[#fbc02d] tracking-wide uppercase">{section.title}</h4>
+                  <p className="text-[11px] text-slate-400 font-semibold leading-relaxed mt-1">{section.desc}</p>
+                </div>
+                <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 flex flex-col gap-2">
+                  {Array.isArray(section.details) && section.details.map((item: string, idx: number) => (
+                    <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                      <span>{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-
-        {/* Demographic statistics sidebar */}
-        <div className="lg:col-span-5 grid grid-cols-2 gap-4">
-          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
-            <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/20 text-[#b91c1c] flex items-center justify-center border border-red-100 dark:border-red-900/30">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t.statsArea}
-            </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{areaStat}</span>
-          </div>
-
-          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/30">
-              <Users2 className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t.statsPop}
-            </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">{popStat}</span>
-          </div>
-
-          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
-            <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/20 text-sky-600 flex items-center justify-center border border-sky-100 dark:border-sky-900/30">
-              <FileSpreadsheet className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t.statsUnits}
-            </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
-              {subdivisionsStat}
-            </span>
-          </div>
-
-          <div className="p-3.5 sm:p-5 rounded-xl sm:rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col items-center text-center animate-fade-in">
-            <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/20 text-amber-600 flex items-center justify-center border border-amber-100 dark:border-amber-900/30">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] text-slate-400 font-extrabold uppercase mt-3 tracking-wide">
-              {t.statsNTM}
-            </span>
-            <span className="text-lg sm:text-xl font-black text-slate-900 dark:text-white mt-1">
-              {standardStat}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 2: Cơ cấu tổ chức (#co-cau) */}
-      <section id="co-cau" className="scroll-mt-24 flex flex-col gap-5">
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-          <Workflow className="w-5 h-5 text-[#b91c1c]" />
-          <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-            {t.orgTitle}
-          </h3>
-        </div>
-
-        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
-          {t.orgSubtitle}
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
-          {orgSections.map((section: any, index: number) => (
-            <div
-              key={section.title || index}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-sm flex flex-col gap-3 sm:gap-4 group hover:border-[#b91c1c] hover:shadow-md transition-all"
-            >
-              <div className="flex flex-col">
-                <h4 className="text-xs sm:text-sm font-black text-[#b91c1c] dark:text-[#fbc02d] tracking-wide uppercase">{section.title}</h4>
-                <p className="text-[11px] text-slate-400 font-semibold leading-relaxed mt-1">{section.desc}</p>
-              </div>
-              <div className="border-t border-slate-100 dark:border-slate-800/80 pt-3 flex flex-col gap-2">
-                {Array.isArray(section.details) && section.details.map((item: string, idx: number) => (
-                  <div key={idx} className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    <span>{item}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Section 3: Thông tin lãnh đạo (#lanh-dao) */}
-      <section id="lanh-dao" className="scroll-mt-24 flex flex-col gap-5">
-        <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
-          <UserSquare2 className="w-5 h-5 text-[#b91c1c]" />
-          <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
-            {t.leaderTitle}
-          </h3>
-        </div>
+      {detailLeaders && detailLeaders.length > 0 && (
+        <section id="lanh-dao" className="scroll-mt-24 flex flex-col gap-5">
+          <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+            <UserSquare2 className="w-5 h-5 text-[#b91c1c]" />
+            <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-900 dark:text-white uppercase tracking-wide">
+              {t.leaderTitle}
+            </h3>
+          </div>
 
-        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
-          {t.leaderSubtitle}
-        </p>
+          <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-400 font-semibold leading-relaxed">
+            {t.leaderSubtitle}
+          </p>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-2">
-          {detailLeaders.map((leader: any, index: number) => (
-            <div
-              key={leader.name || index}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden flex flex-col"
-            >
-              <div className="p-4 sm:p-5 border-b border-slate-150 dark:border-slate-850 flex items-center gap-2.5 sm:gap-3 bg-slate-50/50 dark:bg-slate-950/45 shrink-0">
-                <div className="w-12 h-12 rounded-full bg-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] flex items-center justify-center font-bold text-lg shadow-inner">
-                  {(leader.name || "A").split(' ').pop()?.[0]}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-2">
+            {detailLeaders.map((leader: any, index: number) => (
+              <div
+                key={leader.name || index}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl sm:rounded-2xl shadow-sm overflow-hidden flex flex-col"
+              >
+                <div className="p-4 sm:p-5 border-b border-slate-150 dark:border-slate-850 flex items-center gap-2.5 sm:gap-3 bg-slate-50/50 dark:bg-slate-950/45 shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-[#b91c1c]/10 text-[#b91c1c] dark:text-[#fbc02d] flex items-center justify-center font-bold text-lg shadow-inner">
+                    {(leader.name || "A").split(' ').pop()?.[0]}
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <h4 className="text-sm font-black text-slate-900 dark:text-white truncate">{leader.name}</h4>
+                    <span className="text-[10px] text-[#b91c1c] dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate">{leader.role}</span>
+                  </div>
                 </div>
-                <div className="flex flex-col min-w-0">
-                  <h4 className="text-sm font-black text-slate-900 dark:text-white truncate">{leader.name}</h4>
-                  <span className="text-[10px] text-[#b91c1c] dark:text-[#fbc02d] font-bold uppercase tracking-wider truncate">{leader.role}</span>
+
+                <div className="p-4 sm:p-5 flex-1 flex flex-col gap-4 text-xs">
+                  <div className="flex flex-col gap-1.5 flex-1">
+                    <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
+                      <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
+                      {t.responsibility}
+                    </span>
+                    <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
+                      {leader.responsibility}
+                    </p>
+                  </div>
+
+                  <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 flex flex-col gap-2.5 font-medium text-slate-600 dark:text-slate-400">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
+                      <span>{t.workRoom}: {leader.room}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-slate-400 shrink-0" />
+                      <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">{t.phone}: {leader.phone}</a>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-slate-400 shrink-0" />
+                      <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">{t.email}: {leader.email}</a>
+                    </div>
+                  </div>
                 </div>
               </div>
+            ))}
+          </div>
+        </section>
+      )}
 
-              <div className="p-4 sm:p-5 flex-1 flex flex-col gap-4 text-xs">
-                <div className="flex flex-col gap-1.5 flex-1">
-                  <span className="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest flex items-center gap-1">
-                    <CalendarDays className="w-3.5 h-3.5 text-slate-400" />
-                    {t.responsibility}
-                  </span>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed font-semibold">
-                    {leader.responsibility}
-                  </p>
-                </div>
-
-                <div className="border-t border-slate-100 dark:border-slate-800/80 pt-4 flex flex-col gap-2.5 font-medium text-slate-600 dark:text-slate-400">
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                    <span>{t.workRoom}: {leader.room}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-slate-400 shrink-0" />
-                    <a href={`tel:${leader.phone}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">{t.phone}: {leader.phone}</a>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-slate-400 shrink-0" />
-                    <a href={`mailto:${leader.email}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">{t.email}: {leader.email}</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
+      {!historyText && (!orgSections || orgSections.length === 0) && (!detailLeaders || detailLeaders.length === 0) && (
+        <div className="flex flex-col items-center justify-center p-8 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 text-xs font-semibold">
+          Chưa có thông tin giới thiệu từ máy chủ CMS.
         </div>
-      </section>
+      )}
 
     </div>
   )

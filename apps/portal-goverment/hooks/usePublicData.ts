@@ -64,3 +64,25 @@ export function usePublicDossier(code: string) {
     retry: false,
   });
 }
+
+export function usePublicDocuments(query?: { page?: number; limit?: number; search?: string; typeId?: string; fieldId?: string; status?: string; transparencyCategory?: string; fiscalYear?: number }) {
+  return useQuery({
+    queryKey: ["public-documents", query],
+    queryFn: async () => {
+      const response = await apiClient.get("/public/documents", { params: query });
+      return response;
+    },
+  });
+}
+
+export function usePublicDocumentById(id: string) {
+  return useQuery({
+    queryKey: ["public-document", id],
+    queryFn: async () => {
+      const response = await apiClient.get(`/public/documents/${id}`);
+      return response;
+    },
+    enabled: !!id,
+  });
+}
+

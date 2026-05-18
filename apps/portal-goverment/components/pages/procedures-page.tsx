@@ -18,98 +18,10 @@ import {
   Check
 } from "lucide-react"
 
-const MOCK_PROCEDURES = [
-  {
-    id: "01",
-    title: "Đăng ký khai sinh lưu động / trực tuyến cấp xã",
-    time: "Trong ngày làm việc",
-    fee: "Miễn phí hoàn toàn",
-    docs: [
-      "Tờ khai đăng ký khai sinh theo mẫu quy định (Tải mẫu)",
-      "Giấy chứng sinh của trẻ em do cơ sở y tế cấp (hoặc văn bản làm chứng)",
-      "Căn cước công dân của cha và mẹ để chứng minh quan hệ hôn nhân"
-    ],
-    steps: [
-      "Công dân đăng ký trực tuyến hoặc trực tiếp nộp hồ sơ tại bộ phận một cửa xã.",
-      "Công chức Tư pháp - Hộ tịch tiếp nhận hồ sơ, kiểm tra tính hợp lệ và cập nhật cơ sở dữ liệu quốc gia.",
-      "Chủ tịch UBND xã ký duyệt Giấy khai sinh; trả kết quả bản giấy và bản điện tử cho công dân."
-    ],
-    category: "ho-tich"
-  },
-  {
-    id: "02",
-    title: "Đăng ký kết hôn cho công dân Việt Nam cư trú tại địa phương",
-    time: "Trong ngày làm việc (ngay sau khi nhận đủ hồ sơ)",
-    fee: "Miễn phí hoàn toàn",
-    docs: [
-      "Tờ khai đăng ký kết hôn có chữ ký và xác nhận tình trạng của cả hai bên nam, nữ (Tải mẫu)",
-      "Giấy xác nhận tình trạng hôn nhân do UBND nơi cư trú trước đây cấp (nếu có)",
-      "Căn cước công dân bản gốc đối chiếu trực tiếp"
-    ],
-    steps: [
-      "Hai bên nam nữ trực tiếp có mặt, nộp hồ sơ đăng ký kết hôn tại sảnh Một cửa xã.",
-      "Cán bộ hộ tịch đối chiếu thông tin cá nhân trên Cơ sở dữ liệu dân cư quốc gia.",
-      "Cán bộ in Giấy chứng nhận kết hôn; hai bên nam nữ ký vào Giấy chứng nhận kết hôn và Sổ hộ tịch; lãnh đạo xã ký đóng dấu trao kết quả."
-    ],
-    category: "ho-tich"
-  },
-  {
-    id: "03",
-    title: "Chứng thực bản sao từ bản chính các loại giấy tờ văn bằng",
-    time: "Giải quyết ngay trong ngày tiếp nhận (tối đa 2 giờ làm việc)",
-    fee: "2.000 đồng / trang (từ trang thứ ba: 1.000 đồng / trang)",
-    docs: [
-      "Bản chính giấy tờ, văn bằng do cơ quan có thẩm quyền của Việt Nam cấp cần chứng thực",
-      "Các bản photo sẵn cần chứng thực đối chiếu (hoặc photo trực tiếp tại bộ phận một cửa)"
-    ],
-    steps: [
-      "Nộp hồ sơ trực tiếp tại sảnh Một cửa xã Dang Kang.",
-      "Cán bộ Tư pháp đối chiếu bản photo với bản gốc bảo đảm trùng khớp nội dung.",
-      "Lãnh đạo UBND xã ký xác nhận đóng dấu chứng thực bản sao hợp pháp."
-    ],
-    category: "chung-thuc"
-  },
-  {
-    id: "04",
-    title: "Xác nhận tình trạng hôn nhân (Xin giấy xác nhận độc thân)",
-    time: "Tối đa 3 ngày làm việc",
-    fee: "15.000 đồng / bản xác nhận",
-    docs: [
-      "Tờ khai yêu cầu cấp Giấy xác nhận tình trạng hôn nhân theo mẫu",
-      "Bản án ly hôn bản gốc (nếu đã từng ly hôn trước đó)"
-    ],
-    steps: [
-      "Công dân nộp hồ sơ trực tuyến qua Cổng dịch vụ công hoặc trực tiếp tại xã.",
-      "Công chức kiểm tra trạng thái hôn nhân trực tiếp của công dân trên sổ đăng ký hộ tịch cấp xã qua các năm.",
-      "Ký duyệt trả kết quả giấy xác nhận tình trạng hôn nhân hợp pháp."
-    ],
-    category: "ho-tich"
-  }
-]
-
-const TRACKING_DATA = {
-  "DK-2026-888": {
-    status: "success",
-    step: 4,
-    applicant: "Nguyễn Thị Mai (Thôn 3, xã Dang Kang)",
-    title: "Đăng ký khai sinh trực tuyến cho con thứ hai",
-    submitDate: "05/05/2026",
-    completeDate: "06/05/2026"
-  },
-  "DK-2026-999": {
-    status: "process",
-    step: 2,
-    applicant: "Y-Nguên Mlô (Buôn Êga, xã Dang Kang)",
-    title: "Yêu cầu cấp giấy xác nhận tình trạng hôn nhân",
-    submitDate: "06/05/2026",
-    completeDate: "Dự kiến 08/05/2026"
-  }
-}
-
 export default function ProceduresPage() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [activeCategory, setActiveCategory] = React.useState("all")
-  const [activeProcedureIdx, setActiveProcedureIdx] = React.useState<string | null>("01")
+  const [activeProcedureIdx, setActiveProcedureIdx] = React.useState<string | null>(null)
 
   // Tracking code states
   const [trackCode, setTrackCode] = React.useState("")
@@ -128,11 +40,7 @@ export default function ProceduresPage() {
     e.preventDefault()
     const code = trackCode.trim().toUpperCase()
     if (code) {
-      if (TRACKING_DATA[code as keyof typeof TRACKING_DATA]) {
-        setTrackResult(TRACKING_DATA[code as keyof typeof TRACKING_DATA])
-      } else {
-        setActiveTrackCode(code)
-      }
+      setActiveTrackCode(code)
     }
   }
 
@@ -167,13 +75,15 @@ export default function ProceduresPage() {
         category: proc.category
       }));
     }
-    return MOCK_PROCEDURES.filter(proc => {
-      const matchesSearch = !searchQuery.trim() ||
-        proc.title.toLowerCase().includes(searchQuery.toLowerCase())
-      const matchesCategory = activeCategory === "all" || proc.category === activeCategory
-      return matchesSearch && matchesCategory
-    });
-  }, [dbProceduresData, searchQuery, activeCategory])
+    return [];
+  }, [dbProceduresData])
+
+  React.useEffect(() => {
+    if (filteredProcedures.length > 0 && !activeProcedureIdx) {
+      setActiveProcedureIdx(filteredProcedures[0].id)
+    }
+  }, [filteredProcedures, activeProcedureIdx])
+
 
   return (
     <div className="flex flex-col gap-6 sm:gap-10 md:gap-12 animate-fade-in select-none">
@@ -201,7 +111,7 @@ export default function ProceduresPage() {
               TRA CỨU TIẾN ĐỘ HỒ SƠ MỘT CỬA ĐIỆN TỬ
             </h3>
             <p className="text-[11px] text-slate-400 font-semibold leading-relaxed">
-              Nhập mã số hồ sơ (Ví dụ mẫu: <span className="text-[#fbc02d] underline font-mono cursor-pointer" onClick={() => setTrackCode("DK-2026-888")}>DK-2026-888</span> hoặc <span className="text-[#fbc02d] underline font-mono cursor-pointer" onClick={() => setTrackCode("DK-2026-999")}>DK-2026-999</span>) để theo dõi trạng thái xử lý liên thông cấp xã
+              Nhập mã số biên nhận in trên giấy hẹn để theo dõi trạng thái xử lý liên thông cấp xã
             </p>
           </div>
         </div>
