@@ -55,7 +55,7 @@ export default function ZoomController() {
           <button
             onClick={handleZoomIn}
             disabled={zoomLevel >= 150}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-[#cc0000] hover:text-white dark:bg-slate-950 dark:hover:bg-red-900/60 disabled:opacity-40 disabled:hover:bg-slate-50 disabled:hover:text-current text-slate-700 dark:text-slate-300 transition-all group"
+            className="p-2 rounded-xl bg-slate-50 hover:bg-portal-primary hover:text-white dark:bg-slate-950 dark:hover:bg-red-900/60 disabled:opacity-40 disabled:hover:bg-slate-50 disabled:hover:text-current text-slate-700 dark:text-slate-300 transition-all group"
             title="Phóng to trang (+10%)"
           >
             <ZoomIn className="w-4 h-4 transition-transform group-hover:scale-110" />
@@ -69,7 +69,7 @@ export default function ZoomController() {
           {/* Reset Button */}
           <button
             onClick={handleReset}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-[#cc0000] hover:text-white dark:bg-slate-950 dark:hover:bg-red-900/60 text-slate-700 dark:text-slate-300 transition-all group"
+            className="p-2 rounded-xl bg-slate-50 hover:bg-portal-primary hover:text-white dark:bg-slate-950 dark:hover:bg-red-900/60 text-slate-700 dark:text-slate-300 transition-all group"
             title="Đặt lại kích thước (100%)"
           >
             <RotateCcw className="w-4 h-4 transition-transform group-hover:rotate-12" />
@@ -79,7 +79,7 @@ export default function ZoomController() {
           <button
             onClick={handleZoomOut}
             disabled={zoomLevel <= 80}
-            className="p-2 rounded-xl bg-slate-50 hover:bg-[#cc0000] hover:text-white dark:bg-slate-950 dark:hover:bg-red-900/60 disabled:opacity-40 disabled:hover:bg-slate-50 disabled:hover:text-current text-slate-700 dark:text-slate-300 transition-all group"
+            className="p-2 rounded-xl bg-slate-50 hover:bg-portal-primary hover:text-white dark:bg-slate-950 dark:hover:bg-red-900/60 disabled:opacity-40 disabled:hover:bg-slate-50 disabled:hover:text-current text-slate-700 dark:text-slate-300 transition-all group"
             title="Thu nhỏ trang (-10%)"
           >
             <ZoomOut className="w-4 h-4 transition-transform group-hover:scale-90" />
@@ -91,8 +91,8 @@ export default function ZoomController() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg border text-white transition-all transform hover:scale-105 active:scale-95 group relative overflow-hidden ${isOpen
-          ? "bg-[#cc0000] border-red-500 shadow-red-500/20"
-          : "bg-slate-900 dark:bg-slate-800 border-slate-750 hover:bg-[#cc0000] dark:hover:bg-[#cc0000]"
+          ? "bg-portal-primary border-portal-primary-hover shadow-portal-primary/20"
+          : "bg-slate-900 dark:bg-slate-800 border-slate-750 hover:bg-portal-primary dark:hover:bg-portal-primary"
           }`}
         title="Trợ năng: Cỡ chữ & Kích thước trang"
       >

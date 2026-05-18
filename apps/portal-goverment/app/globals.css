@@ -137,7 +137,12 @@
     @apply border-border outline-ring/50;
   }
 
+  html, body, p, span, h1, h2, h3, h4, h5, h6, a, button, input, select, textarea {
+    font-family: var(--font-portal) !important;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-portal-bg) !important;
+    @apply text-foreground;
   }
 }

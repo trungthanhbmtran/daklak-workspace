@@ -546,7 +546,7 @@ export default function Header() {
             </span>
           </div>
           <div className="flex items-center gap-4 flex-wrap justify-center font-semibold">
-            <a href="mailto:xadangkang@daklak.gov.vn" className="hover:text-[#cc0000] transition-colors">
+            <a href="mailto:xadangkang@daklak.gov.vn" className="hover:text-portal-primary transition-colors">
               xadangkang@daklak.gov.vn
             </a>
             {mounted && (

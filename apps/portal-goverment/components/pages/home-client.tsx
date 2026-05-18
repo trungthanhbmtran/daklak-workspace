@@ -44,8 +44,8 @@ const getBannerBackgroundStyle = (styles: any) => {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='100%' opacity='0.08'><circle cx='50%' cy='50%' r='40%' fill='none' stroke='%23ffffff' stroke-width='2'/><circle cx='50%' cy='50%' r='30%' fill='none' stroke='%23ffffff' stroke-dasharray='10,10'/><circle cx='50%' cy='50%' r='20%' fill='none' stroke='%23ffffff'/><circle cx='50%' cy='50%' r='10%' fill='none' stroke='%23ffffff'/></svg>`;
       const drumBg = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
       return {
-        background: `linear-gradient(to right, ${styles.bgGradientStart || "#990000"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "#cc0000"}, ${styles.bgGradientEnd || "#800000"})`,
-        backgroundImage: `${drumBg}, linear-gradient(to right, ${styles.bgGradientStart || "#990000"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "#cc0000"}, ${styles.bgGradientEnd || "#800000"})`,
+        background: `linear-gradient(to right, ${styles.bgGradientStart || "var(--primary-hover-color)"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "var(--primary-color)"}, ${styles.bgGradientEnd || "var(--primary-hover-color)"})`,
+        backgroundImage: `${drumBg}, linear-gradient(to right, ${styles.bgGradientStart || "var(--primary-hover-color)"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "var(--primary-color)"}, ${styles.bgGradientEnd || "var(--primary-hover-color)"})`,
         backgroundSize: "cover",
         backgroundPosition: "center"
       };
@@ -54,8 +54,8 @@ const getBannerBackgroundStyle = (styles: any) => {
       const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='60' height='30' opacity='0.05'><path d='M0 15 Q15 0, 30 15 T60 15' fill='none' stroke='%23ffffff' stroke-width='1.5'/></svg>`;
       const cloudsBg = `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
       return {
-        background: `linear-gradient(to right, ${styles.bgGradientStart || "#990000"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "#cc0000"}, ${styles.bgGradientEnd || "#800000"})`,
-        backgroundImage: `${cloudsBg}, linear-gradient(to right, ${styles.bgGradientStart || "#990000"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "#cc0000"}, ${styles.bgGradientEnd || "#800000"})`,
+        background: `linear-gradient(to right, ${styles.bgGradientStart || "var(--primary-hover-color)"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "var(--primary-color)"}, ${styles.bgGradientEnd || "var(--primary-hover-color)"})`,
+        backgroundImage: `${cloudsBg}, linear-gradient(to right, ${styles.bgGradientStart || "var(--primary-hover-color)"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "var(--primary-color)"}, ${styles.bgGradientEnd || "var(--primary-hover-color)"})`,
         backgroundRepeat: "repeat"
       };
     }
@@ -68,7 +68,7 @@ const getBannerBackgroundStyle = (styles: any) => {
     }
   }
   return {
-    background: `linear-gradient(to right, ${styles.bgGradientStart || "#990000"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "#cc0000"}, ${styles.bgGradientEnd || "#800000"})`
+    background: `linear-gradient(to right, ${styles.bgGradientStart || "var(--primary-hover-color)"}, ${styles.bgGradientMiddle || styles.bgGradientStart || "var(--primary-color)"}, ${styles.bgGradientEnd || "var(--primary-hover-color)"})`
   };
 };
 
@@ -219,9 +219,9 @@ function PortalBannerSlot({ position, banners }: { position: string; banners: an
       let isSlogan = false;
       let styles: any = {
         bgType: "gradient",
-        bgGradientStart: "#990000",
-        bgGradientMiddle: "#cc0000",
-        bgGradientEnd: "#800000",
+        bgGradientStart: "var(--primary-hover-color)",
+        bgGradientMiddle: "var(--primary-color)",
+        bgGradientEnd: "var(--primary-hover-color)",
         titleColor: "#fbc02d",
         textColor: "#fff7ed",
         alignment: "left",
@@ -781,7 +781,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* 1. Horizontal Scrolling Ticker: Chạy TIN NỔI BẬT (Under the Header) */}
       <div className="w-full bg-[#fff9db] dark:bg-amber-950/20 border border-[#ffe066] dark:border-amber-900/30 rounded-xl px-4 py-2.5 flex items-center gap-3 shadow-sm select-none">
-        <div className="flex items-center gap-1.5 text-[#cc0000] dark:text-red-400 font-black shrink-0 text-xs tracking-wider uppercase animate-pulse">
+        <div className="flex items-center gap-1.5 text-portal-primary dark:text-portal-primary font-black shrink-0 text-xs tracking-wider uppercase animate-pulse">
           <Volume2 className="w-4 h-4 shrink-0" />
           <span>TIN NỔI BẬT:</span>
         </div>
@@ -796,9 +796,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       {/* 2. Top Main Portal News Layout: 3-Column Structured Layout (Left Menu, Middle Slideshow, Right Announcements) */}
       <div className="flex flex-col gap-4">
         {/* Unified Star Accent Section Header */}
-        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+        <div className="flex items-center gap-2 border-b-2 border-portal-primary pb-2">
           <span className="text-[#f1c40f] text-lg animate-pulse">⭐</span>
-          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+          <h2 className="text-base md:text-lg font-black text-portal-primary dark:text-portal-primary uppercase tracking-wide">
             TIN TỨC SỰ KIỆN NỔI BẬT & CHỈ ĐẠO ĐIỀU HÀNH
           </h2>
         </div>
@@ -809,7 +809,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
           {/* Column 1 (Left, span 3): Danh mục chuyên mục (Internal wing navigation links) */}
           <div className="lg:col-span-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3 flex flex-col gap-3 shadow-sm justify-between">
             <div>
-              <div className="bg-[#cc0000] text-white py-2 px-3 rounded font-bold text-xs uppercase tracking-wide text-center mb-2 shadow-sm">
+              <div className="bg-portal-primary text-white py-2 px-3 rounded font-bold text-xs uppercase tracking-wide text-center mb-2 shadow-sm">
                 {currentLang === "en" ? "Categories" : "Danh mục chuyên mục"}
               </div>
               <div className="flex flex-col">
@@ -817,9 +817,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   <Link
                     key={idx}
                     href={item.path}
-                    className="flex gap-2 items-center p-2 rounded text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 hover:text-[#cc0000] dark:hover:text-red-400 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-950/40 transition-all group"
+                    className="flex gap-2 items-center p-2 rounded text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 hover:text-portal-primary dark:hover:text-red-400 border-b border-slate-100 dark:border-slate-800 last:border-0 hover:bg-slate-50 dark:hover:bg-slate-950/40 transition-all group"
                   >
-                    <span className="text-[#cc0000]/70 text-[11px] shrink-0 group-hover:translate-x-0.5 transition-transform">
+                    <span className="text-portal-primary/70 text-[11px] shrink-0 group-hover:translate-x-0.5 transition-transform">
                       🔸
                     </span>
                     <span className="truncate">{item.name}</span>
@@ -832,7 +832,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-extrabold block uppercase tracking-wide">
                 {currentLang === "en" ? "COMMUNE HOTLINE" : "ĐƯỜNG DÂY NÓNG UBND XÃ"}
               </span>
-              <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="text-sm text-[#cc0000] dark:text-red-400 font-black tracking-widest mt-0.5 block font-mono">
+              <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="text-sm text-portal-primary dark:text-portal-primary font-black tracking-widest mt-0.5 block font-mono">
                 {getConfigValue("hotline", "0262.3812.345")}
               </a>
             </div>
@@ -857,7 +857,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 {/* Semi-transparent Overlay Bottom Block */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 z-20 flex flex-col gap-2 bg-gradient-to-t from-black/95 to-black/60 border-t border-white/5">
                   <div className="flex items-center gap-2">
-                    <span className="bg-[#cc0000] text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow">
+                    <span className="bg-portal-primary text-white text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded shadow">
                       {slide.category}
                     </span>
                     <span className="text-white/80 text-[10px] font-bold flex items-center gap-1">
@@ -907,12 +907,12 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
           {/* Column 3 (Right, span 3): Thông báo (Announcements Box on side of slider) */}
           <div className="lg:col-span-3 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg p-4 flex flex-col relative overflow-hidden shadow-sm justify-between">
             {/* Subtle administrative bronze pattern watermark */}
-            <div className="absolute inset-0 bg-[radial-gradient(#cc000004_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(var(--primary-color)04_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
 
             <div>
               <div className="border-b border-amber-200/60 dark:border-slate-800 pb-2 mb-3 z-10 flex items-center gap-1.5">
-                <Volume2 className="w-4 h-4 text-[#cc0000]" />
-                <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
+                <Volume2 className="w-4 h-4 text-portal-primary" />
+                <span className="text-xs font-black uppercase text-portal-primary dark:text-portal-primary tracking-wide">
                   {currentLang === "en" ? "Administrative Announcements" : "Thông báo hành chính"}
                 </span>
               </div>
@@ -925,9 +925,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     <div key={`${ann.id}-1`} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                       <Link
                         href="/tin-tuc"
-                        className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                        className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors leading-relaxed"
                       >
-                        <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                        <span className="text-portal-primary text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
                           🔴
                         </span>
                         <span className="line-clamp-2">{ann.title}</span>
@@ -947,9 +947,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     <div key={`${ann.id}-2`} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                       <Link
                         href="/tin-tuc"
-                        className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                        className="flex gap-2 items-start text-xs md:text-[13px] font-semibold md:font-bold text-slate-700 dark:text-slate-300 group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors leading-relaxed"
                       >
-                        <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                        <span className="text-portal-primary text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
                           🔴
                         </span>
                         <span className="line-clamp-2">{ann.title}</span>
@@ -970,11 +970,11 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
             {/* Citizen Support Quick Info Box */}
             <div className="p-2.5 bg-white dark:bg-slate-950 rounded-lg border border-amber-200/30 dark:border-slate-800/60 flex items-center gap-3 z-10 shrink-0 shadow-sm mb-1">
-              <div className="p-2 rounded-lg bg-red-50 dark:bg-red-950/40 text-[#cc0000] dark:text-red-400 shrink-0">
+              <div className="p-2 rounded-lg bg-red-50 dark:bg-portal-secondary/40 text-portal-primary dark:text-portal-primary shrink-0">
                 <Clock className="w-4 h-4" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-wide">
+                <span className="text-[10px] text-portal-primary dark:text-portal-primary font-extrabold uppercase tracking-wide">
                   {currentLang === "en" ? "CITIZEN RECEPTION" : "LỊCH TIẾP CÔNG DÂN"}
                 </span>
                 <span className="text-xs font-bold text-slate-700 dark:text-slate-300 mt-0.5 truncate">
@@ -985,7 +985,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
             <Link
               href="/tin-tuc"
-              className="mt-1 pt-2.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-xs text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1 shrink-0"
+              className="mt-1 pt-2.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-xs text-portal-primary dark:text-portal-primary font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1 shrink-0"
             >
               Xem tất cả thông báo
               <ArrowRight className="w-3.5 h-3.5" />
@@ -1011,9 +1011,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               {customPatrioticBanners.map((banner: any) => {
                 let styles: any = {
                   bgType: "gradient",
-                  bgGradientStart: "#990000",
-                  bgGradientMiddle: "#cc0000",
-                  bgGradientEnd: "#800000",
+                  bgGradientStart: "var(--primary-hover-color)",
+                  bgGradientMiddle: "var(--primary-color)",
+                  bgGradientEnd: "var(--primary-hover-color)",
                   titleColor: "#fbc02d",
                   textColor: "#fff7ed",
                   alignment: "left",
@@ -1041,7 +1041,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
         // Ultimate beautiful fallback static banner
         return (
-          <div className="w-full bg-gradient-to-r from-[#990000] via-[#cc0000] to-[#800000] text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
+          <div className="w-full bg-gradient-to-r from-portal-primary-hover via-portal-primary to-portal-primary-hover text-white py-4.5 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left relative overflow-hidden">
             {/* Intricate Gold Borders */}
             <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
             <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
@@ -1076,9 +1076,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* 4. Quick Services Administrative Icons Grid */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+        <div className="flex items-center gap-2 border-b-2 border-portal-primary pb-2">
           <span className="text-[#f1c40f] text-lg">⭐</span>
-          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+          <h2 className="text-base md:text-lg font-black text-portal-primary dark:text-portal-primary uppercase tracking-wide">
             CỔNG DỊCH VỤ CÔNG TRỰC TUYẾN MỘT CỬA
           </h2>
         </div>
@@ -1090,7 +1090,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               <Link
                 key={serv.title}
                 href={serv.link}
-                className={`p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 ${serv.borderColor} ${serv.hoverBg} shadow-sm hover:shadow-md hover:border-[#cc0000] dark:hover:border-red-600 transition-all transform hover:-translate-y-1 flex flex-col gap-3.5 relative group overflow-hidden`}
+                className={`p-5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 border-l-4 ${serv.borderColor} ${serv.hoverBg} shadow-sm hover:shadow-md hover:border-portal-primary dark:hover:border-portal-primary transition-all transform hover:-translate-y-1 flex flex-col gap-3.5 relative group overflow-hidden`}
               >
                 {/* Micro hover shadow glow decoration */}
                 <div className="absolute right-0 top-0 w-24 h-24 bg-slate-500/5 dark:bg-white/5 rounded-full blur-xl translate-x-8 -translate-y-8 scale-75 group-hover:scale-125 transition-transform duration-500 pointer-events-none" />
@@ -1099,7 +1099,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   <Icon className="w-5 h-5 shrink-0" />
                 </div>
                 <div className="flex flex-col gap-1 flex-1">
-                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors">
+                  <h4 className="text-xs font-extrabold text-slate-900 dark:text-white uppercase tracking-wider group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors">
                     {serv.title}
                   </h4>
                   <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed font-medium">
@@ -1107,7 +1107,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   </p>
                 </div>
 
-                <span className="mt-1 text-xs font-bold tracking-wider text-slate-400 group-hover:text-[#cc0000] dark:group-hover:text-red-400 uppercase flex items-center gap-1 group-hover:underline">
+                <span className="mt-1 text-xs font-bold tracking-wider text-slate-400 group-hover:text-portal-primary dark:group-hover:text-red-400 uppercase flex items-center gap-1 group-hover:underline">
                   Truy cập dịch vụ
                   <ChevronRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
                 </span>
@@ -1121,9 +1121,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: News list */}
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+          <div className="flex items-center gap-2 border-b-2 border-portal-primary pb-2">
             <span className="text-[#f1c40f] text-lg">⭐</span>
-            <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+            <h2 className="text-base md:text-lg font-black text-portal-primary dark:text-portal-primary uppercase tracking-wide">
               Tin tức lĩnh vực xây dựng và công thương
             </h2>
           </div>
@@ -1132,7 +1132,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
             {constructionNews.map((news: any) => (
               <div
                 key={news.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-[#cc0000] transition-all flex flex-col sm:flex-row gap-4 group"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-portal-primary transition-all flex flex-col sm:flex-row gap-4 group"
               >
                 <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0">
                   <img
@@ -1146,7 +1146,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
                     {news.date}
                   </span>
-                  <h4 className="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors tracking-wide line-clamp-2">
+                  <h4 className="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors tracking-wide line-clamp-2">
                     <Link href={`/tin-tuc`}>{news.title}</Link>
                   </h4>
                   <p className="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2 leading-relaxed font-semibold">
@@ -1160,12 +1160,12 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
         {/* Right Column: Category navigation links on light textured background */}
         <div className="lg:col-span-4 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg p-4 flex flex-col relative overflow-hidden shadow-sm h-full self-stretch justify-between">
-          <div className="absolute inset-0 bg-[radial-gradient(#cc000004_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(var(--primary-color)04_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
 
           <div>
             <div className="border-b border-amber-200/60 dark:border-slate-800 pb-2 mb-3.5 z-10 flex items-center gap-1.5">
-              <FolderOpen className="w-4 h-4 text-[#cc0000]" />
-              <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
+              <FolderOpen className="w-4 h-4 text-portal-primary" />
+              <span className="text-xs font-black uppercase text-portal-primary dark:text-portal-primary tracking-wide">
                 Chuyên mục xây dựng
               </span>
             </div>
@@ -1175,9 +1175,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 <div key={idx} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                   <Link
                     href={link.link}
-                    className="flex gap-2 items-start text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                    className="flex gap-2 items-start text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors leading-relaxed"
                   >
-                    <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                    <span className="text-portal-primary text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
                       🔴
                     </span>
                     <span>{link.text}</span>
@@ -1189,7 +1189,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
           <Link
             href="/tin-tuc"
-            className="mt-6 pt-3.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1"
+            className="mt-6 pt-3.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] text-portal-primary dark:text-portal-primary font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1"
           >
             Xem tất cả chuyên đề
             <ArrowRight className="w-3.5 h-3.5" />
@@ -1204,9 +1204,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: News list */}
         <div className="lg:col-span-8 flex flex-col gap-4">
-          <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+          <div className="flex items-center gap-2 border-b-2 border-portal-primary pb-2">
             <span className="text-[#f1c40f] text-lg">⭐</span>
-            <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+            <h2 className="text-base md:text-lg font-black text-portal-primary dark:text-portal-primary uppercase tracking-wide">
               Tin tức lĩnh vực nông nghiệp và môi trường
             </h2>
           </div>
@@ -1215,7 +1215,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
             {agricultureNews.map((news: any) => (
               <div
                 key={news.id}
-                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-[#cc0000] transition-all flex flex-col sm:flex-row gap-4 group"
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-3.5 shadow-sm hover:shadow-md hover:border-portal-primary transition-all flex flex-col sm:flex-row gap-4 group"
               >
                 <div className="w-full sm:w-44 h-28 overflow-hidden rounded relative shrink-0">
                   <img
@@ -1229,7 +1229,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
                     {news.date}
                   </span>
-                  <h4 className="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors tracking-wide line-clamp-2">
+                  <h4 className="text-xs md:text-sm font-extrabold text-slate-900 dark:text-white leading-snug group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors tracking-wide line-clamp-2">
                     <Link href={`/tin-tuc`}>{news.title}</Link>
                   </h4>
                   <p className="text-slate-500 dark:text-slate-400 text-[11px] line-clamp-2 leading-relaxed font-semibold">
@@ -1243,12 +1243,12 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
         {/* Right Column: Category navigation links on light textured background */}
         <div className="lg:col-span-4 bg-[#faf8f2] dark:bg-slate-900 border border-amber-200/40 dark:border-slate-800 rounded-lg p-4 flex flex-col relative overflow-hidden shadow-sm h-full self-stretch justify-between">
-          <div className="absolute inset-0 bg-[radial-gradient(#cc000004_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(var(--primary-color)04_1.5px,transparent_1.5px)] [background-size:12px_12px] pointer-events-none" />
 
           <div>
             <div className="border-b border-amber-200/60 dark:border-slate-800 pb-2 mb-3.5 z-10 flex items-center gap-1.5">
-              <FolderOpen className="w-4 h-4 text-[#cc0000]" />
-              <span className="text-xs font-black uppercase text-[#cc0000] dark:text-red-400 tracking-wide">
+              <FolderOpen className="w-4 h-4 text-portal-primary" />
+              <span className="text-xs font-black uppercase text-portal-primary dark:text-portal-primary tracking-wide">
                 Chuyên mục nông nghiệp
               </span>
             </div>
@@ -1258,9 +1258,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                 <div key={idx} className="group border-b border-dashed border-amber-200/30 dark:border-slate-800/50 pb-2.5 last:border-none last:pb-0">
                   <Link
                     href={link.link}
-                    className="flex gap-2 items-start text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-[#cc0000] dark:group-hover:text-red-400 transition-colors leading-relaxed"
+                    className="flex gap-2 items-start text-[11px] font-bold text-slate-700 dark:text-slate-300 group-hover:text-portal-primary dark:group-hover:text-red-400 transition-colors leading-relaxed"
                   >
-                    <span className="text-[#cc0000] text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
+                    <span className="text-portal-primary text-xs shrink-0 select-none group-hover:translate-x-0.5 transition-transform mt-0.5">
                       🔴
                     </span>
                     <span>{link.text}</span>
@@ -1272,7 +1272,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
           <Link
             href="/tin-tuc"
-            className="mt-6 pt-3.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] text-[#cc0000] dark:text-red-400 font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1"
+            className="mt-6 pt-3.5 border-t border-amber-200/60 dark:border-slate-800 text-center text-[10px] text-portal-primary dark:text-portal-primary font-extrabold uppercase tracking-widest hover:underline z-10 flex items-center justify-center gap-1"
           >
             Xem tất cả chuyên đề
             <ArrowRight className="w-3.5 h-3.5" />
@@ -1285,9 +1285,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* 7. Commune Photo Gallery Section - "THƯ VIỆN ẢNH HOẠT ĐỘNG DANG KANG" */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+        <div className="flex items-center gap-2 border-b-2 border-portal-primary pb-2">
           <span className="text-[#f1c40f] text-lg">⭐</span>
-          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+          <h2 className="text-base md:text-lg font-black text-portal-primary dark:text-portal-primary uppercase tracking-wide">
             THƯ VIỆN ẢNH HOẠT ĐỘNG & QUÊ HƯƠNG DANG KANG
           </h2>
         </div>
@@ -1315,7 +1315,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   />
                   {/* Tag and Title Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent flex flex-col justify-between p-4 sm:p-6 z-10">
-                    <span className="self-start bg-[#cc0000] text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded shadow border border-white/5">
+                    <span className="self-start bg-portal-primary text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded shadow border border-white/5">
                       {photo.tag}
                     </span>
                     <div className="flex flex-col gap-1.5">
@@ -1364,7 +1364,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   key={photo.id}
                   onClick={() => setCurrentGalleryIdx(idx)}
                   className={`flex gap-3 items-center p-2.5 rounded-xl border text-left transition-all ${isActive
-                    ? "bg-red-50/50 dark:bg-red-950/20 border-[#cc0000] shadow-sm"
+                    ? "bg-red-50/50 dark:bg-red-950/20 border-portal-primary shadow-sm"
                     : "bg-slate-50/50 dark:bg-slate-950/20 border-slate-150 dark:border-slate-800/80 hover:bg-slate-100/50"
                     }`}
                 >
@@ -1375,17 +1375,17 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                       className="w-full h-full object-cover"
                     />
                     {isActive && (
-                      <div className="absolute inset-0 bg-[#cc0000]/25 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-portal-primary/25 flex items-center justify-center">
                         <span className="text-white text-xs animate-pulse">⭐</span>
                       </div>
                     )}
                   </div>
                   <div className="flex flex-col gap-1 min-w-0">
-                    <span className={`text-[9px] font-black uppercase tracking-wider ${isActive ? "text-[#cc0000] dark:text-red-400" : "text-slate-400"
+                    <span className={`text-[9px] font-black uppercase tracking-wider ${isActive ? "text-portal-primary dark:text-portal-primary" : "text-slate-400"
                       }`}>
                       {photo.tag}
                     </span>
-                    <h4 className={`text-[11px] font-extrabold truncate ${isActive ? "text-[#cc0000] dark:text-red-400" : "text-slate-700 dark:text-slate-300"
+                    <h4 className={`text-[11px] font-extrabold truncate ${isActive ? "text-portal-primary dark:text-portal-primary" : "text-slate-700 dark:text-slate-300"
                       }`}>
                       {photo.title}
                     </h4>
@@ -1434,9 +1434,9 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
       {/* 8. Dedicated Interactive Dashboard: Gathered Civic and Sidebar Widgets in elegant 4-column row */}
       <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-2 border-b-2 border-[#cc0000] pb-2">
+        <div className="flex items-center gap-2 border-b-2 border-portal-primary pb-2">
           <span className="text-[#f1c40f] text-lg">⭐</span>
-          <h2 className="text-base md:text-lg font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide">
+          <h2 className="text-base md:text-lg font-black text-portal-primary dark:text-portal-primary uppercase tracking-wide">
             CỔNG TƯƠNG TÁC CÔNG DÂN & TIỆN ÍCH DỊCH VỤ SỐ
           </h2>
         </div>
@@ -1444,7 +1444,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-start">
 
           {/* Dashboard Item 1: Key leadership directory */}
-          <div className="bg-gradient-to-br from-[#990000] via-[#5c0000] to-slate-950 p-4.5 rounded-lg border border-[#ff0000]/10 shadow text-white relative overflow-hidden h-full animate-fade-in">
+          <div className="bg-gradient-to-br from-portal-primary-hover via-portal-primary/70 to-slate-950 p-4.5 rounded-lg border border-portal-primary/10 shadow text-white relative overflow-hidden h-full animate-fade-in">
             <div className="absolute right-0 top-0 w-24 h-24 bg-white/5 rounded-full blur-2xl pointer-events-none" />
 
             <div className="flex items-center gap-2 border-b border-white/10 pb-3 mb-4">
@@ -1566,7 +1566,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               <button
                 onClick={handleVoteSubmit}
                 disabled={!pollChoice}
-                className="w-full mt-2 bg-[#cc0000] hover:bg-[#a80000] disabled:bg-slate-200 text-white text-xs font-black tracking-widest uppercase py-2.5 rounded shadow-sm transition-all"
+                className="w-full mt-2 bg-portal-primary hover:bg-portal-primary-hover disabled:bg-slate-200 text-white text-xs font-black tracking-widest uppercase py-2.5 rounded shadow-sm transition-all"
               >
                 GỬI BÌNH CHỌN
               </button>
@@ -1617,7 +1617,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
 
             <Link
               href="/tuong-tac"
-              className="text-center bg-[#cc0000] hover:bg-[#a80000] text-white text-xs font-black tracking-widest py-2.5 rounded shadow transition-all block uppercase"
+              className="text-center bg-portal-primary hover:bg-portal-primary-hover text-white text-xs font-black tracking-widest py-2.5 rounded shadow transition-all block uppercase"
             >
               GỬI CÂU HỎI MỚI
             </Link>
@@ -1632,7 +1632,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   href={banner.customUrl || "#"}
                   target={banner.target || "_blank"}
                   rel="noopener noreferrer"
-                  className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-md transition-all flex flex-col group flex-1"
+                  className="rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-portal-primary hover:shadow-md transition-all flex flex-col group flex-1"
                 >
                   <div className="w-full h-24 overflow-hidden relative">
                     <img
@@ -1642,8 +1642,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                     />
                   </div>
                   <div className="p-2 flex flex-col justify-center">
-                    <span className="text-[9px] text-[#cc0000] dark:text-red-400 font-extrabold tracking-wider uppercase">LIÊN THÔNG BAN NGÀNH</span>
-                    <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate mt-0.5 group-hover:text-[#cc0000] transition-colors">
+                    <span className="text-[9px] text-portal-primary dark:text-portal-primary font-extrabold tracking-wider uppercase">LIÊN THÔNG BAN NGÀNH</span>
+                    <span className="text-xs font-black text-slate-800 dark:text-slate-100 truncate mt-0.5 group-hover:text-portal-primary transition-colors">
                       {banner.name}
                     </span>
                   </div>
@@ -1660,13 +1660,13 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
                   href={banner.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-[#cc0000] hover:shadow-sm shadow-sm transition-all flex items-center justify-between group flex-1"
+                  className="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-portal-primary hover:shadow-sm shadow-sm transition-all flex items-center justify-between group flex-1"
                 >
                   <div className="flex flex-col">
-                    <span className="text-[10.5px] text-[#cc0000] dark:text-red-400 font-extrabold tracking-wider">LIÊN THÔNG BAN NGÀNH</span>
-                    <span className="text-xs md:text-[13px] font-black text-slate-800 dark:text-slate-100 mt-0.5 tracking-wide group-hover:text-[#cc0000] transition-colors">{banner.label}</span>
+                    <span className="text-[10.5px] text-portal-primary dark:text-portal-primary font-extrabold tracking-wider">LIÊN THÔNG BAN NGÀNH</span>
+                    <span className="text-xs md:text-[13px] font-black text-slate-800 dark:text-slate-100 mt-0.5 tracking-wide group-hover:text-portal-primary transition-colors">{banner.label}</span>
                   </div>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#cc0000] transition-colors shrink-0" />
+                  <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-portal-primary transition-colors shrink-0" />
                 </a>
               ))
             )}
