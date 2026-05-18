@@ -48,9 +48,22 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
   --font-sans: var(--font-sans);
+  --color-portal-primary: var(--primary-color);
+  --color-portal-primary-hover: var(--primary-hover-color);
+  --color-portal-secondary: var(--secondary-color);
+  --color-portal-bg: var(--background-color);
+  --font-portal: var(--font-family);
+  --radius-portal: var(--border-radius);
 }
 
 :root {
+  --primary-color: #cc0000;
+  --primary-hover-color: #a80000;
+  --secondary-color: #fdfbf7;
+  --background-color: #faf9f6;
+  --font-family: 'Times New Roman', Times, serif;
+  --border-radius: 6px;
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);

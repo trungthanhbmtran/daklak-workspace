@@ -2,6 +2,7 @@ import { Inter } from "next/font/google"
 import "../globals.css"
 import * as React from "react"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AppearanceProvider } from "@/components/appearance-provider"
 import { Providers } from "@/providers"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
@@ -41,14 +42,16 @@ export default async function LocaleLayout({
       <body className="flex min-h-screen flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
         <ThemeProvider>
           <Providers>
-            <React.Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-slate-950" />}>
-              <Header />
-              <main className="flex-1 w-full max-w-7xl mx-auto py-6 md:py-8 px-4 md:px-8">
-                {children}
-              </main>
-              <Footer />
-              <ZoomController />
-            </React.Suspense>
+            <AppearanceProvider>
+              <React.Suspense fallback={<div className="min-h-screen bg-slate-50 dark:bg-slate-950" />}>
+                <Header />
+                <main className="flex-1 w-full max-w-7xl mx-auto py-6 md:py-8 px-4 md:px-8">
+                  {children}
+                </main>
+                <Footer />
+                <ZoomController />
+              </React.Suspense>
+            </AppearanceProvider>
           </Providers>
         </ThemeProvider>
       </body>

@@ -157,3 +157,35 @@ export interface CitizenFeedback {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface ThemeColors {
+  primary: string;
+  primaryHover: string;
+  secondary: string;
+  background: string;
+}
+
+export interface ThemeTypography {
+  fontFamily: string;
+}
+
+export interface ThemeLayout {
+  headerStyle: 'standard' | 'centered' | 'minimal';
+  footerStyle: 'standard' | 'simple' | 'corporate';
+  homepageLayout: 'grid' | 'classic' | 'magazine';
+}
+
+export interface ThemeBranding {
+  logo: string;
+  favicon: string;
+  borderRadius: string;
+}
+
+export interface ThemeAppearanceConfig {
+  theme: 'government' | 'news' | 'education' | 'minimal';
+  colors: ThemeColors;
+  typography: ThemeTypography;
+  layout: ThemeLayout;
+  branding: ThemeBranding;
+}
+

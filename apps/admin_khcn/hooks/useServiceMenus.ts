@@ -12,6 +12,7 @@ import {
   FileText,
   Newspaper,
   Layers,
+  Palette,
   type LucideIcon,
 } from "lucide-react";
 import { menuApi, type MenuNode } from "@/features/system-admin/menus/api";
@@ -165,6 +166,14 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
         href: `${config.basePath}/portal-page-builder`,
         icon: Layers,
         order: 7,
+      });
+    }
+    if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/appearance"))) {
+      menuItems.push({
+        name: "Quản trị Giao diện",
+        href: `${config.basePath}/appearance`,
+        icon: Palette,
+        order: 8,
       });
     }
   }

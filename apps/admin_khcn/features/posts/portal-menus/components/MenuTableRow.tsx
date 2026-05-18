@@ -85,9 +85,8 @@ export const MenuTableRow = React.memo(function MenuTableRow({
               {depth > 0 && <div className="w-4 h-[2px] bg-slate-200 -ml-2 mr-1" />}
 
               <div
-                className={`p-1.5 rounded ${
-                  !menu.isActive ? "bg-slate-100 text-slate-400" : "bg-blue-50 text-blue-600"
-                }`}
+                className={`p-1.5 rounded ${!menu.isActive ? "bg-slate-100 text-slate-400" : "bg-blue-50 text-blue-600"
+                  }`}
               >
                 {menu.type === "CATEGORY" && <Layers className="w-3.5 h-3.5" />}
                 {menu.type === "POST" && <FileText className="w-3.5 h-3.5" />}
@@ -97,9 +96,8 @@ export const MenuTableRow = React.memo(function MenuTableRow({
 
               <div className="flex flex-col">
                 <span
-                  className={`text-sm ${
-                    !menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"
-                  } ${!isTranslated ? "italic text-slate-400 font-medium" : ""}`}
+                  className={`text-sm ${!menu.isActive ? "text-slate-400 line-through" : "text-slate-800 font-semibold"
+                    } ${!isTranslated ? "italic text-slate-400 font-medium" : ""}`}
                 >
                   {displayName}
                   {!isTranslated && (
@@ -155,19 +153,18 @@ export const MenuTableRow = React.memo(function MenuTableRow({
         <TableCell>
           <Badge
             variant="secondary"
-            className={`text-[10px] uppercase font-bold py-0 h-5 ${
-              menu.position === "HORIZONTAL"
+            className={`text-[10px] uppercase font-bold py-0 h-5 ${menu.position === "HORIZONTAL"
                 ? "bg-indigo-50 text-indigo-700 border-indigo-100"
                 : menu.position === "VERTICAL"
-                ? "bg-amber-50 text-amber-700 border-amber-100"
-                : "bg-slate-100 text-slate-600 border-slate-200"
-            }`}
+                  ? "bg-amber-50 text-amber-700 border-amber-100"
+                  : "bg-slate-100 text-slate-600 border-slate-200"
+              }`}
           >
             {menu.position === "HORIZONTAL"
               ? "Ngang"
               : menu.position === "VERTICAL"
-              ? "Dọc"
-              : "Chân trang"}
+                ? "Dọc"
+                : "Chân trang"}
           </Badge>
         </TableCell>
         <TableCell>

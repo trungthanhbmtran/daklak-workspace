@@ -7,6 +7,7 @@ import { useTheme } from "next-themes"
 import { useQuery } from "@tanstack/react-query"
 import apiClient from "@/lib/axiosInstance"
 import { resolveMediaUrl } from "@/lib/utils"
+import { useAppearance } from "@/components/appearance-provider"
 import {
   Phone,
   Mail,
@@ -180,6 +181,8 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [dateTimeStr, setDateTimeStr] = React.useState("")
   const [langOpen, setLangOpen] = React.useState(false)
+
+  const { config: appearanceConfig } = useAppearance()
 
   // 3. Resolve the active language client-side based on pathname segment
   const currentLang = React.useMemo(() => {
@@ -441,6 +444,10 @@ export default function Header() {
     return found.name || fallback
   }, [portalConfigData, currentLang])
 
+  const logoUrlToRender = React.useMemo(() => {
+    return appearanceConfig.branding.logo || getConfigValue("logo_url", "");
+  }, [appearanceConfig.branding.logo, getConfigValue]);
+
   const topBanners = React.useMemo(() => {
     if (!bannersData?.data || bannersData.data.length === 0) {
       return []
@@ -579,116 +586,166 @@ export default function Header() {
       </div>
 
       {/* 2. Main Admin Portal Banner */}
-      <div className="w-full bg-[#fdfbf7] dark:bg-slate-900 border-b-2 border-[#cc0000] dark:border-red-700 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06] pointer-events-none select-none z-0">
-          <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="drumPattern" width="120" height="120" patternUnits="userSpaceOnUse">
-                <g stroke="#cc0000" strokeWidth="0.5" fill="none">
-                  <circle cx="60" cy="60" r="54" />
-                  <circle cx="60" cy="60" r="48" />
-                  <circle cx="60" cy="60" r="40" strokeDasharray="1 1" />
-                  <circle cx="60" cy="60" r="32" />
-                  <circle cx="60" cy="60" r="24" strokeDasharray="2 1" />
-                  <circle cx="60" cy="60" r="14" />
-                  <path d="M60 4 L60 116 M4 60 L116 60 M20 20 L100 100 M20 100 L100 20 M38 10 L82 110 M38 110 L82 10 M10 38 L110 82 M10 82 L110 38" />
-                </g>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#drumPattern)" />
-          </svg>
-        </div>
+      {appearanceConfig.layout.headerStyle === "standard" && (
+        <div className="w-full bg-portal-secondary dark:bg-slate-900 border-b-2 border-portal-primary dark:border-red-700 relative overflow-hidden">
+          <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.06] pointer-events-none select-none z-0">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="drumPattern" width="120" height="120" patternUnits="userSpaceOnUse">
+                  <g stroke="var(--primary-color)" strokeWidth="0.5" fill="none">
+                    <circle cx="60" cy="60" r="54" />
+                    <circle cx="60" cy="60" r="48" />
+                    <circle cx="60" cy="60" r="40" strokeDasharray="1 1" />
+                    <circle cx="60" cy="60" r="32" />
+                    <circle cx="60" cy="60" r="24" strokeDasharray="2 1" />
+                    <circle cx="60" cy="60" r="14" />
+                    <path d="M60 4 L60 116 M4 60 L116 60 M20 20 L100 100 M20 100 L100 20 M38 10 L82 110 M38 110 L82 10 M10 38 L110 82 M10 82 L110 38" />
+                  </g>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#drumPattern)" />
+            </svg>
+          </div>
 
-        <div className="max-w-7xl mx-auto w-full px-4 relative flex items-center justify-between min-h-[96px] md:min-h-[115px] py-3.5 z-10">
-          <div className="flex items-center gap-3.5 sm:gap-4 text-left z-10 select-none max-w-[85%] md:max-w-[55%]">
-            <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex items-center justify-center">
-              {getConfigValue("logo_url", "") ? (
-                <img src={resolveMediaUrl(getConfigValue("logo_url", ""))} alt="Logo" className="w-full h-full object-contain" />
+          <div className="max-w-7xl mx-auto w-full px-4 relative flex items-center justify-between min-h-[96px] md:min-h-[115px] py-3.5 z-10">
+            <div className="flex items-center gap-3.5 sm:gap-4 text-left z-10 select-none max-w-[85%] md:max-w-[55%]">
+              <div className="shrink-0 w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 flex items-center justify-center">
+                {logoUrlToRender ? (
+                  <img src={resolveMediaUrl(logoUrlToRender)} alt="Logo" className="w-full h-full object-contain" />
+                ) : (
+                  <NationalEmblem className="w-full h-full animate-fade-in" />
+                )}
+              </div>
+              <div className="flex flex-col">
+                <span className="text-portal-primary dark:text-blue-400 text-[10px] sm:text-xs md:text-sm font-serif font-black tracking-widest uppercase leading-none opacity-85">
+                  {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
+                </span>
+                <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-serif font-black text-portal-primary dark:text-red-500 uppercase tracking-wide leading-tight my-0.5 sm:my-1">
+                  {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+                </h1>
+                <span className="text-blue-800 dark:text-blue-400/80 text-[8px] sm:text-[10px] md:text-xs font-serif font-bold tracking-wider leading-none uppercase">
+                  {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+                </span>
+              </div>
+            </div>
+
+            <div className="absolute right-4 top-0 bottom-0 h-full w-[45%] lg:w-[50%] hidden md:block select-none z-0">
+              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-portal-secondary to-transparent dark:from-slate-900 z-10" />
+              {topBanners.length > 0 ? (
+                <div className="relative w-full h-full overflow-hidden">
+                  {shouldTopSlide ? (
+                    topBanners.map((banner: any, idx: number) => {
+                      const isActive = idx === topActiveIdx
+                      return (
+                        <div
+                          key={banner.id}
+                          className={`absolute inset-0 transition-opacity duration-1000 ${isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+                            }`}
+                        >
+                          <a href={banner.customUrl || "#"} target={banner.target || "_self"} className="block w-full h-full">
+                            <img
+                              src={resolveMediaUrl(banner.imageUrl)}
+                              alt={banner.name}
+                              className="w-full h-full object-cover object-right"
+                            />
+                          </a>
+                        </div>
+                      )
+                    })
+                  ) : (
+                    <div className="absolute inset-0">
+                      <a href={topBanners[0].customUrl || "#"} target={topBanners[0].target || "_self"} className="block w-full h-full">
+                        <img
+                          src={resolveMediaUrl(topBanners[0].imageUrl)}
+                          alt={topBanners[0].name}
+                          className="w-full h-full object-cover object-right"
+                        />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <img
+                  src="/banner_scenery.png"
+                  alt="Cảnh quan nông thôn mới xã Dang Kang"
+                  className="w-full h-full object-cover object-right"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {appearanceConfig.layout.headerStyle === "centered" && (
+        <div className="w-full bg-portal-secondary dark:bg-slate-900 border-b-2 border-portal-primary dark:border-red-700 py-6 px-4 flex flex-col items-center gap-3 relative overflow-hidden">
+          <div className="shrink-0 w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center z-10">
+            {logoUrlToRender ? (
+              <img src={resolveMediaUrl(logoUrlToRender)} alt="Logo" className="w-full h-full object-contain" />
+            ) : (
+              <NationalEmblem className="w-full h-full animate-fade-in" />
+            )}
+          </div>
+          <div className="flex flex-col text-center z-10 select-none">
+            <span className="text-portal-primary dark:text-blue-400 text-xs sm:text-sm font-serif font-black tracking-widest uppercase leading-none opacity-85">
+              {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
+            </span>
+            <h1 className="text-lg sm:text-2xl md:text-3xl font-serif font-black text-portal-primary dark:text-red-500 uppercase tracking-wide leading-tight mt-2 mb-1">
+              {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+            </h1>
+            <span className="text-blue-800 dark:text-blue-400/80 text-[10px] sm:text-xs font-serif font-bold tracking-wider leading-none uppercase">
+              {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {appearanceConfig.layout.headerStyle === "minimal" && (
+        <div className="w-full bg-white dark:bg-slate-950 border-b py-3 px-4 md:px-8 flex justify-between items-center select-none">
+          <div className="flex items-center gap-3.5">
+            <div className="shrink-0 w-10 h-10 flex items-center justify-center">
+              {logoUrlToRender ? (
+                <img src={resolveMediaUrl(logoUrlToRender)} alt="Logo" className="w-full h-full object-contain" />
               ) : (
                 <NationalEmblem className="w-full h-full animate-fade-in" />
               )}
             </div>
-            <div className="flex flex-col">
-              <span className="text-[#0056b3] dark:text-blue-400 text-[10px] sm:text-xs md:text-sm font-serif font-black tracking-widest uppercase leading-none">
-                {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
-              </span>
-              <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-serif font-black text-[#cc0000] dark:text-red-500 uppercase tracking-wide leading-tight my-0.5 sm:my-1">
+            <div className="flex flex-col text-left">
+              <h1 className="text-sm sm:text-base font-sans font-black text-portal-primary dark:text-red-500 uppercase tracking-wide leading-tight">
                 {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
               </h1>
-              <span className="text-blue-800 dark:text-blue-400/80 text-[8px] sm:text-[10px] md:text-xs font-serif font-bold tracking-wider leading-none uppercase">
+              <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 uppercase font-medium">
                 {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
               </span>
             </div>
           </div>
-
-          <div className="absolute right-4 top-0 bottom-0 h-full w-[45%] lg:w-[50%] hidden md:block select-none z-0">
-            <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#fdfbf7] to-transparent dark:from-slate-900 z-10" />
-            {topBanners.length > 0 ? (
-              <div className="relative w-full h-full overflow-hidden">
-                {shouldTopSlide ? (
-                  topBanners.map((banner: any, idx: number) => {
-                    const isActive = idx === topActiveIdx
-                    return (
-                      <div
-                        key={banner.id}
-                        className={`absolute inset-0 transition-opacity duration-1000 ${isActive ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-                          }`}
-                      >
-                        <a href={banner.customUrl || "#"} target={banner.target || "_self"} className="block w-full h-full">
-                          <img
-                            src={resolveMediaUrl(banner.imageUrl)}
-                            alt={banner.name}
-                            className="w-full h-full object-cover object-right"
-                          />
-                        </a>
-                      </div>
-                    )
-                  })
-                ) : (
-                  <div className="absolute inset-0">
-                    <a href={topBanners[0].customUrl || "#"} target={topBanners[0].target || "_self"} className="block w-full h-full">
-                      <img
-                        src={resolveMediaUrl(topBanners[0].imageUrl)}
-                        alt={topBanners[0].name}
-                        className="w-full h-full object-cover object-right"
-                      />
-                    </a>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <img
-                src="/banner_scenery.png"
-                alt="Cảnh quan nông thôn mới xã Dang Kang"
-                className="w-full h-full object-cover object-right"
-              />
-            )}
+          <div className="text-[10px] bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded text-slate-500 dark:text-slate-400 font-semibold uppercase hidden sm:block">
+            {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
           </div>
         </div>
-      </div>
+      )}
 
       {/* 3. Navigation Bar */}
-      <nav className="w-full bg-[#cc0000] dark:bg-red-950 border-b border-[#a80000] dark:border-slate-900 text-white font-medium sticky top-0 shadow-md z-40 hidden md:block">
+      <nav className="w-full bg-portal-primary dark:bg-portal-primary/90 border-b border-portal-primary-hover dark:border-slate-900 text-white font-medium sticky top-0 shadow-md z-40 hidden md:block">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-12">
           <div className="flex items-center gap-0.5 flex-wrap h-full">
             {menuItems.map((item: MenuItem) => {
               const hasChildren = !!item.children
               const isActive = pathname === item.path || (item.path !== "/" && pathname.startsWith(item.path))
-
+ 
               if (item.name === t.home) {
                 return (
-                  <div key={item.name} className="relative flex items-center justify-center h-12 px-3.5 hover:bg-[#a80000] dark:hover:bg-red-900 transition-colors">
+                  <div key={item.name} className="relative flex items-center justify-center h-12 px-3.5 hover:bg-portal-primary-hover dark:hover:bg-slate-900 transition-colors">
                     <Link href="/" className={`text-white transition-colors ${isActive ? "text-[#fef08a]" : ""}`} title={t.home}>
                       <Home className="w-4 h-4 fill-current stroke-current" />
                     </Link>
                   </div>
                 )
               }
-
+ 
               return (
                 <div
                   key={item.name}
-                  className="relative group flex items-center h-12 px-3.5 hover:bg-[#a80000] dark:hover:bg-red-900 transition-colors"
+                  className="relative group flex items-center h-12 px-3.5 hover:bg-portal-primary-hover dark:hover:bg-slate-900 transition-colors"
                   onMouseEnter={() => hasChildren && setActiveDropdown(item.name)}
                   onMouseLeave={() => setActiveDropdown(null)}
                 >
@@ -710,15 +767,15 @@ export default function Header() {
                       {item.name}
                     </Link>
                   )}
-
+ 
                   {/* Desktop Dropdown */}
                   {hasChildren && (
-                    <div className="absolute top-full left-0 bg-[#b91c1c] dark:bg-slate-950 border border-[#991313] dark:border-slate-800 rounded-b-lg shadow-xl py-1 min-w-[220px] transition-all transform opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
+                    <div className="absolute top-full left-0 bg-portal-primary dark:bg-slate-950 border border-portal-primary-hover dark:border-slate-800 rounded-b-lg shadow-xl py-1 min-w-[220px] transition-all transform opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto">
                       {item.children?.map((child: { name: string; path: string }) => (
                         <Link
                           key={child.name}
                           href={child.path}
-                          className="block px-4 py-2.5 text-xs text-white/90 hover:text-[#fef08a] hover:bg-[#a81c1c]/50 dark:hover:bg-slate-900/60 transition-colors border-b border-white/5 last:border-0"
+                          className="block px-4 py-2.5 text-xs text-white/90 hover:text-[#fef08a] hover:bg-portal-primary-hover/50 dark:hover:bg-slate-900/60 transition-colors border-b border-white/5 last:border-0"
                         >
                           {child.name}
                         </Link>
@@ -729,7 +786,7 @@ export default function Header() {
               )
             })}
           </div>
-
+ 
           <div className="flex items-center gap-4 text-white">
             <button
               onClick={() => router.push(currentLang === "en" ? "/news" : "/tin-tuc")}
@@ -750,20 +807,23 @@ export default function Header() {
       </nav>
 
       {/* 4. Mobile Menu Button & Drawer */}
-      <div className="md:hidden w-full bg-[#cc0000] dark:bg-red-950 border-b border-[#a80000] dark:border-slate-800 text-white py-3.5 px-4 flex items-center justify-between z-40 sticky top-0 shadow-md">
+      <div className="md:hidden w-full bg-portal-primary dark:bg-portal-primary/95 border-b border-portal-primary-hover dark:border-slate-800 text-white py-3.5 px-4 flex items-center justify-between z-40 sticky top-0 shadow-md">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-white p-0.5 rounded-full flex items-center justify-center border border-slate-200">
-            <NationalEmblem className="w-full h-full" />
+            {logoUrlToRender ? (
+              <img src={resolveMediaUrl(logoUrlToRender)} alt="Logo" className="w-full h-full object-contain" />
+            ) : (
+              <NationalEmblem className="w-full h-full" />
+            )}
           </div>
           <span className="text-xs font-black uppercase tracking-wider text-[#fef08a]">
             {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
           </span>
         </Link>
-
+ 
         <div className="flex items-center gap-3">
           {mounted && (
             <>
-
               {/* PREMIUM INLINE MOBILE LANG SELECTOR */}
               <div className="flex items-center">
                 <button
@@ -780,7 +840,7 @@ export default function Header() {
               </div>
               <button
                 onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                className="p-1.5 rounded-md hover:bg-[#a80000] dark:hover:bg-slate-900 transition-colors text-white cursor-pointer"
+                className="p-1.5 rounded-md hover:bg-portal-primary-hover dark:hover:bg-slate-900 transition-colors text-white cursor-pointer"
               >
                 {resolvedTheme === "dark" ? (
                   <Sun className="w-4 h-4 text-amber-500" />
@@ -792,18 +852,18 @@ export default function Header() {
           )}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-1.5 rounded-md bg-[#a80000] border border-[#880000] text-white hover:bg-[#880000] dark:bg-red-900 dark:border-red-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-md bg-portal-primary-hover border border-portal-primary-hover text-white hover:bg-portal-primary dark:bg-slate-900 dark:border-slate-800 transition-colors cursor-pointer"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
       </div>
-
+ 
       {/* Mobile Drawer Overlay */}
       {mobileMenuOpen && (
         <div className="md:hidden fixed inset-0 bg-black/60 z-50 transition-opacity backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}>
           <div
-            className="absolute top-0 right-0 w-[280px] h-full bg-[#cc0000] dark:bg-slate-950 border-l border-[#a80000] dark:border-slate-800 shadow-2xl p-5 flex flex-col gap-6 text-white"
+            className="absolute top-0 right-0 w-[280px] h-full bg-portal-primary dark:bg-slate-950 border-l border-portal-primary-hover dark:border-slate-800 shadow-2xl p-5 flex flex-col gap-6 text-white"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/20 pb-4">
@@ -812,19 +872,19 @@ export default function Header() {
               </span>
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-1.5 rounded-full bg-[#a80000] border border-[#880000] hover:bg-[#880000] dark:bg-slate-900 dark:border-slate-800 text-white cursor-pointer"
+                className="p-1.5 rounded-full bg-portal-primary-hover border border-portal-primary-hover hover:bg-portal-primary dark:bg-slate-900 dark:border-slate-800 text-white cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
-
+ 
             <form onSubmit={handleSearch} className="relative w-full">
               <input
                 type="text"
                 placeholder={t.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#a80000] dark:bg-slate-900 border border-[#880000] dark:border-slate-800 rounded-lg py-2 pl-3 pr-9 text-xs text-white placeholder-white/70 focus:outline-none focus:border-white"
+                className="w-full bg-portal-primary-hover dark:bg-slate-900 border border-portal-primary-hover dark:border-slate-800 rounded-lg py-2 pl-3 pr-9 text-xs text-white placeholder-white/70 focus:outline-none focus:border-white"
               />
               <button type="submit" className="absolute right-2.5 top-2.5 text-white/75 cursor-pointer">
                 <Search className="w-4 h-4" />
