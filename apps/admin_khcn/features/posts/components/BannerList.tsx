@@ -19,6 +19,17 @@ import { Switch } from "@/components/ui/switch";
 import { postsApi } from "../api";
 import { Banner } from "../types";
 import { useGetCategories, useUpdateCategory } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface BannerListProps {
   onNavigateToCreate: () => void;
@@ -33,6 +44,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
   const [showConfig, setShowConfig] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState<string>("all");
+  const [deletingBannerId, setDeletingBannerId] = useState<string | null>(null);
 
   const getFriendlyPositionName = (pos: string) => {
     const found = categories.find((cat: any) => cat.group === "BANNER_POSITION" && cat.code?.toLowerCase() === pos?.toLowerCase());
@@ -58,9 +70,9 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
     mutationFn: (id: string) => postsApi.deleteBanner(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["banners"] });
-      alert("Xóa banner thành công!");
+      toast.success("Xóa banner thành công!");
     },
-    onError: () => alert("Có lỗi xảy ra khi xóa banner."),
+    onError: () => toast.error("Có lỗi xảy ra khi xóa banner."),
   });
 
   const filteredBanners = (banners?.items || []).filter((b: Banner) => {
@@ -81,7 +93,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Quản lý Banner/Quảng cáo</h2>
@@ -264,9 +277,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
                       size="icon"
                       className="h-7 w-7 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-950/40 border border-slate-100 hover:scale-105 shadow-sm transition-all duration-200"
                       onClick={() => {
-                        if (confirm(`Bạn có chắc muốn xóa banner "${banner.name}"?`)) {
-                          deleteMutation.mutate(banner.id);
-                        }
+                        setDeletingBannerId(banner.id);
                       }}
                       title="Xóa banner"
                     >
@@ -363,5 +374,31 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
         )}
       </div>
     </div>
+    
+      <AlertDialog open={!!deletingBannerId} onOpenChange={(open) => !open && setDeletingBannerId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Banner này sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingBannerId) {
+                  deleteMutation.mutate(deletingBannerId);
+                  setDeletingBannerId(null);
+                }
+              }}
+            >
+              Xóa banner
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

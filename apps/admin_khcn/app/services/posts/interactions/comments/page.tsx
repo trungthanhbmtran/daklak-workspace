@@ -6,10 +6,21 @@ import { Comment } from "@/features/posts/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Check, X, ShieldAlert, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function CommentsModerationPage() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchComments();
@@ -37,7 +48,10 @@ export default function CommentsModerationPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa bình luận này?")) return;
+    setDeletingCommentId(id);
+  };
+
+  const confirmDelete = async (id: string) => {
     try {
       await postsApi.deleteComment(id);
       toast.success("Đã xóa bình luận");
@@ -48,7 +62,8 @@ export default function CommentsModerationPage() {
   };
 
   return (
-    <div className="p-6">
+    <>
+      <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Kiểm duyệt bình luận</h1>
         <div className="text-sm text-gray-500">
@@ -105,5 +120,31 @@ export default function CommentsModerationPage() {
         )}
       </div>
     </div>
+    
+      <AlertDialog open={!!deletingCommentId} onOpenChange={(open) => !open && setDeletingCommentId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Bình luận này sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingCommentId) {
+                  confirmDelete(deletingCommentId);
+                  setDeletingCommentId(null);
+                }
+              }}
+            >
+              Xóa bình luận
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

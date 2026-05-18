@@ -38,6 +38,7 @@ import {
 import { postsApi } from "../api";
 import { useImageUpload } from "../hooks/useImageUpload";
 import { Category } from "../types";
+import { toast } from "sonner";
 
 const categorySchema = z.object({
   name: z.string().min(2, "Tên chuyên mục quá ngắn"),
@@ -140,7 +141,7 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     mutationFn: (v: CategoryFormValues) => isEdit ? postsApi.updateCategory(editId!, v) : postsApi.createCategory(v),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts-categories"] });
-      alert(isEdit ? "Cập nhật thành công!" : "Tạo mới thành công!");
+      toast.success(isEdit ? "Cập nhật thành công!" : "Tạo mới thành công!");
       onBack();
     },
   });
@@ -183,10 +184,10 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       });
 
       form.setValue("attachmentId", confirmRes.data.id, { shouldDirty: true });
-      alert("Tải lên văn bản thành công!");
+      toast.success("Tải lên văn bản thành công!");
     } catch (error) {
       console.error(error);
-      alert("Lỗi khi tải văn bản!");
+      toast.error("Lỗi khi tải văn bản!");
     } finally {
       setIsUploadingDoc(false);
     }

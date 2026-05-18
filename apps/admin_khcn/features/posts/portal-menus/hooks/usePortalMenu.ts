@@ -117,7 +117,6 @@ export function usePortalMenu() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa menu này?")) return;
     try {
       await postsApi.deletePortalMenu(id);
       toast.success("Đã xóa menu");

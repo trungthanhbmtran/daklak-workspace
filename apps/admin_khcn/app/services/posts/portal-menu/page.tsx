@@ -1,12 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { usePortalMenu, MenuTable, EditMenuModal, QuickSetupModal } from "@/features/posts/portal-menus";
 import { Button } from "@/components/ui/button";
 import { Globe, Plus, Zap, Languages } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function PortalMenuPage() {
+  const [deletingMenuId, setDeletingMenuId] = useState<string | null>(null);
   const {
     activeTab,
     setActiveTab,
@@ -96,7 +107,7 @@ export default function PortalMenuPage() {
           displayLang={displayLang}
           languages={languages}
           onEdit={handleOpenDialog}
-          onDelete={handleDelete}
+          onDelete={(id) => setDeletingMenuId(id)}
           onToggleActive={toggleActive}
         />
       </div>
@@ -117,6 +128,31 @@ export default function PortalMenuPage() {
         menus={menus}
         onSave={handleSave}
       />
+
+      <AlertDialog open={!!deletingMenuId} onOpenChange={(open) => !open && setDeletingMenuId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Menu này và các menu con của nó sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingMenuId) {
+                  handleDelete(deletingMenuId);
+                  setDeletingMenuId(null);
+                }
+              }}
+            >
+              Xóa menu
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -39,6 +39,24 @@ import { Post, PostStatus } from "../types";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const STATUS_CONFIG: Record<PostStatus, { label: string; bg: string; text: string; dot: string; icon: React.ComponentType<{ className?: string }> }> = {
   DRAFT: {
@@ -103,6 +121,9 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
+  const [rejectingPostId, setRejectingPostId] = useState<string | null>(null);
+  const [rejectionNote, setRejectionNote] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -233,7 +254,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   };
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
+    <>
+      <div className="flex flex-col gap-6 animate-fade-in">
 
       {/* CMS Quick Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -589,8 +611,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                                 size="sm"
                                 className="h-8 text-[10px] px-2.5 font-bold rounded-lg text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-950/30"
                                 onClick={() => {
-                                  const note = prompt("Nhập lý do từ chối:");
-                                  if (note) workflowMutation.mutate({ id: post.id, action: 'reject', note });
+                                  setRejectingPostId(post.id);
+                                  setRejectionNote("");
                                 }}
                               >
                                 <X className="h-3 w-3 mr-1 shrink-0" /> Từ chối
@@ -637,9 +659,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
                             className="h-8.5 w-8.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 rounded-lg transition-colors"
                             title="Xóa"
                             onClick={() => {
-                              if (confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
-                                deleteMutation.mutate(post.id);
-                              }
+                              setDeletingPostId(post.id);
                             }}
                           >
                             <Trash2 className="h-4 w-4" />
@@ -758,5 +778,74 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
         </div>
       </Card>
     </div>
+
+      <AlertDialog open={!!deletingPostId} onOpenChange={(open) => !open && setDeletingPostId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Bài viết này sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingPostId) {
+                  deleteMutation.mutate(deletingPostId);
+                  setDeletingPostId(null);
+                }
+              }}
+            >
+              Xóa bài viết
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={!!rejectingPostId} onOpenChange={(open) => !open && setRejectingPostId(null)}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-bold text-slate-800 dark:text-white">Từ chối bài viết</DialogTitle>
+            <DialogDescription className="text-slate-500 dark:text-slate-400 text-xs">
+              Vui lòng nhập lý do từ chối phê duyệt bài viết này. Thông tin này sẽ được lưu lại trong lịch sử duyệt bài.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col gap-2">
+              <Input
+                id="rejectionNote"
+                placeholder="Nhập lý do từ chối..."
+                value={rejectionNote}
+                onChange={(e) => setRejectionNote(e.target.value)}
+                className="w-full h-10 border border-slate-200 dark:border-slate-800 rounded-xl text-xs bg-slate-50/50 focus:bg-white text-slate-900 dark:text-slate-100"
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="ghost"
+              className="text-xs rounded-xl font-bold h-9"
+              onClick={() => setRejectingPostId(null)}
+            >
+              Hủy
+            </Button>
+            <Button
+              className="bg-rose-600 hover:bg-rose-700 text-white text-xs rounded-xl font-bold h-9"
+              disabled={!rejectionNote.trim()}
+              onClick={() => {
+                if (rejectingPostId && rejectionNote.trim()) {
+                  workflowMutation.mutate({ id: rejectingPostId, action: 'reject', note: rejectionNote });
+                  setRejectingPostId(null);
+                }
+              }}
+            >
+              Xác nhận từ chối
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

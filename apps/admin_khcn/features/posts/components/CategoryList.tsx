@@ -27,6 +27,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { postsApi } from "../api";
 import { Category } from "../types";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface CategoryListProps {
   onNavigateToCreate: () => void;
@@ -36,6 +47,7 @@ interface CategoryListProps {
 export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryListProps) {
   const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
+  const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
   const { data: categories, isLoading } = useQuery({
     queryKey: ["posts-categories"],
@@ -45,20 +57,16 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
     },
   });
 
-  console.log("categories", categories)
-
   const deleteMutation = useMutation({
     mutationFn: (id: string) => postsApi.deleteCategory(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts-categories"] });
-      alert("Xóa chuyên mục thành công!");
+      toast.success("Xóa chuyên mục thành công!");
     },
   });
 
   const handleDelete = (id: string) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa chuyên mục này?")) {
-      deleteMutation.mutate(id);
-    }
+    setDeletingCategoryId(id);
   };
 
   const filteredCategories = categories?.filter((cat: Category) =>
@@ -74,7 +82,8 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Chuyên mục bài viết</h1>
@@ -196,5 +205,31 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
         </CardContent>
       </Card>
     </div>
+    
+      <AlertDialog open={!!deletingCategoryId} onOpenChange={(open) => !open && setDeletingCategoryId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Chuyên mục này sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive hover:bg-destructive/90"
+              onClick={() => {
+                if (deletingCategoryId) {
+                  deleteMutation.mutate(deletingCategoryId);
+                  setDeletingCategoryId(null);
+                }
+              }}
+            >
+              Xóa chuyên mục
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

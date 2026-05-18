@@ -2,6 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import imageCompression from "browser-image-compression";
 import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onRemove?: () => void }) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -33,7 +34,7 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
       setPreviewUrl(conf.downloadUrl);
       options?.onSuccess?.(uploadInfo.fileId);
     } catch (error) {
-      alert("Lỗi tải ảnh");
+      toast.error("Lỗi tải ảnh");
     } finally {
       setIsUploading(false);
     }

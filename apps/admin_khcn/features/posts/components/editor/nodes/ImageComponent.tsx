@@ -7,6 +7,7 @@ import { CloudDownload, Loader2, CheckCircle2, Image as ImageIcon } from 'lucide
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ImageNode } from './ImageNode';
+import { toast } from 'sonner';
 
 export default function ImageComponent({
   src,
@@ -75,7 +76,7 @@ export default function ImageComponent({
       setIsSuccess(true);
       setTimeout(() => setIsHovered(false), 2000);
     } catch (error) {
-      alert("Đã xảy ra lỗi khi tải ảnh về máy chủ!");
+      toast.error("Đã xảy ra lỗi khi tải ảnh về máy chủ!");
     } finally {
       setIsUploading(false);
     }
