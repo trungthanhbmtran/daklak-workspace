@@ -30,7 +30,8 @@ import {
   Workflow,
   UserSquare2,
   CalendarDays,
-  Layout
+  Layout,
+  Palette
 } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
 

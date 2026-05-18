@@ -39,8 +39,7 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-se
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
 
 # Khởi động lại các services
-docker compose -f docker-compose.prod.yml up -d
-
+docker compose -f docker-compose.prod.yml up -d 
 # Chạy seeders (nếu cần dữ liệu mẫu)
 # Lưu ý: Nên chạy theo thứ tự dưới đây
 docker exec -it daklak-workspace-user-service-1 npx prisma db seed
