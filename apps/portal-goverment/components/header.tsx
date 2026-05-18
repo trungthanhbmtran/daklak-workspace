@@ -542,12 +542,12 @@ export default function Header() {
         <div className="max-w-7xl mx-auto w-full px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
-              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thứ Tư, 06/05/2026")} | Đắk Lắk 20°-23° 🌦️
+              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thứ Tư, 06/05/2026")} | {getConfigValue("weather_info", currentLang === "en" ? "Dak Lak 20°-23° 🌦️" : "Đắk Lắk 20°-23° 🌦️")}
             </span>
           </div>
           <div className="flex items-center gap-4 flex-wrap justify-center font-semibold">
-            <a href="mailto:xadangkang@daklak.gov.vn" className="hover:text-portal-primary transition-colors">
-              xadangkang@daklak.gov.vn
+            <a href={`mailto:${getConfigValue("email", "xadangkang@daklak.gov.vn")}`} className="hover:text-portal-primary transition-colors">
+              {getConfigValue("email", "xadangkang@daklak.gov.vn")}
             </a>
             {mounted && (
               <>
@@ -667,7 +667,7 @@ export default function Header() {
               ) : (
                 <img
                   src="/banner_scenery.png"
-                  alt="Cảnh quan nông thôn mới xã Dang Kang"
+                  alt={getConfigValue("unit_name", currentLang === "en" ? "PEOPLE'S COMMITTEE OF DANG KANG COMMUNE" : "UBND XÃ DANG KANG")}
                   className="w-full h-full object-cover object-right"
                 />
               )}
