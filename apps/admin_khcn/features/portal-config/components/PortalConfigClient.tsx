@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { Button } from "@/components/ui/button";
@@ -159,13 +160,14 @@ const DEFAULT_COMMUNE_ZONES_EN = [
 ];
 
 export function PortalConfigClient() {
+  const router = useRouter();
   const [logoUrl, setLogoUrl] = useState("");
   const [mapUrl, setMapUrl] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const [languages, setLanguages] = useState<any[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
-  const [activeConfigTab, setActiveConfigTab] = useState<string>("general");
+  const [activeConfigTab, setActiveConfigTab] = useState<string>("identity");
   const [isCompareMode, setIsCompareMode] = useState<boolean>(false);
 
   const [configTranslations, setConfigTranslations] = useState<Record<string, {
@@ -1016,394 +1018,15 @@ export function PortalConfigClient() {
     );
   };
 
-  // -------------------------------------------------------------
-  // THÀNH PHẦN QUẢN LÝ ĐỘNG CHO TRANG GIỚI THIỆU & PHÂN VÙNG BẢN ĐỒ
-  // -------------------------------------------------------------
-  const renderHistoryCard = (langCode: string, labelPrefix = "") => {
-    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
-    const trans = configTranslations[langCode] || { aboutHistory: "" };
 
-    return (
-      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
-        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <FileText className="w-4 h-4 text-indigo-600" />
-              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                Tổng quan Địa lý & Lịch sử
-              </CardTitle>
-            </div>
-            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-              {lang.name} {labelPrefix}
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="p-5">
-          <div className="space-y-1.5">
-            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
-              Văn bản thuyết minh chi tiết
-            </Label>
-            <Textarea
-              rows={8}
-              placeholder={langCode === 'vi' ? "Nhập nội dung lịch sử địa lý tổng quan..." : "Enter geographical & historical overview..."}
-              className="rounded-lg border-slate-250 focus:border-indigo-500 focus:ring-indigo-500/20 text-xs font-semibold leading-relaxed"
-              value={trans.aboutHistory || ""}
-              onChange={(e) => updateTranslationField(langCode, "aboutHistory", e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
-  const renderStatsCard = (langCode: string, labelPrefix = "") => {
-    const lang = activeLangs.find(l => l.code === langCode) || { code: langCode, name: langCode === 'vi' ? 'Tiếng Việt' : 'English' };
-    const trans = configTranslations[langCode] || {
-      aboutArea: "",
-      aboutPopulation: "",
-      aboutSubdivisions: "",
-      aboutStandard: ""
-    };
 
-    return (
-      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
-        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-indigo-600" />
-              <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
-                Chỉ số Thống kê Tổng quan (Trang giới thiệu)
-              </CardTitle>
-            </div>
-            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded uppercase ${langCode === 'vi' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'}`}>
-              {lang.name} {labelPrefix}
-            </span>
-          </div>
-        </CardHeader>
-        <CardContent className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
-              Diện tích tự nhiên (e.g. 2,452.8 Ha)
-            </Label>
-            <Input
-              placeholder={langCode === 'vi' ? "Ví dụ: 2,452.8 Ha" : "e.g., 2,452.8 Ha"}
-              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
-              value={trans.aboutArea || ""}
-              onChange={(e) => updateTranslationField(langCode, "aboutArea", e.target.value)}
-            />
-          </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
-              Dân số hiện tại (e.g. 6,842 người)
-            </Label>
-            <Input
-              placeholder={langCode === 'vi' ? "Ví dụ: 6,842 người" : "e.g., 6,842 people"}
-              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
-              value={trans.aboutPopulation || ""}
-              onChange={(e) => updateTranslationField(langCode, "aboutPopulation", e.target.value)}
-            />
-          </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
-              Đơn vị hành chính (e.g. 8 Thôn, Buôn)
-            </Label>
-            <Input
-              placeholder={langCode === 'vi' ? "Ví dụ: 8 Thôn, Buôn" : "e.g., 8 Villages / Hamlets"}
-              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
-              value={trans.aboutSubdivisions || ""}
-              onChange={(e) => updateTranslationField(langCode, "aboutSubdivisions", e.target.value)}
-            />
-          </div>
 
-          <div className="space-y-1.5">
-            <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
-              Chuẩn nông thôn mới (e.g. Đạt 19/19)
-            </Label>
-            <Input
-              placeholder={langCode === 'vi' ? "Ví dụ: Đạt 19/19 Tiêu chí" : "e.g., Achieved 19/19"}
-              className="rounded-lg border-slate-250 focus:border-indigo-500 text-xs font-bold"
-              value={trans.aboutStandard || ""}
-              onChange={(e) => updateTranslationField(langCode, "aboutStandard", e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
-  const renderOrgSectionsEditor = (langCode: string, labelPrefix = "") => {
-    const list = orgSections[langCode] || [];
 
-    const handleAddField = () => {
-      const newList = [...list, { title: "CƠ QUAN MỚI", desc: "Mô tả...", details: ["Thành phần 1"] }];
-      setOrgSections(prev => ({ ...prev, [langCode]: newList }));
-    };
 
-    const handleUpdateField = (index: number, key: string, value: any) => {
-      const newList = list.map((item, idx) => {
-        if (idx === index) {
-          return { ...item, [key]: value };
-        }
-        return item;
-      });
-      setOrgSections(prev => ({ ...prev, [langCode]: newList }));
-    };
-
-    const handleRemoveField = (index: number) => {
-      const newList = list.filter((_, idx) => idx !== index);
-      setOrgSections(prev => ({ ...prev, [langCode]: newList }));
-    };
-
-    return (
-      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
-        <CardHeader className="bg-slate-50/50 border-b py-4 px-5 flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Workflow className="w-4 h-4 text-indigo-600" />
-            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
-              Sơ đồ Bộ máy hành chính ({langCode.toUpperCase()})
-            </CardTitle>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddField}
-            className="rounded-lg text-[10px] font-black uppercase py-1 px-2.5 h-7 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-          >
-            + Thêm nhóm/khối
-          </Button>
-        </CardHeader>
-        <CardContent className="p-5 space-y-4">
-          {list.length === 0 ? (
-            <p className="text-xs font-semibold text-slate-400 italic text-center py-4">Chưa có dữ liệu sơ đồ bộ máy.</p>
-          ) : (
-            list.map((item, index) => (
-              <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
-                <button
-                  type="button"
-                  onClick={() => handleRemoveField(index)}
-                  className="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors p-1"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="grid grid-cols-1 gap-3 pr-6">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Tên cơ quan / Nhóm bộ máy</Label>
-                    <Input
-                      value={item.title || ""}
-                      onChange={(e) => handleUpdateField(index, "title", e.target.value)}
-                      className="bg-white text-xs font-extrabold text-slate-800"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Chức năng, vai trò tóm tắt</Label>
-                    <Textarea
-                      value={item.desc || ""}
-                      onChange={(e) => handleUpdateField(index, "desc", e.target.value)}
-                      className="bg-white text-xs font-semibold leading-relaxed"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Các phòng ban / chức danh liên quan (Mỗi dòng một mục)</Label>
-                    <Textarea
-                      value={Array.isArray(item.details) ? item.details.join("\n") : ""}
-                      onChange={(e) => handleUpdateField(index, "details", e.target.value.split("\n").filter((l: string) => l.trim() !== ""))}
-                      className="bg-white text-xs font-semibold leading-relaxed font-mono"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderLeadersEditor = (langCode: string, labelPrefix = "") => {
-    const list = leaders[langCode] || [];
-
-    const handleAddField = () => {
-      const newList = [...list, { name: "Họ và tên", role: "Chức vụ", responsibility: "Nhiệm vụ phụ trách...", phone: "09xx.xxx.xxx", email: "...", room: "Phòng..." }];
-      setLeaders(prev => ({ ...prev, [langCode]: newList }));
-    };
-
-    const handleUpdateField = (index: number, key: string, value: any) => {
-      const newList = list.map((item, idx) => {
-        if (idx === index) {
-          return { ...item, [key]: value };
-        }
-        return item;
-      });
-      setLeaders(prev => ({ ...prev, [langCode]: newList }));
-    };
-
-    const handleRemoveField = (index: number) => {
-      const newList = list.filter((_, idx) => idx !== index);
-      setLeaders(prev => ({ ...prev, [langCode]: newList }));
-    };
-
-    return (
-      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
-        <CardHeader className="bg-slate-50/50 border-b py-4 px-5 flex flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <UserSquare2 className="w-4 h-4 text-indigo-600" />
-            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
-              Danh sách Lãnh đạo chủ chốt ({langCode.toUpperCase()})
-            </CardTitle>
-          </div>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleAddField}
-            className="rounded-lg text-[10px] font-black uppercase py-1 px-2.5 h-7 border-indigo-200 text-indigo-600 hover:bg-indigo-50"
-          >
-            + Thêm lãnh đạo
-          </Button>
-        </CardHeader>
-        <CardContent className="p-5 space-y-4">
-          {list.length === 0 ? (
-            <p className="text-xs font-semibold text-slate-400 italic text-center py-4">Chưa có thông tin lãnh đạo.</p>
-          ) : (
-            list.map((item, index) => (
-              <div key={index} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3 relative group">
-                <button
-                  type="button"
-                  onClick={() => handleRemoveField(index)}
-                  className="absolute top-3 right-3 text-slate-400 hover:text-red-500 transition-colors p-1"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pr-6">
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Họ và tên</Label>
-                    <Input
-                      value={item.name || ""}
-                      onChange={(e) => handleUpdateField(index, "name", e.target.value)}
-                      className="bg-white text-xs font-bold text-slate-900"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Chức danh / Chức vụ</Label>
-                    <Input
-                      value={item.role || ""}
-                      onChange={(e) => handleUpdateField(index, "role", e.target.value)}
-                      className="bg-white text-xs font-bold text-[#b91c1c]"
-                    />
-                  </div>
-                  <div className="space-y-1 sm:col-span-2">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Phạm vi trách nhiệm / Nhiệm vụ phụ trách</Label>
-                    <Textarea
-                      value={item.responsibility || ""}
-                      onChange={(e) => handleUpdateField(index, "responsibility", e.target.value)}
-                      className="bg-white text-xs font-semibold leading-relaxed"
-                      rows={2}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Nơi làm việc / Số phòng</Label>
-                    <Input
-                      value={item.room || ""}
-                      onChange={(e) => handleUpdateField(index, "room", e.target.value)}
-                      className="bg-white text-xs font-semibold"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Điện thoại liên hệ</Label>
-                    <Input
-                      value={item.phone || ""}
-                      onChange={(e) => handleUpdateField(index, "phone", e.target.value)}
-                      className="bg-white text-xs font-semibold font-mono"
-                    />
-                  </div>
-                  <div className="space-y-1 sm:col-span-2">
-                    <Label className="text-[10px] font-black text-slate-500 uppercase">Thư điện tử công vụ (Email)</Label>
-                    <Input
-                      value={item.email || ""}
-                      onChange={(e) => handleUpdateField(index, "email", e.target.value)}
-                      className="bg-white text-xs font-semibold"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderCommuneZonesEditor = (langCode: string, labelPrefix = "") => {
-    const list = communeZones[langCode] || [];
-
-    const handleUpdateField = (index: number, key: string, value: any) => {
-      const newList = list.map((item, idx) => {
-        if (idx === index) {
-          return { ...item, [key]: value };
-        }
-        return item;
-      });
-      setCommuneZones(prev => ({ ...prev, [langCode]: newList }));
-    };
-
-    return (
-      <Card className={`border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md ${langCode === 'vi' && isCompareMode ? 'bg-slate-50/50 border-r-2 border-r-indigo-500' : ''}`}>
-        <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
-          <div className="flex items-center gap-2">
-            <MapIcon className="w-4 h-4 text-indigo-600" />
-            <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
-              Cấu hình phân vùng Thôn Buôn ({langCode.toUpperCase()})
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-5 space-y-4">
-          <p className="text-[11px] text-slate-400 font-semibold leading-normal pb-2 border-b">
-            Chỉnh sửa các thông số mô phỏng hiển thị ranh giới địa lý hành chính (8 phân vùng vector SVG) trên cổng thông tin.
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {list.map((item, index) => (
-              <div key={item.id} className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5 relative">
-                <span className="absolute top-2.5 right-3 text-[10px] font-mono font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                  Phân vùng: {item.id}
-                </span>
-                <div className="space-y-1.5">
-                  <Label className="text-[9px] font-black text-slate-500 uppercase">Tên khu vực / Thôn / Buôn</Label>
-                  <Input
-                    value={item.name || ""}
-                    onChange={(e) => handleUpdateField(index, "name", e.target.value)}
-                    className="bg-white text-xs font-bold"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label className="text-[9px] font-black text-slate-500 uppercase">Diện tích</Label>
-                    <Input
-                      value={item.area || ""}
-                      onChange={(e) => handleUpdateField(index, "area", e.target.value)}
-                      className="bg-white text-xs font-semibold"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[9px] font-black text-slate-500 uppercase">Quy mô dân cư</Label>
-                    <Input
-                      value={item.pop || ""}
-                      onChange={(e) => handleUpdateField(index, "pop", e.target.value)}
-                      className="bg-white text-xs font-semibold"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
 
   // Simulator Localized values
   const simName = configTranslations[activeLangTab]?.unitName || "UBND XÃ DANG KANG";
@@ -1512,9 +1135,8 @@ export function PortalConfigClient() {
           {/* CONFIGURATION SECTIONS TABS */}
           <div className="flex border-b border-slate-200 gap-1.5 overflow-x-auto pb-px">
             {[
-              { id: "general", label: "Cấu hình chung", icon: Settings },
-              { id: "about", label: "Trang giới thiệu", icon: FileText },
-              { id: "zones", label: "Bản đồ phân vùng", icon: MapIcon }
+              { id: "identity", label: "Cấu hình đơn vị", icon: Building },
+              { id: "contact", label: "Thông tin liên hệ", icon: Phone }
             ].map(tab => {
               const TabIcon = tab.icon;
               const isActive = activeConfigTab === tab.id;
@@ -1536,8 +1158,8 @@ export function PortalConfigClient() {
             })}
           </div>
 
-          {/* TAB 1: CẤU HÌNH CHUNG PORTAL */}
-          {activeConfigTab === "general" && (
+          {/* TAB 1: CẤU HÌNH ĐƠN VỊ & LỊCH TIẾP DÂN */}
+          {activeConfigTab === "identity" && (
             <div className="space-y-6 animate-fade-in">
               {isCompareMode ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1556,7 +1178,12 @@ export function PortalConfigClient() {
               ) : (
                 renderScheduleCard(activeLangTab)
               )}
+            </div>
+          )}
 
+          {/* TAB 2: THÔNG TIN LIÊN HỆ & MẠNG XÃ HỘI */}
+          {activeConfigTab === "contact" && (
+            <div className="space-y-6 animate-fade-in">
               {isCompareMode ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {renderAddressLicenseCard("vi", "(Bản gốc)")}
@@ -1585,197 +1212,73 @@ export function PortalConfigClient() {
               )}
             </div>
           )}
-
-          {/* TAB 2: CẤU HÌNH TRANG GIỚI THIỆU */}
-          {activeConfigTab === "about" && (
-            <div className="space-y-6 animate-fade-in">
-              {isCompareMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {renderHistoryCard("vi", "(Bản gốc)")}
-                  {renderHistoryCard("en", "(Bản dịch)")}
-                </div>
-              ) : (
-                renderHistoryCard(activeLangTab)
-              )}
-
-              {isCompareMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {renderStatsCard("vi", "(Bản gốc)")}
-                  {renderStatsCard("en", "(Bản dịch)")}
-                </div>
-              ) : (
-                renderStatsCard(activeLangTab)
-              )}
-
-              {isCompareMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {renderOrgSectionsEditor("vi", "(Bản gốc)")}
-                  {renderOrgSectionsEditor("en", "(Bản dịch)")}
-                </div>
-              ) : (
-                renderOrgSectionsEditor(activeLangTab)
-              )}
-
-              {isCompareMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {renderLeadersEditor("vi", "(Bản gốc)")}
-                  {renderLeadersEditor("en", "(Bản dịch)")}
-                </div>
-              ) : (
-                renderLeadersEditor(activeLangTab)
-              )}
-            </div>
-          )}
-
-          {/* TAB 3: BẢN ĐỒ PHÂN VÙNG THÔN BUÔN */}
-          {activeConfigTab === "zones" && (
-            <div className="space-y-6 animate-fade-in">
-              {isCompareMode ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {renderCommuneZonesEditor("vi", "(Bản gốc)")}
-                  {renderCommuneZonesEditor("en", "(Bản dịch)")}
-                </div>
-              ) : (
-                renderCommuneZonesEditor(activeLangTab)
-              )}
-            </div>
-          )}
         </div>
 
-        {/* RIGHT COLUMN: LOGO UPLOADER & LIVE PORTAL PREVIEW */}
+        {/* RIGHT COLUMN: SHORTCUTS & LIVE PORTAL PREVIEW */}
         <div className="space-y-8">
-          {/* LOGO CONFIG */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
+          {/* STYLE & LAYOUT SHORTCUTS CARD */}
+          <Card className="border border-indigo-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md bg-gradient-to-br from-indigo-50/10 to-slate-50/30">
+            <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
               <div className="flex items-center gap-2.5">
-                <ImageIcon className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Logo nhận diện đơn vị
+                <Sparkles className="w-4 h-4 text-indigo-600 animate-pulse" />
+                <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                  Phím tắt Thiết kế & Bố cục
                 </CardTitle>
               </div>
             </CardHeader>
-            <CardContent className="p-6 flex flex-col items-center gap-5">
-              <div className="relative w-32 h-32 rounded-full border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner group">
-                {activeLogo ? (
-                  <>
-                    <img src={resolveLogoUrl(activeLogo)} alt="Logo preview" className="w-full h-full object-contain p-2" />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        removeImage();
-                        setLogoUrl("");
-                      }}
-                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white rounded-full text-xs font-bold gap-1"
-                    >
-                      <X className="w-4 h-4" /> Gỡ ảnh
-                    </button>
-                  </>
-                ) : isUploading ? (
-                  <div className="flex flex-col items-center justify-center gap-1.5 text-indigo-600">
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-[10px] font-bold animate-pulse">Đang tải...</span>
+            <CardContent className="p-5 space-y-4">
+              <p className="text-[11px] text-slate-500 font-semibold leading-relaxed">
+                Tài nguyên thương hiệu (Logo, Favicon), màu sắc, phông chữ và cách thiết kế trang giới thiệu đã được đồng bộ hóa quy hoạch sang các phân hệ chuyên dụng dưới đây:
+              </p>
+
+              {/* Shortcut 1: Giao diện */}
+              <div className="group relative border border-slate-150 rounded-xl p-4 bg-white hover:border-indigo-300 hover:shadow-sm transition-all duration-300">
+                <div className="flex gap-3">
+                  <div className="p-2 bg-rose-500/10 rounded-lg text-rose-600 group-hover:scale-105 transition-transform duration-300 shrink-0 h-9 w-9 flex items-center justify-center">
+                    <Palette className="w-4.5 h-4.5" />
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors gap-1"
-                  >
-                    <UploadCloud className="w-8 h-8" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Tải lên Logo</span>
-                  </button>
-                )}
-              </div>
-
-              <input
-                type="file"
-                ref={fileInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
-
-              <div className="text-center">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading}
-                  className="rounded-lg text-xs font-bold uppercase text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                >
-                  <UploadCloud className="w-3.5 h-3.5 mr-1.5" />
-                  Chọn tệp ảnh logo
-                </Button>
-                <p className="text-[10px] text-slate-400 mt-2">Dạng tệp hỗ trợ: PNG, JPG, WEBP. Dung lượng tối đa: 2MB.</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* BẢN ĐỒ HÀNH CHÍNH CONFIG */}
-          <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
-            <CardHeader className="bg-slate-50/50 border-b">
-              <div className="flex items-center gap-2.5">
-                <MapIcon className="w-4 h-4 text-indigo-600" />
-                <CardTitle className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">
-                  Bản đồ hành chính đơn vị
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="p-6 flex flex-col items-center gap-5">
-              <div className="relative w-full aspect-video rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shadow-inner group">
-                {activeMap ? (
-                  <>
-                    <img src={resolveLogoUrl(activeMap)} alt="Administrative map preview" className="w-full h-full object-cover" />
-                    <button
+                  <div className="space-y-1">
+                    <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-wide">
+                      Quản trị Giao diện (Appearance)
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-semibold leading-normal">
+                      Cấu hình màu sắc, phông chữ, bo góc, tải lên Logo nhận diện và Favicon của đơn vị.
+                    </p>
+                    <Button
                       type="button"
-                      onClick={() => {
-                        removeMapImage();
-                        setMapUrl("");
-                      }}
-                      className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1"
+                      variant="link"
+                      onClick={() => router.push("/services/posts/appearance")}
+                      className="p-0 text-indigo-600 hover:text-indigo-800 font-extrabold text-[10px] h-auto mt-1 flex items-center gap-1"
                     >
-                      <X className="w-4 h-4" /> Gỡ bản đồ
-                    </button>
-                  </>
-                ) : isUploadingMap ? (
-                  <div className="flex flex-col items-center justify-center gap-1.5 text-indigo-600">
-                    <Loader2 className="w-6 h-6 animate-spin" />
-                    <span className="text-[10px] font-bold animate-pulse">Đang tải...</span>
+                      Đi tới Quản lý Giao diện &rarr;
+                    </Button>
                   </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => mapInputRef.current?.click()}
-                    className="flex flex-col items-center justify-center text-slate-400 hover:text-indigo-600 transition-colors gap-1.5 p-4"
-                  >
-                    <UploadCloud className="w-8 h-8" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Tải lên Bản đồ</span>
-                  </button>
-                )}
+                </div>
               </div>
 
-              <input
-                type="file"
-                ref={mapInputRef}
-                accept="image/*"
-                className="hidden"
-                onChange={handleMapUpload}
-              />
-
-              <div className="text-center w-full">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => mapInputRef.current?.click()}
-                  disabled={isUploadingMap}
-                  className="rounded-lg text-xs font-bold uppercase text-indigo-600 border-indigo-200 hover:bg-indigo-50 w-full"
-                >
-                  <UploadCloud className="w-3.5 h-3.5 mr-1.5" />
-                  Chọn tệp ảnh bản đồ
-                </Button>
-                <p className="text-[10px] text-slate-400 mt-2">Dạng tệp hỗ trợ: PNG, JPG, WEBP. Dung lượng tối đa: 2MB.</p>
+              {/* Shortcut 2: Page Builder */}
+              <div className="group relative border border-slate-150 rounded-xl p-4 bg-white hover:border-indigo-300 hover:shadow-sm transition-all duration-300">
+                <div className="flex gap-3">
+                  <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-600 group-hover:scale-105 transition-transform duration-300 shrink-0 h-9 w-9 flex items-center justify-center">
+                    <Layout className="w-4.5 h-4.5" />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="text-[11px] font-black text-slate-800 uppercase tracking-wide">
+                      Trình tạo Trang trực quan (Page Builder)
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-semibold leading-normal">
+                      Thiết kế sinh động bố cục trang giới thiệu (/gioi-thieu), trang chủ và liên hệ hành chính.
+                    </p>
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={() => router.push("/services/posts/portal-page-builder")}
+                      className="p-0 text-indigo-600 hover:text-indigo-800 font-extrabold text-[10px] h-auto mt-1 flex items-center gap-1"
+                    >
+                      Mở Trình tạo Trang trực quan &rarr;
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
