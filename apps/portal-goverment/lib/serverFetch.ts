@@ -24,7 +24,7 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
   console.log(`[serverFetch] Fetching from: ${url} (lang: ${lang})`);
   try {
     const res = await fetch(url, {
-      next: { revalidate: 60 }, // ISR 60 giây
+      cache: "no-store",
       headers: {
         "x-lang": lang,
         "Accept-Language": lang,
@@ -45,7 +45,7 @@ export async function serverFetch<T>(path: string): Promise<T | null> {
       console.log(`[serverFetch] Retrying with localhost fallback: ${fallbackUrl}`);
       try {
         const res = await fetch(fallbackUrl, {
-          next: { revalidate: 60 },
+          cache: "no-store",
           headers: {
             "x-lang": lang,
             "Accept-Language": lang,

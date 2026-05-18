@@ -38,27 +38,8 @@ const DETAIL_MAPPING: Record<string, React.ComponentType<{ id: string }>> = {
   "tuy-bien": CustomBuilderPage,
 }
 
-// ISR configuration
-export const revalidate = 60
-
-export async function generateStaticParams() {
-  const params: Array<{ lang: string; content?: string[] }> = []
-  
-  // Register home pages for both languages
-  params.push({ lang: "vi", content: [] })
-  params.push({ lang: "en", content: [] })
-
-  // Register categories for both languages
-  Object.keys(SLUG_MAPPING).forEach((slug) => {
-    const isEn = ["aboutus", "contact", "procedures", "news", "feedback", "documents"].includes(slug)
-    params.push({
-      lang: isEn ? "en" : "vi",
-      content: [slug],
-    })
-  })
-
-  return params
-}
+// Force fully dynamic rendering on every request
+export const dynamic = "force-dynamic"
 
 interface PageProps {
   params: Promise<{
