@@ -444,6 +444,53 @@ export default function Header() {
     return found.name || fallback
   }, [portalConfigData, currentLang])
 
+  // Fetch dynamic online weather from Open-Meteo for Dak Lak (Buon Ma Thuot: Lat 12.6667, Lon 108.0500)
+  const { data: weatherData } = useQuery({
+    queryKey: ["online-weather"],
+    queryFn: async () => {
+      try {
+        const response = await fetch(
+          "https://api.open-meteo.com/v1/forecast?latitude=12.6667&longitude=108.0500&current=temperature_2m,weather_code"
+        )
+        if (!response.ok) throw new Error("Weather request failed")
+        const json = await response.json()
+        
+        const temp = json?.current?.temperature_2m
+        const code = json?.current?.weather_code
+
+        // Map WMO codes to emojis
+        let emoji = "☀️"
+        if (code === 0) emoji = "☀️"
+        else if (code >= 1 && code <= 3) emoji = "🌤️"
+        else if (code === 45 || code === 48) emoji = "🌫️"
+        else if (code >= 51 && code <= 67) emoji = "🌧️"
+        else if (code >= 71 && code <= 77) emoji = "❄️"
+        else if (code >= 80 && code <= 82) emoji = "🌦️"
+        else if (code === 85 || code === 86) emoji = "❄️"
+        else if (code >= 95) emoji = "⛈️"
+
+        return {
+          temp: Math.round(temp),
+          emoji
+        }
+      } catch (e) {
+        console.error("Failed to fetch weather from Open-Meteo", e)
+        return null
+      }
+    },
+    staleTime: 15 * 60 * 1000, // Stale for 15 minutes
+  })
+
+  const weatherString = React.useMemo(() => {
+    const defaultLocation = currentLang === "en" ? "Dak Lak" : "Đắk Lắk"
+    const location = getConfigValue("weather_location", defaultLocation)
+    if (weatherData) {
+      return `${location} ${weatherData.temp}°C ${weatherData.emoji}`
+    }
+    // Fallback if API fails or is loading
+    return `${location} 24°C 🌤️`
+  }, [weatherData, currentLang, getConfigValue])
+
   const logoUrlToRender = React.useMemo(() => {
     return appearanceConfig.branding.logo || getConfigValue("logo_url", "");
   }, [appearanceConfig.branding.logo, getConfigValue]);
@@ -542,12 +589,12 @@ export default function Header() {
         <div className="max-w-7xl mx-auto w-full px-4 py-2 flex flex-col md:flex-row justify-between items-center gap-2">
           <div className="flex items-center gap-4 flex-wrap justify-center">
             <span className="flex items-center gap-1.5 font-semibold text-slate-700 dark:text-slate-300">
-              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thứ Tư, 06/05/2026")} | {getConfigValue("weather_info", currentLang === "en" ? "Dak Lak 20°-23° 🌦️" : "Đắk Lắk 20°-23° 🌦️")}
+              {dateTimeStr || (currentLang === "en" ? "Wednesday, 05/06/2026" : "Thứ Tư, 06/05/2026")} | {weatherString}
             </span>
           </div>
           <div className="flex items-center gap-4 flex-wrap justify-center font-semibold">
-            <a href={`mailto:${getConfigValue("email", "xadangkang@daklak.gov.vn")}`} className="hover:text-portal-primary transition-colors">
-              {getConfigValue("email", "xadangkang@daklak.gov.vn")}
+            <a href={`mailto:${getConfigValue("email", "")}`} className="hover:text-portal-primary transition-colors">
+              {getConfigValue("email", "")}
             </a>
             {mounted && (
               <>
@@ -618,13 +665,13 @@ export default function Header() {
               </div>
               <div className="flex flex-col">
                 <span className="text-portal-primary dark:text-blue-400 text-[10px] sm:text-xs md:text-sm font-serif font-black tracking-widest uppercase leading-none opacity-85">
-                  {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
+                  {getConfigValue("unit_title", "")}
                 </span>
                 <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl font-serif font-black text-portal-primary dark:text-red-500 uppercase tracking-wide leading-tight my-0.5 sm:my-1">
-                  {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+                  {getConfigValue("unit_name", "")}
                 </h1>
                 <span className="text-blue-800 dark:text-blue-400/80 text-[8px] sm:text-[10px] md:text-xs font-serif font-bold tracking-wider leading-none uppercase">
-                  {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+                  {getConfigValue("unit_identifier", "")}
                 </span>
               </div>
             </div>
@@ -667,7 +714,7 @@ export default function Header() {
               ) : (
                 <img
                   src="/banner_scenery.png"
-                  alt={getConfigValue("unit_name", currentLang === "en" ? "PEOPLE'S COMMITTEE OF DANG KANG COMMUNE" : "UBND XÃ DANG KANG")}
+                  alt={getConfigValue("unit_name", "")}
                   className="w-full h-full object-cover object-right"
                 />
               )}
@@ -687,13 +734,13 @@ export default function Header() {
           </div>
           <div className="flex flex-col text-center z-10 select-none">
             <span className="text-portal-primary dark:text-blue-400 text-xs sm:text-sm font-serif font-black tracking-widest uppercase leading-none opacity-85">
-              {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
+              {getConfigValue("unit_title", "")}
             </span>
             <h1 className="text-lg sm:text-2xl md:text-3xl font-serif font-black text-portal-primary dark:text-red-500 uppercase tracking-wide leading-tight mt-2 mb-1">
-              {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+              {getConfigValue("unit_name", "")}
             </h1>
             <span className="text-blue-800 dark:text-blue-400/80 text-[10px] sm:text-xs font-serif font-bold tracking-wider leading-none uppercase">
-              {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+              {getConfigValue("unit_identifier", "")}
             </span>
           </div>
         </div>
@@ -711,15 +758,15 @@ export default function Header() {
             </div>
             <div className="flex flex-col text-left">
               <h1 className="text-sm sm:text-base font-sans font-black text-portal-primary dark:text-red-500 uppercase tracking-wide leading-tight">
-                {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+                {getConfigValue("unit_name", "")}
               </h1>
               <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 uppercase font-medium">
-                {getConfigValue("unit_identifier", "TỈNH ĐẮK LẮK")}
+                {getConfigValue("unit_identifier", "")}
               </span>
             </div>
           </div>
           <div className="text-[10px] bg-slate-100 dark:bg-slate-900 px-3 py-1 rounded text-slate-500 dark:text-slate-400 font-semibold uppercase hidden sm:block">
-            {getConfigValue("unit_title", "TRANG THÔNG TIN ĐIỆN TỬ")}
+            {getConfigValue("unit_title", "")}
           </div>
         </div>
       )}
@@ -817,7 +864,7 @@ export default function Header() {
             )}
           </div>
           <span className="text-xs font-black uppercase tracking-wider text-[#fef08a]">
-            {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+            {getConfigValue("unit_name", "")}
           </span>
         </Link>
  
@@ -941,10 +988,10 @@ export default function Header() {
 
             <div className="mt-auto border-t border-white/25 pt-4 text-center">
               <span className="text-[10px] text-white/70 font-mono block">
-                {t.hotline}: {getConfigValue("hotline", "0262.3812.345")}
+                {t.hotline}: {getConfigValue("hotline", "")}
               </span>
               <span className="text-[10px] text-white/70 font-mono block mt-1">
-                © 2026 {getConfigValue("unit_name", "UBND XÃ DANG KANG")}
+                © 2026 {getConfigValue("unit_name", "")}
               </span>
             </div>
           </div>

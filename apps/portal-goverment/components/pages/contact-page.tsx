@@ -207,19 +207,19 @@ export default function ContactPage() {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
                 <span>
-                  {getConfigValue("address", currentLang === "en" ? "Village 6, Dang Kang commune, Krong Bong district, Dak Lak province" : "Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}
+                  {getConfigValue("address", "")}
                 </span>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-                <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
-                  {(currentLang === "en" ? "Phone: " : "Điện thoại: ") + getConfigValue("hotline", "0262.3812.345")}
+                <a href={`tel:${getConfigValue("hotline", "").replace(/[^\d]/g, "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d]">
+                  {(currentLang === "en" ? "Phone: " : "Điện thoại: ") + getConfigValue("hotline", "")}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
-                  {"Email: " + getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}
+                <a href={`mailto:${getConfigValue("email", "")}`} className="hover:text-[#b91c1c] dark:hover:text-[#fbc02d] break-all">
+                  {"Email: " + getConfigValue("email", "")}
                 </a>
               </div>
               <div className="flex items-start gap-2.5 border-t border-slate-100 dark:border-slate-850 pt-4 font-medium text-slate-500">
@@ -229,7 +229,7 @@ export default function ContactPage() {
                     {currentLang === "en" ? "Direct citizen reception hours:" : "Thời gian tiếp nhận công dân trực tiếp:"}
                   </span>
                   <span className="whitespace-pre-line text-slate-600 dark:text-slate-400">
-                    {getConfigValue("citizen_schedule", currentLang === "en" ? "Every Thursday • 08:00 - 11:30" : "Thứ 5 hàng tuần • 08:00 - 11:30")}
+                    {getConfigValue("citizen_schedule", "")}
                   </span>
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function ContactPage() {
             <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
               <Mail className="w-5 h-5 text-[#b91c1c]" />
               <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide">
-                {getConfigValue("contact_form_title", currentLang === "en" ? "SEND FEEDBACK / COMMENTS TO OFFICE" : "GỬI PHẢN ÁNH / GÓP Ý ĐẾN VĂN PHÒNG")}
+                {getConfigValue("contact_form_title", "")}
               </h3>
             </div>
 
@@ -318,7 +318,7 @@ export default function ContactPage() {
                     {currentLang === "en" ? "MESSAGE SENT SUCCESSFULLY!" : "ĐÃ GỬI THƯ THÀNH CÔNG!"}
                   </h4>
                   <p className="text-slate-500 font-medium leading-relaxed">
-                    {getConfigValue("contact_form_success_desc", currentLang === "en" ? "Dang Kang commune clerical department has received your comment and will respond as soon as possible via email." : "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
+                    {getConfigValue("contact_form_success_desc", "")}
                   </p>
                 </div>
                 <button
@@ -338,7 +338,7 @@ export default function ContactPage() {
           <div className="flex items-center gap-2 border-b border-slate-100 dark:border-slate-800 pb-3">
             <MapIcon className="w-5 h-5 text-[#b91c1c]" />
             <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white uppercase tracking-wide flex-1">
-              {getConfigValue("contact_map_title", currentLang === "en" ? "DANG KANG COMMUNE ADMINISTRATIVE SUBDIVISION MAP" : "BẢN ĐỒ PHÂN VÙNG HÀNH CHÍNH XÃ DANG KANG")}
+              {getConfigValue("contact_map_title", "")}
             </h3>
           </div>
 

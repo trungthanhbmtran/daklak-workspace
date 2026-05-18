@@ -417,6 +417,11 @@ async function main() {
       code: "email",
       name: "xadangkang@krongbong.daklak.gov.vn",
       description: JSON.stringify({ vi: "xadangkang@krongbong.daklak.gov.vn", en: "xadangkang@krongbong.daklak.gov.vn" })
+    },
+    {
+      code: "weather_location",
+      name: "Đắk Lắk",
+      description: JSON.stringify({ vi: "Đắk Lắk", en: "Dak Lak" })
     }
   ];
 

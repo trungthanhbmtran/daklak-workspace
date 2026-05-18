@@ -351,36 +351,36 @@ export default function Footer() {
                   {ft.managingAuthority}
                 </span>
                 <h3 className="text-lg font-extrabold text-white uppercase tracking-wide mt-1">
-                  {getConfigValue("unit_name", currentLang === "en" ? "PEOPLE'S COMMITTEE OF DANG KANG COMMUNE" : "ỦY BAN NHÂN DÂN XÃ DANG KANG")}
+                  {getConfigValue("unit_name", "")}
                 </h3>
                 <span className="text-xs font-semibold text-[#fef08a] uppercase tracking-wide mt-0.5">
-                  {getConfigValue("unit_identifier", currentLang === "en" ? "KRONG BONG DISTRICT - DAK LAK PROVINCE" : "HUYỆN KRÔNG BÔNG - TỈNH ĐẮK LẮK")}
+                  {getConfigValue("unit_identifier", "")}
                 </span>
               </div>
 
               <p className="text-xs text-slate-400 leading-relaxed">
-                {getConfigValue("license_info", currentLang === "en" ? "License No: 45/GP-TTĐT issued by Dak Lak Department of Information and Communications" : "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp")}. {currentLang === "en" ? "Responsible for content" : "Chịu trách nhiệm nội dung"}: {getConfigValue("responsible_person", currentLang === "en" ? "Mr. Tran Van Minh - Chairman of Dang Kang People's Committee" : "Ông Trần Văn Minh - Chủ tịch UBND xã Dang Kang")}.
+                {getConfigValue("license_info", "")} {getConfigValue("responsible_person", "") ? `${currentLang === "en" ? "Responsible for content" : "Chịu trách nhiệm nội dung"}: ${getConfigValue("responsible_person", "")}` : ""}.
               </p>
 
               <div className="flex flex-col gap-2.5 mt-2 text-xs font-medium">
                 <div className="flex items-start gap-2.5">
                   <MapPin className="w-4 h-4 text-red-500 shrink-0 mt-0.5" />
-                  <span>{ft.addressLabel} {getConfigValue("address", ft.address)}</span>
+                  <span>{ft.addressLabel} {getConfigValue("address", "")}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Phone className="w-4 h-4 text-[#fbc02d] shrink-0" />
-                  <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="hover:text-white transition-colors">
-                    {ft.hotlineLabel} {getConfigValue("hotline", "0262.3812.345")}
+                  <a href={`tel:${getConfigValue("hotline", "").replace(/[^\d]/g, "")}`} className="hover:text-white transition-colors">
+                    {ft.hotlineLabel} {getConfigValue("hotline", "")}
                   </a>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Printer className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>{ft.faxLabel} {getConfigValue("fax", "0262.3812.346")}</span>
+                  <span>{ft.faxLabel} {getConfigValue("fax", "")}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <Mail className="w-4 h-4 text-sky-400 shrink-0" />
-                  <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-white transition-colors">
-                    {ft.emailLabel} {getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}
+                  <a href={`mailto:${getConfigValue("email", "")}`} className="hover:text-white transition-colors">
+                    {ft.emailLabel} {getConfigValue("email", "")}
                   </a>
                 </div>
               </div>
@@ -501,14 +501,14 @@ export default function Footer() {
             {/* Col 1 */}
             <div className="lg:col-span-5 flex flex-col gap-3">
               <h3 className="text-sm font-black text-white uppercase tracking-wider border-b border-slate-800 pb-2">
-                {getConfigValue("unit_name", "ỦY BAN NHÂN DÂN XÃ DANG KANG")}
+                {getConfigValue("unit_name", "")}
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                {getConfigValue("license_info", "Giấy phép số: 45/GP-TTĐT do Sở Thông tin và Truyền thông tỉnh Đắk Lắk cấp.")}
+                {getConfigValue("license_info", "")}
               </p>
               <div className="flex flex-col gap-1.5 text-xs text-slate-400 mt-2">
-                <span>{ft.addressLabel} {getConfigValue("address", ft.address)}</span>
-                <span>{ft.hotlineLabel} {getConfigValue("hotline", "0262.3812.345")}</span>
+                <span>{ft.addressLabel} {getConfigValue("address", "")}</span>
+                <span>{ft.hotlineLabel} {getConfigValue("hotline", "")}</span>
               </div>
             </div>
             {/* Col 2 */}
@@ -546,8 +546,8 @@ export default function Footer() {
         <footer className="w-full bg-slate-950 text-slate-400 py-8 px-4 md:px-8 border-t border-slate-900 select-none text-center">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4 text-xs">
             <div className="flex flex-col items-center md:items-start gap-1 text-left">
-              <p className="font-extrabold text-white uppercase">{getConfigValue("unit_name", "ỦY BAN NHÂN DÂN XÃ DANG KANG")}</p>
-              <p className="text-[10px] text-slate-500">{getConfigValue("address", ft.address)}</p>
+              <p className="font-extrabold text-white uppercase">{getConfigValue("unit_name", "")}</p>
+              <p className="text-[10px] text-slate-500">{getConfigValue("address", "")}</p>
             </div>
             <div className="flex flex-col items-center md:items-end gap-1 text-[10px] text-slate-500 md:text-right">
               <span>{ft.copyright}</span>

@@ -832,8 +832,8 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
               <span className="text-[11px] text-slate-500 dark:text-slate-400 font-extrabold block uppercase tracking-wide">
                 {currentLang === "en" ? "COMMUNE HOTLINE" : "ĐƯỜNG DÂY NÓNG UBND XÃ"}
               </span>
-              <a href={`tel:${getConfigValue("hotline", "0262.3812.345").replace(/[^\d]/g, "")}`} className="text-sm text-portal-primary dark:text-portal-primary font-black tracking-widest mt-0.5 block font-mono">
-                {getConfigValue("hotline", "0262.3812.345")}
+              <a href={`tel:${getConfigValue("hotline", "").replace(/[^\d]/g, "")}`} className="text-sm text-portal-primary dark:text-portal-primary font-black tracking-widest mt-0.5 block font-mono">
+                {getConfigValue("hotline", "")}
               </a>
             </div>
           </div>

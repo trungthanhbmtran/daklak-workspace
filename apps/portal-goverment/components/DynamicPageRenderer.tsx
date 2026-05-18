@@ -1018,10 +1018,10 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                             {widget.type === "STATISTICS_GRID" && (
                               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                 {(widget.data?.items || [
-                                  { label: currentLang === "en" ? "Natural Area" : "Diện tích tự nhiên", value: getConfigValue("about_area", "2,452.8 Ha"), icon: "Building2", color: "text-red-600" },
-                                  { label: currentLang === "en" ? "Population" : "Dân cư", value: getConfigValue("about_population", "6.842"), icon: "Users2", color: "text-blue-600" },
-                                  { label: currentLang === "en" ? "Subdivisions" : "Đơn vị hành chính", value: getConfigValue("about_subdivisions", "8 Thôn, Buôn"), icon: "FileSpreadsheet", color: "text-sky-600" },
-                                  { label: currentLang === "en" ? "Standards" : "Chuẩn nông thôn mới", value: getConfigValue("about_standard", "Đạt 19/19"), icon: "ShieldCheck", color: "text-amber-600" }
+                                  { label: currentLang === "en" ? "Natural Area" : "Diện tích tự nhiên", value: getConfigValue("about_area", ""), icon: "Building2", color: "text-red-600" },
+                                  { label: currentLang === "en" ? "Population" : "Dân cư", value: getConfigValue("about_population", ""), icon: "Users2", color: "text-blue-600" },
+                                  { label: currentLang === "en" ? "Subdivisions" : "Đơn vị hành chính", value: getConfigValue("about_subdivisions", ""), icon: "FileSpreadsheet", color: "text-sky-600" },
+                                  { label: currentLang === "en" ? "Standards" : "Chuẩn nông thôn mới", value: getConfigValue("about_standard", ""), icon: "ShieldCheck", color: "text-amber-600" }
                                 ]).map((item: any, i: number) => {
                                   const Icon = (lucideIcons as any)[item.icon] || Building2
                                   return (
@@ -1240,7 +1240,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                     <MapPin className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                                     <div className="flex flex-col gap-0.5">
                                       <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Headquarters Address" : "Địa chỉ trụ sở"}</span>
-                                      <span className="leading-relaxed">{getConfigValue("address", "Địa chỉ: Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk")}</span>
+                                      <span className="leading-relaxed">{getConfigValue("address", "")}</span>
                                     </div>
                                   </div>
 
@@ -1248,7 +1248,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                     <Phone className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                                     <div className="flex flex-col gap-0.5">
                                       <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Hotline Support" : "Đường dây nóng"}</span>
-                                      <a href={`tel:${getConfigValue("hotline", "0262.3812.345")}`} className="hover:text-red-600">{getConfigValue("hotline", "0262.3812.345")}</a>
+                                      <a href={`tel:${getConfigValue("hotline", "")}`} className="hover:text-red-600">{getConfigValue("hotline", "")}</a>
                                     </div>
                                   </div>
                                 </div>
@@ -1258,7 +1258,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                     <Mail className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                                     <div className="flex flex-col gap-0.5">
                                       <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Official Email" : "Thư điện tử"}</span>
-                                      <a href={`mailto:${getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}`} className="hover:text-red-600 break-all">{getConfigValue("email", "xadangkang@krongbong.daklak.gov.vn")}</a>
+                                      <a href={`mailto:${getConfigValue("email", "")}`} className="hover:text-red-600 break-all">{getConfigValue("email", "")}</a>
                                     </div>
                                   </div>
 
@@ -1266,7 +1266,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                     <Clock className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
                                     <div className="flex flex-col gap-0.5">
                                       <span className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest">{currentLang === "en" ? "Reception Schedule" : "Lịch tiếp công dân"}</span>
-                                      <span className="leading-relaxed">{getConfigValue("citizen_schedule", "Thứ 5 hàng tuần • 08:00 - 11:30")}</span>
+                                      <span className="leading-relaxed">{getConfigValue("citizen_schedule", "")}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1351,7 +1351,7 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
                                         {currentLang === "en" ? "MESSAGE SENT SUCCESSFULLY!" : "ĐÃ GỬI THƯ THÀNH CÔNG!"}
                                       </h5>
                                       <p className="text-slate-450 font-medium leading-relaxed">
-                                        {getConfigValue("contact_form_success_desc", currentLang === "en" ? "Dang Kang commune clerical department has received your comment and will respond as soon as possible via email." : "Bộ phận văn thư xã Dang Kang đã nhận được ý kiến của bạn và sẽ có phản hồi sớm nhất qua hòm thư điện tử.")}
+                                        {getConfigValue("contact_form_success_desc", "")}
                                       </p>
                                     </div>
                                     <button
