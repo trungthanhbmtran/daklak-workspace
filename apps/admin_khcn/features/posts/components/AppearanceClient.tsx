@@ -147,7 +147,9 @@ const RADIUS_OPTIONS = [
 export function AppearanceClient() {
   const [activeTab, setActiveTab] = useState<string>("theme");
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [previewPage, setPreviewPage] = useState<'home' | 'post' | 'documents' | 'contact'>('home');
+
+  // Active Simulated Page Mode for Live Preview
+  const [previewPage, setPreviewPage] = useState<"home" | "post" | "category" | "static">("home");
 
   // Core Theme State
   const [config, setConfig] = useState<ThemeAppearanceConfig>(THEME_PRESETS.government);
@@ -361,11 +363,10 @@ export function AppearanceClient() {
                       <button
                         key={key}
                         onClick={() => applyPreset(key as any)}
-                        className={`flex flex-col text-left p-4 rounded-xl border transition-all ${
-                          isSelected
-                            ? "border-rose-500 bg-rose-50/20 ring-1 ring-rose-400"
-                            : "border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300"
-                        }`}
+                        className={`flex flex-col text-left p-4 rounded-xl border transition-all ${isSelected
+                          ? "border-rose-500 bg-rose-50/20 ring-1 ring-rose-400"
+                          : "border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300"
+                          }`}
                       >
                         <span className="text-xs font-bold capitalize mb-2 flex items-center justify-between">
                           {key === "government" ? "1. Government Standard" : key === "news" ? "2. Editorial News" : key === "education" ? "3. Academic Education" : "4. Clean Minimalist"}
@@ -380,10 +381,10 @@ export function AppearanceClient() {
                           {key === "government"
                             ? "Đỏ vàng trang trọng, truyền thống, font chữ Serif uy nghiêm."
                             : key === "news"
-                            ? "Xanh trắng hiện đại, thông tin trực quan, dễ đọc, giãn rộng."
-                            : key === "education"
-                            ? "Xanh lục tri thức, bo góc cong mềm mại thân thiện."
-                            : "Đen xám tối giản, sắc sảo, thích hợp hiển thị đa phương tiện phẳng."}
+                              ? "Xanh trắng hiện đại, thông tin trực quan, dễ đọc, giãn rộng."
+                              : key === "education"
+                                ? "Xanh lục tri thức, bo góc cong mềm mại thân thiện."
+                                : "Đen xám tối giản, sắc sảo, thích hợp hiển thị đa phương tiện phẳng."}
                         </span>
                       </button>
                     );
@@ -487,11 +488,10 @@ export function AppearanceClient() {
                           <button
                             key={f.name}
                             onClick={() => handleTypographyChange("fontFamily", f.value)}
-                            className={`flex items-center justify-between p-3 rounded-lg border text-xs text-left ${
-                              isSelected
-                                ? "border-rose-500 bg-rose-50/10 font-bold"
-                                : "border-slate-200 bg-white hover:bg-slate-50"
-                            }`}
+                            className={`flex items-center justify-between p-3 rounded-lg border text-xs text-left ${isSelected
+                              ? "border-rose-500 bg-rose-50/10 font-bold"
+                              : "border-slate-200 bg-white hover:bg-slate-50"
+                              }`}
                           >
                             <span style={{ fontFamily: f.value }}>{f.name}</span>
                             {isSelected && <CheckCircle2 className="w-4 h-4 text-rose-600" />}
@@ -521,11 +521,10 @@ export function AppearanceClient() {
                         <button
                           key={h.value}
                           onClick={() => handleLayoutChange("headerStyle", h.value as any)}
-                          className={`flex flex-col text-left p-3 rounded-lg border text-xs transition-all ${
-                            isSelected
-                              ? "border-rose-500 bg-rose-50/20 font-bold ring-1 ring-rose-400"
-                              : "border-slate-200 bg-white hover:bg-slate-50"
-                          }`}
+                          className={`flex flex-col text-left p-3 rounded-lg border text-xs transition-all ${isSelected
+                            ? "border-rose-500 bg-rose-50/20 font-bold ring-1 ring-rose-400"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                            }`}
                         >
                           <span className="font-bold mb-1 capitalize">{h.name}</span>
                           <span className="text-[9px] text-slate-500 leading-tight">{h.desc}</span>
@@ -551,11 +550,10 @@ export function AppearanceClient() {
                         <button
                           key={h.value}
                           onClick={() => handleLayoutChange("homepageLayout", h.value as any)}
-                          className={`flex flex-col text-left p-3 rounded-lg border text-xs transition-all ${
-                            isSelected
-                              ? "border-rose-500 bg-rose-50/20 font-bold ring-1 ring-rose-400"
-                              : "border-slate-200 bg-white hover:bg-slate-50"
-                          }`}
+                          className={`flex flex-col text-left p-3 rounded-lg border text-xs transition-all ${isSelected
+                            ? "border-rose-500 bg-rose-50/20 font-bold ring-1 ring-rose-400"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                            }`}
                         >
                           <span className="font-bold mb-1 capitalize">{h.name}</span>
                           <span className="text-[9px] text-slate-500 leading-tight">{h.desc}</span>
@@ -581,11 +579,10 @@ export function AppearanceClient() {
                         <button
                           key={h.value}
                           onClick={() => handleLayoutChange("footerStyle", h.value as any)}
-                          className={`flex flex-col text-left p-3 rounded-lg border text-xs transition-all ${
-                            isSelected
-                              ? "border-rose-500 bg-rose-50/20 font-bold ring-1 ring-rose-400"
-                              : "border-slate-200 bg-white hover:bg-slate-50"
-                          }`}
+                          className={`flex flex-col text-left p-3 rounded-lg border text-xs transition-all ${isSelected
+                            ? "border-rose-500 bg-rose-50/20 font-bold ring-1 ring-rose-400"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                            }`}
                         >
                           <span className="font-bold mb-1 capitalize">{h.name}</span>
                           <span className="text-[9px] text-slate-500 leading-tight">{h.desc}</span>
@@ -611,11 +608,10 @@ export function AppearanceClient() {
                         <button
                           key={r.value}
                           onClick={() => handleBrandingChange("borderRadius", r.value)}
-                          className={`flex items-center justify-between p-3 rounded-lg border text-xs text-left ${
-                            isSelected
-                              ? "border-rose-500 bg-rose-50/10 font-bold"
-                              : "border-slate-200 bg-white hover:bg-slate-50"
-                          }`}
+                          className={`flex items-center justify-between p-3 rounded-lg border text-xs text-left ${isSelected
+                            ? "border-rose-500 bg-rose-50/10 font-bold"
+                            : "border-slate-200 bg-white hover:bg-slate-50"
+                            }`}
                         >
                           <span>{r.name}</span>
                           <div
@@ -729,43 +725,44 @@ export function AppearanceClient() {
           RIGHT PANEL: HIGH-FIDELITY LIVE PREVIEW MOCKUP
           ======================================================================= */}
       <div className="w-full lg:w-7/12 flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2.5 bg-slate-50 p-3 rounded-lg border border-slate-200 gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping shrink-0" />
-            <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
               <Eye className="w-4 h-4 text-emerald-600" />
-              Realtime Preview
+              Realtime Preview (Mô phỏng Giao diện Portal)
             </span>
           </div>
-
-          {/* Page Selector Tabs */}
-          <div className="flex bg-slate-200/80 p-0.5 rounded-lg text-[9px] font-extrabold border border-slate-350 self-start sm:self-center">
-            {[
-              { id: "home", label: "Trang chủ" },
-              { id: "post", label: "Trang thông tin" },
-              { id: "documents", label: "Trang văn bản" },
-              { id: "contact", label: "Trang liên hệ" }
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setPreviewPage(tab.id as any)}
-                className={`px-2 py-1 rounded-md transition-all cursor-pointer select-none ${
-                  previewPage === tab.id
-                    ? "bg-white shadow-sm font-black"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-                style={{
-                  color: previewPage === tab.id ? config.colors.primary : undefined
-                }}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <span className="text-[9px] bg-slate-200 px-2 py-0.5 rounded text-slate-650 font-bold uppercase shrink-0 hidden md:inline-block">
-            Preset: {config.theme}
+          <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-semibold uppercase self-start sm:self-auto">
+            Active: {config.theme.toUpperCase()} Preset
           </span>
+        </div>
+
+        {/* PAGE SWITCHER TABS */}
+        <div className="flex gap-1.5 p-1 bg-slate-100/90 border border-slate-200 rounded-lg overflow-x-auto shrink-0 select-none shadow-sm">
+          {[
+            { id: "home", label: "Trang chủ", icon: Home },
+            { id: "post", label: "Chi tiết bài viết", icon: Info },
+            { id: "category", label: "Chuyên mục tin", icon: Layers },
+            { id: "static", label: "Giới thiệu tĩnh", icon: Settings2 }
+          ].map((p) => {
+            const Icon = p.icon;
+            const isActive = previewPage === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setPreviewPage(p.id as any)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-md text-xs font-bold transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-white text-slate-900 shadow-sm border border-slate-200"
+                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-200/50"
+                }`}
+              >
+                <Icon className={`w-3.5 h-3.5 ${isActive ? "text-rose-500 animate-pulse" : "text-slate-400"}`} />
+                {p.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* 
@@ -786,7 +783,7 @@ export function AppearanceClient() {
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 block" />
             </div>
             <div className="bg-slate-700/80 rounded-md text-[10px] text-slate-300 px-3 py-1 font-mono flex-1 text-center truncate max-w-md mx-auto">
-              https://portal.daklak.gov.vn/dangkang
+              https://portal.daklak.gov.vn/dang-kang/{previewPage === "home" ? "" : previewPage}
             </div>
           </div>
 
@@ -872,42 +869,73 @@ export function AppearanceClient() {
           )}
 
           {/* 
-            3. MOCK NAVIGATION BAR
+            3. MOCK NAVIGATION BAR (INTERACTIVE)
           */}
           <div
-            className="w-full text-white px-4 flex items-center h-10 overflow-hidden shadow-sm"
+            className="w-full text-white px-4 flex items-center h-10 overflow-hidden shadow-sm select-none"
             style={{ backgroundColor: config.colors.primary }}
           >
             <div className="flex gap-4 items-center h-full text-xs font-bold font-sans">
-              <span className="flex items-center justify-center h-full px-2 hover:bg-black/10 cursor-pointer">
+              <span
+                onClick={() => setPreviewPage("home")}
+                className={`flex items-center justify-center h-full px-2 hover:bg-black/15 cursor-pointer transition-colors ${previewPage === "home" ? "bg-black/10" : ""}`}
+                title="Về Trang chủ"
+              >
                 <Home className="w-3.5 h-3.5" />
               </span>
-              <span className="h-full flex items-center px-1 border-b-2 border-amber-300 font-extrabold cursor-pointer">TRANG CHỦ</span>
-              <span className="h-full flex items-center px-1 text-white/80 hover:text-white cursor-pointer transition-colors">GIỚI THI�          {/* 
-            4. CONDITIONAL PAGE VIEWS (HOMEPAGE, POST DETAIL, LEGAL DOCUMENTS, CONTACT)
-          */}
+              <span
+                onClick={() => setPreviewPage("home")}
+                className={`h-full flex items-center px-1.5 cursor-pointer transition-all border-b-2 ${
+                  previewPage === "home" ? "border-amber-300 font-extrabold" : "border-transparent text-white/80 hover:text-white"
+                }`}
+              >
+                TRANG CHỦ
+              </span>
+              <span
+                onClick={() => setPreviewPage("static")}
+                className={`h-full flex items-center px-1.5 cursor-pointer transition-all border-b-2 ${
+                  previewPage === "static" ? "border-amber-300 font-extrabold" : "border-transparent text-white/80 hover:text-white"
+                }`}
+              >
+                GIỚI THIỆU
+              </span>
+              <span
+                onClick={() => setPreviewPage("category")}
+                className={`h-full flex items-center px-1.5 cursor-pointer transition-all border-b-2 ${
+                  previewPage === "category" ? "border-amber-300 font-extrabold" : "border-transparent text-white/80 hover:text-white"
+                }`}
+              >
+                TIN TỨC
+              </span>
+              <span
+                onClick={() => setPreviewPage("post")}
+                className={`h-full flex items-center px-1.5 cursor-pointer transition-all border-b-2 ${
+                  previewPage === "post" ? "border-amber-300 font-extrabold" : "border-transparent text-white/80 hover:text-white"
+                }`}
+              >
+                TIN CHI TIẾT
+              </span>
+            </div>
+          </div>
+
+          {/* =======================================================================
+              MOCK PAGE 1: HOME PAGE
+              ======================================================================= */}
           {previewPage === "home" && (
-            <>
-              {/* MOCK HERO SLIDER */}
+            <div className="animate-fade-in flex flex-col w-full">
+              {/* Mock Hero Slider */}
               <div className="w-full px-4 pt-4 select-none">
                 <div
                   className="w-full aspect-[21/8] bg-slate-800 relative overflow-hidden flex items-end p-4 border border-slate-200"
                   style={{ borderRadius: config.branding.borderRadius }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
-                  <img
-                    src="/banner_scenery.png"
-                    alt="Banner Scenery"
-                    className="absolute inset-0 w-full h-full object-cover object-center opacity-70"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                  {/* Fallback pattern for sceneries */}
                   <div className="absolute inset-0 bg-gradient-to-r from-rose-950/60 to-amber-900/60 opacity-60 z-0" />
-                  
+
                   <div className="relative z-20 text-left">
                     <span
-                      className="px-2 py-0.5 text-[9px] font-bold text-white rounded uppercase inline-block mb-1.5"
+                      className="px-2 py-0.5 text-[9px] font-bold text-white rounded uppercase inline-block mb-1.5 animate-pulse"
                       style={{ backgroundColor: config.colors.primary }}
                     >
                       Tin Nổi Bật
@@ -922,10 +950,11 @@ export function AppearanceClient() {
                 </div>
               </div>
 
-              {/* MOCK HOMEPAGE CONTENT AREA */}
+              {/* Mock Homepage Content Area */}
               <div className="w-full px-4 py-5 flex flex-col md:flex-row gap-4 text-left">
                 {/* Main News Flow */}
                 <div className="flex-1 flex flex-col gap-4">
+                  {/* Tabs list mockup */}
                   <div className="w-full border-b flex gap-2 text-xs font-bold font-sans">
                     <span
                       className="pb-1 px-1 border-b-2"
@@ -948,7 +977,8 @@ export function AppearanceClient() {
                       ].map((item, idx) => (
                         <div
                           key={idx}
-                          className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-all"
+                          onClick={() => setPreviewPage("post")}
+                          className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer group"
                           style={{ borderRadius: config.branding.borderRadius }}
                         >
                           <div className="w-full aspect-[16/10] bg-slate-200 relative flex items-center justify-center overflow-hidden">
@@ -957,7 +987,7 @@ export function AppearanceClient() {
                           </div>
                           <div className="p-2.5 flex-1 flex flex-col justify-between">
                             <div>
-                              <h4 className="text-[11px] font-bold line-clamp-2 text-slate-800 leading-snug hover:text-rose-600 transition-colors">
+                              <h4 className="text-[11px] font-bold line-clamp-2 text-slate-800 leading-snug group-hover:text-rose-600 transition-colors">
                                 {item.title}
                               </h4>
                               <p className="text-[9px] text-slate-500 line-clamp-2 mt-1 leading-normal font-sans">
@@ -966,7 +996,7 @@ export function AppearanceClient() {
                             </div>
                             <div className="flex justify-between items-center border-t pt-1.5 mt-2 text-[8px] text-slate-400 font-sans">
                               <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
-                              <span className="font-bold uppercase" style={{ color: config.colors.primary }}>Xem tiếp</span>
+                              <span className="font-bold uppercase tracking-wider" style={{ color: config.colors.primary }}>Xem tiếp</span>
                             </div>
                           </div>
                         </div>
@@ -982,15 +1012,16 @@ export function AppearanceClient() {
                       ].map((item, idx) => (
                         <div
                           key={idx}
-                          className="bg-white border p-3 flex gap-3 shadow-sm hover:shadow transition-all"
+                          onClick={() => setPreviewPage("post")}
+                          className="bg-white border p-3 flex gap-3 shadow-sm hover:shadow hover:-translate-y-0.5 transition-all cursor-pointer group"
                           style={{ borderRadius: config.branding.borderRadius }}
                         >
-                          <div className="w-16 h-16 bg-slate-200 rounded shrink-0 relative flex items-center justify-center overflow-hidden">
+                          <div className="w-16 h-16 bg-slate-200 rounded shrink-0 relative flex items-center justify-center overflow-hidden border">
                             <span className="text-[8px] text-slate-400 font-bold text-center leading-none">Ảnh</span>
                           </div>
                           <div className="flex-1 flex flex-col justify-between">
                             <div>
-                              <h4 className="text-[11px] font-bold line-clamp-1 text-slate-800 leading-snug hover:text-rose-600 transition-colors">
+                              <h4 className="text-[11px] font-bold line-clamp-1 text-slate-800 leading-snug group-hover:text-rose-600 transition-colors">
                                 {item.title}
                               </h4>
                               <p className="text-[9px] text-slate-500 line-clamp-2 mt-0.5 leading-normal font-sans">
@@ -999,7 +1030,7 @@ export function AppearanceClient() {
                             </div>
                             <div className="flex justify-between items-center text-[8px] text-slate-400 mt-1 font-sans">
                               <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
-                              <span className="font-bold uppercase" style={{ color: config.colors.primary }}>Đọc thêm</span>
+                              <span className="font-bold uppercase tracking-wider" style={{ color: config.colors.primary }}>Đọc thêm</span>
                             </div>
                           </div>
                         </div>
@@ -1009,15 +1040,17 @@ export function AppearanceClient() {
 
                   {config.layout.homepageLayout === "magazine" && (
                     <div className="flex flex-col gap-3">
+                      {/* Magazine Main Large Post */}
                       <div
-                        className="w-full bg-white border shadow-sm rounded-lg overflow-hidden flex flex-col"
+                        onClick={() => setPreviewPage("post")}
+                        className="w-full bg-white border shadow-sm rounded-lg overflow-hidden flex flex-col cursor-pointer group hover:shadow"
                         style={{ borderRadius: config.branding.borderRadius }}
                       >
                         <div className="w-full aspect-[21/9] bg-slate-200 flex items-center justify-center relative overflow-hidden">
                           <span className="text-[9px] text-slate-400 font-bold">Hình ảnh đại diện bài viết lớn</span>
                         </div>
                         <div className="p-3">
-                          <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                          <h4 className="text-xs font-bold text-slate-900 leading-snug group-hover:text-rose-600 transition-colors">
                             Đại hội Đại biểu Hội Nông dân Xã Dang Kang khóa X nhiệm kỳ 2026-2031 thành công tốt đẹp
                           </h4>
                           <p className="text-[10px] text-slate-500 mt-1 font-sans">
@@ -1025,7 +1058,7 @@ export function AppearanceClient() {
                           </p>
                           <div className="flex items-center justify-between text-[8px] text-slate-400 mt-2 pt-2 border-t font-sans">
                             <span>18/05/2026 | Hội Nông dân</span>
-                            <span className="font-extrabold" style={{ color: config.colors.primary }}>Xem bài viết</span>
+                            <span className="font-extrabold uppercase tracking-wide" style={{ color: config.colors.primary }}>Xem bài viết</span>
                           </div>
                         </div>
                       </div>
@@ -1035,6 +1068,7 @@ export function AppearanceClient() {
 
                 {/* Sidebar widgets */}
                 <div className="w-full md:w-48 shrink-0 flex flex-col gap-4">
+                  {/* Hotline widget mockup */}
                   <div
                     className="p-3 bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2"
                     style={{ borderRadius: config.branding.borderRadius }}
@@ -1049,283 +1083,441 @@ export function AppearanceClient() {
                     </div>
                   </div>
 
+                  {/* Dịch vụ công liên kết */}
                   <div
-                    className="p-3 shadow-sm border text-white flex flex-col gap-2"
+                    className="p-3 shadow-sm border text-white flex flex-col gap-2 cursor-pointer hover:opacity-95 transition-all"
                     style={{
                       borderRadius: config.branding.borderRadius,
                       backgroundColor: config.colors.primary
                     }}
                   >
                     <h5 className="text-[10px] font-bold border-b border-white/20 pb-1 flex items-center gap-1 font-sans">
-                      <Sparkles className="w-3 h-3 text-yellow-300" />
+                      <Sparkles className="w-3 h-3 text-yellow-300 animate-pulse" />
                       Dịch Vụ Công Một Cửa
                     </h5>
                     <p className="text-[8px] text-white/80 leading-normal font-sans">
                       Tra cứu tiến độ hồ sơ hành chính trực tuyến công khai nhanh chóng.
                     </p>
-                    <span className="text-[8px] font-black text-yellow-300 uppercase tracking-wider flex items-center self-end gap-0.5 mt-1 cursor-pointer">
+                    <span className="text-[8px] font-black text-yellow-300 uppercase tracking-wider flex items-center self-end gap-0.5 mt-1">
                       Tra cứu <ArrowRight className="w-2.5 h-2.5" />
                     </span>
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           )}
 
+          {/* =======================================================================
+              MOCK PAGE 2: POST DETAIL PAGE (TIN CHI TIẾT)
+              ======================================================================= */}
           {previewPage === "post" && (
-            <div className="w-full px-4 py-5 text-left flex flex-col gap-4">
-              {/* Breadcrumbs */}
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-sans">
-                <span className="hover:underline cursor-pointer">Trang chủ</span>
-                <span>&gt;</span>
-                <span className="hover:underline cursor-pointer">Tin hoạt động</span>
-                <span>&gt;</span>
-                <span className="text-slate-650 font-medium">Chi tiết bài viết</span>
-              </div>
+            <div className="w-full px-4 py-4 text-left flex flex-col md:flex-row gap-4 animate-fade-in">
+              {/* Left pane: post content */}
+              <div className="flex-1 bg-white border border-slate-200/80 p-4 shadow-sm" style={{ borderRadius: config.branding.borderRadius }}>
+                {/* Breadcrumbs */}
+                <div className="text-[10px] text-slate-400 font-sans flex items-center gap-1 mb-2">
+                  <span className="hover:text-slate-600 cursor-pointer" onClick={() => setPreviewPage("home")}>Trang chủ</span>
+                  <span>/</span>
+                  <span className="hover:text-slate-600 cursor-pointer" onClick={() => setPreviewPage("category")}>Tin hoạt động</span>
+                  <span>/</span>
+                  <span className="text-slate-500 font-medium">Chi tiết bài viết</span>
+                </div>
 
-              {/* Article Header */}
-              <div className="border-b pb-3 flex flex-col gap-2">
-                <h2 className="text-sm sm:text-base font-bold font-serif text-slate-900 leading-snug">
-                  Hội nghị triển khai kế hoạch chuyển đổi số và nâng cao năng lực ứng dụng CNTT năm 2026
+                {/* Article Header */}
+                <h2 className="text-sm sm:text-base font-serif font-black leading-snug text-slate-900 mb-2">
+                  Hội nghị Ban chấp hành Đảng bộ Xã Dang Kang lần thứ 15: Thúc đẩy cơ cấu nông lâm nghiệp bền vững
                 </h2>
-                <div className="flex items-center gap-4 text-[9px] text-slate-400 font-sans">
-                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 19/05/2026 08:30</span>
-                  <span>|</span>
-                  <span>Người đăng: Quản trị viên</span>
-                  <span>|</span>
-                  <span>Lượt xem: 1,428</span>
-                </div>
-              </div>
-
-              {/* Article Content */}
-              <div className="text-[11px] text-slate-700 leading-relaxed font-sans flex flex-col gap-3">
-                <p className="font-bold text-slate-800">
-                  Sáng ngày 19/5/2026, Ủy ban nhân dân xã Dang Kang đã tổ chức thành công Hội nghị chuyên đề về chuyển đổi số, nhằm mục tiêu đưa công nghệ số hỗ trợ phát triển sản xuất nông nghiệp và hiện đại hóa dịch vụ công một cửa.
-                </p>
                 
-                <div className="w-full my-1 flex flex-col items-center gap-1.5 bg-slate-50 p-2.5 border rounded-lg">
-                  <div className="w-full aspect-[21/9] bg-slate-250 relative flex items-center justify-center overflow-hidden" style={{ borderRadius: config.branding.borderRadius }}>
-                    <img 
-                      src="/banner_scenery.png" 
-                      className="absolute inset-0 w-full h-full object-cover opacity-60" 
-                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/40 to-slate-950/40 z-0" />
-                    <span className="relative z-10 text-[9px] font-bold text-yellow-300 bg-black/60 px-3 py-1.5 rounded shadow-sm border border-white/20">Ảnh minh họa: Toàn cảnh đại hội hội trường xã</span>
+                {/* Metadata */}
+                <div className="flex items-center justify-between border-y border-slate-100 py-1.5 my-3 text-[9px] text-slate-500 font-sans">
+                  <div className="flex items-center gap-2">
+                    <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> 18/05/2026</span>
+                    <span>•</span>
+                    <span>Tác giả: Ban Biên tập</span>
+                    <span>•</span>
+                    <span>Lượt xem: 1,425</span>
                   </div>
-                  <span className="text-[8px] text-slate-400 italic">Quang cảnh làm việc nghiêm túc, khẩn trương tại hội trường tầng 2 UBND</span>
+                  <div className="flex gap-1.5">
+                    <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded text-[8px] font-bold cursor-pointer hover:bg-blue-700">Chia sẻ F</span>
+                    <span className="bg-sky-500 text-white px-1.5 py-0.5 rounded text-[8px] font-bold cursor-pointer hover:bg-sky-600">Zalo</span>
+                  </div>
                 </div>
 
-                <p>
-                  Tại hội nghị, các đại biểu đã thảo luận sôi nổi về giải pháp số hóa dữ liệu hộ tịch, liên thông thủ tục hành chính 3 cấp, và xây dựng bản đồ số các sản phẩm nông sản OCOP đặc trưng của xã Dang Kang. Đại diện lãnh đạo nhấn mạnh, việc chuyển đổi số phải lấy người dân làm trung tâm, đảm bảo sự tiện lợi, minh bạch và rút ngắn tối đa thời gian xử lý hồ sơ hành chính.
-                </p>
+                {/* Content Paragraphs */}
+                <div className="text-[11px] text-slate-700 leading-relaxed font-sans space-y-3">
+                  <p className="font-bold">
+                    Sáng ngày 18/05, Đảng ủy xã Dang Kang đã tổ chức Hội nghị Ban chấp hành lần thứ 15 nhiệm kỳ 2020-2025. Hội nghị tập trung thảo luận sâu sắc về các giải pháp đẩy mạnh ứng dụng khoa học kỹ thuật và cơ cấu lại ngành nông lâm nghiệp nhằm thích ứng với biến đổi khí hậu.
+                  </p>
+                  <p>
+                    Chủ trì Hội nghị có đồng chí Bí thư Đảng ủy Xã. Tham dự có đầy đủ các đồng chí trong Ban chấp hành Đảng bộ, lãnh đạo HĐND, UBND, Ủy ban MTTQ Việt Nam xã và trưởng các tổ chức đoàn thể chính trị - xã hội.
+                  </p>
+                  
+                  {/* Styled Blockquote */}
+                  <blockquote 
+                    className="pl-3 border-l-4 my-3 text-slate-800 italic p-2" 
+                    style={{ 
+                      borderColor: config.colors.primary,
+                      backgroundColor: config.colors.secondary
+                    }}
+                  >
+                    "Việc chuyển dịch cơ cấu cây trồng nông nghiệp từ các loại cây ngắn ngày năng suất thấp sang các loại cây ăn quả giá trị cao là chìa khóa giúp người dân xóa đói giảm nghèo bền vững."
+                  </blockquote>
+
+                  {/* Mock Image with borderRadius */}
+                  <div className="my-3 flex flex-col items-center gap-1.5">
+                    <div 
+                      className="w-full aspect-[21/9] bg-slate-100 border flex items-center justify-center relative overflow-hidden"
+                      style={{ borderRadius: config.branding.borderRadius }}
+                    >
+                      <span className="text-[9px] text-slate-400 font-bold">Hình ảnh: Lãnh đạo phát biểu ý kiến chỉ đạo tại Hội nghị</span>
+                    </div>
+                    <span className="text-[9px] text-slate-500 italic">Toàn cảnh hội nghị BCH Đảng bộ Xã Dang Kang sáng 18/05/2026.</span>
+                  </div>
+
+                  <p>
+                    Hội nghị cũng đã thống nhất thông qua chỉ tiêu phát triển nông thôn mới nâng cao trong giai đoạn kế tiếp, đồng thời tiếp tục đẩy mạnh công tác số hóa dịch vụ hành chính công để tạo điều kiện thuận lợi tối đa cho nhân dân.
+                  </p>
+
+                  {/* Table with custom styling */}
+                  <div className="my-4 overflow-hidden border rounded" style={{ borderRadius: config.branding.borderRadius }}>
+                    <table className="w-full border-collapse text-[10px]">
+                      <thead>
+                        <tr className="text-white" style={{ backgroundColor: config.colors.primary }}>
+                          <th className="p-1.5 text-left font-bold border-r border-white/20">STT</th>
+                          <th className="p-1.5 text-left font-bold border-r border-white/20">Nội dung nhiệm vụ chính</th>
+                          <th className="p-1.5 text-left font-bold">Tiến độ mục tiêu</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 bg-white">
+                        <tr className="bg-slate-50/50">
+                          <td className="p-1.5 border-r font-mono">01</td>
+                          <td className="p-1.5 border-r font-medium text-slate-700">Hoàn thành quy hoạch nông thôn nâng cao</td>
+                          <td className="p-1.5 text-emerald-600 font-bold">Đã đạt 100%</td>
+                        </tr>
+                        <tr>
+                          <td className="p-1.5 border-r font-mono">02</td>
+                          <td className="p-1.5 border-r font-medium text-slate-700">Số hóa kết quả TTHC thuộc thẩm quyền xã</td>
+                          <td className="p-1.5 text-amber-600 font-bold">Đang triển khai (80%)</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Tags block */}
+                <div className="flex flex-wrap gap-1.5 mt-4 pt-3 border-t">
+                  <span className="text-[9px] font-sans text-slate-400 font-bold shrink-0 self-center">Tags:</span>
+                  {["Đảng bộ Dang Kang", "Phát triển Nông nghiệp", "Tin hoạt động"].map((t) => (
+                    <span 
+                      key={t}
+                      className="px-2 py-0.5 text-[9px] font-sans font-bold border border-slate-200 hover:border-rose-500 cursor-pointer rounded-full transition-all bg-slate-50 hover:bg-rose-50/10"
+                      style={{ 
+                        borderRadius: "100px",
+                        color: config.colors.primary 
+                      }}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Citizen Comments Form */}
+                <div className="mt-5 pt-4 border-t space-y-3">
+                  <h4 className="text-[11px] font-bold text-slate-800 flex items-center gap-1">
+                    <Mail className="w-3.5 h-3.5 text-rose-500" />
+                    Ý kiến phản hồi công dân
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input 
+                      type="text" 
+                      placeholder="Họ và tên..." 
+                      className="border border-slate-200 p-1.5 text-[9px] outline-none w-full bg-slate-50 focus:bg-white focus:border-slate-300 transition-colors"
+                      style={{ borderRadius: config.branding.borderRadius }} 
+                    />
+                    <input 
+                      type="text" 
+                      placeholder="Số điện thoại..." 
+                      className="border border-slate-200 p-1.5 text-[9px] outline-none w-full bg-slate-50 focus:bg-white focus:border-slate-300 transition-colors"
+                      style={{ borderRadius: config.branding.borderRadius }} 
+                    />
+                  </div>
+                  <textarea 
+                    placeholder="Nhập ý kiến đóng góp của bạn..." 
+                    rows={2}
+                    className="border border-slate-200 p-1.5 text-[9px] outline-none w-full resize-none bg-slate-50 focus:bg-white focus:border-slate-300 transition-colors"
+                    style={{ borderRadius: config.branding.borderRadius }}
+                  />
+                  <Button 
+                    size="sm" 
+                    className="text-[9px] font-bold h-7 self-start text-white hover:opacity-90"
+                    style={{ 
+                      backgroundColor: config.colors.primary, 
+                      borderRadius: config.branding.borderRadius 
+                    }}
+                  >
+                    Gửi phản hồi đóng góp
+                  </Button>
+                </div>
               </div>
 
-              {/* Interactive Comment Section */}
-              <div className="mt-4 border-t pt-4">
-                <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1 font-sans">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  Phản hồi, Đóng góp của người dân (2)
-                </h4>
+              {/* Right Sidebar widgets */}
+              <div className="w-full md:w-48 shrink-0 flex flex-col gap-4">
+                {/* Related Posts Widget */}
+                <div className="p-3 bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2.5" style={{ borderRadius: config.branding.borderRadius }}>
+                  <h5 className="text-[10px] font-bold text-slate-800 border-b pb-1 flex items-center gap-1 font-sans">
+                    <Layers className="w-3 h-3 text-rose-500" />
+                    Tin cùng chuyên mục
+                  </h5>
+                  <div className="flex flex-col gap-2.5 text-slate-700">
+                    {[
+                      { title: "Ra quân ngày Chủ nhật xanh chung tay dọn vệ sinh cảnh quan", date: "17/05/2026" },
+                      { title: "Đoàn giám sát HĐND Huyện làm việc tại xã về Cải cách hành chính", date: "16/05/2026" },
+                      { title: "Phát động chiến dịch mùa hè tình nguyện hỗ trợ bà con nghèo", date: "15/05/2026" }
+                    ].map((item, idx) => (
+                      <div 
+                        key={idx} 
+                        onClick={() => setPreviewPage("post")}
+                        className="flex flex-col gap-0.5 cursor-pointer hover:text-rose-600 transition-colors group"
+                      >
+                        <h6 className="text-[10px] font-bold line-clamp-2 leading-snug group-hover:underline">
+                          {item.title}
+                        </h6>
+                        <span className="text-[8px] text-slate-400 font-mono">{item.date}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Administrative Helpline */}
+                <div 
+                  className="p-3 bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2"
+                  style={{ borderRadius: config.branding.borderRadius }}
+                >
+                  <h5 className="text-[10px] font-bold text-slate-800 border-b pb-1 flex items-center gap-1 font-sans">
+                    <Phone className="w-3 h-3 text-emerald-600" />
+                    Đường Dây Nóng
+                  </h5>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-black text-rose-600 font-mono tracking-wider">0262.3812.345</span>
+                    <span className="text-[8px] text-slate-400 font-sans">Hỗ trợ khẩn cấp 24/7</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* =======================================================================
+              MOCK PAGE 3: CATEGORY LIST PAGE (CHUYÊN MỤC TIN TỨC)
+              ======================================================================= */}
+          {previewPage === "category" && (
+            <div className="w-full px-4 py-4 text-left flex flex-col md:flex-row gap-4 animate-fade-in">
+              {/* Main List */}
+              <div className="flex-1 bg-white border border-slate-200/80 p-4 shadow-sm flex flex-col gap-4" style={{ borderRadius: config.branding.borderRadius }}>
+                {/* Breadcrumbs */}
+                <div className="text-[10px] text-slate-400 font-sans flex items-center gap-1">
+                  <span className="hover:text-slate-600 cursor-pointer" onClick={() => setPreviewPage("home")}>Trang chủ</span>
+                  <span>/</span>
+                  <span className="text-slate-500 font-medium">Chuyên mục tin</span>
+                </div>
+
+                {/* Category Header */}
+                <div className="border-b-2 pb-2 flex items-center justify-between" style={{ borderBottomColor: config.colors.primary }}>
+                  <h2 className="text-xs sm:text-sm font-serif font-black uppercase text-slate-900 flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-rose-600" />
+                    Chuyên mục: Tin hoạt động nông thôn mới
+                  </h2>
+                  <span className="text-[9px] text-slate-500 font-mono font-medium">Có 24 tin bài</span>
+                </div>
+
+                {/* Search & Filter Bar */}
+                <div className="flex gap-2 text-xs font-sans">
+                  <input 
+                    type="text" 
+                    placeholder="Tìm kiếm tin bài..." 
+                    className="border border-slate-200 px-2 py-1 text-[9px] flex-1 outline-none focus:border-slate-300"
+                    style={{ borderRadius: config.branding.borderRadius }} 
+                  />
+                  <select 
+                    className="border border-slate-200 px-2 py-1 text-[9px] outline-none bg-slate-50 text-slate-600 cursor-pointer"
+                    style={{ borderRadius: config.branding.borderRadius }}
+                  >
+                    <option>Mới nhất</option>
+                    <option>Cũ nhất</option>
+                  </select>
+                </div>
+
+                {/* List items */}
                 <div className="flex flex-col gap-3">
                   {[
-                    { author: "Nguyễn Văn Hùng", role: "Thôn 3, Xã Dang Kang", date: "1 giờ trước", text: "Chuyển đổi số làm thủ tục hành chính trực tuyến rất nhanh, không phải photo nhiều giấy tờ như trước. Rất ủng hộ!" },
-                    { author: "Trần Thị Mai", role: "Hợp tác xã OCOP", date: "3 giờ trước", text: "Mong xã sớm có lớp hướng dẫn bà con đưa nông sản lên sàn thương mại điện tử để mở rộng đầu ra tốt hơn." }
-                  ].map((cmt, cIdx) => (
-                    <div key={cIdx} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60 flex gap-2.5">
-                      <div className="w-7 h-7 rounded-full bg-slate-250 shrink-0 flex items-center justify-center font-bold text-[10px] text-slate-650 uppercase font-sans">
-                        {cmt.author[0]}
+                    { title: "Hội nghị Ban chấp hành Đảng bộ Xã Dang Kang lần thứ 15 nhiệm kỳ 2020-2025", desc: "Triển khai định hướng nhiệm vụ phát triển nông lâm nghiệp, chuyển dịch cơ cấu cây trồng có giá trị cao.", date: "18/05/2026", cat: "Hoạt động Đảng" },
+                    { title: "Ra quân ngày Chủ nhật xanh chung tay dọn vệ sinh cảnh quan môi trường nông thôn mới", desc: "Thu hút hơn 500 đoàn viên thanh niên và đông đảo bà con nhân dân hưởng ứng nhiệt tình làm sạch ngõ xóm.", date: "17/05/2026", cat: "Môi trường" },
+                    { title: "Đoàn giám sát HĐND Huyện làm việc tại xã Dang Kang về chuyên đề chuyển đổi số", desc: "Đánh giá cao kết quả chỉ số cải cách hành chính và xây dựng cổng thông tin hiện đại, đồng bộ.", date: "16/05/2026", cat: "Cải cách hành chính" },
+                    { title: "Tuyên truyền phổ biến pháp luật phòng chống cháy nổ trong khu dân cư", desc: "Nâng cao ý thức người dân trong việc sử dụng điện an toàn, phòng chống cháy nổ trong mùa hanh khô sắp tới.", date: "15/05/2026", cat: "An ninh - Quốc phòng" }
+                  ].map((item, idx) => (
+                    <div 
+                      key={idx} 
+                      onClick={() => setPreviewPage("post")}
+                      className="p-3 border border-slate-100 rounded-lg hover:shadow hover:border-slate-200 transition-all bg-white flex gap-3 cursor-pointer group"
+                      style={{ borderRadius: config.branding.borderRadius }}
+                    >
+                      <div className="w-20 h-20 bg-slate-50 rounded shrink-0 relative flex items-center justify-center overflow-hidden border border-slate-200/60">
+                        <span className="text-[8px] text-slate-400 font-bold text-center leading-none">Ảnh đại diện</span>
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[9.5px] font-bold text-slate-800">{cmt.author} <span className="text-[8px] text-slate-400 font-normal bg-slate-200/50 px-1.5 py-0.5 rounded ml-1">{cmt.role}</span></span>
-                          <span className="text-[8px] text-slate-400">{cmt.date}</span>
+                      <div className="flex-1 flex flex-col justify-between">
+                        <div>
+                          <span 
+                            className="px-1.5 py-0.5 rounded text-[8px] font-bold font-sans uppercase mb-1 inline-block"
+                            style={{ 
+                              backgroundColor: config.colors.secondary,
+                              color: config.colors.primary 
+                            }}
+                          >
+                            {item.cat}
+                          </span>
+                          <h4 className="text-[11px] font-bold line-clamp-1 text-slate-800 leading-snug group-hover:text-rose-600 transition-colors">
+                            {item.title}
+                          </h4>
+                          <p className="text-[9px] text-slate-500 line-clamp-2 mt-0.5 leading-normal font-sans">
+                            {item.desc}
+                          </p>
                         </div>
-                        <p className="text-[9.5px] text-slate-600 mt-1 leading-snug font-sans">{cmt.text}</p>
+                        <div className="flex justify-between items-center text-[8px] text-slate-400 mt-1 font-sans">
+                          <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
+                          <span className="font-bold uppercase tracking-wide" style={{ color: config.colors.primary }}>Xem bài viết</span>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* Pagination */}
+                <div className="flex justify-center items-center gap-1 border-t pt-4 mt-2 text-[9px] font-sans">
+                  <span className="px-2 py-1 border rounded text-slate-400 cursor-not-allowed bg-slate-50">Trước</span>
+                  <span className="px-2.5 py-1 border rounded text-white font-bold cursor-pointer" style={{ backgroundColor: config.colors.primary }}>1</span>
+                  <span className="px-2.5 py-1 border rounded text-slate-600 hover:bg-slate-50 cursor-pointer">2</span>
+                  <span className="px-2.5 py-1 border rounded text-slate-600 hover:bg-slate-50 cursor-pointer">3</span>
+                  <span className="px-2.5 py-1 border rounded text-slate-400">...</span>
+                  <span className="px-2.5 py-1 border rounded text-slate-600 hover:bg-slate-50 cursor-pointer">6</span>
+                  <span className="px-2 py-1 border rounded text-slate-600 hover:bg-slate-50 cursor-pointer">Sau</span>
+                </div>
               </div>
             </div>
           )}
 
-          {previewPage === "documents" && (
-            <div className="w-full px-4 py-5 text-left flex flex-col gap-4">
-              {/* Breadcrumbs */}
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-sans">
-                <span className="hover:underline cursor-pointer">Trang chủ</span>
-                <span>&gt;</span>
-                <span className="text-slate-650 font-medium">Văn bản chỉ đạo, điều hành</span>
-              </div>
-
-              {/* Title */}
-              <div className="border-b pb-2">
-                <h2 className="text-sm font-bold text-slate-900 font-sans">Hệ thống Văn bản Pháp quy điện tử</h2>
-                <p className="text-[9px] text-slate-400 mt-0.5 font-sans">Công khai, minh bạch các văn bản, kế hoạch, nghị quyết của chính quyền xã Dang Kang</p>
-              </div>
-
-              {/* Search & Filter Mockup */}
-              <div className="bg-slate-50 p-2.5 border rounded-lg flex flex-col sm:flex-row gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Nhập số ký hiệu hoặc trích yếu văn bản..." 
-                  disabled
-                  className="flex-1 bg-white border text-[10px] px-2.5 py-1 rounded" 
-                />
-                <button 
-                  disabled
-                  className="px-3 py-1 text-[10px] font-bold text-white rounded bg-slate-600 shrink-0 cursor-not-allowed"
-                  style={{ backgroundColor: config.colors.primary }}
-                >
-                  Tìm kiếm
-                </button>
-              </div>
-
-              {/* Documents Table */}
-              <div className="w-full border rounded-lg overflow-hidden bg-white shadow-sm">
-                <table className="w-full border-collapse text-left text-[9px] font-sans">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-500 font-bold border-b">
-                      <th className="p-2 border-r w-[30%]">Số ký hiệu / Ban hành</th>
-                      <th className="p-2 border-r w-[55%]">Trích yếu nội dung</th>
-                      <th className="p-2 text-center w-[15%]">Tài liệu</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y text-slate-700">
+          {/* =======================================================================
+              MOCK PAGE 4: STATIC INTRODUCTION PAGE (GIỚI THIỆU TĨNH)
+              ======================================================================= */}
+          {previewPage === "static" && (
+            <div className="w-full px-4 py-4 text-left flex flex-col md:flex-row gap-4 animate-fade-in">
+              {/* Left pane: Static Sidebar menu */}
+              <div className="w-full md:w-48 shrink-0 flex flex-col gap-3">
+                <div className="bg-white border p-3 flex flex-col gap-2.5 shadow-sm" style={{ borderRadius: config.branding.borderRadius }}>
+                  <h5 className="text-[10px] font-bold text-slate-800 border-b pb-1 flex items-center gap-1 font-sans">
+                    <Info className="w-3.5 h-3.5 text-rose-500 animate-pulse" />
+                    Giới thiệu
+                  </h5>
+                  <div className="flex flex-col gap-1 text-[10px] font-sans">
                     {[
-                      { code: "12/2026/QĐ-UBND", date: "10/05/2026", desc: "Quyết định V/v Kiện toàn ban chỉ đạo chương trình mục tiêu quốc gia xây dựng nông thôn mới xã Dang Kang nhiệm kỳ mới", agency: "UBND Xã" },
-                      { code: "48/KH-UBND", date: "02/05/2026", desc: "Kế hoạch V/v Triển khai chiến dịch ra quân dọn dẹp vệ sinh môi trường, phòng chống sốt xuất huyết tại địa bàn các thôn", agency: "UBND Xã" },
-                      { code: "05/2026/NQ-HĐND", date: "28/04/2026", desc: "Nghị quyết V/v Phê duyệt phương án thu, chi ngân sách địa phương và phân bổ nguồn vốn đầu tư công năm 2026", agency: "HĐND Xã" }
-                    ].map((doc, dIdx) => (
-                      <tr key={dIdx} className="hover:bg-slate-50/50">
-                        <td className="p-2 border-r font-medium flex flex-col gap-0.5">
-                          <span className="font-bold text-slate-900">{doc.code}</span>
-                          <span className="text-[8px] text-slate-400">{doc.date}</span>
-                        </td>
-                        <td className="p-2 border-r leading-relaxed">
-                          <p className="line-clamp-2 font-medium hover:text-red-650 cursor-pointer">{doc.desc}</p>
-                          <span className="text-[7.5px] bg-slate-100 text-slate-500 px-1 py-0.2 rounded font-sans font-bold uppercase tracking-wider">{doc.agency}</span>
-                        </td>
-                        <td className="p-2 text-center">
-                          <button 
-                            disabled
-                            className="px-2 py-0.5 text-[8px] font-bold text-white rounded bg-slate-650 inline-block hover:shadow cursor-not-allowed uppercase"
-                            style={{ backgroundColor: config.colors.primary }}
-                          >
-                            Tải PDF
-                          </button>
-                        </td>
-                      </tr>
+                      { id: "geo", name: "Điều kiện tự nhiên", active: true },
+                      { id: "hist", name: "Lịch sử phát triển", active: false },
+                      { id: "org", name: "Cơ cấu tổ chức bộ máy", active: false },
+                      { id: "contact", name: "Thông tin liên hệ công tác", active: false }
+                    ].map((sub) => (
+                      <span 
+                        key={sub.id}
+                        className={`p-2 rounded cursor-pointer transition-all font-medium ${sub.active 
+                          ? "font-bold text-white shadow-sm" 
+                          : "text-slate-600 hover:bg-slate-50"
+                        }`}
+                        style={sub.active ? { backgroundColor: config.colors.primary } : {}}
+                      >
+                        {sub.name}
+                      </span>
                     ))}
-                  </tbody>
-                </table>
+                  </div>
+                </div>
+
+                {/* Helpline Widget */}
+                <div 
+                  className="p-3 bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2"
+                  style={{ borderRadius: config.branding.borderRadius }}
+                >
+                  <h5 className="text-[10px] font-bold text-slate-800 border-b pb-1 flex items-center gap-1 font-sans">
+                    <Phone className="w-3 h-3 text-emerald-600" />
+                    Đường Dây Nóng
+                  </h5>
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-black text-rose-600 font-mono tracking-wider">0262.3812.345</span>
+                    <span className="text-[8px] text-slate-400 font-sans">Hỗ trợ khẩn cấp 24/7</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right pane: document details */}
+              <div className="flex-1 bg-white border border-slate-200/80 p-4 shadow-sm flex flex-col gap-3" style={{ borderRadius: config.branding.borderRadius }}>
+                {/* Breadcrumbs */}
+                <div className="text-[10px] text-slate-400 font-sans flex items-center gap-1">
+                  <span className="hover:text-slate-600 cursor-pointer" onClick={() => setPreviewPage("home")}>Trang chủ</span>
+                  <span>/</span>
+                  <span className="hover:text-slate-600 cursor-pointer" onClick={() => setPreviewPage("static")}>Giới thiệu</span>
+                  <span>/</span>
+                  <span className="text-slate-500 font-medium">Điều kiện tự nhiên</span>
+                </div>
+
+                {/* Page Title */}
+                <h2 className="text-sm sm:text-base font-serif font-black leading-snug text-slate-900 border-b pb-2">
+                  Giới thiệu: Điều kiện Tự nhiên Xã Dang Kang
+                </h2>
+
+                {/* Document Body */}
+                <div className="text-[11px] text-slate-700 leading-relaxed font-sans space-y-3">
+                  <h4 className="text-[12px] font-bold text-slate-800 mt-2 font-serif flex items-center gap-1">
+                    1. Vị trí địa lý & Ranh giới hành chính
+                  </h4>
+                  <p>
+                    Dang Kang là một xã thuộc huyện Krông Bông, tỉnh Đắk Lắk. Xã nằm cách trung tâm huyện lỵ khoảng 15 km về hướng Tây Bắc, có vị trí địa lý thuận lợi trong giao lưu văn hóa và phát triển kinh tế vùng:
+                  </p>
+                  
+                  {/* Styled bullet list */}
+                  <ul className="list-none pl-1 space-y-1.5 my-3">
+                    {[
+                      "Phía Đông giáp xã Cư Kty và xã Hòa Sơn.",
+                      "Phía Tây giáp xã Dang Kang và ranh giới hành chính Huyện Cư Kuin.",
+                      "Phía Nam giáp dãy núi Chư Yang Sin kỳ vĩ.",
+                      "Phía Bắc giáp sông Krông Pắc dòng nước mát quanh năm bồi đắp phù sa."
+                    ].map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-1.5">
+                        <span className="text-[10px] font-bold mt-0.5" style={{ color: config.colors.primary }}>•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <h4 className="text-[12px] font-bold text-slate-800 mt-4 font-serif">
+                    2. Tiềm năng tự nhiên & Phát triển kinh tế
+                  </h4>
+                  <p>
+                    Với tổng diện tích tự nhiên tương đối lớn, đất đai chủ yếu là đất đỏ bazan và đất phù sa ven sông vô cùng màu mỡ, xã Dang Kang có thế mạnh vượt trội trong việc phát triển các mô hình trồng trọt nông nghiệp công nghệ cao kết hợp với chăn nuôi đại gia súc.
+                  </p>
+
+                  {/* Informational Callout Box using secondary theme color */}
+                  <div 
+                    className="p-3 border-l-4 my-4 flex gap-2"
+                    style={{ 
+                      borderColor: config.colors.primary, 
+                      backgroundColor: config.colors.secondary,
+                      borderRadius: config.branding.borderRadius 
+                    }}
+                  >
+                    <Info className="w-4 h-4 shrink-0 mt-0.5" style={{ color: config.colors.primary }} />
+                    <div className="text-[10px] text-slate-800 font-medium leading-relaxed">
+                      <strong>Khuyến cáo đầu tư:</strong> Chính quyền xã đang áp dụng cơ chế đặc thù ưu đãi hỗ trợ 100% thủ tục đăng ký kinh doanh và chuyển giao công nghệ cho doanh nghiệp đầu tư vào lĩnh vực chế biến sản phẩm nông lâm nghiệp tại địa phương.
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}
-
-          {previewPage === "contact" && (
-            <div className="w-full px-4 py-5 text-left flex flex-col gap-4">
-              {/* Breadcrumbs */}
-              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-sans">
-                <span className="hover:underline cursor-pointer">Trang chủ</span>
-                <span>&gt;</span>
-                <span className="text-slate-650 font-medium">Liên hệ & Góp ý kiến</span>
-              </div>
-
-              {/* Title */}
-              <div className="border-b pb-2">
-                <h2 className="text-sm font-bold text-slate-900 font-sans">Hộp thư điện tử Tiếp nhận ý kiến Công dân</h2>
-                <p className="text-[9px] text-slate-400 mt-0.5 font-sans">Nhận phản hồi, kiến nghị xây dựng chính quyền địa phương vững mạnh</p>
-              </div>
-
-              <div className="flex flex-col md:flex-row gap-4 mt-1">
-                {/* Contact information column */}
-                <div className="flex-1 flex flex-col gap-3">
-                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-200/80 flex flex-col gap-2 font-sans text-[10px]">
-                    <h3 className="font-extrabold text-slate-800 text-[11px] uppercase tracking-wide flex items-center gap-1 border-b pb-1">
-                      <MapPin className="w-3.5 h-3.5" style={{ color: config.colors.primary }} />
-                      Thông tin cơ quan
-                    </h3>
-                    <p className="leading-relaxed">
-                      <span className="font-bold text-slate-700 block text-[11px]">Ủy ban nhân dân xã Dang Kang</span>
-                      Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk.
-                    </p>
-                    <p>
-                      <span className="font-bold text-slate-750">Điện thoại:</span> 0262.3812.345
-                    </p>
-                    <p>
-                      <span className="font-bold text-slate-750">Thư điện tử:</span> xadangkang@krongbong.daklak.gov.vn
-                    </p>
-                    <p>
-                      <span className="font-bold text-slate-750">Thời gian làm việc:</span> Thứ 2 - Thứ 6 (Sáng: 07h30 - 11h30; Chiều: 13h30 - 17h00)
-                    </p>
-                  </div>
-                  
-                  {/* Mock Map view */}
-                  <div className="w-full h-24 bg-slate-100 rounded-lg border border-slate-200 relative overflow-hidden flex items-center justify-center">
-                    <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:12px_12px]" />
-                    <div className="absolute w-5 h-5 rounded-full animate-ping opacity-75" style={{ backgroundColor: config.colors.primary }} />
-                    <div className="relative z-10 p-2 bg-white rounded shadow-md border text-[8px] font-sans flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-red-500" />
-                      <span className="font-bold text-slate-700">Vị trí UBND Xã Dang Kang</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Feedback Form Column */}
-                <div className="flex-1 bg-white p-3 rounded-lg border border-slate-200/80 flex flex-col gap-2.5">
-                  <h3 className="font-bold text-slate-800 text-[11px] font-sans">Gửi Ý Kiến, Kiến Nghị Trực Tuyến</h3>
-                  
-                  <div className="flex flex-col gap-1 font-sans">
-                    <label className="text-[8.5px] font-bold text-slate-500">Họ và tên công dân *</label>
-                    <input type="text" placeholder="Nguyễn Văn A" disabled className="w-full border px-2 py-1 text-[9.5px] rounded bg-slate-50/50" />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 font-sans">
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[8.5px] font-bold text-slate-500">Số điện thoại *</label>
-                      <input type="text" placeholder="0905.xxx.xxx" disabled className="w-full border px-2 py-1 text-[9.5px] rounded bg-slate-50/50" />
-                    </div>
-                    <div className="flex flex-col gap-1">
-                      <label className="text-[8.5px] font-bold text-slate-500">Email cá nhân</label>
-                      <input type="email" placeholder="email@gmail.com" disabled className="w-full border px-2 py-1 text-[9.5px] rounded bg-slate-50/50" />
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col gap-1 font-sans">
-                    <label className="text-[8.5px] font-bold text-slate-500">Nội dung kiến nghị góp ý *</label>
-                    <textarea rows={3} placeholder="Nhập chi tiết ý kiến phản hồi..." disabled className="w-full border p-2 text-[9.5px] rounded bg-slate-50/50 resize-none" />
-                  </div>
-
-                  <button 
-                    disabled 
-                    className="w-full py-1.5 text-[9.5px] font-extrabold text-white rounded bg-slate-650 cursor-not-allowed hover:shadow transition-all"
-                    style={{ backgroundColor: config.colors.primary }}
-                  >
-                    Gửi ý kiến phản hồi
-                  </button>
-                </div>
-              </div>
-            </div>
-          )},
-                  backgroundColor: config.colors.primary
-                }}
-              >
-                <h5 className="text-[10px] font-bold border-b border-white/20 pb-1 flex items-center gap-1 font-sans">
-                  <Sparkles className="w-3 h-3 text-yellow-300" />
-                  Dịch Vụ Công Một Cửa
-                </h5>
-                <p className="text-[8px] text-white/80 leading-normal font-sans">
-                  Tra cứu tiến độ hồ sơ hành chính trực tuyến công khai nhanh chóng.
-                </p>
-                <span className="text-[8px] font-black text-yellow-300 uppercase tracking-wider flex items-center self-end gap-0.5 mt-1 cursor-pointer">
-                  Tra cứu <ArrowRight className="w-2.5 h-2.5" />
-                </span>
-              </div>
-            </div>
-
-          </div>
 
           {/* 
             6. MOCK FOOTER
@@ -1355,7 +1547,7 @@ export function AppearanceClient() {
                   Email: xadangkang@krongbong.daklak.gov.vn
                 </p>
               </div>
-              <div className="text-[8px] text-white/70 self-end sm:text-right flex flex-col gap-0.5 shrink-0">
+              <div className="text-[8px] text-white/70 self-end sm:text-right flex flex-col gap-0.5 shrink-0 font-sans">
                 <span>© 2026 Bản quyền thuộc UBND Xã Dang Kang.</span>
                 <span>Thiết kế & phát triển: Hệ thống Quản trị CMS.</span>
               </div>
@@ -1372,13 +1564,13 @@ export function AppearanceClient() {
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <span className="font-bold text-white border-b border-slate-700 pb-1 uppercase text-[9px] tracking-wider" style={{ color: config.colors.primary }}>Dịch vụ trực tuyến</span>
-                  <span className="hover:text-white cursor-pointer">Thủ tục hành chính</span>
-                  <span className="hover:text-white cursor-pointer">Hỏi đáp công dân</span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setPreviewPage("category")}>Thủ tục hành chính</span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setPreviewPage("post")}>Hỏi đáp công dân</span>
                 </div>
                 <div className="flex flex-col gap-1.5">
                   <span className="font-bold text-white border-b border-slate-700 pb-1 uppercase text-[9px] tracking-wider" style={{ color: config.colors.primary }}>Cổng thông tin liên kết</span>
-                  <span className="hover:text-white cursor-pointer">UBND Huyện Krông Bông</span>
-                  <span className="hover:text-white cursor-pointer">Tỉnh Đắk Lắk</span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setPreviewPage("home")}>UBND Huyện Krông Bông</span>
+                  <span className="hover:text-white cursor-pointer" onClick={() => setPreviewPage("home")}>Tỉnh Đắk Lắk</span>
                 </div>
               </div>
               <div className="border-t border-slate-800 pt-3 flex justify-between text-[8px] text-slate-500">
@@ -1403,7 +1595,7 @@ export function AppearanceClient() {
           <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
           <div>
             <span className="font-bold block text-slate-700 mb-0.5">Mẹo tùy chỉnh Giao diện:</span>
-            Bạn có thể thử nghiệm các mã màu khác nhau bằng cách click vào ô màu ở cột cấu hình. Các thành phần như menu, nút chức năng, biểu tượng nổi bật và footer sẽ thay đổi màu sắc ngay lập tức trên bản mô phỏng để bạn trực quan so sánh. Sau khi ưng ý, hãy nhấn nút **Lưu Giao diện** ở trên cùng để áp dụng thay đổi ra ngoài Portal.
+            Bạn có thể thử nghiệm các chế độ xem thử bằng bộ chuyển tab (**Trang chủ**, **Chi tiết bài viết**, **Chuyên mục tin**, **Giới thiệu tĩnh**) hoặc click trực tiếp vào thanh Menu điều hướng của website mô phỏng. Sự thay đổi về màu sắc chủ đạo, font chữ và bo góc sẽ được áp dụng ngay lập tức giúp bạn đánh giá tính đồng bộ thiết kế một cách toàn diện nhất trước khi lưu.
           </div>
         </div>
       </div>
