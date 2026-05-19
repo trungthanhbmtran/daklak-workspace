@@ -471,6 +471,228 @@ function LegalDocumentsWidget({ posts, currentLang, data }: { posts: any[], curr
   )
 }
 
+function OrgDirectoryWidget({
+  allOrgUnits,
+  currentLang,
+  data
+}: {
+  allOrgUnits: any[];
+  currentLang: string;
+  data?: any;
+}) {
+  const displayStyle = data?.displayStyle || "tree";
+  const selectedUnitIds = data?.selectedUnitIds || [];
+  const selectedUnitsCache = data?.selectedUnits || [];
+
+  // Determine source units: Use allOrgUnits if it exists and has items, otherwise fallback to cache
+  const sourceUnits = React.useMemo(() => {
+    if (Array.isArray(allOrgUnits) && allOrgUnits.length > 0) {
+      return allOrgUnits;
+    }
+    if (Array.isArray(selectedUnitsCache) && selectedUnitsCache.length > 0) {
+      return selectedUnitsCache;
+    }
+    // If absolutely empty, fallback to mock units to maintain a beautiful layout preview!
+    const sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"] || [];
+    return sections.map((section: any, idx: number) => ({
+      id: idx + 10000,
+      name: section.title,
+      description: section.desc,
+      address: section.details?.[0] || "",
+      email: section.details?.[1] || "lienhe@daklak.gov.vn",
+      parentId: null
+    }));
+  }, [allOrgUnits, selectedUnitsCache, currentLang]);
+
+  // Filter based on selectedUnitIds (safe type matching using string conversion)
+  const filteredUnits = React.useMemo(() => {
+    if (Array.isArray(selectedUnitIds) && selectedUnitIds.length > 0) {
+      const stringIds = selectedUnitIds.map(String);
+      return sourceUnits.filter((unit: any) => stringIds.includes(String(unit.id)));
+    }
+    return sourceUnits;
+  }, [sourceUnits, selectedUnitIds]);
+
+  // Tree building logic
+  const orgTree = React.useMemo(() => {
+    if (!Array.isArray(filteredUnits) || filteredUnits.length === 0) return [];
+    
+    const idMap: Record<string, any> = {};
+    const roots: any[] = [];
+
+    // Initialize map
+    filteredUnits.forEach((unit) => {
+      idMap[String(unit.id)] = { ...unit, children: [] };
+    });
+
+    // Populate children
+    filteredUnits.forEach((unit) => {
+      const mapped = idMap[String(unit.id)];
+      const parentIdStr = unit.parentId ? String(unit.parentId) : null;
+      if (parentIdStr && idMap[parentIdStr]) {
+        idMap[parentIdStr].children.push(mapped);
+      } else {
+        roots.push(mapped);
+      }
+    });
+
+    return roots;
+  }, [filteredUnits]);
+
+  // Expanded state for Tree
+  const [expandedIds, setExpandedIds] = React.useState<Record<string, boolean>>({});
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // Auto-expand roots on mount
+  React.useEffect(() => {
+    if (orgTree.length > 0) {
+      const initial: Record<string, boolean> = {};
+      orgTree.forEach((root) => {
+        initial[String(root.id)] = true;
+      });
+      setExpandedIds(prev => ({ ...initial, ...prev }));
+    }
+  }, [orgTree]);
+
+  // Recursive Tree Item Render
+  const RenderTreeItem = ({ node, level = 0 }: { node: any; level: number }) => {
+    const hasChildren = node.children && node.children.length > 0;
+    const isExpanded = !!expandedIds[String(node.id)];
+
+    return (
+      <div className="flex flex-col w-full animate-fade-in">
+        <div 
+          onClick={() => hasChildren && toggleExpand(String(node.id))}
+          className={`flex items-center justify-between p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border border-transparent hover:border-slate-200/40 dark:hover:border-slate-850/40 ${
+            level === 0 ? "font-bold text-slate-800 dark:text-white" : "text-xs font-semibold text-slate-600 dark:text-slate-400"
+          }`}
+          style={{ paddingLeft: `${Math.max(14, level * 28)}px` }}
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            {level === 0 ? (
+              <Building2 className="w-4 h-4 text-red-600 dark:text-amber-400 shrink-0" />
+            ) : (
+              <Building2 className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+            )}
+            <span className="truncate">{node.name}</span>
+          </div>
+
+          {hasChildren && (
+            <div className="w-5 h-5 rounded-lg bg-slate-150/50 dark:bg-slate-900 flex items-center justify-center text-slate-500">
+              {isExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+            </div>
+          )}
+        </div>
+
+        {hasChildren && isExpanded && (
+          <div className="flex flex-col border-l border-slate-200 dark:border-slate-800 ml-5 mt-1 pb-2">
+            {node.children.map((child: any) => (
+              <RenderTreeItem key={child.id} node={child} level={level + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render Grid style
+  const renderGridStyle = () => {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 text-left w-full animate-fade-in">
+        {filteredUnits.map((unit) => (
+          <div 
+            key={unit.id}
+            className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-2xl flex flex-col justify-between gap-4 hover:border-red-500/50 hover:shadow-md transition-all group"
+          >
+            <div className="flex flex-col gap-2">
+              <div className="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950/40 text-red-600 dark:text-amber-400 flex items-center justify-center shadow-sm shrink-0">
+                <Building2 className="w-5 h-5" />
+              </div>
+              <h5 className="font-extrabold text-slate-900 dark:text-white uppercase text-xs tracking-wide group-hover:text-red-600 dark:group-hover:text-amber-400 transition-colors">
+                {unit.name}
+              </h5>
+              {unit.code && (
+                <span className="inline-block self-start text-[8px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-350 px-1.5 py-0.5 rounded font-black tracking-wider uppercase">
+                  Mã: {unit.code}
+                </span>
+              )}
+            </div>
+
+            <div className="border-t border-slate-200 dark:border-slate-800 pt-3 flex flex-col gap-1.5 text-[10.5px] font-medium text-slate-500 dark:text-slate-400 leading-normal">
+              <span className="flex items-start gap-1.5"><MapPin className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.address || (currentLang === "en" ? "HQ Address" : "Trụ sở UBND Xã")}</span>
+              {unit.phoneNumber && <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.phoneNumber}</span>}
+              <span className="flex items-center gap-1.5 truncate"><Mail className="w-3.5 h-3.5 shrink-0 text-slate-400" /> {unit.email || "xadangkang@daklak.gov.vn"}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Render List style
+  const renderListStyle = () => {
+    return (
+      <div className="flex flex-col gap-3 text-left w-full animate-fade-in">
+        {filteredUnits.map((unit) => (
+          <div 
+            key={unit.id}
+            className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl flex items-center justify-between gap-4 hover:border-red-500/50 transition-colors group"
+          >
+            <div className="flex items-center gap-3.5 min-w-0">
+              <div className="w-8 h-8 rounded bg-red-100 dark:bg-red-950/40 text-red-655 dark:text-amber-400 flex items-center justify-center shrink-0">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col min-w-0">
+                <h5 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-snug truncate group-hover:text-red-600 transition-colors">
+                  {unit.name}
+                </h5>
+                <span className="text-[10px] text-slate-400 font-medium leading-relaxed truncate">
+                  {unit.address || (currentLang === "en" ? "Commune Headquarters" : "Trụ sở Ủy ban nhân dân")} • {unit.email || "xadangkang@daklak.gov.vn"}
+                </span>
+              </div>
+            </div>
+
+            {unit.code && (
+              <span className="text-[9px] bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-350 px-2.5 py-1 rounded font-black tracking-wider uppercase shrink-0">
+                {unit.code}
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
+  // Return container
+  return (
+    <div className="w-full">
+      {filteredUnits.length === 0 ? (
+        <div className="py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl w-full">
+          <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-relaxed">
+            Chưa thiết lập sơ đồ thư mục tổ chức
+          </p>
+        </div>
+      ) : (
+        <>
+          {displayStyle === "tree" && (
+            <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-2xl space-y-1 shadow-inner w-full">
+              {orgTree.map((root) => (
+                <RenderTreeItem key={root.id} node={root} level={0} />
+              ))}
+            </div>
+          )}
+
+          {displayStyle === "grid" && renderGridStyle()}
+
+          {displayStyle === "list" && renderListStyle()}
+        </>
+      )}
+    </div>
+  );
+}
+
 function MediaGalleryWidget({ posts, currentLang, data }: { posts: any[], currentLang: string, data?: any }) {
   const mediaItems = [
     { title: "Hội nghị tổng kết phong trào thi đua toàn dân đoàn kết", img: "https://images.unsplash.com/photo-1541872703-74c5e44368f9?auto=format&fit=crop&w=600&q=80", type: "photo" },
@@ -1120,47 +1342,11 @@ export function DynamicPageRenderer({ layoutSchema, currentLang }: DynamicPageRe
 
                             {/* ORG SECTIONS DIRECTORY WIDGET */}
                             {widget.type === "ORG_SECTIONS_DIRECTORY" && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {(() => {
-                                  let sections = []
-                                  if (Array.isArray(widget.data?.selectedUnitIds) && widget.data.selectedUnitIds.length > 0) {
-                                    sections = allOrgUnits.filter((unit: any) => widget.data.selectedUnitIds.includes(unit.id)).map((unit: any) => ({
-                                      title: getLocalizedField(unit, "name", currentLang),
-                                      desc: getLocalizedField(unit, "description", currentLang),
-                                      details: [
-                                        `${currentLang === 'en' ? 'Address' : 'Địa chỉ'}: ${unit.address || 'UBND Xã'}`,
-                                        `${currentLang === 'en' ? 'Email' : 'Email'}: ${unit.email || 'xadangkang@daklak.gov.vn'}`,
-                                      ]
-                                    }))
-                                  } else {
-                                    sections = DEFAULT_ORG_SECTIONS[currentLang as "vi" | "en" || "vi"]
-                                  }
-
-                                  return Array.isArray(sections) ? sections.map((section: any, idx: number) => (
-                                    <div
-                                      key={section?.title || idx}
-                                      className="bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 p-4 rounded-xl flex flex-col gap-3"
-                                    >
-                                      <div className="flex flex-col gap-1.5 min-w-0">
-                                        <h5 className="text-xs font-black text-slate-900 dark:text-white uppercase truncate tracking-wide">
-                                          {section.title}
-                                        </h5>
-                                        <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
-                                          {section.desc}
-                                        </p>
-                                      </div>
-                                      <div className="border-t border-slate-200 dark:border-slate-800 pt-2.5 flex flex-col gap-1.5">
-                                        {Array.isArray(section.details) && section.details.map((item: string, i: number) => (
-                                          <div key={i} className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 dark:text-slate-300">
-                                            <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
-                                            <span>{item}</span>
-                                          </div>
-                                        ))}
-                                      </div>
-                                    </div>
-                                  )) : null;
-                                })()}
-                              </div>
+                              <OrgDirectoryWidget
+                                allOrgUnits={allOrgUnits}
+                                currentLang={currentLang}
+                                data={widget.data}
+                              />
                             )}
 
                             {/* COMMUNE INTERACTIVE MAP WIDGET */}

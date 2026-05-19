@@ -3,7 +3,7 @@ import { Widget } from "../../core/types";
 import { DirectoryData, DirectoryUnit } from "./directory.schema";
 import { Label } from "@/components/ui/label";
 import { useOrganizationTreeQuery } from "../../services/dataBinding";
-import { Loader2, Landmark, Building2, CheckSquare2, Square } from "lucide-react";
+import { Loader2, Landmark, Building2, CheckSquare2, Square, Network } from "lucide-react";
 
 interface DirectoryEditorProps {
   widget: Widget<DirectoryData>;
@@ -62,7 +62,7 @@ export const DirectoryEditor: React.FC<DirectoryEditorProps> = ({ widget, onChan
         <div 
           onClick={() => toggleUnitRecursive(node, !isSelected)}
           className={`flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-900 cursor-pointer transition-colors border border-transparent hover:border-slate-100/50 dark:hover:border-slate-800/30 ${
-            level === 0 ? "font-bold text-slate-800 dark:text-white" : "text-xs font-semibold text-slate-500 dark:text-slate-450"
+            level === 0 ? "font-bold text-slate-800 dark:text-white" : "text-xs font-semibold text-slate-500 dark:text-slate-454"
           }`}
           style={{ paddingLeft: `${Math.max(12, level * 24)}px` }}
         >
@@ -97,9 +97,47 @@ export const DirectoryEditor: React.FC<DirectoryEditorProps> = ({ widget, onChan
   };
 
   return (
-    <div className="space-y-4 animate-fade-in">
+    <div className="space-y-5 animate-fade-in">
+      {/* Kiểu hiển thị Selector */}
+      <div className="flex flex-col gap-2 px-1">
+        <Label className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest leading-none">
+          Kiểu hiển thị trên Portal
+        </Label>
+        <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl border border-slate-200/40 dark:border-slate-800/40 text-center text-xs">
+          {[
+            { id: "tree", label: "Sơ đồ cây", icon: Network },
+            { id: "grid", label: "Dạng lưới", icon: Landmark },
+            { id: "list", label: "Danh sách", icon: Building2 }
+          ].map((style) => {
+            const StyleIcon = style.icon;
+            const isSelected = (widget.data?.displayStyle || "tree") === style.id;
+            return (
+              <button
+                key={style.id}
+                type="button"
+                onClick={() => {
+                  onChangeData({
+                    selectedUnitIds,
+                    selectedUnits,
+                    displayStyle: style.id as any
+                  });
+                }}
+                className={`py-2 px-2 rounded-xl font-bold flex items-center justify-center gap-1.5 transition-all select-none ${
+                  isSelected
+                    ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-indigo-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/40"
+                }`}
+              >
+                <StyleIcon className="w-3.5 h-3.5 shrink-0" />
+                <span className="text-[10px]">{style.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="flex flex-col gap-1 px-1">
-        <Label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">
+        <Label className="text-[10px] font-black text-slate-450 dark:text-slate-500 uppercase tracking-widest leading-none">
           Thư mục sơ đồ tổ chức
         </Label>
         <span className="text-[9px] text-indigo-500 font-bold leading-normal mt-1">
