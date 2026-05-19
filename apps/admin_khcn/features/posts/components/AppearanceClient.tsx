@@ -147,6 +147,7 @@ const RADIUS_OPTIONS = [
 export function AppearanceClient() {
   const [activeTab, setActiveTab] = useState<string>("theme");
   const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [previewPage, setPreviewPage] = useState<'home' | 'post' | 'documents' | 'contact'>('home');
 
   // Core Theme State
   const [config, setConfig] = useState<ThemeAppearanceConfig>(THEME_PRESETS.government);
@@ -728,16 +729,42 @@ export function AppearanceClient() {
           RIGHT PANEL: HIGH-FIDELITY LIVE PREVIEW MOCKUP
           ======================================================================= */}
       <div className="w-full lg:w-7/12 flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b pb-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b pb-2.5 bg-slate-50 p-3 rounded-lg border border-slate-200 gap-2">
           <div className="flex items-center gap-2">
-            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping shrink-0" />
+            <span className="text-xs font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5 shrink-0">
               <Eye className="w-4 h-4 text-emerald-600" />
-              Realtime Preview (Mô phỏng Giao diện Portal)
+              Realtime Preview
             </span>
           </div>
-          <span className="text-[10px] bg-slate-200 px-2 py-0.5 rounded text-slate-600 font-semibold uppercase">
-            Active: {config.theme.toUpperCase()} Preset
+
+          {/* Page Selector Tabs */}
+          <div className="flex bg-slate-200/80 p-0.5 rounded-lg text-[9px] font-extrabold border border-slate-350 self-start sm:self-center">
+            {[
+              { id: "home", label: "Trang chủ" },
+              { id: "post", label: "Trang thông tin" },
+              { id: "documents", label: "Trang văn bản" },
+              { id: "contact", label: "Trang liên hệ" }
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setPreviewPage(tab.id as any)}
+                className={`px-2 py-1 rounded-md transition-all cursor-pointer select-none ${
+                  previewPage === tab.id
+                    ? "bg-white shadow-sm font-black"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+                style={{
+                  color: previewPage === tab.id ? config.colors.primary : undefined
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <span className="text-[9px] bg-slate-200 px-2 py-0.5 rounded text-slate-650 font-bold uppercase shrink-0 hidden md:inline-block">
+            Preset: {config.theme}
           </span>
         </div>
 
@@ -856,189 +883,432 @@ export function AppearanceClient() {
                 <Home className="w-3.5 h-3.5" />
               </span>
               <span className="h-full flex items-center px-1 border-b-2 border-amber-300 font-extrabold cursor-pointer">TRANG CHỦ</span>
-              <span className="h-full flex items-center px-1 text-white/80 hover:text-white cursor-pointer transition-colors">GIỚI THIỆU</span>
-              <span className="h-full flex items-center px-1 text-white/80 hover:text-white cursor-pointer transition-colors">TIN TỨC</span>
-              <span className="h-full flex items-center px-1 text-white/80 hover:text-white cursor-pointer transition-colors">VĂN BẢN</span>
-              <span className="h-full flex items-center px-1 text-white/80 hover:text-white cursor-pointer transition-colors">THỦ TỤC</span>
-            </div>
-          </div>
-
-          {/* 
-            4. MOCK HERO SLIDER
+              <span className="h-full flex items-center px-1 text-white/80 hover:text-white cursor-pointer transition-colors">GIỚI THI�          {/* 
+            4. CONDITIONAL PAGE VIEWS (HOMEPAGE, POST DETAIL, LEGAL DOCUMENTS, CONTACT)
           */}
-          <div className="w-full px-4 pt-4 select-none">
-            <div
-              className="w-full aspect-[21/8] bg-slate-800 relative overflow-hidden flex items-end p-4 border border-slate-200"
-              style={{ borderRadius: config.branding.borderRadius }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
-              <img
-                src="/banner_scenery.png"
-                alt="Banner Scenery"
-                className="absolute inset-0 w-full h-full object-cover object-center opacity-70"
-                onError={(e) => {
-                  // Fallback to high quality background color block
-                  e.currentTarget.style.display = 'none';
-                }}
-              />
-              {/* Fallback pattern for sceneries */}
-              <div className="absolute inset-0 bg-gradient-to-r from-rose-950/60 to-amber-900/60 opacity-60 z-0" />
-              
-              <div className="relative z-20 text-left">
-                <span
-                  className="px-2 py-0.5 text-[9px] font-bold text-white rounded uppercase inline-block mb-1.5"
-                  style={{ backgroundColor: config.colors.primary }}
+          {previewPage === "home" && (
+            <>
+              {/* MOCK HERO SLIDER */}
+              <div className="w-full px-4 pt-4 select-none">
+                <div
+                  className="w-full aspect-[21/8] bg-slate-800 relative overflow-hidden flex items-end p-4 border border-slate-200"
+                  style={{ borderRadius: config.branding.borderRadius }}
                 >
-                  Tin Nổi Bật
-                </span>
-                <h3 className="text-xs sm:text-sm md:text-base font-bold text-yellow-300 font-serif leading-tight">
-                  Chào mừng quý khách đến với Trang thông tin điện tử Đảng ủy - HĐND - UBND Xã Dang Kang
-                </h3>
-                <p className="text-[10px] text-white/80 mt-1 line-clamp-1 font-sans">
-                  Quyết tâm xây dựng chính quyền số, phát triển nông thôn mới văn minh, giàu đẹp.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 
-            5. MOCK HOMEPAGE CONTENT AREA
-          */}
-          <div className="w-full px-4 py-5 flex flex-col md:flex-row gap-4 text-left">
-            
-            {/* Main News Flow */}
-            <div className="flex-1 flex flex-col gap-4">
-              {/* Tabs list mockup */}
-              <div className="w-full border-b flex gap-2 text-xs font-bold font-sans">
-                <span
-                  className="pb-1 px-1 border-b-2"
-                  style={{
-                    borderColor: config.colors.primary,
-                    color: config.colors.primary
-                  }}
-                >
-                  Tin hoạt động
-                </span>
-                <span className="pb-1 px-1 text-slate-400 hover:text-slate-600 cursor-pointer">Kinh tế - Xã hội</span>
-                <span className="pb-1 px-1 text-slate-400 hover:text-slate-600 cursor-pointer">Xây dựng nông thôn mới</span>
-              </div>
-
-              {config.layout.homepageLayout === "grid" && (
-                <div className="grid grid-cols-2 gap-3">
-                  {[
-                    { title: "Hội nghị Ban chấp hành Đảng bộ Xã Dang Kang lần thứ 15 nhiệm kỳ 2020-2025", desc: "Triển khai định hướng nhiệm vụ phát triển nông lâm nghiệp.", date: "18/05/2026" },
-                    { title: "Ra quân ngày Chủ nhật xanh chung tay dọn vệ sinh cảnh quan môi trường nông thôn mới", desc: "Thu hút hơn 500 đoàn viên thanh niên tham gia hưởng ứng nhiệt tình.", date: "17/05/2026" }
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-all"
-                      style={{ borderRadius: config.branding.borderRadius }}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
+                  <img
+                    src="/banner_scenery.png"
+                    alt="Banner Scenery"
+                    className="absolute inset-0 w-full h-full object-cover object-center opacity-70"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-rose-950/60 to-amber-900/60 opacity-60 z-0" />
+                  
+                  <div className="relative z-20 text-left">
+                    <span
+                      className="px-2 py-0.5 text-[9px] font-bold text-white rounded uppercase inline-block mb-1.5"
+                      style={{ backgroundColor: config.colors.primary }}
                     >
-                      <div className="w-full aspect-[16/10] bg-slate-200 relative flex items-center justify-center overflow-hidden">
-                        <div className="absolute inset-0 bg-slate-900/10" />
-                        <span className="text-[9px] text-slate-400 font-bold">Hình ảnh tin tức</span>
-                      </div>
-                      <div className="p-2.5 flex-1 flex flex-col justify-between">
-                        <div>
-                          <h4 className="text-[11px] font-bold line-clamp-2 text-slate-800 leading-snug hover:text-rose-600 transition-colors">
-                            {item.title}
-                          </h4>
-                          <p className="text-[9px] text-slate-500 line-clamp-2 mt-1 leading-normal font-sans">
-                            {item.desc}
-                          </p>
+                      Tin Nổi Bật
+                    </span>
+                    <h3 className="text-xs sm:text-sm md:text-base font-bold text-yellow-300 font-serif leading-tight">
+                      Chào mừng quý khách đến với Trang thông tin điện tử Đảng ủy - HĐND - UBND Xã Dang Kang
+                    </h3>
+                    <p className="text-[10px] text-white/80 mt-1 line-clamp-1 font-sans">
+                      Quyết tâm xây dựng chính quyền số, phát triển nông thôn mới văn minh, giàu đẹp.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* MOCK HOMEPAGE CONTENT AREA */}
+              <div className="w-full px-4 py-5 flex flex-col md:flex-row gap-4 text-left">
+                {/* Main News Flow */}
+                <div className="flex-1 flex flex-col gap-4">
+                  <div className="w-full border-b flex gap-2 text-xs font-bold font-sans">
+                    <span
+                      className="pb-1 px-1 border-b-2"
+                      style={{
+                        borderColor: config.colors.primary,
+                        color: config.colors.primary
+                      }}
+                    >
+                      Tin hoạt động
+                    </span>
+                    <span className="pb-1 px-1 text-slate-400 hover:text-slate-600 cursor-pointer">Kinh tế - Xã hội</span>
+                    <span className="pb-1 px-1 text-slate-400 hover:text-slate-600 cursor-pointer">Xây dựng nông thôn mới</span>
+                  </div>
+
+                  {config.layout.homepageLayout === "grid" && (
+                    <div className="grid grid-cols-2 gap-3">
+                      {[
+                        { title: "Hội nghị Ban chấp hành Đảng bộ Xã Dang Kang lần thứ 15 nhiệm kỳ 2020-2025", desc: "Triển khai định hướng nhiệm vụ phát triển nông lâm nghiệp.", date: "18/05/2026" },
+                        { title: "Ra quân ngày Chủ nhật xanh chung tay dọn vệ sinh cảnh quan môi trường nông thôn mới", desc: "Thu hút hơn 500 đoàn viên thanh niên tham gia hưởng ứng nhiệt tình.", date: "17/05/2026" }
+                      ].map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-white border rounded-lg overflow-hidden shadow-sm flex flex-col hover:shadow-md transition-all"
+                          style={{ borderRadius: config.branding.borderRadius }}
+                        >
+                          <div className="w-full aspect-[16/10] bg-slate-200 relative flex items-center justify-center overflow-hidden">
+                            <div className="absolute inset-0 bg-slate-900/10" />
+                            <span className="text-[9px] text-slate-400 font-bold">Hình ảnh tin tức</span>
+                          </div>
+                          <div className="p-2.5 flex-1 flex flex-col justify-between">
+                            <div>
+                              <h4 className="text-[11px] font-bold line-clamp-2 text-slate-800 leading-snug hover:text-rose-600 transition-colors">
+                                {item.title}
+                              </h4>
+                              <p className="text-[9px] text-slate-500 line-clamp-2 mt-1 leading-normal font-sans">
+                                {item.desc}
+                              </p>
+                            </div>
+                            <div className="flex justify-between items-center border-t pt-1.5 mt-2 text-[8px] text-slate-400 font-sans">
+                              <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
+                              <span className="font-bold uppercase" style={{ color: config.colors.primary }}>Xem tiếp</span>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center border-t pt-1.5 mt-2 text-[8px] text-slate-400 font-sans">
-                          <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
-                          <span className="font-bold uppercase" style={{ color: config.colors.primary }}>Xem tiếp</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {config.layout.homepageLayout === "classic" && (
+                    <div className="flex flex-col gap-3">
+                      {[
+                        { title: "Đoàn giám sát HĐND Huyện làm việc tại xã Dang Kang về chuyên đề chuyển đổi số hành chính công", desc: "Đánh giá cao kết quả chỉ số cải cách hành chính xã trong quý I năm 2026.", date: "18/05/2026" },
+                        { title: "Tuyên truyền phổ biến pháp luật phòng chống cháy nổ trong khu dân cư nông thôn mới", desc: "Nâng cao ý thức người dân trong việc sử dụng điện an toàn phòng chống cháy nổ.", date: "17/05/2026" }
+                      ].map((item, idx) => (
+                        <div
+                          key={idx}
+                          className="bg-white border p-3 flex gap-3 shadow-sm hover:shadow transition-all"
+                          style={{ borderRadius: config.branding.borderRadius }}
+                        >
+                          <div className="w-16 h-16 bg-slate-200 rounded shrink-0 relative flex items-center justify-center overflow-hidden">
+                            <span className="text-[8px] text-slate-400 font-bold text-center leading-none">Ảnh</span>
+                          </div>
+                          <div className="flex-1 flex flex-col justify-between">
+                            <div>
+                              <h4 className="text-[11px] font-bold line-clamp-1 text-slate-800 leading-snug hover:text-rose-600 transition-colors">
+                                {item.title}
+                              </h4>
+                              <p className="text-[9px] text-slate-500 line-clamp-2 mt-0.5 leading-normal font-sans">
+                                {item.desc}
+                              </p>
+                            </div>
+                            <div className="flex justify-between items-center text-[8px] text-slate-400 mt-1 font-sans">
+                              <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
+                              <span className="font-bold uppercase" style={{ color: config.colors.primary }}>Đọc thêm</span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {config.layout.homepageLayout === "magazine" && (
+                    <div className="flex flex-col gap-3">
+                      <div
+                        className="w-full bg-white border shadow-sm rounded-lg overflow-hidden flex flex-col"
+                        style={{ borderRadius: config.branding.borderRadius }}
+                      >
+                        <div className="w-full aspect-[21/9] bg-slate-200 flex items-center justify-center relative overflow-hidden">
+                          <span className="text-[9px] text-slate-400 font-bold">Hình ảnh đại diện bài viết lớn</span>
+                        </div>
+                        <div className="p-3">
+                          <h4 className="text-xs font-bold text-slate-900 leading-snug">
+                            Đại hội Đại biểu Hội Nông dân Xã Dang Kang khóa X nhiệm kỳ 2026-2031 thành công tốt đẹp
+                          </h4>
+                          <p className="text-[10px] text-slate-500 mt-1 font-sans">
+                            Đại hội bầu ra ban chấp hành mới gồm 11 đồng chí tiêu biểu đại diện cho tiếng nói nông dân xã...
+                          </p>
+                          <div className="flex items-center justify-between text-[8px] text-slate-400 mt-2 pt-2 border-t font-sans">
+                            <span>18/05/2026 | Hội Nông dân</span>
+                            <span className="font-extrabold" style={{ color: config.colors.primary }}>Xem bài viết</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )}
                 </div>
-              )}
 
-              {config.layout.homepageLayout === "classic" && (
-                <div className="flex flex-col gap-3">
-                  {[
-                    { title: "Đoàn giám sát HĐND Huyện làm việc tại xã Dang Kang về chuyên đề chuyển đổi số hành chính công", desc: "Đánh giá cao kết quả chỉ số cải cách hành chính xã trong quý I năm 2026.", date: "18/05/2026" },
-                    { title: "Tuyên truyền phổ biến pháp luật phòng chống cháy nổ trong khu dân cư nông thôn mới", desc: "Nâng cao ý thức người dân trong việc sử dụng điện an toàn phòng chống cháy nổ.", date: "17/05/2026" }
-                  ].map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="bg-white border p-3 flex gap-3 shadow-sm hover:shadow transition-all"
-                      style={{ borderRadius: config.branding.borderRadius }}
-                    >
-                      <div className="w-16 h-16 bg-slate-200 rounded shrink-0 relative flex items-center justify-center overflow-hidden">
-                        <span className="text-[8px] text-slate-400 font-bold text-center leading-none">Ảnh</span>
-                      </div>
-                      <div className="flex-1 flex flex-col justify-between">
-                        <div>
-                          <h4 className="text-[11px] font-bold line-clamp-1 text-slate-800 leading-snug hover:text-rose-600 transition-colors">
-                            {item.title}
-                          </h4>
-                          <p className="text-[9px] text-slate-500 line-clamp-2 mt-0.5 leading-normal font-sans">
-                            {item.desc}
-                          </p>
-                        </div>
-                        <div className="flex justify-between items-center text-[8px] text-slate-400 mt-1 font-sans">
-                          <span className="flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" /> {item.date}</span>
-                          <span className="font-bold uppercase" style={{ color: config.colors.primary }}>Đọc thêm</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {config.layout.homepageLayout === "magazine" && (
-                <div className="flex flex-col gap-3">
-                  {/* Magazine Main Large Post */}
+                {/* Sidebar widgets */}
+                <div className="w-full md:w-48 shrink-0 flex flex-col gap-4">
                   <div
-                    className="w-full bg-white border shadow-sm rounded-lg overflow-hidden flex flex-col"
+                    className="p-3 bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2"
                     style={{ borderRadius: config.branding.borderRadius }}
                   >
-                    <div className="w-full aspect-[21/9] bg-slate-200 flex items-center justify-center relative overflow-hidden">
-                      <span className="text-[9px] text-slate-400 font-bold">Hình ảnh đại diện bài viết lớn</span>
+                    <h5 className="text-[10px] font-bold text-slate-800 border-b pb-1 flex items-center gap-1 font-sans">
+                      <Phone className="w-3 h-3 text-emerald-600" />
+                      Đường Dây Nóng
+                    </h5>
+                    <div className="flex flex-col">
+                      <span className="text-[13px] font-black text-rose-600 font-mono tracking-wider">0262.3812.345</span>
+                      <span className="text-[8px] text-slate-400 font-sans">Hỗ trợ khẩn cấp 24/7</span>
                     </div>
-                    <div className="p-3">
-                      <h4 className="text-xs font-bold text-slate-900 leading-snug">
-                        Đại hội Đại biểu Hội Nông dân Xã Dang Kang khóa X nhiệm kỳ 2026-2031 thành công tốt đẹp
-                      </h4>
-                      <p className="text-[10px] text-slate-500 mt-1 font-sans">
-                        Đại hội bầu ra ban chấp hành mới gồm 11 đồng chí tiêu biểu đại diện cho tiếng nói nông dân xã...
-                      </p>
-                      <div className="flex items-center justify-between text-[8px] text-slate-400 mt-2 pt-2 border-t font-sans">
-                        <span>18/05/2026 | Hội Nông dân</span>
-                        <span className="font-extrabold" style={{ color: config.colors.primary }}>Xem bài viết</span>
+                  </div>
+
+                  <div
+                    className="p-3 shadow-sm border text-white flex flex-col gap-2"
+                    style={{
+                      borderRadius: config.branding.borderRadius,
+                      backgroundColor: config.colors.primary
+                    }}
+                  >
+                    <h5 className="text-[10px] font-bold border-b border-white/20 pb-1 flex items-center gap-1 font-sans">
+                      <Sparkles className="w-3 h-3 text-yellow-300" />
+                      Dịch Vụ Công Một Cửa
+                    </h5>
+                    <p className="text-[8px] text-white/80 leading-normal font-sans">
+                      Tra cứu tiến độ hồ sơ hành chính trực tuyến công khai nhanh chóng.
+                    </p>
+                    <span className="text-[8px] font-black text-yellow-300 uppercase tracking-wider flex items-center self-end gap-0.5 mt-1 cursor-pointer">
+                      Tra cứu <ArrowRight className="w-2.5 h-2.5" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {previewPage === "post" && (
+            <div className="w-full px-4 py-5 text-left flex flex-col gap-4">
+              {/* Breadcrumbs */}
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-sans">
+                <span className="hover:underline cursor-pointer">Trang chủ</span>
+                <span>&gt;</span>
+                <span className="hover:underline cursor-pointer">Tin hoạt động</span>
+                <span>&gt;</span>
+                <span className="text-slate-650 font-medium">Chi tiết bài viết</span>
+              </div>
+
+              {/* Article Header */}
+              <div className="border-b pb-3 flex flex-col gap-2">
+                <h2 className="text-sm sm:text-base font-bold font-serif text-slate-900 leading-snug">
+                  Hội nghị triển khai kế hoạch chuyển đổi số và nâng cao năng lực ứng dụng CNTT năm 2026
+                </h2>
+                <div className="flex items-center gap-4 text-[9px] text-slate-400 font-sans">
+                  <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 19/05/2026 08:30</span>
+                  <span>|</span>
+                  <span>Người đăng: Quản trị viên</span>
+                  <span>|</span>
+                  <span>Lượt xem: 1,428</span>
+                </div>
+              </div>
+
+              {/* Article Content */}
+              <div className="text-[11px] text-slate-700 leading-relaxed font-sans flex flex-col gap-3">
+                <p className="font-bold text-slate-800">
+                  Sáng ngày 19/5/2026, Ủy ban nhân dân xã Dang Kang đã tổ chức thành công Hội nghị chuyên đề về chuyển đổi số, nhằm mục tiêu đưa công nghệ số hỗ trợ phát triển sản xuất nông nghiệp và hiện đại hóa dịch vụ công một cửa.
+                </p>
+                
+                <div className="w-full my-1 flex flex-col items-center gap-1.5 bg-slate-50 p-2.5 border rounded-lg">
+                  <div className="w-full aspect-[21/9] bg-slate-250 relative flex items-center justify-center overflow-hidden" style={{ borderRadius: config.branding.borderRadius }}>
+                    <img 
+                      src="/banner_scenery.png" 
+                      className="absolute inset-0 w-full h-full object-cover opacity-60" 
+                      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-900/40 to-slate-950/40 z-0" />
+                    <span className="relative z-10 text-[9px] font-bold text-yellow-300 bg-black/60 px-3 py-1.5 rounded shadow-sm border border-white/20">Ảnh minh họa: Toàn cảnh đại hội hội trường xã</span>
+                  </div>
+                  <span className="text-[8px] text-slate-400 italic">Quang cảnh làm việc nghiêm túc, khẩn trương tại hội trường tầng 2 UBND</span>
+                </div>
+
+                <p>
+                  Tại hội nghị, các đại biểu đã thảo luận sôi nổi về giải pháp số hóa dữ liệu hộ tịch, liên thông thủ tục hành chính 3 cấp, và xây dựng bản đồ số các sản phẩm nông sản OCOP đặc trưng của xã Dang Kang. Đại diện lãnh đạo nhấn mạnh, việc chuyển đổi số phải lấy người dân làm trung tâm, đảm bảo sự tiện lợi, minh bạch và rút ngắn tối đa thời gian xử lý hồ sơ hành chính.
+                </p>
+              </div>
+
+              {/* Interactive Comment Section */}
+              <div className="mt-4 border-t pt-4">
+                <h4 className="text-[10px] font-bold text-slate-800 uppercase tracking-wider mb-3 flex items-center gap-1 font-sans">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  Phản hồi, Đóng góp của người dân (2)
+                </h4>
+                <div className="flex flex-col gap-3">
+                  {[
+                    { author: "Nguyễn Văn Hùng", role: "Thôn 3, Xã Dang Kang", date: "1 giờ trước", text: "Chuyển đổi số làm thủ tục hành chính trực tuyến rất nhanh, không phải photo nhiều giấy tờ như trước. Rất ủng hộ!" },
+                    { author: "Trần Thị Mai", role: "Hợp tác xã OCOP", date: "3 giờ trước", text: "Mong xã sớm có lớp hướng dẫn bà con đưa nông sản lên sàn thương mại điện tử để mở rộng đầu ra tốt hơn." }
+                  ].map((cmt, cIdx) => (
+                    <div key={cIdx} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200/60 flex gap-2.5">
+                      <div className="w-7 h-7 rounded-full bg-slate-250 shrink-0 flex items-center justify-center font-bold text-[10px] text-slate-650 uppercase font-sans">
+                        {cmt.author[0]}
                       </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9.5px] font-bold text-slate-800">{cmt.author} <span className="text-[8px] text-slate-400 font-normal bg-slate-200/50 px-1.5 py-0.5 rounded ml-1">{cmt.role}</span></span>
+                          <span className="text-[8px] text-slate-400">{cmt.date}</span>
+                        </div>
+                        <p className="text-[9.5px] text-slate-600 mt-1 leading-snug font-sans">{cmt.text}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {previewPage === "documents" && (
+            <div className="w-full px-4 py-5 text-left flex flex-col gap-4">
+              {/* Breadcrumbs */}
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-sans">
+                <span className="hover:underline cursor-pointer">Trang chủ</span>
+                <span>&gt;</span>
+                <span className="text-slate-650 font-medium">Văn bản chỉ đạo, điều hành</span>
+              </div>
+
+              {/* Title */}
+              <div className="border-b pb-2">
+                <h2 className="text-sm font-bold text-slate-900 font-sans">Hệ thống Văn bản Pháp quy điện tử</h2>
+                <p className="text-[9px] text-slate-400 mt-0.5 font-sans">Công khai, minh bạch các văn bản, kế hoạch, nghị quyết của chính quyền xã Dang Kang</p>
+              </div>
+
+              {/* Search & Filter Mockup */}
+              <div className="bg-slate-50 p-2.5 border rounded-lg flex flex-col sm:flex-row gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Nhập số ký hiệu hoặc trích yếu văn bản..." 
+                  disabled
+                  className="flex-1 bg-white border text-[10px] px-2.5 py-1 rounded" 
+                />
+                <button 
+                  disabled
+                  className="px-3 py-1 text-[10px] font-bold text-white rounded bg-slate-600 shrink-0 cursor-not-allowed"
+                  style={{ backgroundColor: config.colors.primary }}
+                >
+                  Tìm kiếm
+                </button>
+              </div>
+
+              {/* Documents Table */}
+              <div className="w-full border rounded-lg overflow-hidden bg-white shadow-sm">
+                <table className="w-full border-collapse text-left text-[9px] font-sans">
+                  <thead>
+                    <tr className="bg-slate-50 text-slate-500 font-bold border-b">
+                      <th className="p-2 border-r w-[30%]">Số ký hiệu / Ban hành</th>
+                      <th className="p-2 border-r w-[55%]">Trích yếu nội dung</th>
+                      <th className="p-2 text-center w-[15%]">Tài liệu</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y text-slate-700">
+                    {[
+                      { code: "12/2026/QĐ-UBND", date: "10/05/2026", desc: "Quyết định V/v Kiện toàn ban chỉ đạo chương trình mục tiêu quốc gia xây dựng nông thôn mới xã Dang Kang nhiệm kỳ mới", agency: "UBND Xã" },
+                      { code: "48/KH-UBND", date: "02/05/2026", desc: "Kế hoạch V/v Triển khai chiến dịch ra quân dọn dẹp vệ sinh môi trường, phòng chống sốt xuất huyết tại địa bàn các thôn", agency: "UBND Xã" },
+                      { code: "05/2026/NQ-HĐND", date: "28/04/2026", desc: "Nghị quyết V/v Phê duyệt phương án thu, chi ngân sách địa phương và phân bổ nguồn vốn đầu tư công năm 2026", agency: "HĐND Xã" }
+                    ].map((doc, dIdx) => (
+                      <tr key={dIdx} className="hover:bg-slate-50/50">
+                        <td className="p-2 border-r font-medium flex flex-col gap-0.5">
+                          <span className="font-bold text-slate-900">{doc.code}</span>
+                          <span className="text-[8px] text-slate-400">{doc.date}</span>
+                        </td>
+                        <td className="p-2 border-r leading-relaxed">
+                          <p className="line-clamp-2 font-medium hover:text-red-650 cursor-pointer">{doc.desc}</p>
+                          <span className="text-[7.5px] bg-slate-100 text-slate-500 px-1 py-0.2 rounded font-sans font-bold uppercase tracking-wider">{doc.agency}</span>
+                        </td>
+                        <td className="p-2 text-center">
+                          <button 
+                            disabled
+                            className="px-2 py-0.5 text-[8px] font-bold text-white rounded bg-slate-650 inline-block hover:shadow cursor-not-allowed uppercase"
+                            style={{ backgroundColor: config.colors.primary }}
+                          >
+                            Tải PDF
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {previewPage === "contact" && (
+            <div className="w-full px-4 py-5 text-left flex flex-col gap-4">
+              {/* Breadcrumbs */}
+              <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-sans">
+                <span className="hover:underline cursor-pointer">Trang chủ</span>
+                <span>&gt;</span>
+                <span className="text-slate-650 font-medium">Liên hệ & Góp ý kiến</span>
+              </div>
+
+              {/* Title */}
+              <div className="border-b pb-2">
+                <h2 className="text-sm font-bold text-slate-900 font-sans">Hộp thư điện tử Tiếp nhận ý kiến Công dân</h2>
+                <p className="text-[9px] text-slate-400 mt-0.5 font-sans">Nhận phản hồi, kiến nghị xây dựng chính quyền địa phương vững mạnh</p>
+              </div>
+
+              <div className="flex flex-col md:flex-row gap-4 mt-1">
+                {/* Contact information column */}
+                <div className="flex-1 flex flex-col gap-3">
+                  <div className="bg-slate-50 p-3 rounded-lg border border-slate-200/80 flex flex-col gap-2 font-sans text-[10px]">
+                    <h3 className="font-extrabold text-slate-800 text-[11px] uppercase tracking-wide flex items-center gap-1 border-b pb-1">
+                      <MapPin className="w-3.5 h-3.5" style={{ color: config.colors.primary }} />
+                      Thông tin cơ quan
+                    </h3>
+                    <p className="leading-relaxed">
+                      <span className="font-bold text-slate-700 block text-[11px]">Ủy ban nhân dân xã Dang Kang</span>
+                      Thôn 6, xã Dang Kang, huyện Krông Bông, tỉnh Đắk Lắk.
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-750">Điện thoại:</span> 0262.3812.345
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-750">Thư điện tử:</span> xadangkang@krongbong.daklak.gov.vn
+                    </p>
+                    <p>
+                      <span className="font-bold text-slate-750">Thời gian làm việc:</span> Thứ 2 - Thứ 6 (Sáng: 07h30 - 11h30; Chiều: 13h30 - 17h00)
+                    </p>
+                  </div>
+                  
+                  {/* Mock Map view */}
+                  <div className="w-full h-24 bg-slate-100 rounded-lg border border-slate-200 relative overflow-hidden flex items-center justify-center">
+                    <div className="absolute inset-0 opacity-40 bg-[radial-gradient(#cbd5e1_1px,transparent_1px)] [background-size:12px_12px]" />
+                    <div className="absolute w-5 h-5 rounded-full animate-ping opacity-75" style={{ backgroundColor: config.colors.primary }} />
+                    <div className="relative z-10 p-2 bg-white rounded shadow-md border text-[8px] font-sans flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-red-500" />
+                      <span className="font-bold text-slate-700">Vị trí UBND Xã Dang Kang</span>
                     </div>
                   </div>
                 </div>
-              )}
-            </div>
 
-            {/* Sidebar widgets */}
-            <div className="w-full md:w-48 shrink-0 flex flex-col gap-4">
-              {/* Hotline widget mockup */}
-              <div
-                className="p-3 bg-white border border-slate-200/80 shadow-sm flex flex-col gap-2"
-                style={{ borderRadius: config.branding.borderRadius }}
-              >
-                <h5 className="text-[10px] font-bold text-slate-800 border-b pb-1 flex items-center gap-1 font-sans">
-                  <Phone className="w-3 h-3 text-emerald-600" />
-                  Đường Dây Nóng
-                </h5>
-                <div className="flex flex-col">
-                  <span className="text-[13px] font-black text-rose-600 font-mono tracking-wider">0262.3812.345</span>
-                  <span className="text-[8px] text-slate-400 font-sans">Hỗ trợ khẩn cấp 24/7</span>
+                {/* Feedback Form Column */}
+                <div className="flex-1 bg-white p-3 rounded-lg border border-slate-200/80 flex flex-col gap-2.5">
+                  <h3 className="font-bold text-slate-800 text-[11px] font-sans">Gửi Ý Kiến, Kiến Nghị Trực Tuyến</h3>
+                  
+                  <div className="flex flex-col gap-1 font-sans">
+                    <label className="text-[8.5px] font-bold text-slate-500">Họ và tên công dân *</label>
+                    <input type="text" placeholder="Nguyễn Văn A" disabled className="w-full border px-2 py-1 text-[9.5px] rounded bg-slate-50/50" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 font-sans">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[8.5px] font-bold text-slate-500">Số điện thoại *</label>
+                      <input type="text" placeholder="0905.xxx.xxx" disabled className="w-full border px-2 py-1 text-[9.5px] rounded bg-slate-50/50" />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[8.5px] font-bold text-slate-500">Email cá nhân</label>
+                      <input type="email" placeholder="email@gmail.com" disabled className="w-full border px-2 py-1 text-[9.5px] rounded bg-slate-50/50" />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1 font-sans">
+                    <label className="text-[8.5px] font-bold text-slate-500">Nội dung kiến nghị góp ý *</label>
+                    <textarea rows={3} placeholder="Nhập chi tiết ý kiến phản hồi..." disabled className="w-full border p-2 text-[9.5px] rounded bg-slate-50/50 resize-none" />
+                  </div>
+
+                  <button 
+                    disabled 
+                    className="w-full py-1.5 text-[9.5px] font-extrabold text-white rounded bg-slate-650 cursor-not-allowed hover:shadow transition-all"
+                    style={{ backgroundColor: config.colors.primary }}
+                  >
+                    Gửi ý kiến phản hồi
+                  </button>
                 </div>
               </div>
-
-              {/* Dịch vụ công liên kết */}
-              <div
-                className="p-3 shadow-sm border text-white flex flex-col gap-2"
-                style={{
-                  borderRadius: config.branding.borderRadius,
+            </div>
+          )},
                   backgroundColor: config.colors.primary
                 }}
               >
