@@ -209,3 +209,50 @@ export class OrganizationsController implements OnModuleInit {
     return { success: true, data: result };
   }
 }
+
+@ApiTags('Đơn vị tổ chức công khai')
+@Controller('public/org-units')
+export class PublicOrganizationsController implements OnModuleInit {
+  private orgService: any;
+
+  constructor(
+    @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
+  ) { }
+
+  onModuleInit() {
+    this.orgService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Lấy danh sách phẳng tất cả đơn vị tổ chức công khai' })
+  @ApiResponse({ status: 200, description: 'Danh sách phẳng tất cả đơn vị tổ chức' })
+  async getPublicOrgUnits() {
+    try {
+      const res = await firstValueFrom(this.orgService.GetFullTree({})) as any;
+      const nodes = res.nodes || [];
+      const flatList = this.flattenTree(nodes);
+      return { success: true, data: flatList };
+    } catch (error) {
+      return { success: false, data: [], message: error.message };
+    }
+  }
+
+  private flattenTree(nodes: any[]): any[] {
+    if (!Array.isArray(nodes)) return [];
+    let result: any[] = [];
+    nodes.forEach((node) => {
+      const { children, ...rest } = node;
+      const rawParentId = rest.parentId ?? rest.parent_id;
+      const normalizedNode = {
+        ...rest,
+        parentId: rawParentId === 0 ? null : (rawParentId ?? null),
+      };
+      result.push(normalizedNode);
+      if (Array.isArray(children) && children.length > 0) {
+        result = result.concat(this.flattenTree(children));
+      }
+    });
+    return result;
+  }
+}
+

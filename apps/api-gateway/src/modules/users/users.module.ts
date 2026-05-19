@@ -7,7 +7,7 @@ import { PbacController } from './pbac.controller';
 import { ResourcesController } from './resources.controller';
 import { CategoriesController, PublicCategoriesController } from './categories.controller';
 import { MenusController } from './menus.controller';
-import { OrganizationsController } from './organizations.controller';
+import { OrganizationsController, PublicOrganizationsController } from './organizations.controller';
 
 @Module({
   imports: [
@@ -26,6 +26,7 @@ import { OrganizationsController } from './organizations.controller';
     PublicCategoriesController,
     MenusController,
     OrganizationsController,
+    PublicOrganizationsController,
   ],
 })
 export class UsersModule {}

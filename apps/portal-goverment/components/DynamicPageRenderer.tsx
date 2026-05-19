@@ -516,7 +516,7 @@ function OrgDirectoryWidget({
   // Tree building logic
   const orgTree = React.useMemo(() => {
     if (!Array.isArray(filteredUnits) || filteredUnits.length === 0) return [];
-    
+
     const idMap: Record<string, any> = {};
     const roots: any[] = [];
 
@@ -563,11 +563,10 @@ function OrgDirectoryWidget({
 
     return (
       <div className="flex flex-col w-full animate-fade-in">
-        <div 
+        <div
           onClick={() => hasChildren && toggleExpand(String(node.id))}
-          className={`flex items-center justify-between p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border border-transparent hover:border-slate-200/40 dark:hover:border-slate-850/40 ${
-            level === 0 ? "font-bold text-slate-800 dark:text-white" : "text-xs font-semibold text-slate-600 dark:text-slate-400"
-          }`}
+          className={`flex items-center justify-between p-3 rounded-xl hover:bg-slate-100/70 dark:hover:bg-slate-800/40 cursor-pointer transition-colors border border-transparent hover:border-slate-200/40 dark:hover:border-slate-850/40 ${level === 0 ? "font-bold text-slate-800 dark:text-white" : "text-xs font-semibold text-slate-600 dark:text-slate-400"
+            }`}
           style={{ paddingLeft: `${Math.max(14, level * 28)}px` }}
         >
           <div className="flex items-center gap-2.5 min-w-0">
@@ -602,7 +601,7 @@ function OrgDirectoryWidget({
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 text-left w-full animate-fade-in">
         {filteredUnits.map((unit) => (
-          <div 
+          <div
             key={unit.id}
             className="p-5 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-2xl flex flex-col justify-between gap-4 hover:border-red-500/50 hover:shadow-md transition-all group"
           >
@@ -636,7 +635,7 @@ function OrgDirectoryWidget({
     return (
       <div className="flex flex-col gap-3 text-left w-full animate-fade-in">
         {filteredUnits.map((unit) => (
-          <div 
+          <div
             key={unit.id}
             className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-150 dark:border-slate-850 rounded-xl flex items-center justify-between gap-4 hover:border-red-500/50 transition-colors group"
           >

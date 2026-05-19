@@ -7,6 +7,7 @@ import { DroppableColumn, DraggableBlock } from "../../dnd/DndWrapper";
 import { cn } from "@/lib/utils";
 import { Trash2, Smartphone, Tablet, Monitor, Settings, Compass } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import StructureTree from "./StructureTree";
 
 // Auto-initialize registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {
@@ -122,7 +123,7 @@ export const EditorCanvas: React.FC = () => {
                         col.widgets.map((widget, wIdx) => {
                           const isWidgetSelected = selectedWidgetId === widget.id;
                           const blockConfig = BlockRegistry.getBlock(widget.type);
-                          
+
                           // Safe Widget Title evaluation
                           const title = (() => {
                             const rawTitle = widget.title as any;
