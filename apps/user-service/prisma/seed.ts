@@ -695,8 +695,8 @@ async function main() {
     { jt: 'PHO_BI_THU_CHI_BO', types: ['SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'UBND_XA'] },
     { jt: 'BI_THU', types: ['CQ_DANG', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
     { jt: 'PHO_BI_THU', types: ['CQ_DANG', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
-    { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH', 'SO_NGANH'] },
-    { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH', 'SO_NGANH'] },
+    { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
+    { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
   ];
 
   for (const link of links) {
