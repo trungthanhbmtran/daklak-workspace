@@ -243,6 +243,18 @@ async function main() {
     { group: 'BANNER_POSITION', code: 'middle', order: 5, nameVi: 'Thân trang (Sidebar)', nameEn: 'Sidebar (Middle)' },
     { group: 'BANNER_POSITION', code: 'bottom', order: 6, nameVi: 'Cuối trang (Footer)', nameEn: 'Bottom (Footer)' },
     { group: 'BANNER_POSITION', code: 'custom', order: 7, nameVi: 'Khẩu hiệu chính', nameEn: 'Custom Slogan' },
+
+    // --- PORTAL APPEARANCE CONFIGURATIONS ---
+    { group: 'font_family', code: "'Times New Roman', Times, serif", order: 1, nameVi: 'Serif Uy Nghiêm (Government)', nameEn: 'Government Serif' },
+    { group: 'font_family', code: "'Inter', sans-serif", order: 2, nameVi: 'Sans-Serif Hiện Đại (Inter)', nameEn: 'Modern Sans-Serif' },
+    { group: 'font_family', code: "'Outfit', 'Inter', sans-serif", order: 3, nameVi: 'Trẻ Trung (Outfit)', nameEn: 'Outfit Sans-Serif' },
+    { group: 'font_family', code: "'Roboto Mono', monospace", order: 4, nameVi: 'Tối Giản Hướng Công Nghệ', nameEn: 'Monospace Minimal' },
+
+    { group: 'border_radius', code: '0px', order: 1, nameVi: 'Không bo góc (0px)', nameEn: 'No border radius (0px)' },
+    { group: 'border_radius', code: '4px', order: 2, nameVi: 'Bo góc nhỏ (4px)', nameEn: 'Small radius (4px)' },
+    { group: 'border_radius', code: '8px', order: 3, nameVi: 'Bo góc trung bình (8px)', nameEn: 'Medium radius (8px)' },
+    { group: 'border_radius', code: '12px', order: 4, nameVi: 'Bo góc tròn (12px)', nameEn: 'Round radius (12px)' },
+    { group: 'border_radius', code: '16px', order: 5, nameVi: 'Bo góc lớn (16px)', nameEn: 'Large radius (16px)' },
   ];
 
   console.log(`📦 Seeding ${categoriesData.length} categories with dual translations...`);
@@ -313,6 +325,8 @@ async function main() {
     { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
     { code: 'WORKFLOW_ACTION', name: 'Hành động quy trình' },
     { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
+    { code: 'font_family', name: 'Phông chữ giao diện (Portal)' },
+    { code: 'border_radius', name: 'Độ bo góc khối (Portal)' },
   ];
 
   console.log('📦 Seeding Category Groups...');
