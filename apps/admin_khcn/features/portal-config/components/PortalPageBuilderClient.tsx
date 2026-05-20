@@ -437,7 +437,10 @@ export function PortalPageBuilderClient() {
               return (
                 <div
                   key={p.id}
-                  onClick={() => setSelectedPageId(p.id)}
+                  onClick={() => {
+                    setSelectedPageId(p.id);
+                    setShowPagesSidebar(false);
+                  }}
                   className={`group relative p-5 rounded-2xl border transition-all cursor-pointer ${
                     isSelected 
                       ? "bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 shadow-sm" 
