@@ -343,44 +343,44 @@ export function PortalPageBuilderClient() {
     <div className="flex flex-col h-screen bg-[#f8fafc] dark:bg-[#020617] overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
       
       {/* GLOBAL TOP HEADER */}
-      <header className="h-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800 px-8 flex items-center justify-between z-40 shrink-0">
-        <div className="flex items-center gap-5">
-          <div className="w-12 h-12 bg-indigo-600 rounded-[18px] flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 rotate-3 transition-transform hover:rotate-0 cursor-pointer">
-            <Layout className="w-6 h-6 text-white" />
+      <header className="min-h-[80px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800 px-4 lg:px-8 flex items-center justify-between z-40 shrink-0 gap-4 overflow-x-auto scrollbar-hide">
+        <div className="flex items-center gap-3 lg:gap-5 shrink-0">
+          <div className="w-10 h-10 lg:w-12 lg:h-12 bg-indigo-600 rounded-[18px] flex items-center justify-center shadow-lg shadow-indigo-200 dark:shadow-indigo-900/20 rotate-3 transition-transform hover:rotate-0 cursor-pointer shrink-0">
+            <Layout className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Visual Portal Builder</h1>
+          <div className="flex flex-col shrink-0">
+            <h1 className="text-base lg:text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none">Visual Portal Builder</h1>
             <div className="flex items-center gap-2 mt-1">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Administrative Design Suite</span>
+              <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap">Administrative Design Suite</span>
             </div>
           </div>
-          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-2" />
+          <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 mx-1 lg:mx-2 shrink-0" />
           <Button
             variant="outline"
             size="icon"
             onClick={() => setShowPagesSidebar(!showPagesSidebar)}
             className={cn(
-              "w-10 h-10 rounded-2xl border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all",
+              "w-9 h-9 lg:w-10 lg:h-10 rounded-2xl border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all shrink-0",
               showPagesSidebar ? "bg-slate-50 dark:bg-slate-800 border-indigo-200 dark:border-indigo-800 text-indigo-650 dark:text-indigo-400 shadow-sm" : "text-slate-500"
             )}
             title={showPagesSidebar ? "Ẩn thanh quản lý trang" : "Hiện thanh quản lý trang"}
           >
-            <Columns className={cn("w-4.5 h-4.5 transition-transform duration-300", !showPagesSidebar && "rotate-180")} />
+            <Columns className={cn("w-4 h-4 lg:w-4.5 lg:h-4.5 transition-transform duration-300", !showPagesSidebar && "rotate-180")} />
           </Button>
         </div>
 
-        <div className="hidden md:block">
+        <div className="hidden xl:block shrink-0">
           <PortalSubNav />
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden xl:flex items-center gap-6 mr-6 py-2 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
+        <div className="flex items-center gap-2 lg:gap-4 shrink-0">
+          <div className="hidden xl:flex items-center gap-6 mr-4 lg:mr-6 py-2 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 shrink-0">
             <div className="flex flex-col items-center">
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Trang đang mở</span>
               <span className="text-xs font-bold text-indigo-600 uppercase tracking-tight truncate max-w-[150px]">{selectedPageMeta?.title?.vi}</span>
             </div>
-            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700" />
+            <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 shrink-0" />
             <div className="flex flex-col items-center">
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Trạng thái</span>
               <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest ${selectedPageMeta?.isActive ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
@@ -392,19 +392,20 @@ export function PortalPageBuilderClient() {
           <Button
             variant="outline"
             onClick={() => refetch()}
-            className="h-11 px-5 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest gap-2 shadow-sm transition-all active:scale-95"
+            className="h-10 lg:h-11 px-3 lg:px-5 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-2xl text-[10px] font-black uppercase tracking-widest gap-1.5 lg:gap-2 shadow-sm transition-all active:scale-95 shrink-0"
           >
             <RefreshCw className="w-4 h-4" />
-            Đồng bộ
+            <span className="hidden sm:inline">Đồng bộ</span>
           </Button>
 
           <Button
             onClick={() => handleSaveLayout(selectedPageId, currentLayout)}
             disabled={isSaving}
-            className="h-11 px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl text-[10px] gap-2 shadow-xl shadow-indigo-100 dark:shadow-none transition-all active:scale-95"
+            className="h-10 lg:h-11 px-4 lg:px-8 bg-indigo-600 hover:bg-indigo-700 text-white font-black uppercase tracking-[0.2em] rounded-2xl text-[10px] gap-1.5 lg:gap-2 shadow-xl shadow-indigo-100 dark:shadow-none transition-all active:scale-95 shrink-0"
           >
             {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Xuất bản Portal
+            <span className="hidden sm:inline">Xuất bản Portal</span>
+            <span className="sm:hidden">Lưu</span>
           </Button>
         </div>
       </header>
@@ -512,20 +513,20 @@ export function PortalPageBuilderClient() {
           </div>
 
           {/* PAGE CONFIGURATION BOTTOM BAR (QUICK TOGGLES) */}
-          <div className="h-14 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800 px-6 flex items-center justify-between shrink-0">
-             <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200/50 dark:border-slate-700">
-                   <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Đang sửa:</span>
-                   <span className="text-[10px] font-bold text-slate-800 dark:text-white uppercase truncate max-w-[200px]">{selectedPageMeta?.title?.vi}</span>
+          <div className="min-h-[56px] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800 px-4 lg:px-6 flex items-center justify-between shrink-0 overflow-x-auto scrollbar-hide gap-4">
+             <div className="flex items-center gap-2 lg:gap-4 shrink-0">
+                <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200/50 dark:border-slate-700">
+                   <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">Đang sửa:</span>
+                   <span className="text-[10px] font-bold text-slate-800 dark:text-white uppercase truncate max-w-[120px] lg:max-w-[200px]">{selectedPageMeta?.title?.vi}</span>
                 </div>
-                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-2" />
-                <div className="flex items-center gap-2">
-                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Public Route:</span>
-                   <code className="text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50">/tuy-bien/{selectedPageMeta?.id}</code>
+                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1 lg:mx-2 shrink-0" />
+                <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
+                   <span className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap hidden sm:inline">Public Route:</span>
+                   <code className="text-[9px] lg:text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50 whitespace-nowrap">/tuy-bien/{selectedPageMeta?.id}</code>
                 </div>
              </div>
 
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-4 shrink-0">
                 <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-4 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700">
                    <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${selectedPageMeta?.isActive ? "text-emerald-600" : "text-amber-600"}`}>
                       {selectedPageMeta?.isActive ? "Trang đang hoạt động" : "Trang đang bảo trì"}

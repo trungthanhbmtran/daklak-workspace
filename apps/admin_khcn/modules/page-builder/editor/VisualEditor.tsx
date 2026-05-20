@@ -185,20 +185,20 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
   return (
     <div className="w-full h-full flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
       {/* 1. TOP UTILITY TOOLBAR PANEL */}
-      <header className="h-16 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex items-center justify-between px-6 shrink-0 z-30 shadow-sm">
+      <header className="min-h-[64px] py-2 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-wrap md:flex-nowrap items-center justify-between px-4 lg:px-6 shrink-0 z-30 shadow-sm gap-4 overflow-x-auto scrollbar-hide">
         {/* Left Side: Brand Logo, Lang selector */}
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-100 dark:shadow-none">
-              <Sparkles className="w-4.5 h-4.5 animate-pulse" />
+        <div className="flex items-center gap-3 lg:gap-6 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-100 dark:shadow-none shrink-0">
+              <Sparkles className="w-4 h-4 lg:w-4.5 lg:h-4.5 animate-pulse" />
             </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Headless Visual CMS</span>
-              <span className="text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight mt-0.5">Page Builder</span>
+            <div className="flex flex-col hidden sm:flex shrink-0">
+              <span className="text-[9px] lg:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none whitespace-nowrap">Headless Visual CMS</span>
+              <span className="text-[10px] lg:text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight mt-0.5 whitespace-nowrap">Page Builder</span>
             </div>
           </div>
 
-          <div className="h-6 w-px bg-slate-100 dark:bg-slate-850 shrink-0" />
+          <div className="h-6 w-px bg-slate-100 dark:bg-slate-850 shrink-0 hidden sm:block" />
 
           {/* Multilingual Selector */}
           <div className="flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl p-1 shrink-0">
@@ -207,7 +207,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
                 key={lang.code}
                 onClick={() => setActiveLang(lang.code)}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all",
+                  "px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
                   activeLang === lang.code
                     ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm font-black border border-slate-100/50 dark:border-slate-850"
                     : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
@@ -224,43 +224,43 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
           <button
             onClick={() => setViewport("desktop")}
             className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+              "w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center transition-all",
               viewport === "desktop"
                 ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
             )}
             title="Giao diện Máy tính"
           >
-            <Monitor className="w-4.5 h-4.5" />
+            <Monitor className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
           </button>
           <button
             onClick={() => setViewport("tablet")}
             className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+              "w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center transition-all",
               viewport === "tablet"
                 ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
             )}
             title="Giao diện Máy tính bảng"
           >
-            <Tablet className="w-4.5 h-4.5" />
+            <Tablet className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
           </button>
           <button
             onClick={() => setViewport("mobile")}
             className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center transition-all",
+              "w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center transition-all",
               viewport === "mobile"
                 ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
                 : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
             )}
             title="Giao diện Điện thoại"
           >
-            <Smartphone className="w-4.5 h-4.5" />
+            <Smartphone className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
           </button>
         </div>
 
         {/* Right Side: History (Undo/Redo) & UI Layout toggles */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 lg:gap-4 shrink-0">
           {/* History control buttons */}
           <div className="flex gap-1">
             <Button
