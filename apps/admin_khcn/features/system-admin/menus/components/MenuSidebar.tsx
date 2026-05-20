@@ -41,7 +41,7 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
 
   // LOGIC CHẾ ĐỘ 1: VIEW THEO NGHIỆP VỤ (CÂY CHA - CON)
   const renderBusinessTree = (parentId: number | null, level: number = 0) => {
-    const children = filteredMenus.filter(m => m.parentId === parentId).sort((a, b) => a.sort - b.sort);
+    const children = filteredMenus.filter(m => parentId ? m.parentId === parentId : !m.parentId).sort((a, b) => a.sort - b.sort);
     if (children.length === 0) return null;
 
     return (

@@ -63,6 +63,7 @@ model JobTitle {
   applicableUnitTemplates UnitTypeJobTemplate[]
   jobPositions  JobPosition[]          
   staffingPlans OrganizationStaffing[] 
+  type          String?   @default("GOVERNMENT")
   @@index([domainId])
   @@index([reportsToJobTitleId])
   @@index([geographicAreaId])

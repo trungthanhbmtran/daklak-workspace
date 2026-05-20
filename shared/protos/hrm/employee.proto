@@ -44,6 +44,11 @@ message Employee {
   
   string createdAt = 18;
   string updatedAt = 19;
+
+  int32 civilServantRankId = 20;
+  int32 partyTitleId = 21;
+  JobTitlePreview civilServantRank = 22;
+  JobTitlePreview partyTitle = 23;
 }
 
 // ---------------- REQUESTS ----------------
@@ -63,6 +68,8 @@ message CreateEmployeeRequest {
   string status = 12;
   string address = 13;
   string avatar = 14;
+  int32 civilServantRankId = 20;
+  int32 partyTitleId = 21;
 }
 
 message UpdateEmployeeRequest {
@@ -80,6 +87,8 @@ message UpdateEmployeeRequest {
   string status = 11;
   string address = 12;
   string avatar = 13;
+  int32 civilServantRankId = 20;
+  int32 partyTitleId = 21;
 }
 
 message DeleteEmployeeRequest {

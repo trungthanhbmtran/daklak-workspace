@@ -44,6 +44,7 @@ export interface JobTitleItem {
   geographicAreaName?: string;
   category?: string;
   rank?: number;
+  type?: string;
 }
 
 /** Phân công riêng từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực theo slot */

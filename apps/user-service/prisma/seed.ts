@@ -599,6 +599,7 @@ async function main() {
     { email: 'reviewer@daklak.gov.vn', username: 'reviewer', fullName: 'Lê Văn Thẩm Định', role: 'REVIEWER' },
     { email: 'approver@daklak.gov.vn', username: 'approver', fullName: 'Phạm Phê Duyệt', role: 'REVIEWER' },
     { email: 'publisher@daklak.gov.vn', username: 'publisher', fullName: 'Trần Xuất Bản', role: 'PUBLISHER' },
+    { email: 'trungthanh@daklak.gov.vn', username: 'trungthanh', fullName: 'Trần Trung Thành', role: 'ADMIN' },
   ];
 
   for (const u of cmsUsers) {
@@ -625,33 +626,63 @@ async function main() {
   // ==========================================================
   console.log('📦 Seeding Job Titles...');
   const jobTitlesData = [
-    { code: 'CHU_TICH', name: 'Chủ tịch', category: 'EXECUTIVE', rank: 1 },
-    { code: 'PHO_CHU_TICH', name: 'Phó Chủ tịch', category: 'EXECUTIVE', rank: 2 },
-    { code: 'GIAM_DOC', name: 'Giám đốc', category: 'EXECUTIVE', rank: 1 },
-    { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc', category: 'EXECUTIVE', rank: 2 },
-    { code: 'TRUONG_PHONG', name: 'Trưởng phòng', category: 'MANAGER', rank: 1 },
-    { code: 'PHO_PHONG', name: 'Phó Trưởng phòng', category: 'MANAGER', rank: 2 },
-    { code: 'CHUYEN_VIEN', name: 'Chuyên viên', category: 'STAFF', rank: 3 },
+    { code: 'CHU_TICH', name: 'Chủ tịch', category: 'EXECUTIVE', rank: 1, type: 'GOVERNMENT' },
+    { code: 'PHO_CHU_TICH', name: 'Phó Chủ tịch', category: 'EXECUTIVE', rank: 2, type: 'GOVERNMENT' },
+    { code: 'GIAM_DOC', name: 'Giám đốc', category: 'EXECUTIVE', rank: 1, type: 'GOVERNMENT' },
+    { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc', category: 'EXECUTIVE', rank: 2, type: 'GOVERNMENT' },
+    { code: 'TRUONG_PHONG', name: 'Trưởng phòng', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
+    { code: 'PHO_PHONG', name: 'Phó Trưởng phòng', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
+    { code: 'CHUYEN_VIEN', name: 'Chuyên viên', category: 'STAFF', rank: 3, type: 'RANK' },
+    { code: 'CHUYEN_VIEN_CAO_CAP', name: 'Chuyên viên cao cấp', category: 'STAFF', rank: 1, type: 'RANK' },
+    { code: 'CHUYEN_VIEN_CHINH', name: 'Chuyên viên chính', category: 'STAFF', rank: 2, type: 'RANK' },
+    { code: 'CAN_SU', name: 'Cán sự', category: 'STAFF', rank: 4, type: 'RANK' },
+    { code: 'NHAN_VIEN', name: 'Nhân viên', category: 'SUPPORT', rank: 5, type: 'RANK' },
+    { code: 'CONG_CHUC_PHU_TRACH', name: 'Công chức phụ trách', category: 'STAFF', rank: 3, type: 'GOVERNMENT' },
+    { code: 'CAN_BO_PHU_TRACH', name: 'Cán bộ phụ trách', category: 'STAFF', rank: 3, type: 'GOVERNMENT' },
+    { code: 'BI_THU_DANG_BO', name: 'Bí thư Đảng bộ', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
+    { code: 'PHO_BI_THU_DANG_BO', name: 'Phó Bí thư Đảng bộ', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
+    { code: 'BI_THU_CHI_BO', name: 'Bí thư Chi bộ', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
+    { code: 'PHO_BI_THU_CHI_BO', name: 'Phó Bí thư Chi bộ', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
+    { code: 'BI_THU', name: 'Bí thư', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
+    { code: 'PHO_BI_THU', name: 'Phó Bí thư', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
+    { code: 'TRUONG_BAN', name: 'Trưởng ban', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
+    { code: 'PHO_TRUONG_BAN', name: 'Phó Trưởng ban', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
   ];
 
   for (const jt of jobTitlesData) {
     await prisma.jobTitle.upsert({
       where: { code: jt.code },
-      update: { name: jt.name, category: jt.category, rank: jt.rank },
+      update: { name: jt.name, category: jt.category, rank: jt.rank, type: jt.type },
       create: jt,
     });
   }
 
   // 7.1 LINK JOB TITLES TO UNIT TYPES (Using Template)
-  console.log('📦 Linking Job Titles to Unit Types...');
+  console.log('📦 Cleaning and linking Job Titles to Unit Types...');
+  await prisma.unitTypeJobTemplate.deleteMany({});
+
   const links = [
     { jt: 'CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
     { jt: 'PHO_CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
     { jt: 'GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'PHO_PHONG', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'PHO_PHONG', types: ['PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'CQ_TU', 'UBND_TINH', 'UBND_HUYEN'] },
+    { jt: 'CHUYEN_VIEN_CAO_CAP', types: ['UBND_TINH', 'SO_NGANH'] },
+    { jt: 'CHUYEN_VIEN_CHINH', types: ['UBND_TINH', 'UBND_HUYEN', 'SO_NGANH'] },
+    { jt: 'CAN_SU', types: ['UBND_HUYEN', 'UBND_XA', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'NHAN_VIEN', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'CONG_CHUC_PHU_TRACH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'CAN_BO_PHU_TRACH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'BI_THU_DANG_BO', types: ['SO_NGANH', 'UBND_TINH', 'UBND_HUYEN'] },
+    { jt: 'PHO_BI_THU_DANG_BO', types: ['SO_NGANH', 'UBND_TINH', 'UBND_HUYEN'] },
+    { jt: 'BI_THU_CHI_BO', types: ['SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'UBND_XA'] },
+    { jt: 'PHO_BI_THU_CHI_BO', types: ['SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'UBND_XA'] },
+    { jt: 'BI_THU', types: ['CQ_DANG', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'PHO_BI_THU', types: ['CQ_DANG', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH', 'SO_NGANH'] },
+    { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH', 'SO_NGANH'] },
   ];
 
   for (const link of links) {
@@ -815,6 +846,48 @@ async function main() {
   await createDept('UBND_BUON_HO', { code: 'BH_NV', name: 'Phòng Nội vụ' });
   await createDept('UBND_BUON_HO', { code: 'BH_TC_KH', name: 'Phòng Tài chính - Kế hoạch' });
   await createDept('UBND_BUON_HO', { code: 'BH_KT_HT', name: 'Phòng Kinh tế - Hạ tầng' });
+
+  // ==========================================================
+  // 9. JOB POSITIONS
+  // ==========================================================
+  console.log('📦 Seeding Job Positions...');
+  const targetUser = await prisma.user.findUnique({
+    where: { email: 'trungthanh@daklak.gov.vn' },
+  });
+  const soKhcnUnit = await prisma.organizationUnit.findUnique({
+    where: { code: 'SO_KHCN' },
+  });
+  const congChucJob = await prisma.jobTitle.findUnique({
+    where: { code: 'CONG_CHUC_PHU_TRACH' },
+  });
+
+  if (targetUser && soKhcnUnit && congChucJob) {
+    const existingPosition = await prisma.jobPosition.findFirst({
+      where: {
+        userId: targetUser.id,
+        unitId: soKhcnUnit.id,
+        jobTitleId: congChucJob.id,
+      },
+    });
+
+    if (!existingPosition) {
+      await prisma.jobPosition.create({
+        data: {
+          userId: targetUser.id,
+          unitId: soKhcnUnit.id,
+          jobTitleId: congChucJob.id,
+          isPrimary: true,
+          isUnitLeader: false,
+          isDeputyLeader: false,
+        },
+      });
+      console.log('✅ Created job position for Trần Trung Thành at Sở KH&CN');
+    } else {
+      console.log('ℹ️ Job position already exists for Trần Trung Thành');
+    }
+  } else {
+    console.warn('⚠️ Could not find targetUser, soKhcnUnit, or congChucJob to seed JobPosition');
+  }
 }
 
 main()

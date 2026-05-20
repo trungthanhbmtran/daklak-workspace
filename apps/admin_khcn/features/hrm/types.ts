@@ -15,8 +15,12 @@ export interface HrmEmployee {
   avatar?: string;
   departmentId?: number;
   jobTitleId?: number;
+  civilServantRankId?: number;
+  partyTitleId?: number;
   department?: { id: number; name: string; code: string };
-  jobTitle?: { id: number; name: string; code: string };
+  jobTitle?: { id: number; name: string; code: string; type?: string };
+  civilServantRank?: { id: number; name: string; code: string; type?: string };
+  partyTitle?: { id: number; name: string; code: string; type?: string };
 }
 
 /** Tham số danh sách nhân viên (phân trang, lọc) */

@@ -34,6 +34,7 @@ import {
   Palette
 } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
+import { PortalSubNav } from "./PortalSubNav";
 
 // -------------------------------------------------------------
 // DỮ LIỆU MẶC ĐỊNH CHO CÁC THÀNH PHẦN (FALLBACKS)
@@ -164,6 +165,7 @@ export function PortalConfigClient() {
   const router = useRouter();
   const [logoUrl, setLogoUrl] = useState("");
   const [mapUrl, setMapUrl] = useState("");
+  const [themeLogo, setThemeLogo] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
   const [languages, setLanguages] = useState<any[]>([]);
@@ -187,14 +189,8 @@ export function PortalConfigClient() {
     hotline: string;
     fax: string;
     email: string;
-    aboutHistory: string;
-    aboutArea: string;
-    aboutPopulation: string;
-    aboutSubdivisions: string;
-    aboutStandard: string;
   }>>({});
 
-  // States cho các danh sách cấu hình động phức tạp
   const [orgSections, setOrgSections] = useState<Record<string, any[]>>({
     vi: DEFAULT_ORG_SECTIONS_VI,
     en: DEFAULT_ORG_SECTIONS_EN
@@ -265,40 +261,22 @@ export function PortalConfigClient() {
       const footerPortalTitleCat: any = dbCategories.find((c: any) => c.code === "footer_portal_title");
       const footerPortalSubtitleCat: any = dbCategories.find((c: any) => c.code === "footer_portal_subtitle");
 
-      // Các chỉ số giới thiệu mới
-      const aboutHistoryCat: any = dbCategories.find((c: any) => c.code === "about_history");
-      const aboutAreaCat: any = dbCategories.find((c: any) => c.code === "about_area");
-      const aboutPopulationCat: any = dbCategories.find((c: any) => c.code === "about_population");
-      const aboutSubdivisionsCat: any = dbCategories.find((c: any) => c.code === "about_subdivisions");
-      const aboutStandardCat: any = dbCategories.find((c: any) => c.code === "about_standard");
-
-      // Cấu hình danh sách mảng
-      const orgSectionsCat: any = dbCategories.find((c: any) => c.code === "about_org_sections");
-      const leadersCat: any = dbCategories.find((c: any) => c.code === "about_leaders");
-      const communeZonesCat: any = dbCategories.find((c: any) => c.code === "commune_zones");
-      const useCustomAboutLayoutCat: any = dbCategories.find((c: any) => c.code === "use_custom_about_layout");
-      const customAboutLayoutCat: any = dbCategories.find((c: any) => c.code === "custom_about_layout");
+      // Extract logo from theme_appearance config if available
+      const themeAppearanceCat: any = dbCategories.find((c: any) => c.code === "theme_appearance");
+      if (themeAppearanceCat && themeAppearanceCat.description) {
+        try {
+          const parsed = JSON.parse(themeAppearanceCat.description);
+          if (parsed?.branding?.logo) {
+            setThemeLogo(parsed.branding.logo);
+          }
+        } catch (e) {
+          console.error("Failed to parse theme appearance logo", e);
+        }
+      }
 
       // Set global fields
       if (logoCat) setLogoUrl(logoCat.name);
       if (mapCat) setMapUrl(mapCat.name);
-
-      if (useCustomAboutLayoutCat) {
-        setUseCustomAboutLayout(useCustomAboutLayoutCat.name === "true");
-      } else {
-        setUseCustomAboutLayout(false);
-      }
-
-      if (customAboutLayoutCat && customAboutLayoutCat.description) {
-        try {
-          setCustomAboutLayout(JSON.parse(customAboutLayoutCat.description));
-        } catch (e) {
-          console.error("Failed to parse custom page layout", e);
-          setCustomAboutLayout([]);
-        }
-      } else {
-        setCustomAboutLayout([]);
-      }
 
       const activeLangs = languages.length > 0 ? languages.map(l => l.code) : ["vi", "en"];
       const newTranslations: typeof configTranslations = {};
@@ -320,11 +298,6 @@ export function PortalConfigClient() {
           hotline: "",
           fax: "",
           email: "",
-          aboutHistory: "",
-          aboutArea: "",
-          aboutPopulation: "",
-          aboutSubdivisions: "",
-          aboutStandard: "",
         };
       });
 
@@ -378,47 +351,10 @@ export function PortalConfigClient() {
           hotline: extractField(hotlineCat, langCode),
           fax: extractField(faxCat, langCode),
           email: extractField(emailCat, langCode),
-          // Chỉ số mới
-          aboutHistory: extractField(aboutHistoryCat, langCode),
-          aboutArea: extractField(aboutAreaCat, langCode),
-          aboutPopulation: extractField(aboutPopulationCat, langCode),
-          aboutSubdivisions: extractField(aboutSubdivisionsCat, langCode),
-          aboutStandard: extractField(aboutStandardCat, langCode),
         };
       });
 
       setConfigTranslations(newTranslations);
-
-      // Giải mã cấu hình danh sách dạng array
-      const parseListField = (cat: any, fallback: Record<string, any[]>) => {
-        if (!cat || !cat.description) return fallback;
-        try {
-          const parsed = JSON.parse(cat.description);
-          const result: Record<string, any[]> = { ...fallback };
-          activeLangs.forEach(langCode => {
-            const val = parsed[langCode];
-            if (val) {
-              if (typeof val === 'string') {
-                try {
-                  result[langCode] = JSON.parse(val);
-                } catch (e) {
-                  console.error("Failed to parse inner JSON list", e);
-                }
-              } else if (Array.isArray(val)) {
-                result[langCode] = val;
-              }
-            }
-          });
-          return result;
-        } catch (e) {
-          console.error("Failed to parse list config", e);
-          return fallback;
-        }
-      };
-
-      setOrgSections(parseListField(orgSectionsCat, { vi: DEFAULT_ORG_SECTIONS_VI, en: DEFAULT_ORG_SECTIONS_EN }));
-      setLeaders(parseListField(leadersCat, { vi: DEFAULT_LEADERS_VI, en: DEFAULT_LEADERS_EN }));
-      setCommuneZones(parseListField(communeZonesCat, { vi: DEFAULT_COMMUNE_ZONES_VI, en: DEFAULT_COMMUNE_ZONES_EN }));
     }
   }, [dbCategories, languages]);
 
@@ -484,7 +420,7 @@ export function PortalConfigClient() {
   });
 
   // Dynamic active selection
-  const activeLogo = previewUrl || logoUrl;
+  const activeLogo = previewUrl || themeLogo || logoUrl;
   const activeMap = previewMapUrl || mapUrl;
 
   const resolveLogoUrl = (url: string) => {
@@ -596,58 +532,6 @@ export function PortalConfigClient() {
           code: "email",
           name: configTranslations["vi"]?.email || "xadangkang@krongbong.daklak.gov.vn",
           description: buildTranslationsJson(lang => configTranslations[lang]?.email)
-        },
-        // Mới: Vị trí địa lý & Thống kê
-        {
-          code: "about_history",
-          name: "Vị trí địa lý và Lịch sử xã",
-          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutHistory)
-        },
-        {
-          code: "about_area",
-          name: "Chỉ số: Diện tích tự nhiên",
-          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutArea)
-        },
-        {
-          code: "about_population",
-          name: "Chỉ số: Dân số hiện tại",
-          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutPopulation)
-        },
-        {
-          code: "about_subdivisions",
-          name: "Chỉ số: Đơn vị hành chính",
-          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutSubdivisions)
-        },
-        {
-          code: "about_standard",
-          name: "Chỉ số: Chuẩn nông thôn mới",
-          description: buildTranslationsJson(lang => configTranslations[lang]?.aboutStandard)
-        },
-        // Mới: Mảng danh sách cấu trúc phức tạp
-        {
-          code: "about_org_sections",
-          name: "Sơ đồ bộ máy hành chính xã",
-          description: buildTranslationsJson(lang => JSON.stringify(orgSections[lang] || []))
-        },
-        {
-          code: "about_leaders",
-          name: "Thông tin Lãnh đạo chủ chốt xã",
-          description: buildTranslationsJson(lang => JSON.stringify(leaders[lang] || []))
-        },
-        {
-          code: "commune_zones",
-          name: "Bản đồ phân vùng 8 thôn buôn xã Dang Kang",
-          description: buildTranslationsJson(lang => JSON.stringify(communeZones[lang] || []))
-        },
-        {
-          code: "use_custom_about_layout",
-          name: useCustomAboutLayout ? "true" : "false",
-          description: "Sử dụng thiết kế trang giới thiệu trực quan"
-        },
-        {
-          code: "custom_about_layout",
-          name: "Cấu trúc layout trang giới thiệu thiết kế trực quan",
-          description: JSON.stringify(customAboutLayout)
         }
       ];
 
@@ -1048,6 +932,8 @@ export function PortalConfigClient() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
+      {/* GLOBAL SUB-NAVIGATION */}
+      <PortalSubNav />
       {/* HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
         <div className="space-y-1">
@@ -1211,6 +1097,93 @@ export function PortalConfigClient() {
               ) : (
                 renderContactDetailsCard(activeLangTab)
               )}
+
+              {/* Standalone Map Upload Card */}
+              <Card className="border border-slate-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md">
+                <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
+                  <div className="flex items-center gap-2">
+                    <MapIcon className="w-4 h-4 text-indigo-650" />
+                    <CardTitle className="text-xs font-black text-slate-800 uppercase tracking-wider">
+                      Bản đồ Hành chính Đơn vị
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-5 space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black text-slate-600 uppercase tracking-wider block">
+                      Hình ảnh Bản đồ hành chính
+                    </Label>
+                    
+                    <div className="flex items-start gap-4">
+                      <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 bg-slate-50/50 dark:bg-slate-900/30 flex flex-col items-center justify-center text-center shrink-0 w-44 h-28 relative overflow-hidden group">
+                        {activeMap ? (
+                          <>
+                            <img
+                              src={resolveLogoUrl(activeMap)}
+                              alt="Administrative Map"
+                              className="w-full h-full object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => removeMapImage()}
+                                className="p-1.5 bg-red-600 rounded-full text-white hover:bg-red-700 transition-colors"
+                              >
+                                <X className="w-4.5 h-4.5" />
+                              </button>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center gap-1.5 text-slate-400">
+                            {isUploadingMap ? (
+                              <Loader2 className="w-6 h-6 animate-spin text-indigo-650" />
+                            ) : (
+                              <UploadCloud className="w-6 h-6 text-slate-400" />
+                            )}
+                            <span className="text-[9px] font-bold uppercase tracking-wider">Chưa có ảnh</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-2 flex-1 pt-1">
+                        <p className="text-[10px] text-slate-400 font-semibold leading-relaxed">
+                          Tải lên hình ảnh ranh giới phân vùng hành chính hoặc bản đồ địa giới của đơn vị. Hình ảnh này sẽ hiển thị trực quan trên Trang Liên hệ ở Cổng Dân Cư.
+                        </p>
+                        <input
+                          type="file"
+                          ref={mapInputRef}
+                          onChange={handleMapUpload}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            disabled={isUploadingMap}
+                            onClick={() => mapInputRef.current?.click()}
+                            className="text-[10px] font-black uppercase tracking-wider border-slate-250 rounded-lg hover:bg-slate-50 h-8"
+                          >
+                            Tải ảnh lên
+                          </Button>
+                          {activeMap && (
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => removeMapImage()}
+                              className="text-[10px] font-black uppercase tracking-wider rounded-lg h-8"
+                            >
+                              Xóa ảnh
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </div>

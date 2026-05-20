@@ -21,6 +21,8 @@ export class EmployeesService {
     avatar: string | null;
     departmentId: number;
     jobTitleId: number;
+    civilServantRankId?: number | null;
+    partyTitleId?: number | null;
     startDate: Date;
     createdAt: Date;
     updatedAt: Date;
@@ -39,9 +41,13 @@ export class EmployeesService {
     avatar: string;
     departmentId: number;
     jobTitleId: number;
+    civilServantRankId: number;
+    partyTitleId: number;
     startDate: string;
     department: { id: number; name: string; code: string };
     jobTitle: { id: number; name: string; code: string };
+    civilServantRank: { id: number; name: string; code: string };
+    partyTitle: { id: number; name: string; code: string };
     createdAt: string;
     updatedAt: string;
   } {
@@ -60,9 +66,13 @@ export class EmployeesService {
       avatar: row.avatar ?? '',
       departmentId: row.departmentId,
       jobTitleId: row.jobTitleId,
+      civilServantRankId: row.civilServantRankId ?? 0,
+      partyTitleId: row.partyTitleId ?? 0,
       startDate: row.startDate.toISOString().slice(0, 10),
       department: { id: row.departmentId, name: '', code: '' },
       jobTitle: { id: row.jobTitleId, name: '', code: '' },
+      civilServantRank: { id: row.civilServantRankId ?? 0, name: '', code: '' },
+      partyTitle: { id: row.partyTitleId ?? 0, name: '', code: '' },
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
     };
@@ -79,6 +89,8 @@ export class EmployeesService {
     identityCard?: string;
     departmentId: number;
     jobTitleId: number;
+    civilServantRankId?: number;
+    partyTitleId?: number;
     startDate?: string;
     status?: string;
     address?: string;
@@ -105,6 +117,8 @@ export class EmployeesService {
         address: data.address ?? null,
         departmentId: data.departmentId,
         jobTitleId: data.jobTitleId,
+        civilServantRankId: data.civilServantRankId ?? null,
+        partyTitleId: data.partyTitleId ?? null,
         startDate: data.startDate ? new Date(data.startDate) : new Date(),
         avatar: data.avatar ?? null,
       },
@@ -123,6 +137,8 @@ export class EmployeesService {
     identityCard: string;
     departmentId: number;
     jobTitleId: number;
+    civilServantRankId: number;
+    partyTitleId: number;
     status: string;
     address: string;
     avatar: string;
@@ -146,6 +162,8 @@ export class EmployeesService {
         ...(data.identityCard != null && { identityCard: data.identityCard }),
         ...(data.departmentId != null && { departmentId: data.departmentId }),
         ...(data.jobTitleId != null && { jobTitleId: data.jobTitleId }),
+        ...(data.civilServantRankId !== undefined && { civilServantRankId: data.civilServantRankId }),
+        ...(data.partyTitleId !== undefined && { partyTitleId: data.partyTitleId }),
         ...(data.status != null && { status: data.status }),
         ...(data.address != null && { address: data.address }),
         ...(data.avatar != null && { avatar: data.avatar }),

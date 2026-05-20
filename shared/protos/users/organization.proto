@@ -176,6 +176,7 @@ message JobTitleItem {
   string geographic_area_name = 9;
   string category = 10;
   int32 rank = 11;
+  string type = 12;
 }
 
 message UnitTypeItem {

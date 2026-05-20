@@ -35,6 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
 import dynamic from "next/dynamic";
+import { PortalSubNav } from "./PortalSubNav";
 
 const PageBuilder = dynamic(
   () => import("./PageBuilder").then((mod) => mod.PageBuilder),
@@ -367,6 +368,10 @@ export function PortalPageBuilderClient() {
           >
             <Columns className={cn("w-4.5 h-4.5 transition-transform duration-300", !showPagesSidebar && "rotate-180")} />
           </Button>
+        </div>
+
+        <div className="hidden md:block">
+          <PortalSubNav />
         </div>
 
         <div className="flex items-center gap-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ import {
 import apiClient from "@/lib/axiosInstance";
 import { ThemeAppearanceConfig } from "../types";
 import { PageRenderer } from "@/modules/page-builder/renderer/PageRenderer";
+import { PortalSubNav } from "@/features/portal-config";
 
 // ============================================================================
 // THEME PRESETS DEFINITIONS
@@ -172,6 +173,36 @@ export function AppearanceClient() {
       }
     }
   });
+
+  // Fetch shared categories for FONT_OPTIONS and RADIUS_OPTIONS
+  const { data: dbSharedCategories = [] } = useQuery({
+    queryKey: ["shared-categories"],
+    queryFn: async () => {
+      try {
+        const res: any = await apiClient.get("/categories");
+        return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+      } catch (error) {
+        console.error("Error fetching shared categories", error);
+        return [];
+      }
+    }
+  });
+
+  // Derived Font Options (fallback to FONT_OPTIONS if database lacks it)
+  const fontOptions = useMemo(() => {
+    const fromDb = dbSharedCategories
+      .filter((c: any) => c.group === "font_family" && c.active !== 0)
+      .map((c: any) => ({ name: c.name, value: c.code }));
+    return fromDb.length > 0 ? fromDb : FONT_OPTIONS;
+  }, [dbSharedCategories]);
+
+  // Derived Radius Options (fallback to RADIUS_OPTIONS if database lacks it)
+  const radiusOptions = useMemo(() => {
+    const fromDb = dbSharedCategories
+      .filter((c: any) => c.group === "border_radius" && c.active !== 0)
+      .map((c: any) => ({ name: c.name, value: c.code }));
+    return fromDb.length > 0 ? fromDb : RADIUS_OPTIONS;
+  }, [dbSharedCategories]);
 
   // Fetch real portal menus from CMS
   const { data: dbMenus } = useQuery({
@@ -365,7 +396,28 @@ export function AppearanceClient() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 p-1 select-none animate-fade-in">
+    <div className="p-6 max-w-7xl mx-auto space-y-8 select-none animate-fade-in">
+      {/* GLOBAL SUB-NAVIGATION */}
+      <PortalSubNav />
+
+      {/* HEADER SECTION */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-rose-500/10 rounded-lg text-rose-600">
+              <Palette className="w-5 h-5" />
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">
+              Quản trị Giao diện Portal
+            </h1>
+          </div>
+          <p className="text-sm text-slate-500 font-medium">
+            Quản lý presets màu sắc mẫu, mã màu chủ đạo, kiểu font chữ hệ thống và hình ảnh thương hiệu (Logo/Favicon) đồng bộ.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6 p-1">
       {/* =======================================================================
           LEFT PANEL: CONTROLS
           ======================================================================= */}
@@ -546,7 +598,7 @@ export function AppearanceClient() {
                   <div className="space-y-2">
                     <Label className="text-xs font-semibold text-slate-600">Font chữ Cổng Thông Tin</Label>
                     <div className="grid grid-cols-1 gap-2">
-                      {FONT_OPTIONS.map((f) => {
+                      {fontOptions.map((f) => {
                         const isSelected = config.typography.fontFamily === f.value;
                         return (
                           <button
@@ -666,7 +718,7 @@ export function AppearanceClient() {
                     Độ bo góc khối (Border Radius)
                   </Label>
                   <div className="grid grid-cols-1 gap-1.5">
-                    {RADIUS_OPTIONS.map((r) => {
+                    {radiusOptions.map((r) => {
                       const isSelected = config.branding.borderRadius === r.value;
                       return (
                         <button
@@ -1930,5 +1982,6 @@ export function AppearanceClient() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 }

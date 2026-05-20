@@ -30,12 +30,16 @@ export type EmployeeAvgAggregateOutputType = {
   id: number | null
   departmentId: number | null
   jobTitleId: number | null
+  civilServantRankId: number | null
+  partyTitleId: number | null
 }
 
 export type EmployeeSumAggregateOutputType = {
   id: number | null
   departmentId: number | null
   jobTitleId: number | null
+  civilServantRankId: number | null
+  partyTitleId: number | null
 }
 
 export type EmployeeMinAggregateOutputType = {
@@ -53,6 +57,8 @@ export type EmployeeMinAggregateOutputType = {
   avatar: string | null
   departmentId: number | null
   jobTitleId: number | null
+  civilServantRankId: number | null
+  partyTitleId: number | null
   startDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -73,6 +79,8 @@ export type EmployeeMaxAggregateOutputType = {
   avatar: string | null
   departmentId: number | null
   jobTitleId: number | null
+  civilServantRankId: number | null
+  partyTitleId: number | null
   startDate: Date | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -93,6 +101,8 @@ export type EmployeeCountAggregateOutputType = {
   avatar: number
   departmentId: number
   jobTitleId: number
+  civilServantRankId: number
+  partyTitleId: number
   startDate: number
   createdAt: number
   updatedAt: number
@@ -104,12 +114,16 @@ export type EmployeeAvgAggregateInputType = {
   id?: true
   departmentId?: true
   jobTitleId?: true
+  civilServantRankId?: true
+  partyTitleId?: true
 }
 
 export type EmployeeSumAggregateInputType = {
   id?: true
   departmentId?: true
   jobTitleId?: true
+  civilServantRankId?: true
+  partyTitleId?: true
 }
 
 export type EmployeeMinAggregateInputType = {
@@ -127,6 +141,8 @@ export type EmployeeMinAggregateInputType = {
   avatar?: true
   departmentId?: true
   jobTitleId?: true
+  civilServantRankId?: true
+  partyTitleId?: true
   startDate?: true
   createdAt?: true
   updatedAt?: true
@@ -147,6 +163,8 @@ export type EmployeeMaxAggregateInputType = {
   avatar?: true
   departmentId?: true
   jobTitleId?: true
+  civilServantRankId?: true
+  partyTitleId?: true
   startDate?: true
   createdAt?: true
   updatedAt?: true
@@ -167,6 +185,8 @@ export type EmployeeCountAggregateInputType = {
   avatar?: true
   departmentId?: true
   jobTitleId?: true
+  civilServantRankId?: true
+  partyTitleId?: true
   startDate?: true
   createdAt?: true
   updatedAt?: true
@@ -274,6 +294,8 @@ export type EmployeeGroupByOutputType = {
   avatar: string | null
   departmentId: number
   jobTitleId: number
+  civilServantRankId: number | null
+  partyTitleId: number | null
   startDate: Date
   createdAt: Date
   updatedAt: Date
@@ -317,6 +339,8 @@ export type EmployeeWhereInput = {
   avatar?: Prisma.StringNullableFilter<"Employee"> | string | null
   departmentId?: Prisma.IntFilter<"Employee"> | number
   jobTitleId?: Prisma.IntFilter<"Employee"> | number
+  civilServantRankId?: Prisma.IntNullableFilter<"Employee"> | number | null
+  partyTitleId?: Prisma.IntNullableFilter<"Employee"> | number | null
   startDate?: Prisma.DateTimeFilter<"Employee"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
@@ -337,6 +361,8 @@ export type EmployeeOrderByWithRelationInput = {
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrderInput | Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrderInput | Prisma.SortOrder
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -361,6 +387,8 @@ export type EmployeeWhereUniqueInput = Prisma.AtLeast<{
   avatar?: Prisma.StringNullableFilter<"Employee"> | string | null
   departmentId?: Prisma.IntFilter<"Employee"> | number
   jobTitleId?: Prisma.IntFilter<"Employee"> | number
+  civilServantRankId?: Prisma.IntNullableFilter<"Employee"> | number | null
+  partyTitleId?: Prisma.IntNullableFilter<"Employee"> | number | null
   startDate?: Prisma.DateTimeFilter<"Employee"> | Date | string
   createdAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Employee"> | Date | string
@@ -381,6 +409,8 @@ export type EmployeeOrderByWithAggregationInput = {
   avatar?: Prisma.SortOrderInput | Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrderInput | Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrderInput | Prisma.SortOrder
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -409,6 +439,8 @@ export type EmployeeScalarWhereWithAggregatesInput = {
   avatar?: Prisma.StringNullableWithAggregatesFilter<"Employee"> | string | null
   departmentId?: Prisma.IntWithAggregatesFilter<"Employee"> | number
   jobTitleId?: Prisma.IntWithAggregatesFilter<"Employee"> | number
+  civilServantRankId?: Prisma.IntNullableWithAggregatesFilter<"Employee"> | number | null
+  partyTitleId?: Prisma.IntNullableWithAggregatesFilter<"Employee"> | number | null
   startDate?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Employee"> | Date | string
@@ -428,6 +460,8 @@ export type EmployeeCreateInput = {
   avatar?: string | null
   departmentId: number
   jobTitleId: number
+  civilServantRankId?: number | null
+  partyTitleId?: number | null
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -448,6 +482,8 @@ export type EmployeeUncheckedCreateInput = {
   avatar?: string | null
   departmentId: number
   jobTitleId: number
+  civilServantRankId?: number | null
+  partyTitleId?: number | null
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -467,6 +503,8 @@ export type EmployeeUpdateInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   jobTitleId?: Prisma.IntFieldUpdateOperationsInput | number
+  civilServantRankId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  partyTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -487,6 +525,8 @@ export type EmployeeUncheckedUpdateInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   jobTitleId?: Prisma.IntFieldUpdateOperationsInput | number
+  civilServantRankId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  partyTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -507,6 +547,8 @@ export type EmployeeCreateManyInput = {
   avatar?: string | null
   departmentId: number
   jobTitleId: number
+  civilServantRankId?: number | null
+  partyTitleId?: number | null
   startDate: Date | string
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -526,6 +568,8 @@ export type EmployeeUpdateManyMutationInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   jobTitleId?: Prisma.IntFieldUpdateOperationsInput | number
+  civilServantRankId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  partyTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -546,6 +590,8 @@ export type EmployeeUncheckedUpdateManyInput = {
   avatar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   departmentId?: Prisma.IntFieldUpdateOperationsInput | number
   jobTitleId?: Prisma.IntFieldUpdateOperationsInput | number
+  civilServantRankId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  partyTitleId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   startDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -572,6 +618,8 @@ export type EmployeeCountOrderByAggregateInput = {
   avatar?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -581,6 +629,8 @@ export type EmployeeAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrder
 }
 
 export type EmployeeMaxOrderByAggregateInput = {
@@ -598,6 +648,8 @@ export type EmployeeMaxOrderByAggregateInput = {
   avatar?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -618,6 +670,8 @@ export type EmployeeMinOrderByAggregateInput = {
   avatar?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrder
   startDate?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -627,6 +681,8 @@ export type EmployeeSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   departmentId?: Prisma.SortOrder
   jobTitleId?: Prisma.SortOrder
+  civilServantRankId?: Prisma.SortOrder
+  partyTitleId?: Prisma.SortOrder
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -643,6 +699,14 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
 
 export type IntFieldUpdateOperationsInput = {
   set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
   increment?: number
   decrement?: number
   multiply?: number
@@ -670,6 +734,8 @@ export type EmployeeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   avatar?: boolean
   departmentId?: boolean
   jobTitleId?: boolean
+  civilServantRankId?: boolean
+  partyTitleId?: boolean
   startDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -692,12 +758,14 @@ export type EmployeeSelectScalar = {
   avatar?: boolean
   departmentId?: boolean
   jobTitleId?: boolean
+  civilServantRankId?: boolean
+  partyTitleId?: boolean
   startDate?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstname" | "lastname" | "employeeCode" | "email" | "phone" | "gender" | "birthday" | "identityCard" | "status" | "address" | "avatar" | "departmentId" | "jobTitleId" | "startDate" | "createdAt" | "updatedAt", ExtArgs["result"]["employee"]>
+export type EmployeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "firstname" | "lastname" | "employeeCode" | "email" | "phone" | "gender" | "birthday" | "identityCard" | "status" | "address" | "avatar" | "departmentId" | "jobTitleId" | "civilServantRankId" | "partyTitleId" | "startDate" | "createdAt" | "updatedAt", ExtArgs["result"]["employee"]>
 
 export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Employee"
@@ -717,6 +785,8 @@ export type $EmployeePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     avatar: string | null
     departmentId: number
     jobTitleId: number
+    civilServantRankId: number | null
+    partyTitleId: number | null
     startDate: Date
     createdAt: Date
     updatedAt: Date
@@ -1103,6 +1173,8 @@ export interface EmployeeFieldRefs {
   readonly avatar: Prisma.FieldRef<"Employee", 'String'>
   readonly departmentId: Prisma.FieldRef<"Employee", 'Int'>
   readonly jobTitleId: Prisma.FieldRef<"Employee", 'Int'>
+  readonly civilServantRankId: Prisma.FieldRef<"Employee", 'Int'>
+  readonly partyTitleId: Prisma.FieldRef<"Employee", 'Int'>
   readonly startDate: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Employee", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Employee", 'DateTime'>

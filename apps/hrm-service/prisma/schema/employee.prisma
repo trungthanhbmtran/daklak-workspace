@@ -14,6 +14,8 @@ model Employee {
   avatar       String?  @db.Text
   departmentId Int      @map("department_id")  // ID đơn vị trong user-service (OrganizationUnit)
   jobTitleId   Int      @map("job_title_id")   // ID chức danh trong user-service (JobTitle)
+  civilServantRankId Int? @map("civil_servant_rank_id")
+  partyTitleId       Int? @map("party_title_id")
   startDate    DateTime @db.Date @map("start_date")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")

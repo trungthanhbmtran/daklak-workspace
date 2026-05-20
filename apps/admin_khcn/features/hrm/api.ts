@@ -24,8 +24,14 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
       row.departmentId != null ? Number(row.departmentId) : row.department_id != null ? Number(row.department_id) : undefined,
     jobTitleId:
       row.jobTitleId != null ? Number(row.jobTitleId) : row.job_title_id != null ? Number(row.job_title_id) : undefined,
+    civilServantRankId:
+      row.civilServantRankId != null ? Number(row.civilServantRankId) : row.civil_servant_rank_id != null ? Number(row.civil_servant_rank_id) : undefined,
+    partyTitleId:
+      row.partyTitleId != null ? Number(row.partyTitleId) : row.party_title_id != null ? Number(row.party_title_id) : undefined,
     department: row.department as HrmEmployee["department"],
     jobTitle: row.jobTitle as HrmEmployee["jobTitle"],
+    civilServantRank: row.civilServantRank as HrmEmployee["civilServantRank"],
+    partyTitle: row.partyTitle as HrmEmployee["partyTitle"],
   };
 }
 

@@ -44,12 +44,39 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
     return found?.name ?? employee?.department?.name ?? "—";
   }, [employee, treeNodes]);
 
-  const jobTitleName = useMemo(() => {
-    if (!employee?.jobTitleId) return employee?.jobTitle?.name ?? "—";
+  const govtTitleName = useMemo(() => {
+    const title = employee?.jobTitle;
+    if (title && title.type === "GOVERNMENT") return title.name;
+    if (!employee?.jobTitleId) return "—";
     const items = jobTitlesRes?.items ?? [];
     const found = items.find((j: { id: number }) => j.id === employee.jobTitleId);
-    return found?.name ?? employee?.jobTitle?.name ?? "—";
+    if (found && found.type === "GOVERNMENT") return found.name;
+    return "—";
   }, [employee, jobTitlesRes]);
+
+  const rankTitleName = useMemo(() => {
+    const rank = employee?.civilServantRank;
+    if (rank) return rank.name;
+    if (!employee?.civilServantRankId) return "—";
+    const items = jobTitlesRes?.items ?? [];
+    const found = items.find((j: { id: number }) => j.id === employee.civilServantRankId);
+    return found?.name ?? "—";
+  }, [employee, jobTitlesRes]);
+
+  const partyTitleName = useMemo(() => {
+    const party = employee?.partyTitle;
+    if (party) return party.name;
+    if (!employee?.partyTitleId) return "—";
+    const items = jobTitlesRes?.items ?? [];
+    const found = items.find((j: { id: number }) => j.id === employee.partyTitleId);
+    return found?.name ?? "—";
+  }, [employee, jobTitlesRes]);
+
+  const mainTitleName = useMemo(() => {
+    if (govtTitleName !== "—") return govtTitleName;
+    if (rankTitleName !== "—") return rankTitleName;
+    return "Nhân sự";
+  }, [govtTitleName, rankTitleName]);
 
   const fullName = employee ? [employee.firstname, employee.lastname].filter(Boolean).join(" ") : "—";
 
@@ -107,7 +134,7 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                   </AvatarFallback>
                 </Avatar>
                 <h3 className="text-xl font-bold text-slate-900 mt-3">{fullName}</h3>
-                <p className="text-slate-500 font-medium text-sm mt-1">{jobTitleName}</p>
+                <p className="text-slate-500 font-medium text-sm mt-1">{mainTitleName}</p>
                 <div className="mt-3">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 border border-emerald-200/50">
                     <ShieldCheck className="w-3.5 h-3.5 mr-1" /> Đang làm việc
@@ -173,8 +200,16 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
                         <span className="font-semibold text-slate-900 text-base">{unitName}</span>
                       </div>
                       <div className="flex flex-col space-y-1.5">
-                        <span className="text-slate-500">Chức danh</span>
-                        <span className="font-semibold text-slate-900 text-base">{jobTitleName}</span>
+                        <span className="text-slate-500">Chức vụ chính quyền</span>
+                        <span className="font-semibold text-slate-900 text-base">{govtTitleName}</span>
+                      </div>
+                      <div className="flex flex-col space-y-1.5">
+                        <span className="text-slate-500">Ngạch công chức</span>
+                        <span className="font-semibold text-slate-900 text-base">{rankTitleName}</span>
+                      </div>
+                      <div className="flex flex-col space-y-1.5">
+                        <span className="text-slate-500">Chức vụ Đảng</span>
+                        <span className="font-semibold text-slate-900 text-base">{partyTitleName}</span>
                       </div>
                     </div>
                   </div>

@@ -40,6 +40,7 @@ export default function CreateEmployeePage() {
   const [form, setForm] = useState({
     firstname: "", lastname: "", employeeCode: "", email: "",
     phone: "", identityCard: "", departmentId: "", jobTitleId: "",
+    civilServantRankId: "", partyTitleId: "",
     startDate: new Date().toISOString().slice(0, 10), birthday: "",
     avatar: "", // Đây sẽ lưu File ID/Path sau khi upload thành công
   });
@@ -69,18 +70,25 @@ export default function CreateEmployeePage() {
   const selectedUnit = units.find(u => u.id.toString() === form.departmentId);
   const jobTitles = jobTitlesRes?.items ?? [];
 
+  const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
+  const rankTitles = useMemo(() => jobTitles.filter(j => j.type === "RANK"), [jobTitles]);
+  const partyTitles = useMemo(() => jobTitles.filter(j => j.type === "PARTY"), [jobTitles]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.departmentId || !form.jobTitleId) {
-      toast.error("Vui lòng chọn Đơn vị và Chức danh");
+    if (!form.departmentId || !form.civilServantRankId) {
+      toast.error("Vui lòng chọn Đơn vị và Ngạch công chức");
       return;
     }
     setSubmitting(true);
     try {
+      const finalJobTitleId = form.jobTitleId ? parseInt(form.jobTitleId, 10) : parseInt(form.civilServantRankId, 10);
       await hrmApi.create({
         ...form,
-        departmentId: parseInt(form.departmentId),
-        jobTitleId: parseInt(form.jobTitleId)
+        departmentId: parseInt(form.departmentId, 10),
+        jobTitleId: finalJobTitleId,
+        civilServantRankId: parseInt(form.civilServantRankId, 10),
+        partyTitleId: form.partyTitleId ? parseInt(form.partyTitleId, 10) : undefined,
       });
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
       toast.success("Thêm nhân sự thành công");
@@ -174,22 +182,61 @@ export default function CreateEmployeePage() {
                   </div>
                 )}
 
-                {/* Chức danh */}
-                <div className="space-y-2">
-                  <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">2. Chức danh công việc</Label>
-                  <div className="relative">
-                    <select
-                      className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
-                      value={form.jobTitleId}
-                      onChange={(e) => setForm({ ...form, jobTitleId: e.target.value })}
-                      disabled={!form.departmentId}
-                    >
-                      <option value="">-- Chọn chức danh --</option>
-                      {jobTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
-                    </select>
-                    <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
-                    {isLoadingJobs && <Loader2 className="absolute right-10 top-3.5 h-4 w-4 animate-spin text-blue-600" />}
+                 {/* Chức danh */}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">2. Chức vụ chính quyền (Không bắt buộc)</Label>
+                    <div className="relative">
+                      <select
+                        className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
+                        value={form.jobTitleId}
+                        onChange={(e) => setForm({ ...form, jobTitleId: e.target.value })}
+                        disabled={!form.departmentId}
+                      >
+                        <option value="">-- Chọn chức vụ chính quyền --</option>
+                        {govtTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
+                    </div>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">3. Ngạch công chức *</Label>
+                    <div className="relative">
+                      <select
+                        className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
+                        value={form.civilServantRankId}
+                        onChange={(e) => setForm({ ...form, civilServantRankId: e.target.value })}
+                        disabled={!form.departmentId}
+                      >
+                        <option value="">-- Chọn ngạch công chức --</option>
+                        {rankTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">4. Chức vụ Đảng (Không bắt buộc)</Label>
+                    <div className="relative">
+                      <select
+                        className="w-full h-11 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold focus:ring-2 focus:ring-blue-600 outline-none appearance-none disabled:bg-slate-100"
+                        value={form.partyTitleId}
+                        onChange={(e) => setForm({ ...form, partyTitleId: e.target.value })}
+                        disabled={!form.departmentId}
+                      >
+                        <option value="">-- Chọn chức vụ Đảng --</option>
+                        {partyTitles.map((j: any) => <option key={j.id} value={j.id}>{j.name}</option>)}
+                      </select>
+                      <ChevronRight className="absolute right-4 top-3.5 h-4 w-4 text-slate-400 rotate-90" />
+                    </div>
+                  </div>
+
+                  {isLoadingJobs && (
+                    <div className="flex items-center gap-2 text-xs text-blue-600 font-semibold mt-1">
+                      <Loader2 className="h-3 w-3 animate-spin" /> Đang tải danh sách chức danh...
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

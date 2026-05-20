@@ -273,6 +273,7 @@ export class OrganizationsController {
       geographicAreaName: this.getCatName(j.geographicArea),
       category: j.category ?? '',
       rank: j.rank ?? 0,
+      type: j.type ?? '',
     };
   }
 }

@@ -524,6 +524,8 @@ export const EmployeeScalarFieldEnum = {
   avatar: 'avatar',
   departmentId: 'departmentId',
   jobTitleId: 'jobTitleId',
+  civilServantRankId: 'civilServantRankId',
+  partyTitleId: 'partyTitleId',
   startDate: 'startDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'

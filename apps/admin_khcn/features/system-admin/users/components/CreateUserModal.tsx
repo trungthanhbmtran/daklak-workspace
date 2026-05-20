@@ -105,8 +105,24 @@ export function CreateUserModal({
 
   const getUnitName = (emp: HrmEmployee) =>
     emp.department?.name || (emp.departmentId != null ? unitNameMap.get(emp.departmentId) : null) || "";
-  const getJobTitleName = (emp: HrmEmployee) =>
-    emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleNameMap.get(emp.jobTitleId) : null) || "";
+  const getJobTitleName = (emp: HrmEmployee) => {
+    const parts: string[] = [];
+    
+    // Government title (or any primary job title if type is GOVERNMENT or undefined)
+    const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleNameMap.get(emp.jobTitleId) : null);
+    if (govt) parts.push(govt);
+
+    // Rank title
+    const rank = emp.civilServantRank?.name || (emp.civilServantRankId != null ? jobTitleNameMap.get(emp.civilServantRankId) : null);
+    // If rank is different from govt, add it
+    if (rank && rank !== govt) parts.push(rank);
+
+    // Party title
+    const party = emp.partyTitle?.name || (emp.partyTitleId != null ? jobTitleNameMap.get(emp.partyTitleId) : null);
+    if (party) parts.push(party);
+
+    return parts.length > 0 ? parts.join(" - ") : "";
+  };
 
   const form = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),

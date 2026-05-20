@@ -25,7 +25,17 @@ function getUnitName(emp: HrmEmployee, unitMap: Map<number, string>) {
   return emp.department?.name || (emp.departmentId != null ? unitMap.get(emp.departmentId) : null) || "—";
 }
 function getJobTitleName(emp: HrmEmployee, jobTitleMap: Map<number, string>) {
-  return emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleMap.get(emp.jobTitleId) : null) || "—";
+  const parts: string[] = [];
+  const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleMap.get(emp.jobTitleId) : null);
+  if (govt) parts.push(govt);
+
+  const rank = emp.civilServantRank?.name || (emp.civilServantRankId != null ? jobTitleMap.get(emp.civilServantRankId) : null);
+  if (rank && rank !== govt) parts.push(rank);
+
+  const party = emp.partyTitle?.name || (emp.partyTitleId != null ? jobTitleMap.get(emp.partyTitleId) : null);
+  if (party) parts.push(party);
+
+  return parts.length > 0 ? parts.join(" - ") : "—";
 }
 
 export function EmployeeListClient() {

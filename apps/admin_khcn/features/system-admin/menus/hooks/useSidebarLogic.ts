@@ -8,7 +8,7 @@ export function useSidebarLogic(menus: MenuItem[]) {
   useEffect(() => {
     if (menus.length > 0 && Object.keys(expandedRows).length === 0) {
       const initialExpanded: Record<number, boolean> = {};
-      menus.filter(m => m.parentId === null).forEach(m => { initialExpanded[m.id] = true; });
+      menus.filter(m => !m.parentId).forEach(m => { initialExpanded[m.id] = true; });
       setExpandedRows(initialExpanded);
     }
   }, [menus]); // eslint-disable-line react-hooks/exhaustive-deps

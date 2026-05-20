@@ -119,6 +119,7 @@ function normalizeJobTitleItem(j: any): JobTitleItem {
     geographicAreaName: j.geographicAreaName ?? j.geographic_area_name,
     category: j.category,
     rank: j.rank,
+    type: j.type,
   };
 }
 
