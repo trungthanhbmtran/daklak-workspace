@@ -35,7 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
 import dynamic from "next/dynamic";
-import { PortalSubNav } from "./PortalSubNav";
+
 
 const PageBuilder = dynamic(
   () => import("./PageBuilder").then((mod) => mod.PageBuilder),
@@ -370,9 +370,6 @@ export function PortalPageBuilderClient() {
           </Button>
         </div>
 
-        <div className="hidden xl:block shrink-0">
-          <PortalSubNav />
-        </div>
 
         <div className="flex items-center gap-2 lg:gap-4 shrink-0">
           <div className="hidden xl:flex items-center gap-6 mr-4 lg:mr-6 py-2 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 shrink-0">

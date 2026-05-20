@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,19 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useOrganizationContext } from "../../context/OrganizationContext";
 import { useStaffingReport } from "./hooks/useStaffingReport";
 import { useStaffingMutations } from "./hooks/useStaffingMutations";
 import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { JobTitleItem } from "../../types";
+import type { JobTitleItem, StaffingReportItem } from "../../types";
 
 export function OrganizationStaffing() {
   const { state, meta } = useOrganizationContext();
   const { selectedId, flatUnits } = state;
   const { domains } = meta;
 
+  const [activeTab, setActiveTab] = useState<"DANG" | "CHINH_QUYEN">("CHINH_QUYEN");
   const [selectedJobTitleId, setSelectedJobTitleId] = useState<string>("");
   const [quantity, setQuantity] = useState("1");
   const [configOpen, setConfigOpen] = useState(false);
@@ -105,6 +107,46 @@ export function OrganizationStaffing() {
     setSelectedJobTitleId("");
   };
 
+  // Logic phân loại chức danh
+  const isParty = (j: JobTitleItem) =>
+    ["DANG", "PARTY"].includes(j.category?.toUpperCase() ?? "") ||
+    ["DANG", "PARTY"].includes(j.type?.toUpperCase() ?? "");
+  const isGov = (j: JobTitleItem) =>
+    ["CHINH_QUYEN", "GOV", "CHINHQUYEN"].includes(j.category?.toUpperCase() ?? "") ||
+    ["CHINH_QUYEN", "GOV", "CHINHQUYEN"].includes(j.type?.toUpperCase() ?? "");
+
+  const getJobTitleGroup = (j: JobTitleItem) => {
+    if (isParty(j)) return "DANG";
+    if (isGov(j)) return "CHINH_QUYEN";
+    // Mặc định cho vào Chính quyền nếu không xác định
+    return "CHINH_QUYEN";
+  };
+
+  const { partyTitles, govTitles } = useMemo(() => {
+    const p: JobTitleItem[] = [];
+    const g: JobTitleItem[] = [];
+    jobTitles.forEach((j) => {
+      // Bỏ qua Ngạch vì không định biên theo Ngạch
+      const group = getJobTitleGroup(j);
+      if (group === "DANG") p.push(j);
+      else g.push(j);
+    });
+    return { partyTitles: p, govTitles: g };
+  }, [jobTitles]);
+
+  const { partyReport, govReport } = useMemo(() => {
+    const p: StaffingReportItem[] = [];
+    const g: StaffingReportItem[] = [];
+
+    report.forEach((rep) => {
+      const matchJobTitle = jobTitles.find((j) => j.id === rep.jobTitleId);
+      const group = matchJobTitle ? getJobTitleGroup(matchJobTitle) : "CHINH_QUYEN";
+      if (group === "DANG") p.push(rep);
+      else g.push(rep);
+    });
+    return { partyReport: p, govReport: g };
+  }, [report, jobTitles]);
+
   if (selectedId == null) return null;
 
   if (isError) {
@@ -117,6 +159,123 @@ export function OrganizationStaffing() {
     );
   }
 
+  const renderTabContent = (
+    titleList: JobTitleItem[],
+    reportList: StaffingReportItem[],
+    label: string
+  ) => {
+    return (
+      <div className="space-y-6 mt-4">
+        <section className="rounded-lg border bg-muted/30 p-4">
+          <h3 className="text-sm font-medium mb-3">Thêm định biên {label.toLowerCase()}</h3>
+          <form
+            onSubmit={handleSubmitStaffing}
+            className="flex flex-wrap items-end gap-4"
+          >
+            <div className="space-y-1.5 min-w-[220px]">
+              <label className="text-sm font-medium text-foreground">Chức danh</label>
+              <Select
+                value={selectedJobTitleId || "__none__"}
+                onValueChange={(v) =>
+                  setSelectedJobTitleId(v === "__none__" ? "" : v)
+                }
+                disabled={isLoadingJobTitles}
+              >
+                <SelectTrigger className="h-9">
+                  <SelectValue placeholder="Chọn chức danh" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Chọn chức danh</SelectItem>
+                  {titleList.map((j) => (
+                    <SelectItem key={j.id} value={String(j.id)}>
+                      <span>
+                        {j.name} ({j.code})
+                        {(j.domainName || j.geographicAreaName) && (
+                          <span className="text-muted-foreground text-xs ml-1">
+                            — {[j.domainName, j.geographicAreaName].filter(Boolean).join(", ")}
+                          </span>
+                        )}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5 w-24">
+              <label className="text-sm font-medium text-foreground">Số lượng</label>
+              <Input
+                type="number"
+                min={1}
+                className="h-9"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                disabled={setStaffing.isPending}
+              />
+            </div>
+            <Button
+              type="submit"
+              size="default"
+              className="h-9"
+              disabled={setStaffing.isPending || !selectedJobTitleId}
+            >
+              {setStaffing.isPending ? "Đang lưu..." : "Lưu định biên"}
+            </Button>
+          </form>
+        </section>
+
+        <section>
+          <h3 className="text-sm font-medium mb-3">Danh sách {label.toLowerCase()}</h3>
+          {isLoadingReport ? (
+            <Skeleton className="h-40 w-full rounded-lg" />
+          ) : reportList.length === 0 ? (
+            <div className="rounded-lg border border-dashed bg-muted/20 py-10 text-center text-sm text-muted-foreground">
+              Chưa có định biên. Thêm chức danh và số lượng ở form trên.
+            </div>
+          ) : (
+            <div className="rounded-lg border overflow-hidden">
+              <StaffingTable
+                report={reportList}
+                domainsForUnit={domainsForUnit}
+                geoAreas={geoAreas}
+                subordinateUnits={subordinateUnits}
+                onSaveSlot={(payload) => setStaffingSlot.mutate(payload)}
+                isSavingSlot={setStaffingSlot.isPending}
+              />
+            </div>
+          )}
+        </section>
+
+        {titleList.length > 0 && (
+          <section className="rounded-lg border bg-muted/20 p-4">
+            <h3 className="text-sm font-medium mb-1">Cấu hình chức danh</h3>
+            <p className="text-xs text-muted-foreground mb-3">
+              Lĩnh vực phụ trách (theo cấp trên giao). Theo dõi phòng ban: đơn vị trực thuộc.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {titleList.map((j) => (
+                <Button
+                  key={j.id}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8"
+                  onClick={() => openConfig(j)}
+                >
+                  {j.name}
+                  {(j.domainName ||
+                    j.geographicAreaName ||
+                    (j.monitoredUnitNames?.length ?? 0) > 0) && (
+                    <span className="ml-1.5 text-muted-foreground">•</span>
+                  )}
+                </Button>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -127,114 +286,36 @@ export function OrganizationStaffing() {
           )}
         </h2>
         <p className="text-xs text-muted-foreground mt-0.5">
-          Chức danh theo NĐ 24/2014, 107/2020. Chỉ hiện chức danh áp dụng cho loại đơn vị.
+          Chức danh theo NĐ 334/2025/NĐ-CP (Đảng, Chính quyền).
         </p>
       </div>
 
-      <section className="rounded-lg border bg-muted/30 p-4">
-        <h3 className="text-sm font-medium mb-3">Thêm / cập nhật định biên</h3>
-        <form
-          onSubmit={handleSubmitStaffing}
-          className="flex flex-wrap items-end gap-4"
-        >
-          <div className="space-y-1.5 min-w-[220px]">
-            <label className="text-sm font-medium text-foreground">Chức danh</label>
-            <Select
-              value={selectedJobTitleId || "__none__"}
-              onValueChange={(v) =>
-                setSelectedJobTitleId(v === "__none__" ? "" : v)
-              }
-              disabled={isLoadingJobTitles}
-            >
-              <SelectTrigger className="h-9">
-                <SelectValue placeholder="Chọn chức danh" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__none__">Chọn chức danh</SelectItem>
-                {jobTitles.map((j) => (
-                  <SelectItem key={j.id} value={String(j.id)}>
-                    <span>
-                      {j.name} ({j.code})
-                      {(j.domainName || j.geographicAreaName) && (
-                        <span className="text-muted-foreground text-xs ml-1">
-                          — {[j.domainName, j.geographicAreaName].filter(Boolean).join(", ")}
-                        </span>
-                      )}
-                    </span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5 w-24">
-            <label className="text-sm font-medium text-foreground">Số lượng</label>
-            <Input
-              type="number"
-              min={1}
-              className="h-9"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              disabled={setStaffing.isPending}
-            />
-          </div>
-          <Button
-            type="submit"
-            size="default"
-            className="h-9"
-            disabled={setStaffing.isPending || !selectedJobTitleId}
-          >
-            {setStaffing.isPending ? "Đang lưu..." : "Lưu định biên"}
-          </Button>
-        </form>
-      </section>
+      <Tabs
+        value={activeTab}
+        onValueChange={(val: any) => {
+          setActiveTab(val);
+          setSelectedJobTitleId("");
+          setQuantity("1");
+        }}
+        className="w-full"
+      >
+        <TabsList className="w-full grid grid-cols-2 h-10 items-center justify-center rounded-xl bg-muted p-1 text-muted-foreground">
+          <TabsTrigger value="CHINH_QUYEN" className="rounded-lg text-xs font-semibold">
+            Chính quyền
+          </TabsTrigger>
+          <TabsTrigger value="DANG" className="rounded-lg text-xs font-semibold">
+            Đảng đoàn thể
+          </TabsTrigger>
+        </TabsList>
 
-      <section>
-        <h3 className="text-sm font-medium mb-3">Danh sách chức danh đơn vị</h3>
-        {isLoadingReport ? (
-          <Skeleton className="h-40 w-full rounded-lg" />
-        ) : report.length === 0 ? (
-          <div className="rounded-lg border border-dashed bg-muted/20 py-10 text-center text-sm text-muted-foreground">
-            Chưa có định biên. Thêm chức danh và số lượng ở form trên.
-          </div>
-        ) : (
-          <div className="rounded-lg border overflow-hidden">
-            <StaffingTable
-              report={report}
-              domainsForUnit={domainsForUnit}
-              geoAreas={geoAreas}
-              subordinateUnits={subordinateUnits}
-              onSaveSlot={(payload) => setStaffingSlot.mutate(payload)}
-              isSavingSlot={setStaffingSlot.isPending}
-            />
-          </div>
-        )}
-      </section>
+        <TabsContent value="CHINH_QUYEN">
+          {renderTabContent(govTitles, govReport, "chức danh chính quyền")}
+        </TabsContent>
 
-      <section className="rounded-lg border bg-muted/20 p-4">
-        <h3 className="text-sm font-medium mb-1">Cấu hình chức danh</h3>
-        <p className="text-xs text-muted-foreground mb-3">
-          Lĩnh vực phụ trách (theo cấp trên giao). Theo dõi phòng ban: đơn vị trực thuộc.
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {jobTitles.map((j) => (
-            <Button
-              key={j.id}
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-8"
-              onClick={() => openConfig(j)}
-            >
-              {j.name}
-              {(j.domainName ||
-                j.geographicAreaName ||
-                (j.monitoredUnitNames?.length ?? 0) > 0) && (
-                <span className="ml-1.5 text-muted-foreground">•</span>
-              )}
-            </Button>
-          ))}
-        </div>
-      </section>
+        <TabsContent value="DANG">
+          {renderTabContent(partyTitles, partyReport, "chức danh Đảng")}
+        </TabsContent>
+      </Tabs>
 
       <JobTitleConfigDialog
         open={configOpen}
