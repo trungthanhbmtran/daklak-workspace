@@ -95,9 +95,6 @@ export const hrmApi = {
     });
   },
 
-  /**
-   * Tạo nhân viên mới (POST /hrm/employees).
-   */
   create(payload: any): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
     return apiClient.post(HRM_EMPLOYEES_PATH, payload).then((res: any) => {
       return {
@@ -107,4 +104,39 @@ export const hrmApi = {
       };
     });
   },
+};
+
+// ==========================================
+// MOCK APIs CHO PHÂN HỆ MỞ RỘNG HRM
+// (Cần được thay thế bằng gọi API thật khi backend đã sẵn sàng)
+// ==========================================
+
+export const hrmDepartmentsApi = {
+  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
+    return Promise.resolve({ data: [], meta: { total: 0 } });
+  }
+};
+
+export const hrmLeaveApi = {
+  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
+    return Promise.resolve({ data: [], meta: { total: 0 } });
+  }
+};
+
+export const hrmAttendanceApi = {
+  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
+    return Promise.resolve({ data: [], meta: { total: 0 } });
+  }
+};
+
+export const hrmContractsApi = {
+  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
+    return Promise.resolve({ data: [], meta: { total: 0 } });
+  }
+};
+
+export const hrmPayrollApi = {
+  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
+    return Promise.resolve({ data: [], meta: { total: 0 } });
+  }
 };

@@ -541,6 +541,11 @@ async function main() {
   // 3. HRM Module
   const hrmMenus = [
     { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_DEPARTMENTS', name: 'Sơ đồ tổ chức', route: 'departments', icon: 'git-network-outline', order: 2, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_LEAVE', name: 'Quản lý nghỉ phép', route: 'leave', icon: 'calendar-outline', order: 3, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_ATTENDANCE', name: 'Quản lý chấm công', route: 'attendance', icon: 'time-outline', order: 4, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_CONTRACTS', name: 'Hợp đồng lao động', route: 'contracts', icon: 'document-text-outline', order: 5, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_PAYROLL', name: 'Quản lý lương', route: 'payroll', icon: 'cash-outline', order: 6, res: 'HRM_EMPLOYEE' },
   ];
 
   for (const { res, ...m } of hrmMenus) {
@@ -945,10 +950,8 @@ async function main() {
 
   // 1. UBND Tỉnh Đắk Lắk
   await assignLeader('dohuuhuy@daklak.gov.vn', 'dohuuhuy', 'Đỗ Hữu Huy', 'UBND_TINH_DAKLAK', 'CHU_TICH', true);
-
   // 2. Sở Nội vụ
   await assignLeader('truongngoctuan@daklak.gov.vn', 'truongngoctuan', 'Trương Ngọc Tuấn', 'SO_NV', 'GIAM_DOC', true);
-
   // 3. Sở Khoa học & Công nghệ
   await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'GIAM_DOC', true);
   await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_GIAM_DOC', true);
@@ -956,36 +959,23 @@ async function main() {
   // Bí thư Đảng bộ thường là Giám đốc
   await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'BI_THU_DANG_BO', true);
   await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_BI_THU_DANG_BO', true);
-
   // 4. Sở Tài chính
   await assignLeader('tranvantan@daklak.gov.vn', 'tranvantan', 'Trần Văn Tân', 'SO_TC', 'GIAM_DOC', true);
-
   // 5. Existing test user
   await assignLeader('trungthanh@daklak.gov.vn', 'trungthanh', 'Trần Trung Thành', 'SO_KHCN', 'CONG_CHUC_PHU_TRACH', false);
-
   // 6. Phường Tân Lập
   await assignLeader('vuvanhung@daklak.gov.vn', 'vuvanhung', 'Vũ Văn Hưng', 'UBND_XA_TAN_LAP', 'BI_THU_DANG_BO', true);
   await assignLeader('tranducnhat@daklak.gov.vn', 'tranducnhat', 'Trần Đức Nhật', 'UBND_XA_TAN_LAP', 'CHU_TICH', true);
-
   // 7. Phường Tân An
   await assignLeader('nguyenducvinh@daklak.gov.vn', 'nguyenducvinh', 'Nguyễn Đức Vinh', 'UBND_XA_TAN_AN', 'BI_THU_DANG_BO', true);
   await assignLeader('phamtrungnghia@daklak.gov.vn', 'phamtrungnghia', 'Phạm Trung Nghĩa', 'UBND_XA_TAN_AN', 'CHU_TICH', true);
-
-
-
-  // 8.1 Trưởng phòng, Chánh văn phòng Sở KH&CN
-  // (Đã xóa dữ liệu mô phỏng theo yêu cầu sử dụng dữ liệu thật)
-
   // 9. Các giám đốc Sở mới (cập nhật từ 2026)
   await assignLeader('caodinhhuy@daklak.gov.vn', 'caodinhhuy', 'Cao Đình Huy', 'SO_XD', 'GIAM_DOC', true);
-
   // 10. Các phường/xã còn lại
   await assignLeader('nguyenthanhliem@daklak.gov.vn', 'nguyenthanhliem', 'Nguyễn Thanh Liêm', 'UBND_XA_THANH_NHAT', 'BI_THU_DANG_BO', true);
   await assignLeader('nguyendinhtam@daklak.gov.vn', 'nguyendinhtam', 'Nguyễn Đình Tâm', 'UBND_XA_THANH_NHAT', 'CHU_TICH', true);
-
   await assignLeader('phamtienhung@daklak.gov.vn', 'phamtienhung', 'Phạm Tiến Hưng', 'UBND_XA_HOA_PHU', 'BI_THU_DANG_BO', true);
   await assignLeader('nguyenthehau@daklak.gov.vn', 'nguyenthehau', 'Nguyễn Thế Hậu', 'UBND_XA_HOA_PHU', 'CHU_TICH', true);
-
   await assignLeader('danggiaduan@daklak.gov.vn', 'danggiaduan', 'Đặng Gia Duẩn', 'UBND_XA_EA_KAO', 'BI_THU_DANG_BO', true);
   await assignLeader('ledaithang@daklak.gov.vn', 'ledaithang', 'Lê Đại Thắng', 'UBND_XA_EA_KAO', 'CHU_TICH', true);
 }
