@@ -290,7 +290,7 @@ async function main() {
   console.log('✅ Categories and dual Vietnamese/English translations seeded');
 
 
- 
+
   // ==========================================================
   // 3.2 CATEGORY GROUPS (For friendly names)
   // ==========================================================
@@ -350,7 +350,10 @@ async function main() {
     { code: 'SO_NGANH', name: 'Sở, Ban, Ngành', level: 2 },
     { code: 'UBND_HUYEN', name: 'UBND Cấp Huyện', level: 2 },
     { code: 'HDND_HUYEN', name: 'HĐND Cấp Huyện', level: 2 },
+    { code: 'PHONG_BAN_SO', name: 'Phòng chuyên môn cấp Sở', level: 3 },
     { code: 'PHONG_BAN_HUYEN', name: 'Phòng, Ban chuyên môn cấp Huyện', level: 3 },
+    { code: 'VAN_PHONG', name: 'Văn phòng', level: 3 },
+    { code: 'THANH_TRA', name: 'Thanh tra', level: 3 },
     { code: 'UBND_XA', name: 'UBND Cấp Xã/Phường', level: 3 },
     { code: 'HDND_XA', name: 'HĐND Cấp Xã', level: 3 },
     { code: 'DVSN', name: 'Đơn vị sự nghiệp', level: 2 },
@@ -646,6 +649,14 @@ async function main() {
     { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc', category: 'EXECUTIVE', rank: 2, type: 'GOVERNMENT' },
     { code: 'TRUONG_PHONG', name: 'Trưởng phòng', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
     { code: 'PHO_PHONG', name: 'Phó Trưởng phòng', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
+    { code: 'CHANH_VAN_PHONG', name: 'Chánh Văn phòng', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
+    { code: 'PHO_CHANH_VAN_PHONG', name: 'Phó Chánh Văn phòng', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
+    { code: 'CHANH_THANH_TRA', name: 'Chánh Thanh tra', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
+    { code: 'PHO_CHANH_THANH_TRA', name: 'Phó Chánh Thanh tra', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
+    { code: 'THANH_TRA_VIEN', name: 'Thanh tra viên', category: 'STAFF', rank: 3, type: 'RANK' },
+    { code: 'THANH_TRA_VIEN_CHINH', name: 'Thanh tra viên chính', category: 'STAFF', rank: 2, type: 'RANK' },
+    { code: 'THANH_TRA_VIEN_CAO_CAP', name: 'Thanh tra viên cao cấp', category: 'STAFF', rank: 1, type: 'RANK' },
+    { code: 'UY_VIEN_UBND', name: 'Ủy viên UBND', category: 'EXECUTIVE', rank: 3, type: 'GOVERNMENT' },
     { code: 'CHUYEN_VIEN', name: 'Chuyên viên', category: 'STAFF', rank: 3, type: 'RANK' },
     { code: 'CHUYEN_VIEN_CAO_CAP', name: 'Chuyên viên cao cấp', category: 'STAFF', rank: 1, type: 'RANK' },
     { code: 'CHUYEN_VIEN_CHINH', name: 'Chuyên viên chính', category: 'STAFF', rank: 2, type: 'RANK' },
@@ -657,6 +668,8 @@ async function main() {
     { code: 'PHO_BI_THU_DANG_BO', name: 'Phó Bí thư Đảng bộ', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
     { code: 'BI_THU_CHI_BO', name: 'Bí thư Chi bộ', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
     { code: 'PHO_BI_THU_CHI_BO', name: 'Phó Bí thư Chi bộ', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
+    { code: 'DANG_UY_VIEN', name: 'Đảng ủy viên', category: 'EXECUTIVE', rank: 3, type: 'PARTY' },
+    { code: 'CHI_UY_VIEN', name: 'Chi ủy viên', category: 'EXECUTIVE', rank: 3, type: 'PARTY' },
     { code: 'BI_THU', name: 'Bí thư', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
     { code: 'PHO_BI_THU', name: 'Phó Bí thư', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
     { code: 'TRUONG_BAN', name: 'Trưởng ban', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
@@ -678,23 +691,33 @@ async function main() {
   const links = [
     { jt: 'CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
     { jt: 'PHO_CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
+    { jt: 'UY_VIEN_UBND', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
     { jt: 'GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'PHO_PHONG', types: ['PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN_HUYEN', 'SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'CQ_TU', 'UBND_TINH', 'UBND_HUYEN'] },
-    { jt: 'CHUYEN_VIEN_CAO_CAP', types: ['UBND_TINH', 'SO_NGANH'] },
-    { jt: 'CHUYEN_VIEN_CHINH', types: ['UBND_TINH', 'UBND_HUYEN', 'SO_NGANH'] },
-    { jt: 'CAN_SU', types: ['UBND_HUYEN', 'UBND_XA', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'NHAN_VIEN', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'CONG_CHUC_PHU_TRACH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'CAN_BO_PHU_TRACH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'BI_THU_DANG_BO', types: ['SO_NGANH', 'UBND_TINH', 'UBND_HUYEN'] },
-    { jt: 'PHO_BI_THU_DANG_BO', types: ['SO_NGANH', 'UBND_TINH', 'UBND_HUYEN'] },
-    { jt: 'BI_THU_CHI_BO', types: ['SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'UBND_XA'] },
-    { jt: 'PHO_BI_THU_CHI_BO', types: ['SO_NGANH', 'PHONG_BAN_HUYEN', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'UBND_XA'] },
-    { jt: 'BI_THU', types: ['CQ_DANG', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
-    { jt: 'PHO_BI_THU', types: ['CQ_DANG', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'PHO_PHONG', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'CHANH_VAN_PHONG', types: ['VAN_PHONG'] },
+    { jt: 'PHO_CHANH_VAN_PHONG', types: ['VAN_PHONG'] },
+    { jt: 'CHANH_THANH_TRA', types: ['THANH_TRA'] },
+    { jt: 'PHO_CHANH_THANH_TRA', types: ['THANH_TRA'] },
+    { jt: 'THANH_TRA_VIEN', types: ['THANH_TRA'] },
+    { jt: 'THANH_TRA_VIEN_CHINH', types: ['THANH_TRA'] },
+    { jt: 'THANH_TRA_VIEN_CAO_CAP', types: ['THANH_TRA'] },
+    { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    { jt: 'CHUYEN_VIEN_CAO_CAP', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'] },
+    { jt: 'CHUYEN_VIEN_CHINH', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'] },
+    { jt: 'CAN_SU', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'NHAN_VIEN', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'CONG_CHUC_PHU_TRACH', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'CAN_BO_PHU_TRACH', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
+    { jt: 'BI_THU_DANG_BO', types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'DVSN', 'CHI_CUC'] },
+    { jt: 'PHO_BI_THU_DANG_BO', types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'DVSN', 'CHI_CUC'] },
+    { jt: 'DANG_UY_VIEN', types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'DVSN', 'CHI_CUC'] },
+    { jt: 'BI_THU_CHI_BO', types: ['CQ_DANG', 'PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'PHO_BI_THU_CHI_BO', types: ['CQ_DANG', 'PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'CHI_UY_VIEN', types: ['CQ_DANG', 'PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'BI_THU', types: ['CQ_DANG'] },
+    { jt: 'PHO_BI_THU', types: ['CQ_DANG'] },
     { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
     { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
   ];
@@ -741,6 +764,13 @@ async function main() {
     { code: 'SO_TC', name: 'Sở Tài chính', shortName: 'Sở Tài chính' },
     { code: 'SO_KHDT', name: 'Sở Kế hoạch và Đầu tư', shortName: 'Sở KH&ĐT' },
     { code: 'SO_NV', name: 'Sở Nội vụ', shortName: 'Sở Nội vụ' },
+    { code: 'SO_XD', name: 'Sở Xây dựng', shortName: 'Sở Xây dựng' },
+    { code: 'SO_TP', name: 'Sở Tư pháp', shortName: 'Sở Tư pháp' },
+    { code: 'SO_VHTT', name: 'Sở Văn hóa - Thể thao và Du lịch', shortName: 'Sở VHTTDL' },
+    { code: 'SO_CT', name: 'Sở Công thương', shortName: 'Sở Công thương' },
+    { code: 'SO_NN', name: 'Sở Nông nghiệp và Phát triển nông thôn', shortName: 'Sở NN&PTNT' },
+    { code: 'SO_DT', name: 'Sở Dân tộc và Tôn giáo', shortName: 'Sở Dân tộc' },
+    { code: 'TT_TINH', name: 'Thanh tra Tỉnh', shortName: 'Thanh tra Tỉnh' },
     { code: 'VP_UBND', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND' },
   ];
 
@@ -752,28 +782,37 @@ async function main() {
     });
   }
 
-  const districtsUnits = [
-    { code: 'UBND_BMT', name: 'UBND Thành phố Buôn Ma Thuột', shortName: 'UBND BMT' },
-    { code: 'UBND_BUON_HO', name: 'UBND Thị xã Buôn Hồ', shortName: 'UBND Buôn Hồ' },
-  ];
-
-  for (const d of districtsUnits) {
-    await prisma.organizationUnit.upsert({
-      where: { code: d.code },
-      update: { parentId: province.id, typeId: ubndHuyenTypeId },
-      create: { ...d, parentId: province.id, typeId: ubndHuyenTypeId },
-    });
-  }
-
-  // Thêm ví dụ UBND Xã
-  const ubndBmt = await prisma.organizationUnit.findUnique({ where: { code: 'UBND_BMT' } });
-  if (ubndBmt) {
-    await prisma.organizationUnit.upsert({
-      where: { code: 'UBND_XA_TAN_LOI' },
-      update: { parentId: ubndBmt.id, typeId: ubndXaTypeId },
-      create: { code: 'UBND_XA_TAN_LOI', name: 'UBND Phường Tân Lợi', parentId: ubndBmt.id, typeId: ubndXaTypeId },
-    });
-  }
+  // Thêm ví dụ UBND Xã (Trực thuộc Tỉnh theo mô hình 2 cấp)
+  await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_XA_TAN_LOI' },
+    update: { parentId: province.id, typeId: ubndXaTypeId },
+    create: { code: 'UBND_XA_TAN_LOI', name: 'UBND Phường Tân Lợi', parentId: province.id, typeId: ubndXaTypeId },
+  });
+  await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_XA_TAN_LAP' },
+    update: { parentId: province.id, typeId: ubndXaTypeId },
+    create: { code: 'UBND_XA_TAN_LAP', name: 'UBND Phường Tân Lập', parentId: province.id, typeId: ubndXaTypeId },
+  });
+  await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_XA_TAN_AN' },
+    update: { parentId: province.id, typeId: ubndXaTypeId },
+    create: { code: 'UBND_XA_TAN_AN', name: 'UBND Phường Tân An', parentId: province.id, typeId: ubndXaTypeId },
+  });
+  await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_XA_THANH_NHAT' },
+    update: { parentId: province.id, typeId: ubndXaTypeId },
+    create: { code: 'UBND_XA_THANH_NHAT', name: 'UBND Phường Thành Nhất', parentId: province.id, typeId: ubndXaTypeId },
+  });
+  await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_XA_HOA_PHU' },
+    update: { parentId: province.id, typeId: ubndXaTypeId },
+    create: { code: 'UBND_XA_HOA_PHU', name: 'UBND Xã Hòa Phú', parentId: province.id, typeId: ubndXaTypeId },
+  });
+  await prisma.organizationUnit.upsert({
+    where: { code: 'UBND_XA_EA_KAO' },
+    update: { parentId: province.id, typeId: ubndXaTypeId },
+    create: { code: 'UBND_XA_EA_KAO', name: 'UBND Phường Ea Kao', parentId: province.id, typeId: ubndXaTypeId },
+  });
 
   // Thêm Đơn vị sự nghiệp tiêu biểu
   const soKhcn = await prisma.organizationUnit.findUnique({ where: { code: 'SO_KHCN' } });
@@ -791,20 +830,22 @@ async function main() {
   console.log('📦 Seeding Departments for Organizations...');
 
   // helper tạo phòng ban
-  const createDept = async (parentCode: string, dept: { code: string; name: string }) => {
+  const createDept = async (parentCode: string, dept: { code: string; name: string; typeCode?: string }) => {
     const parent = await prisma.organizationUnit.findUnique({
       where: { code: parentCode },
     });
     if (!parent) return;
 
+    const tId = dept.typeCode ? unitTypeMap[dept.typeCode]?.id : phongTypeId;
+
     await prisma.organizationUnit.upsert({
       where: { code: dept.code },
-      update: { parentId: parent.id },
+      update: { parentId: parent.id, typeId: tId },
       create: {
         code: dept.code,
         name: dept.name,
         parentId: parent.id,
-        typeId: phongTypeId,
+        typeId: tId,
       },
     });
   };
@@ -812,96 +853,141 @@ async function main() {
   // ==========================
   // 1. SỞ KHOA HỌC & CÔNG NGHỆ
   // ==========================
-  await createDept('SO_KHCN', { code: 'SO_KHCN_VP', name: 'Văn phòng Sở' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_TT', name: 'Thanh tra Sở' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_KHTC', name: 'Phòng Kế hoạch - Tài chính' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_QLKH', name: 'Phòng Quản lý Khoa học' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_CNSH', name: 'Phòng Công nghệ & Sở hữu trí tuệ' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_QLKH', name: 'Phòng Quản lý Khoa học', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_CNSH', name: 'Phòng Công nghệ & Sở hữu trí tuệ', typeCode: 'PHONG_BAN_SO' });
 
   // ==========================
   // 2. SỞ Y TẾ
   // ==========================
-  await createDept('SO_YTE', { code: 'SO_YTE_VP', name: 'Văn phòng Sở' });
-  await createDept('SO_YTE', { code: 'SO_YTE_TT', name: 'Thanh tra Sở' });
-  await createDept('SO_YTE', { code: 'SO_YTE_KHTC', name: 'Phòng Kế hoạch - Tài chính' });
-  await createDept('SO_YTE', { code: 'SO_YTE_NVY', name: 'Phòng Nghiệp vụ Y' });
-  await createDept('SO_YTE', { code: 'SO_YTE_DUOC', name: 'Phòng Quản lý Dược' });
+  await createDept('SO_YTE', { code: 'SO_YTE_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
+  await createDept('SO_YTE', { code: 'SO_YTE_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
+  await createDept('SO_YTE', { code: 'SO_YTE_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_YTE', { code: 'SO_YTE_NVY', name: 'Phòng Nghiệp vụ Y', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_YTE', { code: 'SO_YTE_DUOC', name: 'Phòng Quản lý Dược', typeCode: 'PHONG_BAN_SO' });
 
   // ==========================
   // 3. SỞ GIÁO DỤC
   // ==========================
-  await createDept('SO_GDDT', { code: 'SO_GDDT_VP', name: 'Văn phòng Sở' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_TT', name: 'Thanh tra Sở' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_KHTC', name: 'Phòng Kế hoạch - Tài chính' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_TCCB', name: 'Phòng Tổ chức Cán bộ' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_GDTRH', name: 'Phòng Giáo dục Trung học' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_TCCB', name: 'Phòng Tổ chức Cán bộ', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_GDDT', { code: 'SO_GDDT_GDTRH', name: 'Phòng Giáo dục Trung học', typeCode: 'PHONG_BAN_SO' });
 
   // ==========================
   // 4. SỞ TÀI CHÍNH
   // ==========================
-  await createDept('SO_TC', { code: 'SO_TC_VP', name: 'Văn phòng Sở' });
-  await createDept('SO_TC', { code: 'SO_TC_TT', name: 'Thanh tra Sở' });
-  await createDept('SO_TC', { code: 'SO_TC_NS', name: 'Phòng Ngân sách' });
-  await createDept('SO_TC', { code: 'SO_TC_HCSN', name: 'Phòng Hành chính sự nghiệp' });
+  await createDept('SO_TC', { code: 'SO_TC_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
+  await createDept('SO_TC', { code: 'SO_TC_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
+  await createDept('SO_TC', { code: 'SO_TC_NS', name: 'Phòng Ngân sách', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_TC', { code: 'SO_TC_HCSN', name: 'Phòng Hành chính sự nghiệp', typeCode: 'PHONG_BAN_SO' });
 
-  // ==========================
-  // 5. UBND TP BUÔN MA THUỘT
-  // ==========================
-  await createDept('UBND_BMT', { code: 'BMT_VP', name: 'Văn phòng HĐND & UBND' });
-  await createDept('UBND_BMT', { code: 'BMT_NV', name: 'Phòng Nội vụ' });
-  await createDept('UBND_BMT', { code: 'BMT_TC_KH', name: 'Phòng Tài chính - Kế hoạch' });
-  await createDept('UBND_BMT', { code: 'BMT_KT', name: 'Phòng Kinh tế' });
-  await createDept('UBND_BMT', { code: 'BMT_TNMT', name: 'Phòng Tài nguyên & Môi trường' });
 
-  // ==========================
-  // 6. UBND BUÔN HỒ
-  // ==========================
-  await createDept('UBND_BUON_HO', { code: 'BH_VP', name: 'Văn phòng HĐND & UBND' });
-  await createDept('UBND_BUON_HO', { code: 'BH_NV', name: 'Phòng Nội vụ' });
-  await createDept('UBND_BUON_HO', { code: 'BH_TC_KH', name: 'Phòng Tài chính - Kế hoạch' });
-  await createDept('UBND_BUON_HO', { code: 'BH_KT_HT', name: 'Phòng Kinh tế - Hạ tầng' });
 
   // ==========================================================
   // 9. JOB POSITIONS
   // ==========================================================
-  console.log('📦 Seeding Job Positions...');
-  const targetUser = await prisma.user.findUnique({
-    where: { email: 'trungthanh@daklak.gov.vn' },
-  });
-  const soKhcnUnit = await prisma.organizationUnit.findUnique({
-    where: { code: 'SO_KHCN' },
-  });
-  const congChucJob = await prisma.jobTitle.findUnique({
-    where: { code: 'CONG_CHUC_PHU_TRACH' },
-  });
+  console.log('📦 Seeding Job Positions & Leaders (April 2026)...');
 
-  if (targetUser && soKhcnUnit && congChucJob) {
-    const existingPosition = await prisma.jobPosition.findFirst({
-      where: {
-        userId: targetUser.id,
-        unitId: soKhcnUnit.id,
-        jobTitleId: congChucJob.id,
+  const assignLeader = async (
+    email: string,
+    username: string,
+    fullName: string,
+    unitCode: string,
+    jobTitleCode: string,
+    isUnitLeader: boolean
+  ) => {
+    // We assume DEFAULT_PASSWORD is still in scope
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: { fullName },
+      create: {
+        email,
+        username,
+        fullName,
+        // Default role for new users created this way
+        roles: { connect: [{ id: roleMap['AUTHOR']?.id || 1 }] },
       },
     });
 
-    if (!existingPosition) {
-      await prisma.jobPosition.create({
-        data: {
-          userId: targetUser.id,
-          unitId: soKhcnUnit.id,
-          jobTitleId: congChucJob.id,
-          isPrimary: true,
-          isUnitLeader: false,
-          isDeputyLeader: false,
-        },
+    // ensure password
+    await prisma.credential.upsert({
+      where: { userId: user.id },
+      update: { passwordHash },
+      create: { userId: user.id, passwordHash },
+    });
+
+    const unit = await prisma.organizationUnit.findUnique({ where: { code: unitCode } });
+    const jobTitle = await prisma.jobTitle.findUnique({ where: { code: jobTitleCode } });
+
+    if (unit && jobTitle) {
+      const existingPosition = await prisma.jobPosition.findFirst({
+        where: { userId: user.id, unitId: unit.id, jobTitleId: jobTitle.id },
       });
-      console.log('✅ Created job position for Trần Trung Thành at Sở KH&CN');
-    } else {
-      console.log('ℹ️ Job position already exists for Trần Trung Thành');
+      if (!existingPosition) {
+        await prisma.jobPosition.create({
+          data: {
+            userId: user.id,
+            unitId: unit.id,
+            jobTitleId: jobTitle.id,
+            isPrimary: true,
+            isUnitLeader,
+            isDeputyLeader: jobTitleCode.includes('PHO_'),
+          },
+        });
+        console.log(`✅ Created job position for ${fullName} at ${unit.name} (${jobTitle.name})`);
+      }
     }
-  } else {
-    console.warn('⚠️ Could not find targetUser, soKhcnUnit, or congChucJob to seed JobPosition');
-  }
+  };
+
+  // 1. UBND Tỉnh Đắk Lắk
+  await assignLeader('dohuuhuy@daklak.gov.vn', 'dohuuhuy', 'Đỗ Hữu Huy', 'UBND_TINH_DAKLAK', 'CHU_TICH', true);
+
+  // 2. Sở Nội vụ
+  await assignLeader('truongngoctuan@daklak.gov.vn', 'truongngoctuan', 'Trương Ngọc Tuấn', 'SO_NV', 'GIAM_DOC', true);
+
+  // 3. Sở Khoa học & Công nghệ
+  await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'GIAM_DOC', true);
+  await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_GIAM_DOC', true);
+  await assignLeader('ralantruongthanhha@daklak.gov.vn', 'ralantruongthanhha', 'Ra Lan Trương Thanh Hà', 'SO_KHCN', 'PHO_GIAM_DOC', true);
+  // Bí thư Đảng bộ thường là Giám đốc
+  await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'BI_THU_DANG_BO', true);
+  await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_BI_THU_DANG_BO', true);
+
+  // 4. Sở Tài chính
+  await assignLeader('tranvantan@daklak.gov.vn', 'tranvantan', 'Trần Văn Tân', 'SO_TC', 'GIAM_DOC', true);
+
+  // 5. Existing test user
+  await assignLeader('trungthanh@daklak.gov.vn', 'trungthanh', 'Trần Trung Thành', 'SO_KHCN', 'CONG_CHUC_PHU_TRACH', false);
+
+  // 6. Phường Tân Lập
+  await assignLeader('vuvanhung@daklak.gov.vn', 'vuvanhung', 'Vũ Văn Hưng', 'UBND_XA_TAN_LAP', 'BI_THU_DANG_BO', true);
+  await assignLeader('tranducnhat@daklak.gov.vn', 'tranducnhat', 'Trần Đức Nhật', 'UBND_XA_TAN_LAP', 'CHU_TICH', true);
+
+  // 7. Phường Tân An
+  await assignLeader('nguyenducvinh@daklak.gov.vn', 'nguyenducvinh', 'Nguyễn Đức Vinh', 'UBND_XA_TAN_AN', 'BI_THU_DANG_BO', true);
+  await assignLeader('phamtrungnghia@daklak.gov.vn', 'phamtrungnghia', 'Phạm Trung Nghĩa', 'UBND_XA_TAN_AN', 'CHU_TICH', true);
+
+
+
+  // 8.1 Trưởng phòng, Chánh văn phòng Sở KH&CN
+  // (Đã xóa dữ liệu mô phỏng theo yêu cầu sử dụng dữ liệu thật)
+
+  // 9. Các giám đốc Sở mới (cập nhật từ 2026)
+  await assignLeader('caodinhhuy@daklak.gov.vn', 'caodinhhuy', 'Cao Đình Huy', 'SO_XD', 'GIAM_DOC', true);
+
+  // 10. Các phường/xã còn lại
+  await assignLeader('nguyenthanhliem@daklak.gov.vn', 'nguyenthanhliem', 'Nguyễn Thanh Liêm', 'UBND_XA_THANH_NHAT', 'BI_THU_DANG_BO', true);
+  await assignLeader('nguyendinhtam@daklak.gov.vn', 'nguyendinhtam', 'Nguyễn Đình Tâm', 'UBND_XA_THANH_NHAT', 'CHU_TICH', true);
+
+  await assignLeader('phamtienhung@daklak.gov.vn', 'phamtienhung', 'Phạm Tiến Hưng', 'UBND_XA_HOA_PHU', 'BI_THU_DANG_BO', true);
+  await assignLeader('nguyenthehau@daklak.gov.vn', 'nguyenthehau', 'Nguyễn Thế Hậu', 'UBND_XA_HOA_PHU', 'CHU_TICH', true);
+
+  await assignLeader('danggiaduan@daklak.gov.vn', 'danggiaduan', 'Đặng Gia Duẩn', 'UBND_XA_EA_KAO', 'BI_THU_DANG_BO', true);
+  await assignLeader('ledaithang@daklak.gov.vn', 'ledaithang', 'Lê Đại Thắng', 'UBND_XA_EA_KAO', 'CHU_TICH', true);
 }
 
 main()
