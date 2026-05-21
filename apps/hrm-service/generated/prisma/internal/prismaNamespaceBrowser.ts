@@ -51,7 +51,12 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Employee: 'Employee'
+  Employee: 'Employee',
+  Task: 'Task',
+  KpiPeriod: 'KpiPeriod',
+  KpiCriteria: 'KpiCriteria',
+  KpiEvaluation: 'KpiEvaluation',
+  KpiEvaluationDetail: 'KpiEvaluationDetail'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -95,6 +100,72 @@ export const EmployeeScalarFieldEnum = {
 export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typeof EmployeeScalarFieldEnum]
 
 
+export const TaskScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  assigneeId: 'assigneeId',
+  assignerId: 'assignerId',
+  status: 'status',
+  dueDate: 'dueDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const KpiPeriodScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KpiPeriodScalarFieldEnum = (typeof KpiPeriodScalarFieldEnum)[keyof typeof KpiPeriodScalarFieldEnum]
+
+
+export const KpiCriteriaScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KpiCriteriaScalarFieldEnum = (typeof KpiCriteriaScalarFieldEnum)[keyof typeof KpiCriteriaScalarFieldEnum]
+
+
+export const KpiEvaluationScalarFieldEnum = {
+  id: 'id',
+  employeeId: 'employeeId',
+  periodId: 'periodId',
+  totalScore: 'totalScore',
+  status: 'status',
+  reviewerId: 'reviewerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KpiEvaluationScalarFieldEnum = (typeof KpiEvaluationScalarFieldEnum)[keyof typeof KpiEvaluationScalarFieldEnum]
+
+
+export const KpiEvaluationDetailScalarFieldEnum = {
+  id: 'id',
+  evaluationId: 'evaluationId',
+  criteriaId: 'criteriaId',
+  selfScore: 'selfScore',
+  reviewerScore: 'reviewerScore',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type KpiEvaluationDetailScalarFieldEnum = (typeof KpiEvaluationDetailScalarFieldEnum)[keyof typeof KpiEvaluationDetailScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -125,4 +196,41 @@ export const EmployeeOrderByRelevanceFieldEnum = {
 } as const
 
 export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
+
+
+export const TaskOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  status: 'status'
+} as const
+
+export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const KpiPeriodOrderByRelevanceFieldEnum = {
+  name: 'name'
+} as const
+
+export type KpiPeriodOrderByRelevanceFieldEnum = (typeof KpiPeriodOrderByRelevanceFieldEnum)[keyof typeof KpiPeriodOrderByRelevanceFieldEnum]
+
+
+export const KpiCriteriaOrderByRelevanceFieldEnum = {
+  name: 'name'
+} as const
+
+export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]
+
+
+export const KpiEvaluationOrderByRelevanceFieldEnum = {
+  status: 'status'
+} as const
+
+export type KpiEvaluationOrderByRelevanceFieldEnum = (typeof KpiEvaluationOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationOrderByRelevanceFieldEnum]
+
+
+export const KpiEvaluationDetailOrderByRelevanceFieldEnum = {
+  notes: 'notes'
+} as const
+
+export type KpiEvaluationDetailOrderByRelevanceFieldEnum = (typeof KpiEvaluationDetailOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationDetailOrderByRelevanceFieldEnum]
 

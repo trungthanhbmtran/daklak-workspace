@@ -22,3 +22,28 @@ export * from './enums';
  * 
  */
 export type Employee = Prisma.EmployeeModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
+ * Model KpiPeriod
+ * 
+ */
+export type KpiPeriod = Prisma.KpiPeriodModel
+/**
+ * Model KpiCriteria
+ * 
+ */
+export type KpiCriteria = Prisma.KpiCriteriaModel
+/**
+ * Model KpiEvaluation
+ * 
+ */
+export type KpiEvaluation = Prisma.KpiEvaluationModel
+/**
+ * Model KpiEvaluationDetail
+ * 
+ */
+export type KpiEvaluationDetail = Prisma.KpiEvaluationDetailModel

@@ -9,4 +9,9 @@
  * 🟢 You can import this file directly.
  */
 export type * from './models/Employee'
+export type * from './models/Task'
+export type * from './models/KpiPeriod'
+export type * from './models/KpiCriteria'
+export type * from './models/KpiEvaluation'
+export type * from './models/KpiEvaluationDetail'
 export type * from './commonInputTypes'

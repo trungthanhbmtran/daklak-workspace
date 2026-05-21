@@ -1,0 +1,77 @@
+model Task {
+  id          Int       @id @default(autoincrement())
+  title       String    @map("title")
+  description String?   @db.Text
+  assigneeId  Int       @map("assignee_id") // Employee receiving task
+  assignerId  Int       @map("assigner_id") // Employee assigning task
+  status      String    @default("TODO") // TODO, IN_PROGRESS, DONE, OVERDUE
+  dueDate     DateTime? @map("due_date") @db.Date
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  assignee    Employee  @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigner    Employee  @relation("TaskAssigner", fields: [assignerId], references: [id])
+
+  @@map("tasks")
+}
+
+model KpiPeriod {
+  id          Int             @id @default(autoincrement())
+  name        String          @map("name") // e.g. "Tháng 5/2026"
+  startDate   DateTime        @map("start_date") @db.Date
+  endDate     DateTime        @map("end_date") @db.Date
+  evaluations KpiEvaluation[]
+
+  createdAt   DateTime        @default(now()) @map("created_at")
+  updatedAt   DateTime        @updatedAt @map("updated_at")
+
+  @@map("kpi_periods")
+}
+
+model KpiCriteria {
+  id          Int                   @id @default(autoincrement())
+  name        String                @map("name")
+  weight      Float                 @default(1.0) @map("weight")
+  details     KpiEvaluationDetail[]
+
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+
+  @@map("kpi_criteria")
+}
+
+model KpiEvaluation {
+  id          Int                   @id @default(autoincrement())
+  employeeId  Int                   @map("employee_id")
+  periodId    Int                   @map("period_id")
+  totalScore  Float?                @map("total_score")
+  status      String                @default("DRAFT") // DRAFT, SUBMITTED, APPROVED
+  reviewerId  Int?                  @map("reviewer_id")
+
+  employee    Employee              @relation("KpiEmployee", fields: [employeeId], references: [id])
+  reviewer    Employee?             @relation("KpiReviewer", fields: [reviewerId], references: [id])
+  period      KpiPeriod             @relation(fields: [periodId], references: [id])
+  details     KpiEvaluationDetail[]
+
+  createdAt   DateTime              @default(now()) @map("created_at")
+  updatedAt   DateTime              @updatedAt @map("updated_at")
+
+  @@map("kpi_evaluations")
+}
+
+model KpiEvaluationDetail {
+  id            Int           @id @default(autoincrement())
+  evaluationId  Int           @map("evaluation_id")
+  criteriaId    Int           @map("criteria_id")
+  selfScore     Float?        @map("self_score")
+  reviewerScore Float?        @map("reviewer_score")
+  notes         String?       @db.Text
+
+  evaluation    KpiEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  criteria      KpiCriteria   @relation(fields: [criteriaId], references: [id])
+
+  createdAt     DateTime      @default(now()) @map("created_at")
+  updatedAt     DateTime      @updatedAt @map("updated_at")
+
+  @@map("kpi_evaluation_details")
+}
