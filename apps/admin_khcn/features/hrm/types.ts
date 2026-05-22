@@ -138,4 +138,5 @@ export interface HrmPlanObjective {
   assignee?: HrmEmployee;
   startDate?: string;
   dueDate?: string;
+  cases?: { id: string; title: string; isDone: boolean }[];
 }

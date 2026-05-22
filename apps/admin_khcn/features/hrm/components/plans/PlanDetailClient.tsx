@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Target, Plus, CheckCircle2, Circle, Clock, Building2, Users, HeartHandshake, Lightbulb, PieChart } from "lucide-react";
+import { ArrowLeft, Target, Plus, CheckCircle2, Circle, Clock, Building2, Users, HeartHandshake, Lightbulb, PieChart, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { hrmPlansApi, hrmObjectivesApi } from "@/features/hrm/api";
@@ -62,7 +62,7 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
 
   // Calculate stats
   const totalWeight = (pId: BscPerspective) => objectives.filter(o => o.perspective === pId).reduce((sum, o) => sum + (o.weight || 0), 0);
-  
+
   return (
     <div className="space-y-6 p-4 md:p-8 bg-slate-50 min-h-screen">
       {/* Header */}
@@ -76,7 +76,7 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
               <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-md uppercase">
                 Strategy Dashboard
               </span>
-              <span className={cn("px-2.5 py-1 text-xs font-bold rounded-md uppercase", 
+              <span className={cn("px-2.5 py-1 text-xs font-bold rounded-md uppercase",
                 plan.status === "ACTIVE" ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-700"
               )}>
                 {plan.status}
@@ -114,8 +114,8 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                   <div className="text-xs font-semibold text-slate-500">
                     Trọng số: <span className={cn("text-sm", isOverWeight ? "text-red-500" : "text-slate-700")}>{currentWeight}%</span> / 100%
                   </div>
-                  <Button 
-                    size="sm" 
+                  <Button
+                    size="sm"
                     onClick={() => handleOpenDrawer(p.id)}
                     className={cn("rounded-lg font-bold shadow-sm h-8", "bg-white border", p.borderColor, p.color, "hover:bg-white/80")}
                   >
@@ -134,9 +134,9 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                 ) : (
                   pObjs.map(obj => (
                     <Card key={obj.id} className="rounded-2xl border-0 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                      <div className={cn("absolute top-0 left-0 w-1 h-full", 
-                        obj.status === "DONE" ? "bg-emerald-500" : 
-                        obj.status === "IN_PROGRESS" ? "bg-amber-500" : "bg-slate-300"
+                      <div className={cn("absolute top-0 left-0 w-1 h-full",
+                        obj.status === "DONE" ? "bg-emerald-500" :
+                          obj.status === "IN_PROGRESS" ? "bg-amber-500" : "bg-slate-300"
                       )}></div>
                       <CardContent className="p-4 pl-5">
                         <div className="flex justify-between items-start mb-2">
@@ -144,7 +144,7 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                             {obj.title}
                           </h4>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-2 my-3">
                           <div className="bg-slate-50 p-2 rounded-lg border border-slate-100">
                             <p className="text-[10px] text-slate-400 uppercase font-bold">Metric</p>
@@ -156,11 +156,29 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                           </div>
                         </div>
 
+                        {obj.cases && obj.cases.length > 0 && (
+                          <div className="mt-3 bg-indigo-50/50 rounded-xl border border-indigo-100 p-3">
+                            <p className="text-xs font-bold text-indigo-700 flex items-center gap-1.5 mb-2">
+                              <ListChecks className="w-3.5 h-3.5" /> Chi tiết công việc ({obj.cases.filter(c => c.isDone).length}/{obj.cases.length})
+                            </p>
+                            <ul className="space-y-1.5">
+                              {obj.cases.map((c, idx) => (
+                                <li key={c.id} className="flex items-start gap-2 text-xs text-slate-600">
+                                  <div className="mt-0.5">
+                                    {c.isDone ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Circle className="w-3.5 h-3.5 text-slate-300" />}
+                                  </div>
+                                  <span className={cn(c.isDone && "line-through text-slate-400")}>{c.title}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
                         <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-50">
                           <div className="flex items-center gap-1.5 text-xs font-medium text-slate-500">
                             {obj.status === "DONE" ? <CheckCircle2 className="w-4 h-4 text-emerald-500" /> :
-                             obj.status === "IN_PROGRESS" ? <Clock className="w-4 h-4 text-amber-500" /> :
-                             <Circle className="w-4 h-4 text-slate-300" />}
+                              obj.status === "IN_PROGRESS" ? <Clock className="w-4 h-4 text-amber-500" /> :
+                                <Circle className="w-4 h-4 text-slate-300" />}
                             {obj.weight}% KPI
                           </div>
                           <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold" title="Người phụ trách">
@@ -177,9 +195,9 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
         })}
       </div>
 
-      <PlanTaskAssignDrawer 
-        isOpen={drawerOpen} 
-        onClose={() => setDrawerOpen(false)} 
+      <PlanTaskAssignDrawer
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
         planId={planId}
         perspective={activePerspective}
         onSuccess={() => {

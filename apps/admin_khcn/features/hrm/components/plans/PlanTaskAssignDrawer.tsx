@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Target, Users, Scale, FileSignature, Save, X } from "lucide-react";
+import { Target, Users, Scale, FileSignature, Save, X, Plus, Trash2, ListChecks } from "lucide-react";
 import { hrmApi, hrmObjectivesApi } from "@/features/hrm/api";
 import type { BscPerspective, HrmEmployee } from "@/features/hrm/types";
 
@@ -41,6 +41,19 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
     dueDate: "",
   });
 
+  const [cases, setCases] = useState<{ id: string, title: string }[]>([]);
+  const [newCaseInput, setNewCaseInput] = useState("");
+
+  const handleAddCase = () => {
+    if (!newCaseInput.trim()) return;
+    setCases([...cases, { id: Date.now().toString(), title: newCaseInput.trim() }]);
+    setNewCaseInput("");
+  };
+
+  const handleRemoveCase = (id: string) => {
+    setCases(cases.filter(c => c.id !== id));
+  };
+
   useEffect(() => {
     if (isOpen) {
       setLoadingEmployees(true);
@@ -56,6 +69,8 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
       setFormData({
         title: "", description: "", metric: "", target: "", weight: 10, assigneeId: "", startDate: "", dueDate: ""
       });
+      setCases([]);
+      setNewCaseInput("");
     }
   }, [isOpen]);
 
@@ -73,6 +88,7 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
         perspective,
         ...formData,
         assigneeId: Number(formData.assigneeId),
+        cases: cases.map(c => ({ ...c, isDone: false })),
       });
       toast.success("Đã giao việc & thiết lập mục tiêu thành công!");
       onSuccess();
@@ -108,12 +124,12 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
               <h3 className="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-50 pb-2">
                 <FileSignature className="w-4 h-4 text-blue-500" /> Thông tin cơ sở
               </h3>
-              
+
               <div className="space-y-2">
                 <Label className="font-bold text-slate-700">Tên Mục tiêu / Công việc <span className="text-red-500">*</span></Label>
-                <Input 
-                  placeholder="VD: Tối ưu chi phí vận hành..." 
-                  value={formData.title} 
+                <Input
+                  placeholder="VD: Tối ưu chi phí vận hành..."
+                  value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
                   className="h-11 bg-slate-50"
                 />
@@ -121,12 +137,45 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
 
               <div className="space-y-2">
                 <Label className="font-bold text-slate-700">Mô tả chi tiết</Label>
-                <textarea 
+                <textarea
                   className="w-full min-h-[100px] p-3 rounded-xl border border-slate-200 bg-slate-50 outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                   placeholder="Diễn giải thêm..."
                   value={formData.description}
                   onChange={e => setFormData({ ...formData, description: e.target.value })}
                 />
+              </div>
+
+              {/* Các case nhiệm vụ chi tiết */}
+              <div className="space-y-3 pt-4 border-t border-slate-100">
+                <Label className="font-bold text-slate-700 flex items-center gap-2">
+                  <ListChecks className="w-4 h-4 text-indigo-500" /> Các case nhiệm vụ chi tiết (Sub-tasks)
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="VD: Khảo sát hiện trạng..."
+                    value={newCaseInput}
+                    onChange={e => setNewCaseInput(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddCase())}
+                    className="h-10 bg-slate-50"
+                  />
+                  <Button type="button" onClick={handleAddCase} variant="outline" className="h-10 border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+                    <Plus className="w-4 h-4" /> Thêm
+                  </Button>
+                </div>
+                {cases.length > 0 && (
+                  <ul className="space-y-2 mt-2">
+                    {cases.map((c, idx) => (
+                      <li key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
+                        <span className="text-sm text-slate-700 font-medium">
+                          {idx + 1}. {c.title}
+                        </span>
+                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveCase(c.id)} className="h-6 w-6 text-slate-400 hover:text-red-500 rounded-full">
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </div>
 
@@ -135,22 +184,22 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
               <h3 className="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-50 pb-2">
                 <Target className="w-4 h-4 text-emerald-500" /> Thiết lập KPI+
               </h3>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="font-bold text-slate-700">Chỉ số đo lường (Metric) <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="VD: Tỷ lệ % / Doanh thu..." 
-                    value={formData.metric} 
+                  <Input
+                    placeholder="VD: Tỷ lệ % / Doanh thu..."
+                    value={formData.metric}
                     onChange={e => setFormData({ ...formData, metric: e.target.value })}
                     className="h-11"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-bold text-slate-700">Chỉ tiêu (Target) <span className="text-red-500">*</span></Label>
-                  <Input 
-                    placeholder="VD: > 15%" 
-                    value={formData.target} 
+                  <Input
+                    placeholder="VD: > 15%"
+                    value={formData.target}
                     onChange={e => setFormData({ ...formData, target: e.target.value })}
                     className="h-11 border-emerald-300 focus-visible:ring-emerald-500"
                   />
@@ -162,10 +211,10 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
                   <Scale className="w-4 h-4 text-slate-400" /> Trọng số (Weight %)
                 </Label>
                 <div className="flex items-center gap-4">
-                  <input 
-                    type="range" 
-                    min="1" max="100" 
-                    value={formData.weight} 
+                  <input
+                    type="range"
+                    min="1" max="100"
+                    value={formData.weight}
                     onChange={e => setFormData({ ...formData, weight: Number(e.target.value) })}
                     className="flex-1 accent-indigo-600"
                   />
@@ -181,10 +230,10 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
               <h3 className="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-50 pb-2">
                 <Users className="w-4 h-4 text-amber-500" /> Phân công & Tiến độ
               </h3>
-              
+
               <div className="space-y-2">
                 <Label className="font-bold text-slate-700">Người thực hiện chính <span className="text-red-500">*</span></Label>
-                <select 
+                <select
                   className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   value={formData.assigneeId}
                   onChange={e => setFormData({ ...formData, assigneeId: e.target.value })}
@@ -200,18 +249,18 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label className="font-bold text-slate-700">Ngày bắt đầu</Label>
-                  <Input 
-                    type="date" 
-                    value={formData.startDate} 
+                  <Input
+                    type="date"
+                    value={formData.startDate}
                     onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                     className="h-11 bg-slate-50"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-bold text-slate-700">Deadline</Label>
-                  <Input 
-                    type="date" 
-                    value={formData.dueDate} 
+                  <Input
+                    type="date"
+                    value={formData.dueDate}
                     onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
                     className="h-11 bg-slate-50"
                   />
