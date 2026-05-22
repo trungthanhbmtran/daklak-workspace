@@ -18,6 +18,8 @@ export { LeaveRequestListClient } from "./components/leave/LeaveRequestListClien
 export { TimesheetClient } from "./components/attendance/TimesheetClient";
 export { ContractListClient } from "./components/contracts/ContractListClient";
 export { PayrollListClient } from "./components/payroll/PayrollListClient";
+export { TaskListClient } from "./components/tasks/TaskListClient";
+export { KpiDashboardClient } from "./components/kpi/KpiDashboardClient";
 
 export {
   hrmDepartmentsApi,

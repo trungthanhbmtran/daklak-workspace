@@ -80,6 +80,20 @@ export const MICROSERVICES = {
     URL: getHrmUrl(),
     SERVICE: 'EmployeeHandlers',
   },
+  TASK: {
+    PACKAGE: 'task',
+    SYMBOL: 'TASK_PACKAGE',
+    PROTO: 'hrm/task.proto',
+    URL: getHrmUrl(),
+    SERVICE: 'TaskService',
+  },
+  KPI: {
+    PACKAGE: 'kpi',
+    SYMBOL: 'KPI_PACKAGE',
+    PROTO: 'hrm/kpi.proto',
+    URL: getHrmUrl(),
+    SERVICE: 'KpiService',
+  },
   // Document
   DOCUMENT_CATEGORY: {
     PACKAGE: 'category',

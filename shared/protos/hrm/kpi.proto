@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package kpi;
+
+service KpiService {
+  rpc FindPeriods (FindPeriodsRequest) returns (PeriodsResponse) {}
+  rpc CreatePeriod (CreatePeriodRequest) returns (PeriodResponse) {}
+  rpc FindCriteria (FindCriteriaRequest) returns (CriteriaResponse) {}
+  rpc CreateEvaluation (CreateEvaluationRequest) returns (EvaluationResponse) {}
+  rpc FindEvaluations (FindEvaluationsRequest) returns (EvaluationsResponse) {}
+}
+
+message FindPeriodsRequest {}
+
+message PeriodResponse {
+  int32 id = 1;
+  string name = 2;
+  string startDate = 3;
+  string endDate = 4;
+}
+
+message PeriodsResponse {
+  repeated PeriodResponse periods = 1;
+}
+
+message CreatePeriodRequest {
+  string name = 1;
+  string startDate = 2;
+  string endDate = 3;
+}
+
+message FindCriteriaRequest {}
+
+message CriterionResponse {
+  int32 id = 1;
+  string name = 2;
+  float weight = 3;
+}
+
+message CriteriaResponse {
+  repeated CriterionResponse criteria = 1;
+}
+
+message CreateEvaluationRequest {
+  int32 employeeId = 1;
+  int32 periodId = 2;
+  repeated EvaluationDetailInput details = 3;
+}
+
+message EvaluationDetailInput {
+  int32 criteriaId = 1;
+  float selfScore = 2;
+  string notes = 3;
+}
+
+message EvaluationResponse {
+  int32 id = 1;
+  int32 employeeId = 2;
+  int32 periodId = 3;
+  string status = 4;
+}
+
+message FindEvaluationsRequest {
+  int32 employeeId = 1;
+}
+
+message EvaluationsResponse {
+  repeated EvaluationResponse evaluations = 1;
+}

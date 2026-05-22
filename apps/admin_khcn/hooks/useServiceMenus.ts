@@ -176,6 +176,23 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
         order: 8,
       });
     }
+
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/tasks"))) {
+      menuItems.push({
+        name: "Giao việc",
+        href: `${config.basePath}/tasks`,
+        icon: ListTree,
+        order: 9,
+      });
+    }
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/kpi"))) {
+      menuItems.push({
+        name: "Đánh giá KPI",
+        href: `${config.basePath}/kpi`,
+        icon: Settings2,
+        order: 10,
+      });
+    }
   }
 
   return {

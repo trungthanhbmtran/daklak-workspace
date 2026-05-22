@@ -537,15 +537,20 @@ async function main() {
     });
     await linkMenuPBAC(node.id, res, 'READ');
   }
+  // Clean up redundant menus
+  await prisma.menu.deleteMany({
+    where: { code: 'HRM_MENU_DEPARTMENTS' }
+  });
 
   // 3. HRM Module
   const hrmMenus = [
     { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_DEPARTMENTS', name: 'Sơ đồ tổ chức', route: 'departments', icon: 'git-network-outline', order: 2, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_LEAVE', name: 'Quản lý nghỉ phép', route: 'leave', icon: 'calendar-outline', order: 3, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_ATTENDANCE', name: 'Quản lý chấm công', route: 'attendance', icon: 'time-outline', order: 4, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_CONTRACTS', name: 'Hợp đồng lao động', route: 'contracts', icon: 'document-text-outline', order: 5, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_PAYROLL', name: 'Quản lý lương', route: 'payroll', icon: 'cash-outline', order: 6, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_LEAVE', name: 'Quản lý nghỉ phép', route: 'leave', icon: 'calendar-outline', order: 2, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_ATTENDANCE', name: 'Quản lý chấm công', route: 'attendance', icon: 'time-outline', order: 3, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_CONTRACTS', name: 'Hợp đồng lao động', route: 'contracts', icon: 'document-text-outline', order: 4, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_PAYROLL', name: 'Quản lý lương', route: 'payroll', icon: 'cash-outline', order: 5, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_TASKS', name: 'Giao việc', route: 'tasks', icon: 'list-outline', order: 6, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_KPI', name: 'Đánh giá KPI', route: 'kpi', icon: 'settings-outline', order: 7, res: 'HRM_EMPLOYEE' },
   ];
 
   for (const { res, ...m } of hrmMenus) {
