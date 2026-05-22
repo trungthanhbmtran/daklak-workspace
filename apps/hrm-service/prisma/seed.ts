@@ -15,9 +15,9 @@ async function main() {
   console.log('🔹 Seed HRM employees...');
   const startDate = new Date('2020-01-01');
 
-  // Fetch real units and job titles from the database
-  const units: any[] = await prisma.$queryRaw`SELECT id, code FROM OrganizationUnit`;
-  const jobTitles: any[] = await prisma.$queryRaw`SELECT id, code FROM JobTitle`;
+  // Fetch real units and job titles from the user-service database (admin_systems)
+  const units: any[] = await prisma.$queryRaw`SELECT id, code FROM admin_systems.organization_units`;
+  const jobTitles: any[] = await prisma.$queryRaw`SELECT id, code FROM admin_systems.job_titles`;
 
   const unitMap = Object.fromEntries(units.map(u => [u.code, u.id]));
   const jobMap = Object.fromEntries(jobTitles.map(j => [j.code, j.id]));

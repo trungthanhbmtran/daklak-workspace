@@ -155,3 +155,50 @@ export const hrmPayrollApi = {
     }));
   }
 };
+export interface HrmMasterPlan {
+  id: number;
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+  createdAt: string;
+}
+
+// Giả lập (Mock) dữ liệu cho kế hoạch tổng do backend chưa có endpoint thực sự
+let mockPlans: HrmMasterPlan[] = [
+  { id: 1, title: "Kế hoạch năm 2026", description: "Các nhiệm vụ trọng tâm 2026", startDate: "2026-01-01", endDate: "2026-12-31", status: "ACTIVE", createdAt: "2026-01-01T00:00:00Z" },
+  { id: 2, title: "Kế hoạch Quý III/2026", description: "Đẩy mạnh chuyển đổi số", startDate: "2026-07-01", endDate: "2026-09-30", status: "ACTIVE", createdAt: "2026-06-25T00:00:00Z" }
+];
+
+export const hrmPlansApi = {
+  list(params: any = {}): Promise<{ data: HrmMasterPlan[]; meta: any }> {
+    // Trả về mock data thay vì gọi API thật
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          data: [...mockPlans],
+          meta: { total: mockPlans.length, page: 1, pageSize: 20, totalPages: 1 }
+        });
+      }, 500);
+    });
+  },
+  
+  create(payload: any): Promise<{ success: boolean; data?: HrmMasterPlan }> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newPlan: HrmMasterPlan = {
+          id: Date.now(),
+          title: payload.title,
+          description: payload.description,
+          startDate: payload.startDate,
+          endDate: payload.endDate,
+          status: payload.status || "ACTIVE",
+          createdAt: new Date().toISOString()
+        };
+        mockPlans.unshift(newPlan);
+        resolve({ success: true, data: newPlan });
+      }, 600);
+    });
+  }
+};

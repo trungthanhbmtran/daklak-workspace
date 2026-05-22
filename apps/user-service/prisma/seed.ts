@@ -258,6 +258,12 @@ async function main() {
   ];
 
   console.log(`📦 Seeding ${categoriesData.length} categories with dual translations...`);
+  try {
+    await prisma.$executeRawUnsafe('ALTER TABLE sys_categories DROP COLUMN name, DROP COLUMN description;');
+    console.log('✅ Dropped unused legacy columns from sys_categories');
+  } catch (e) {
+    // Ignore if already dropped
+  }
   for (const cat of categoriesData) {
     const category = await prisma.category.upsert({
       where: { group_code: { group: cat.group, code: cat.code } },

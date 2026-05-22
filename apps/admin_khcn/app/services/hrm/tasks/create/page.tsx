@@ -10,8 +10,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { hrmApi } from "@/features/hrm/api";
-import type { HrmEmployee } from "@/features/hrm/types";
+import { hrmApi, hrmPlansApi } from "@/features/hrm/api";
+import type { HrmEmployee, HrmMasterPlan } from "@/features/hrm/types";
 
 const FRAMEWORK_TEMPLATES = {
   SMART: {
@@ -145,14 +145,15 @@ export default function CreateTaskPage() {
 
   const [employees, setEmployees] = useState<(HrmEmployee & { workload: number })[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(true);
+  const [plans, setPlans] = useState<HrmMasterPlan[]>([]);
 
   useEffect(() => {
+    // Tải nhân sự
     hrmApi.list({ pageSize: 100 }).then(res => {
-      // Giả lập (mock) tham số workload vì backend chưa có trường này
       const withWorkload = res.data.map(emp => ({
         ...emp,
-        workload: Math.floor(Math.random() * 8) // Số task đang làm từ 0-7
-      })).sort((a, b) => a.workload - b.workload); // Sắp xếp tăng dần theo khối lượng
+        workload: Math.floor(Math.random() * 8)
+      })).sort((a, b) => a.workload - b.workload);
       setEmployees(withWorkload);
       setLoadingEmployees(false);
     }).catch(err => {
@@ -160,6 +161,14 @@ export default function CreateTaskPage() {
       toast.error("Lỗi khi tải danh sách nhân sự");
       setLoadingEmployees(false);
     });
+
+    // Tải danh sách kế hoạch tổng
+    hrmPlansApi.list().then(res => {
+      setPlans(res.data);
+      if (res.data.length > 0 && taskInfo.basis === "Kế hoạch Quý III/2026") {
+        setTaskInfo(prev => ({ ...prev, basis: res.data[0].id.toString() }));
+      }
+    }).catch(err => console.error(err));
   }, []);
 
   const handleAutoAssign = () => {
@@ -293,10 +302,13 @@ export default function CreateTaskPage() {
                         value={taskInfo.basis}
                         onChange={e => setTaskInfo({ ...taskInfo, basis: e.target.value })}
                       >
-                        <option>Kế hoạch Năm 2026</option>
-                        <option>Kế hoạch Quý III/2026</option>
-                        <option>Chỉ đạo đột xuất của Lãnh đạo</option>
-                        <option>Nghị quyết số 123/NQ-CP</option>
+                        {plans.length === 0 ? (
+                          <option value="">Đang tải hoặc chưa có kế hoạch...</option>
+                        ) : (
+                          plans.map(p => (
+                            <option key={p.id} value={p.id.toString()}>{p.title}</option>
+                          ))
+                        )}
                       </select>
                     </div>
 

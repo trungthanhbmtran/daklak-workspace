@@ -111,3 +111,13 @@ export interface HrmPayrollRecord {
   status: "DRAFT" | "APPROVED" | "PAID";
   employee?: HrmEmployee;
 }
+
+export interface HrmMasterPlan {
+  id: number;
+  title: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
+  createdAt: string;
+}
