@@ -121,3 +121,21 @@ export interface HrmMasterPlan {
   status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
   createdAt: string;
 }
+
+export type BscPerspective = "FINANCIAL" | "CUSTOMER" | "INTERNAL_PROCESS" | "LEARNING_GROWTH";
+
+export interface HrmPlanObjective {
+  id: number;
+  planId: number;
+  perspective: BscPerspective;
+  title: string;
+  description?: string;
+  metric?: string;
+  target?: string;
+  weight?: number; // percentage
+  status: "TODO" | "IN_PROGRESS" | "DONE";
+  assigneeId?: number;
+  assignee?: HrmEmployee;
+  startDate?: string;
+  dueDate?: string;
+}

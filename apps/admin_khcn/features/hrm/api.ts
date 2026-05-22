@@ -165,6 +165,8 @@ export interface HrmMasterPlan {
   createdAt: string;
 }
 
+import { HrmPlanObjective } from "./types";
+
 // Giả lập (Mock) dữ liệu cho kế hoạch tổng do backend chưa có endpoint thực sự
 let mockPlans: HrmMasterPlan[] = [
   { id: 1, title: "Kế hoạch năm 2026", description: "Các nhiệm vụ trọng tâm 2026", startDate: "2026-01-01", endDate: "2026-12-31", status: "ACTIVE", createdAt: "2026-01-01T00:00:00Z" },
@@ -199,6 +201,45 @@ export const hrmPlansApi = {
         mockPlans.unshift(newPlan);
         resolve({ success: true, data: newPlan });
       }, 600);
+    });
+  },
+  
+  getOne(id: number): Promise<HrmMasterPlan | null> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(mockPlans.find(p => p.id === id) || null);
+      }, 300);
+    });
+  }
+};
+
+let mockObjectives: HrmPlanObjective[] = [
+  { id: 1, planId: 1, perspective: "FINANCIAL", title: "Tối ưu ngân sách Q3", metric: "Tỷ lệ tiết kiệm", target: "10%", weight: 30, status: "IN_PROGRESS" },
+  { id: 2, planId: 1, perspective: "CUSTOMER", title: "Nâng cao độ hài lòng", metric: "NPS Score", target: "> 85", weight: 20, status: "TODO" },
+  { id: 3, planId: 1, perspective: "INTERNAL_PROCESS", title: "Số hóa quy trình duyệt", metric: "Thời gian xử lý", target: "< 24h", weight: 30, status: "DONE" },
+  { id: 4, planId: 1, perspective: "LEARNING_GROWTH", title: "Đào tạo nhân sự mới", metric: "Tỷ lệ pass test", target: "100%", weight: 20, status: "TODO" },
+];
+
+export const hrmObjectivesApi = {
+  list(planId: number): Promise<{ data: HrmPlanObjective[] }> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ data: mockObjectives.filter(o => o.planId === planId) });
+      }, 400);
+    });
+  },
+  
+  create(payload: any): Promise<{ success: boolean; data?: HrmPlanObjective }> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newObj: HrmPlanObjective = {
+          id: Date.now(),
+          ...payload,
+          status: payload.status || "TODO"
+        };
+        mockObjectives.push(newObj);
+        resolve({ success: true, data: newObj });
+      }, 500);
     });
   }
 };

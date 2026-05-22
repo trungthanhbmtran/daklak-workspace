@@ -147,9 +147,11 @@ export const PlanListClient = () => {
               </CardContent>
 
               <CardFooter className="pt-4 border-t border-slate-50 flex justify-between gap-2 bg-slate-50/50 group-hover:bg-indigo-50/30 transition-colors">
-                <Button variant="ghost" className="flex-1 rounded-xl text-slate-600 hover:text-indigo-700 hover:bg-indigo-100/50 font-semibold">
-                  <Eye className="w-4 h-4 mr-2" /> Xem
-                </Button>
+                <Link href={`/services/hrm/plans/${plan.id}`} className="flex-1">
+                  <Button variant="ghost" className="w-full rounded-xl text-slate-600 hover:text-indigo-700 hover:bg-indigo-100/50 font-semibold">
+                    <Eye className="w-4 h-4 mr-2" /> Xem
+                  </Button>
+                </Link>
                 <div className="w-px h-6 bg-slate-200 self-center"></div>
                 <Button variant="ghost" className="flex-1 rounded-xl text-slate-600 hover:text-amber-700 hover:bg-amber-100/50 font-semibold">
                   <Edit className="w-4 h-4 mr-2" /> Sửa
