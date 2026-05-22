@@ -12,6 +12,7 @@ import { hrmPlansApi, hrmObjectivesApi, hrmDepartmentsApi } from "@/features/hrm
 import type { HrmMasterPlan, HrmPlanObjective, HrmPlanPerspective, HrmDepartment } from "@/features/hrm/types";
 import { cn } from "@/lib/utils";
 import { PlanTaskAssignDrawer } from "./PlanTaskAssignDrawer";
+import { PlanAutoGeneratorModal } from "./PlanAutoGeneratorModal";
 import { toast } from "sonner";
 
 export const PlanDetailClient = ({ planId }: { planId: number }) => {
@@ -28,6 +29,8 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
   const [addColOpen, setAddColOpen] = useState(false);
   const [newColTitle, setNewColTitle] = useState("");
   const [newColColor, setNewColColor] = useState("indigo");
+
+  const [aiModalOpen, setAiModalOpen] = useState(false);
 
   const loadData = () => {
     setLoading(true);
@@ -111,6 +114,16 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
             </h1>
             <p className="text-sm text-slate-500 mt-1 max-w-2xl">{plan.description || "Quản trị hiệu suất theo chuẩn Balanced Scorecard & KPI+"}</p>
           </div>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <Button 
+            onClick={() => setAiModalOpen(true)}
+            className="rounded-xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-lg shadow-indigo-200 hover:opacity-90 border-0 flex items-center gap-2 h-11 px-5"
+          >
+            <Lightbulb className="w-5 h-5 text-yellow-200" />
+            <span className="hidden sm:inline">AI Lập Kế Hoạch</span>
+          </Button>
         </div>
       </div>
 
@@ -262,6 +275,16 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
         perspectiveTitle={activePerspectiveTitle}
         onSuccess={() => {
           setDrawerOpen(false);
+          loadData();
+        }}
+      />
+      
+      <PlanAutoGeneratorModal
+        isOpen={aiModalOpen}
+        onClose={() => setAiModalOpen(false)}
+        plan={plan}
+        onSuccess={() => {
+          setAiModalOpen(false);
           loadData();
         }}
       />
