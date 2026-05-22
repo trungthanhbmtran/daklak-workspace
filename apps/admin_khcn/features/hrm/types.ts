@@ -120,14 +120,19 @@ export interface HrmMasterPlan {
   endDate?: string;
   status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
   createdAt: string;
+  perspectives?: HrmPlanPerspective[];
 }
 
-export type BscPerspective = "FINANCIAL" | "CUSTOMER" | "INTERNAL_PROCESS" | "LEARNING_GROWTH";
+export interface HrmPlanPerspective {
+  id: string;
+  title: string;
+  colorClass: string;
+}
 
 export interface HrmPlanObjective {
   id: number;
   planId: number;
-  perspective: BscPerspective;
+  perspective: string;
   title: string;
   description?: string;
   metric?: string;

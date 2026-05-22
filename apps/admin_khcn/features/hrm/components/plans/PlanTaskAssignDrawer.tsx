@@ -8,24 +8,18 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Target, Users, Scale, FileSignature, Save, X, Plus, Trash2, ListChecks, Sparkles } from "lucide-react";
 import { hrmApi, hrmObjectivesApi, hrmTaskThemesApi } from "@/features/hrm/api";
-import type { BscPerspective, HrmEmployee, HrmTaskTheme } from "@/features/hrm/types";
+import type { HrmEmployee, HrmTaskTheme } from "@/features/hrm/types";
 
 interface PlanTaskAssignDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   planId: number;
-  perspective: BscPerspective;
+  perspectiveId: string;
+  perspectiveTitle: string;
   onSuccess: () => void;
 }
 
-const PERSPECTIVE_LABELS: Record<BscPerspective, string> = {
-  FINANCIAL: "Tài chính",
-  CUSTOMER: "Khách hàng",
-  INTERNAL_PROCESS: "Quy trình nội bộ",
-  LEARNING_GROWTH: "Học hỏi & Phát triển",
-};
-
-export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onSuccess }: PlanTaskAssignDrawerProps) => {
+export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, perspectiveTitle, onSuccess }: PlanTaskAssignDrawerProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [employees, setEmployees] = useState<HrmEmployee[]>([]);
   const [themes, setThemes] = useState<HrmTaskTheme[]>([]);
@@ -125,7 +119,7 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
     try {
       await hrmObjectivesApi.create({
         planId,
-        perspective,
+        perspective: perspectiveId,
         ...formData,
         assigneeId: Number(formData.assigneeId),
         cases: cases.map(c => ({ ...c, isDone: false })),
@@ -147,7 +141,7 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-md uppercase">
-                  {PERSPECTIVE_LABELS[perspective]}
+                  {perspectiveTitle}
                 </span>
               </div>
               <SheetTitle className="text-xl font-black text-slate-800">Giao việc & Thiết lập KPI</SheetTitle>

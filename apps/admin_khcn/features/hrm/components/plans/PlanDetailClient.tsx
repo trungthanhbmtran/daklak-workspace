@@ -5,8 +5,11 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Target, Plus, CheckCircle2, Circle, Clock, Building2, Users, HeartHandshake, Lightbulb, PieChart, ListChecks } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { hrmPlansApi, hrmObjectivesApi } from "@/features/hrm/api";
-import type { HrmMasterPlan, HrmPlanObjective, BscPerspective } from "@/features/hrm/types";
+import type { HrmMasterPlan, HrmPlanObjective, HrmPlanPerspective } from "@/features/hrm/types";
 import { cn } from "@/lib/utils";
 import { PlanTaskAssignDrawer } from "./PlanTaskAssignDrawer";
 import { toast } from "sonner";
@@ -18,7 +21,12 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
   const [loading, setLoading] = useState(true);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activePerspective, setActivePerspective] = useState<BscPerspective>("FINANCIAL");
+  const [activePerspectiveId, setActivePerspectiveId] = useState<string>("FINANCIAL");
+  const [activePerspectiveTitle, setActivePerspectiveTitle] = useState<string>("Tài chính");
+
+  const [addColOpen, setAddColOpen] = useState(false);
+  const [newColTitle, setNewColTitle] = useState("");
+  const [newColColor, setNewColColor] = useState("indigo");
 
   const loadData = () => {
     setLoading(true);
@@ -40,17 +48,30 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
     loadData();
   }, [planId]);
 
-  const handleOpenDrawer = (perspective: BscPerspective) => {
-    setActivePerspective(perspective);
+  const handleOpenDrawer = (perspectiveId: string, perspectiveTitle: string) => {
+    setActivePerspectiveId(perspectiveId);
+    setActivePerspectiveTitle(perspectiveTitle);
     setDrawerOpen(true);
   };
 
-  const PERSPECTIVES: { id: BscPerspective; label: string; icon: any; color: string; bg: string; borderColor: string }[] = [
-    { id: "FINANCIAL", label: "Tài chính", icon: Building2, color: "text-amber-600", bg: "bg-amber-50", borderColor: "border-amber-200" },
-    { id: "CUSTOMER", label: "Khách hàng", icon: HeartHandshake, color: "text-rose-600", bg: "bg-rose-50", borderColor: "border-rose-200" },
-    { id: "INTERNAL_PROCESS", label: "Quy trình nội bộ", icon: Target, color: "text-blue-600", bg: "bg-blue-50", borderColor: "border-blue-200" },
-    { id: "LEARNING_GROWTH", label: "Học hỏi & Phát triển", icon: Lightbulb, color: "text-emerald-600", bg: "bg-emerald-50", borderColor: "border-emerald-200" }
-  ];
+  const handleAddColumn = async () => {
+    if (!newColTitle.trim() || !plan) return;
+    const newCol: HrmPlanPerspective = {
+      id: "custom_" + Date.now(),
+      title: newColTitle.trim(),
+      colorClass: newColColor
+    };
+    const updatedPerspectives = [...(plan.perspectives || []), newCol];
+    
+    // Update local state immediately for fast feedback
+    setPlan({ ...plan, perspectives: updatedPerspectives });
+    setAddColOpen(false);
+    setNewColTitle("");
+    
+    // Update backend (mock)
+    await hrmPlansApi.update(plan.id, { perspectives: updatedPerspectives });
+    toast.success("Đã thêm nhóm mục tiêu mới");
+  };
 
   if (loading) {
     return <div className="p-10 text-center animate-pulse text-slate-500 font-bold">Đang tải cấu trúc BSC...</div>;
@@ -61,7 +82,7 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
   }
 
   // Calculate stats
-  const totalWeight = (pId: BscPerspective) => objectives.filter(o => o.perspective === pId).reduce((sum, o) => sum + (o.weight || 0), 0);
+  const totalWeight = (pId: string) => objectives.filter(o => o.perspective === pId).reduce((sum, o) => sum + (o.weight || 0), 0);
 
   return (
     <div className="space-y-6 p-4 md:p-8 bg-slate-50 min-h-screen">
@@ -90,25 +111,30 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
         </div>
       </div>
 
-      {/* BSC Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {PERSPECTIVES.map(p => {
+      {/* BSC Grid - Horizontal Scroll for Kanban style */}
+      <div className="flex gap-6 overflow-x-auto pb-4 snap-x">
+        {plan.perspectives?.map(p => {
           const pObjs = objectives.filter(o => o.perspective === p.id);
           const currentWeight = totalWeight(p.id);
           const isOverWeight = currentWeight > 100;
+          
+          const colorClass = p.colorClass || "indigo";
+          const colorText = `text-${colorClass}-600`;
+          const colorBg = `bg-${colorClass}-50`;
+          const colorBorder = `border-${colorClass}-200`;
 
           return (
-            <div key={p.id} className="flex flex-col gap-4">
+            <div key={p.id} className="flex flex-col gap-4 w-full min-w-[320px] max-w-[350px] shrink-0 snap-start">
               {/* Perspective Header */}
-              <div className={cn("p-5 rounded-2xl border-t-4 shadow-sm relative overflow-hidden", p.bg, p.borderColor)}>
+              <div className={cn("p-5 rounded-2xl border-t-4 shadow-sm relative overflow-hidden", colorBg, colorBorder)}>
                 <div className="absolute -right-4 -top-4 opacity-10">
-                  <p.icon className="w-24 h-24" />
+                  <Target className="w-24 h-24" />
                 </div>
                 <div className="flex items-center gap-3 mb-2">
-                  <div className={cn("p-2 rounded-xl bg-white shadow-sm", p.color)}>
-                    <p.icon className="w-5 h-5" />
+                  <div className={cn("p-2 rounded-xl bg-white shadow-sm", colorText)}>
+                    <Target className="w-5 h-5" />
                   </div>
-                  <h3 className={cn("font-bold text-lg", p.color)}>{p.label}</h3>
+                  <h3 className={cn("font-bold text-lg", colorText)}>{p.title}</h3>
                 </div>
                 <div className="flex justify-between items-end mt-4">
                   <div className="text-xs font-semibold text-slate-500">
@@ -116,8 +142,8 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                   </div>
                   <Button
                     size="sm"
-                    onClick={() => handleOpenDrawer(p.id)}
-                    className={cn("rounded-lg font-bold shadow-sm h-8", "bg-white border", p.borderColor, p.color, "hover:bg-white/80")}
+                    onClick={() => handleOpenDrawer(p.id, p.title)}
+                    className={cn("rounded-lg font-bold shadow-sm h-8", "bg-white border", colorBorder, colorText, "hover:bg-white/80")}
                   >
                     <Plus className="w-4 h-4 mr-1" /> Giao việc
                   </Button>
@@ -193,18 +219,77 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
             </div>
           );
         })}
+        
+        {/* Add Column Button */}
+        <div className="flex flex-col gap-4 w-full min-w-[320px] max-w-[350px] shrink-0 snap-start">
+          <Button 
+            variant="outline" 
+            onClick={() => setAddColOpen(true)}
+            className="h-full min-h-[140px] border-2 border-dashed border-slate-300 bg-transparent hover:bg-slate-100 text-slate-500 rounded-2xl flex flex-col items-center justify-center gap-2 transition-colors"
+          >
+            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center mb-1">
+              <Plus className="w-5 h-5 text-slate-600" />
+            </div>
+            <span className="font-bold">Thêm nhóm mục tiêu</span>
+          </Button>
+        </div>
       </div>
 
       <PlanTaskAssignDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         planId={planId}
-        perspective={activePerspective}
+        perspectiveId={activePerspectiveId}
+        perspectiveTitle={activePerspectiveTitle}
         onSuccess={() => {
           setDrawerOpen(false);
           loadData();
         }}
       />
+      
+      {/* Dialog Thêm Cột */}
+      <Dialog open={addColOpen} onOpenChange={setAddColOpen}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-slate-800">Thêm nhóm mục tiêu mới</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="colTitle" className="font-bold text-slate-700">Tên nhóm / Cột</Label>
+              <Input
+                id="colTitle"
+                placeholder="VD: Kinh doanh, Chăm sóc khách hàng..."
+                value={newColTitle}
+                onChange={(e) => setNewColTitle(e.target.value)}
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="font-bold text-slate-700">Màu sắc chủ đạo</Label>
+              <div className="flex items-center gap-3">
+                {["indigo", "emerald", "blue", "amber", "rose", "purple", "cyan"].map(color => (
+                  <button
+                    key={color}
+                    type="button"
+                    onClick={() => setNewColColor(color)}
+                    className={cn(
+                      "w-8 h-8 rounded-full border-2 transition-all",
+                      newColColor === color ? "border-slate-800 scale-110 shadow-sm" : "border-transparent hover:scale-105",
+                      `bg-${color}-500`
+                    )}
+                    // Fallback using style for dynamic tailwind bg if not safelisted
+                    style={{ backgroundColor: color === 'indigo' ? '#6366f1' : color === 'emerald' ? '#10b981' : color === 'blue' ? '#3b82f6' : color === 'amber' ? '#f59e0b' : color === 'rose' ? '#f43f5e' : color === 'purple' ? '#a855f7' : '#06b6d4' }}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddColOpen(false)} className="rounded-xl font-bold">Hủy</Button>
+            <Button onClick={handleAddColumn} className="rounded-xl font-bold bg-slate-900 text-white">Thêm nhóm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

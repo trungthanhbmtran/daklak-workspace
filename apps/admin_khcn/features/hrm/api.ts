@@ -155,22 +155,19 @@ export const hrmPayrollApi = {
     }));
   }
 };
-export interface HrmMasterPlan {
-  id: number;
-  title: string;
-  description?: string;
-  startDate?: string;
-  endDate?: string;
-  status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
-  createdAt: string;
-}
+import { HrmPlanObjective, HrmTaskTheme, HrmMasterPlan } from "./types";
 
-import { HrmPlanObjective, HrmTaskTheme } from "./types";
+const defaultPerspectives = [
+  { id: "FINANCIAL", title: "Tài chính", colorClass: "emerald" },
+  { id: "CUSTOMER", title: "Khách hàng", colorClass: "blue" },
+  { id: "INTERNAL_PROCESS", title: "Quy trình nội bộ", colorClass: "amber" },
+  { id: "LEARNING_GROWTH", title: "Học hỏi & Phát triển", colorClass: "purple" }
+];
 
 // Giả lập (Mock) dữ liệu cho kế hoạch tổng do backend chưa có endpoint thực sự
 let mockPlans: HrmMasterPlan[] = [
-  { id: 1, title: "Kế hoạch năm 2026", description: "Các nhiệm vụ trọng tâm 2026", startDate: "2026-01-01", endDate: "2026-12-31", status: "ACTIVE", createdAt: "2026-01-01T00:00:00Z" },
-  { id: 2, title: "Kế hoạch Quý III/2026", description: "Đẩy mạnh chuyển đổi số", startDate: "2026-07-01", endDate: "2026-09-30", status: "ACTIVE", createdAt: "2026-06-25T00:00:00Z" }
+  { id: 1, title: "Kế hoạch năm 2026", description: "Các nhiệm vụ trọng tâm 2026", startDate: "2026-01-01", endDate: "2026-12-31", status: "ACTIVE", createdAt: "2026-01-01T00:00:00Z", perspectives: [...defaultPerspectives] },
+  { id: 2, title: "Kế hoạch Quý III/2026", description: "Đẩy mạnh chuyển đổi số", startDate: "2026-07-01", endDate: "2026-09-30", status: "ACTIVE", createdAt: "2026-06-25T00:00:00Z", perspectives: [...defaultPerspectives] }
 ];
 
 export const hrmPlansApi = {
@@ -196,7 +193,8 @@ export const hrmPlansApi = {
           startDate: payload.startDate,
           endDate: payload.endDate,
           status: payload.status || "ACTIVE",
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          perspectives: [...defaultPerspectives]
         };
         mockPlans.unshift(newPlan);
         resolve({ success: true, data: newPlan });
@@ -207,8 +205,26 @@ export const hrmPlansApi = {
   getOne(id: number): Promise<HrmMasterPlan | null> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(mockPlans.find(p => p.id === id) || null);
+        const plan = mockPlans.find(p => p.id === id);
+        if (plan && !plan.perspectives) {
+          plan.perspectives = [...defaultPerspectives];
+        }
+        resolve(plan || null);
       }, 300);
+    });
+  },
+
+  update(id: number, payload: Partial<HrmMasterPlan>): Promise<{ success: boolean; data?: HrmMasterPlan }> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const index = mockPlans.findIndex(p => p.id === id);
+        if (index > -1) {
+          mockPlans[index] = { ...mockPlans[index], ...payload };
+          resolve({ success: true, data: mockPlans[index] });
+        } else {
+          resolve({ success: false });
+        }
+      }, 400);
     });
   }
 };

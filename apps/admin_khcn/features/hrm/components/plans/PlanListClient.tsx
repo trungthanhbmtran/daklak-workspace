@@ -5,7 +5,8 @@ import { Card, CardHeader, CardContent, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Plus, Eye, Edit, Trash2, CalendarDays, Target, BarChart, Sparkles, Import, MoreHorizontal } from "lucide-react";
-import { hrmPlansApi, HrmMasterPlan } from "@/features/hrm/api";
+import { hrmPlansApi } from "@/features/hrm/api";
+import { HrmMasterPlan } from "@/features/hrm/types";
 import { cn } from "@/lib/utils";
 
 export const PlanListClient = () => {
