@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Save, FileSignature, AlignLeft, CalendarClock, Users, Bot, CheckCircle2, ShieldCheck, Sparkles, BookOpen } from "lucide-react";
+import { ArrowLeft, Save, FileSignature, AlignLeft, CalendarClock, Users, Bot, CheckCircle2, ShieldCheck, Sparkles, BookOpen, X, BrainCircuit, Target, ListTodo, Presentation, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,11 +11,121 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
+const FRAMEWORK_TEMPLATES = {
+  SMART: {
+    title: "Tổ chức Hội thảo Khoa học: Chuyển đổi số Nông nghiệp 2026",
+    description: `Mục tiêu thiết lập theo nguyên tắc SMART:
+
+- [S] Specific (Cụ thể): Tổ chức Hội thảo khoa học với 500 khách mời tại Trung tâm Hội nghị Tỉnh để giới thiệu các giải pháp công nghệ mới.
+- [M] Measurable (Đo lường): Đạt tỷ lệ 90% khách mời xác nhận tham dự, thu thập ít nhất 200 leads (liên hệ tiềm năng).
+- [A] Achievable (Khả thi): Đã duyệt ngân sách 200 triệu, có sự cam kết phối hợp từ 3 Sở ban ngành liên quan.
+- [R] Relevant (Thực tế/Liên quan): Phù hợp với chủ trương số hóa nông nghiệp của Tỉnh năm 2026.
+- [T] Time-bound (Thời gian): Hoàn tất công tác chuẩn bị trước 15/10/2026 và tổ chức vào 30/10/2026.`,
+    kpi: `- Số khách tham dự: >= 450 người.
+- Phản hồi hài lòng: > 85% qua form khảo sát.
+- Số lượng liên hệ đối tác (leads): >= 200.`,
+  },
+  "5W1H2C5M": {
+    title: "Triển khai phần mềm Quản lý Hành chính công",
+    description: `Kế hoạch tối ưu quy trình (5W1H2C5M):
+
+1. WHO (Ai làm): Phòng CNTT phối hợp cùng đơn vị phần mềm ngoài.
+2. WHAT (Làm gì): Cài đặt, cấu hình và đào tạo sử dụng Phần mềm Hành chính công V2.0.
+3. WHERE (Ở đâu): Trụ sở UBND và các phường trực thuộc.
+4. WHEN (Khi nào): Bắt đầu từ 01/11, Golive vào 15/12.
+5. WHY (Tại sao): Tự động hóa quy trình, giảm thời gian xử lý hồ sơ từ 5 ngày xuống 2 ngày.
+6. HOW (Như thế nào): Triển khai cuốn chiếu từng phòng ban, có tài liệu hướng dẫn (User Manual).
+
+[2C - Control & Check]
+- Control: Giám sát bằng báo cáo tiến độ tuần (Weekly Report).
+- Check: Nghiệm thu các lỗi (Bugs) theo danh mục UAT (User Acceptance Testing).
+
+[5M - Nguồn lực]
+- Manpower: 2 Dev, 1 BA, 1 PM.
+- Money: Ngân sách 500 triệu.
+- Material: Server cấu hình 16 Core, 64GB RAM.
+- Machine: Mạng nội bộ đã nâng cấp.
+- Method: Phương pháp Agile Scrum.`,
+    kpi: `- Hoàn thành đúng hạn Golive (15/12).
+- Số lượng lỗi (Bugs) Critical sau Golive: 0.
+- 100% chuyên viên vượt qua bài test sử dụng phần mềm.`,
+  },
+  SWOT: {
+    title: "Phân tích và Xây dựng Chiến lược Marketing Quý 4",
+    description: `Khung phân tích chiến lược (SWOT):
+
+[S] Strengths (Điểm mạnh):
+- Sản phẩm có tính độc quyền cao tại khu vực.
+- Đội ngũ Sales nhiều kinh nghiệm.
+
+[W] Weaknesses (Điểm yếu):
+- Ngân sách quảng cáo (Ads) bị cắt giảm 20% so với Quý 3.
+- Thương hiệu chưa được nhận diện tốt trên nền tảng TikTok.
+
+[O] Opportunities (Cơ hội):
+- Xu hướng tiêu dùng cuối năm tăng cao.
+- Đối thủ cạnh tranh chính đang gặp khủng hoảng truyền thông.
+
+[T] Threats (Thách thức):
+- Thay đổi thuật toán của Facebook làm giảm Reach tự nhiên.
+- Giá nguyên liệu đầu vào có xu hướng tăng.
+
+Yêu cầu thực hiện: Dựa trên phân tích trên, lập kế hoạch chi tiết (Action Plan) để khai thác [O] và khắc phục [W].`,
+    kpi: `- Bản Action Plan đầy đủ ngân sách và nhân sự thực hiện.
+- Tăng trưởng doanh số: +15% so với Quý trước.`,
+  },
+  AGILE: {
+    title: "Phát triển tính năng App Mobile (Sprint 12)",
+    description: `Quản lý công việc linh hoạt (Agile Framework):
+
+[SPRINT GOAL]
+Hoàn thiện tính năng Thanh toán quét mã QR và Đăng nhập bằng Sinh trắc học (FaceID/TouchID).
+
+[BACKLOG ITEMS]
+1. Tích hợp SDK Thanh toán VNPay (Story points: 5).
+2. Xây dựng luồng UI/UX màn hình quét QR (Story points: 3).
+3. Code module Sinh trắc học iOS/Android (Story points: 8).
+4. Viết Unit Test và kiểm thử QA (Story points: 3).
+
+[QUY TRÌNH THỰC HIỆN]
+- Daily Stand-up: 9h00 sáng mỗi ngày qua Google Meet (15 phút).
+- Sprint Review & Retrospective: Chiều Thứ 6 cuối Sprint.`,
+    kpi: `- Hoàn thành 100% Story points (19 points).
+- Pass toàn bộ Test case của QA (Zero bug critical).
+- Mã nguồn được merge thành công lên nhánh staging.`,
+  },
+  EISENHOWER: {
+    title: "Xử lý khủng hoảng truyền thông (Ưu tiên Cao)",
+    description: `Áp dụng Ma trận sắp xếp ưu tiên (Eisenhower Matrix):
+
+Cần phân loại và giải quyết các đầu việc theo ma trận sau:
+
+[QUARTER 1 - Do First] (Khẩn cấp & Quan trọng - Làm ngay)
+- Soạn thảo thông cáo báo chí đính chính thông tin sai lệch.
+- Đăng tải bài viết giải thích trên Fanpage chính thức.
+
+[QUARTER 2 - Schedule] (Quan trọng nhưng Không khẩn cấp - Lên lịch)
+- Tổ chức buổi họp báo với các đơn vị truyền thông.
+- Xây dựng quy trình phản ứng rủi ro chuẩn (SOP).
+
+[QUARTER 3 - Delegate] (Khẩn cấp nhưng Không quan trọng - Giao việc)
+- Phản hồi bình luận (Comment) của người dùng trên mạng xã hội (Giao cho team CSKH).
+
+[QUARTER 4 - Don't Do] (Không khẩn - Không quan trọng - Bỏ qua)
+- Tạm dừng các chiến dịch quảng cáo PR sản phẩm mới trong tuần này.`,
+    kpi: `- Đăng thông cáo báo chí trong vòng 4 giờ kể từ khi nhận việc.
+- Kiểm soát và giảm 90% lượng bình luận tiêu cực trong vòng 48 giờ.`,
+  }
+};
+
 export default function CreateTaskPage() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(1);
   const [autoAssigning, setAutoAssigning] = useState(false);
+  
+  // State for AI Planner Modal
+  const [showPlannerModal, setShowPlannerModal] = useState(false);
 
   // Form State
   const [taskInfo, setTaskInfo] = useState({
@@ -41,6 +151,18 @@ export default function CreateTaskPage() {
     }, 1500);
   };
 
+  const applyFrameworkTemplate = (type: keyof typeof FRAMEWORK_TEMPLATES) => {
+    const template = FRAMEWORK_TEMPLATES[type];
+    setTaskInfo({
+      ...taskInfo,
+      title: template.title,
+      description: template.description,
+      kpi: template.kpi
+    });
+    setShowPlannerModal(false);
+    toast.success(`Đã nạp mẫu kế hoạch ${type} thành công!`);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!taskInfo.title || !taskInfo.assignee) {
@@ -56,7 +178,7 @@ export default function CreateTaskPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-6 md:p-10 text-slate-900">
+    <div className="min-h-screen bg-[#f8fafc] p-6 md:p-10 text-slate-900 relative">
       <form onSubmit={handleSubmit} className="max-w-[1200px] mx-auto space-y-6">
 
         {/* Header */}
@@ -164,9 +286,22 @@ export default function CreateTaskPage() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label className="font-bold text-slate-700 flex items-center gap-2"><AlignLeft className="w-4 h-4 text-slate-400" /> Mô tả chi tiết & Hướng dẫn thực hiện</Label>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <Label className="font-bold text-slate-700 flex items-center gap-2">
+                          <AlignLeft className="w-4 h-4 text-slate-400" /> Mô tả chi tiết & Hướng dẫn thực hiện
+                        </Label>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowPlannerModal(true)}
+                          className="text-purple-700 border-purple-200 bg-purple-50 hover:bg-purple-100 font-bold shadow-sm"
+                        >
+                          <BrainCircuit className="w-4 h-4 mr-2" /> Trợ lý Lập kế hoạch (AI)
+                        </Button>
+                      </div>
                       <textarea
-                        className="w-full min-h-[150px] p-4 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none resize-y text-sm leading-relaxed"
+                        className="w-full min-h-[250px] p-4 rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-600 outline-none resize-y text-sm leading-relaxed"
                         placeholder="Ghi chú chi tiết các bước, yêu cầu cần làm, tài nguyên hỗ trợ..."
                         value={taskInfo.description}
                         onChange={e => setTaskInfo({ ...taskInfo, description: e.target.value })}
@@ -272,7 +407,7 @@ export default function CreateTaskPage() {
                         <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Yêu cầu kết quả đầu ra (Định lượng KPI)
                       </Label>
                       <textarea
-                        className="w-full min-h-[120px] p-4 rounded-xl border border-emerald-200 bg-emerald-50/30 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none resize-y text-sm leading-relaxed"
+                        className="w-full min-h-[150px] p-4 rounded-xl border border-emerald-200 bg-emerald-50/30 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none resize-y text-sm leading-relaxed"
                         placeholder="Ví dụ: Đạt 1000 lượt tương tác, Xử lý xong 50 hồ sơ, Không có lỗi phát sinh..."
                         value={taskInfo.kpi}
                         onChange={e => setTaskInfo({ ...taskInfo, kpi: e.target.value })}
@@ -317,6 +452,88 @@ export default function CreateTaskPage() {
 
         </div>
       </form>
+
+      {/* AI Planner Modal */}
+      {showPlannerModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+              <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                <BrainCircuit className="text-purple-600 w-5 h-5" /> Trợ lý Lập kế hoạch (AI Planner)
+              </h3>
+              <Button type="button" variant="ghost" size="icon" onClick={() => setShowPlannerModal(false)} className="rounded-full text-slate-400 hover:text-slate-600">
+                <X className="w-5 h-5" />
+              </Button>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-slate-500 text-sm mb-6">Chọn một khung quản trị (Framework) phù hợp dưới đây. Hệ thống AI sẽ tự động điền cấu trúc và dữ liệu mẫu thực tế vào form để bạn dễ dàng biên tập.</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div 
+                  className="p-5 border-2 border-slate-100 hover:border-purple-300 hover:shadow-md rounded-2xl cursor-pointer bg-white hover:bg-purple-50 transition-all group"
+                  onClick={() => applyFrameworkTemplate('SMART')}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-blue-100 text-blue-700 rounded-xl group-hover:bg-purple-200 group-hover:text-purple-800"><Target className="w-5 h-5" /></div>
+                    <h4 className="font-bold text-slate-800 group-hover:text-purple-900">Mô hình SMART</h4>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">Phù hợp tổ chức sự kiện, hội thảo. Thiết lập mục tiêu Cụ thể, Đo lường được, Khả thi, Thực tế và Có thời hạn.</p>
+                </div>
+
+                <div 
+                  className="p-5 border-2 border-slate-100 hover:border-purple-300 hover:shadow-md rounded-2xl cursor-pointer bg-white hover:bg-purple-50 transition-all group"
+                  onClick={() => applyFrameworkTemplate('5W1H2C5M')}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-emerald-100 text-emerald-700 rounded-xl group-hover:bg-purple-200 group-hover:text-purple-800"><ListTodo className="w-5 h-5" /></div>
+                    <h4 className="font-bold text-slate-800 group-hover:text-purple-900">Mô hình 5W1H2C5M</h4>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">Dùng tối ưu quy trình phức tạp, triển khai phần mềm (Who, What, Where, When, Why, How, Check, Control...)</p>
+                </div>
+
+                <div 
+                  className="p-5 border-2 border-slate-100 hover:border-purple-300 hover:shadow-md rounded-2xl cursor-pointer bg-white hover:bg-purple-50 transition-all group"
+                  onClick={() => applyFrameworkTemplate('SWOT')}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-amber-100 text-amber-700 rounded-xl group-hover:bg-purple-200 group-hover:text-purple-800"><Presentation className="w-5 h-5" /></div>
+                    <h4 className="font-bold text-slate-800 group-hover:text-purple-900">Phân tích SWOT</h4>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">Dành cho kế hoạch Marketing, Chiến lược thông qua Điểm mạnh, Yếu, Cơ hội, Thách thức.</p>
+                </div>
+
+                <div 
+                  className="p-5 border-2 border-slate-100 hover:border-purple-300 hover:shadow-md rounded-2xl cursor-pointer bg-white hover:bg-purple-50 transition-all group"
+                  onClick={() => applyFrameworkTemplate('AGILE')}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-indigo-100 text-indigo-700 rounded-xl group-hover:bg-purple-200 group-hover:text-purple-800"><Zap className="w-5 h-5" /></div>
+                    <h4 className="font-bold text-slate-800 group-hover:text-purple-900">Khung linh hoạt Agile</h4>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">Phù hợp phát triển App, IT. Quản lý linh hoạt theo Sprint, Daily Stand-up, Backlog.</p>
+                </div>
+
+                <div 
+                  className="p-5 border-2 border-slate-100 hover:border-purple-300 hover:shadow-md rounded-2xl cursor-pointer bg-white hover:bg-purple-50 transition-all group md:col-span-2"
+                  onClick={() => applyFrameworkTemplate('EISENHOWER')}
+                >
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-2.5 bg-rose-100 text-rose-700 rounded-xl group-hover:bg-purple-200 group-hover:text-purple-800"><AlignLeft className="w-5 h-5" /></div>
+                    <h4 className="font-bold text-slate-800 group-hover:text-purple-900">Ma trận Eisenhower</h4>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">Sắp xếp mức độ Khẩn cấp và Quan trọng để xử lý khủng hoảng, phân loại công việc cần uỷ quyền hay làm ngay.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="px-6 py-4 bg-slate-50 flex justify-end border-t border-slate-100">
+              <Button type="button" variant="ghost" onClick={() => setShowPlannerModal(false)} className="font-bold text-slate-600">Đóng lại</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
