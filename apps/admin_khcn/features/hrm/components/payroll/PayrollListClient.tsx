@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Calendar, Download, MoreVertical, Banknote, CheckCircle2, Clock } from "lucide-react";
+import { Search, Calendar, Download, MoreVertical, Banknote, CheckCircle2, Clock, Plus, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -42,10 +42,13 @@ export function PayrollListClient() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
+            <Plus className="mr-2 h-4 w-4" /> Thêm bảng lương
+          </Button>
           <Button variant="outline" className="rounded-xl">
             <Calendar className="mr-2 h-4 w-4" /> Tháng 5/2026
           </Button>
-          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
+          <Button variant="outline" className="rounded-xl">
             <Download className="mr-2 h-4 w-4" /> Tải bảng lương (Excel)
           </Button>
         </div>
@@ -104,9 +107,17 @@ export function PayrollListClient() {
                   </TableCell>
                   <TableCell className="text-center">{getStatusBadge(item.status)}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-900 rounded-full">
-                      <MoreVertical className="h-4 w-4" />
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full" title="Xem chi tiết">
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-full" title="Chỉnh sửa">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full" title="Xóa">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

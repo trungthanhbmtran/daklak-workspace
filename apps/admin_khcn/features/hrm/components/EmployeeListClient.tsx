@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Plus, MoreVertical, Building2, Briefcase, Loader2 } from "lucide-react";
+import { Search, Plus, MoreVertical, Building2, Briefcase, Loader2, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -183,11 +183,21 @@ export function EmployeeListClient() {
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/services/hrm/employees/${emp.id}`}>
-                          <Button variant="ghost" size="icon" className="text-slate-400 hover:text-slate-900 rounded-full">
-                            <MoreVertical className="h-5 w-5" />
+                        <div className="flex justify-end gap-2">
+                          <Link href={`/services/hrm/employees/${emp.id}`}>
+                            <Button variant="ghost" size="icon" className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-full" title="Xem chi tiết">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link href={`/services/hrm/employees/${emp.id}/edit`}>
+                            <Button variant="ghost" size="icon" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-full" title="Chỉnh sửa">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full" title="Xóa">
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
