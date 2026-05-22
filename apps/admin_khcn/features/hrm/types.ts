@@ -139,11 +139,14 @@ export interface HrmPlanObjective {
   target?: string;
   weight?: number; // percentage
   status: "TODO" | "IN_PROGRESS" | "DONE";
-  assigneeId?: number;
-  assignee?: HrmEmployee;
+  departmentIds?: number[];
+  assigneeIds?: number[];
+  assignee?: HrmEmployee; // Deprecated, kept for backward compatibility if needed temporarily
+  departments?: HrmDepartment[];
+  assignees?: HrmEmployee[];
   startDate?: string;
   dueDate?: string;
-  cases?: { id: string; title: string; isDone: boolean }[];
+  cases?: { id: string; title: string; isDone: boolean; assigneeId?: number; assigneeName?: string }[];
 }
 
 export interface HrmTaskTheme {

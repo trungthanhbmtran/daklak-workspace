@@ -113,10 +113,21 @@ export const hrmApi = {
 
 export const hrmDepartmentsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return apiClient.get("/hrm/departments", { params }).then((res: any) => ({
-      data: unwrapData(res),
-      meta: unwrapMeta(res) || { total: 0 },
-    }));
+    // Return mock data for UI development
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          data: [
+            { id: 1, name: "Ban Giám Đốc", code: "BGD" },
+            { id: 2, name: "Phòng Kỹ Thuật", code: "IT" },
+            { id: 3, name: "Phòng Hành Chính Nhân Sự", code: "HR" },
+            { id: 4, name: "Phòng Kế Toán", code: "ACC" },
+            { id: 5, name: "Phòng Kinh Doanh", code: "SALE" }
+          ],
+          meta: { total: 5, page: 1, pageSize: 20, totalPages: 1 }
+        });
+      }, 300);
+    });
   }
 };
 
@@ -230,10 +241,10 @@ export const hrmPlansApi = {
 };
 
 let mockObjectives: HrmPlanObjective[] = [
-  { id: 1, planId: 1, perspective: "FINANCIAL", title: "Tối ưu ngân sách Q3", metric: "Tỷ lệ tiết kiệm", target: "10%", weight: 30, status: "IN_PROGRESS" },
-  { id: 2, planId: 1, perspective: "CUSTOMER", title: "Nâng cao độ hài lòng", metric: "NPS Score", target: "> 85", weight: 20, status: "TODO" },
-  { id: 3, planId: 1, perspective: "INTERNAL_PROCESS", title: "Số hóa quy trình duyệt", metric: "Thời gian xử lý", target: "< 24h", weight: 30, status: "DONE" },
-  { id: 4, planId: 1, perspective: "LEARNING_GROWTH", title: "Đào tạo nhân sự mới", metric: "Tỷ lệ pass test", target: "100%", weight: 20, status: "TODO" },
+  { id: 1, planId: 1, perspective: "FINANCIAL", title: "Tối ưu ngân sách Q3", metric: "Tỷ lệ tiết kiệm", target: "10%", weight: 30, status: "IN_PROGRESS", departmentIds: [4] },
+  { id: 2, planId: 1, perspective: "CUSTOMER", title: "Nâng cao độ hài lòng", metric: "NPS Score", target: "> 85", weight: 20, status: "TODO", departmentIds: [5] },
+  { id: 3, planId: 1, perspective: "INTERNAL_PROCESS", title: "Số hóa quy trình duyệt", metric: "Thời gian xử lý", target: "< 24h", weight: 30, status: "DONE", departmentIds: [2, 3] },
+  { id: 4, planId: 1, perspective: "LEARNING_GROWTH", title: "Đào tạo nhân sự mới", metric: "Tỷ lệ pass test", target: "100%", weight: 20, status: "TODO", departmentIds: [3] },
 ];
 
 export const hrmObjectivesApi = {

@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Target, Users, Scale, FileSignature, Save, X, Plus, Trash2, ListChecks, Sparkles } from "lucide-react";
-import { hrmApi, hrmObjectivesApi, hrmTaskThemesApi } from "@/features/hrm/api";
-import type { HrmEmployee, HrmTaskTheme } from "@/features/hrm/types";
+import { hrmApi, hrmObjectivesApi, hrmTaskThemesApi, hrmDepartmentsApi } from "@/features/hrm/api";
+import type { HrmEmployee, HrmTaskTheme, HrmDepartment } from "@/features/hrm/types";
 
 interface PlanTaskAssignDrawerProps {
   isOpen: boolean;
@@ -22,6 +22,7 @@ interface PlanTaskAssignDrawerProps {
 export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, perspectiveTitle, onSuccess }: PlanTaskAssignDrawerProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [employees, setEmployees] = useState<HrmEmployee[]>([]);
+  const [departments, setDepartments] = useState<HrmDepartment[]>([]);
   const [themes, setThemes] = useState<HrmTaskTheme[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
   const [suggestedThemes, setSuggestedThemes] = useState<HrmTaskTheme[]>([]);
@@ -32,17 +33,17 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
     metric: "",
     target: "",
     weight: 10,
-    assigneeId: "",
+    departmentIds: [] as number[],
     startDate: "",
     dueDate: "",
   });
 
-  const [cases, setCases] = useState<{ id: string, title: string }[]>([]);
+  const [cases, setCases] = useState<{ id: string, title: string, isDone: boolean, assigneeId?: number, assigneeName?: string }[]>([]);
   const [newCaseInput, setNewCaseInput] = useState("");
 
   const handleAddCase = () => {
     if (!newCaseInput.trim()) return;
-    setCases([...cases, { id: Date.now().toString(), title: newCaseInput.trim() }]);
+    setCases([...cases, { id: Date.now().toString(), title: newCaseInput.trim(), isDone: false }]);
     setNewCaseInput("");
   };
 
@@ -55,10 +56,12 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
       setLoadingEmployees(true);
       Promise.all([
         hrmApi.list({ pageSize: 100 }),
-        hrmTaskThemesApi.list()
-      ]).then(([empRes, themeRes]) => {
+        hrmTaskThemesApi.list(),
+        hrmDepartmentsApi.list()
+      ]).then(([empRes, themeRes, deptRes]) => {
         setEmployees(empRes.data);
         setThemes(themeRes.data);
+        setDepartments(deptRes.data);
         setLoadingEmployees(false);
       }).catch(err => {
         console.error(err);
@@ -67,7 +70,7 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
     } else {
       // Reset form
       setFormData({
-        title: "", description: "", metric: "", target: "", weight: 10, assigneeId: "", startDate: "", dueDate: ""
+        title: "", description: "", metric: "", target: "", weight: 10, departmentIds: [], startDate: "", dueDate: ""
       });
       setCases([]);
       setNewCaseInput("");
@@ -76,18 +79,33 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
   }, [isOpen]);
 
   useEffect(() => {
-    if (formData.assigneeId) {
-      // Logic gợi ý Theme theo người dùng (ví dụ dùng departmentId hoặc jobTitleId)
-      const emp = employees.find(e => e.id.toString() === formData.assigneeId);
-      if (emp) {
-        // Giả sử emp.departmentId để map. Trong thực tế có thể map jobTitleId
-        const filtered = themes.filter(t => !emp.departmentId || t.targetDepartmentIds.includes(emp.departmentId));
-        setSuggestedThemes(filtered.length > 0 ? filtered : themes); // Nếu không có, hiện tất cả
-      }
+    if (formData.departmentIds.length > 0) {
+      // Logic gợi ý Theme theo phòng ban được chọn
+      const filtered = themes.filter(t => t.targetDepartmentIds.some(id => formData.departmentIds.includes(id)));
+      setSuggestedThemes(filtered.length > 0 ? filtered : themes);
+      
+      // Auto-reset case assignee if their department is no longer selected
+      setCases(prev => prev.map(c => {
+        if (!c.assigneeId) return c;
+        const emp = employees.find(e => e.id === c.assigneeId);
+        if (emp && emp.departmentId && !formData.departmentIds.includes(emp.departmentId)) {
+          return { ...c, assigneeId: undefined, assigneeName: undefined };
+        }
+        return c;
+      }));
     } else {
-      setSuggestedThemes([]);
+      setSuggestedThemes(themes); // Nếu không chọn phòng, hiện tất cả theme
     }
-  }, [formData.assigneeId, employees, themes]);
+  }, [formData.departmentIds, themes, employees]);
+
+  const toggleDepartment = (id: number) => {
+    setFormData(prev => ({
+      ...prev,
+      departmentIds: prev.departmentIds.includes(id) 
+        ? prev.departmentIds.filter(d => d !== id)
+        : [...prev.departmentIds, id]
+    }));
+  };
 
   const handleApplyTheme = (themeId: string) => {
     if (!themeId) return;
@@ -103,15 +121,15 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
     }));
     
     if (theme.defaultCases) {
-      setCases(theme.defaultCases.map((c, i) => ({ id: Date.now().toString() + i, title: c })));
+      setCases(theme.defaultCases.map((c, i) => ({ id: Date.now().toString() + i, title: c, isDone: false })));
     }
     toast.success("Đã áp dụng mẫu công việc: " + theme.title);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.assigneeId || !formData.metric || !formData.target) {
-      toast.error("Vui lòng điền đầy đủ các thông tin bắt buộc (*)");
+    if (!formData.title || formData.departmentIds.length === 0 || !formData.metric || !formData.target) {
+      toast.error("Vui lòng điền tên mục tiêu, chọn ít nhất 1 phòng ban và điền đầy đủ KPI (*)");
       return;
     }
 
@@ -121,8 +139,7 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
         planId,
         perspective: perspectiveId,
         ...formData,
-        assigneeId: Number(formData.assigneeId),
-        cases: cases.map(c => ({ ...c, isDone: false })),
+        cases: cases,
       });
       toast.success("Đã giao việc & thiết lập mục tiêu thành công!");
       onSuccess();
@@ -159,21 +176,33 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
                 <Users className="w-4 h-4 text-amber-500" /> Phân công & Tiến độ
               </h3>
               
-              <div className="space-y-2">
-                <Label className="font-bold text-slate-700">Người thực hiện chính <span className="text-red-500">*</span></Label>
-                <select 
-                  className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                  value={formData.assigneeId}
-                  onChange={e => setFormData({ ...formData, assigneeId: e.target.value })}
-                  disabled={loadingEmployees}
-                >
-                  <option value="">{loadingEmployees ? "Đang tải..." : "Chọn nhân sự..."}</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id.toString()}>{emp.firstname} {emp.lastname} - {emp.department?.name}</option>
-                  ))}
-                </select>
-                {!formData.assigneeId && (
-                  <p className="text-xs text-amber-600 italic">Mẹo: Hãy chọn người thực hiện trước để hệ thống gợi ý Mẫu công việc phù hợp.</p>
+              <div className="space-y-3">
+                <Label className="font-bold text-slate-700">Phòng Ban chịu trách nhiệm chính <span className="text-red-500">*</span></Label>
+                {loadingEmployees ? (
+                  <div className="text-sm text-slate-500 animate-pulse">Đang tải danh sách...</div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {departments.map(dept => {
+                      const isSelected = formData.departmentIds.includes(dept.id);
+                      return (
+                        <button
+                          key={dept.id}
+                          type="button"
+                          onClick={() => toggleDepartment(dept.id)}
+                          className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-all ${
+                            isSelected 
+                              ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm' 
+                              : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300 hover:bg-indigo-50'
+                          }`}
+                        >
+                          {dept.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+                {formData.departmentIds.length === 0 && (
+                  <p className="text-xs text-amber-600 italic">Hãy chọn ít nhất 1 phòng ban để hệ thống gợi ý Mẫu công việc và nhân sự phân rã.</p>
                 )}
               </div>
 
@@ -261,17 +290,45 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
                   </Button>
                 </div>
                 {cases.length > 0 && (
-                  <ul className="space-y-2 mt-2">
-                    {cases.map((c, idx) => (
-                      <li key={c.id} className="flex items-center justify-between p-2.5 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
-                        <span className="text-sm text-slate-700 font-medium">
-                          {idx + 1}. {c.title}
-                        </span>
-                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveCase(c.id)} className="h-6 w-6 text-slate-400 hover:text-red-500 rounded-full">
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </li>
-                    ))}
+                  <ul className="space-y-3 mt-4">
+                    {cases.map((c, idx) => {
+                      // Filter employees that belong to the selected departments
+                      const allowedEmployees = employees.filter(e => e.departmentId && formData.departmentIds.includes(e.departmentId));
+                      
+                      return (
+                        <li key={c.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-indigo-50/50 border border-indigo-100/50 gap-3">
+                          <span className="text-sm text-slate-700 font-bold flex-1">
+                            {idx + 1}. {c.title}
+                          </span>
+                          
+                          <div className="flex items-center gap-2">
+                            <select
+                              className="h-8 rounded-md border border-indigo-200 bg-white px-2 text-xs text-indigo-700 font-semibold focus:ring-1 focus:ring-indigo-500 outline-none max-w-[180px] w-full"
+                              value={c.assigneeId || ""}
+                              onChange={e => {
+                                const val = e.target.value;
+                                if (!val) {
+                                  setCases(prev => prev.map(item => item.id === c.id ? { ...item, assigneeId: undefined, assigneeName: undefined } : item));
+                                  return;
+                                }
+                                const empId = Number(val);
+                                const emp = employees.find(emp => emp.id === empId);
+                                setCases(prev => prev.map(item => item.id === c.id ? { ...item, assigneeId: empId, assigneeName: emp ? `${emp.firstname} ${emp.lastname}` : "" } : item));
+                              }}
+                            >
+                              <option value="">-- Phân công --</option>
+                              {allowedEmployees.map(emp => (
+                                <option key={emp.id} value={emp.id}>{emp.firstname} {emp.lastname}</option>
+                              ))}
+                            </select>
+                            
+                            <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveCase(c.id)} className="h-8 w-8 text-slate-400 hover:text-red-500 rounded-md hover:bg-red-50">
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
               </div>

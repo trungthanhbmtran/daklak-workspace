@@ -8,8 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { hrmPlansApi, hrmObjectivesApi } from "@/features/hrm/api";
-import type { HrmMasterPlan, HrmPlanObjective, HrmPlanPerspective } from "@/features/hrm/types";
+import { hrmPlansApi, hrmObjectivesApi, hrmDepartmentsApi } from "@/features/hrm/api";
+import type { HrmMasterPlan, HrmPlanObjective, HrmPlanPerspective, HrmDepartment } from "@/features/hrm/types";
 import { cn } from "@/lib/utils";
 import { PlanTaskAssignDrawer } from "./PlanTaskAssignDrawer";
 import { toast } from "sonner";
@@ -18,6 +18,7 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
   const router = useRouter();
   const [plan, setPlan] = useState<HrmMasterPlan | null>(null);
   const [objectives, setObjectives] = useState<HrmPlanObjective[]>([]);
+  const [departments, setDepartments] = useState<HrmDepartment[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -32,10 +33,12 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
     setLoading(true);
     Promise.all([
       hrmPlansApi.getOne(planId),
-      hrmObjectivesApi.list(planId)
-    ]).then(([planRes, objRes]) => {
+      hrmObjectivesApi.list(planId),
+      hrmDepartmentsApi.list()
+    ]).then(([planRes, objRes, deptRes]) => {
       setPlan(planRes);
       setObjectives(objRes.data);
+      setDepartments(deptRes.data);
       setLoading(false);
     }).catch(err => {
       console.error(err);
@@ -193,7 +196,12 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                                   <div className="mt-0.5">
                                     {c.isDone ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Circle className="w-3.5 h-3.5 text-slate-300" />}
                                   </div>
-                                  <span className={cn(c.isDone && "line-through text-slate-400")}>{c.title}</span>
+                                  <span className={cn("flex-1", c.isDone && "line-through text-slate-400")}>{c.title}</span>
+                                  {c.assigneeName && (
+                                    <span className="text-[10px] px-1.5 py-0.5 rounded bg-white border border-indigo-100 text-indigo-600 font-semibold whitespace-nowrap">
+                                      {c.assigneeName}
+                                    </span>
+                                  )}
                                 </li>
                               ))}
                             </ul>
@@ -207,8 +215,19 @@ export const PlanDetailClient = ({ planId }: { planId: number }) => {
                                 <Circle className="w-4 h-4 text-slate-300" />}
                             {obj.weight}% KPI
                           </div>
-                          <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-[10px] font-bold" title="Người phụ trách">
-                            {obj.assigneeId ? "ID" + obj.assigneeId : "?"}
+                          <div className="flex flex-wrap gap-1 justify-end max-w-[120px]" title="Phòng ban phụ trách">
+                            {obj.departmentIds && obj.departmentIds.length > 0 ? (
+                              obj.departmentIds.map(dId => {
+                                const dept = departments.find(d => d.id === dId);
+                                return dept ? (
+                                  <span key={dId} className="px-1.5 py-0.5 rounded-md bg-indigo-100/80 text-indigo-700 text-[10px] font-bold border border-indigo-200/50">
+                                    {dept.code || dept.name}
+                                  </span>
+                                ) : null;
+                              })
+                            ) : (
+                              <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-[10px] font-bold">?</span>
+                            )}
                           </div>
                         </div>
                       </CardContent>
