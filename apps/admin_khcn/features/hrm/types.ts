@@ -140,3 +140,13 @@ export interface HrmPlanObjective {
   dueDate?: string;
   cases?: { id: string; title: string; isDone: boolean }[];
 }
+
+export interface HrmTaskTheme {
+  id: number;
+  title: string;
+  description: string;
+  defaultMetric: string;
+  defaultTarget: string;
+  defaultCases: string[];
+  targetDepartmentIds: number[]; // Use department ID for broader matching since mock job titles might be sparse
+}

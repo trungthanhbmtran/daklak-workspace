@@ -165,7 +165,7 @@ export interface HrmMasterPlan {
   createdAt: string;
 }
 
-import { HrmPlanObjective } from "./types";
+import { HrmPlanObjective, HrmTaskTheme } from "./types";
 
 // Giả lập (Mock) dữ liệu cho kế hoạch tổng do backend chưa có endpoint thực sự
 let mockPlans: HrmMasterPlan[] = [
@@ -240,6 +240,46 @@ export const hrmObjectivesApi = {
         mockObjectives.push(newObj);
         resolve({ success: true, data: newObj });
       }, 500);
+    });
+  }
+};
+
+let mockTaskThemes: HrmTaskTheme[] = [
+  {
+    id: 1,
+    title: "Tuyển dụng nhân sự mới",
+    description: "Tuyển dụng nhân sự theo yêu cầu định biên của các phòng ban",
+    defaultMetric: "Thời gian đóng vị trí",
+    defaultTarget: "< 30 ngày",
+    defaultCases: ["Đăng tuyển", "Lọc CV", "Phỏng vấn vòng 1", "Offer"],
+    targetDepartmentIds: [1, 2, 3, 4, 5] // Phù hợp với tất cả các bộ phận HR hoặc cấp quản lý
+  },
+  {
+    id: 2,
+    title: "Phát triển tính năng mới",
+    description: "Lập trình và kiểm thử tính năng theo yêu cầu sản phẩm",
+    defaultMetric: "Bug rate sau release",
+    defaultTarget: "< 5%",
+    defaultCases: ["Phân tích tài liệu", "Lập trình", "Tự test (Unit Test)", "Tạo Pull Request"],
+    targetDepartmentIds: [2, 3] // Giả sử bộ phận Kỹ thuật
+  },
+  {
+    id: 3,
+    title: "Quyết toán thuế tháng",
+    description: "Thực hiện rà soát và nộp báo cáo thuế đúng hạn",
+    defaultMetric: "Tỷ lệ sai sót",
+    defaultTarget: "0%",
+    defaultCases: ["Kiểm tra hóa đơn", "Đối chiếu sổ phụ ngân hàng", "Lập tờ khai thuế", "Nộp thuế"],
+    targetDepartmentIds: [4, 5] // Giả sử bộ phận Kế toán/Tài chính
+  }
+];
+
+export const hrmTaskThemesApi = {
+  list(): Promise<{ data: HrmTaskTheme[] }> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({ data: mockTaskThemes });
+      }, 300);
     });
   }
 };

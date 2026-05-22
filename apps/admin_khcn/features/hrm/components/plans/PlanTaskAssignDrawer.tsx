@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Target, Users, Scale, FileSignature, Save, X, Plus, Trash2, ListChecks } from "lucide-react";
-import { hrmApi, hrmObjectivesApi } from "@/features/hrm/api";
-import type { BscPerspective, HrmEmployee } from "@/features/hrm/types";
+import { Target, Users, Scale, FileSignature, Save, X, Plus, Trash2, ListChecks, Sparkles } from "lucide-react";
+import { hrmApi, hrmObjectivesApi, hrmTaskThemesApi } from "@/features/hrm/api";
+import type { BscPerspective, HrmEmployee, HrmTaskTheme } from "@/features/hrm/types";
 
 interface PlanTaskAssignDrawerProps {
   isOpen: boolean;
@@ -28,7 +28,9 @@ const PERSPECTIVE_LABELS: Record<BscPerspective, string> = {
 export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onSuccess }: PlanTaskAssignDrawerProps) => {
   const [submitting, setSubmitting] = useState(false);
   const [employees, setEmployees] = useState<HrmEmployee[]>([]);
+  const [themes, setThemes] = useState<HrmTaskTheme[]>([]);
   const [loadingEmployees, setLoadingEmployees] = useState(false);
+  const [suggestedThemes, setSuggestedThemes] = useState<HrmTaskTheme[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -57,8 +59,12 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
   useEffect(() => {
     if (isOpen) {
       setLoadingEmployees(true);
-      hrmApi.list({ pageSize: 100 }).then(res => {
-        setEmployees(res.data);
+      Promise.all([
+        hrmApi.list({ pageSize: 100 }),
+        hrmTaskThemesApi.list()
+      ]).then(([empRes, themeRes]) => {
+        setEmployees(empRes.data);
+        setThemes(themeRes.data);
         setLoadingEmployees(false);
       }).catch(err => {
         console.error(err);
@@ -71,8 +77,42 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
       });
       setCases([]);
       setNewCaseInput("");
+      setSuggestedThemes([]);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (formData.assigneeId) {
+      // Logic gợi ý Theme theo người dùng (ví dụ dùng departmentId hoặc jobTitleId)
+      const emp = employees.find(e => e.id.toString() === formData.assigneeId);
+      if (emp) {
+        // Giả sử emp.departmentId để map. Trong thực tế có thể map jobTitleId
+        const filtered = themes.filter(t => !emp.departmentId || t.targetDepartmentIds.includes(emp.departmentId));
+        setSuggestedThemes(filtered.length > 0 ? filtered : themes); // Nếu không có, hiện tất cả
+      }
+    } else {
+      setSuggestedThemes([]);
+    }
+  }, [formData.assigneeId, employees, themes]);
+
+  const handleApplyTheme = (themeId: string) => {
+    if (!themeId) return;
+    const theme = themes.find(t => t.id.toString() === themeId);
+    if (!theme) return;
+
+    setFormData(prev => ({
+      ...prev,
+      title: theme.title,
+      description: theme.description,
+      metric: theme.defaultMetric,
+      target: theme.defaultTarget
+    }));
+    
+    if (theme.defaultCases) {
+      setCases(theme.defaultCases.map((c, i) => ({ id: Date.now().toString() + i, title: c })));
+    }
+    toast.success("Đã áp dụng mẫu công việc: " + theme.title);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,11 +159,75 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
           </div>
 
           <div className="p-6 space-y-6 flex-1">
-            {/* Basic Info */}
+            {/* Assignment Info - Moved up to trigger theme suggestion */}
             <div className="space-y-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-50 pb-2">
+                <Users className="w-4 h-4 text-amber-500" /> Phân công & Tiến độ
+              </h3>
+              
+              <div className="space-y-2">
+                <Label className="font-bold text-slate-700">Người thực hiện chính <span className="text-red-500">*</span></Label>
+                <select 
+                  className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  value={formData.assigneeId}
+                  onChange={e => setFormData({ ...formData, assigneeId: e.target.value })}
+                  disabled={loadingEmployees}
+                >
+                  <option value="">{loadingEmployees ? "Đang tải..." : "Chọn nhân sự..."}</option>
+                  {employees.map(emp => (
+                    <option key={emp.id} value={emp.id.toString()}>{emp.firstname} {emp.lastname} - {emp.department?.name}</option>
+                  ))}
+                </select>
+                {!formData.assigneeId && (
+                  <p className="text-xs text-amber-600 italic">Mẹo: Hãy chọn người thực hiện trước để hệ thống gợi ý Mẫu công việc phù hợp.</p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Ngày bắt đầu</Label>
+                  <Input 
+                    type="date" 
+                    value={formData.startDate} 
+                    onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                    className="h-11 bg-slate-50"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Deadline</Label>
+                  <Input 
+                    type="date" 
+                    value={formData.dueDate} 
+                    onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
+                    className="h-11 bg-slate-50"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Basic Info */}
+            <div className="space-y-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm relative">
               <h3 className="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-50 pb-2">
                 <FileSignature className="w-4 h-4 text-blue-500" /> Thông tin cơ sở
               </h3>
+              
+              {suggestedThemes.length > 0 && (
+                <div className="absolute top-4 right-5">
+                  <div className="flex items-center gap-2 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">
+                    <Sparkles className="w-4 h-4 text-indigo-500" />
+                    <select 
+                      className="bg-transparent border-none text-xs font-bold text-indigo-700 outline-none cursor-pointer"
+                      onChange={e => handleApplyTheme(e.target.value)}
+                      defaultValue=""
+                    >
+                      <option value="" disabled>-- Chọn mẫu công việc --</option>
+                      {suggestedThemes.map(t => (
+                        <option key={t.id} value={t.id}>{t.title}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label className="font-bold text-slate-700">Tên Mục tiêu / Công việc <span className="text-red-500">*</span></Label>
@@ -221,49 +325,6 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspective, onS
                   <div className="w-16 h-10 flex items-center justify-center bg-indigo-50 text-indigo-700 font-bold rounded-lg border border-indigo-100">
                     {formData.weight}%
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Assignment Info */}
-            <div className="space-y-4 bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2 border-b border-slate-50 pb-2">
-                <Users className="w-4 h-4 text-amber-500" /> Phân công & Tiến độ
-              </h3>
-
-              <div className="space-y-2">
-                <Label className="font-bold text-slate-700">Người thực hiện chính <span className="text-red-500">*</span></Label>
-                <select
-                  className="w-full h-11 rounded-lg border border-slate-200 bg-slate-50 px-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
-                  value={formData.assigneeId}
-                  onChange={e => setFormData({ ...formData, assigneeId: e.target.value })}
-                  disabled={loadingEmployees}
-                >
-                  <option value="">{loadingEmployees ? "Đang tải..." : "Chọn nhân sự..."}</option>
-                  {employees.map(emp => (
-                    <option key={emp.id} value={emp.id.toString()}>{emp.firstname} {emp.lastname} - {emp.department?.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Ngày bắt đầu</Label>
-                  <Input
-                    type="date"
-                    value={formData.startDate}
-                    onChange={e => setFormData({ ...formData, startDate: e.target.value })}
-                    className="h-11 bg-slate-50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label className="font-bold text-slate-700">Deadline</Label>
-                  <Input
-                    type="date"
-                    value={formData.dueDate}
-                    onChange={e => setFormData({ ...formData, dueDate: e.target.value })}
-                    className="h-11 bg-slate-50"
-                  />
                 </div>
               </div>
             </div>
