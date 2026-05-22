@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Plus, MoreVertical, CheckCircle2, Clock, XCircle, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -39,9 +40,11 @@ export function LeaveRequestListClient() {
             Quản lý các đơn xin nghỉ phép, nghỉ ốm và vắng mặt của nhân sự.
           </p>
         </div>
-        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
-          <Plus className="mr-2 h-4 w-4" /> Tạo đơn nghỉ phép
-        </Button>
+        <Link href="/services/hrm/leave/create">
+          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
+            <Plus className="mr-2 h-4 w-4" /> Tạo đơn nghỉ phép
+          </Button>
+        </Link>
       </div>
 
       <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">

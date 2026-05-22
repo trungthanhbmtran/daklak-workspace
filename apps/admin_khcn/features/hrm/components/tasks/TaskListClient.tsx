@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 
@@ -30,9 +31,11 @@ export const TaskListClient = () => {
           <h1 className="text-3xl font-bold tracking-tight">Giao việc</h1>
           <p className="text-muted-foreground">Quản lý và theo dõi tiến độ công việc</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Giao việc mới
-        </Button>
+        <Link href="/services/hrm/tasks/create">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Giao việc mới
+          </Button>
+        </Link>
       </div>
 
       <Card>

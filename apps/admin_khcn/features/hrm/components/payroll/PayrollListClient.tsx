@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Calendar, Download, MoreVertical, Banknote, CheckCircle2, Clock, Plus, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -42,9 +43,11 @@ export function PayrollListClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
-            <Plus className="mr-2 h-4 w-4" /> Thêm bảng lương
-          </Button>
+          <Link href="/services/hrm/payroll/create">
+            <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
+              <Plus className="mr-2 h-4 w-4" /> Thêm bảng lương
+            </Button>
+          </Link>
           <Button variant="outline" className="rounded-xl">
             <Calendar className="mr-2 h-4 w-4" /> Tháng 5/2026
           </Button>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 
@@ -30,9 +31,11 @@ export const KpiDashboardClient = () => {
           <h1 className="text-3xl font-bold tracking-tight">Đánh giá KPI</h1>
           <p className="text-muted-foreground">Quản lý và đánh giá hiệu suất nhân viên</p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Tạo kỳ đánh giá
-        </Button>
+        <Link href="/services/hrm/kpi/create">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" /> Tạo kỳ đánh giá
+          </Button>
+        </Link>
       </div>
 
       <Card>

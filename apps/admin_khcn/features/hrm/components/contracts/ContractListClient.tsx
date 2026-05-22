@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, Plus, MoreVertical, FileText, CheckCircle2, AlertCircle, Clock, Eye, Edit, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -39,9 +40,11 @@ export function ContractListClient() {
             Theo dõi và quản lý hợp đồng lao động của nhân sự.
           </p>
         </div>
-        <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
-          <Plus className="mr-2 h-4 w-4" /> Thêm hợp đồng
-        </Button>
+        <Link href="/services/hrm/contracts/create">
+          <Button className="rounded-xl bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
+            <Plus className="mr-2 h-4 w-4" /> Thêm hợp đồng
+          </Button>
+        </Link>
       </div>
 
       <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">
