@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { hrmPlansApi } from "@/features/hrm/api";
-import { ArrowLeft, Save, UploadCloud, FileSpreadsheet, Sparkles, X, LayoutList } from "lucide-react";
+import { ArrowLeft, Save, UploadCloud, FileSpreadsheet, Sparkles, X, LayoutList, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { cn } from "@/lib/utils";
 
@@ -117,6 +117,30 @@ export const PlanFormClient = () => {
       toast.error("Đã xảy ra lỗi khi tạo kế hoạch");
       setSubmitting(false);
     }
+  };
+
+  const downloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        "Tên công việc": "Khảo sát hiện trạng hệ thống",
+        "Mô tả": "Lập danh sách các máy chủ và phần mềm hiện tại",
+        "Người thực hiện": "Nguyễn Văn A",
+        "Thời hạn": "2026-10-15",
+        "Ưu tiên": "Cao",
+        "KPI": "Bản báo cáo hoàn chỉnh"
+      },
+      {
+        "Tên công việc": "Cài đặt phần mềm mới",
+        "Mô tả": "Cài đặt bộ phần mềm văn phòng số trên toàn bộ máy chủ",
+        "Người thực hiện": "Trần Thị B",
+        "Thời hạn": "2026-10-20",
+        "Ưu tiên": "Trung bình",
+        "KPI": "Hoàn thành 100% server"
+      }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "DanhSachCongViec");
+    XLSX.writeFile(wb, "Mau_Ke_Hoach_Cong_Viec.xlsx");
   };
 
   return (
@@ -281,10 +305,18 @@ export const PlanFormClient = () => {
                     </div>
                   )}
 
-                  <div className="mt-6 pt-6 border-t border-indigo-100">
+                  <div className="mt-6 pt-6 border-t border-indigo-100 space-y-4">
                     <p className="text-xs text-slate-500 leading-relaxed">
                       <strong>Lưu ý:</strong> Tệp Excel nên có dòng đầu tiên là tiêu đề cột (Ví dụ: Tên công việc, Người phụ trách, Hạn chót...). Hệ thống sẽ tự động đối chiếu các trường thông tin.
                     </p>
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={downloadTemplate}
+                      className="w-full text-indigo-600 border-indigo-200 bg-white hover:bg-indigo-50 font-bold rounded-xl"
+                    >
+                      <Download className="w-4 h-4 mr-2" /> Tải file mẫu (Template)
+                    </Button>
                   </div>
                 </CardContent>
               </Card>

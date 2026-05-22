@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Save, FileSignature, AlignLeft, CalendarClock, Users, Bot, CheckCircle2, ShieldCheck, Sparkles, BookOpen, X, BrainCircuit, Target, ListTodo, Presentation, Zap, UploadCloud, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, Save, FileSignature, AlignLeft, CalendarClock, Users, Bot, CheckCircle2, ShieldCheck, Sparkles, BookOpen, X, BrainCircuit, Target, ListTodo, Presentation, Zap, UploadCloud, FileSpreadsheet, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -175,6 +175,30 @@ export default function CreateTaskPage() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
+  const downloadTemplate = () => {
+    const ws = XLSX.utils.json_to_sheet([
+      {
+        "Tên công việc": "Khảo sát hiện trạng",
+        "Mô tả": "Lập danh sách các máy chủ",
+        "Người thực hiện": "Nguyễn Văn A",
+        "Thời hạn": "2026-10-15",
+        "Ưu tiên": "Cao",
+        "KPI": "Bản báo cáo hoàn chỉnh"
+      },
+      {
+        "Tên công việc": "Cài đặt phần mềm",
+        "Mô tả": "Cài đặt phần mềm nội bộ",
+        "Người thực hiện": "Trần Thị B",
+        "Thời hạn": "2026-10-20",
+        "Ưu tiên": "Trung bình",
+        "KPI": "Hoàn thành 100%"
+      }
+    ]);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "DanhSachCongViec");
+    XLSX.writeFile(wb, "Mau_Ke_Hoach_Cong_Viec.xlsx");
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] p-6 md:p-10 text-slate-900 relative">
       <form onSubmit={handleSubmit} className="max-w-[1200px] mx-auto space-y-6">
@@ -244,7 +268,16 @@ export default function CreateTaskPage() {
                       
                       <div className="p-4 bg-amber-50 border border-amber-100 rounded-xl">
                         <h4 className="font-bold text-amber-800 text-sm mb-1 flex items-center"><Target className="w-4 h-4 mr-1"/> Hướng dẫn form mẫu</h4>
-                        <p className="text-xs text-amber-700 leading-relaxed">Vui lòng sử dụng dòng đầu tiên trong Excel làm dòng Tiêu đề. Tên cột nên bao gồm: <strong>Tên việc, Người nhận, Mô tả, Deadline</strong> để hệ thống tự động nhận diện chính xác nhất.</p>
+                        <p className="text-xs text-amber-700 leading-relaxed mb-3">Vui lòng sử dụng dòng đầu tiên trong Excel làm dòng Tiêu đề. Tên cột nên bao gồm: <strong>Tên việc, Người nhận, Mô tả, Deadline</strong> để hệ thống tự động nhận diện chính xác nhất.</p>
+                        <Button 
+                          type="button" 
+                          variant="outline" 
+                          size="sm"
+                          onClick={downloadTemplate}
+                          className="w-full text-amber-700 border-amber-200 bg-white hover:bg-amber-100 font-bold rounded-lg"
+                        >
+                          <Download className="w-4 h-4 mr-2" /> Tải file mẫu (Template)
+                        </Button>
                       </div>
                     </div>
                   </div>
