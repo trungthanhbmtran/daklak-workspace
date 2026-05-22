@@ -107,36 +107,51 @@ export const hrmApi = {
 };
 
 // ==========================================
-// MOCK APIs CHO PHÂN HỆ MỞ RỘNG HRM
-// (Cần được thay thế bằng gọi API thật khi backend đã sẵn sàng)
+// THỰC THI GỌI API THẬT CHO PHÂN HỆ MỞ RỘNG HRM
+// Giao tiếp qua Gateway: /api/v1/hrm/...
 // ==========================================
 
 export const hrmDepartmentsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return Promise.resolve({ data: [], meta: { total: 0 } });
+    return apiClient.get("/hrm/departments", { params }).then((res: any) => ({
+      data: unwrapData(res),
+      meta: unwrapMeta(res) || { total: 0 },
+    }));
   }
 };
 
 export const hrmLeaveApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return Promise.resolve({ data: [], meta: { total: 0 } });
+    return apiClient.get("/hrm/leaves", { params }).then((res: any) => ({
+      data: unwrapData(res),
+      meta: unwrapMeta(res) || { total: 0 },
+    }));
   }
 };
 
 export const hrmAttendanceApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return Promise.resolve({ data: [], meta: { total: 0 } });
+    return apiClient.get("/hrm/attendance", { params }).then((res: any) => ({
+      data: unwrapData(res),
+      meta: unwrapMeta(res) || { total: 0 },
+    }));
   }
 };
 
 export const hrmContractsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return Promise.resolve({ data: [], meta: { total: 0 } });
+    return apiClient.get("/hrm/contracts", { params }).then((res: any) => ({
+      data: unwrapData(res),
+      meta: unwrapMeta(res) || { total: 0 },
+    }));
   }
 };
 
 export const hrmPayrollApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return Promise.resolve({ data: [], meta: { total: 0 } });
+    return apiClient.get("/hrm/payroll", { params }).then((res: any) => ({
+      data: unwrapData(res),
+      meta: unwrapMeta(res) || { total: 0 },
+    }));
   }
 };
