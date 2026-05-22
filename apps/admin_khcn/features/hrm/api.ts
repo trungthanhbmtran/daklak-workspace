@@ -32,6 +32,8 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
     jobTitle: row.jobTitle as HrmEmployee["jobTitle"],
     civilServantRank: row.civilServantRank as HrmEmployee["civilServantRank"],
     partyTitle: row.partyTitle as HrmEmployee["partyTitle"],
+    // Mock dữ liệu cho thuật toán Cân bằng tải (Load Balancing)
+    currentTaskCount: Math.floor(Math.random() * 5),
   };
 }
 

@@ -21,6 +21,7 @@ export interface HrmEmployee {
   jobTitle?: { id: number; name: string; code: string; type?: string };
   civilServantRank?: { id: number; name: string; code: string; type?: string };
   partyTitle?: { id: number; name: string; code: string; type?: string };
+  currentTaskCount?: number;
 }
 
 /** Tham số danh sách nhân viên (phân trang, lọc) */

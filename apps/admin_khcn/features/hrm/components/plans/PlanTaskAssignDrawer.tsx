@@ -51,6 +51,24 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
     setCases(cases.filter(c => c.id !== id));
   };
 
+  const handleAutoSuggest = (caseId: string, allowedEmps: HrmEmployee[]) => {
+    if (allowedEmps.length === 0) {
+      toast.error("Không có nhân sự nào trong các phòng ban đã chọn để phân công.");
+      return;
+    }
+    
+    // Tìm nhân sự đang rảnh nhất (currentTaskCount thấp nhất)
+    const sorted = [...allowedEmps].sort((a, b) => (a.currentTaskCount || 0) - (b.currentTaskCount || 0));
+    const suggestedEmp = sorted[0];
+
+    setCases(prev => prev.map(c => 
+      c.id === caseId 
+        ? { ...c, assigneeId: suggestedEmp.id, assigneeName: `${suggestedEmp.firstname} ${suggestedEmp.lastname}` } 
+        : c
+    ));
+    toast.success(`Đã tự động chọn ${suggestedEmp.firstname} ${suggestedEmp.lastname} (Đang có ${suggestedEmp.currentTaskCount || 0} việc)`);
+  };
+
   useEffect(() => {
     if (isOpen) {
       setLoadingEmployees(true);
@@ -317,10 +335,27 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
                               }}
                             >
                               <option value="">-- Phân công --</option>
-                              {allowedEmployees.map(emp => (
-                                <option key={emp.id} value={emp.id}>{emp.firstname} {emp.lastname}</option>
-                              ))}
+                              {allowedEmployees.map(emp => {
+                                const count = emp.currentTaskCount || 0;
+                                const status = count === 0 ? "Rất rảnh" : count < 3 ? "Bình thường" : "Khá bận";
+                                return (
+                                  <option key={emp.id} value={emp.id}>
+                                    {emp.firstname} {emp.lastname} ({count} việc - {status})
+                                  </option>
+                                );
+                              })}
                             </select>
+                            
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleAutoSuggest(c.id, allowedEmployees)} 
+                              className="h-8 px-2 text-xs font-bold text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-100"
+                              title="Tự động giao cho người rảnh nhất"
+                            >
+                              <Sparkles className="w-3.5 h-3.5 mr-1" /> Gợi ý
+                            </Button>
                             
                             <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveCase(c.id)} className="h-8 w-8 text-slate-400 hover:text-red-500 rounded-md hover:bg-red-50">
                               <Trash2 className="w-4 h-4" />
