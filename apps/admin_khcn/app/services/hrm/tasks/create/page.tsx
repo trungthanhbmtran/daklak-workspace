@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Save, FileSignature, AlignLeft, CalendarClock, Users, Bot, CheckCircle2, ShieldCheck, Sparkles, BookOpen, X, BrainCircuit, Target, ListTodo, Presentation, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { hrmApi } from "@/features/hrm/api";
+import type { HrmEmployee } from "@/features/hrm/types";
 
 const FRAMEWORK_TEMPLATES = {
   SMART: {
@@ -141,13 +143,37 @@ export default function CreateTaskPage() {
     reportFrequency: "Hàng tuần",
   });
 
+  const [employees, setEmployees] = useState<(HrmEmployee & { workload: number })[]>([]);
+  const [loadingEmployees, setLoadingEmployees] = useState(true);
+
+  useEffect(() => {
+    hrmApi.list({ pageSize: 100 }).then(res => {
+      // Giả lập (mock) tham số workload vì backend chưa có trường này
+      const withWorkload = res.data.map(emp => ({
+        ...emp,
+        workload: Math.floor(Math.random() * 8) // Số task đang làm từ 0-7
+      })).sort((a, b) => a.workload - b.workload); // Sắp xếp tăng dần theo khối lượng
+      setEmployees(withWorkload);
+      setLoadingEmployees(false);
+    }).catch(err => {
+      console.error(err);
+      toast.error("Lỗi khi tải danh sách nhân sự");
+      setLoadingEmployees(false);
+    });
+  }, []);
+
   const handleAutoAssign = () => {
+    if (employees.length === 0) {
+      toast.error("Chưa có dữ liệu nhân viên khả dụng");
+      return;
+    }
     setAutoAssigning(true);
     // Giả lập AI chạy trong 1.5s
     setTimeout(() => {
       setAutoAssigning(false);
-      setTaskInfo({ ...taskInfo, assignee: "Nguyễn Văn A (Rảnh 30% thời gian)" });
-      toast.success("AI đã phân tích và đề xuất nhân sự phù hợp nhất!");
+      const bestMatch = employees[0]; // Nhân viên ở đầu danh sách (ít việc nhất)
+      setTaskInfo({ ...taskInfo, assignee: bestMatch.id.toString() });
+      toast.success(`AI đã đề xuất: ${bestMatch.firstname} ${bestMatch.lastname} (${bestMatch.workload} công việc đang xử lý)!`);
     }, 1500);
   };
 
@@ -340,12 +366,19 @@ export default function CreateTaskPage() {
                           )}
                         </Button>
                       </div>
-                      <Input
-                        placeholder="Chọn hoặc để AI gợi ý..."
+                      <select
+                        className="w-full h-12 rounded-lg border border-indigo-200 bg-white px-3 text-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 outline-none disabled:bg-slate-50"
                         value={taskInfo.assignee}
                         onChange={e => setTaskInfo({ ...taskInfo, assignee: e.target.value })}
-                        className="h-12 text-lg border-indigo-200 focus:border-indigo-500 focus:ring-indigo-500 bg-white"
-                      />
+                        disabled={loadingEmployees}
+                      >
+                        <option value="">{loadingEmployees ? "Đang tải danh sách..." : "Chọn nhân sự..."}</option>
+                        {employees.map(emp => (
+                          <option key={emp.id} value={emp.id.toString()}>
+                            {emp.firstname} {emp.lastname} - Phòng {emp.department?.name || 'Chưa rõ'} ({emp.workload} việc đang chờ)
+                          </option>
+                        ))}
+                      </select>
                       <p className="text-xs text-indigo-600/70 font-medium">
                         * Tự động giao việc sẽ phân tích Lịch biểu hiện tại, Ma trận kỹ năng và Khối lượng công việc (Workload) để tìm người phù hợp.
                       </p>
