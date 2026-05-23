@@ -507,16 +507,34 @@ async function main() {
     { code: 'ADMIN_MENUS', name: 'Cấu hình Menu', route: 'menus', icon: 'list-outline', order: 4, res: 'MENU' },
     { code: 'ADMIN_ORGANIZATION', name: 'Đơn vị & Phòng ban', route: 'organization', icon: 'apartment', order: 5, res: 'ORGANIZATION' },
     { code: 'ADMIN_CATEGORIES', name: 'Danh mục hệ thống', route: 'categories', icon: 'cog-outline', order: 6, res: 'CATEGORY' },
-    { code: 'ADMIN_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'megaphone-outline', order: 7, res: 'NOTIFICATION' },
+    { code: 'ADMIN_SETTINGS', name: 'Thiết lập hệ thống', route: 'settings', icon: 'settings-outline', order: 7, res: 'SYSTEM' },
   ];
 
   for (const { res, ...m } of adminMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
-      update: { parentId: serviceNodes['USER_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
+      update: { parentId: serviceNodes['USER_SERVICE'].id, order: m.order, route: m.route, icon: m.icon, name: m.name },
       create: { ...m, parentId: serviceNodes['USER_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'USER_SERVICE' },
     });
     await linkMenuPBAC(node.id, res, 'READ');
+  }
+
+  // Admin Sub-menus for Settings
+  const adminSettingsNode = await prisma.menu.findUnique({ where: { code: 'ADMIN_SETTINGS' } });
+  if (adminSettingsNode) {
+    const adminSettingsSubMenus = [
+      { code: 'ADMIN_SETTINGS_GENERAL', name: 'Thông số chung', route: 'settings', icon: 'options-outline', order: 1, res: 'SYSTEM' },
+      { code: 'ADMIN_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'megaphone-outline', order: 2, res: 'NOTIFICATION' },
+    ];
+
+    for (const { res, ...m } of adminSettingsSubMenus) {
+      const node = await prisma.menu.upsert({
+        where: { code: m.code },
+        update: { parentId: adminSettingsNode.id, order: m.order, route: m.route, icon: m.icon, name: m.name },
+        create: { ...m, parentId: adminSettingsNode.id, application: 'ADMIN_PORTAL', service: 'USER_SERVICE' },
+      });
+      await linkMenuPBAC(node.id, res, 'READ');
+    }
   }
 
   // 2. Document Module
