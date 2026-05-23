@@ -1067,6 +1067,65 @@ async function main() {
   await assignLeader('nguyenthehau@daklak.gov.vn', 'nguyenthehau', 'Nguyễn Thế Hậu', 'UBND_XA_HOA_PHU', 'CHU_TICH', true);
   await assignLeader('danggiaduan@daklak.gov.vn', 'danggiaduan', 'Đặng Gia Duẩn', 'UBND_XA_EA_KAO', 'BI_THU_DANG_BO', true);
   await assignLeader('ledaithang@daklak.gov.vn', 'ledaithang', 'Lê Đại Thắng', 'UBND_XA_EA_KAO', 'CHU_TICH', true);
+
+  // ==========================
+  // STAFFING (Định biên)
+  // ==========================
+  console.log('📦 Seeding Staffing (Định biên)...');
+  const setStaffing = async (unitCode: string, jobTitleCode: string, quantity: number) => {
+    const unit = await prisma.organizationUnit.findUnique({ where: { code: unitCode } });
+    const jobTitle = await prisma.jobTitle.findUnique({ where: { code: jobTitleCode } });
+    if (unit && jobTitle) {
+      await prisma.organizationStaffing.upsert({
+        where: {
+          unitId_jobTitleId: { unitId: unit.id, jobTitleId: jobTitle.id },
+        },
+        update: { quantity },
+        create: {
+          unitId: unit.id,
+          jobTitleId: jobTitle.id,
+          quantity,
+        },
+      });
+    }
+  };
+
+  // Sở KHCN
+  await setStaffing('SO_KHCN', 'GIAM_DOC', 1);
+  await setStaffing('SO_KHCN', 'PHO_GIAM_DOC', 4);
+  
+  // Các phòng ban thuộc Sở
+  await setStaffing('SO_KHCN_VP', 'CHANH_VAN_PHONG', 1);
+  await setStaffing('SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', 2);
+  await setStaffing('SO_KHCN_VP', 'CHUYEN_VIEN', 5);
+
+  const phongBanCodes = ['SO_KHCN_KHTC', 'SO_KHCN_QLKH', 'SO_KHCN_CDS', 'SO_KHCN_QLCN', 'SO_KHCN_TDC'];
+  for (const code of phongBanCodes) {
+    await setStaffing(code, 'TRUONG_PHONG', 1);
+    await setStaffing(code, 'PHO_TRUONG_PHONG', 2);
+    await setStaffing(code, 'CHUYEN_VIEN', 4);
+  }
+
+  // Các Trung tâm
+  const trungTamCodes = ['TT_DMSM', 'TT_IOC', 'TT_KTTDC'];
+  for (const code of trungTamCodes) {
+    await setStaffing(code, 'GIAM_DOC', 1);
+    await setStaffing(code, 'PHO_GIAM_DOC', 2);
+  }
+
+  // Các phòng thuộc Trung tâm
+  const phongTrungTamCodes = [
+    'TT_DMSM_HC', 'TT_DMSM_UT',
+    'TT_IOC_HC', 'TT_IOC_CN',
+    'TT_KTTDC_HC', 'TT_KTTDC_DL', 'TT_KTTDC_TN'
+  ];
+  for (const code of phongTrungTamCodes) {
+    await setStaffing(code, 'TRUONG_PHONG', 1);
+    await setStaffing(code, 'PHO_TRUONG_PHONG', 1);
+    await setStaffing(code, 'CHUYEN_VIEN', 3);
+  }
+
+  console.log('✅ Staffing seeded successfully!');
 }
 
 main()
