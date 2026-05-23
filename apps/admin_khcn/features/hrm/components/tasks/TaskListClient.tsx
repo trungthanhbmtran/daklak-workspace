@@ -18,6 +18,7 @@ export const TaskListClient = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
@@ -36,12 +37,100 @@ export const TaskListClient = () => {
       });
   }, []);
 
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+
+  const activeTasks = tasks.filter(t => t.status !== 'DONE' && t.status !== 'ARCHIVED');
+
+  const overdueCount = activeTasks.filter(t => {
+    if (t.status === 'OVERDUE') return true;
+    if (!t.dueDate) return false;
+    const due = new Date(t.dueDate);
+    due.setHours(0, 0, 0, 0);
+    return due < now;
+  }).length;
+
+  const dueIn3DaysCount = activeTasks.filter(t => {
+    if (t.status === 'OVERDUE') return false;
+    if (!t.dueDate) return false;
+    const due = new Date(t.dueDate);
+    due.setHours(0, 0, 0, 0);
+    if (due < now) return false;
+    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays >= 0 && diffDays <= 3;
+  }).length;
+
+  const dueIn7DaysCount = activeTasks.filter(t => {
+    if (t.status === 'OVERDUE') return false;
+    if (!t.dueDate) return false;
+    const due = new Date(t.dueDate);
+    due.setHours(0, 0, 0, 0);
+    if (due < now) return false;
+    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays > 3 && diffDays <= 7;
+  }).length;
+
+  const dueOver7DaysCount = activeTasks.filter(t => {
+    if (t.status === 'OVERDUE') return false;
+    if (!t.dueDate) return true; // Tasks without deadline are technically safe
+    const due = new Date(t.dueDate);
+    due.setHours(0, 0, 0, 0);
+    if (due < now) return false;
+    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return diffDays > 7;
+  }).length;
+
   const stats = [
-    { label: 'Tổng công việc', value: tasks.length, icon: <LayoutGrid className="h-5 w-5" />, color: 'from-blue-500 to-cyan-400' },
-    { label: 'Đang xử lý', value: tasks.filter(t => t.status === 'IN_PROGRESS').length, icon: <PlayCircle className="h-5 w-5" />, color: 'from-amber-500 to-orange-400' },
-    { label: 'Đã hoàn thành', value: tasks.filter(t => t.status === 'DONE').length, icon: <CheckCircle2 className="h-5 w-5" />, color: 'from-emerald-500 to-teal-400' },
-    { label: 'Quá hạn', value: tasks.filter(t => t.status === 'OVERDUE').length, icon: <AlertCircle className="h-5 w-5" />, color: 'from-rose-500 to-red-400' },
+    { id: 'overdue', label: 'Quá hạn xử lý', value: overdueCount, icon: <AlertCircle className="h-5 w-5" />, color: 'from-red-600 to-red-400 text-white' },
+    { id: 'dueIn3Days', label: 'Còn ≤ 3 ngày', value: dueIn3DaysCount, icon: <Clock className="h-5 w-5" />, color: 'from-orange-500 to-orange-400 text-white' },
+    { id: 'dueIn7Days', label: 'Còn 4-7 ngày', value: dueIn7DaysCount, icon: <Calendar className="h-5 w-5" />, color: 'from-yellow-500 to-yellow-400 text-white' },
+    { id: 'dueOver7Days', label: 'Còn > 7 ngày', value: dueOver7DaysCount, icon: <CheckCircle2 className="h-5 w-5" />, color: 'from-green-500 to-emerald-400 text-white' },
   ];
+
+  const displayedTasks = tasks.filter(t => {
+    if (!activeFilter) return true;
+    if (t.status === 'DONE' || t.status === 'ARCHIVED') return false;
+
+    if (activeFilter === 'overdue') {
+      if (t.status === 'OVERDUE') return true;
+      if (!t.dueDate) return false;
+      const due = new Date(t.dueDate);
+      due.setHours(0, 0, 0, 0);
+      return due < now;
+    }
+    
+    if (activeFilter === 'dueIn3Days') {
+      if (t.status === 'OVERDUE') return false;
+      if (!t.dueDate) return false;
+      const due = new Date(t.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due < now) return false;
+      const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      return diffDays >= 0 && diffDays <= 3;
+    }
+
+    if (activeFilter === 'dueIn7Days') {
+      if (t.status === 'OVERDUE') return false;
+      if (!t.dueDate) return false;
+      const due = new Date(t.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due < now) return false;
+      const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      return diffDays > 3 && diffDays <= 7;
+    }
+
+    if (activeFilter === 'dueOver7Days') {
+      if (t.status === 'OVERDUE') return false;
+      if (!t.dueDate) return true;
+      const due = new Date(t.dueDate);
+      due.setHours(0, 0, 0, 0);
+      if (due < now) return false;
+      const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      return diffDays > 7;
+    }
+
+    return true;
+  });
 
   const getStatusBadge = (status: string) => {
     switch(status) {
@@ -84,7 +173,11 @@ export const TaskListClient = () => {
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
-          <Card key={idx} className="border-none shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+          <Card 
+            key={idx} 
+            className={`border-none shadow-md transition-all duration-300 overflow-hidden group cursor-pointer ${activeFilter === stat.id ? 'ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'hover:shadow-xl'}`}
+            onClick={() => setActiveFilter(activeFilter === stat.id ? null : stat.id)}
+          >
             <CardContent className="p-6 relative">
               <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-10 rounded-bl-full group-hover:scale-110 transition-transform duration-500`} />
               <div className="flex justify-between items-start">
@@ -140,17 +233,21 @@ export const TaskListClient = () => {
         <div className="flex justify-center items-center py-20">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
-      ) : tasks.length === 0 ? (
+      ) : displayedTasks.length === 0 ? (
         <div className="text-center py-20 bg-slate-50 dark:bg-slate-900 rounded-3xl border border-dashed border-slate-200 dark:border-slate-800">
           <div className="mx-auto w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
             <CheckCircle2 className="h-10 w-10 text-slate-400" />
           </div>
-          <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300">Hoan hô! Không có công việc nào</h3>
-          <p className="text-slate-500 mt-2">Bạn đã hoàn thành tất cả hoặc chưa có công việc được giao.</p>
+          <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300">
+            {activeFilter ? "Không có công việc nào phù hợp với bộ lọc" : "Hoan hô! Không có công việc nào"}
+          </h3>
+          <p className="text-slate-500 mt-2">
+            {activeFilter ? "Thử chọn một bộ lọc khác hoặc bỏ chọn." : "Bạn đã hoàn thành tất cả hoặc chưa có công việc được giao."}
+          </p>
         </div>
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {tasks.map((task: any) => (
+          {displayedTasks.map((task: any) => (
             <Card key={task.id} className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
               <CardContent className="p-0">
                 <div className="p-6">
@@ -208,7 +305,7 @@ export const TaskListClient = () => {
                 </tr>
               </thead>
               <tbody>
-                {tasks.map((task: any) => (
+                {displayedTasks.map((task: any) => (
                   <tr key={task.id} className="bg-white dark:bg-slate-900 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group">
                     <td className="px-6 py-4 font-medium text-slate-900 dark:text-white max-w-xs truncate">
                       {task.title}
