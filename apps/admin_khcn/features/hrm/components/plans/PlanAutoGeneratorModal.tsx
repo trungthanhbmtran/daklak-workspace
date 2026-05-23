@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Sparkles, Target, Layers, AlignStartVertical, Users, Loader2 } from "lucide-react";
+import { Sparkles, Target, Layers, AlignStartVertical, Users, Loader2, PieChart, BarChart, Compass, CheckCircle2, FileText, BarChart2, ShieldCheck } from "lucide-react";
 import { hrmPlansApi, hrmObjectivesApi } from "@/features/hrm/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -17,37 +17,79 @@ interface PlanAutoGeneratorModalProps {
   onSuccess: () => void;
 }
 
-type Framework = "OKRs" | "BSC" | "SMART" | "RACI";
+type Framework = "OKRs" | "BSC" | "SMART" | "RACI" | "MBO" | "KPI" | "AGILE" | "LEAN" | "DATA_DRIVEN" | "GOVERNANCE";
 
-const FRAMEWORKS = [
+const FRAMEWORKS: { id: Framework; name: string; description: string; icon: any; color: string }[] = [
   {
     id: "OKRs",
     name: "OKRs",
-    description: "Tập trung vào 1 Mục tiêu cốt lõi và 3-5 Kết quả then chốt đo lường được.",
+    description: "Objective & Key Results (Google)",
     icon: Target,
     color: "indigo"
   },
   {
     id: "BSC",
     name: "BSC",
-    description: "Cân bằng 4 viễn cảnh: Tài chính, Khách hàng, Nội bộ, Học hỏi.",
-    icon: Layers,
+    description: "Balanced Scorecard (Tài chính, KH, Nội bộ, Học tập)",
+    icon: PieChart,
     color: "emerald"
   },
   {
+    id: "KPI",
+    name: "KPI Management",
+    description: "Quản trị hiệu suất trọng yếu",
+    icon: BarChart,
+    color: "rose"
+  },
+  {
+    id: "MBO",
+    name: "MBO",
+    description: "Management by Objectives (Quản trị theo mục tiêu)",
+    icon: Compass,
+    color: "cyan"
+  },
+  {
     id: "SMART",
-    name: "SMART",
-    description: "Cụ thể, Đo lường được, Khả thi, Thực tế, Có thời hạn.",
-    icon: AlignStartVertical,
+    name: "SMART Goals",
+    description: "Cụ thể, Đo lường, Khả thi, Thực tế, Thời gian",
+    icon: CheckCircle2,
     color: "amber"
   },
   {
+    id: "AGILE",
+    name: "Agile",
+    description: "Quản trị linh hoạt, thích ứng nhanh",
+    icon: Layers,
+    color: "orange"
+  },
+  {
+    id: "LEAN",
+    name: "Lean",
+    description: "Quản trị tinh gọn, tối ưu quy trình",
+    icon: FileText,
+    color: "lime"
+  },
+  {
+    id: "DATA_DRIVEN",
+    name: "Data-Driven",
+    description: "Quản trị dựa trên dữ liệu",
+    icon: BarChart2,
+    color: "sky"
+  },
+  {
+    id: "GOVERNANCE",
+    name: "Governance Model",
+    description: "Mô hình quản trị tổ chức",
+    icon: ShieldCheck,
+    color: "fuchsia"
+  },
+  {
     id: "RACI",
-    name: "RACI",
-    description: "Chú trọng ma trận phân quyền và luồng công việc liên phòng ban.",
+    name: "RACI Matrix",
+    description: "Phân quyền Trách nhiệm rõ ràng",
     icon: Users,
     color: "blue"
-  }
+  },
 ];
 
 export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: PlanAutoGeneratorModalProps) => {
