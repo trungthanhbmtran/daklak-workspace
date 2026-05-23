@@ -12,8 +12,8 @@ message TaskResponse {
   int32 id = 1;
   string title = 2;
   string description = 3;
-  int32 assigneeId = 4;
-  int32 assignerId = 5;
+  string assigneeCode = 4;
+  string assignerCode = 5;
   string status = 6;
   string dueDate = 7;
   string createdAt = 8;
@@ -23,13 +23,13 @@ message TaskResponse {
 message CreateTaskRequest {
   string title = 1;
   string description = 2;
-  int32 assigneeId = 3;
-  int32 assignerId = 4;
+  string assigneeCode = 3;
+  string assignerCode = 4;
   string dueDate = 5;
 }
 
 message ListTasksRequest {
-  int32 assigneeId = 1; // optional
+  string assigneeCode = 1; // optional
 }
 
 message ListTasksResponse {

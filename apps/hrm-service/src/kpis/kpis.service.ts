@@ -3,7 +3,7 @@ import { PrismaService } from '@/database/prisma.service';
 
 @Injectable()
 export class KpisService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findPeriods() {
     return this.prisma.kpiPeriod.findMany();

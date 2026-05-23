@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
   KpiEvaluation: 'KpiEvaluation',
@@ -104,15 +105,36 @@ export const TaskScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
-  assigneeId: 'assigneeId',
-  assignerId: 'assignerId',
+  assigneeCode: 'assigneeCode',
+  assignerCode: 'assignerCode',
   status: 'status',
+  priority: 'priority',
+  documentIds: 'documentIds',
+  workflowInstId: 'workflowInstId',
   dueDate: 'dueDate',
+  completionDate: 'completionDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  planId: 'planId'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const MasterPlanScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  status: 'status',
+  documentId: 'documentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+export type MasterPlanScalarFieldEnum = (typeof MasterPlanScalarFieldEnum)[keyof typeof MasterPlanScalarFieldEnum]
 
 
 export const KpiPeriodScalarFieldEnum = {
@@ -140,11 +162,11 @@ export type KpiCriteriaScalarFieldEnum = (typeof KpiCriteriaScalarFieldEnum)[key
 
 export const KpiEvaluationScalarFieldEnum = {
   id: 'id',
-  employeeId: 'employeeId',
+  employeeCode: 'employeeCode',
   periodId: 'periodId',
   totalScore: 'totalScore',
   status: 'status',
-  reviewerId: 'reviewerId',
+  reviewerCode: 'reviewerCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -174,6 +196,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
@@ -198,13 +228,45 @@ export const EmployeeOrderByRelevanceFieldEnum = {
 export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
 
 
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const TaskOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
-  status: 'status'
+  assigneeCode: 'assigneeCode',
+  assignerCode: 'assignerCode',
+  status: 'status',
+  priority: 'priority',
+  workflowInstId: 'workflowInstId'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const MasterPlanOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  status: 'status',
+  documentId: 'documentId'
+} as const
+
+export type MasterPlanOrderByRelevanceFieldEnum = (typeof MasterPlanOrderByRelevanceFieldEnum)[keyof typeof MasterPlanOrderByRelevanceFieldEnum]
 
 
 export const KpiPeriodOrderByRelevanceFieldEnum = {
@@ -222,7 +284,9 @@ export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRel
 
 
 export const KpiEvaluationOrderByRelevanceFieldEnum = {
-  status: 'status'
+  employeeCode: 'employeeCode',
+  status: 'status',
+  reviewerCode: 'reviewerCode'
 } as const
 
 export type KpiEvaluationOrderByRelevanceFieldEnum = (typeof KpiEvaluationOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationOrderByRelevanceFieldEnum]

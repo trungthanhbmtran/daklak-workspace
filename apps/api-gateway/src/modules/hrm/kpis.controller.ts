@@ -40,9 +40,9 @@ export class KpisController implements OnModuleInit {
   }
 
   @Get('evaluations')
-  async findEvaluations(@Query('employeeId') employeeId: string) {
+  async findEvaluations(@Query('employeeCode') employeeCode: string) {
     return firstValueFrom(this.kpiService.FindEvaluations({
-      employeeId: employeeId ? parseInt(employeeId, 10) : undefined,
+      employeeCode,
     }));
   }
 }

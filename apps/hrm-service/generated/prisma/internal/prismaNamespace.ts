@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
   KpiEvaluation: 'KpiEvaluation',
@@ -405,7 +406,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "task" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail"
+    modelProps: "employee" | "task" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -538,6 +539,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TaskCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TaskCountAggregateOutputType> | number
+        }
+      }
+    }
+    MasterPlan: {
+      payload: Prisma.$MasterPlanPayload<ExtArgs>
+      fields: Prisma.MasterPlanFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MasterPlanFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MasterPlanFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>
+        }
+        findFirst: {
+          args: Prisma.MasterPlanFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MasterPlanFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>
+        }
+        findMany: {
+          args: Prisma.MasterPlanFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>[]
+        }
+        create: {
+          args: Prisma.MasterPlanCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>
+        }
+        createMany: {
+          args: Prisma.MasterPlanCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.MasterPlanDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>
+        }
+        update: {
+          args: Prisma.MasterPlanUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>
+        }
+        deleteMany: {
+          args: Prisma.MasterPlanDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MasterPlanUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.MasterPlanUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPlanPayload>
+        }
+        aggregate: {
+          args: Prisma.MasterPlanAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMasterPlan>
+        }
+        groupBy: {
+          args: Prisma.MasterPlanGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MasterPlanGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MasterPlanCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MasterPlanCountAggregateOutputType> | number
         }
       }
     }
@@ -873,15 +940,36 @@ export const TaskScalarFieldEnum = {
   id: 'id',
   title: 'title',
   description: 'description',
-  assigneeId: 'assigneeId',
-  assignerId: 'assignerId',
+  assigneeCode: 'assigneeCode',
+  assignerCode: 'assignerCode',
   status: 'status',
+  priority: 'priority',
+  documentIds: 'documentIds',
+  workflowInstId: 'workflowInstId',
   dueDate: 'dueDate',
+  completionDate: 'completionDate',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  planId: 'planId'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const MasterPlanScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  status: 'status',
+  documentId: 'documentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+export type MasterPlanScalarFieldEnum = (typeof MasterPlanScalarFieldEnum)[keyof typeof MasterPlanScalarFieldEnum]
 
 
 export const KpiPeriodScalarFieldEnum = {
@@ -909,11 +997,11 @@ export type KpiCriteriaScalarFieldEnum = (typeof KpiCriteriaScalarFieldEnum)[key
 
 export const KpiEvaluationScalarFieldEnum = {
   id: 'id',
-  employeeId: 'employeeId',
+  employeeCode: 'employeeCode',
   periodId: 'periodId',
   totalScore: 'totalScore',
   status: 'status',
-  reviewerId: 'reviewerId',
+  reviewerCode: 'reviewerCode',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -943,6 +1031,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
@@ -967,13 +1063,45 @@ export const EmployeeOrderByRelevanceFieldEnum = {
 export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
 
 
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+} as const
+
+export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
 export const TaskOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
-  status: 'status'
+  assigneeCode: 'assigneeCode',
+  assignerCode: 'assignerCode',
+  status: 'status',
+  priority: 'priority',
+  workflowInstId: 'workflowInstId'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const MasterPlanOrderByRelevanceFieldEnum = {
+  title: 'title',
+  description: 'description',
+  type: 'type',
+  status: 'status',
+  documentId: 'documentId'
+} as const
+
+export type MasterPlanOrderByRelevanceFieldEnum = (typeof MasterPlanOrderByRelevanceFieldEnum)[keyof typeof MasterPlanOrderByRelevanceFieldEnum]
 
 
 export const KpiPeriodOrderByRelevanceFieldEnum = {
@@ -991,7 +1119,9 @@ export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRel
 
 
 export const KpiEvaluationOrderByRelevanceFieldEnum = {
-  status: 'status'
+  employeeCode: 'employeeCode',
+  status: 'status',
+  reviewerCode: 'reviewerCode'
 } as const
 
 export type KpiEvaluationOrderByRelevanceFieldEnum = (typeof KpiEvaluationOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationOrderByRelevanceFieldEnum]
@@ -1028,6 +1158,20 @@ export type StringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 
  * Reference to a field of type 'DateTime'
  */
 export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -1134,6 +1278,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   employee?: Prisma.EmployeeOmit
   task?: Prisma.TaskOmit
+  masterPlan?: Prisma.MasterPlanOmit
   kpiPeriod?: Prisma.KpiPeriodOmit
   kpiCriteria?: Prisma.KpiCriteriaOmit
   kpiEvaluation?: Prisma.KpiEvaluationOmit

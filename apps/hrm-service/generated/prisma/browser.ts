@@ -28,6 +28,11 @@ export type Employee = Prisma.EmployeeModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model MasterPlan
+ * 
+ */
+export type MasterPlan = Prisma.MasterPlanModel
+/**
  * Model KpiPeriod
  * 
  */

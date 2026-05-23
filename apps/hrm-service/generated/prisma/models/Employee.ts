@@ -713,14 +713,14 @@ export type EmployeeSumOrderByAggregateInput = {
   partyTitleId?: Prisma.SortOrder
 }
 
-export type EmployeeScalarRelationFilter = {
-  is?: Prisma.EmployeeWhereInput
-  isNot?: Prisma.EmployeeWhereInput
-}
-
 export type EmployeeNullableScalarRelationFilter = {
   is?: Prisma.EmployeeWhereInput | null
   isNot?: Prisma.EmployeeWhereInput | null
+}
+
+export type EmployeeScalarRelationFilter = {
+  is?: Prisma.EmployeeWhereInput
+  isNot?: Prisma.EmployeeWhereInput
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -767,18 +767,22 @@ export type EmployeeCreateNestedOneWithoutTasksAssignedInput = {
   connect?: Prisma.EmployeeWhereUniqueInput
 }
 
-export type EmployeeUpdateOneRequiredWithoutTasksReceivedNestedInput = {
+export type EmployeeUpdateOneWithoutTasksReceivedNestedInput = {
   create?: Prisma.XOR<Prisma.EmployeeCreateWithoutTasksReceivedInput, Prisma.EmployeeUncheckedCreateWithoutTasksReceivedInput>
   connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutTasksReceivedInput
   upsert?: Prisma.EmployeeUpsertWithoutTasksReceivedInput
+  disconnect?: Prisma.EmployeeWhereInput | boolean
+  delete?: Prisma.EmployeeWhereInput | boolean
   connect?: Prisma.EmployeeWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutTasksReceivedInput, Prisma.EmployeeUpdateWithoutTasksReceivedInput>, Prisma.EmployeeUncheckedUpdateWithoutTasksReceivedInput>
 }
 
-export type EmployeeUpdateOneRequiredWithoutTasksAssignedNestedInput = {
+export type EmployeeUpdateOneWithoutTasksAssignedNestedInput = {
   create?: Prisma.XOR<Prisma.EmployeeCreateWithoutTasksAssignedInput, Prisma.EmployeeUncheckedCreateWithoutTasksAssignedInput>
   connectOrCreate?: Prisma.EmployeeCreateOrConnectWithoutTasksAssignedInput
   upsert?: Prisma.EmployeeUpsertWithoutTasksAssignedInput
+  disconnect?: Prisma.EmployeeWhereInput | boolean
+  delete?: Prisma.EmployeeWhereInput | boolean
   connect?: Prisma.EmployeeWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.EmployeeUpdateToOneWithWhereWithoutTasksAssignedInput, Prisma.EmployeeUpdateWithoutTasksAssignedInput>, Prisma.EmployeeUncheckedUpdateWithoutTasksAssignedInput>
 }

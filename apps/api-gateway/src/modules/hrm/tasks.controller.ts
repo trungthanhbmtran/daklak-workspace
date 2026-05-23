@@ -25,9 +25,9 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get()
-  async list(@Query('assigneeId') assigneeId: string) {
+  async list(@Query('assigneeCode') assigneeCode: string) {
     return firstValueFrom(this.taskService.ListTasks({
-      assigneeId: assigneeId ? parseInt(assigneeId, 10) : undefined,
+      assigneeCode,
     }));
   }
 

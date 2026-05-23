@@ -42,7 +42,7 @@ message CriteriaResponse {
 }
 
 message CreateEvaluationRequest {
-  int32 employeeId = 1;
+  string employeeCode = 1;
   int32 periodId = 2;
   repeated EvaluationDetailInput details = 3;
 }
@@ -55,13 +55,13 @@ message EvaluationDetailInput {
 
 message EvaluationResponse {
   int32 id = 1;
-  int32 employeeId = 2;
+  string employeeCode = 2;
   int32 periodId = 3;
   string status = 4;
 }
 
 message FindEvaluationsRequest {
-  int32 employeeId = 1;
+  string employeeCode = 1;
 }
 
 message EvaluationsResponse {

@@ -28,49 +28,45 @@ export type AggregateKpiEvaluation = {
 
 export type KpiEvaluationAvgAggregateOutputType = {
   id: number | null
-  employeeId: number | null
   periodId: number | null
   totalScore: number | null
-  reviewerId: number | null
 }
 
 export type KpiEvaluationSumAggregateOutputType = {
   id: number | null
-  employeeId: number | null
   periodId: number | null
   totalScore: number | null
-  reviewerId: number | null
 }
 
 export type KpiEvaluationMinAggregateOutputType = {
   id: number | null
-  employeeId: number | null
+  employeeCode: string | null
   periodId: number | null
   totalScore: number | null
   status: string | null
-  reviewerId: number | null
+  reviewerCode: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type KpiEvaluationMaxAggregateOutputType = {
   id: number | null
-  employeeId: number | null
+  employeeCode: string | null
   periodId: number | null
   totalScore: number | null
   status: string | null
-  reviewerId: number | null
+  reviewerCode: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
 
 export type KpiEvaluationCountAggregateOutputType = {
   id: number
-  employeeId: number
+  employeeCode: number
   periodId: number
   totalScore: number
   status: number
-  reviewerId: number
+  reviewerCode: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -79,49 +75,45 @@ export type KpiEvaluationCountAggregateOutputType = {
 
 export type KpiEvaluationAvgAggregateInputType = {
   id?: true
-  employeeId?: true
   periodId?: true
   totalScore?: true
-  reviewerId?: true
 }
 
 export type KpiEvaluationSumAggregateInputType = {
   id?: true
-  employeeId?: true
   periodId?: true
   totalScore?: true
-  reviewerId?: true
 }
 
 export type KpiEvaluationMinAggregateInputType = {
   id?: true
-  employeeId?: true
+  employeeCode?: true
   periodId?: true
   totalScore?: true
   status?: true
-  reviewerId?: true
+  reviewerCode?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type KpiEvaluationMaxAggregateInputType = {
   id?: true
-  employeeId?: true
+  employeeCode?: true
   periodId?: true
   totalScore?: true
   status?: true
-  reviewerId?: true
+  reviewerCode?: true
   createdAt?: true
   updatedAt?: true
 }
 
 export type KpiEvaluationCountAggregateInputType = {
   id?: true
-  employeeId?: true
+  employeeCode?: true
   periodId?: true
   totalScore?: true
   status?: true
-  reviewerId?: true
+  reviewerCode?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -215,11 +207,11 @@ export type KpiEvaluationGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 
 export type KpiEvaluationGroupByOutputType = {
   id: number
-  employeeId: number
+  employeeCode: string
   periodId: number
   totalScore: number | null
   status: string
-  reviewerId: number | null
+  reviewerCode: string | null
   createdAt: Date
   updatedAt: Date
   _count: KpiEvaluationCountAggregateOutputType | null
@@ -249,11 +241,11 @@ export type KpiEvaluationWhereInput = {
   OR?: Prisma.KpiEvaluationWhereInput[]
   NOT?: Prisma.KpiEvaluationWhereInput | Prisma.KpiEvaluationWhereInput[]
   id?: Prisma.IntFilter<"KpiEvaluation"> | number
-  employeeId?: Prisma.IntFilter<"KpiEvaluation"> | number
+  employeeCode?: Prisma.StringFilter<"KpiEvaluation"> | string
   periodId?: Prisma.IntFilter<"KpiEvaluation"> | number
   totalScore?: Prisma.FloatNullableFilter<"KpiEvaluation"> | number | null
   status?: Prisma.StringFilter<"KpiEvaluation"> | string
-  reviewerId?: Prisma.IntNullableFilter<"KpiEvaluation"> | number | null
+  reviewerCode?: Prisma.StringNullableFilter<"KpiEvaluation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"KpiEvaluation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiEvaluation"> | Date | string
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
@@ -264,11 +256,11 @@ export type KpiEvaluationWhereInput = {
 
 export type KpiEvaluationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewerCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   employee?: Prisma.EmployeeOrderByWithRelationInput
@@ -283,11 +275,11 @@ export type KpiEvaluationWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.KpiEvaluationWhereInput | Prisma.KpiEvaluationWhereInput[]
   OR?: Prisma.KpiEvaluationWhereInput[]
   NOT?: Prisma.KpiEvaluationWhereInput | Prisma.KpiEvaluationWhereInput[]
-  employeeId?: Prisma.IntFilter<"KpiEvaluation"> | number
+  employeeCode?: Prisma.StringFilter<"KpiEvaluation"> | string
   periodId?: Prisma.IntFilter<"KpiEvaluation"> | number
   totalScore?: Prisma.FloatNullableFilter<"KpiEvaluation"> | number | null
   status?: Prisma.StringFilter<"KpiEvaluation"> | string
-  reviewerId?: Prisma.IntNullableFilter<"KpiEvaluation"> | number | null
+  reviewerCode?: Prisma.StringNullableFilter<"KpiEvaluation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"KpiEvaluation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiEvaluation"> | Date | string
   employee?: Prisma.XOR<Prisma.EmployeeScalarRelationFilter, Prisma.EmployeeWhereInput>
@@ -298,11 +290,11 @@ export type KpiEvaluationWhereUniqueInput = Prisma.AtLeast<{
 
 export type KpiEvaluationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewerCode?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.KpiEvaluationCountOrderByAggregateInput
@@ -317,11 +309,11 @@ export type KpiEvaluationScalarWhereWithAggregatesInput = {
   OR?: Prisma.KpiEvaluationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.KpiEvaluationScalarWhereWithAggregatesInput | Prisma.KpiEvaluationScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"KpiEvaluation"> | number
-  employeeId?: Prisma.IntWithAggregatesFilter<"KpiEvaluation"> | number
+  employeeCode?: Prisma.StringWithAggregatesFilter<"KpiEvaluation"> | string
   periodId?: Prisma.IntWithAggregatesFilter<"KpiEvaluation"> | number
   totalScore?: Prisma.FloatNullableWithAggregatesFilter<"KpiEvaluation"> | number | null
   status?: Prisma.StringWithAggregatesFilter<"KpiEvaluation"> | string
-  reviewerId?: Prisma.IntNullableWithAggregatesFilter<"KpiEvaluation"> | number | null
+  reviewerCode?: Prisma.StringNullableWithAggregatesFilter<"KpiEvaluation"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"KpiEvaluation"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"KpiEvaluation"> | Date | string
 }
@@ -339,11 +331,11 @@ export type KpiEvaluationCreateInput = {
 
 export type KpiEvaluationUncheckedCreateInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   periodId: number
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
@@ -362,11 +354,11 @@ export type KpiEvaluationUpdateInput = {
 
 export type KpiEvaluationUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
@@ -374,11 +366,11 @@ export type KpiEvaluationUncheckedUpdateInput = {
 
 export type KpiEvaluationCreateManyInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   periodId: number
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -392,11 +384,11 @@ export type KpiEvaluationUpdateManyMutationInput = {
 
 export type KpiEvaluationUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -419,51 +411,47 @@ export type KpiEvaluationOrderByRelevanceInput = {
 
 export type KpiEvaluationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrder
+  reviewerCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type KpiEvaluationAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrder
 }
 
 export type KpiEvaluationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrder
+  reviewerCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type KpiEvaluationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
   status?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrder
+  reviewerCode?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type KpiEvaluationSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  employeeId?: Prisma.SortOrder
   periodId?: Prisma.SortOrder
   totalScore?: Prisma.SortOrder
-  reviewerId?: Prisma.SortOrder
 }
 
 export type KpiEvaluationScalarRelationFilter = {
@@ -634,7 +622,7 @@ export type KpiEvaluationUncheckedCreateWithoutEmployeeInput = {
   periodId: number
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
@@ -662,7 +650,7 @@ export type KpiEvaluationCreateWithoutReviewerInput = {
 
 export type KpiEvaluationUncheckedCreateWithoutReviewerInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   periodId: number
   totalScore?: number | null
   status?: string
@@ -702,11 +690,11 @@ export type KpiEvaluationScalarWhereInput = {
   OR?: Prisma.KpiEvaluationScalarWhereInput[]
   NOT?: Prisma.KpiEvaluationScalarWhereInput | Prisma.KpiEvaluationScalarWhereInput[]
   id?: Prisma.IntFilter<"KpiEvaluation"> | number
-  employeeId?: Prisma.IntFilter<"KpiEvaluation"> | number
+  employeeCode?: Prisma.StringFilter<"KpiEvaluation"> | string
   periodId?: Prisma.IntFilter<"KpiEvaluation"> | number
   totalScore?: Prisma.FloatNullableFilter<"KpiEvaluation"> | number | null
   status?: Prisma.StringFilter<"KpiEvaluation"> | string
-  reviewerId?: Prisma.IntNullableFilter<"KpiEvaluation"> | number | null
+  reviewerCode?: Prisma.StringNullableFilter<"KpiEvaluation"> | string | null
   createdAt?: Prisma.DateTimeFilter<"KpiEvaluation"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"KpiEvaluation"> | Date | string
 }
@@ -739,10 +727,10 @@ export type KpiEvaluationCreateWithoutPeriodInput = {
 
 export type KpiEvaluationUncheckedCreateWithoutPeriodInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedCreateNestedManyWithoutEvaluationInput
@@ -786,11 +774,11 @@ export type KpiEvaluationCreateWithoutDetailsInput = {
 
 export type KpiEvaluationUncheckedCreateWithoutDetailsInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   periodId: number
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -823,11 +811,11 @@ export type KpiEvaluationUpdateWithoutDetailsInput = {
 
 export type KpiEvaluationUncheckedUpdateWithoutDetailsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -837,14 +825,14 @@ export type KpiEvaluationCreateManyEmployeeInput = {
   periodId: number
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
 
 export type KpiEvaluationCreateManyReviewerInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   periodId: number
   totalScore?: number | null
   status?: string
@@ -867,7 +855,7 @@ export type KpiEvaluationUncheckedUpdateWithoutEmployeeInput = {
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
@@ -878,7 +866,7 @@ export type KpiEvaluationUncheckedUpdateManyWithoutEmployeeInput = {
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -895,7 +883,7 @@ export type KpiEvaluationUpdateWithoutReviewerInput = {
 
 export type KpiEvaluationUncheckedUpdateWithoutReviewerInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -906,7 +894,7 @@ export type KpiEvaluationUncheckedUpdateWithoutReviewerInput = {
 
 export type KpiEvaluationUncheckedUpdateManyWithoutReviewerInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   periodId?: Prisma.IntFieldUpdateOperationsInput | number
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
@@ -916,10 +904,10 @@ export type KpiEvaluationUncheckedUpdateManyWithoutReviewerInput = {
 
 export type KpiEvaluationCreateManyPeriodInput = {
   id?: number
-  employeeId: number
+  employeeCode: string
   totalScore?: number | null
   status?: string
-  reviewerId?: number | null
+  reviewerCode?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -936,10 +924,10 @@ export type KpiEvaluationUpdateWithoutPeriodInput = {
 
 export type KpiEvaluationUncheckedUpdateWithoutPeriodInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   details?: Prisma.KpiEvaluationDetailUncheckedUpdateManyWithoutEvaluationNestedInput
@@ -947,10 +935,10 @@ export type KpiEvaluationUncheckedUpdateWithoutPeriodInput = {
 
 export type KpiEvaluationUncheckedUpdateManyWithoutPeriodInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  employeeId?: Prisma.IntFieldUpdateOperationsInput | number
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   totalScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
-  reviewerId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  reviewerCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -988,11 +976,11 @@ export type KpiEvaluationCountOutputTypeCountDetailsArgs<ExtArgs extends runtime
 
 export type KpiEvaluationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  employeeId?: boolean
+  employeeCode?: boolean
   periodId?: boolean
   totalScore?: boolean
   status?: boolean
-  reviewerId?: boolean
+  reviewerCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
@@ -1006,16 +994,16 @@ export type KpiEvaluationSelect<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type KpiEvaluationSelectScalar = {
   id?: boolean
-  employeeId?: boolean
+  employeeCode?: boolean
   periodId?: boolean
   totalScore?: boolean
   status?: boolean
-  reviewerId?: boolean
+  reviewerCode?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type KpiEvaluationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "employeeId" | "periodId" | "totalScore" | "status" | "reviewerId" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiEvaluation"]>
+export type KpiEvaluationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "employeeCode" | "periodId" | "totalScore" | "status" | "reviewerCode" | "createdAt" | "updatedAt", ExtArgs["result"]["kpiEvaluation"]>
 export type KpiEvaluationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   employee?: boolean | Prisma.EmployeeDefaultArgs<ExtArgs>
   reviewer?: boolean | Prisma.KpiEvaluation$reviewerArgs<ExtArgs>
@@ -1034,11 +1022,11 @@ export type $KpiEvaluationPayload<ExtArgs extends runtime.Types.Extensions.Inter
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    employeeId: number
+    employeeCode: string
     periodId: number
     totalScore: number | null
     status: string
-    reviewerId: number | null
+    reviewerCode: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["kpiEvaluation"]>
@@ -1415,11 +1403,11 @@ export interface Prisma__KpiEvaluationClient<T, Null = never, ExtArgs extends ru
  */
 export interface KpiEvaluationFieldRefs {
   readonly id: Prisma.FieldRef<"KpiEvaluation", 'Int'>
-  readonly employeeId: Prisma.FieldRef<"KpiEvaluation", 'Int'>
+  readonly employeeCode: Prisma.FieldRef<"KpiEvaluation", 'String'>
   readonly periodId: Prisma.FieldRef<"KpiEvaluation", 'Int'>
   readonly totalScore: Prisma.FieldRef<"KpiEvaluation", 'Float'>
   readonly status: Prisma.FieldRef<"KpiEvaluation", 'String'>
-  readonly reviewerId: Prisma.FieldRef<"KpiEvaluation", 'Int'>
+  readonly reviewerCode: Prisma.FieldRef<"KpiEvaluation", 'String'>
   readonly createdAt: Prisma.FieldRef<"KpiEvaluation", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"KpiEvaluation", 'DateTime'>
 }
