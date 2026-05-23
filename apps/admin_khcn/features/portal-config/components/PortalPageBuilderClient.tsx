@@ -350,7 +350,7 @@ export function PortalPageBuilderClient() {
 
   return (
     <div className="flex flex-col h-screen bg-[#f8fafc] dark:bg-[#020617] overflow-hidden selection:bg-indigo-100 selection:text-indigo-900">
-      
+
       {/* GLOBAL TOP HEADER */}
       <header className="min-h-[80px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-800 px-4 lg:px-8 flex items-center justify-between z-40 shrink-0 gap-4 overflow-x-auto scrollbar-hide">
         <div className="flex items-center gap-3 lg:gap-5 shrink-0">
@@ -417,7 +417,7 @@ export function PortalPageBuilderClient() {
       </header>
 
       <main className="flex-1 flex overflow-hidden">
-        
+
         {/* LEFT SIDEBAR: Pages List */}
         <aside className={cn(
           "border-r border-slate-200/60 dark:border-slate-800 bg-white dark:bg-[#0f172a] flex flex-col z-30 shrink-0 transition-all duration-300",
@@ -447,11 +447,10 @@ export function PortalPageBuilderClient() {
                     setSelectedPageId(p.id);
                     setShowPagesSidebar(false);
                   }}
-                  className={`group relative p-5 rounded-2xl border transition-all cursor-pointer ${
-                    isSelected 
-                      ? "bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 shadow-sm" 
+                  className={`group relative p-5 rounded-2xl border transition-all cursor-pointer ${isSelected
+                      ? "bg-indigo-50/50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800 shadow-sm"
                       : "border-slate-100 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex flex-col min-w-0">
@@ -472,16 +471,16 @@ export function PortalPageBuilderClient() {
                         {Object.entries(p.title).filter(([k]) => k !== 'vi').map(([_, v]) => v).join(' / ')}
                       </span>
                     </div>
-                    
+
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); openEditPageModal(p); }}
                         className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm border border-transparent hover:border-indigo-100 dark:hover:border-indigo-900"
                       >
                         <Settings2 className="w-3.5 h-3.5" />
                       </button>
                       {p.id !== "about-page" && p.id !== "contact-page" && (
-                        <button 
+                        <button
                           onClick={(e) => { e.stopPropagation(); handleDeletePage(p.id); }}
                           className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-white dark:hover:bg-slate-700 transition-all shadow-sm border border-transparent hover:border-rose-100 dark:hover:border-rose-900"
                         >
@@ -500,22 +499,22 @@ export function PortalPageBuilderClient() {
           </div>
 
           <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
-             <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4">
-                <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl flex items-center justify-center shrink-0">
-                  <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">AI Assist</span>
-                  <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sẵn sàng tối ưu Layout</span>
-                </div>
-             </div>
+            <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+              <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl flex items-center justify-center shrink-0">
+                <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">AI Assist</span>
+                <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sẵn sàng tối ưu Layout</span>
+              </div>
+            </div>
           </div>
         </aside>
 
         {/* CONTENT AREA: Page Builder */}
         <div className="flex-1 overflow-hidden flex flex-col relative">
           <div className="flex-1 bg-[#f8fafc] dark:bg-[#020617] flex flex-col h-full overflow-hidden relative">
-            <PageBuilder 
+            <PageBuilder
               key={selectedPageId}
               layout={currentLayout}
               onChange={setCurrentLayout}
@@ -525,38 +524,38 @@ export function PortalPageBuilderClient() {
 
           {/* PAGE CONFIGURATION BOTTOM BAR (QUICK TOGGLES) */}
           <div className="min-h-[56px] py-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-slate-200/60 dark:border-slate-800 px-4 lg:px-6 flex items-center justify-between shrink-0 overflow-x-auto scrollbar-hide gap-4">
-             <div className="flex items-center gap-2 lg:gap-4 shrink-0">
-                <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200/50 dark:border-slate-700">
-                   <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">Đang sửa:</span>
-                   <span className="text-[10px] font-bold text-slate-800 dark:text-white uppercase truncate max-w-[120px] lg:max-w-[200px]">{selectedPageMeta?.title?.vi || selectedPageMeta?.title?.[Object.keys(selectedPageMeta?.title || {})[0]]}</span>
-                </div>
-                <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1 lg:mx-2 shrink-0" />
-                <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
-                   <span className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap hidden sm:inline">Public Route:</span>
-                   <code className="text-[9px] lg:text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50 whitespace-nowrap">/tuy-bien/{selectedPageMeta?.id}</code>
-                </div>
-             </div>
+            <div className="flex items-center gap-2 lg:gap-4 shrink-0">
+              <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200/50 dark:border-slate-700">
+                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">Đang sửa:</span>
+                <span className="text-[10px] font-bold text-slate-800 dark:text-white uppercase truncate max-w-[120px] lg:max-w-[200px]">{selectedPageMeta?.title?.vi || selectedPageMeta?.title?.[Object.keys(selectedPageMeta?.title || {})[0]]}</span>
+              </div>
+              <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1 lg:mx-2 shrink-0" />
+              <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
+                <span className="text-[9px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest whitespace-nowrap hidden sm:inline">Public Route:</span>
+                <code className="text-[9px] lg:text-[10px] font-black text-indigo-600 bg-indigo-50 dark:bg-indigo-950/30 px-2 py-0.5 rounded-md border border-indigo-100 dark:border-indigo-900/50 whitespace-nowrap">/tuy-bien/{selectedPageMeta?.id}</code>
+              </div>
+            </div>
 
-             <div className="flex items-center gap-4 shrink-0">
-                <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-4 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700">
-                   <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${selectedPageMeta?.isActive ? "text-emerald-600" : "text-amber-600"}`}>
-                      {selectedPageMeta?.isActive ? "Trang đang hoạt động" : "Trang đang bảo trì"}
-                   </span>
-                   <button
-                    onClick={() => {
-                      const updatedList = pagesList.map((p) => {
-                        if (p.id === selectedPageId) return { ...p, isActive: !p.isActive };
-                        return p;
-                      });
-                      setPagesList(updatedList);
-                      handleSaveLayout(selectedPageId, currentLayout, updatedList);
-                    }}
-                    className={`relative inline-flex h-4.5 w-9 items-center rounded-full transition-all shadow-inner ${selectedPageMeta?.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"}`}
-                   >
-                     <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-md transition-all ${selectedPageMeta?.isActive ? "translate-x-5" : "translate-x-1"}`} />
-                   </button>
-                </div>
-             </div>
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-800/50 px-4 py-1.5 rounded-xl border border-slate-100 dark:border-slate-700">
+                <span className={`text-[9px] font-black uppercase tracking-[0.2em] ${selectedPageMeta?.isActive ? "text-emerald-600" : "text-amber-600"}`}>
+                  {selectedPageMeta?.isActive ? "Trang đang hoạt động" : "Trang đang bảo trì"}
+                </span>
+                <button
+                  onClick={() => {
+                    const updatedList = pagesList.map((p) => {
+                      if (p.id === selectedPageId) return { ...p, isActive: !p.isActive };
+                      return p;
+                    });
+                    setPagesList(updatedList);
+                    handleSaveLayout(selectedPageId, currentLayout, updatedList);
+                  }}
+                  className={`relative inline-flex h-4.5 w-9 items-center rounded-full transition-all shadow-inner ${selectedPageMeta?.isActive ? "bg-emerald-500" : "bg-slate-300 dark:bg-slate-700"}`}
+                >
+                  <span className={`inline-block h-3 w-3 transform rounded-full bg-white shadow-md transition-all ${selectedPageMeta?.isActive ? "translate-x-5" : "translate-x-1"}`} />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </main>
@@ -578,12 +577,14 @@ export function PortalPageBuilderClient() {
             </DialogHeader>
 
             <div className="space-y-6">
-              <MultiLangTitleSlug 
+              <MultiLangTitleSlug
                 value={multiLangValue}
-                onChange={handleMultiLangChange}
-                singleSlugMode={true}
-                singleSlugValue={modalPageId}
-                onSingleSlugChange={setModalPageId}
+                onChange={(newVal) => {
+                  handleMultiLangChange(newVal);
+                  if (modalMode === "ADD" && newVal['vi']?.slug) {
+                    setModalPageId(newVal['vi'].slug);
+                  }
+                }}
                 disabledSlug={modalMode === "EDIT"}
               />
 
