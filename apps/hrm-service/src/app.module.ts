@@ -4,8 +4,9 @@ import { PrismaModule } from '@/database/prisma.module';
 import { EmployeesModule } from '@/modules/employees/employees.module';
 import { TasksModule } from './tasks/tasks.module';
 import { KpisModule } from './kpis/kpis.module';
+import { PlansModule } from './plans/plans.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, EmployeesModule, TasksModule, KpisModule],
+  imports: [ConfigModule, PrismaModule, EmployeesModule, TasksModule, KpisModule, PlansModule],
 })
 export class AppModule {}

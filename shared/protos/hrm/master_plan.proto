@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package hrm;
+
+service MasterPlanService {
+  rpc FindAll (FindAllMasterPlansRequest) returns (MasterPlanList) {}
+  rpc FindById (FindMasterPlanByIdRequest) returns (MasterPlan) {}
+  rpc Create (CreateMasterPlanRequest) returns (MasterPlan) {}
+  rpc Update (UpdateMasterPlanRequest) returns (MasterPlan) {}
+  rpc Delete (DeleteMasterPlanRequest) returns (DeleteMasterPlanResponse) {}
+}
+
+message MasterPlan {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  string type = 4;
+  string status = 5;
+  string startDate = 6;
+  string endDate = 7;
+  string documentId = 8;
+  string createdAt = 9;
+  string updatedAt = 10;
+  int32 totalTasks = 11;
+  int32 completedTasks = 12;
+}
+
+message MasterPlanList {
+  repeated MasterPlan masterPlans = 1;
+}
+
+message FindAllMasterPlansRequest {
+  string type = 1;
+  string status = 2;
+}
+
+message FindMasterPlanByIdRequest {
+  int32 id = 1;
+}
+
+message CreateMasterPlanRequest {
+  string title = 1;
+  string description = 2;
+  string type = 3;
+  string startDate = 4;
+  string endDate = 5;
+  string documentId = 6;
+}
+
+message UpdateMasterPlanRequest {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  string type = 4;
+  string status = 5;
+  string startDate = 6;
+  string endDate = 7;
+  string documentId = 8;
+}
+
+message DeleteMasterPlanRequest {
+  int32 id = 1;
+}
+
+message DeleteMasterPlanResponse {
+  bool success = 1;
+  string message = 2;
+}

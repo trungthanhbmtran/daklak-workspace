@@ -551,12 +551,8 @@ async function main() {
   // 3. HRM Module
   const hrmMenus = [
     { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_LEAVE', name: 'Quản lý nghỉ phép', route: 'leave', icon: 'calendar-outline', order: 2, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_ATTENDANCE', name: 'Quản lý chấm công', route: 'attendance', icon: 'time-outline', order: 3, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_CONTRACTS', name: 'Hợp đồng lao động', route: 'contracts', icon: 'document-text-outline', order: 4, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_PAYROLL', name: 'Bảng lương (Payroll)', route: 'payroll', icon: 'cash-outline', order: 5, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_TASKS', name: 'Phân công & Giao việc', route: 'tasks', icon: 'list-outline', order: 6, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_KPI', name: 'Đánh giá Năng lực (KPI)', route: 'kpi', icon: 'settings-outline', order: 7, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_TASKS', name: 'Phân công & Giao việc', route: 'tasks', icon: 'list-outline', order: 2, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_KPI', name: 'Đánh giá Năng lực (KPI)', route: 'kpi', icon: 'settings-outline', order: 3, res: 'HRM_EMPLOYEE' },
   ];
 
   for (const { res, ...m } of hrmMenus) {

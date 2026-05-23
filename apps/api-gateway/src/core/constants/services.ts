@@ -94,6 +94,13 @@ export const MICROSERVICES = {
     URL: getHrmUrl(),
     SERVICE: 'KpiService',
   },
+  MASTER_PLAN: {
+    PACKAGE: 'hrm',
+    SYMBOL: 'MASTER_PLAN_PACKAGE',
+    PROTO: 'hrm/master_plan.proto',
+    URL: getHrmUrl(),
+    SERVICE: 'MasterPlanService',
+  },
   // Document
   DOCUMENT_CATEGORY: {
     PACKAGE: 'category',

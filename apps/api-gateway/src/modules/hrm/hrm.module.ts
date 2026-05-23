@@ -8,6 +8,7 @@ import { JobTitleController } from './jobtitle.controller';
 import { PublicHrmController } from './public-hrm.controller';
 import { TasksController } from './tasks.controller';
 import { KpisController } from './kpis.controller';
+import { MasterPlansController } from './master-plans.controller';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { KpisController } from './kpis.controller';
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.TASK),
     registerGrpcService(MICROSERVICES.KPI),
+    registerGrpcService(MICROSERVICES.MASTER_PLAN),
   ],
   controllers: [
     DepartmentController,
@@ -24,6 +26,7 @@ import { KpisController } from './kpis.controller';
     PublicHrmController,
     TasksController,
     KpisController,
+    MasterPlansController,
   ],
 })
 export class HrmModule {}
