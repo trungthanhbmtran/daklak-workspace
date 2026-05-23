@@ -34,7 +34,7 @@ async function main() {
     { firstname: 'Ra Lan Trương', lastname: 'Thanh Hà', employeeCode: 'NV_003', email: 'ralantruongthanhha@daklak.gov.vn', phone: '0901000003', identityCard: '001000003', departmentId: unitMap['SO_KHCN'], jobTitleId: jobMap['PHO_GIAM_DOC'] },
     { firstname: 'Trần Văn', lastname: 'Sơn', employeeCode: 'NV_004', email: 'tranvanson@daklak.gov.vn', phone: '0901000004', identityCard: '001000004', departmentId: unitMap['SO_KHCN'], jobTitleId: jobMap['PHO_GIAM_DOC'] },
     { firstname: 'Lâm Vũ Mỹ', lastname: 'Hạnh', employeeCode: 'NV_005', email: 'lamvumyhanh@daklak.gov.vn', phone: '0901000005', identityCard: '001000005', departmentId: unitMap['SO_KHCN'], jobTitleId: jobMap['PHO_GIAM_DOC'] },
-    
+
     // Lãnh đạo các phòng ban Sở KHCN
     { firstname: 'Nguyễn Văn', lastname: 'A', employeeCode: 'NV_020', email: 'nguyenvana@daklak.gov.vn', phone: '0902000020', identityCard: '002000020', departmentId: unitMap['SO_KHCN_VP'], jobTitleId: jobMap['CHANH_VAN_PHONG'] },
     { firstname: 'Lê Thị', lastname: 'B', employeeCode: 'NV_021', email: 'lethib@daklak.gov.vn', phone: '0902000021', identityCard: '002000021', departmentId: unitMap['SO_KHCN_KHTC'], jobTitleId: jobMap['TRUONG_PHONG'] },
