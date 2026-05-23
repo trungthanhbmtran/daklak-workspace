@@ -9,6 +9,7 @@ import { hrmPlansApi, hrmObjectivesApi } from "@/features/hrm/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { HrmMasterPlan } from "@/features/hrm/types";
+import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 interface PlanAutoGeneratorModalProps {
   isOpen: boolean;
@@ -96,7 +97,15 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
   const [objectiveText, setObjectiveText] = useState("");
   const [selectedFramework, setSelectedFramework] = useState<Framework>("OKRs");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [loadingText, setLoadingText] = useState("");
+  const [loadingText, setLoadingText] = useState("Khởi tạo AI Engine...");
+
+  const { data: categories = [] } = useGetCategories();
+  const planFrameworkCategories = categories.filter((c: any) => c.group === "PLAN_FRAMEWORK");
+
+  const displayFrameworks = FRAMEWORKS.map(fw => {
+    const dbCat = planFrameworkCategories.find((c: any) => c.code === fw.id);
+    return dbCat ? { ...fw, name: dbCat.name } : fw;
+  });
 
   const handleGenerate = async () => {
     if (!objectiveText.trim()) {
@@ -313,7 +322,7 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
             <div className="space-y-3">
               <Label className="text-sm font-bold text-slate-700">Chọn mô hình quản trị</Label>
               <div className="grid grid-cols-2 gap-3">
-                {FRAMEWORKS.map((fw) => {
+                {displayFrameworks.map((fw) => {
                   const isSelected = selectedFramework === fw.id;
                   const Icon = fw.icon;
                   return (

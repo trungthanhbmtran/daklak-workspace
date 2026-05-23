@@ -11,11 +11,15 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 export const MasterPlanListClient = () => {
   const [plans, setPlans] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+  const { data: categories = [] } = useGetCategories();
+  const planFrameworkCategories = categories.filter((c: any) => c.group === "PLAN_FRAMEWORK");
 
   useEffect(() => {
     setIsLoading(true);
@@ -38,19 +42,28 @@ export const MasterPlanListClient = () => {
   ];
 
   const getTypeBadge = (type: string) => {
+    // Try to get dynamic name from categories
+    const dynamicCat = planFrameworkCategories.find((c: any) => c.code === type);
+    const label = dynamicCat ? dynamicCat.name : (
+      type === 'SMART_GOAL' ? 'Mục tiêu SMART' :
+      type === 'MASTER_PLAN' ? 'Kế hoạch Tổng thể' :
+      type === 'PROJECT' ? 'Dự án' : type
+    );
+    
     switch(type) {
-      case 'SMART_GOAL': return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Mục tiêu SMART</Badge>;
-      case 'OKR': return <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">OKR</Badge>;
-      case 'MASTER_PLAN': return <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">Kế hoạch Tổng thể</Badge>;
-      case 'MBO': return <Badge variant="outline" className="text-cyan-600 border-cyan-200 bg-cyan-50">MBO</Badge>;
-      case 'KPI': return <Badge variant="outline" className="text-rose-600 border-rose-200 bg-rose-50">KPI</Badge>;
-      case 'BSC': return <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">BSC</Badge>;
-      case 'AGILE': return <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">Agile</Badge>;
-      case 'LEAN': return <Badge variant="outline" className="text-lime-600 border-lime-200 bg-lime-50">Lean</Badge>;
-      case 'DATA_DRIVEN': return <Badge variant="outline" className="text-sky-600 border-sky-200 bg-sky-50">Data-Driven</Badge>;
-      case 'GOVERNANCE': return <Badge variant="outline" className="text-fuchsia-600 border-fuchsia-200 bg-fuchsia-50">Governance</Badge>;
-      case 'PROJECT': return <Badge variant="outline" className="text-slate-600 border-slate-200 bg-slate-50">Dự án</Badge>;
-      default: return <Badge variant="outline">{type}</Badge>;
+      case 'SMART_GOAL': return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">{label}</Badge>;
+      case 'OKRs':
+      case 'OKR': return <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">{label}</Badge>;
+      case 'MASTER_PLAN': return <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">{label}</Badge>;
+      case 'MBO': return <Badge variant="outline" className="text-cyan-600 border-cyan-200 bg-cyan-50">{label}</Badge>;
+      case 'KPI': return <Badge variant="outline" className="text-rose-600 border-rose-200 bg-rose-50">{label}</Badge>;
+      case 'BSC': return <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">{label}</Badge>;
+      case 'AGILE': return <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">{label}</Badge>;
+      case 'LEAN': return <Badge variant="outline" className="text-lime-600 border-lime-200 bg-lime-50">{label}</Badge>;
+      case 'DATA_DRIVEN': return <Badge variant="outline" className="text-sky-600 border-sky-200 bg-sky-50">{label}</Badge>;
+      case 'GOVERNANCE': return <Badge variant="outline" className="text-fuchsia-600 border-fuchsia-200 bg-fuchsia-50">{label}</Badge>;
+      case 'PROJECT': return <Badge variant="outline" className="text-slate-600 border-slate-200 bg-slate-50">{label}</Badge>;
+      default: return <Badge variant="outline" className="text-slate-600 border-slate-200 bg-slate-50">{label}</Badge>;
     }
   };
 

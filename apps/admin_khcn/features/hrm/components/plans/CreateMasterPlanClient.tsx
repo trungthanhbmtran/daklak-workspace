@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Bot, LayoutTemplate, Plus, Trash2, Save, Send } from "lucide-react";
 import { hrmPlansApi, hrmTasksApi } from "@/features/hrm/api";
+import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 export function CreateMasterPlanClient() {
   const router = useRouter();
@@ -20,6 +21,9 @@ export function CreateMasterPlanClient() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSavingAI, setIsSavingAI] = useState(false);
   const [planData, setPlanData] = useState<any>(null);
+
+  const { data: categories = [] } = useGetCategories();
+  const planFrameworkCategories = categories.filter((c: any) => c.group === "PLAN_FRAMEWORK");
 
   // --- MANUAL (WBS) STATE ---
   const [isSavingManual, setIsSavingManual] = useState(false);
@@ -194,15 +198,9 @@ export function CreateMasterPlanClient() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="MASTER_PLAN">Kế hoạch Tổng thể (Master Plan / WBS)</SelectItem>
-                    <SelectItem value="MBO">Quản trị theo Mục tiêu (MBO)</SelectItem>
-                    <SelectItem value="OKR">Mục tiêu & Kết quả then chốt (OKR)</SelectItem>
-                    <SelectItem value="KPI">Quản trị hiệu suất (KPI Management)</SelectItem>
-                    <SelectItem value="BSC">Thẻ điểm cân bằng (Balanced Scorecard - BSC)</SelectItem>
-                    <SelectItem value="AGILE">Quản trị linh hoạt (Agile Management)</SelectItem>
-                    <SelectItem value="LEAN">Quản trị tinh gọn (Lean Management)</SelectItem>
-                    <SelectItem value="DATA_DRIVEN">Quản trị dựa trên dữ liệu (Data-Driven)</SelectItem>
-                    <SelectItem value="GOVERNANCE">Mô hình quản trị tổ chức (Governance Model)</SelectItem>
-                    <SelectItem value="SMART_GOAL">Mục tiêu SMART</SelectItem>
+                    {planFrameworkCategories.map((cat: any) => (
+                      <SelectItem key={cat.code} value={cat.code}>{cat.name}</SelectItem>
+                    ))}
                     <SelectItem value="PROJECT">Dự án thông thường (Project)</SelectItem>
                   </SelectContent>
                 </Select>

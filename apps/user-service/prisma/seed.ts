@@ -1125,7 +1125,44 @@ async function main() {
     await setStaffing(code, 'CHUYEN_VIEN', 3);
   }
 
-  console.log('✅ Staffing seeded successfully!');
+  // ==========================================================
+  // 10. CATEGORIES (Danh mục dùng chung)
+  // ==========================================================
+  console.log('🔹 Seeding Categories...');
+  
+  await prisma.categoryGroup.upsert({
+    where: { code: 'PLAN_FRAMEWORK' },
+    update: { name: 'Mô hình Quản trị / Kế hoạch' },
+    create: { code: 'PLAN_FRAMEWORK', name: 'Mô hình Quản trị / Kế hoạch' },
+  });
+
+  const planFrameworks = [
+    { code: 'OKRs', name: 'Objective & Key Results (OKRs)', order: 1 },
+    { code: 'BSC', name: 'Balanced Scorecard (BSC)', order: 2 },
+    { code: 'KPI', name: 'KPI Management', order: 3 },
+    { code: 'MBO', name: 'Management by Objectives (MBO)', order: 4 },
+    { code: 'SMART', name: 'SMART Goals', order: 5 },
+    { code: 'AGILE', name: 'Agile Management', order: 6 },
+    { code: 'LEAN', name: 'Lean Management', order: 7 },
+    { code: 'DATA_DRIVEN', name: 'Data-Driven Management', order: 8 },
+    { code: 'GOVERNANCE', name: 'Governance Model', order: 9 },
+    { code: 'RACI', name: 'RACI Matrix', order: 10 },
+  ];
+
+  for (const fw of planFrameworks) {
+    const cat = await prisma.category.upsert({
+      where: { group_code: { group: 'PLAN_FRAMEWORK', code: fw.code } },
+      update: { order: fw.order },
+      create: { group: 'PLAN_FRAMEWORK', code: fw.code, order: fw.order },
+    });
+    
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_langCode: { categoryId: cat.id, langCode: 'vi' } },
+      update: { name: fw.name },
+      create: { categoryId: cat.id, langCode: 'vi', name: fw.name },
+    });
+  }
+  console.log('✅ Categories seeded successfully!');
 }
 
 main()
