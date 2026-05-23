@@ -4,6 +4,7 @@ import { AuditService } from '../audit/audit.service';
 import { WorkflowService, PostStatus } from '../workflow/workflow.service';
 import { ClientGrpc, ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
+import { generateSlug } from '../../utils/slug.util';
 
 @Injectable()
 export class PostsService implements OnModuleInit {
@@ -177,21 +178,9 @@ export class PostsService implements OnModuleInit {
     }
   }
 
-  private generateSlug(text: string): string {
-    if (!text) return '';
-    return text.toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[đĐ]/g, 'd')
-      .replace(/([^a-z0-9\s-]|(?<=\s)-|-(?=\s))/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  }
-
   async create(data: any) {
     const { tagIds, translations, ...rest } = data;
-    const slug = rest.slug || this.generateSlug(rest.title);
+    const slug = rest.slug || generateSlug(rest.title);
 
     const post = await this.prisma.post.create({
       data: {
@@ -232,7 +221,7 @@ export class PostsService implements OnModuleInit {
             langCode,
             // Nếu là ngôn ngữ tự động dịch và để trống -> dùng nhãn chờ, ngược lại mới fallback VN
             title: t.title || (isAuto ? `[Đang dịch ${langCode}...]` : post.title),
-            slug: t.slug || this.generateSlug(t.title || post.title),
+            slug: t.slug || generateSlug(t.title || post.title),
             description: t.description || (isAuto ? "" : post.description),
             content: t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content),
             contentHtml: this.lexicalToHtml(t.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : post.content)),
@@ -316,7 +305,7 @@ export class PostsService implements OnModuleInit {
 
     const nextVersion = post.currentVersion + 1;
     let parsedTranslations = translations;
-    const slug = rest.slug || (rest.title ? this.generateSlug(rest.title) : post.slug);
+    const slug = rest.slug || (rest.title ? generateSlug(rest.title) : post.slug);
     if (translations && typeof translations === 'string') {
       try {
         parsedTranslations = JSON.parse(translations);
@@ -375,7 +364,7 @@ export class PostsService implements OnModuleInit {
               postId: id,
               langCode,
               title: t.title || (existingTrans?.title || (isAuto ? `[Đang dịch ${langCode}...]` : updatedPost.title)),
-              slug: t.slug || this.generateSlug(t.title || existingTrans?.title || updatedPost.title),
+              slug: t.slug || generateSlug(t.title || existingTrans?.title || updatedPost.title),
               description: t.description || existingTrans?.description || (isAuto ? "" : updatedPost.description),
               content: t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content)),
               contentHtml: this.lexicalToHtml(t.content || (existingTrans?.content || (isAuto ? '{"root":{"children":[{"children":[],"direction":null,"format":"","indent":0,"type":"paragraph","version":1}],"direction":null,"format":"","indent":0,"type":"root","version":1}}' : updatedPost.content))),
@@ -660,7 +649,7 @@ export class PostsService implements OnModuleInit {
       const updateData: any = {};
       if (data.title !== undefined) {
         updateData.title = data.title;
-        updateData.slug = data.slug ?? this.generateSlug(data.title);
+        updateData.slug = data.slug ?? generateSlug(data.title);
       }
       if (data.description !== undefined) {
         updateData.description = data.description;
@@ -690,7 +679,7 @@ export class PostsService implements OnModuleInit {
           postId,
           langCode,
           title: data.title ?? lastTrans?.title ?? post.title,
-          slug: data.slug ?? this.generateSlug(data.title ?? lastTrans?.title ?? post.title),
+          slug: data.slug ?? generateSlug(data.title ?? lastTrans?.title ?? post.title),
           description: data.description ?? lastTrans?.description ?? "",
           content: data.content ?? lastTrans?.content ?? post.content,
           contentHtml: this.lexicalToHtml(data.content ?? lastTrans?.content ?? post.content ?? ''),

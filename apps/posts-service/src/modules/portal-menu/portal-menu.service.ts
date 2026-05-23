@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { generateSlug } from '../../utils/slug.util';
 
 @Injectable()
 export class PortalMenuService {
   constructor(private prisma: PrismaService) { }
 
   async create(data: any) {
-    let translations = {};
+    let translations: any = {};
     if (data.translations) {
       try {
         translations = typeof data.translations === 'string' ? JSON.parse(data.translations) : data.translations;
@@ -15,13 +16,27 @@ export class PortalMenuService {
       }
     }
 
+    // Auto generate slug/link for translations if missing
+    for (const [lang, trans] of Object.entries(translations)) {
+      const t: any = trans;
+      if (t.name && !t.slug) {
+        t.slug = generateSlug(t.name);
+      }
+    }
+
+    // Auto generate link if not provided and it's a URL or CUSTOM_PAGE
+    let finalLink = data.link;
+    if (!finalLink && data.name && (data.type === 'URL' || data.type === 'CUSTOM_PAGE')) {
+      finalLink = data.type === 'CUSTOM_PAGE' ? `/tuy-bien/${generateSlug(data.name)}` : `/${generateSlug(data.name)}`;
+    }
+
     return this.prisma.portalMenu.create({
       data: {
         name: data.name,
         description: data.description,
         translations: translations,
         icon: data.icon,
-        link: data.link,
+        link: finalLink,
         order: data.order || 0,
         parentId: data.parentId || null,
         isActive: data.isActive !== undefined ? data.isActive : true,
@@ -96,12 +111,32 @@ export class PortalMenuService {
       updateData.referenceId = null;
     }
 
-    if (updateData.translations && typeof updateData.translations === 'string') {
-      try {
-        updateData.translations = JSON.parse(updateData.translations);
-      } catch (e) {
-        console.error('Error parsing translations in update:', e);
-        delete updateData.translations;
+    if (updateData.translations) {
+      if (typeof updateData.translations === 'string') {
+        try {
+          updateData.translations = JSON.parse(updateData.translations);
+        } catch (e) {
+          console.error('Error parsing translations in update:', e);
+          delete updateData.translations;
+        }
+      }
+
+      if (updateData.translations && typeof updateData.translations === 'object') {
+        for (const [lang, trans] of Object.entries(updateData.translations)) {
+          const t: any = trans;
+          if (t.name && !t.slug) {
+            t.slug = generateSlug(t.name);
+          }
+        }
+      }
+    }
+
+    // Auto generate link if not provided and it's a URL or CUSTOM_PAGE
+    if (updateData.name && !updateData.link) {
+      // Only do this if we are actively changing the link to empty, or if we know the type requires it
+      const type = updateData.type || 'URL';
+      if (updateData.link === '' && (type === 'URL' || type === 'CUSTOM_PAGE')) {
+        updateData.link = type === 'CUSTOM_PAGE' ? `/tuy-bien/${generateSlug(updateData.name)}` : `/${generateSlug(updateData.name)}`;
       }
     }
 
