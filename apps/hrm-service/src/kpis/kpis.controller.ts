@@ -40,7 +40,7 @@ export class KpisController {
 
   @GrpcMethod('KpiService', 'CreateEvaluation')
   async createEvaluation(data: {
-    employeeId: number;
+    employeeCode: string;
     periodId: number;
     details: { criteriaId: number; selfScore: number; notes?: string }[];
   }) {
@@ -49,9 +49,9 @@ export class KpisController {
   }
 
   @GrpcMethod('KpiService', 'FindEvaluations')
-  async findEvaluations(data: { employeeId: number }) {
-    if (!data.employeeId) return { evaluations: [] };
-    const evals = await this.kpisService.findEvaluationsByEmployee(data.employeeId);
+  async findEvaluations(data: { employeeCode: string }) {
+    if (!data.employeeCode) return { evaluations: [] };
+    const evals = await this.kpisService.findEvaluationsByEmployee(data.employeeCode);
     return { evaluations: evals };
   }
 }

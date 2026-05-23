@@ -80,7 +80,7 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
       if (selectedFramework === "OKRs") {
         const objId = "okr_obj_" + Date.now();
         newPerspectives.push({ id: objId, title: "Objective: " + objectiveText, colorClass: "indigo" });
-        
+
         newObjectivesToCreate.push({
           perspective: objId, title: "KR1: Đạt doanh thu kỳ vọng", metric: "VND", target: "2 Tỷ", weight: 40, status: "TODO" as const, departmentIds: [5]
         });
@@ -96,7 +96,7 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
         const p2 = "bsc_cus_" + Date.now();
         const p3 = "bsc_int_" + Date.now();
         const p4 = "bsc_lea_" + Date.now();
-        
+
         newPerspectives.push(
           { id: p1, title: "Tài chính", colorClass: "emerald" },
           { id: p2, title: "Khách hàng", colorClass: "blue" },
@@ -114,14 +114,14 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
       } else if (selectedFramework === "SMART") {
         const pId = "smart_" + Date.now();
         newPerspectives.push({ id: pId, title: "Mục tiêu SMART", colorClass: "rose" });
-        
+
         newObjectivesToCreate.push({
-          perspective: pId, 
-          title: objectiveText, 
-          metric: "Hoàn thành", 
-          target: "100%", 
-          weight: 100, 
-          status: "TODO" as const, 
+          perspective: pId,
+          title: objectiveText,
+          metric: "Hoàn thành",
+          target: "100%",
+          weight: 100,
+          status: "TODO" as const,
           departmentIds: [1, 2, 5],
           cases: [
             { id: "c1", title: "Cụ thể hóa yêu cầu (S)", isDone: false },
@@ -135,14 +135,14 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
       } else if (selectedFramework === "RACI") {
         const pId = "raci_" + Date.now();
         newPerspectives.push({ id: pId, title: "Ma trận RACI: " + objectiveText, colorClass: "cyan" });
-        
+
         newObjectivesToCreate.push({
-          perspective: pId, 
-          title: "Thiết kế giải pháp " + objectiveText, 
-          metric: "Tài liệu", 
-          target: "Approved", 
-          weight: 50, 
-          status: "TODO" as const, 
+          perspective: pId,
+          title: "Thiết kế giải pháp " + objectiveText,
+          metric: "Tài liệu",
+          target: "Approved",
+          weight: 50,
+          status: "TODO" as const,
           departmentIds: [2, 3],
           cases: [
             { id: "c1", title: "(R) Chịu trách nhiệm thực thi: Phòng Kỹ Thuật", isDone: false },
@@ -155,7 +155,7 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
 
       // Update plan with new perspectives
       await hrmPlansApi.update(plan.id, { perspectives: newPerspectives });
-      
+
       // Create objectives
       for (const obj of newObjectivesToCreate) {
         await hrmObjectivesApi.create({ planId: plan.id, ...obj });
@@ -175,7 +175,7 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
     <Dialog open={isOpen} onOpenChange={(open) => !open && !isGenerating && onClose()}>
       <DialogContent className="sm:max-w-[600px] rounded-3xl overflow-hidden p-0 bg-slate-50 border-0 shadow-2xl">
         <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 opacity-10"></div>
-        
+
         <div className="p-8 relative">
           <DialogHeader className="mb-6">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-200">
@@ -215,8 +215,8 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
                       onClick={() => setSelectedFramework(fw.id as Framework)}
                       className={cn(
                         "text-left p-4 rounded-2xl border-2 transition-all flex flex-col gap-2",
-                        isSelected 
-                          ? `border-${fw.color}-500 bg-${fw.color}-50/50 shadow-sm ring-1 ring-${fw.color}-500` 
+                        isSelected
+                          ? `border-${fw.color}-500 bg-${fw.color}-50/50 shadow-sm ring-1 ring-${fw.color}-500`
                           : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
                       )}
                     >
@@ -248,9 +248,9 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
               Hủy bỏ
             </Button>
           )}
-          <Button 
-            onClick={handleGenerate} 
-            disabled={isGenerating || !objectiveText.trim()} 
+          <Button
+            onClick={handleGenerate}
+            disabled={isGenerating || !objectiveText.trim()}
             className={cn(
               "rounded-xl font-bold h-11 px-8 shadow-lg transition-all",
               isGenerating ? "bg-indigo-400 opacity-50" : "bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 hover:shadow-indigo-200 text-white"

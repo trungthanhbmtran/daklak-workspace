@@ -7,7 +7,7 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @GrpcMethod('TaskService', 'CreateTask')
-  async createTask(data: { title: string; description?: string; assigneeId: number; assignerId: number; dueDate?: string }) {
+  async createTask(data: { title: string; description?: string; assigneeCode: string; assignerCode: string; dueDate?: string }) {
     const task = await this.tasksService.create({
       ...data,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,
@@ -21,10 +21,10 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'ListTasks')
-  async listTasks(data: { assigneeId?: number }) {
+  async listTasks(data: { assigneeCode?: string }) {
     let tasks;
-    if (data.assigneeId) {
-      tasks = await this.tasksService.findByAssignee(data.assigneeId);
+    if (data.assigneeCode) {
+      tasks = await this.tasksService.findByAssignee(data.assigneeCode);
     } else {
       tasks = await this.tasksService.findAll();
     }

@@ -18,13 +18,13 @@ export class KpisService {
   }
 
   async createEvaluation(data: {
-    employeeId: number;
+    employeeCode: string;
     periodId: number;
     details: { criteriaId: number; selfScore: number; notes?: string }[];
   }) {
     return this.prisma.kpiEvaluation.create({
       data: {
-        employeeId: data.employeeId,
+        employeeCode: data.employeeCode,
         periodId: data.periodId,
         status: 'SUBMITTED',
         details: {
@@ -34,9 +34,9 @@ export class KpisService {
     });
   }
 
-  async findEvaluationsByEmployee(employeeId: number) {
+  async findEvaluationsByEmployee(employeeCode: string) {
     return this.prisma.kpiEvaluation.findMany({
-      where: { employeeId },
+      where: { employeeCode },
       include: {
         period: true,
         details: {

@@ -1,19 +1,30 @@
 model Task {
-  id          Int       @id @default(autoincrement())
-  title       String    @map("title")
-  description String?   @db.Text
-  assigneeId  Int       @map("assignee_id") // Employee receiving task
-  assignerId  Int       @map("assigner_id") // Employee assigning task
-  status      String    @default("TODO") // TODO, IN_PROGRESS, DONE, OVERDUE
-  dueDate     DateTime? @map("due_date") @db.Date
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  id             Int       @id @default(autoincrement())
+  title          String    @map("title")
+  description    String?   @db.Text
+  
+  // Decoupled Identity: Dùng employee_code (String) làm Integration Key thay vì khóa ngoại cứng (Int)
+  assigneeCode   String    @map("assignee_code") 
+  assignerCode   String    @map("assigner_code")
+  
+  status         String    @default("TODO") // DRAFT, TODO, IN_PROGRESS, REVIEWING, DONE, OVERDUE, CANCELLED
+  priority       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  
+  // Document-driven Workflow: Lưu danh sách ID văn bản liên quan (Evidence/Source)
+  documentIds    Json?     @map("document_ids") // Lưu array of strings/UUIDs
+  workflowInstId String?   @map("workflow_instance_id")
 
-  planId      Int?      @map("plan_id")
-  plan        MasterPlan? @relation(fields: [planId], references: [id])
+  dueDate        DateTime? @map("due_date") @db.Date
+  completionDate DateTime? @map("completion_date")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  assignee    Employee  @relation("TaskAssignee", fields: [assigneeId], references: [id])
-  assigner    Employee  @relation("TaskAssigner", fields: [assignerId], references: [id])
+  planId         Int?      @map("plan_id")
+  plan           MasterPlan? @relation(fields: [planId], references: [id])
+
+  // Quan hệ tới bảng Employee được thực hiện lỏng lẻo qua employeeCode
+  assignee       Employee? @relation("TaskAssignee", fields: [assigneeCode], references: [employeeCode])
+  assigner       Employee? @relation("TaskAssigner", fields: [assignerCode], references: [employeeCode])
 
   @@map("tasks")
 }
@@ -22,9 +33,15 @@ model MasterPlan {
   id          Int       @id @default(autoincrement())
   title       String    @map("title")
   description String?   @db.Text
+  type        String    @default("SMART_GOAL") // SMART_GOAL, OKR, MASTER_PLAN
+  
   startDate   DateTime? @map("start_date") @db.Date
   endDate     DateTime? @map("end_date") @db.Date
-  status      String    @default("ACTIVE") // ACTIVE, COMPLETED, CANCELLED
+  status      String    @default("ACTIVE") // DRAFT, ACTIVE, COMPLETED, CANCELLED
+  
+  // Document Reference (Nghị quyết, Chủ trương sinh ra MasterPlan này)
+  documentId  String?   @map("document_id")
+
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
@@ -60,14 +77,14 @@ model KpiCriteria {
 
 model KpiEvaluation {
   id          Int                   @id @default(autoincrement())
-  employeeId  Int                   @map("employee_id")
+  employeeCode String                 @map("employee_code") // Đổi sang Code để decouple
   periodId    Int                   @map("period_id")
   totalScore  Float?                @map("total_score")
-  status      String                @default("DRAFT") // DRAFT, SUBMITTED, APPROVED
-  reviewerId  Int?                  @map("reviewer_id")
+  status      String                @default("DRAFT") // DRAFT, COMPUTING, SUBMITTED, APPROVED
+  reviewerCode String?                @map("reviewer_code")
 
-  employee    Employee              @relation("KpiEmployee", fields: [employeeId], references: [id])
-  reviewer    Employee?             @relation("KpiReviewer", fields: [reviewerId], references: [id])
+  employee    Employee              @relation("KpiEmployee", fields: [employeeCode], references: [employeeCode])
+  reviewer    Employee?             @relation("KpiReviewer", fields: [reviewerCode], references: [employeeCode])
   period      KpiPeriod             @relation(fields: [periodId], references: [id])
   details     KpiEvaluationDetail[]
 

@@ -14,9 +14,9 @@ export class TasksService {
     });
   }
 
-  async findByAssignee(assigneeId: number) {
+  async findByAssignee(assigneeCode: string) {
     return this.prisma.task.findMany({
-      where: { assigneeId },
+      where: { assigneeCode },
       include: {
         assignee: true,
         assigner: true,
@@ -27,8 +27,8 @@ export class TasksService {
   async create(data: {
     title: string;
     description?: string;
-    assigneeId: number;
-    assignerId: number;
+    assigneeCode: string;
+    assignerCode: string;
     dueDate?: Date;
   }) {
     return this.prisma.task.create({
