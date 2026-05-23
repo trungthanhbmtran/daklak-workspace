@@ -181,7 +181,12 @@ async function main() {
     { group: 'POSITION', code: 'GIAM_DOC', order: 1, nameVi: 'Giám đốc', nameEn: 'Director' },
     { group: 'POSITION', code: 'PHO_GIAM_DOC', order: 2, nameVi: 'Phó Giám đốc', nameEn: 'Deputy Director' },
     { group: 'POSITION', code: 'TRUONG_PHONG', order: 3, nameVi: 'Trưởng phòng', nameEn: 'Head of Department' },
-    { group: 'POSITION', code: 'CHUYEN_VIEN', order: 4, nameVi: 'Chuyên viên', nameEn: 'Expert' },
+    { group: 'POSITION', code: 'PHO_TRUONG_PHONG', order: 4, nameVi: 'Phó Trưởng phòng', nameEn: 'Deputy Head of Department' },
+    { group: 'POSITION', code: 'CHANH_VAN_PHONG', order: 5, nameVi: 'Chánh Văn phòng', nameEn: 'Chief of Office' },
+    { group: 'POSITION', code: 'PHO_CHANH_VAN_PHONG', order: 6, nameVi: 'Phó Chánh Văn phòng', nameEn: 'Deputy Chief of Office' },
+    { group: 'POSITION', code: 'CHANH_THANH_TRA', order: 7, nameVi: 'Chánh Thanh tra', nameEn: 'Chief Inspector' },
+    { group: 'POSITION', code: 'PHO_CHANH_THANH_TRA', order: 8, nameVi: 'Phó Chánh Thanh tra', nameEn: 'Deputy Chief Inspector' },
+    { group: 'POSITION', code: 'CHUYEN_VIEN', order: 9, nameVi: 'Chuyên viên', nameEn: 'Expert' },
 
     { group: 'CIVIL_SERVANT_RANK', code: 'CVC_CAO_CAP', order: 1, nameVi: 'Chuyên viên cao cấp', nameEn: 'Senior Expert' },
     { group: 'CIVIL_SERVANT_RANK', code: 'CVC_CHINH', order: 2, nameVi: 'Chuyên viên chính', nameEn: 'Principal Expert' },
@@ -853,9 +858,19 @@ async function main() {
   const soKhcn = await prisma.organizationUnit.findUnique({ where: { code: 'SO_KHCN' } });
   if (soKhcn) {
     await prisma.organizationUnit.upsert({
-      where: { code: 'TT_CNTT_KHCN' },
+      where: { code: 'TT_DMSM' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
-      create: { code: 'TT_CNTT_KHCN', name: 'Trung tâm Công nghệ thông tin và Khoa học công nghệ', parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: { code: 'TT_DMSM', name: 'Trung tâm Đổi mới Sáng tạo', parentId: soKhcn.id, typeId: trungTamTypeId },
+    });
+    await prisma.organizationUnit.upsert({
+      where: { code: 'TT_IOC' },
+      update: { parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: { code: 'TT_IOC', name: 'Trung tâm Giám sát, Điều hành Đô thị Thông minh (IOC)', parentId: soKhcn.id, typeId: trungTamTypeId },
+    });
+    await prisma.organizationUnit.upsert({
+      where: { code: 'TT_KTTDC' },
+      update: { parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: { code: 'TT_KTTDC', name: 'Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng', parentId: soKhcn.id, typeId: trungTamTypeId },
     });
   }
 
@@ -892,7 +907,22 @@ async function main() {
   await createDept('SO_KHCN', { code: 'SO_KHCN_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
   await createDept('SO_KHCN', { code: 'SO_KHCN_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
   await createDept('SO_KHCN', { code: 'SO_KHCN_QLKH', name: 'Phòng Quản lý Khoa học', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_CNSH', name: 'Phòng Công nghệ & Sở hữu trí tuệ', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_CDS', name: 'Phòng Chuyển đổi số', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_QLCN', name: 'Phòng Quản lý Công nghệ và Đổi mới sáng tạo', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_KHCN', { code: 'SO_KHCN_TDC', name: 'Phòng Quản lý Tiêu chuẩn - Đo lường - Chất lượng', typeCode: 'PHONG_BAN_SO' });
+
+  // Các phòng thuộc Trung tâm Đổi mới Sáng tạo
+  await createDept('TT_DMSM', { code: 'TT_DMSM_HC', name: 'Phòng Hành chính - Tổng hợp', typeCode: 'VAN_PHONG' });
+  await createDept('TT_DMSM', { code: 'TT_DMSM_UT', name: 'Phòng Ươm tạo và Phát triển', typeCode: 'PHONG_BAN_SO' });
+
+  // Các phòng thuộc Trung tâm IOC
+  await createDept('TT_IOC', { code: 'TT_IOC_HC', name: 'Phòng Hành chính - Quản trị', typeCode: 'VAN_PHONG' });
+  await createDept('TT_IOC', { code: 'TT_IOC_CN', name: 'Phòng Công nghệ và Hạ tầng', typeCode: 'PHONG_BAN_SO' });
+
+  // Các phòng thuộc Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng
+  await createDept('TT_KTTDC', { code: 'TT_KTTDC_HC', name: 'Phòng Hành chính - Tổ chức', typeCode: 'VAN_PHONG' });
+  await createDept('TT_KTTDC', { code: 'TT_KTTDC_DL', name: 'Phòng Đo lường', typeCode: 'PHONG_BAN_SO' });
+  await createDept('TT_KTTDC', { code: 'TT_KTTDC_TN', name: 'Phòng Thử nghiệm', typeCode: 'PHONG_BAN_SO' });
 
   // ==========================
   // 2. SỞ Y TẾ
@@ -986,9 +1016,24 @@ async function main() {
   await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'GIAM_DOC', true);
   await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_GIAM_DOC', true);
   await assignLeader('ralantruongthanhha@daklak.gov.vn', 'ralantruongthanhha', 'Ra Lan Trương Thanh Hà', 'SO_KHCN', 'PHO_GIAM_DOC', true);
+  await assignLeader('tranvanson@daklak.gov.vn', 'tranvanson', 'Trần Văn Sơn', 'SO_KHCN', 'PHO_GIAM_DOC', true);
+  await assignLeader('lamvumyhanh@daklak.gov.vn', 'lamvumyhanh', 'Lâm Vũ Mỹ Hạnh', 'SO_KHCN', 'PHO_GIAM_DOC', true);
   // Bí thư Đảng bộ thường là Giám đốc
   await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'BI_THU_DANG_BO', true);
   await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_BI_THU_DANG_BO', true);
+
+  // Lãnh đạo các phòng ban Sở KHCN
+  await assignLeader('nguyenvana@daklak.gov.vn', 'nguyenvana', 'Nguyễn Văn A', 'SO_KHCN_VP', 'CHANH_VAN_PHONG', true);
+  await assignLeader('lethib@daklak.gov.vn', 'lethib', 'Lê Thị B', 'SO_KHCN_KHTC', 'TRUONG_PHONG', true);
+  await assignLeader('tranvanc@daklak.gov.vn', 'tranvanc', 'Trần Văn C', 'SO_KHCN_QLKH', 'TRUONG_PHONG', true);
+  await assignLeader('phamthid@daklak.gov.vn', 'phamthid', 'Phạm Thị D', 'SO_KHCN_CDS', 'TRUONG_PHONG', true);
+  await assignLeader('hoangvane@daklak.gov.vn', 'hoangvane', 'Hoàng Văn E', 'SO_KHCN_QLCN', 'TRUONG_PHONG', true);
+  await assignLeader('vuthif@daklak.gov.vn', 'vuthif', 'Vũ Thị F', 'SO_KHCN_TDC', 'TRUONG_PHONG', true);
+
+  // Lãnh đạo các Trung tâm thuộc Sở KHCN
+  await assignLeader('dovang@daklak.gov.vn', 'dovang', 'Đỗ Văn G', 'TT_DMSM', 'GIAM_DOC', true);
+  await assignLeader('ngothih@daklak.gov.vn', 'ngothih', 'Ngô Thị H', 'TT_IOC', 'GIAM_DOC', true);
+  await assignLeader('lyvani@daklak.gov.vn', 'lyvani', 'Lý Văn I', 'TT_KTTDC', 'GIAM_DOC', true);
   // 4. Sở Tài chính
   await assignLeader('tranvantan@daklak.gov.vn', 'tranvantan', 'Trần Văn Tân', 'SO_TC', 'GIAM_DOC', true);
   // 5. Existing test user
