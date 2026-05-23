@@ -551,8 +551,9 @@ async function main() {
   // 3. HRM Module
   const hrmMenus = [
     { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_TASKS', name: 'Phân công & Giao việc', route: 'tasks', icon: 'list-outline', order: 2, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_KPI', name: 'Đánh giá Năng lực (KPI)', route: 'kpi', icon: 'settings-outline', order: 3, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_PLANS', name: 'Chủ trương & Kế hoạch', route: 'plans', icon: 'layers-outline', order: 2, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_TASKS', name: 'Phân công & Giao việc', route: 'tasks', icon: 'list-outline', order: 3, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_KPI', name: 'Đánh giá Năng lực (KPI)', route: 'kpi', icon: 'settings-outline', order: 4, res: 'HRM_EMPLOYEE' },
   ];
 
   for (const { res, ...m } of hrmMenus) {
