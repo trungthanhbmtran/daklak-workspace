@@ -114,23 +114,25 @@ export function UserDetailSheet({
                   <h5 className="font-semibold mb-3 flex items-center gap-2 text-sm">
                     <AlertTriangle className="w-4 h-4 text-amber-500" /> Chính sách hiệu lực (Policies)
                   </h5>
-                  <ul className="text-sm space-y-3">
-                    {policies.length > 0 ? policies.map((policy, idx) => (
-                      <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0 border-primary/5">
-                        <div className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                          <span className="font-medium">{policy.description ?? "—"}</span>
-                        </div>
-                        <span className="text-xs text-muted-foreground pl-3.5">
-                          Tài nguyên: <code className="bg-background px-1.5 py-0.5 rounded border">{policy.resource ?? "—"}</code>
-                        </span>
-                      </li>
-                    )) : (
-                      <li className="text-muted-foreground text-xs italic">
-                        Người dùng chưa có chính sách quyền hạn nào được áp dụng.
-                      </li>
-                    )}
-                  </ul>
+                  <ScrollArea className="h-[250px] pr-4">
+                    <ul className="text-sm space-y-3">
+                      {policies.length > 0 ? policies.map((policy, idx) => (
+                        <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0 border-primary/5">
+                          <div className="flex items-start gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
+                            <span className="font-medium">{policy.description ?? "—"}</span>
+                          </div>
+                          <span className="text-xs text-muted-foreground pl-3.5">
+                            Tài nguyên: <code className="bg-background px-1.5 py-0.5 rounded border">{policy.resource ?? "—"}</code>
+                          </span>
+                        </li>
+                      )) : (
+                        <li className="text-muted-foreground text-xs italic">
+                          Người dùng chưa có chính sách quyền hạn nào được áp dụng.
+                        </li>
+                      )}
+                    </ul>
+                  </ScrollArea>
                 </div>
               </section>
               
