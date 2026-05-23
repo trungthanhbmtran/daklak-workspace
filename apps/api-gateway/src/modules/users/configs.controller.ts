@@ -8,7 +8,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class ConfigsController implements OnModuleInit {
   private configService: any;
 
-  constructor(@Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any) {}
+  constructor(@Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any) {}
 
   onModuleInit() {
     this.configService = this.client.getService('SystemConfigService');

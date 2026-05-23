@@ -44,6 +44,13 @@ export const MICROSERVICES = {
     URL: getUserUrl(),
     SERVICE: 'PbacService',
   },
+  SYS_CONFIG: {
+    PACKAGE: 'users',
+    SYMBOL: 'SYS_CONFIG_PACKAGE',
+    PROTO: 'users/system_config.proto',
+    URL: getUserUrl(),
+    SERVICE: 'SystemConfigService',
+  },
   SYS_CATEGORY: {
     PACKAGE: 'category',
     SYMBOL: 'SYS_CATEGORY_PACKAGE',

@@ -18,6 +18,7 @@ import { ConfigsController } from './configs.controller';
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
     registerGrpcService(MICROSERVICES.MENU),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
+    registerGrpcService(MICROSERVICES.SYS_CONFIG),
   ],
   controllers: [
     UserController,
