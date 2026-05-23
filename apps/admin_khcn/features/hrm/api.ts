@@ -28,6 +28,8 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
       row.civilServantRankId != null ? Number(row.civilServantRankId) : row.civil_servant_rank_id != null ? Number(row.civil_servant_rank_id) : undefined,
     partyTitleId:
       row.partyTitleId != null ? Number(row.partyTitleId) : row.party_title_id != null ? Number(row.party_title_id) : undefined,
+    startDate: String(row.startDate ?? row.start_date ?? ""),
+    birthday: String(row.birthday ?? ""),
     department: row.department as HrmEmployee["department"],
     jobTitle: row.jobTitle as HrmEmployee["jobTitle"],
     civilServantRank: row.civilServantRank as HrmEmployee["civilServantRank"],
@@ -103,6 +105,31 @@ export const hrmApi = {
         success: res?.success ?? true,
         message: res?.message,
         data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
+      };
+    });
+  },
+
+  /**
+   * Cập nhật một nhân viên (PUT /hrm/employees/:id).
+   */
+  update(id: number, payload: any): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
+    return apiClient.put(`${HRM_EMPLOYEES_PATH}/${id}`, payload).then((res: any) => {
+      return {
+        success: res?.success ?? true,
+        message: res?.message,
+        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
+      };
+    });
+  },
+
+  /**
+   * Xóa một nhân viên (DELETE /hrm/employees/:id).
+   */
+  deleteOne(id: number): Promise<{ success: boolean; message?: string }> {
+    return apiClient.delete(`${HRM_EMPLOYEES_PATH}/${id}`).then((res: any) => {
+      return {
+        success: res?.success ?? true,
+        message: res?.message,
       };
     });
   },

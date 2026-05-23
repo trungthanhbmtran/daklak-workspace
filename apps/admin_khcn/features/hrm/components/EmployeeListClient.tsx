@@ -7,7 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useHrmEmployeesList } from "@/features/hrm/hooks/useHrmEmployees";
+import { useHrmEmployeesList, useDeleteHrmEmployee } from "@/features/hrm/hooks/useHrmEmployees";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+import { toast } from "sonner";
 import type { HrmEmployee } from "@/features/hrm/types";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery } from "@tanstack/react-query";
@@ -24,18 +26,12 @@ function flattenUnits(nodes: unknown[], acc: { id: number; name: string }[] = []
 function getUnitName(emp: HrmEmployee, unitMap: Map<number, string>) {
   return emp.department?.name || (emp.departmentId != null ? unitMap.get(emp.departmentId) : null) || "—";
 }
-function getJobTitleName(emp: HrmEmployee, jobTitleMap: Map<number, string>) {
-  const parts: string[] = [];
+function getJobTitleGroups(emp: HrmEmployee, jobTitleMap: Map<number, string>) {
   const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleMap.get(emp.jobTitleId) : null);
-  if (govt) parts.push(govt);
-
   const rank = emp.civilServantRank?.name || (emp.civilServantRankId != null ? jobTitleMap.get(emp.civilServantRankId) : null);
-  if (rank && rank !== govt) parts.push(rank);
-
   const party = emp.partyTitle?.name || (emp.partyTitleId != null ? jobTitleMap.get(emp.partyTitleId) : null);
-  if (party) parts.push(party);
-
-  return parts.length > 0 ? parts.join(" - ") : "—";
+  
+  return { govt, rank, party };
 }
 
 export function EmployeeListClient() {
@@ -43,6 +39,9 @@ export function EmployeeListClient() {
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
+  
+  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const { mutate: deleteEmployee, isPending: isDeleting } = useDeleteHrmEmployee();
 
   const { data: listRes, isLoading, isError } = useHrmEmployeesList({
     page,
@@ -77,6 +76,20 @@ export function EmployeeListClient() {
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 
   const handleSearch = () => setKeyword(searchInput.trim());
+
+  const handleDelete = () => {
+    if (!deleteId) return;
+    deleteEmployee(deleteId, {
+      onSuccess: () => {
+        toast.success("Xóa nhân sự thành công");
+        setDeleteId(null);
+      },
+      onError: () => {
+        toast.error("Lỗi khi xóa nhân sự");
+        setDeleteId(null);
+      }
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 p-6 md:p-10 space-y-6">
@@ -168,11 +181,28 @@ export function EmployeeListClient() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col space-y-1">
-                          <div className="flex items-center text-sm text-slate-700 font-medium">
-                            <Briefcase className="h-3.5 w-3.5 mr-2 text-slate-400" /> {getJobTitleName(emp, jobTitleMap)}
-                          </div>
-                          <div className="flex items-center text-xs text-slate-500">
+                        <div className="flex flex-col space-y-2">
+                          {(() => {
+                            const { govt, rank, party } = getJobTitleGroups(emp, jobTitleMap);
+                            return (
+                              <>
+                                <div className="flex items-start">
+                                  <Briefcase className="h-3.5 w-3.5 mr-2 text-blue-500 mt-0.5 shrink-0" /> 
+                                  <div className="flex flex-col">
+                                    <span className="text-sm text-slate-800 font-bold">{govt || "Chưa bổ nhiệm (CQ)"}</span>
+                                    {rank && rank !== govt && <span className="text-xs text-slate-500">Ngạch: {rank}</span>}
+                                  </div>
+                                </div>
+                                {party && (
+                                  <div className="flex items-start">
+                                    <Briefcase className="h-3.5 w-3.5 mr-2 text-red-500 mt-0.5 shrink-0" />
+                                    <span className="text-xs text-slate-700 font-medium">Đảng: {party}</span>
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
+                          <div className="flex items-center text-xs text-slate-500 pt-1 border-t border-slate-100">
                             <Building2 className="h-3.5 w-3.5 mr-2 text-slate-400" /> {getUnitName(emp, unitMap)}
                           </div>
                         </div>
@@ -194,7 +224,13 @@ export function EmployeeListClient() {
                               <Edit className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Button variant="ghost" size="icon" className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full" title="Xóa">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => setDeleteId(emp.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full" 
+                            title="Xóa"
+                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -235,6 +271,14 @@ export function EmployeeListClient() {
           </div>
         )}
       </div>
+
+      <ConfirmDeleteModal 
+        isOpen={deleteId !== null}
+        onClose={() => setDeleteId(null)}
+        onConfirm={handleDelete}
+        isDeleting={isDeleting}
+        description="Thao tác này sẽ xóa hoàn toàn hồ sơ nhân sự khỏi hệ thống. Bạn có chắc chắn muốn tiếp tục?"
+      />
     </div>
   );
 }

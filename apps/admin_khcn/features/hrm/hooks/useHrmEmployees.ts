@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { hrmApi } from "../api";
 import { hrmKeys } from "../keys";
 import type { HrmEmployeesListParams } from "../types";
@@ -39,6 +39,33 @@ export function useHrmEmployee(id: number | null, options?: { enabled?: boolean 
     queryKey: hrmKeys.detail(id ?? 0),
     queryFn: () => hrmApi.getOne(id!),
     enabled: (options?.enabled ?? true) && id != null && id > 0,
+  });
+}
+
+/**
+ * Cập nhật một nhân viên.
+ */
+export function useUpdateHrmEmployee() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmApi.update(id, payload),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
+      queryClient.invalidateQueries({ queryKey: hrmKeys.detail(id) });
+    },
+  });
+}
+
+/**
+ * Xóa một nhân viên.
+ */
+export function useDeleteHrmEmployee() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => hrmApi.deleteOne(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
+    },
   });
 }
 
