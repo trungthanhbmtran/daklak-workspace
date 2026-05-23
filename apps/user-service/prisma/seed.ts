@@ -545,7 +545,11 @@ async function main() {
   }
   // Clean up redundant menus
   await prisma.menu.deleteMany({
-    where: { code: 'HRM_MENU_DEPARTMENTS' }
+    where: {
+      code: {
+        in: ['HRM_MENU_DEPARTMENTS', 'HRM_MENU_ATTENDANCE', 'HRM_MENU_CONTRACTS', 'HRM_MENU_LEAVE', 'HRM_MENU_PAYROLL']
+      }
+    }
   });
 
   // 3. HRM Module
