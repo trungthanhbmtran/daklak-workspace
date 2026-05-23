@@ -48,6 +48,19 @@ async function main() {
     { firstname: 'Ngô Thị', lastname: 'H', employeeCode: 'NV_027', email: 'ngothih@daklak.gov.vn', phone: '0902000027', identityCard: '002000027', departmentId: unitMap['TT_IOC'], jobTitleId: jobMap['GIAM_DOC'] },
     { firstname: 'Lý Văn', lastname: 'I', employeeCode: 'NV_028', email: 'lyvani@daklak.gov.vn', phone: '0902000028', identityCard: '002000028', departmentId: unitMap['TT_KTTDC'], jobTitleId: jobMap['GIAM_DOC'] },
 
+    // Lãnh đạo các phòng thuộc Trung tâm
+    { firstname: 'Hoàng Văn', lastname: 'HC', employeeCode: 'NV_029', email: 'truongphonghc_dmsm@daklak.gov.vn', phone: '0902000029', identityCard: '002000029', departmentId: unitMap['TT_DMSM_HC'], jobTitleId: jobMap['TRUONG_PHONG'] },
+    { firstname: 'Lê Thị', lastname: 'UT', employeeCode: 'NV_030', email: 'truongphongut_dmsm@daklak.gov.vn', phone: '0902000030', identityCard: '002000030', departmentId: unitMap['TT_DMSM_UT'], jobTitleId: jobMap['TRUONG_PHONG'] },
+    { firstname: 'Trần Văn', lastname: 'HC', employeeCode: 'NV_031', email: 'truongphonghc_ioc@daklak.gov.vn', phone: '0902000031', identityCard: '002000031', departmentId: unitMap['TT_IOC_HC'], jobTitleId: jobMap['TRUONG_PHONG'] },
+    { firstname: 'Phạm Thị', lastname: 'CN', employeeCode: 'NV_032', email: 'truongphongcn_ioc@daklak.gov.vn', phone: '0902000032', identityCard: '002000032', departmentId: unitMap['TT_IOC_CN'], jobTitleId: jobMap['TRUONG_PHONG'] },
+    { firstname: 'Nguyễn Văn', lastname: 'HC', employeeCode: 'NV_033', email: 'truongphonghc_kttdc@daklak.gov.vn', phone: '0902000033', identityCard: '002000033', departmentId: unitMap['TT_KTTDC_HC'], jobTitleId: jobMap['TRUONG_PHONG'] },
+    { firstname: 'Đinh Thị', lastname: 'DL', employeeCode: 'NV_034', email: 'truongphongdl_kttdc@daklak.gov.vn', phone: '0902000034', identityCard: '002000034', departmentId: unitMap['TT_KTTDC_DL'], jobTitleId: jobMap['TRUONG_PHONG'] },
+    { firstname: 'Vũ Văn', lastname: 'TN', employeeCode: 'NV_035', email: 'truongphongtn_kttdc@daklak.gov.vn', phone: '0902000035', identityCard: '002000035', departmentId: unitMap['TT_KTTDC_TN'], jobTitleId: jobMap['TRUONG_PHONG'] },
+
+    // Thêm Phó Trưởng phòng (Ví dụ)
+    { firstname: 'Trương Văn', lastname: 'Phó 1', employeeCode: 'NV_036', email: 'phochvp_khcn@daklak.gov.vn', phone: '0902000036', identityCard: '002000036', departmentId: unitMap['SO_KHCN_VP'], jobTitleId: jobMap['PHO_CHANH_VAN_PHONG'] },
+    { firstname: 'Ngô Thị', lastname: 'Phó 2', employeeCode: 'NV_037', email: 'photp_khtc_khcn@daklak.gov.vn', phone: '0902000037', identityCard: '002000037', departmentId: unitMap['SO_KHCN_KHTC'], jobTitleId: jobMap['PHO_TRUONG_PHONG'] },
+
     // Lãnh đạo Sở khác
     { firstname: 'Trương Ngọc', lastname: 'Tuấn', employeeCode: 'NV_010', email: 'truongngoctuan@daklak.gov.vn', phone: '0901000010', identityCard: '001000010', departmentId: unitMap['SO_NV'], jobTitleId: jobMap['GIAM_DOC'] },
     { firstname: 'Trần Văn', lastname: 'Tân', employeeCode: 'NV_011', email: 'tranvantan@daklak.gov.vn', phone: '0901000011', identityCard: '001000011', departmentId: unitMap['SO_TC'], jobTitleId: jobMap['GIAM_DOC'] },

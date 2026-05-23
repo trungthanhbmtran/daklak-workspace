@@ -1034,6 +1034,20 @@ async function main() {
   await assignLeader('dovang@daklak.gov.vn', 'dovang', 'Đỗ Văn G', 'TT_DMSM', 'GIAM_DOC', true);
   await assignLeader('ngothih@daklak.gov.vn', 'ngothih', 'Ngô Thị H', 'TT_IOC', 'GIAM_DOC', true);
   await assignLeader('lyvani@daklak.gov.vn', 'lyvani', 'Lý Văn I', 'TT_KTTDC', 'GIAM_DOC', true);
+
+  // Lãnh đạo các phòng thuộc Trung tâm
+  await assignLeader('truongphonghc_dmsm@daklak.gov.vn', 'truongphonghc_dmsm', 'Hoàng Văn HC', 'TT_DMSM_HC', 'TRUONG_PHONG', true);
+  await assignLeader('truongphongut_dmsm@daklak.gov.vn', 'truongphongut_dmsm', 'Lê Thị UT', 'TT_DMSM_UT', 'TRUONG_PHONG', true);
+  await assignLeader('truongphonghc_ioc@daklak.gov.vn', 'truongphonghc_ioc', 'Trần Văn HC', 'TT_IOC_HC', 'TRUONG_PHONG', true);
+  await assignLeader('truongphongcn_ioc@daklak.gov.vn', 'truongphongcn_ioc', 'Phạm Thị CN', 'TT_IOC_CN', 'TRUONG_PHONG', true);
+  await assignLeader('truongphonghc_kttdc@daklak.gov.vn', 'truongphonghc_kttdc', 'Nguyễn Văn HC', 'TT_KTTDC_HC', 'TRUONG_PHONG', true);
+  await assignLeader('truongphongdl_kttdc@daklak.gov.vn', 'truongphongdl_kttdc', 'Đinh Thị DL', 'TT_KTTDC_DL', 'TRUONG_PHONG', true);
+  await assignLeader('truongphongtn_kttdc@daklak.gov.vn', 'truongphongtn_kttdc', 'Vũ Văn TN', 'TT_KTTDC_TN', 'TRUONG_PHONG', true);
+
+  // Thêm một số Phó Trưởng phòng (Ví dụ)
+  await assignLeader('phochvp_khcn@daklak.gov.vn', 'phochvp_khcn', 'Trương Văn Phó 1', 'SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', false);
+  await assignLeader('photp_khtc_khcn@daklak.gov.vn', 'photp_khtc_khcn', 'Ngô Thị Phó 2', 'SO_KHCN_KHTC', 'PHO_TRUONG_PHONG', false);
+
   // 4. Sở Tài chính
   await assignLeader('tranvantan@daklak.gov.vn', 'tranvantan', 'Trần Văn Tân', 'SO_TC', 'GIAM_DOC', true);
   // 5. Existing test user
