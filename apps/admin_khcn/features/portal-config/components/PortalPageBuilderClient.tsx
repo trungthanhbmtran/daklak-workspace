@@ -35,7 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
 import dynamic from "next/dynamic";
-
+import { convertToSlug } from "@/lib/slug";
 
 const PageBuilder = dynamic(
   () => import("./PageBuilder").then((mod) => mod.PageBuilder),
@@ -44,10 +44,7 @@ const PageBuilder = dynamic(
 
 interface CustomPageMeta {
   id: string;
-  title: {
-    vi: string;
-    en: string;
-  };
+  title: Record<string, string>;
   isActive: boolean;
 }
 
@@ -65,8 +62,7 @@ export function PortalPageBuilderClient() {
   const [isPageModalOpen, setIsPageModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"ADD" | "EDIT">("ADD");
   const [modalPageId, setModalPageId] = useState("");
-  const [modalTitleVi, setModalTitleVi] = useState("");
-  const [modalTitleEn, setModalTitleEn] = useState("");
+  const [modalTitles, setModalTitles] = useState<Record<string, string>>({});
   const [modalIsActive, setModalIsActive] = useState(true);
 
   // 1. Fetch registered active languages from Category module
@@ -219,8 +215,9 @@ export function PortalPageBuilderClient() {
       toast.error("Vui lòng nhập mã định danh trang (Slug)");
       return;
     }
-    if (!modalTitleVi.trim()) {
-      toast.error("Vui lòng nhập tiêu đề Tiếng Việt");
+    const defaultLang = activeLangs[0]?.code || "vi";
+    if (!modalTitles[defaultLang] || !modalTitles[defaultLang].trim()) {
+      toast.error(`Vui lòng nhập tiêu đề (${activeLangs[0]?.name || "Mặc định"})`);
       return;
     }
 
@@ -234,10 +231,7 @@ export function PortalPageBuilderClient() {
 
       const newPage: CustomPageMeta = {
         id: cleanId,
-        title: {
-          vi: modalTitleVi.trim(),
-          en: modalTitleEn.trim() || modalTitleVi.trim()
-        },
+        title: { ...modalTitles },
         isActive: modalIsActive
       };
 
@@ -251,10 +245,7 @@ export function PortalPageBuilderClient() {
         if (p.id === modalPageId) {
           return {
             ...p,
-            title: {
-              vi: modalTitleVi.trim(),
-              en: modalTitleEn.trim() || modalTitleVi.trim()
-            },
+            title: { ...modalTitles },
             isActive: modalIsActive
           };
         }
@@ -307,8 +298,7 @@ export function PortalPageBuilderClient() {
   const openAddPageModal = () => {
     setModalMode("ADD");
     setModalPageId("");
-    setModalTitleVi("");
-    setModalTitleEn("");
+    setModalTitles({});
     setModalIsActive(true);
     setIsPageModalOpen(true);
   };
@@ -316,8 +306,7 @@ export function PortalPageBuilderClient() {
   const openEditPageModal = (page: CustomPageMeta) => {
     setModalMode("EDIT");
     setModalPageId(page.id);
-    setModalTitleVi(page.title.vi);
-    setModalTitleEn(page.title.en);
+    setModalTitles(page.title || {});
     setModalIsActive(page.isActive);
     setIsPageModalOpen(true);
   };
@@ -375,7 +364,7 @@ export function PortalPageBuilderClient() {
           <div className="hidden xl:flex items-center gap-6 mr-4 lg:mr-6 py-2 px-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700 shrink-0">
             <div className="flex flex-col items-center">
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Trang đang mở</span>
-              <span className="text-xs font-bold text-indigo-600 uppercase tracking-tight truncate max-w-[150px]">{selectedPageMeta?.title?.vi}</span>
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-tight truncate max-w-[150px]">{selectedPageMeta?.title?.vi || selectedPageMeta?.title?.[Object.keys(selectedPageMeta?.title || {})[0]]}</span>
             </div>
             <div className="w-px h-6 bg-slate-200 dark:bg-slate-700 shrink-0" />
             <div className="flex flex-col items-center">
@@ -447,7 +436,7 @@ export function PortalPageBuilderClient() {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex flex-col min-w-0">
                       <span className={`text-[11px] font-black uppercase tracking-tight truncate ${isSelected ? "text-indigo-700 dark:text-indigo-400" : "text-slate-800 dark:text-slate-200"}`}>
-                        {p.title.vi}
+                        {p.title.vi || p.title[Object.keys(p.title)[0]] || "Không có tiêu đề"}
                       </span>
                       <span className="text-[8px] font-bold font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">
                         Slug: /{p.id}
@@ -459,7 +448,9 @@ export function PortalPageBuilderClient() {
                   <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/50">
                     <div className="flex items-center gap-1.5">
                       <Globe className="w-3 h-3 text-slate-300 dark:text-slate-600" />
-                      <span className="text-[9px] font-bold italic text-slate-400 truncate max-w-[120px]">{p.title.en}</span>
+                      <span className="text-[9px] font-bold italic text-slate-400 truncate max-w-[120px]">
+                        {Object.entries(p.title).filter(([k]) => k !== 'vi').map(([_, v]) => v).join(' / ')}
+                      </span>
                     </div>
                     
                     <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
@@ -517,7 +508,7 @@ export function PortalPageBuilderClient() {
              <div className="flex items-center gap-2 lg:gap-4 shrink-0">
                 <div className="flex items-center gap-1.5 lg:gap-2 px-2 lg:px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-lg border border-slate-200/50 dark:border-slate-700">
                    <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">Đang sửa:</span>
-                   <span className="text-[10px] font-bold text-slate-800 dark:text-white uppercase truncate max-w-[120px] lg:max-w-[200px]">{selectedPageMeta?.title?.vi}</span>
+                   <span className="text-[10px] font-bold text-slate-800 dark:text-white uppercase truncate max-w-[120px] lg:max-w-[200px]">{selectedPageMeta?.title?.vi || selectedPageMeta?.title?.[Object.keys(selectedPageMeta?.title || {})[0]]}</span>
                 </div>
                 <div className="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1 lg:mx-2 shrink-0" />
                 <div className="flex items-center gap-1.5 lg:gap-2 shrink-0">
@@ -582,27 +573,28 @@ export function PortalPageBuilderClient() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 pt-2 border-t border-slate-50 dark:border-slate-800/50">
-                <div className="space-y-2">
-                  <Label htmlFor="titleVi" className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Tiêu đề (TIẾNG VIỆT)</Label>
-                  <Input
-                    id="titleVi"
-                    className="h-12 bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/20 transition-all"
-                    placeholder="Nhập tiêu đề tiếng Việt..."
-                    value={modalTitleVi}
-                    onChange={(e) => setModalTitleVi(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="titleEn" className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Tiêu đề (ENGLISH)</Label>
-                  <Input
-                    id="titleEn"
-                    className="h-12 bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/20 transition-all"
-                    placeholder="Enter English title..."
-                    value={modalTitleEn}
-                    onChange={(e) => setModalTitleEn(e.target.value)}
-                  />
-                </div>
+              <div className="grid grid-cols-1 gap-6 pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
+                {activeLangs.map((lang, index) => (
+                  <div key={lang.code} className="space-y-2">
+                    <Label htmlFor={`title-${lang.code}`} className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">
+                      Tiêu đề ({lang.name})
+                    </Label>
+                    <Input
+                      id={`title-${lang.code}`}
+                      className="h-12 bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/20 transition-all"
+                      placeholder={`Nhập tiêu đề ${lang.name}...`}
+                      value={modalTitles[lang.code] || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setModalTitles(prev => ({ ...prev, [lang.code]: val }));
+                        // Auto generate slug if in ADD mode and this is the default language (first language)
+                        if (modalMode === "ADD" && index === 0 && (!modalPageId || modalPageId === convertToSlug(modalTitles[lang.code] || ""))) {
+                          setModalPageId(convertToSlug(val));
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
               </div>
 
               <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 mt-2">

@@ -29,6 +29,7 @@ import { useImageUpload } from "../hooks/useImageUpload";
 import { postsApi } from "../api";
 import { Category, Post } from "../types";
 import dynamic from "next/dynamic";
+import { convertToSlug } from "@/lib/slug";
 
 const LexicalEditorDynamic = dynamic(
   () => import("./editor/LexicalEditor").then((mod) => mod.LexicalEditor),
@@ -37,19 +38,6 @@ const LexicalEditorDynamic = dynamic(
     loading: () => <div className="h-80 bg-muted/20 animate-pulse rounded-xl border border-dashed flex items-center justify-center text-sm text-muted-foreground">Khởi tạo trình soạn thảo...</div>
   }
 );
-
-// --- HÀM BIẾN TIẾNG VIỆT THÀNH SLUG ---
-const convertToSlug = (text: string) => {
-  return text
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[đĐ]/g, "d")
-    .replace(/([^0-9a-z-\s])/g, "")
-    .replace(/(\s+)/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-+|-+$/g, "");
-};
 
 const postSchema = z.object({
   title: z.string().min(5, "Tiêu đề quá ngắn"),
