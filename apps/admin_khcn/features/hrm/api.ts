@@ -184,6 +184,10 @@ let mockPlans: HrmMasterPlan[] = [
 ];
 
 export const hrmPlansApi = {
+  aiGenerate(payload: { text: string }): Promise<any> {
+    return apiClient.post('/hrm/master-plans/ai-generate', payload).then((res: any) => res);
+  },
+
   list(params: any = {}): Promise<{ data: HrmMasterPlan[]; meta: any }> {
     // Trả về mock data thay vì gọi API thật
     return new Promise((resolve) => {
@@ -197,22 +201,7 @@ export const hrmPlansApi = {
   },
   
   create(payload: any): Promise<{ success: boolean; data?: HrmMasterPlan }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newPlan: HrmMasterPlan = {
-          id: Date.now(),
-          title: payload.title,
-          description: payload.description,
-          startDate: payload.startDate,
-          endDate: payload.endDate,
-          status: payload.status || "ACTIVE",
-          createdAt: new Date().toISOString(),
-          perspectives: [...defaultPerspectives]
-        };
-        mockPlans.unshift(newPlan);
-        resolve({ success: true, data: newPlan });
-      }, 600);
-    });
+    return apiClient.post('/hrm/master-plans', payload).then((res: any) => res);
   },
   
   getOne(id: number): Promise<HrmMasterPlan | null> {
@@ -310,5 +299,11 @@ export const hrmTaskThemesApi = {
         resolve({ data: mockTaskThemes });
       }, 300);
     });
+  }
+};
+
+export const hrmTasksApi = {
+  create(payload: any): Promise<any> {
+    return apiClient.post('/hrm/tasks', payload).then((res: any) => res);
   }
 };

@@ -42,6 +42,14 @@ export const MasterPlanListClient = () => {
       case 'SMART_GOAL': return <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">Mục tiêu SMART</Badge>;
       case 'OKR': return <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">OKR</Badge>;
       case 'MASTER_PLAN': return <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">Kế hoạch Tổng thể</Badge>;
+      case 'MBO': return <Badge variant="outline" className="text-cyan-600 border-cyan-200 bg-cyan-50">MBO</Badge>;
+      case 'KPI': return <Badge variant="outline" className="text-rose-600 border-rose-200 bg-rose-50">KPI</Badge>;
+      case 'BSC': return <Badge variant="outline" className="text-emerald-600 border-emerald-200 bg-emerald-50">BSC</Badge>;
+      case 'AGILE': return <Badge variant="outline" className="text-orange-600 border-orange-200 bg-orange-50">Agile</Badge>;
+      case 'LEAN': return <Badge variant="outline" className="text-lime-600 border-lime-200 bg-lime-50">Lean</Badge>;
+      case 'DATA_DRIVEN': return <Badge variant="outline" className="text-sky-600 border-sky-200 bg-sky-50">Data-Driven</Badge>;
+      case 'GOVERNANCE': return <Badge variant="outline" className="text-fuchsia-600 border-fuchsia-200 bg-fuchsia-50">Governance</Badge>;
+      case 'PROJECT': return <Badge variant="outline" className="text-slate-600 border-slate-200 bg-slate-50">Dự án</Badge>;
       default: return <Badge variant="outline">{type}</Badge>;
     }
   };

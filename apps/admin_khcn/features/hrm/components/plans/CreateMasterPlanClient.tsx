@@ -10,10 +10,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Bot, LayoutTemplate, Plus, Trash2, Save, Send } from "lucide-react";
+import { hrmPlansApi, hrmTasksApi } from "@/features/hrm/api";
 
 export function CreateMasterPlanClient() {
   const router = useRouter();
-  
+
   // --- AI STATE ---
   const [inputText, setInputText] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -38,14 +39,9 @@ export function CreateMasterPlanClient() {
     if (!inputText.trim()) return;
     setIsGenerating(true);
     try {
-      const res = await fetch('http://localhost:3000/admin/hrm/master-plans/ai-generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: inputText }),
-      });
-      const json = await res.json();
-      if (json.status === 'success') {
-        setPlanData(json.data);
+      const res = await hrmPlansApi.aiGenerate({ text: inputText });
+      if (res.status === 'success' || res.success) {
+        setPlanData(res.data);
       }
     } catch (err) {
       console.error(err);
@@ -115,35 +111,27 @@ export function CreateMasterPlanClient() {
 
   // --- COMMON DB SAVE ---
   const savePlanToDb = async (data: any) => {
-    const planRes = await fetch('http://localhost:3000/admin/hrm/master-plans', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: data.title,
-        objective: data.objective,
-        startDate: data.startDate,
-        endDate: data.endDate,
-        status: data.status || 'DRAFT',
-        type: data.type || 'PROJECT',
-      }),
+    const planRes = await hrmPlansApi.create({
+      title: data.title,
+      objective: data.objective,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      status: data.status || 'DRAFT',
+      type: data.type || 'PROJECT',
     });
-    const planJson = await planRes.json();
-    const planId = planJson.data?.id;
+
+    const planId = planRes.data?.id;
 
     if (planId && data.tasks && data.tasks.length > 0) {
-      await Promise.all(data.tasks.map((task: any) => 
-        fetch('http://localhost:3000/admin/hrm/tasks', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: task.title,
-            description: task.description,
-            priority: task.priority || 'NORMAL',
-            status: 'TODO',
-            dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
-            assigneeCode: task.assigneeCode || 'SYSTEM',
-            planId: planId,
-          })
+      await Promise.all(data.tasks.map((task: any) =>
+        hrmTasksApi.create({
+          title: task.title,
+          description: task.description,
+          priority: task.priority || 'NORMAL',
+          status: 'TODO',
+          dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
+          assigneeCode: task.assigneeCode || 'SYSTEM',
+          planId: planId,
         })
       ));
     }
@@ -173,72 +161,79 @@ export function CreateMasterPlanClient() {
         {/* TAB 1: MANUAL (CHUẨN QUỐC TẾ) */}
         <TabsContent value="manual" className="space-y-6">
           <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-md rounded-2xl overflow-hidden">
-             <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-             <CardHeader>
-               <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                 <LayoutTemplate className="h-6 w-6 text-emerald-600" /> Thông tin Master Plan
-               </CardTitle>
-             </CardHeader>
-             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div className="space-y-2 md:col-span-2">
-                 <Label className="font-bold">Tiêu đề Kế hoạch <span className="text-red-500">*</span></Label>
-                 <Input 
-                   placeholder="VD: Kế hoạch Chuyển đổi số nội bộ Quý 3/2026"
-                   value={manualPlan.title}
-                   onChange={(e) => setManualPlan({...manualPlan, title: e.target.value})}
-                   className="h-12 bg-slate-50"
-                 />
-               </div>
-               <div className="space-y-2 md:col-span-2">
-                 <Label className="font-bold">Mục tiêu (Objective) <span className="text-red-500">*</span></Label>
-                 <Textarea 
-                   placeholder="Mô tả mục tiêu cốt lõi (OKR / SMART)..."
-                   value={manualPlan.objective}
-                   onChange={(e) => setManualPlan({...manualPlan, objective: e.target.value})}
-                   className="bg-slate-50"
-                 />
-               </div>
-               <div className="space-y-2">
-                 <Label className="font-bold">Loại kế hoạch</Label>
-                 <Select value={manualPlan.type} onValueChange={(val) => setManualPlan({...manualPlan, type: val})}>
-                   <SelectTrigger className="h-12 bg-slate-50">
-                     <SelectValue placeholder="Chọn loại kế hoạch" />
-                   </SelectTrigger>
-                   <SelectContent>
-                     <SelectItem value="OKR">OKR (Mục tiêu và Kết quả then chốt)</SelectItem>
-                     <SelectItem value="SMART_GOAL">Mục tiêu SMART</SelectItem>
-                     <SelectItem value="MASTER_PLAN">Kế hoạch Tổng thể (Master Plan)</SelectItem>
-                     <SelectItem value="PROJECT">Dự án thông thường (Project)</SelectItem>
-                   </SelectContent>
-                 </Select>
-               </div>
-               <div className="space-y-2">
-                 <Label className="font-bold">Thời gian thực hiện</Label>
-                 <div className="flex items-center gap-2">
-                   <Input type="date" className="h-12 bg-slate-50" value={manualPlan.startDate} onChange={(e) => setManualPlan({...manualPlan, startDate: e.target.value})} />
-                   <span className="text-slate-400">-</span>
-                   <Input type="date" className="h-12 bg-slate-50" value={manualPlan.endDate} onChange={(e) => setManualPlan({...manualPlan, endDate: e.target.value})} />
-                 </div>
-               </div>
-             </CardContent>
+            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+            <CardHeader>
+              <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
+                <LayoutTemplate className="h-6 w-6 text-emerald-600" /> Thông tin Master Plan
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2 md:col-span-2">
+                <Label className="font-bold">Tiêu đề Kế hoạch <span className="text-red-500">*</span></Label>
+                <Input
+                  placeholder="VD: Kế hoạch Chuyển đổi số nội bộ Quý 3/2026"
+                  value={manualPlan.title}
+                  onChange={(e) => setManualPlan({ ...manualPlan, title: e.target.value })}
+                  className="h-12 bg-slate-50"
+                />
+              </div>
+              <div className="space-y-2 md:col-span-2">
+                <Label className="font-bold">Mục tiêu (Objective) <span className="text-red-500">*</span></Label>
+                <Textarea
+                  placeholder="Mô tả mục tiêu cốt lõi (OKR / SMART)..."
+                  value={manualPlan.objective}
+                  onChange={(e) => setManualPlan({ ...manualPlan, objective: e.target.value })}
+                  className="bg-slate-50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-bold">Mô hình Quản trị / Loại kế hoạch</Label>
+                <Select value={manualPlan.type} onValueChange={(val) => setManualPlan({ ...manualPlan, type: val })}>
+                  <SelectTrigger className="h-12 bg-slate-50">
+                    <SelectValue placeholder="Chọn mô hình quản trị" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MASTER_PLAN">Kế hoạch Tổng thể (Master Plan / WBS)</SelectItem>
+                    <SelectItem value="MBO">Quản trị theo Mục tiêu (MBO)</SelectItem>
+                    <SelectItem value="OKR">Mục tiêu & Kết quả then chốt (OKR)</SelectItem>
+                    <SelectItem value="KPI">Quản trị hiệu suất (KPI Management)</SelectItem>
+                    <SelectItem value="BSC">Thẻ điểm cân bằng (Balanced Scorecard - BSC)</SelectItem>
+                    <SelectItem value="AGILE">Quản trị linh hoạt (Agile Management)</SelectItem>
+                    <SelectItem value="LEAN">Quản trị tinh gọn (Lean Management)</SelectItem>
+                    <SelectItem value="DATA_DRIVEN">Quản trị dựa trên dữ liệu (Data-Driven)</SelectItem>
+                    <SelectItem value="GOVERNANCE">Mô hình quản trị tổ chức (Governance Model)</SelectItem>
+                    <SelectItem value="SMART_GOAL">Mục tiêu SMART</SelectItem>
+                    <SelectItem value="PROJECT">Dự án thông thường (Project)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="font-bold">Thời gian thực hiện</Label>
+                <div className="flex items-center gap-2">
+                  <Input type="date" className="h-12 bg-slate-50" value={manualPlan.startDate} onChange={(e) => setManualPlan({ ...manualPlan, startDate: e.target.value })} />
+                  <span className="text-slate-400">-</span>
+                  <Input type="date" className="h-12 bg-slate-50" value={manualPlan.endDate} onChange={(e) => setManualPlan({ ...manualPlan, endDate: e.target.value })} />
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
           <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-md rounded-2xl overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between">
-               <div>
-                 <CardTitle className="text-xl font-bold text-slate-800">Phân rã công việc (Work Breakdown Structure)</CardTitle>
-                 <p className="text-sm text-slate-500 mt-1">Cấu trúc công việc theo chuẩn quản trị (Giao việc, RACI, Deadline).</p>
-               </div>
-               <Button onClick={handleAddManualTask} variant="outline" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
-                 <Plus className="h-4 w-4 mr-2" /> Thêm Task
-               </Button>
+              <div>
+                <CardTitle className="text-xl font-bold text-slate-800">Phân rã công việc (Work Breakdown Structure)</CardTitle>
+                <p className="text-sm text-slate-500 mt-1">Cấu trúc công việc theo chuẩn quản trị (Giao việc, RACI, Deadline).</p>
+              </div>
+              <Button onClick={handleAddManualTask} variant="outline" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
+                <Plus className="h-4 w-4 mr-2" /> Thêm Task
+              </Button>
             </CardHeader>
             <CardContent className="space-y-4">
               {manualTasks.map((task, idx) => (
                 <div key={idx} className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl relative group">
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-rose-500 hover:bg-rose-50 transition-all"
                     onClick={() => handleRemoveManualTask(idx)}
                   >
@@ -246,28 +241,28 @@ export function CreateMasterPlanClient() {
                   </Button>
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mr-6">
                     <div className="md:col-span-12 space-y-2">
-                       <Label className="text-xs font-semibold text-slate-500">Tên công việc (Task)</Label>
-                       <Input placeholder="VD: Thiết kế kiến trúc hệ thống" value={task.title} onChange={e => handleManualTaskChange(idx, 'title', e.target.value)} className="bg-white" />
+                      <Label className="text-xs font-semibold text-slate-500">Tên công việc (Task)</Label>
+                      <Input placeholder="VD: Thiết kế kiến trúc hệ thống" value={task.title} onChange={e => handleManualTaskChange(idx, 'title', e.target.value)} className="bg-white" />
                     </div>
                     <div className="md:col-span-6 space-y-2">
-                       <Label className="text-xs font-semibold text-slate-500">Người thực hiện (Assignee / RACI - R)</Label>
-                       <Input placeholder="Mã NV (VD: NV001)" value={task.assigneeCode} onChange={e => handleManualTaskChange(idx, 'assigneeCode', e.target.value)} className="bg-white" />
+                      <Label className="text-xs font-semibold text-slate-500">Người thực hiện (Assignee / RACI - R)</Label>
+                      <Input placeholder="Mã NV (VD: NV001)" value={task.assigneeCode} onChange={e => handleManualTaskChange(idx, 'assigneeCode', e.target.value)} className="bg-white" />
                     </div>
                     <div className="md:col-span-3 space-y-2">
-                       <Label className="text-xs font-semibold text-slate-500">Độ ưu tiên</Label>
-                       <Select value={task.priority} onValueChange={(val) => handleManualTaskChange(idx, 'priority', val)}>
-                         <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="URGENT" className="text-rose-600">Khẩn cấp (Urgent)</SelectItem>
-                           <SelectItem value="HIGH" className="text-orange-600">Cao (High)</SelectItem>
-                           <SelectItem value="NORMAL" className="text-blue-600">Bình thường</SelectItem>
-                           <SelectItem value="LOW" className="text-slate-600">Thấp (Low)</SelectItem>
-                         </SelectContent>
-                       </Select>
+                      <Label className="text-xs font-semibold text-slate-500">Độ ưu tiên</Label>
+                      <Select value={task.priority} onValueChange={(val) => handleManualTaskChange(idx, 'priority', val)}>
+                        <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="URGENT" className="text-rose-600">Khẩn cấp (Urgent)</SelectItem>
+                          <SelectItem value="HIGH" className="text-orange-600">Cao (High)</SelectItem>
+                          <SelectItem value="NORMAL" className="text-blue-600">Bình thường</SelectItem>
+                          <SelectItem value="LOW" className="text-slate-600">Thấp (Low)</SelectItem>
+                        </SelectContent>
+                      </Select>
                     </div>
                     <div className="md:col-span-3 space-y-2">
-                       <Label className="text-xs font-semibold text-slate-500">Hạn chót (Deadline)</Label>
-                       <Input type="date" value={task.dueDate} onChange={e => handleManualTaskChange(idx, 'dueDate', e.target.value)} className="bg-white" />
+                      <Label className="text-xs font-semibold text-slate-500">Hạn chót (Deadline)</Label>
+                      <Input type="date" value={task.dueDate} onChange={e => handleManualTaskChange(idx, 'dueDate', e.target.value)} className="bg-white" />
                     </div>
                   </div>
                 </div>
@@ -281,9 +276,9 @@ export function CreateMasterPlanClient() {
           </Card>
 
           <div className="flex justify-end pt-4">
-             <Button onClick={handleSaveManual} disabled={isSavingManual} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 rounded-2xl text-lg shadow-lg shadow-emerald-500/20">
-               {isSavingManual ? 'Đang lưu...' : <><Save className="mr-2 h-5 w-5" /> Lưu Kế hoạch Tổng thể</>}
-             </Button>
+            <Button onClick={handleSaveManual} disabled={isSavingManual} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 rounded-2xl text-lg shadow-lg shadow-emerald-500/20">
+              {isSavingManual ? 'Đang lưu...' : <><Save className="mr-2 h-5 w-5" /> Lưu Kế hoạch Tổng thể</>}
+            </Button>
           </div>
         </TabsContent>
 
@@ -360,11 +355,10 @@ export function CreateMasterPlanClient() {
                           <div key={idx} className="p-3 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
                             <div className="flex justify-between items-start mb-2">
                               <h5 className="font-semibold text-sm text-slate-800">{task.title}</h5>
-                              <span className={`text-[10px] px-2 py-1 font-bold rounded-full uppercase ${
-                                task.priority === 'URGENT' ? 'bg-red-100 text-red-700' :
+                              <span className={`text-[10px] px-2 py-1 font-bold rounded-full uppercase ${task.priority === 'URGENT' ? 'bg-red-100 text-red-700' :
                                 task.priority === 'HIGH' ? 'bg-orange-100 text-orange-700' :
-                                'bg-green-100 text-green-700'
-                              }`}>
+                                  'bg-green-100 text-green-700'
+                                }`}>
                                 {task.priority}
                               </span>
                             </div>
