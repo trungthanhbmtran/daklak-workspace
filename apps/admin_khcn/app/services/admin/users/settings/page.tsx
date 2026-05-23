@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { SystemSettingsClient } from '../../../../../../features/system-admin/users/components/SystemSettingsClient';
+import { SystemSettingsClient } from '../../../../../features/system-admin/users/components/SystemSettingsClient';
 
 export const metadata: Metadata = {
   title: 'Cấu hình Hệ thống | Quản trị Hệ thống',
