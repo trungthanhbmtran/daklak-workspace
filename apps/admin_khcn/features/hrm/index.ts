@@ -14,10 +14,6 @@ export {
 
 export { HrmDashboardClient } from "./components/HrmDashboardClient";
 export { EmployeeListClient } from "./components/EmployeeListClient";
-export { LeaveRequestListClient } from "./components/leave/LeaveRequestListClient";
-export { TimesheetClient } from "./components/attendance/TimesheetClient";
-export { ContractListClient } from "./components/contracts/ContractListClient";
-export { PayrollListClient } from "./components/payroll/PayrollListClient";
 export { TaskListClient } from "./components/tasks/TaskListClient";
 export { KpiDashboardClient } from "./components/kpi/KpiDashboardClient";
 
