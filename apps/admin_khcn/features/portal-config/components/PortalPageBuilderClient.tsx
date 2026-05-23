@@ -36,6 +36,7 @@ import { Label } from "@/components/ui/label";
 import apiClient from "@/lib/axiosInstance";
 import dynamic from "next/dynamic";
 import { convertToSlug } from "@/lib/slug";
+import { MultiLangTitleSlug } from "@/components/shared/MultiLangTitleSlug";
 
 const PageBuilder = dynamic(
   () => import("./PageBuilder").then((mod) => mod.PageBuilder),
@@ -66,6 +67,29 @@ export function PortalPageBuilderClient() {
   const [modalIsActive, setModalIsActive] = useState(true);
 
   // 1. Fetch registered active languages from Category module
+  const activeLangs = languages.length > 0
+    ? languages
+    : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
+
+  const multiLangValue = React.useMemo(() => {
+    const result: Record<string, any> = {};
+    for (const lang of activeLangs) {
+      result[lang.code] = {
+        title: modalTitles[lang.code] || "",
+        slug: ""
+      };
+    }
+    return result;
+  }, [modalTitles, activeLangs]);
+
+  const handleMultiLangChange = (newVal: Record<string, any>) => {
+    const newTitles: Record<string, string> = {};
+    for (const langCode in newVal) {
+      newTitles[langCode] = newVal[langCode].title;
+    }
+    setModalTitles(newTitles);
+  };
+
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
@@ -80,10 +104,6 @@ export function PortalPageBuilderClient() {
     };
     fetchLanguages();
   }, []);
-
-  const activeLangs = languages.length > 0
-    ? languages
-    : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
   // 2. Fetch existing portal configurations
   const { data: dbConfigs, isLoading, refetch } = useQuery({
@@ -558,44 +578,14 @@ export function PortalPageBuilderClient() {
             </DialogHeader>
 
             <div className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="pageId" className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">Mã định danh (URL SLUG)</Label>
-                <div className="relative">
-                  <Input
-                    id="pageId"
-                    disabled={modalMode === "EDIT"}
-                    className="h-12 bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 rounded-2xl text-xs font-black uppercase tracking-widest pl-12 focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/20 transition-all"
-                    placeholder="ví dụ: gioi-thieu-chung"
-                    value={modalPageId}
-                    onChange={(e) => setModalPageId(e.target.value)}
-                  />
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300 dark:text-slate-600 font-black text-[10px] select-none">ID:</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 pt-4 mt-2 border-t border-slate-100 dark:border-slate-800">
-                {activeLangs.map((lang, index) => (
-                  <div key={lang.code} className="space-y-2">
-                    <Label htmlFor={`title-${lang.code}`} className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] px-1">
-                      Tiêu đề ({lang.name})
-                    </Label>
-                    <Input
-                      id={`title-${lang.code}`}
-                      className="h-12 bg-slate-50 dark:bg-slate-900 border-slate-100 dark:border-slate-800 rounded-2xl text-xs font-bold focus:ring-4 focus:ring-indigo-50 dark:focus:ring-indigo-900/20 transition-all"
-                      placeholder={`Nhập tiêu đề ${lang.name}...`}
-                      value={modalTitles[lang.code] || ""}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setModalTitles(prev => ({ ...prev, [lang.code]: val }));
-                        // Auto generate slug if in ADD mode and this is the default language (first language)
-                        if (modalMode === "ADD" && index === 0 && (!modalPageId || modalPageId === convertToSlug(modalTitles[lang.code] || ""))) {
-                          setModalPageId(convertToSlug(val));
-                        }
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
+              <MultiLangTitleSlug 
+                value={multiLangValue}
+                onChange={handleMultiLangChange}
+                singleSlugMode={true}
+                singleSlugValue={modalPageId}
+                onSingleSlugChange={setModalPageId}
+                disabledSlug={modalMode === "EDIT"}
+              />
 
               <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-slate-100 dark:border-slate-800 mt-2">
                 <div className="flex flex-col">
