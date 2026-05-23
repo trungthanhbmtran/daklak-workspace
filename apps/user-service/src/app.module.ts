@@ -6,6 +6,7 @@ import { PbacModule } from '@/modules/pbac/pbac.module';
 import { CategoriesModule } from '@/modules/categories/categories.module';
 import { MenusModule } from '@/modules/menus/menus.module';
 import { OrganizationsModule } from '@/modules/organizations/organizations.module';
+import { ConfigsModule } from './configs/configs.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { OrganizationsModule } from '@/modules/organizations/organizations.modul
     CategoriesModule,
     MenusModule,
     OrganizationsModule,
+    ConfigsModule,
   ],
 })
 export class AppModule {}

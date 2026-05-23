@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package users;
+
+service SystemConfigService {
+  rpc GetConfigs (GetConfigsRequest) returns (GetConfigsResponse);
+  rpc UpdateConfig (UpdateConfigRequest) returns (SystemConfigResponse);
+}
+
+message SystemConfigResponse {
+  string key = 1;
+  string value = 2;
+  string description = 3;
+}
+
+message GetConfigsRequest {}
+
+message GetConfigsResponse {
+  repeated SystemConfigResponse configs = 1;
+}
+
+message UpdateConfigRequest {
+  string key = 1;
+  string value = 2;
+  string description = 3;
+}

@@ -1,0 +1,8 @@
+model SystemConfig {
+  key         String   @id
+  value       String   @db.Text
+  description String?
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("sys_configs")
+}

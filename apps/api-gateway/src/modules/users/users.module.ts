@@ -8,6 +8,7 @@ import { ResourcesController } from './resources.controller';
 import { CategoriesController, PublicCategoriesController } from './categories.controller';
 import { MenusController } from './menus.controller';
 import { OrganizationsController, PublicOrganizationsController } from './organizations.controller';
+import { ConfigsController } from './configs.controller';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { OrganizationsController, PublicOrganizationsController } from './organi
     MenusController,
     OrganizationsController,
     PublicOrganizationsController,
+    ConfigsController,
   ],
 })
 export class UsersModule {}

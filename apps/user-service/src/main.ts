@@ -13,6 +13,7 @@ const protoPath = [
   join(userDir, 'menus.proto'),
   join(userDir, 'organization.proto'),
   join(userDir, 'auth.proto'),
+  join(userDir, 'system_config.proto'),
 ];
 
 async function bootstrap() {
@@ -21,7 +22,7 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['user', 'pbac', 'category', 'menu', 'organization'],
+        package: ['user', 'pbac', 'category', 'menu', 'organization', 'users'],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50051',
         loader: {
