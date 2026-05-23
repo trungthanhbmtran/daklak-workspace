@@ -193,6 +193,73 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
             { id: "c4", title: "(I) Nhận thông tin: Phòng Kinh doanh", isDone: false }
           ]
         });
+      } else if (selectedFramework === "MBO") {
+        const p1 = "mbo_co_" + Date.now();
+        const p2 = "mbo_dep_" + Date.now();
+        newPerspectives.push(
+          { id: p1, title: "Mục tiêu Công ty (Cấp cao)", colorClass: "cyan" },
+          { id: p2, title: "Mục tiêu Phòng ban (Phân bổ)", colorClass: "blue" }
+        );
+        newObjectivesToCreate.push(
+          { perspective: p1, title: "Đạt được: " + objectiveText, metric: "Hoàn thành", target: "100%", weight: 60, status: "TODO" as const, departmentIds: [1] },
+          { perspective: p2, title: "Triển khai các chỉ tiêu thành phần của " + objectiveText, metric: "Tiến độ", target: "100%", weight: 40, status: "TODO" as const, departmentIds: [2, 3] }
+        );
+      } else if (selectedFramework === "KPI") {
+        const p1 = "kpi_qual_" + Date.now();
+        const p2 = "kpi_quant_" + Date.now();
+        newPerspectives.push(
+          { id: p1, title: "KPI Định tính", colorClass: "rose" },
+          { id: p2, title: "KPI Định lượng", colorClass: "orange" }
+        );
+        newObjectivesToCreate.push(
+          { perspective: p1, title: "Chất lượng triển khai " + objectiveText, metric: "Điểm đánh giá", target: ">= 9/10", weight: 50, status: "TODO" as const, departmentIds: [3] },
+          { perspective: p2, title: "Khối lượng công việc " + objectiveText, metric: "Hạng mục", target: "Hoàn tất", weight: 50, status: "TODO" as const, departmentIds: [4, 5] }
+        );
+      } else if (selectedFramework === "AGILE") {
+        const p1 = "agile_epic_" + Date.now();
+        const p2 = "agile_sprint_" + Date.now();
+        newPerspectives.push(
+          { id: p1, title: "Epic (Sáng kiến lớn)", colorClass: "orange" },
+          { id: p2, title: "Sprints (Phân kỳ)", colorClass: "amber" }
+        );
+        newObjectivesToCreate.push(
+          { perspective: p1, title: "Epic: " + objectiveText, metric: "Story points", target: "Done", weight: 40, status: "TODO" as const, departmentIds: [2] },
+          { perspective: p2, title: "Sprint 1: Xây dựng nền tảng cho " + objectiveText, metric: "Sprint Backlog", target: "100%", weight: 30, status: "TODO" as const, departmentIds: [2] },
+          { perspective: p2, title: "Sprint 2: Triển khai và Tối ưu", metric: "Sprint Backlog", target: "100%", weight: 30, status: "TODO" as const, departmentIds: [2] }
+        );
+      } else if (selectedFramework === "LEAN") {
+        const p1 = "lean_waste_" + Date.now();
+        const p2 = "lean_value_" + Date.now();
+        newPerspectives.push(
+          { id: p1, title: "Loại bỏ lãng phí (Waste Reduction)", colorClass: "lime" },
+          { id: p2, title: "Tối ưu chuỗi giá trị (Value Stream)", colorClass: "emerald" }
+        );
+        newObjectivesToCreate.push(
+          { perspective: p1, title: "Giảm thời gian chờ trong " + objectiveText, metric: "Thời gian", target: "Giảm 30%", weight: 50, status: "TODO" as const, departmentIds: [4] },
+          { perspective: p2, title: "Tăng tốc độ bàn giao " + objectiveText, metric: "Cycle Time", target: "< 3 ngày", weight: 50, status: "TODO" as const, departmentIds: [5] }
+        );
+      } else if (selectedFramework === "DATA_DRIVEN") {
+        const p1 = "data_coll_" + Date.now();
+        const p2 = "data_ana_" + Date.now();
+        newPerspectives.push(
+          { id: p1, title: "Thu thập & Đo lường", colorClass: "sky" },
+          { id: p2, title: "Phân tích & Ra quyết định", colorClass: "blue" }
+        );
+        newObjectivesToCreate.push(
+          { perspective: p1, title: "Thu thập dữ liệu cho " + objectiveText, metric: "Data Points", target: "> 1000", weight: 40, status: "TODO" as const, departmentIds: [2] },
+          { perspective: p2, title: "Dashboard theo dõi " + objectiveText, metric: "Báo cáo", target: "Real-time", weight: 60, status: "TODO" as const, departmentIds: [1] }
+        );
+      } else if (selectedFramework === "GOVERNANCE") {
+        const p1 = "gov_policy_" + Date.now();
+        const p2 = "gov_comp_" + Date.now();
+        newPerspectives.push(
+          { id: p1, title: "Thể chế & Quy định", colorClass: "fuchsia" },
+          { id: p2, title: "Kiểm soát & Tuân thủ", colorClass: "purple" }
+        );
+        newObjectivesToCreate.push(
+          { perspective: p1, title: "Ban hành quy chế cho " + objectiveText, metric: "Văn bản", target: "Đã duyệt", weight: 50, status: "TODO" as const, departmentIds: [1] },
+          { perspective: p2, title: "Giám sát việc thực thi " + objectiveText, metric: "Tỷ lệ tuân thủ", target: "100%", weight: 50, status: "TODO" as const, departmentIds: [3] }
+        );
       }
 
       // Update plan with new perspectives
