@@ -103,7 +103,7 @@ export function MultiLangTitleSlug({
             /**
              * Auto slug when title changes
              */
-            if (field === "title") {
+            if (field === "title" && !disabledSlug) {
                 updated.slug = convertToSlug(fieldValue);
             }
 
