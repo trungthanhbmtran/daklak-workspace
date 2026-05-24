@@ -778,13 +778,13 @@ async function main() {
     // VĂN PHÒNG UBND
     // =========================
 
-    { code: 'VAN_PHONG_UBND', nameVi: 'Văn phòng UBND' },
+    { group: 'DOMAIN', code: 'VAN_PHONG_UBND', nameVi: 'Văn phòng UBND' },
     {
       code: 'CHI_DAO_DIEU_HANH',
       parentCode: 'VAN_PHONG_UBND',
       nameVi: 'Chỉ đạo điều hành',
     },
-    { code: 'MOT_CUA', parentCode: 'VAN_PHONG_UBND', nameVi: 'Một cửa' },
+    { group: 'DOMAIN', code: 'MOT_CUA', parentCode: 'VAN_PHONG_UBND', nameVi: 'Một cửa' },
     {
       code: 'KIEM_SOAT_TTHC',
       parentCode: 'VAN_PHONG_UBND',
@@ -795,7 +795,7 @@ async function main() {
     // SỞ NỘI VỤ
     // =========================
 
-    { code: 'SO_NOI_VU', nameVi: 'Sở Nội vụ' },
+    { group: 'DOMAIN', code: 'SO_NOI_VU', nameVi: 'Sở Nội vụ' },
     {
       code: 'TO_CHUC_BO_MAY',
       parentCode: 'SO_NOI_VU',
@@ -806,13 +806,13 @@ async function main() {
       parentCode: 'SO_NOI_VU',
       nameVi: 'Cán bộ công chức',
     },
-    { code: 'VIEN_CHUC', parentCode: 'SO_NOI_VU', nameVi: 'Viên chức' },
+    { group: 'DOMAIN', code: 'VIEN_CHUC', parentCode: 'SO_NOI_VU', nameVi: 'Viên chức' },
     {
       code: 'DIA_GIOI_HANH_CHINH',
       parentCode: 'SO_NOI_VU',
       nameVi: 'Địa giới hành chính',
     },
-    { code: 'TON_GIAO', parentCode: 'SO_NOI_VU', nameVi: 'Tôn giáo' },
+    { group: 'DOMAIN', code: 'TON_GIAO', parentCode: 'SO_NOI_VU', nameVi: 'Tôn giáo' },
     {
       code: 'THI_DUA_KHEN_THUONG',
       parentCode: 'SO_NOI_VU',
@@ -823,14 +823,14 @@ async function main() {
     // SỞ TÀI CHÍNH
     // =========================
 
-    { code: 'SO_TAI_CHINH', nameVi: 'Sở Tài chính' },
-    { code: 'NGAN_SACH', parentCode: 'SO_TAI_CHINH', nameVi: 'Ngân sách' },
+    { group: 'DOMAIN', code: 'SO_TAI_CHINH', nameVi: 'Sở Tài chính' },
+    { group: 'DOMAIN', code: 'NGAN_SACH', parentCode: 'SO_TAI_CHINH', nameVi: 'Ngân sách' },
     {
       code: 'TAI_SAN_CONG',
       parentCode: 'SO_TAI_CHINH',
       nameVi: 'Tài sản công',
     },
-    { code: 'DAU_TU_CONG', parentCode: 'SO_TAI_CHINH', nameVi: 'Đầu tư công' },
+    { group: 'DOMAIN', code: 'DAU_TU_CONG', parentCode: 'SO_TAI_CHINH', nameVi: 'Đầu tư công' },
     {
       code: 'DOANH_NGHIEP',
       parentCode: 'SO_TAI_CHINH',
@@ -846,13 +846,13 @@ async function main() {
     // SỞ XÂY DỰNG
     // =========================
 
-    { code: 'SO_XAY_DUNG', nameVi: 'Sở Xây dựng' },
+    { group: 'DOMAIN', code: 'SO_XAY_DUNG', nameVi: 'Sở Xây dựng' },
     {
       code: 'QUY_HOACH',
       parentCode: 'SO_XAY_DUNG',
       nameVi: 'Quy hoạch xây dựng',
     },
-    { code: 'NHA_O', parentCode: 'SO_XAY_DUNG', nameVi: 'Nhà ở' },
+    { group: 'DOMAIN', code: 'NHA_O', parentCode: 'SO_XAY_DUNG', nameVi: 'Nhà ở' },
     {
       code: 'CAP_PHEP_XAY_DUNG',
       parentCode: 'SO_XAY_DUNG',
@@ -863,7 +863,7 @@ async function main() {
       parentCode: 'SO_XAY_DUNG',
       nameVi: 'Vật liệu xây dựng',
     },
-    { code: 'GIAO_THONG', parentCode: 'SO_XAY_DUNG', nameVi: 'Giao thông' },
+    { group: 'DOMAIN', code: 'GIAO_THONG', parentCode: 'SO_XAY_DUNG', nameVi: 'Giao thông' },
     {
       code: 'HA_TANG_DO_THI',
       parentCode: 'SO_XAY_DUNG',
@@ -874,13 +874,13 @@ async function main() {
     // SỞ NÔNG NGHIỆP & MÔI TRƯỜNG
     // =========================
 
-    { code: 'SO_NN_MT', nameVi: 'Sở Nông nghiệp và Môi trường' },
-    { code: 'TRONG_TROT', parentCode: 'SO_NN_MT', nameVi: 'Trồng trọt' },
-    { code: 'CHAN_NUOI', parentCode: 'SO_NN_MT', nameVi: 'Chăn nuôi' },
-    { code: 'THUY_LOI', parentCode: 'SO_NN_MT', nameVi: 'Thủy lợi' },
-    { code: 'LAM_NGHIEP', parentCode: 'SO_NN_MT', nameVi: 'Lâm nghiệp' },
-    { code: 'DAT_DAI', parentCode: 'SO_NN_MT', nameVi: 'Đất đai' },
-    { code: 'MOI_TRUONG', parentCode: 'SO_NN_MT', nameVi: 'Môi trường' },
+    { group: 'DOMAIN', code: 'SO_NN_MT', nameVi: 'Sở Nông nghiệp và Môi trường' },
+    { group: 'DOMAIN', code: 'TRONG_TROT', parentCode: 'SO_NN_MT', nameVi: 'Trồng trọt' },
+    { group: 'DOMAIN', code: 'CHAN_NUOI', parentCode: 'SO_NN_MT', nameVi: 'Chăn nuôi' },
+    { group: 'DOMAIN', code: 'THUY_LOI', parentCode: 'SO_NN_MT', nameVi: 'Thủy lợi' },
+    { group: 'DOMAIN', code: 'LAM_NGHIEP', parentCode: 'SO_NN_MT', nameVi: 'Lâm nghiệp' },
+    { group: 'DOMAIN', code: 'DAT_DAI', parentCode: 'SO_NN_MT', nameVi: 'Đất đai' },
+    { group: 'DOMAIN', code: 'MOI_TRUONG', parentCode: 'SO_NN_MT', nameVi: 'Môi trường' },
     {
       code: 'KHI_TUONG_THUY_VAN',
       parentCode: 'SO_NN_MT',
@@ -891,26 +891,26 @@ async function main() {
     // SỞ KHOA HỌC & CÔNG NGHỆ
     // =========================
 
-    { code: 'SO_KHCN', nameVi: 'Sở Khoa học và Công nghệ' },
-    { code: 'CHUYEN_DOI_SO', parentCode: 'SO_KHCN', nameVi: 'Chuyển đổi số' },
-    { code: 'DU_LIEU_SO', parentCode: 'SO_KHCN', nameVi: 'Dữ liệu số' },
+    { group: 'DOMAIN', code: 'SO_KHCN', nameVi: 'Sở Khoa học và Công nghệ' },
+    { group: 'DOMAIN', code: 'CHUYEN_DOI_SO', parentCode: 'SO_KHCN', nameVi: 'Chuyển đổi số' },
+    { group: 'DOMAIN', code: 'DU_LIEU_SO', parentCode: 'SO_KHCN', nameVi: 'Dữ liệu số' },
     {
       code: 'AN_TOAN_THONG_TIN',
       parentCode: 'SO_KHCN',
       nameVi: 'An toàn thông tin',
     },
-    { code: 'VIEN_THONG', parentCode: 'SO_KHCN', nameVi: 'Viễn thông' },
-    { code: 'KINH_TE_SO', parentCode: 'SO_KHCN', nameVi: 'Kinh tế số' },
+    { group: 'DOMAIN', code: 'VIEN_THONG', parentCode: 'SO_KHCN', nameVi: 'Viễn thông' },
+    { group: 'DOMAIN', code: 'KINH_TE_SO', parentCode: 'SO_KHCN', nameVi: 'Kinh tế số' },
 
     // =========================
     // SỞ GIÁO DỤC
     // =========================
 
-    { code: 'SO_GIAO_DUC', nameVi: 'Sở Giáo dục và Đào tạo' },
-    { code: 'MAM_NON', parentCode: 'SO_GIAO_DUC', nameVi: 'Mầm non' },
-    { code: 'TIEU_HOC', parentCode: 'SO_GIAO_DUC', nameVi: 'Tiểu học' },
-    { code: 'THCS', parentCode: 'SO_GIAO_DUC', nameVi: 'THCS' },
-    { code: 'THPT', parentCode: 'SO_GIAO_DUC', nameVi: 'THPT' },
+    { group: 'DOMAIN', code: 'SO_GIAO_DUC', nameVi: 'Sở Giáo dục và Đào tạo' },
+    { group: 'DOMAIN', code: 'MAM_NON', parentCode: 'SO_GIAO_DUC', nameVi: 'Mầm non' },
+    { group: 'DOMAIN', code: 'TIEU_HOC', parentCode: 'SO_GIAO_DUC', nameVi: 'Tiểu học' },
+    { group: 'DOMAIN', code: 'THCS', parentCode: 'SO_GIAO_DUC', nameVi: 'THCS' },
+    { group: 'DOMAIN', code: 'THPT', parentCode: 'SO_GIAO_DUC', nameVi: 'THPT' },
     {
       code: 'GIAO_DUC_NGHE',
       parentCode: 'SO_GIAO_DUC',
@@ -921,10 +921,10 @@ async function main() {
     // SỞ Y TẾ
     // =========================
 
-    { code: 'SO_Y_TE', nameVi: 'Sở Y tế' },
-    { code: 'KHAM_CHUA_BENH', parentCode: 'SO_Y_TE', nameVi: 'Khám chữa bệnh' },
-    { code: 'Y_TE_DU_PHONG', parentCode: 'SO_Y_TE', nameVi: 'Y tế dự phòng' },
-    { code: 'DUOC', parentCode: 'SO_Y_TE', nameVi: 'Dược' },
+    { group: 'DOMAIN', code: 'SO_Y_TE', nameVi: 'Sở Y tế' },
+    { group: 'DOMAIN', code: 'KHAM_CHUA_BENH', parentCode: 'SO_Y_TE', nameVi: 'Khám chữa bệnh' },
+    { group: 'DOMAIN', code: 'Y_TE_DU_PHONG', parentCode: 'SO_Y_TE', nameVi: 'Y tế dự phòng' },
+    { group: 'DOMAIN', code: 'DUOC', parentCode: 'SO_Y_TE', nameVi: 'Dược' },
     {
       code: 'AN_TOAN_THUC_PHAM',
       parentCode: 'SO_Y_TE',
@@ -935,23 +935,23 @@ async function main() {
     // CÔNG AN
     // =========================
 
-    { code: 'CONG_AN', nameVi: 'Công an' },
-    { code: 'AN_NINH', parentCode: 'CONG_AN', nameVi: 'An ninh' },
-    { code: 'TRAT_TU_XA_HOI', parentCode: 'CONG_AN', nameVi: 'Trật tự xã hội' },
-    { code: 'PCCC', parentCode: 'CONG_AN', nameVi: 'PCCC' },
-    { code: 'CU_TRU', parentCode: 'CONG_AN', nameVi: 'Cư trú' },
+    { group: 'DOMAIN', code: 'CONG_AN', nameVi: 'Công an' },
+    { group: 'DOMAIN', code: 'AN_NINH', parentCode: 'CONG_AN', nameVi: 'An ninh' },
+    { group: 'DOMAIN', code: 'TRAT_TU_XA_HOI', parentCode: 'CONG_AN', nameVi: 'Trật tự xã hội' },
+    { group: 'DOMAIN', code: 'PCCC', parentCode: 'CONG_AN', nameVi: 'PCCC' },
+    { group: 'DOMAIN', code: 'CU_TRU', parentCode: 'CONG_AN', nameVi: 'Cư trú' },
 
     // =========================
     // QUÂN SỰ
     // =========================
 
-    { code: 'QUAN_SU', nameVi: 'Quân sự' },
+    { group: 'DOMAIN', code: 'QUAN_SU', nameVi: 'Quân sự' },
     {
       code: 'QUOC_PHONG_DIA_PHUONG',
       parentCode: 'QUAN_SU',
       nameVi: 'Quốc phòng địa phương',
     },
-    { code: 'DAN_QUAN_TU_VE', parentCode: 'QUAN_SU', nameVi: 'Dân quân tự vệ' },
+    { group: 'DOMAIN', code: 'DAN_QUAN_TU_VE', parentCode: 'QUAN_SU', nameVi: 'Dân quân tự vệ' },
     {
       code: 'NGHIA_VU_QUAN_SU',
       parentCode: 'QUAN_SU',
