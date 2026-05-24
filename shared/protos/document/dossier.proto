@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package document;
+
+service DossierService {
+  rpc GetDossiers (EmptyRequest) returns (DossierListResponse) {}
+  rpc GetDossier (DossierIdRequest) returns (DossierResponse) {}
+  rpc GetComponents (DossierIdRequest) returns (ComponentListResponse) {}
+  rpc UpdateComponent (UpdateComponentRequest) returns (ComponentResponse) {}
+}
+
+message EmptyRequest {}
+
+message DossierIdRequest {
+  string id = 1;
+}
+
+message UpdateComponentRequest {
+  string id = 1;
+  string status = 2;
+  string fileUrl = 3;
+  string source = 4;
+}
+
+message DossierResponse {
+  string id = 1;
+  string code = 2;
+  string senderName = 3;
+  string status = 4;
+  string createdAt = 5;
+}
+
+message DossierListResponse {
+  repeated DossierResponse data = 1;
+}
+
+message ComponentResponse {
+  string id = 1;
+  string dossierId = 2;
+  string name = 3;
+  bool isRequired = 4;
+  string status = 5;
+  string fileUrl = 6;
+  string source = 7;
+}
+
+message ComponentListResponse {
+  repeated ComponentResponse data = 1;
+}

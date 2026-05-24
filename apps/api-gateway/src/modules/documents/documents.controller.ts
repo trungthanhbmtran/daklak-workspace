@@ -108,6 +108,33 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.DeleteDossier({ id }));
   }
 
+  // --- Cabinet ---
+  @Get('cabinet')
+  async listCabinetFiles(@Query('userId') userId: string, @Query('orgId') orgId: string) {
+    return firstValueFrom((this.client.getService('CabinetService') as any).ListFiles({ userId, orgId }));
+  }
+
+  @Post('cabinet')
+  async addCabinetFile(@Body() body: any) {
+    return firstValueFrom((this.client.getService('CabinetService') as any).AddFile(body));
+  }
+
+  @Delete('cabinet/:id')
+  async deleteCabinetFile(@Param('id') id: string) {
+    return firstValueFrom((this.client.getService('CabinetService') as any).DeleteFile({ id }));
+  }
+
+  // --- Components ---
+  @Get('dossiers/:id/components')
+  async getComponents(@Param('id') id: string) {
+    return firstValueFrom((this.client.getService('DossierService') as any).GetComponents({ id }));
+  }
+
+  @Put('dossiers/components/:compId')
+  async updateComponent(@Param('compId') id: string, @Body() body: any) {
+    return firstValueFrom((this.client.getService('DossierService') as any).UpdateComponent({ id, ...body }));
+  }
+
   @Get(':id')
   async getDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.GetDocument({ id }));

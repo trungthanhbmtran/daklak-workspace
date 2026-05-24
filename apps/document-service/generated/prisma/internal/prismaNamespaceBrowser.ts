@@ -58,7 +58,9 @@ export const ModelName = {
   DocumentLog: 'DocumentLog',
   Minutes: 'Minutes',
   AdministrativeProcedure: 'AdministrativeProcedure',
-  OneStopDossier: 'OneStopDossier'
+  OneStopDossier: 'OneStopDossier',
+  DossierComponent: 'DossierComponent',
+  DocumentCabinet: 'DocumentCabinet'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -82,7 +84,6 @@ export const ConsultationScalarFieldEnum = {
   title: 'title',
   description: 'description',
   documentId: 'documentId',
-  fileId: 'fileId',
   deadline: 'deadline',
   status: 'status',
   issuerId: 'issuerId',
@@ -232,6 +233,37 @@ export const OneStopDossierScalarFieldEnum = {
 export type OneStopDossierScalarFieldEnum = (typeof OneStopDossierScalarFieldEnum)[keyof typeof OneStopDossierScalarFieldEnum]
 
 
+export const DossierComponentScalarFieldEnum = {
+  id: 'id',
+  dossierId: 'dossierId',
+  name: 'name',
+  isRequired: 'isRequired',
+  status: 'status',
+  fileUrl: 'fileUrl',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DossierComponentScalarFieldEnum = (typeof DossierComponentScalarFieldEnum)[keyof typeof DossierComponentScalarFieldEnum]
+
+
+export const DocumentCabinetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orgId: 'orgId',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  tags: 'tags',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentCabinetScalarFieldEnum = (typeof DocumentCabinetScalarFieldEnum)[keyof typeof DocumentCabinetScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -253,7 +285,6 @@ export const ConsultationOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   documentId: 'documentId',
-  fileId: 'fileId',
   status: 'status',
   issuerId: 'issuerId',
   issuerName: 'issuerName'
@@ -368,4 +399,29 @@ export const OneStopDossierOrderByRelevanceFieldEnum = {
 } as const
 
 export type OneStopDossierOrderByRelevanceFieldEnum = (typeof OneStopDossierOrderByRelevanceFieldEnum)[keyof typeof OneStopDossierOrderByRelevanceFieldEnum]
+
+
+export const DossierComponentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  dossierId: 'dossierId',
+  name: 'name',
+  status: 'status',
+  fileUrl: 'fileUrl',
+  source: 'source'
+} as const
+
+export type DossierComponentOrderByRelevanceFieldEnum = (typeof DossierComponentOrderByRelevanceFieldEnum)[keyof typeof DossierComponentOrderByRelevanceFieldEnum]
+
+
+export const DocumentCabinetOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orgId: 'orgId',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileType: 'fileType',
+  tags: 'tags'
+} as const
+
+export type DocumentCabinetOrderByRelevanceFieldEnum = (typeof DocumentCabinetOrderByRelevanceFieldEnum)[keyof typeof DocumentCabinetOrderByRelevanceFieldEnum]
 

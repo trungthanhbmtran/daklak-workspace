@@ -137,6 +137,20 @@ export const MICROSERVICES = {
     URL: getDocumentUrl(),
     SERVICE: 'ConsultationService',
   },
+  CABINET: {
+    PACKAGE: 'document',
+    SYMBOL: 'CABINET_PACKAGE',
+    PROTO: 'document/cabinet.proto',
+    URL: getDocumentUrl(),
+    SERVICE: 'CabinetService',
+  },
+  DOSSIER: {
+    PACKAGE: 'document',
+    SYMBOL: 'DOSSIER_PACKAGE',
+    PROTO: 'document/dossier.proto',
+    URL: getDocumentUrl(),
+    SERVICE: 'DossierService',
+  },
   // Posts (posts_service)
   POST: {
     PACKAGE: 'post',

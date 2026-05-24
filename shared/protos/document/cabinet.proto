@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package document;
+
+service CabinetService {
+  rpc ListFiles (ListFilesRequest) returns (CabinetListResponse) {}
+  rpc AddFile (AddFileRequest) returns (CabinetFileResponse) {}
+  rpc DeleteFile (DeleteFileRequest) returns (EmptyResponse) {}
+}
+
+message ListFilesRequest {
+  string userId = 1;
+  string orgId = 2;
+}
+
+message AddFileRequest {
+  string userId = 1;
+  string orgId = 2;
+  string fileName = 3;
+  string fileUrl = 4;
+  string fileType = 5;
+  int32 fileSize = 6;
+  string tags = 7;
+}
+
+message DeleteFileRequest {
+  string id = 1;
+}
+
+message CabinetFileResponse {
+  string id = 1;
+  string userId = 2;
+  string orgId = 3;
+  string fileName = 4;
+  string fileUrl = 5;
+  string fileType = 6;
+  int32 fileSize = 7;
+  string tags = 8;
+  string createdAt = 9;
+}
+
+message CabinetListResponse {
+  repeated CabinetFileResponse data = 1;
+}
+
+message EmptyResponse {}

@@ -32,3 +32,35 @@ model OneStopDossier {
   @@index([status])
   @@map("one_stop_dossiers")
 }
+
+model DossierComponent {
+  id          String   @id @default(uuid())
+  dossierId   String   @map("dossier_id")
+  name        String
+  isRequired  Boolean  @default(true) @map("is_required")
+  status      String   @default("MISSING") // VALID, MISSING, PENDING_REVIEW
+  fileUrl     String?  @map("file_url")
+  source      String?  // UPLOAD, CABINET
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([dossierId])
+  @@map("dossier_components")
+}
+
+model DocumentCabinet {
+  id          String   @id @default(uuid())
+  userId      String?  @map("user_id") // Nếu là tủ cá nhân
+  orgId       String?  @map("org_id")  // Nếu là tủ cơ quan
+  fileName    String   @map("file_name")
+  fileUrl     String   @map("file_url")
+  fileType    String   @map("file_type") // pdf, excel, image, etc.
+  fileSize    Int      @map("file_size") // bytes
+  tags        String   @default("[]") // JSON array
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([orgId])
+  @@map("document_cabinets")
+}

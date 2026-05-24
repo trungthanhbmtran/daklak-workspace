@@ -391,7 +391,9 @@ export const ModelName = {
   DocumentLog: 'DocumentLog',
   Minutes: 'Minutes',
   AdministrativeProcedure: 'AdministrativeProcedure',
-  OneStopDossier: 'OneStopDossier'
+  OneStopDossier: 'OneStopDossier',
+  DossierComponent: 'DossierComponent',
+  DocumentCabinet: 'DocumentCabinet'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -407,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "consultation" | "publicComment" | "consultationResponse" | "document" | "documentLog" | "minutes" | "administrativeProcedure" | "oneStopDossier"
+    modelProps: "consultation" | "publicComment" | "consultationResponse" | "document" | "documentLog" | "minutes" | "administrativeProcedure" | "oneStopDossier" | "dossierComponent" | "documentCabinet"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -939,6 +941,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    DossierComponent: {
+      payload: Prisma.$DossierComponentPayload<ExtArgs>
+      fields: Prisma.DossierComponentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DossierComponentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DossierComponentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>
+        }
+        findFirst: {
+          args: Prisma.DossierComponentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DossierComponentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>
+        }
+        findMany: {
+          args: Prisma.DossierComponentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>[]
+        }
+        create: {
+          args: Prisma.DossierComponentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>
+        }
+        createMany: {
+          args: Prisma.DossierComponentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.DossierComponentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>
+        }
+        update: {
+          args: Prisma.DossierComponentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>
+        }
+        deleteMany: {
+          args: Prisma.DossierComponentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DossierComponentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.DossierComponentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DossierComponentPayload>
+        }
+        aggregate: {
+          args: Prisma.DossierComponentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDossierComponent>
+        }
+        groupBy: {
+          args: Prisma.DossierComponentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DossierComponentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DossierComponentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DossierComponentCountAggregateOutputType> | number
+        }
+      }
+    }
+    DocumentCabinet: {
+      payload: Prisma.$DocumentCabinetPayload<ExtArgs>
+      fields: Prisma.DocumentCabinetFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.DocumentCabinetFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.DocumentCabinetFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>
+        }
+        findFirst: {
+          args: Prisma.DocumentCabinetFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.DocumentCabinetFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>
+        }
+        findMany: {
+          args: Prisma.DocumentCabinetFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>[]
+        }
+        create: {
+          args: Prisma.DocumentCabinetCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>
+        }
+        createMany: {
+          args: Prisma.DocumentCabinetCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.DocumentCabinetDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>
+        }
+        update: {
+          args: Prisma.DocumentCabinetUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>
+        }
+        deleteMany: {
+          args: Prisma.DocumentCabinetDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.DocumentCabinetUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.DocumentCabinetUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$DocumentCabinetPayload>
+        }
+        aggregate: {
+          args: Prisma.DocumentCabinetAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDocumentCabinet>
+        }
+        groupBy: {
+          args: Prisma.DocumentCabinetGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentCabinetGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.DocumentCabinetCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.DocumentCabinetCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -983,7 +1117,6 @@ export const ConsultationScalarFieldEnum = {
   title: 'title',
   description: 'description',
   documentId: 'documentId',
-  fileId: 'fileId',
   deadline: 'deadline',
   status: 'status',
   issuerId: 'issuerId',
@@ -1133,6 +1266,37 @@ export const OneStopDossierScalarFieldEnum = {
 export type OneStopDossierScalarFieldEnum = (typeof OneStopDossierScalarFieldEnum)[keyof typeof OneStopDossierScalarFieldEnum]
 
 
+export const DossierComponentScalarFieldEnum = {
+  id: 'id',
+  dossierId: 'dossierId',
+  name: 'name',
+  isRequired: 'isRequired',
+  status: 'status',
+  fileUrl: 'fileUrl',
+  source: 'source',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DossierComponentScalarFieldEnum = (typeof DossierComponentScalarFieldEnum)[keyof typeof DossierComponentScalarFieldEnum]
+
+
+export const DocumentCabinetScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orgId: 'orgId',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileType: 'fileType',
+  fileSize: 'fileSize',
+  tags: 'tags',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type DocumentCabinetScalarFieldEnum = (typeof DocumentCabinetScalarFieldEnum)[keyof typeof DocumentCabinetScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1154,7 +1318,6 @@ export const ConsultationOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
   documentId: 'documentId',
-  fileId: 'fileId',
   status: 'status',
   issuerId: 'issuerId',
   issuerName: 'issuerName'
@@ -1269,6 +1432,31 @@ export const OneStopDossierOrderByRelevanceFieldEnum = {
 } as const
 
 export type OneStopDossierOrderByRelevanceFieldEnum = (typeof OneStopDossierOrderByRelevanceFieldEnum)[keyof typeof OneStopDossierOrderByRelevanceFieldEnum]
+
+
+export const DossierComponentOrderByRelevanceFieldEnum = {
+  id: 'id',
+  dossierId: 'dossierId',
+  name: 'name',
+  status: 'status',
+  fileUrl: 'fileUrl',
+  source: 'source'
+} as const
+
+export type DossierComponentOrderByRelevanceFieldEnum = (typeof DossierComponentOrderByRelevanceFieldEnum)[keyof typeof DossierComponentOrderByRelevanceFieldEnum]
+
+
+export const DocumentCabinetOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  orgId: 'orgId',
+  fileName: 'fileName',
+  fileUrl: 'fileUrl',
+  fileType: 'fileType',
+  tags: 'tags'
+} as const
+
+export type DocumentCabinetOrderByRelevanceFieldEnum = (typeof DocumentCabinetOrderByRelevanceFieldEnum)[keyof typeof DocumentCabinetOrderByRelevanceFieldEnum]
 
 
 
@@ -1429,6 +1617,8 @@ export type GlobalOmitConfig = {
   minutes?: Prisma.MinutesOmit
   administrativeProcedure?: Prisma.AdministrativeProcedureOmit
   oneStopDossier?: Prisma.OneStopDossierOmit
+  dossierComponent?: Prisma.DossierComponentOmit
+  documentCabinet?: Prisma.DocumentCabinetOmit
 }
 
 /* Types for Logging */

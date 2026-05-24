@@ -57,3 +57,13 @@ export type AdministrativeProcedure = Prisma.AdministrativeProcedureModel
  * 
  */
 export type OneStopDossier = Prisma.OneStopDossierModel
+/**
+ * Model DossierComponent
+ * 
+ */
+export type DossierComponent = Prisma.DossierComponentModel
+/**
+ * Model DocumentCabinet
+ * 
+ */
+export type DocumentCabinet = Prisma.DocumentCabinetModel

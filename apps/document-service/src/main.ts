@@ -16,6 +16,8 @@ async function bootstrap() {
         join(docDir, 'category.proto'),
         join(docDir, 'consultation.proto'),
         join(docDir, 'minutes.proto'),
+        join(docDir, 'cabinet.proto'),
+        join(docDir, 'dossier.proto'),
       ],
       url: process.env.GRPC_URL ?? '0.0.0.0:50056',
       loader: {

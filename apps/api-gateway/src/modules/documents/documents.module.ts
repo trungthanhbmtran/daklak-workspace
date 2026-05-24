@@ -14,6 +14,8 @@ import { PublicDocumentsController } from './public-documents.controller';
     registerGrpcService(MICROSERVICES.DOCUMENT),
     registerGrpcService(MICROSERVICES.MINUTES),
     registerGrpcService(MICROSERVICES.CONSULTATION),
+    registerGrpcService(MICROSERVICES.CABINET),
+    registerGrpcService(MICROSERVICES.DOSSIER),
   ],
   controllers: [
     DocumentCategoryController,
