@@ -18,6 +18,14 @@ message TaskResponse {
   string dueDate = 7;
   string createdAt = 8;
   string updatedAt = 9;
+  
+  float baseScore = 10;
+  float weight = 11;
+  string scoringMethod = 12;
+  float bonusPerDay = 13;
+  float penaltyPerDay = 14;
+  string supervisorCode = 15;
+  int32 planId = 16;
 }
 
 message CreateTaskRequest {
@@ -26,6 +34,14 @@ message CreateTaskRequest {
   string assigneeCode = 3;
   string assignerCode = 4;
   string dueDate = 5;
+  
+  float baseScore = 6;
+  float weight = 7;
+  string scoringMethod = 8;
+  float bonusPerDay = 9;
+  float penaltyPerDay = 10;
+  string supervisorCode = 11;
+  int32 planId = 12;
 }
 
 message ListTasksRequest {

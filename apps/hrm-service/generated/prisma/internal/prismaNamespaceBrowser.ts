@@ -109,6 +109,12 @@ export const TaskScalarFieldEnum = {
   assignerCode: 'assignerCode',
   status: 'status',
   priority: 'priority',
+  baseScore: 'baseScore',
+  weight: 'weight',
+  scoringMethod: 'scoringMethod',
+  bonusPerDay: 'bonusPerDay',
+  penaltyPerDay: 'penaltyPerDay',
+  supervisorCode: 'supervisorCode',
   documentIds: 'documentIds',
   workflowInstId: 'workflowInstId',
   dueDate: 'dueDate',
@@ -252,6 +258,8 @@ export const TaskOrderByRelevanceFieldEnum = {
   assignerCode: 'assignerCode',
   status: 'status',
   priority: 'priority',
+  scoringMethod: 'scoringMethod',
+  supervisorCode: 'supervisorCode',
   workflowInstId: 'workflowInstId'
 } as const
 

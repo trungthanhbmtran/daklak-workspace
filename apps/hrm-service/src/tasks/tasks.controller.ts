@@ -7,7 +7,20 @@ export class TasksController {
   constructor(private readonly tasksService: TasksService) {}
 
   @GrpcMethod('TaskService', 'CreateTask')
-  async createTask(data: { title: string; description?: string; assigneeCode: string; assignerCode: string; dueDate?: string }) {
+  async createTask(data: {
+    title: string;
+    description?: string;
+    assigneeCode: string;
+    assignerCode: string;
+    dueDate?: string;
+    baseScore?: number;
+    weight?: number;
+    scoringMethod?: string;
+    bonusPerDay?: number;
+    penaltyPerDay?: number;
+    supervisorCode?: string;
+    planId?: number;
+  }) {
     const task = await this.tasksService.create({
       ...data,
       dueDate: data.dueDate ? new Date(data.dueDate) : undefined,

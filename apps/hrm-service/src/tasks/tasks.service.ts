@@ -30,6 +30,13 @@ export class TasksService {
     assigneeCode: string;
     assignerCode: string;
     dueDate?: Date;
+    baseScore?: number;
+    weight?: number;
+    scoringMethod?: string;
+    bonusPerDay?: number;
+    penaltyPerDay?: number;
+    supervisorCode?: string;
+    planId?: number;
   }) {
     return this.prisma.task.create({
       data,

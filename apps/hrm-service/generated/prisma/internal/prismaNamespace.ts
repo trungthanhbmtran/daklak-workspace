@@ -944,6 +944,12 @@ export const TaskScalarFieldEnum = {
   assignerCode: 'assignerCode',
   status: 'status',
   priority: 'priority',
+  baseScore: 'baseScore',
+  weight: 'weight',
+  scoringMethod: 'scoringMethod',
+  bonusPerDay: 'bonusPerDay',
+  penaltyPerDay: 'penaltyPerDay',
+  supervisorCode: 'supervisorCode',
   documentIds: 'documentIds',
   workflowInstId: 'workflowInstId',
   dueDate: 'dueDate',
@@ -1087,6 +1093,8 @@ export const TaskOrderByRelevanceFieldEnum = {
   assignerCode: 'assignerCode',
   status: 'status',
   priority: 'priority',
+  scoringMethod: 'scoringMethod',
+  supervisorCode: 'supervisorCode',
   workflowInstId: 'workflowInstId'
 } as const
 
@@ -1162,6 +1170,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
 
 
 /**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1172,13 +1187,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
     
 
 /**

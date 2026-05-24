@@ -9,381 +9,437 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Bot, LayoutTemplate, Plus, Trash2, Save, Send } from "lucide-react";
+import { LayoutTemplate, Plus, Trash2, Save, Users, Target, Activity, Settings2, Clock, CheckCircle2 } from "lucide-react";
 import { hrmPlansApi, hrmTasksApi } from "@/features/hrm/api";
 import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export function CreateMasterPlanClient() {
   const router = useRouter();
-
-  // --- AI STATE ---
-  const [inputText, setInputText] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isSavingAI, setIsSavingAI] = useState(false);
-  const [planData, setPlanData] = useState<any>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState("info");
 
   const { data: categories = [] } = useGetCategories();
   const planFrameworkCategories = categories.filter((c: any) => c.group === "PLAN_FRAMEWORK");
 
-  // --- MANUAL (WBS) STATE ---
-  const [isSavingManual, setIsSavingManual] = useState(false);
-  const [manualPlan, setManualPlan] = useState({
+  // Plan Data
+  const [plan, setPlan] = useState({
     title: '',
     objective: '',
     type: 'MASTER_PLAN',
     startDate: '',
     endDate: '',
   });
-  const [manualTasks, setManualTasks] = useState<any[]>([
-    { title: '', description: '', priority: 'NORMAL', assigneeCode: '', dueDate: '' }
+
+  // Task Data
+  const [tasks, setTasks] = useState<any[]>([
+    { 
+      title: '', 
+      description: '', 
+      priority: 'NORMAL', 
+      assigneeCode: '', 
+      dueDate: '',
+      baseScore: 10,
+      weight: 100,
+      scoringMethod: 'MANUAL',
+      bonusPerDay: 0,
+      penaltyPerDay: 0,
+      supervisorCode: ''
+    }
   ]);
 
-  // --- AI HANDLERS ---
-  const handleGenerate = async () => {
-    if (!inputText.trim()) return;
-    setIsGenerating(true);
-    try {
-      const res = await hrmPlansApi.aiGenerate({ text: inputText });
-      if (res.status === 'success' || res.success) {
-        setPlanData(res.data);
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Có lỗi xảy ra khi gọi AI.');
-    } finally {
-      setIsGenerating(false);
-    }
-  };
+  // Modal State for Assignee Selection
+  const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
+  const [currentTaskIndex, setCurrentTaskIndex] = useState<number | null>(null);
+  
+  // Fake data for assignee selection
+  const departments = ["Phòng Kế hoạch", "Phòng Hành chính", "Phòng Chuyên môn", "Ban Giám đốc"];
+  const fields = ["Chuyển đổi số", "Tổ chức cán bộ", "Tài chính", "Đầu tư"];
+  const employees = [
+    { code: "NV001", name: "Nguyễn Văn A", dept: "Phòng Kế hoạch" },
+    { code: "NV002", name: "Trần Thị B", dept: "Phòng Hành chính" },
+    { code: "NV003", name: "Lê Văn C", dept: "Phòng Chuyên môn" },
+    { code: "NV004", name: "Phạm Thị D", dept: "Ban Giám đốc" },
+  ];
 
-  const handleSaveAI = async () => {
-    if (!planData) return;
-    setIsSavingAI(true);
-    try {
-      await savePlanToDb(planData);
-      alert('Đã tạo Chủ trương và giao việc thành công (AI)!');
-      router.push('/services/hrm/plans');
-    } catch (err) {
-      console.error(err);
-      alert('Lỗi hệ thống khi lưu Kế hoạch.');
-    } finally {
-      setIsSavingAI(false);
-    }
-  };
+  const [filterDept, setFilterDept] = useState("");
+  const [filterField, setFilterField] = useState("");
 
-  // --- MANUAL HANDLERS ---
-  const handleAddManualTask = () => {
-    setManualTasks([...manualTasks, { title: '', description: '', priority: 'NORMAL', assigneeCode: '', dueDate: '' }]);
-  };
-
-  const handleRemoveManualTask = (index: number) => {
-    const newTasks = [...manualTasks];
-    newTasks.splice(index, 1);
-    setManualTasks(newTasks);
-  };
-
-  const handleManualTaskChange = (index: number, field: string, value: string) => {
-    const newTasks = [...manualTasks];
+  const handleTaskChange = (index: number, field: string, value: any) => {
+    const newTasks = [...tasks];
     newTasks[index][field] = value;
-    setManualTasks(newTasks);
+    setTasks(newTasks);
   };
 
-  const handleSaveManual = async () => {
-    if (!manualPlan.title.trim() || !manualPlan.objective.trim()) {
-      alert('Vui lòng nhập đầy đủ Tiêu đề và Mục tiêu Kế hoạch.');
+  const addTask = () => {
+    setTasks([...tasks, { 
+      title: '', description: '', priority: 'NORMAL', assigneeCode: '', dueDate: '',
+      baseScore: 10, weight: 10, scoringMethod: 'MANUAL', bonusPerDay: 0, penaltyPerDay: 0, supervisorCode: ''
+    }]);
+    toast.success("Đã thêm một mục tiêu con mới");
+  };
+
+  const removeTask = (index: number) => {
+    const newTasks = [...tasks];
+    newTasks.splice(index, 1);
+    setTasks(newTasks);
+  };
+
+  const openAssigneeModal = (index: number) => {
+    setCurrentTaskIndex(index);
+    setIsAssigneeModalOpen(true);
+  };
+
+  const selectAssignee = (code: string) => {
+    if (currentTaskIndex !== null) {
+      handleTaskChange(currentTaskIndex, 'assigneeCode', code);
+    }
+    setIsAssigneeModalOpen(false);
+    toast.success(`Đã phân công cho nhân sự ${code}`);
+  };
+
+  const handleSave = async () => {
+    if (!plan.title.trim() || !plan.objective.trim()) {
+      toast.error('Vui lòng nhập đầy đủ Tiêu đề và Mục tiêu tổng thể.');
       return;
     }
-    setIsSavingManual(true);
+    setIsSaving(true);
     try {
-      await savePlanToDb({
-        title: manualPlan.title,
-        objective: manualPlan.objective,
-        startDate: manualPlan.startDate ? new Date(manualPlan.startDate).toISOString() : null,
-        endDate: manualPlan.endDate ? new Date(manualPlan.endDate).toISOString() : null,
-        type: manualPlan.type,
-        status: 'DRAFT',
-        tasks: manualTasks.filter(t => t.title.trim() !== '')
+      // 1. Tạo Plan
+      const planRes = await hrmPlansApi.create({
+        title: plan.title,
+        objective: plan.objective,
+        startDate: plan.startDate ? new Date(plan.startDate).toISOString() : null,
+        endDate: plan.endDate ? new Date(plan.endDate).toISOString() : null,
+        type: plan.type,
+        status: 'ACTIVE',
       });
-      alert('Đã tạo Kế hoạch thủ công thành công!');
+
+      const planId = planRes.data?.id;
+
+      // 2. Tạo Tasks với KPI configurations
+      if (planId && tasks.length > 0) {
+        await Promise.all(tasks.filter(t => t.title.trim() !== '').map((task: any) =>
+          hrmTasksApi.create({
+            title: task.title,
+            description: task.description,
+            priority: task.priority || 'NORMAL',
+            status: 'TODO',
+            dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
+            assigneeCode: task.assigneeCode || 'SYSTEM',
+            planId: planId,
+            baseScore: Number(task.baseScore) || 0,
+            weight: Number(task.weight) || 0,
+            scoringMethod: task.scoringMethod,
+            bonusPerDay: Number(task.bonusPerDay) || 0,
+            penaltyPerDay: Number(task.penaltyPerDay) || 0,
+            supervisorCode: task.supervisorCode || 'SYSTEM'
+          })
+        ));
+      }
+      toast.success('Khởi tạo Kế hoạch & Mục tiêu thành công!');
       router.push('/services/hrm/plans');
     } catch (err) {
       console.error(err);
-      alert('Lỗi hệ thống khi lưu Kế hoạch.');
+      toast.error('Lỗi hệ thống khi lưu Kế hoạch.');
     } finally {
-      setIsSavingManual(false);
+      setIsSaving(false);
     }
-  };
-
-  // --- COMMON DB SAVE ---
-  const savePlanToDb = async (data: any) => {
-    const planRes = await hrmPlansApi.create({
-      title: data.title,
-      objective: data.objective,
-      startDate: data.startDate,
-      endDate: data.endDate,
-      status: data.status || 'DRAFT',
-      type: data.type || 'PROJECT',
-    });
-
-    const planId = planRes.data?.id;
-
-    if (planId && data.tasks && data.tasks.length > 0) {
-      await Promise.all(data.tasks.map((task: any) =>
-        hrmTasksApi.create({
-          title: task.title,
-          description: task.description,
-          priority: task.priority || 'NORMAL',
-          status: 'TODO',
-          dueDate: task.dueDate ? new Date(task.dueDate).toISOString() : null,
-          assigneeCode: task.assigneeCode || 'SYSTEM',
-          planId: planId,
-        })
-      ));
-    }
-    if (!planId) throw new Error("No plan ID returned");
-    return planId;
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in">
-      <div className="flex flex-col">
-        <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400 mb-2">
-          Tạo Kế hoạch mới
-        </h1>
-        <p className="text-muted-foreground">Lựa chọn phương pháp tạo Kế hoạch chiến lược & phân rã công việc.</p>
+    <div className="max-w-7xl mx-auto space-y-6 pb-20 animate-in fade-in">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-6">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+            <Target className="w-8 h-8 text-indigo-600" />
+            Khởi tạo Kế hoạch Chiến lược & Mục tiêu Tổng thể
+          </h1>
+          <p className="text-slate-500 mt-2 font-medium">
+            Mô hình Quản trị theo Mục tiêu (OKR) kết hợp phân rã cấu trúc công việc (WBS) và chấm điểm tự động.
+          </p>
+        </div>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => router.back()} className="h-11 rounded-xl">Hủy bỏ</Button>
+          <Button onClick={handleSave} disabled={isSaving} className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/20 px-8">
+            {isSaving ? 'Đang lưu...' : <><CheckCircle2 className="w-5 h-5 mr-2" /> Ban hành Kế hoạch</>}
+          </Button>
+        </div>
       </div>
 
-      <Tabs defaultValue="manual" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-2 mb-8">
-          <TabsTrigger value="manual" className="flex items-center gap-2">
-            <LayoutTemplate className="h-4 w-4" /> Chuẩn Quốc tế (WBS)
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2 mb-6 h-12 p-1 bg-slate-100 rounded-xl">
+          <TabsTrigger value="info" className="rounded-lg text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
+            1. Mục tiêu (Objective)
           </TabsTrigger>
-          <TabsTrigger value="ai" className="flex items-center gap-2">
-            <Bot className="h-4 w-4" /> Tạo bằng AI
+          <TabsTrigger value="kpi" className="rounded-lg text-base font-semibold data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">
+            2. Kết quả then chốt (Key Results)
           </TabsTrigger>
         </TabsList>
 
-        {/* TAB 1: MANUAL (CHUẨN QUỐC TẾ) */}
-        <TabsContent value="manual" className="space-y-6">
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-md rounded-2xl overflow-hidden">
-            <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-            <CardHeader>
-              <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
-                <LayoutTemplate className="h-6 w-6 text-emerald-600" /> Thông tin Master Plan
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 md:col-span-2">
-                <Label className="font-bold">Tiêu đề Kế hoạch <span className="text-red-500">*</span></Label>
-                <Input
-                  placeholder="VD: Kế hoạch Chuyển đổi số nội bộ Quý 3/2026"
-                  value={manualPlan.title}
-                  onChange={(e) => setManualPlan({ ...manualPlan, title: e.target.value })}
-                  className="h-12 bg-slate-50"
-                />
+        {/* TAB 1: THÔNG TIN CƠ SỞ */}
+        <TabsContent value="info" className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+          <Card className="border-0 shadow-xl bg-white rounded-3xl overflow-hidden">
+            <div className="h-2 w-full bg-gradient-to-r from-blue-500 to-indigo-500"></div>
+            <CardContent className="p-8">
+              <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                <LayoutTemplate className="text-indigo-500 w-6 h-6" /> Định hình Mục tiêu Cấp cao
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="font-bold text-slate-700">Tên Kế hoạch / Chiến dịch <span className="text-rose-500">*</span></Label>
+                  <Input
+                    placeholder="VD: Kế hoạch Chuyển đổi số toàn diện Quý 3/2026"
+                    value={plan.title}
+                    onChange={(e) => setPlan({ ...plan, title: e.target.value })}
+                    className="h-14 text-lg font-bold bg-slate-50 focus:bg-white rounded-xl border-slate-200"
+                  />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <Label className="font-bold text-slate-700">Mục tiêu Cốt lõi (Objective - O) <span className="text-rose-500">*</span></Label>
+                  <Textarea
+                    placeholder="Mô tả tham vọng, tác động và kết quả kỳ vọng ở mức vĩ mô..."
+                    value={plan.objective}
+                    onChange={(e) => setPlan({ ...plan, objective: e.target.value })}
+                    className="min-h-[120px] bg-slate-50 focus:bg-white rounded-xl border-slate-200 resize-none text-base p-4"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Mô hình Quản trị</Label>
+                  <Select value={plan.type} onValueChange={(val) => setPlan({ ...plan, type: val })}>
+                    <SelectTrigger className="h-12 bg-slate-50 rounded-xl">
+                      <SelectValue placeholder="Chọn mô hình quản trị" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="MASTER_PLAN">Kế hoạch Tổng thể (Master Plan)</SelectItem>
+                      <SelectItem value="OKR">Quản trị theo Mục tiêu (OKR)</SelectItem>
+                      <SelectItem value="PROJECT">Dự án trọng điểm</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-slate-700">Khung thời gian (Timeframe)</Label>
+                  <div className="flex items-center gap-3">
+                    <Input type="date" className="h-12 bg-slate-50 rounded-xl flex-1" value={plan.startDate} onChange={(e) => setPlan({ ...plan, startDate: e.target.value })} />
+                    <span className="text-slate-400 font-bold">→</span>
+                    <Input type="date" className="h-12 bg-slate-50 rounded-xl flex-1" value={plan.endDate} onChange={(e) => setPlan({ ...plan, endDate: e.target.value })} />
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2 md:col-span-2">
-                <Label className="font-bold">Mục tiêu (Objective) <span className="text-red-500">*</span></Label>
-                <Textarea
-                  placeholder="Mô tả mục tiêu cốt lõi (OKR / SMART)..."
-                  value={manualPlan.objective}
-                  onChange={(e) => setManualPlan({ ...manualPlan, objective: e.target.value })}
-                  className="bg-slate-50"
-                />
+              
+              <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
+                <Button onClick={() => setActiveTab("kpi")} className="h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8">
+                  Tiếp theo: Phân rã Mục tiêu <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
+                </Button>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* TAB 2: WBS & KPI */}
+        <TabsContent value="kpi" className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
+          <div className="flex justify-between items-end mb-2">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-800">Phân rã Kết quả & Cấu hình KPI</h2>
+              <p className="text-slate-500 font-medium">Thiết lập các Kết quả then chốt (Key Results), giao việc và cài đặt công thức tính điểm.</p>
+            </div>
+            <Button onClick={addTask} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20">
+              <Plus className="w-5 h-5 mr-2" /> Thêm Kết quả then chốt (KR)
+            </Button>
+          </div>
+
+          <div className="space-y-6">
+            {tasks.map((task, idx) => (
+              <Card key={idx} className="border-0 shadow-lg bg-white rounded-2xl overflow-visible relative group border-l-4 border-l-indigo-500">
+                <Button
+                  variant="ghost" size="icon"
+                  className="absolute -top-3 -right-3 h-8 w-8 bg-white border border-slate-200 text-rose-500 rounded-full shadow-sm hover:bg-rose-50 hover:text-rose-600 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                  onClick={() => removeTask(idx)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+                
+                <CardContent className="p-0">
+                  <div className="grid grid-cols-1 lg:grid-cols-12">
+                    {/* Phần 1: Thông tin Task & Phân công */}
+                    <div className="lg:col-span-7 p-6 border-b lg:border-b-0 lg:border-r border-slate-100">
+                      <div className="flex items-center gap-2 mb-4">
+                        <span className="bg-indigo-100 text-indigo-700 text-xs font-black px-2 py-1 rounded-md">KR {idx + 1}</span>
+                        <h4 className="font-bold text-slate-800">Mục tiêu con / Nhiệm vụ</h4>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <Input 
+                          placeholder="VD: Triển khai thành công hệ thống ERP cho 100% nhân sự" 
+                          value={task.title} 
+                          onChange={e => handleTaskChange(idx, 'title', e.target.value)} 
+                          className="h-12 text-base font-semibold bg-slate-50/50 rounded-xl" 
+                        />
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                              <Users className="w-3 h-3" /> Người thực hiện (Assignee)
+                            </Label>
+                            <div className="flex gap-2">
+                              <Input 
+                                value={task.assigneeCode} 
+                                readOnly 
+                                placeholder="Chọn nhân sự..." 
+                                className="h-10 bg-slate-50 cursor-pointer" 
+                                onClick={() => openAssigneeModal(idx)}
+                              />
+                              <Button variant="outline" onClick={() => openAssigneeModal(idx)} className="h-10 px-3 shrink-0">Chọn</Button>
+                            </div>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-xs font-semibold text-slate-500 flex items-center gap-1">
+                              <Clock className="w-3 h-3" /> Hạn chót (Deadline)
+                            </Label>
+                            <Input type="date" value={task.dueDate} onChange={e => handleTaskChange(idx, 'dueDate', e.target.value)} className="h-10 bg-slate-50" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Phần 2: Cấu hình KPI Chấm điểm */}
+                    <div className="lg:col-span-5 p-6 bg-slate-50/50 rounded-r-2xl">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Settings2 className="w-4 h-4 text-emerald-600" />
+                        <h4 className="font-bold text-slate-800">Cấu hình tính điểm (KPI / Score)</h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-slate-500 font-medium">Trọng số (%)</Label>
+                          <div className="relative">
+                            <Input type="number" value={task.weight} onChange={e => handleTaskChange(idx, 'weight', e.target.value)} className="h-9 pr-8" />
+                            <span className="absolute right-3 top-2.5 text-xs text-slate-400 font-bold">%</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-slate-500 font-medium">Điểm chuẩn (Base)</Label>
+                          <Input type="number" value={task.baseScore} onChange={e => handleTaskChange(idx, 'baseScore', e.target.value)} className="h-9" />
+                        </div>
+                        
+                        <div className="col-span-2 space-y-1.5">
+                          <Label className="text-xs text-slate-500 font-medium">Cách tính điểm</Label>
+                          <Select value={task.scoringMethod} onValueChange={(val) => handleTaskChange(idx, 'scoringMethod', val)}>
+                            <SelectTrigger className="h-9 bg-white"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="MANUAL">Giám sát đánh giá thủ công</SelectItem>
+                              <SelectItem value="AUTO_DEADLINE">Tự động (Dựa trên ngày hoàn thành)</SelectItem>
+                              <SelectItem value="AUTO_RESULT">Tự động (Dựa trên khối lượng hoàn thành)</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-emerald-600 font-medium">Thưởng (vượt tiến độ)</Label>
+                          <div className="relative">
+                            <Input type="number" value={task.bonusPerDay} onChange={e => handleTaskChange(idx, 'bonusPerDay', e.target.value)} className="h-9 pr-12 text-emerald-700" placeholder="+1" />
+                            <span className="absolute right-3 top-2.5 text-[10px] text-emerald-500 font-bold">đ/ngày</span>
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs text-rose-600 font-medium">Phạt (chậm tiến độ)</Label>
+                          <div className="relative">
+                            <Input type="number" value={task.penaltyPerDay} onChange={e => handleTaskChange(idx, 'penaltyPerDay', e.target.value)} className="h-9 pr-12 text-rose-700" placeholder="-2" />
+                            <span className="absolute right-3 top-2.5 text-[10px] text-rose-500 font-bold">đ/ngày</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            {tasks.length === 0 && (
+              <div className="text-center py-16 bg-white rounded-3xl border border-dashed border-slate-300">
+                <Target className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                <h3 className="text-lg font-bold text-slate-700">Chưa có Kết quả then chốt nào</h3>
+                <p className="text-slate-500 mb-4">Hãy thêm các Mục tiêu con / Nhiệm vụ để phân rã Kế hoạch.</p>
+                <Button onClick={addTask} variant="outline" className="rounded-xl border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                  <Plus className="w-4 h-4 mr-2" /> Thêm ngay
+                </Button>
+              </div>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* MODAL LỌC VÀ CHỌN NHÂN SỰ */}
+      <Dialog open={isAssigneeModalOpen} onOpenChange={setIsAssigneeModalOpen}>
+        <DialogContent className="sm:max-w-[800px] p-0 overflow-hidden bg-slate-50">
+          <DialogHeader className="p-6 bg-white border-b border-slate-100">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2">
+              <Users className="w-6 h-6 text-indigo-600" /> Chọn Nhân sự thực hiện
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="space-y-2">
-                <Label className="font-bold">Mô hình Quản trị / Loại kế hoạch</Label>
-                <Select value={manualPlan.type} onValueChange={(val) => setManualPlan({ ...manualPlan, type: val })}>
-                  <SelectTrigger className="h-12 bg-slate-50">
-                    <SelectValue placeholder="Chọn mô hình quản trị" />
-                  </SelectTrigger>
+                <Label className="text-xs font-bold text-slate-500 uppercase">Bộ lọc: Phòng ban / Đơn vị</Label>
+                <Select value={filterDept} onValueChange={setFilterDept}>
+                  <SelectTrigger className="bg-white"><SelectValue placeholder="Tất cả phòng ban" /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MASTER_PLAN">Kế hoạch Tổng thể (Master Plan / WBS)</SelectItem>
-                    {planFrameworkCategories.map((cat: any) => (
-                      <SelectItem key={cat.code} value={cat.code}>{cat.name}</SelectItem>
-                    ))}
-                    <SelectItem value="PROJECT">Dự án thông thường (Project)</SelectItem>
+                    <SelectItem value="ALL">Tất cả phòng ban</SelectItem>
+                    {departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="font-bold">Thời gian thực hiện</Label>
-                <div className="flex items-center gap-2">
-                  <Input type="date" className="h-12 bg-slate-50" value={manualPlan.startDate} onChange={(e) => setManualPlan({ ...manualPlan, startDate: e.target.value })} />
-                  <span className="text-slate-400">-</span>
-                  <Input type="date" className="h-12 bg-slate-50" value={manualPlan.endDate} onChange={(e) => setManualPlan({ ...manualPlan, endDate: e.target.value })} />
-                </div>
+                <Label className="text-xs font-bold text-slate-500 uppercase">Bộ lọc: Lĩnh vực / Mảng</Label>
+                <Select value={filterField} onValueChange={setFilterField}>
+                  <SelectTrigger className="bg-white"><SelectValue placeholder="Tất cả lĩnh vực" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ALL">Tất cả lĩnh vực</SelectItem>
+                    {fields.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
+                  </SelectContent>
+                </Select>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
-          <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-md rounded-2xl overflow-hidden">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle className="text-xl font-bold text-slate-800">Phân rã công việc (Work Breakdown Structure)</CardTitle>
-                <p className="text-sm text-slate-500 mt-1">Cấu trúc công việc theo chuẩn quản trị (Giao việc, RACI, Deadline).</p>
-              </div>
-              <Button onClick={handleAddManualTask} variant="outline" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200">
-                <Plus className="h-4 w-4 mr-2" /> Thêm Task
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {manualTasks.map((task, idx) => (
-                <div key={idx} className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl relative group">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-rose-500 hover:bg-rose-50 transition-all"
-                    onClick={() => handleRemoveManualTask(idx)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mr-6">
-                    <div className="md:col-span-12 space-y-2">
-                      <Label className="text-xs font-semibold text-slate-500">Tên công việc (Task)</Label>
-                      <Input placeholder="VD: Thiết kế kiến trúc hệ thống" value={task.title} onChange={e => handleManualTaskChange(idx, 'title', e.target.value)} className="bg-white" />
-                    </div>
-                    <div className="md:col-span-6 space-y-2">
-                      <Label className="text-xs font-semibold text-slate-500">Người thực hiện (Assignee / RACI - R)</Label>
-                      <Input placeholder="Mã NV (VD: NV001)" value={task.assigneeCode} onChange={e => handleManualTaskChange(idx, 'assigneeCode', e.target.value)} className="bg-white" />
-                    </div>
-                    <div className="md:col-span-3 space-y-2">
-                      <Label className="text-xs font-semibold text-slate-500">Độ ưu tiên</Label>
-                      <Select value={task.priority} onValueChange={(val) => handleManualTaskChange(idx, 'priority', val)}>
-                        <SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="URGENT" className="text-rose-600">Khẩn cấp (Urgent)</SelectItem>
-                          <SelectItem value="HIGH" className="text-orange-600">Cao (High)</SelectItem>
-                          <SelectItem value="NORMAL" className="text-blue-600">Bình thường</SelectItem>
-                          <SelectItem value="LOW" className="text-slate-600">Thấp (Low)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="md:col-span-3 space-y-2">
-                      <Label className="text-xs font-semibold text-slate-500">Hạn chót (Deadline)</Label>
-                      <Input type="date" value={task.dueDate} onChange={e => handleManualTaskChange(idx, 'dueDate', e.target.value)} className="bg-white" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {manualTasks.length === 0 && (
-                <div className="text-center py-10 text-slate-500">
-                  Chưa có công việc nào. Bấm "Thêm Task" để bắt đầu phân rã WBS.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end pt-4">
-            <Button onClick={handleSaveManual} disabled={isSavingManual} className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-6 rounded-2xl text-lg shadow-lg shadow-emerald-500/20">
-              {isSavingManual ? 'Đang lưu...' : <><Save className="mr-2 h-5 w-5" /> Lưu Kế hoạch Tổng thể</>}
-            </Button>
+            <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+              <table className="w-full text-sm text-left">
+                <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-100">
+                  <tr>
+                    <th className="px-4 py-3">Mã NV</th>
+                    <th className="px-4 py-3">Họ và Tên</th>
+                    <th className="px-4 py-3">Phòng ban</th>
+                    <th className="px-4 py-3 text-right">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {employees.filter(e => filterDept && filterDept !== 'ALL' ? e.dept === filterDept : true).map((emp) => (
+                    <tr key={emp.code} className="hover:bg-indigo-50/50 transition-colors group">
+                      <td className="px-4 py-3 font-mono text-slate-600">{emp.code}</td>
+                      <td className="px-4 py-3 font-bold text-slate-800">{emp.name}</td>
+                      <td className="px-4 py-3 text-slate-600">{emp.dept}</td>
+                      <td className="px-4 py-3 text-right">
+                        <Button 
+                          size="sm" 
+                          className="bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-600 hover:text-white"
+                          onClick={() => selectAssignee(emp.code)}
+                        >
+                          Chọn Giao
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </TabsContent>
+        </DialogContent>
+      </Dialog>
 
-        {/* TAB 2: AI (OLD LOGIC) */}
-        <TabsContent value="ai">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-0 shadow-lg bg-white/60 backdrop-blur-md rounded-2xl overflow-hidden">
-              <div className="h-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-              <CardHeader>
-                <CardTitle className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
-                  Khởi tạo bằng AI (Task Decomposition)
-                </CardTitle>
-                <p className="text-sm text-gray-500">Dán nội dung Nghị quyết, Văn bản chỉ đạo vào đây để AI tự động phân rã thành Chủ trương và các Đầu việc chi tiết.</p>
-              </CardHeader>
-              <CardContent className="flex flex-col gap-4">
-                <textarea
-                  className="w-full h-80 p-4 rounded-xl border border-indigo-100 bg-white/50 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition-all resize-none shadow-inner"
-                  placeholder="Nhập nội dung văn bản (VD: Nghị quyết đẩy mạnh CĐS ngành y tế năm 2026...)"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                />
-                <button
-                  onClick={handleGenerate}
-                  disabled={isGenerating || !inputText.trim()}
-                  className="relative overflow-hidden w-full py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed group"
-                >
-                  {isGenerating ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      AI đang suy nghĩ...
-                    </span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="text-xl">✨</span> Phân tích bằng AI
-                      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:translate-x-full transition-transform duration-1000" />
-                    </span>
-                  )}
-                </button>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-md rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-xl font-bold text-slate-800">Kết quả Đề xuất</CardTitle>
-                <p className="text-sm text-gray-500">Chủ trương và danh sách các công việc đã được tự động phân rã.</p>
-              </CardHeader>
-              <CardContent>
-                {!planData ? (
-                  <div className="flex flex-col items-center justify-center h-80 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
-                    <div className="text-4xl mb-4 opacity-50">🤖</div>
-                    <p className="text-gray-400 font-medium">Chưa có kết quả phân tích</p>
-                  </div>
-                ) : (
-                  <div className="flex flex-col gap-6">
-                    <div className="bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                      <h3 className="text-lg font-bold text-blue-800 mb-2">{planData.title}</h3>
-                      <p className="text-sm text-blue-700 mb-3"><span className="font-semibold">Mục tiêu:</span> {planData.objective}</p>
-                      <div className="flex gap-4 text-xs font-medium text-blue-600">
-                        <span className="px-2 py-1 bg-blue-100 rounded-md">Từ: {new Date(planData.startDate).toLocaleDateString('vi-VN')}</span>
-                        <span className="px-2 py-1 bg-blue-100 rounded-md">Đến: {new Date(planData.endDate).toLocaleDateString('vi-VN')}</span>
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-bold text-slate-700 mb-3 flex items-center gap-2">
-                        <span className="bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full text-sm">{planData.tasks.length}</span>
-                        Công việc phân rã
-                      </h4>
-                      <div className="flex flex-col gap-3 max-h-60 overflow-y-auto pr-2">
-                        {planData.tasks.map((task: any, idx: number) => (
-                          <div key={idx} className="p-3 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex justify-between items-start mb-2">
-                              <h5 className="font-semibold text-sm text-slate-800">{task.title}</h5>
-                              <span className={`text-[10px] px-2 py-1 font-bold rounded-full uppercase ${task.priority === 'URGENT' ? 'bg-red-100 text-red-700' :
-                                task.priority === 'HIGH' ? 'bg-orange-100 text-orange-700' :
-                                  'bg-green-100 text-green-700'
-                                }`}>
-                                {task.priority}
-                              </span>
-                            </div>
-                            <p className="text-xs text-gray-500 mb-2">{task.description}</p>
-                            <div className="flex items-center justify-between text-[11px] font-medium">
-                              <span className="text-slate-500">👤 Giao cho: {task.assigneeCode}</span>
-                              <span className="text-slate-500">⏳ Hạn: {new Date(task.dueDate).toLocaleDateString('vi-VN')}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      onClick={handleSaveAI}
-                      disabled={isSavingAI}
-                      className="w-full py-3 rounded-xl font-bold text-white bg-slate-800 hover:bg-slate-900 transition-colors shadow-md disabled:opacity-50 mt-4"
-                    >
-                      {isSavingAI ? 'Đang lưu...' : 'Lưu Kế hoạch & Các công việc'}
-                    </button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }

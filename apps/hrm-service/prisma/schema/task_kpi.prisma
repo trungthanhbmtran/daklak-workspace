@@ -10,6 +10,14 @@ model Task {
   status         String    @default("TODO") // DRAFT, TODO, IN_PROGRESS, REVIEWING, DONE, OVERDUE, CANCELLED
   priority       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
   
+  // KPI Scoring Parameters
+  baseScore      Float?    @map("base_score")
+  weight         Float?    @map("weight")
+  scoringMethod  String    @default("MANUAL") @map("scoring_method") // MANUAL, AUTO_DEADLINE, AUTO_RESULT
+  bonusPerDay    Float?    @map("bonus_per_day")
+  penaltyPerDay  Float?    @map("penalty_per_day")
+  supervisorCode String?   @map("supervisor_code")
+
   // Document-driven Workflow: Lưu danh sách ID văn bản liên quan (Evidence/Source)
   documentIds    Json?     @map("document_ids") // Lưu array of strings/UUIDs
   workflowInstId String?   @map("workflow_instance_id")
@@ -25,6 +33,7 @@ model Task {
   // Quan hệ tới bảng Employee được thực hiện lỏng lẻo qua employeeCode
   assignee       Employee? @relation("TaskAssignee", fields: [assigneeCode], references: [employeeCode])
   assigner       Employee? @relation("TaskAssigner", fields: [assignerCode], references: [employeeCode])
+  supervisor     Employee? @relation("TaskSupervisor", fields: [supervisorCode], references: [employeeCode])
 
   @@map("tasks")
 }

@@ -28,11 +28,19 @@ export type AggregateTask = {
 
 export type TaskAvgAggregateOutputType = {
   id: number | null
+  baseScore: number | null
+  weight: number | null
+  bonusPerDay: number | null
+  penaltyPerDay: number | null
   planId: number | null
 }
 
 export type TaskSumAggregateOutputType = {
   id: number | null
+  baseScore: number | null
+  weight: number | null
+  bonusPerDay: number | null
+  penaltyPerDay: number | null
   planId: number | null
 }
 
@@ -44,6 +52,12 @@ export type TaskMinAggregateOutputType = {
   assignerCode: string | null
   status: string | null
   priority: string | null
+  baseScore: number | null
+  weight: number | null
+  scoringMethod: string | null
+  bonusPerDay: number | null
+  penaltyPerDay: number | null
+  supervisorCode: string | null
   workflowInstId: string | null
   dueDate: Date | null
   completionDate: Date | null
@@ -60,6 +74,12 @@ export type TaskMaxAggregateOutputType = {
   assignerCode: string | null
   status: string | null
   priority: string | null
+  baseScore: number | null
+  weight: number | null
+  scoringMethod: string | null
+  bonusPerDay: number | null
+  penaltyPerDay: number | null
+  supervisorCode: string | null
   workflowInstId: string | null
   dueDate: Date | null
   completionDate: Date | null
@@ -76,6 +96,12 @@ export type TaskCountAggregateOutputType = {
   assignerCode: number
   status: number
   priority: number
+  baseScore: number
+  weight: number
+  scoringMethod: number
+  bonusPerDay: number
+  penaltyPerDay: number
+  supervisorCode: number
   documentIds: number
   workflowInstId: number
   dueDate: number
@@ -89,11 +115,19 @@ export type TaskCountAggregateOutputType = {
 
 export type TaskAvgAggregateInputType = {
   id?: true
+  baseScore?: true
+  weight?: true
+  bonusPerDay?: true
+  penaltyPerDay?: true
   planId?: true
 }
 
 export type TaskSumAggregateInputType = {
   id?: true
+  baseScore?: true
+  weight?: true
+  bonusPerDay?: true
+  penaltyPerDay?: true
   planId?: true
 }
 
@@ -105,6 +139,12 @@ export type TaskMinAggregateInputType = {
   assignerCode?: true
   status?: true
   priority?: true
+  baseScore?: true
+  weight?: true
+  scoringMethod?: true
+  bonusPerDay?: true
+  penaltyPerDay?: true
+  supervisorCode?: true
   workflowInstId?: true
   dueDate?: true
   completionDate?: true
@@ -121,6 +161,12 @@ export type TaskMaxAggregateInputType = {
   assignerCode?: true
   status?: true
   priority?: true
+  baseScore?: true
+  weight?: true
+  scoringMethod?: true
+  bonusPerDay?: true
+  penaltyPerDay?: true
+  supervisorCode?: true
   workflowInstId?: true
   dueDate?: true
   completionDate?: true
@@ -137,6 +183,12 @@ export type TaskCountAggregateInputType = {
   assignerCode?: true
   status?: true
   priority?: true
+  baseScore?: true
+  weight?: true
+  scoringMethod?: true
+  bonusPerDay?: true
+  penaltyPerDay?: true
+  supervisorCode?: true
   documentIds?: true
   workflowInstId?: true
   dueDate?: true
@@ -241,6 +293,12 @@ export type TaskGroupByOutputType = {
   assignerCode: string
   status: string
   priority: string
+  baseScore: number | null
+  weight: number | null
+  scoringMethod: string
+  bonusPerDay: number | null
+  penaltyPerDay: number | null
+  supervisorCode: string | null
   documentIds: runtime.JsonValue | null
   workflowInstId: string | null
   dueDate: Date | null
@@ -281,6 +339,12 @@ export type TaskWhereInput = {
   assignerCode?: Prisma.StringFilter<"Task"> | string
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
+  baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
+  weight?: Prisma.FloatNullableFilter<"Task"> | number | null
+  scoringMethod?: Prisma.StringFilter<"Task"> | string
+  bonusPerDay?: Prisma.FloatNullableFilter<"Task"> | number | null
+  penaltyPerDay?: Prisma.FloatNullableFilter<"Task"> | number | null
+  supervisorCode?: Prisma.StringNullableFilter<"Task"> | string | null
   documentIds?: Prisma.JsonNullableFilter<"Task">
   workflowInstId?: Prisma.StringNullableFilter<"Task"> | string | null
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
@@ -291,6 +355,7 @@ export type TaskWhereInput = {
   plan?: Prisma.XOR<Prisma.MasterPlanNullableScalarRelationFilter, Prisma.MasterPlanWhereInput> | null
   assignee?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
   assigner?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
+  supervisor?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
 }
 
 export type TaskOrderByWithRelationInput = {
@@ -301,6 +366,12 @@ export type TaskOrderByWithRelationInput = {
   assignerCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  weight?: Prisma.SortOrderInput | Prisma.SortOrder
+  scoringMethod?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  supervisorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   documentIds?: Prisma.SortOrderInput | Prisma.SortOrder
   workflowInstId?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -311,6 +382,7 @@ export type TaskOrderByWithRelationInput = {
   plan?: Prisma.MasterPlanOrderByWithRelationInput
   assignee?: Prisma.EmployeeOrderByWithRelationInput
   assigner?: Prisma.EmployeeOrderByWithRelationInput
+  supervisor?: Prisma.EmployeeOrderByWithRelationInput
   _relevance?: Prisma.TaskOrderByRelevanceInput
 }
 
@@ -325,6 +397,12 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   assignerCode?: Prisma.StringFilter<"Task"> | string
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
+  baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
+  weight?: Prisma.FloatNullableFilter<"Task"> | number | null
+  scoringMethod?: Prisma.StringFilter<"Task"> | string
+  bonusPerDay?: Prisma.FloatNullableFilter<"Task"> | number | null
+  penaltyPerDay?: Prisma.FloatNullableFilter<"Task"> | number | null
+  supervisorCode?: Prisma.StringNullableFilter<"Task"> | string | null
   documentIds?: Prisma.JsonNullableFilter<"Task">
   workflowInstId?: Prisma.StringNullableFilter<"Task"> | string | null
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
@@ -335,6 +413,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   plan?: Prisma.XOR<Prisma.MasterPlanNullableScalarRelationFilter, Prisma.MasterPlanWhereInput> | null
   assignee?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
   assigner?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
+  supervisor?: Prisma.XOR<Prisma.EmployeeNullableScalarRelationFilter, Prisma.EmployeeWhereInput> | null
 }, "id">
 
 export type TaskOrderByWithAggregationInput = {
@@ -345,6 +424,12 @@ export type TaskOrderByWithAggregationInput = {
   assignerCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
+  weight?: Prisma.SortOrderInput | Prisma.SortOrder
+  scoringMethod?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrderInput | Prisma.SortOrder
+  supervisorCode?: Prisma.SortOrderInput | Prisma.SortOrder
   documentIds?: Prisma.SortOrderInput | Prisma.SortOrder
   workflowInstId?: Prisma.SortOrderInput | Prisma.SortOrder
   dueDate?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -370,6 +455,12 @@ export type TaskScalarWhereWithAggregatesInput = {
   assignerCode?: Prisma.StringWithAggregatesFilter<"Task"> | string
   status?: Prisma.StringWithAggregatesFilter<"Task"> | string
   priority?: Prisma.StringWithAggregatesFilter<"Task"> | string
+  baseScore?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
+  weight?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
+  scoringMethod?: Prisma.StringWithAggregatesFilter<"Task"> | string
+  bonusPerDay?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
+  penaltyPerDay?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
+  supervisorCode?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   documentIds?: Prisma.JsonNullableWithAggregatesFilter<"Task">
   workflowInstId?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   dueDate?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
@@ -384,6 +475,11 @@ export type TaskCreateInput = {
   description?: string | null
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -393,6 +489,7 @@ export type TaskCreateInput = {
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   assignee?: Prisma.EmployeeCreateNestedOneWithoutTasksReceivedInput
   assigner?: Prisma.EmployeeCreateNestedOneWithoutTasksAssignedInput
+  supervisor?: Prisma.EmployeeCreateNestedOneWithoutTasksSupervisedInput
 }
 
 export type TaskUncheckedCreateInput = {
@@ -403,6 +500,12 @@ export type TaskUncheckedCreateInput = {
   assignerCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -417,6 +520,11 @@ export type TaskUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -426,6 +534,7 @@ export type TaskUpdateInput = {
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   assignee?: Prisma.EmployeeUpdateOneWithoutTasksReceivedNestedInput
   assigner?: Prisma.EmployeeUpdateOneWithoutTasksAssignedNestedInput
+  supervisor?: Prisma.EmployeeUpdateOneWithoutTasksSupervisedNestedInput
 }
 
 export type TaskUncheckedUpdateInput = {
@@ -436,6 +545,12 @@ export type TaskUncheckedUpdateInput = {
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -453,6 +568,12 @@ export type TaskCreateManyInput = {
   assignerCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -467,6 +588,11 @@ export type TaskUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -483,6 +609,12 @@ export type TaskUncheckedUpdateManyInput = {
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -516,6 +648,12 @@ export type TaskCountOrderByAggregateInput = {
   assignerCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  weight?: Prisma.SortOrder
+  scoringMethod?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrder
+  supervisorCode?: Prisma.SortOrder
   documentIds?: Prisma.SortOrder
   workflowInstId?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
@@ -527,6 +665,10 @@ export type TaskCountOrderByAggregateInput = {
 
 export type TaskAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  weight?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrder
   planId?: Prisma.SortOrder
 }
 
@@ -538,6 +680,12 @@ export type TaskMaxOrderByAggregateInput = {
   assignerCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  weight?: Prisma.SortOrder
+  scoringMethod?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrder
+  supervisorCode?: Prisma.SortOrder
   workflowInstId?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completionDate?: Prisma.SortOrder
@@ -554,6 +702,12 @@ export type TaskMinOrderByAggregateInput = {
   assignerCode?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  weight?: Prisma.SortOrder
+  scoringMethod?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrder
+  supervisorCode?: Prisma.SortOrder
   workflowInstId?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
   completionDate?: Prisma.SortOrder
@@ -564,6 +718,10 @@ export type TaskMinOrderByAggregateInput = {
 
 export type TaskSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  baseScore?: Prisma.SortOrder
+  weight?: Prisma.SortOrder
+  bonusPerDay?: Prisma.SortOrder
+  penaltyPerDay?: Prisma.SortOrder
   planId?: Prisma.SortOrder
 }
 
@@ -581,6 +739,13 @@ export type TaskCreateNestedManyWithoutAssigneeInput = {
   connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
 }
 
+export type TaskCreateNestedManyWithoutSupervisorInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutSupervisorInput, Prisma.TaskUncheckedCreateWithoutSupervisorInput> | Prisma.TaskCreateWithoutSupervisorInput[] | Prisma.TaskUncheckedCreateWithoutSupervisorInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutSupervisorInput | Prisma.TaskCreateOrConnectWithoutSupervisorInput[]
+  createMany?: Prisma.TaskCreateManySupervisorInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
 export type TaskUncheckedCreateNestedManyWithoutAssignerInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutAssignerInput, Prisma.TaskUncheckedCreateWithoutAssignerInput> | Prisma.TaskCreateWithoutAssignerInput[] | Prisma.TaskUncheckedCreateWithoutAssignerInput[]
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutAssignerInput | Prisma.TaskCreateOrConnectWithoutAssignerInput[]
@@ -592,6 +757,13 @@ export type TaskUncheckedCreateNestedManyWithoutAssigneeInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutAssigneeInput, Prisma.TaskUncheckedCreateWithoutAssigneeInput> | Prisma.TaskCreateWithoutAssigneeInput[] | Prisma.TaskUncheckedCreateWithoutAssigneeInput[]
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutAssigneeInput | Prisma.TaskCreateOrConnectWithoutAssigneeInput[]
   createMany?: Prisma.TaskCreateManyAssigneeInputEnvelope
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+}
+
+export type TaskUncheckedCreateNestedManyWithoutSupervisorInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutSupervisorInput, Prisma.TaskUncheckedCreateWithoutSupervisorInput> | Prisma.TaskCreateWithoutSupervisorInput[] | Prisma.TaskUncheckedCreateWithoutSupervisorInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutSupervisorInput | Prisma.TaskCreateOrConnectWithoutSupervisorInput[]
+  createMany?: Prisma.TaskCreateManySupervisorInputEnvelope
   connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
 }
 
@@ -623,6 +795,20 @@ export type TaskUpdateManyWithoutAssigneeNestedInput = {
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
 }
 
+export type TaskUpdateManyWithoutSupervisorNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutSupervisorInput, Prisma.TaskUncheckedCreateWithoutSupervisorInput> | Prisma.TaskCreateWithoutSupervisorInput[] | Prisma.TaskUncheckedCreateWithoutSupervisorInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutSupervisorInput | Prisma.TaskCreateOrConnectWithoutSupervisorInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutSupervisorInput | Prisma.TaskUpsertWithWhereUniqueWithoutSupervisorInput[]
+  createMany?: Prisma.TaskCreateManySupervisorInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutSupervisorInput | Prisma.TaskUpdateWithWhereUniqueWithoutSupervisorInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutSupervisorInput | Prisma.TaskUpdateManyWithWhereWithoutSupervisorInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
 export type TaskUncheckedUpdateManyWithoutAssignerNestedInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutAssignerInput, Prisma.TaskUncheckedCreateWithoutAssignerInput> | Prisma.TaskCreateWithoutAssignerInput[] | Prisma.TaskUncheckedCreateWithoutAssignerInput[]
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutAssignerInput | Prisma.TaskCreateOrConnectWithoutAssignerInput[]
@@ -649,6 +835,28 @@ export type TaskUncheckedUpdateManyWithoutAssigneeNestedInput = {
   update?: Prisma.TaskUpdateWithWhereUniqueWithoutAssigneeInput | Prisma.TaskUpdateWithWhereUniqueWithoutAssigneeInput[]
   updateMany?: Prisma.TaskUpdateManyWithWhereWithoutAssigneeInput | Prisma.TaskUpdateManyWithWhereWithoutAssigneeInput[]
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type TaskUncheckedUpdateManyWithoutSupervisorNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutSupervisorInput, Prisma.TaskUncheckedCreateWithoutSupervisorInput> | Prisma.TaskCreateWithoutSupervisorInput[] | Prisma.TaskUncheckedCreateWithoutSupervisorInput[]
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutSupervisorInput | Prisma.TaskCreateOrConnectWithoutSupervisorInput[]
+  upsert?: Prisma.TaskUpsertWithWhereUniqueWithoutSupervisorInput | Prisma.TaskUpsertWithWhereUniqueWithoutSupervisorInput[]
+  createMany?: Prisma.TaskCreateManySupervisorInputEnvelope
+  set?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  disconnect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  delete?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  connect?: Prisma.TaskWhereUniqueInput | Prisma.TaskWhereUniqueInput[]
+  update?: Prisma.TaskUpdateWithWhereUniqueWithoutSupervisorInput | Prisma.TaskUpdateWithWhereUniqueWithoutSupervisorInput[]
+  updateMany?: Prisma.TaskUpdateManyWithWhereWithoutSupervisorInput | Prisma.TaskUpdateManyWithWhereWithoutSupervisorInput[]
+  deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type NullableFloatFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type TaskCreateNestedManyWithoutPlanInput = {
@@ -698,6 +906,11 @@ export type TaskCreateWithoutAssignerInput = {
   description?: string | null
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -706,6 +919,7 @@ export type TaskCreateWithoutAssignerInput = {
   updatedAt?: Date | string
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   assignee?: Prisma.EmployeeCreateNestedOneWithoutTasksReceivedInput
+  supervisor?: Prisma.EmployeeCreateNestedOneWithoutTasksSupervisedInput
 }
 
 export type TaskUncheckedCreateWithoutAssignerInput = {
@@ -715,6 +929,12 @@ export type TaskUncheckedCreateWithoutAssignerInput = {
   assigneeCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -739,6 +959,11 @@ export type TaskCreateWithoutAssigneeInput = {
   description?: string | null
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -747,6 +972,7 @@ export type TaskCreateWithoutAssigneeInput = {
   updatedAt?: Date | string
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   assigner?: Prisma.EmployeeCreateNestedOneWithoutTasksAssignedInput
+  supervisor?: Prisma.EmployeeCreateNestedOneWithoutTasksSupervisedInput
 }
 
 export type TaskUncheckedCreateWithoutAssigneeInput = {
@@ -756,6 +982,12 @@ export type TaskUncheckedCreateWithoutAssigneeInput = {
   assignerCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -772,6 +1004,59 @@ export type TaskCreateOrConnectWithoutAssigneeInput = {
 
 export type TaskCreateManyAssigneeInputEnvelope = {
   data: Prisma.TaskCreateManyAssigneeInput | Prisma.TaskCreateManyAssigneeInput[]
+  skipDuplicates?: boolean
+}
+
+export type TaskCreateWithoutSupervisorInput = {
+  title: string
+  description?: string | null
+  status?: string
+  priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: string | null
+  dueDate?: Date | string | null
+  completionDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
+  assignee?: Prisma.EmployeeCreateNestedOneWithoutTasksReceivedInput
+  assigner?: Prisma.EmployeeCreateNestedOneWithoutTasksAssignedInput
+}
+
+export type TaskUncheckedCreateWithoutSupervisorInput = {
+  id?: number
+  title: string
+  description?: string | null
+  assigneeCode: string
+  assignerCode: string
+  status?: string
+  priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: string | null
+  dueDate?: Date | string | null
+  completionDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  planId?: number | null
+}
+
+export type TaskCreateOrConnectWithoutSupervisorInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutSupervisorInput, Prisma.TaskUncheckedCreateWithoutSupervisorInput>
+}
+
+export type TaskCreateManySupervisorInputEnvelope = {
+  data: Prisma.TaskCreateManySupervisorInput | Prisma.TaskCreateManySupervisorInput[]
   skipDuplicates?: boolean
 }
 
@@ -802,6 +1087,12 @@ export type TaskScalarWhereInput = {
   assignerCode?: Prisma.StringFilter<"Task"> | string
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
+  baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
+  weight?: Prisma.FloatNullableFilter<"Task"> | number | null
+  scoringMethod?: Prisma.StringFilter<"Task"> | string
+  bonusPerDay?: Prisma.FloatNullableFilter<"Task"> | number | null
+  penaltyPerDay?: Prisma.FloatNullableFilter<"Task"> | number | null
+  supervisorCode?: Prisma.StringNullableFilter<"Task"> | string | null
   documentIds?: Prisma.JsonNullableFilter<"Task">
   workflowInstId?: Prisma.StringNullableFilter<"Task"> | string | null
   dueDate?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
@@ -827,11 +1118,32 @@ export type TaskUpdateManyWithWhereWithoutAssigneeInput = {
   data: Prisma.XOR<Prisma.TaskUpdateManyMutationInput, Prisma.TaskUncheckedUpdateManyWithoutAssigneeInput>
 }
 
+export type TaskUpsertWithWhereUniqueWithoutSupervisorInput = {
+  where: Prisma.TaskWhereUniqueInput
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutSupervisorInput, Prisma.TaskUncheckedUpdateWithoutSupervisorInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutSupervisorInput, Prisma.TaskUncheckedCreateWithoutSupervisorInput>
+}
+
+export type TaskUpdateWithWhereUniqueWithoutSupervisorInput = {
+  where: Prisma.TaskWhereUniqueInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutSupervisorInput, Prisma.TaskUncheckedUpdateWithoutSupervisorInput>
+}
+
+export type TaskUpdateManyWithWhereWithoutSupervisorInput = {
+  where: Prisma.TaskScalarWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateManyMutationInput, Prisma.TaskUncheckedUpdateManyWithoutSupervisorInput>
+}
+
 export type TaskCreateWithoutPlanInput = {
   title: string
   description?: string | null
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -840,6 +1152,7 @@ export type TaskCreateWithoutPlanInput = {
   updatedAt?: Date | string
   assignee?: Prisma.EmployeeCreateNestedOneWithoutTasksReceivedInput
   assigner?: Prisma.EmployeeCreateNestedOneWithoutTasksAssignedInput
+  supervisor?: Prisma.EmployeeCreateNestedOneWithoutTasksSupervisedInput
 }
 
 export type TaskUncheckedCreateWithoutPlanInput = {
@@ -850,6 +1163,12 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   assignerCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -891,6 +1210,12 @@ export type TaskCreateManyAssignerInput = {
   assigneeCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -907,6 +1232,34 @@ export type TaskCreateManyAssigneeInput = {
   assignerCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: string | null
+  dueDate?: Date | string | null
+  completionDate?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  planId?: number | null
+}
+
+export type TaskCreateManySupervisorInput = {
+  id?: number
+  title: string
+  description?: string | null
+  assigneeCode: string
+  assignerCode: string
+  status?: string
+  priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -921,6 +1274,11 @@ export type TaskUpdateWithoutAssignerInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -929,6 +1287,7 @@ export type TaskUpdateWithoutAssignerInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   assignee?: Prisma.EmployeeUpdateOneWithoutTasksReceivedNestedInput
+  supervisor?: Prisma.EmployeeUpdateOneWithoutTasksSupervisedNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutAssignerInput = {
@@ -938,6 +1297,12 @@ export type TaskUncheckedUpdateWithoutAssignerInput = {
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -954,6 +1319,12 @@ export type TaskUncheckedUpdateManyWithoutAssignerInput = {
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -968,6 +1339,11 @@ export type TaskUpdateWithoutAssigneeInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -976,6 +1352,7 @@ export type TaskUpdateWithoutAssigneeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   assigner?: Prisma.EmployeeUpdateOneWithoutTasksAssignedNestedInput
+  supervisor?: Prisma.EmployeeUpdateOneWithoutTasksSupervisedNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutAssigneeInput = {
@@ -985,6 +1362,12 @@ export type TaskUncheckedUpdateWithoutAssigneeInput = {
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1001,6 +1384,77 @@ export type TaskUncheckedUpdateManyWithoutAssigneeInput = {
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type TaskUpdateWithoutSupervisorInput = {
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
+  assignee?: Prisma.EmployeeUpdateOneWithoutTasksReceivedNestedInput
+  assigner?: Prisma.EmployeeUpdateOneWithoutTasksAssignedNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutSupervisorInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completionDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  planId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+}
+
+export type TaskUncheckedUpdateManyWithoutSupervisorInput = {
+  id?: Prisma.IntFieldUpdateOperationsInput | number
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1018,6 +1472,12 @@ export type TaskCreateManyPlanInput = {
   assignerCode: string
   status?: string
   priority?: string
+  baseScore?: number | null
+  weight?: number | null
+  scoringMethod?: string
+  bonusPerDay?: number | null
+  penaltyPerDay?: number | null
+  supervisorCode?: string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: string | null
   dueDate?: Date | string | null
@@ -1031,6 +1491,11 @@ export type TaskUpdateWithoutPlanInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1039,6 +1504,7 @@ export type TaskUpdateWithoutPlanInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignee?: Prisma.EmployeeUpdateOneWithoutTasksReceivedNestedInput
   assigner?: Prisma.EmployeeUpdateOneWithoutTasksAssignedNestedInput
+  supervisor?: Prisma.EmployeeUpdateOneWithoutTasksSupervisedNestedInput
 }
 
 export type TaskUncheckedUpdateWithoutPlanInput = {
@@ -1049,6 +1515,12 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1065,6 +1537,12 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
+  baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
+  bonusPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  penaltyPerDay?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  supervisorCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentIds?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   workflowInstId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1083,6 +1561,12 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   assignerCode?: boolean
   status?: boolean
   priority?: boolean
+  baseScore?: boolean
+  weight?: boolean
+  scoringMethod?: boolean
+  bonusPerDay?: boolean
+  penaltyPerDay?: boolean
+  supervisorCode?: boolean
   documentIds?: boolean
   workflowInstId?: boolean
   dueDate?: boolean
@@ -1093,6 +1577,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
   assigner?: boolean | Prisma.Task$assignerArgs<ExtArgs>
+  supervisor?: boolean | Prisma.Task$supervisorArgs<ExtArgs>
 }, ExtArgs["result"]["task"]>
 
 
@@ -1105,6 +1590,12 @@ export type TaskSelectScalar = {
   assignerCode?: boolean
   status?: boolean
   priority?: boolean
+  baseScore?: boolean
+  weight?: boolean
+  scoringMethod?: boolean
+  bonusPerDay?: boolean
+  penaltyPerDay?: boolean
+  supervisorCode?: boolean
   documentIds?: boolean
   workflowInstId?: boolean
   dueDate?: boolean
@@ -1114,11 +1605,12 @@ export type TaskSelectScalar = {
   planId?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "assigneeCode" | "assignerCode" | "status" | "priority" | "documentIds" | "workflowInstId" | "dueDate" | "completionDate" | "createdAt" | "updatedAt" | "planId", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "assigneeCode" | "assignerCode" | "status" | "priority" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "supervisorCode" | "documentIds" | "workflowInstId" | "dueDate" | "completionDate" | "createdAt" | "updatedAt" | "planId", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
   assigner?: boolean | Prisma.Task$assignerArgs<ExtArgs>
+  supervisor?: boolean | Prisma.Task$supervisorArgs<ExtArgs>
 }
 
 export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1127,6 +1619,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     plan: Prisma.$MasterPlanPayload<ExtArgs> | null
     assignee: Prisma.$EmployeePayload<ExtArgs> | null
     assigner: Prisma.$EmployeePayload<ExtArgs> | null
+    supervisor: Prisma.$EmployeePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
@@ -1136,6 +1629,12 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     assignerCode: string
     status: string
     priority: string
+    baseScore: number | null
+    weight: number | null
+    scoringMethod: string
+    bonusPerDay: number | null
+    penaltyPerDay: number | null
+    supervisorCode: string | null
     documentIds: runtime.JsonValue | null
     workflowInstId: string | null
     dueDate: Date | null
@@ -1486,6 +1985,7 @@ export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Typ
   plan<T extends Prisma.Task$planArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$planArgs<ExtArgs>>): Prisma.Prisma__MasterPlanClient<runtime.Types.Result.GetResult<Prisma.$MasterPlanPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assignee<T extends Prisma.Task$assigneeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$assigneeArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   assigner<T extends Prisma.Task$assignerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$assignerArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  supervisor<T extends Prisma.Task$supervisorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$supervisorArgs<ExtArgs>>): Prisma.Prisma__EmployeeClient<runtime.Types.Result.GetResult<Prisma.$EmployeePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1522,6 +2022,12 @@ export interface TaskFieldRefs {
   readonly assignerCode: Prisma.FieldRef<"Task", 'String'>
   readonly status: Prisma.FieldRef<"Task", 'String'>
   readonly priority: Prisma.FieldRef<"Task", 'String'>
+  readonly baseScore: Prisma.FieldRef<"Task", 'Float'>
+  readonly weight: Prisma.FieldRef<"Task", 'Float'>
+  readonly scoringMethod: Prisma.FieldRef<"Task", 'String'>
+  readonly bonusPerDay: Prisma.FieldRef<"Task", 'Float'>
+  readonly penaltyPerDay: Prisma.FieldRef<"Task", 'Float'>
+  readonly supervisorCode: Prisma.FieldRef<"Task", 'String'>
   readonly documentIds: Prisma.FieldRef<"Task", 'Json'>
   readonly workflowInstId: Prisma.FieldRef<"Task", 'String'>
   readonly dueDate: Prisma.FieldRef<"Task", 'DateTime'>
@@ -1918,6 +2424,25 @@ export type Task$assigneeArgs<ExtArgs extends runtime.Types.Extensions.InternalA
  * Task.assigner
  */
 export type Task$assignerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Employee
+   */
+  select?: Prisma.EmployeeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Employee
+   */
+  omit?: Prisma.EmployeeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EmployeeInclude<ExtArgs> | null
+  where?: Prisma.EmployeeWhereInput
+}
+
+/**
+ * Task.supervisor
+ */
+export type Task$supervisorArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Employee
    */
