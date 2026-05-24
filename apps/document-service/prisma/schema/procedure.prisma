@@ -53,7 +53,7 @@ model DocumentCabinet {
   userId      String?  @map("user_id") // Nếu là tủ cá nhân
   orgId       String?  @map("org_id")  // Nếu là tủ cơ quan
   fileName    String   @map("file_name")
-  fileUrl     String   @map("file_url")
+  fileUrl     String   @db.Text @map("file_url")
   fileType    String   @map("file_type") // pdf, excel, image, etc.
   fileSize    Int      @map("file_size") // bytes
   tags        String   @default("[]") // JSON array

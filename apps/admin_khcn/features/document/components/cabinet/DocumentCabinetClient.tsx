@@ -12,13 +12,36 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 
 export function DocumentCabinetClient() {
   const [files, setFiles] = useState<any[]>([]);
+  const [dossiers, setDossiers] = useState<any[]>([]);
+  const [activeFolder, setActiveFolder] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, isUploading } = useFileUpload();
 
   useEffect(() => {
     fetchCabinet();
+    fetchDossiers();
   }, []);
+
+  const fetchDossiers = async () => {
+    try {
+      const res: any = await apiClient.get('/documents/dossiers/list');
+      if (res?.data && res.data.length > 0) {
+        setDossiers(res.data);
+      } else {
+        setDossiers([
+          { id: "HS-2023-001", procedureName: "Đăng ký KHCN cấp Tỉnh" },
+          { id: "HS-2023-002", procedureName: "Cấp phép hoạt động đo lường" }
+        ]);
+      }
+    } catch (e) {
+      console.log(e);
+      setDossiers([
+        { id: "HS-2023-001", procedureName: "Đăng ký KHCN cấp Tỉnh" },
+        { id: "HS-2023-002", procedureName: "Cấp phép hoạt động đo lường" }
+      ]);
+    }
+  };
 
   const fetchCabinet = async () => {
     try {
@@ -118,20 +141,36 @@ export function DocumentCabinetClient() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Folders (Mock) */}
-        <div className="col-span-1 md:col-span-4 flex gap-4 overflow-x-auto pb-2">
-          {['Tài liệu định danh', 'Hồ sơ doanh nghiệp', 'Báo cáo khoa học', 'Khảo sát thực địa'].map((folder, idx) => (
-            <Card key={idx} className="min-w-[200px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer">
+        {/* Folders (Dossiers) */}
+        <div className="col-span-1 md:col-span-4 flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
+          <Card 
+            onClick={() => setActiveFolder(null)}
+            className={`min-w-[200px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === null ? 'bg-indigo-50 border-indigo-300' : ''}`}
+          >
+            <CardContent className="p-4 flex items-center gap-3">
+              <Folder className={`h-8 w-8 ${activeFolder === null ? 'text-indigo-600 fill-indigo-200' : 'text-amber-400 fill-amber-100'}`} />
+              <span className={`font-semibold ${activeFolder === null ? 'text-indigo-900' : 'text-slate-700'}`}>Tất cả tài liệu</span>
+            </CardContent>
+          </Card>
+          {dossiers.map((dossier, idx) => (
+            <Card 
+              key={idx} 
+              onClick={() => setActiveFolder(dossier.id)}
+              className={`min-w-[250px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === dossier.id ? 'bg-indigo-50 border-indigo-300' : ''}`}
+            >
               <CardContent className="p-4 flex items-center gap-3">
-                <Folder className="h-8 w-8 text-amber-400 fill-amber-100" />
-                <span className="font-semibold text-slate-700">{folder}</span>
+                <Folder className={`h-8 w-8 ${activeFolder === dossier.id ? 'text-indigo-600 fill-indigo-200' : 'text-amber-400 fill-amber-100'}`} />
+                <div className="flex flex-col">
+                  <span className={`font-semibold text-sm line-clamp-1 ${activeFolder === dossier.id ? 'text-indigo-900' : 'text-slate-700'}`}>{dossier.procedureName}</span>
+                  <span className="text-xs text-slate-500">{dossier.id}</span>
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Files */}
-        {files.map((file) => (
+        {files.filter(f => activeFolder ? f.tags?.includes(activeFolder) : true).map((file) => (
           <Card key={file.id} className="group border-slate-200 shadow-sm hover:shadow-md transition-all">
             <CardContent className="p-5 flex flex-col items-center text-center">
               <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
