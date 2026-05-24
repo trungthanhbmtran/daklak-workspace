@@ -1,19 +1,47 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Folder, File, Upload, Search, Filter, MoreVertical, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 export function DocumentCabinetClient() {
-  const [files, setFiles] = useState([
-    { id: "f1", name: "CCCD_NguyenVanA.pdf", type: "pdf", size: "2.4 MB", date: "2023-10-12", tags: ["Cá nhân", "Định danh"] },
-    { id: "f2", name: "GiayPhepKinhDoanh_CtyX.pdf", type: "pdf", size: "1.1 MB", date: "2023-10-10", tags: ["Doanh nghiệp"] },
-    { id: "f3", name: "BaoCaoTaiChinh_2023.xlsx", type: "excel", size: "5.6 MB", date: "2023-09-28", tags: ["Tài chính"] },
-    { id: "f4", name: "AnhMatTienCoSo.jpg", type: "image", size: "3.2 MB", date: "2023-09-25", tags: ["Khảo sát"] },
-  ]);
+  const [files, setFiles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchCabinet();
+  }, []);
+
+  const fetchCabinet = async () => {
+    try {
+      setLoading(true);
+      // Gọi API lấy tủ văn bản (giả sử userId test = '1')
+      const res: any = await apiClient.get('/documents/cabinet?userId=1');
+      if (res?.data && res.data.length > 0) {
+        setFiles(res.data);
+      } else {
+        // Fallback mock data nếu DB rỗng để demo UI
+        setFiles([
+          { id: "f1", name: "CCCD_NguyenVanA.pdf", type: "pdf", size: 2400000, createdAt: "2023-10-12", tags: '["Cá nhân", "Định danh"]' },
+          { id: "f2", name: "GiayPhepKinhDoanh_CtyX.pdf", type: "pdf", size: 1100000, createdAt: "2023-10-10", tags: '["Doanh nghiệp"]' },
+        ]);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Không thể tải tủ văn bản");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpload = async () => {
+    toast.success("Mở hộp thoại Upload... (Tính năng gọi /admin/media/request-upload)");
+  };
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -31,7 +59,7 @@ export function DocumentCabinetClient() {
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Tủ văn bản số</h2>
           <p className="text-slate-500 mt-2">Kho lưu trữ tài liệu dùng chung, tái sử dụng cho các thủ tục hành chính.</p>
         </div>
-        <Button className="bg-indigo-600 hover:bg-indigo-700">
+        <Button onClick={handleUpload} className="bg-indigo-600 hover:bg-indigo-700">
           <Upload className="mr-2 h-4 w-4" /> Tải tài liệu lên
         </Button>
       </div>
@@ -71,14 +99,19 @@ export function DocumentCabinetClient() {
                 </Button>
               </div>
               <div className="mb-4 mt-2 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
-                {getFileIcon(file.type)}
+                {getFileIcon(file.type || 'pdf')}
               </div>
-              <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.name}>{file.name}</h4>
-              <p className="text-xs text-slate-500 mt-1">{file.size} • {file.date}</p>
+              <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.name || file.fileName}>{file.name || file.fileName}</h4>
+              <p className="text-xs text-slate-500 mt-1">{Math.round(file.size / 1024 / 1024)} MB • {new Date(file.createdAt || file.date).toLocaleDateString('vi-VN')}</p>
               <div className="flex gap-1 mt-4 justify-center flex-wrap">
-                {file.tags.map(tag => (
-                  <Badge key={tag} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600">{tag}</Badge>
-                ))}
+                {(() => {
+                  try {
+                    const parsedTags = typeof file.tags === 'string' ? JSON.parse(file.tags) : file.tags;
+                    return parsedTags?.map((tag: string) => (
+                      <Badge key={tag} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600">{tag}</Badge>
+                    ));
+                  } catch (e) { return null; }
+                })()}
               </div>
             </CardContent>
           </Card>

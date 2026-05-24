@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { ArrowLeft, CheckCircle2, AlertCircle, Upload, Search, Download, Trash2, Link as LinkIcon, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 export function DossierDetailClient({ dossierId }: { dossierId: string }) {
   // Mock data
@@ -18,40 +20,38 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
     submitDate: "2023-10-15",
   };
 
-  const [components, setComponents] = useState([
-    {
-      id: "comp-1",
-      name: "Đơn đăng ký đề tài",
-      isRequired: true,
-      status: "VALID",
-      attachedFile: "DonDangKy_Form01.pdf",
-      source: "UPLOAD"
-    },
-    {
-      id: "comp-2",
-      name: "Thuyết minh đề tài nghiên cứu",
-      isRequired: true,
-      status: "PENDING_REVIEW",
-      attachedFile: "ThuyetMinh_V1.pdf",
-      source: "UPLOAD"
-    },
-    {
-      id: "comp-3",
-      name: "Bản sao CCCD chủ nhiệm đề tài",
-      isRequired: true,
-      status: "MISSING",
-      attachedFile: null,
-      source: null
-    },
-    {
-      id: "comp-4",
-      name: "Giấy tờ chứng minh năng lực (tùy chọn)",
-      isRequired: false,
-      status: "VALID",
-      attachedFile: "ChungChi_KinhNghiem.pdf",
-      source: "CABINET" // Được lấy từ tủ văn bản
+  const [components, setComponents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDossierAndComponents();
+  }, [dossierId]);
+
+  const fetchDossierAndComponents = async () => {
+    try {
+      setLoading(true);
+      const res: any = await apiClient.get(`/documents/dossiers/${dossierId}/components`);
+      if (res?.data && res.data.length > 0) {
+        setComponents(res.data);
+      } else {
+        // Fallback mock nếu chưa có data trong DB
+        setComponents([
+          { id: "comp-1", name: "Đơn đăng ký đề tài", isRequired: true, status: "VALID", fileUrl: "DonDangKy_Form01.pdf", source: "UPLOAD" },
+          { id: "comp-2", name: "Thuyết minh đề tài nghiên cứu", isRequired: true, status: "PENDING_REVIEW", fileUrl: "ThuyetMinh_V1.pdf", source: "UPLOAD" },
+          { id: "comp-3", name: "Bản sao CCCD", isRequired: true, status: "MISSING", fileUrl: null, source: null },
+          { id: "comp-4", name: "Giấy chứng minh năng lực", isRequired: false, status: "VALID", fileUrl: "ChungChi.pdf", source: "CABINET" }
+        ]);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi tải thành phần hồ sơ");
+    } finally {
+      setLoading(false);
     }
-  ]);
+  };
+
+  const handleUploadClick = () => toast.success("Gọi /admin/media/request-upload...");
+  const handleCabinetClick = () => toast.success("Mở modal chọn file từ Tủ văn bản số...");
 
   const getStatusIcon = (status: string) => {
     switch(status) {
@@ -117,10 +117,10 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                       {comp.isRequired && <span className="text-rose-500 text-sm">*</span>}
                       {getStatusBadge(comp.status)}
                     </h4>
-                    {comp.attachedFile ? (
+                    {comp.fileUrl ? (
                       <div className="flex items-center gap-2 mt-2">
                         <Badge variant="secondary" className="bg-white border border-slate-200 text-indigo-700 hover:bg-slate-100 cursor-pointer">
-                          <FileText className="mr-1 h-3 w-3" /> {comp.attachedFile}
+                          <FileText className="mr-1 h-3 w-3" /> {comp.fileUrl.split('/').pop()}
                         </Badge>
                         {comp.source === 'CABINET' && (
                           <span className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-full">
@@ -135,12 +135,12 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                 </div>
 
                 <div className="flex gap-2 w-full md:w-auto">
-                  {!comp.attachedFile ? (
+                  {!comp.fileUrl ? (
                     <>
-                      <Button variant="outline" size="sm" className="flex-1 md:flex-none border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                      <Button onClick={handleUploadClick} variant="outline" size="sm" className="flex-1 md:flex-none border-indigo-200 text-indigo-700 hover:bg-indigo-50">
                         <Upload className="mr-2 h-3 w-3" /> Tải lên
                       </Button>
-                      <Button variant="secondary" size="sm" className="flex-1 md:flex-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                      <Button onClick={handleCabinetClick} variant="secondary" size="sm" className="flex-1 md:flex-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
                         <LinkIcon className="mr-2 h-3 w-3" /> Từ Tủ VB
                       </Button>
                     </>

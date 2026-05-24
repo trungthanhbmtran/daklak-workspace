@@ -4,7 +4,7 @@ package document;
 
 service DossierService {
   rpc GetDossiers (EmptyRequest) returns (DossierListResponse) {}
-  rpc GetDossier (DossierIdRequest) returns (DossierResponse) {}
+  rpc GetDossier (DossierIdRequest) returns (DossierInfoResponse) {}
   rpc GetComponents (DossierIdRequest) returns (ComponentListResponse) {}
   rpc UpdateComponent (UpdateComponentRequest) returns (ComponentResponse) {}
 }
@@ -22,7 +22,7 @@ message UpdateComponentRequest {
   string source = 4;
 }
 
-message DossierResponse {
+message DossierInfoResponse {
   string id = 1;
   string code = 2;
   string senderName = 3;
@@ -31,7 +31,7 @@ message DossierResponse {
 }
 
 message DossierListResponse {
-  repeated DossierResponse data = 1;
+  repeated DossierInfoResponse data = 1;
 }
 
 message ComponentResponse {
