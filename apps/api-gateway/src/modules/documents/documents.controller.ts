@@ -10,13 +10,19 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @ApiBearerAuth('JWT-auth')
 export class DocumentsController implements OnModuleInit {
   private documentService: any;
+  private cabinetService: any;
+  private dossierService: any;
 
   constructor(
-    @Inject(MICROSERVICES.DOCUMENT.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.DOCUMENT.SYMBOL) private readonly documentClient: any,
+    @Inject(MICROSERVICES.CABINET.SYMBOL) private readonly cabinetClient: any,
+    @Inject(MICROSERVICES.DOSSIER.SYMBOL) private readonly dossierClient: any,
   ) { }
 
   onModuleInit() {
-    this.documentService = this.client.getService(MICROSERVICES.DOCUMENT.SERVICE);
+    this.documentService = this.documentClient.getService(MICROSERVICES.DOCUMENT.SERVICE);
+    this.cabinetService = this.cabinetClient.getService(MICROSERVICES.CABINET.SERVICE);
+    this.dossierService = this.dossierClient.getService(MICROSERVICES.DOSSIER.SERVICE);
   }
 
   @Get('stats')
@@ -111,28 +117,28 @@ export class DocumentsController implements OnModuleInit {
   // --- Cabinet ---
   @Get('cabinet')
   async listCabinetFiles(@Query('userId') userId: string, @Query('orgId') orgId: string) {
-    return firstValueFrom((this.client.getService('CabinetService') as any).ListFiles({ userId, orgId }));
+    return firstValueFrom(this.cabinetService.ListFiles({ userId: userId || "", orgId: orgId || "" }));
   }
 
   @Post('cabinet')
   async addCabinetFile(@Body() body: any) {
-    return firstValueFrom((this.client.getService('CabinetService') as any).AddFile(body));
+    return firstValueFrom(this.cabinetService.AddFile(body));
   }
 
   @Delete('cabinet/:id')
   async deleteCabinetFile(@Param('id') id: string) {
-    return firstValueFrom((this.client.getService('CabinetService') as any).DeleteFile({ id }));
+    return firstValueFrom(this.cabinetService.DeleteFile({ id }));
   }
 
   // --- Components ---
   @Get('dossiers/:id/components')
   async getComponents(@Param('id') id: string) {
-    return firstValueFrom((this.client.getService('DossierService') as any).GetComponents({ id }));
+    return firstValueFrom(this.dossierService.GetComponents({ id }));
   }
 
   @Put('dossiers/components/:compId')
   async updateComponent(@Param('compId') id: string, @Body() body: any) {
-    return firstValueFrom((this.client.getService('DossierService') as any).UpdateComponent({ id, ...body }));
+    return firstValueFrom(this.dossierService.UpdateComponent({ id, ...body }));
   }
 
   @Get(':id')
