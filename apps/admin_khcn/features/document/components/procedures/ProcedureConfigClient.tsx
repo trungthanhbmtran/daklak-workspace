@@ -14,14 +14,14 @@ import { useFileUpload } from "@/hooks/useFileUpload";
 export function ProcedureConfigClient() {
   const [procedures, setProcedures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [newProcName, setNewProcName] = useState("");
   const [newProcCode, setNewProcCode] = useState("");
   const [newProcCategory, setNewProcCategory] = useState("Khoa học công nghệ");
-  const [components, setComponents] = useState<{ id: string, name: string, isRequired: boolean, sampleFileUrl?: string }>([
+  const [components, setComponents] = useState<{ id: string, name: string, isRequired: boolean, sampleFileUrl?: string }[]>([
     { id: "1", name: "Đơn đăng ký", isRequired: true }
   ]);
 
@@ -78,7 +78,7 @@ export function ProcedureConfigClient() {
       if (!mediaInfo) throw new Error("Upload thất bại");
 
       const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
-      
+
       setComponents(components.map(c => c.id === uploadingCompId ? { ...c, sampleFileUrl: fileUrl } : c));
       toast.success("Đã tải biểu mẫu lên!");
     } catch (error) {
@@ -151,7 +151,7 @@ export function ProcedureConfigClient() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-slate-400"/></div>
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-slate-400" /></div>
       ) : (
         <div className="grid gap-6">
           {procedures.length === 0 ? (
@@ -246,20 +246,20 @@ export function ProcedureConfigClient() {
                   <div key={c.id} className="flex items-center gap-2">
                     <span className="text-xs font-mono text-slate-400 w-4">{index + 1}.</span>
                     <div className="flex-1 flex flex-col gap-2">
-                      <Input 
-                        value={c.name} 
-                        onChange={e => handleUpdateComponent(c.id, e.target.value)} 
-                        placeholder="Tên tài liệu (VD: Đơn đăng ký)" 
+                      <Input
+                        value={c.name}
+                        onChange={e => handleUpdateComponent(c.id, e.target.value)}
+                        placeholder="Tên tài liệu (VD: Đơn đăng ký)"
                         className="bg-white"
                       />
                       {c.sampleFileUrl && (
                         <span className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded w-fit">
-                          <Paperclip className="h-3 w-3"/> Mẫu: {c.sampleFileUrl.split('/').pop()}
+                          <Paperclip className="h-3 w-3" /> Mẫu: {c.sampleFileUrl.split('/').pop()}
                         </span>
                       )}
                     </div>
-                    <Button 
-                      onClick={() => handleUploadSampleClick(c.id)} 
+                    <Button
+                      onClick={() => handleUploadSampleClick(c.id)}
                       disabled={isUploading && uploadingCompId === c.id}
                       variant="outline"
                       size="sm"
@@ -268,8 +268,8 @@ export function ProcedureConfigClient() {
                     >
                       {isUploading && uploadingCompId === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     </Button>
-                    <Button 
-                      onClick={() => handleToggleRequired(c.id)} 
+                    <Button
+                      onClick={() => handleToggleRequired(c.id)}
                       variant={c.isRequired ? "default" : "outline"}
                       size="sm"
                       className={`shrink-0 ${c.isRequired ? "bg-rose-100 text-rose-700 hover:bg-rose-200" : "text-slate-500"}`}
@@ -287,12 +287,12 @@ export function ProcedureConfigClient() {
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
             <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700">
-              {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Save className="h-4 w-4 mr-2"/>} Lưu Mẫu hồ sơ
+              {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Lưu Mẫu hồ sơ
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
+
       <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
     </div>
   );
