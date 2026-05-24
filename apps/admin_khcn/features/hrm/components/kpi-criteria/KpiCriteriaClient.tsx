@@ -24,6 +24,11 @@ export function KpiCriteriaClient() {
     weight: 10,
     baseScore: 100,
     scoringMethod: "MANUAL",
+    difficulty: "NORMAL",
+    difficultyMultiplier: 1.0,
+    bonusThresholdDays: 0,
+    bonusPerDay: 0,
+    penaltyPerDay: 0,
   });
 
   const fetchData = async () => {
@@ -51,6 +56,11 @@ export function KpiCriteriaClient() {
         weight: item.weight || 10,
         baseScore: item.baseScore || 100,
         scoringMethod: item.scoringMethod || "MANUAL",
+        difficulty: item.difficulty || "NORMAL",
+        difficultyMultiplier: item.difficultyMultiplier || 1.0,
+        bonusThresholdDays: item.bonusThresholdDays || 0,
+        bonusPerDay: item.bonusPerDay || 0,
+        penaltyPerDay: item.penaltyPerDay || 0,
       });
     } else {
       setEditingId(null);
@@ -60,6 +70,11 @@ export function KpiCriteriaClient() {
         weight: 10,
         baseScore: 100,
         scoringMethod: "MANUAL",
+        difficulty: "NORMAL",
+        difficultyMultiplier: 1.0,
+        bonusThresholdDays: 0,
+        bonusPerDay: 0,
+        penaltyPerDay: 0,
       });
     }
     setIsModalOpen(true);
@@ -142,8 +157,14 @@ export function KpiCriteriaClient() {
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-600">
                     <Calculator className="w-4 h-4 text-amber-500" />
-                    <span>Điểm chuẩn: <strong className="text-slate-800">{item.baseScore}</strong> | Trọng số mặc định: <strong className="text-slate-800">{item.weight}%</strong></span>
+                    <span>Điểm: <strong className="text-slate-800">{item.baseScore}</strong> | Độ khó: <strong className="text-slate-800">{item.difficulty === 'EASY' ? 'Dễ (x' + item.difficultyMultiplier + ')' : item.difficulty === 'NORMAL' ? 'Bình thường (x' + item.difficultyMultiplier + ')' : item.difficulty === 'HARD' ? 'Khó (x' + item.difficultyMultiplier + ')' : 'Phức tạp (x' + item.difficultyMultiplier + ')'}</strong></span>
                   </div>
+                  {(item.bonusPerDay > 0 || item.penaltyPerDay > 0) && (
+                    <div className="bg-slate-100 rounded-lg p-2 flex gap-4 text-xs font-medium">
+                      {item.bonusPerDay > 0 && <span className="text-emerald-600">Thưởng: +{item.bonusPerDay}đ/ngày (Trước {item.bonusThresholdDays} ngày)</span>}
+                      {item.penaltyPerDay > 0 && <span className="text-rose-600">Phạt: -{item.penaltyPerDay}đ/ngày trễ</span>}
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -199,6 +220,33 @@ export function KpiCriteriaClient() {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="font-bold text-slate-700">Độ khó (Difficulty)</Label>
+                <Select value={formData.difficulty} onValueChange={(val) => setFormData({ ...formData, difficulty: val })}>
+                  <SelectTrigger className="h-12 bg-white rounded-xl font-medium">
+                    <SelectValue placeholder="Mức độ" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="EASY">Cơ bản / Dễ</SelectItem>
+                    <SelectItem value="NORMAL">Bình thường</SelectItem>
+                    <SelectItem value="HARD">Nâng cao / Khó</SelectItem>
+                    <SelectItem value="COMPLEX">Phức tạp</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="font-bold text-slate-700">Hệ số độ khó</Label>
+                <Input 
+                  type="number" 
+                  step="0.1"
+                  value={formData.difficultyMultiplier} 
+                  onChange={(e) => setFormData({ ...formData, difficultyMultiplier: Number(e.target.value) })} 
+                  className="h-12 bg-white rounded-xl" 
+                />
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label className="font-bold text-slate-700">Mô hình tính điểm</Label>
               <Select value={formData.scoringMethod} onValueChange={(val) => setFormData({ ...formData, scoringMethod: val })}>
@@ -211,6 +259,30 @@ export function KpiCriteriaClient() {
                   <SelectItem value="AUTO_RESULT">Tính điểm tự động (Dựa trên Số lượng/Kết quả đầu ra)</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="grid grid-cols-3 gap-4 p-4 bg-slate-100 rounded-xl border border-slate-200">
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-slate-700 uppercase">Hoàn thành sớm</Label>
+                <div className="flex items-center gap-2">
+                  <Input type="number" value={formData.bonusThresholdDays} onChange={(e) => setFormData({ ...formData, bonusThresholdDays: Number(e.target.value) })} className="h-10 bg-white" />
+                  <span className="text-xs text-slate-500 font-medium">ngày</span>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-emerald-700 uppercase">Điểm thưởng/ngày</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-emerald-500 font-bold">+</span>
+                  <Input type="number" value={formData.bonusPerDay} onChange={(e) => setFormData({ ...formData, bonusPerDay: Number(e.target.value) })} className="h-10 bg-white text-emerald-700" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-bold text-rose-700 uppercase">Điểm phạt/ngày trễ</Label>
+                <div className="flex items-center gap-2">
+                  <span className="text-rose-500 font-bold">-</span>
+                  <Input type="number" value={formData.penaltyPerDay} onChange={(e) => setFormData({ ...formData, penaltyPerDay: Number(e.target.value) })} className="h-10 bg-white text-rose-700" />
+                </div>
+              </div>
             </div>
 
             <div className="space-y-2">

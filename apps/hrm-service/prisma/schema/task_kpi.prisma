@@ -73,15 +73,22 @@ model KpiPeriod {
 }
 
 model KpiCriteria {
-  id            Int                   @id @default(autoincrement())
-  name          String                @map("name")
-  description   String?               @db.Text
-  weight        Float                 @default(1.0) @map("weight")
-  baseScore     Float?                @map("base_score")
-  scoringMethod String                @default("MANUAL") @map("scoring_method")
-  categoryId    Int?                  @map("category_id")
+  id                   Int                   @id @default(autoincrement())
+  name                 String                @map("name")
+  description          String?               @db.Text
+  weight               Float                 @default(1.0) @map("weight")
+  baseScore            Float?                @map("base_score")
+  scoringMethod        String                @default("MANUAL") @map("scoring_method")
+  categoryId           Int?                  @map("category_id")
   
-  details       KpiEvaluationDetail[]
+  // Mở rộng cấu hình Độ khó & Thưởng phạt bằng Điểm tuyệt đối
+  difficulty           String                @default("NORMAL") @map("difficulty")
+  difficultyMultiplier Float                 @default(1.0) @map("difficulty_multiplier")
+  bonusThresholdDays   Int                   @default(0) @map("bonus_threshold_days")
+  bonusPerDay          Float                 @default(0) @map("bonus_per_day")
+  penaltyPerDay        Float                 @default(0) @map("penalty_per_day")
+  
+  details              KpiEvaluationDetail[]
 
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")

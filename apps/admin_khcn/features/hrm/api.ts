@@ -336,9 +336,9 @@ export const hrmTasksApi = {
 };
 
 let mockKpiCriteria = [
-  { id: 1, name: "Thái độ làm việc", description: "Đánh giá mức độ tích cực, chủ động trong công việc. 100đ = Luôn tích cực, 50đ = Cần nhắc nhở.", weight: 10, baseScore: 100, scoringMethod: "MANUAL", categoryId: null },
-  { id: 2, name: "Tiến độ công việc", description: "Tính tự động dựa trên số ngày trễ hạn.", weight: 50, baseScore: 100, scoringMethod: "AUTO_DEADLINE", categoryId: null },
-  { id: 3, name: "Chất lượng sản phẩm", description: "Đánh giá qua số lỗi hoặc feedback khách hàng.", weight: 40, baseScore: 100, scoringMethod: "AUTO_RESULT", categoryId: null }
+  { id: 1, name: "Thái độ làm việc", description: "Đánh giá mức độ tích cực, chủ động trong công việc. 100đ = Luôn tích cực, 50đ = Cần nhắc nhở.", weight: 10, baseScore: 100, scoringMethod: "MANUAL", categoryId: null, difficulty: "NORMAL", difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 },
+  { id: 2, name: "Tiến độ công việc", description: "Tính tự động dựa trên số ngày trễ hạn.", weight: 50, baseScore: 100, scoringMethod: "AUTO_DEADLINE", categoryId: null, difficulty: "NORMAL", difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 },
+  { id: 3, name: "Chất lượng sản phẩm", description: "Đánh giá qua số lỗi hoặc feedback khách hàng.", weight: 40, baseScore: 100, scoringMethod: "AUTO_RESULT", categoryId: null, difficulty: "NORMAL", difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
 ];
 
 export const hrmKpiCriteriaApi = {
