@@ -7,6 +7,7 @@ export interface NotificationItem {
   body: string;
   createdAt: string;
   read: boolean;
+  type?: string;
 }
 
 export async function getNotifications(): Promise<NotificationItem[]> {

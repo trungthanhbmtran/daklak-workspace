@@ -154,7 +154,7 @@ export function EmployeeListClient() {
                   </TableCell>
                 </TableRow>
               ) : (
-                employees.map((emp) => {
+                employees.map((emp: HrmEmployee) => {
                   const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(" ") || "—";
                   return (
                     <TableRow

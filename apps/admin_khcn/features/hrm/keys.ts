@@ -7,4 +7,7 @@ export const hrmKeys = {
   list: (params: Record<string, unknown>) => [...hrmKeys.employees(), "list", params] as const,
   search: (keyword: string) => [...hrmKeys.employees(), "search", keyword] as const,
   detail: (id: number) => [...hrmKeys.employees(), "detail", id] as const,
+  departments: () => [...hrmKeys.all, "departments"] as const,
+  kpis: () => [...hrmKeys.all, "kpis"] as const,
+  plans: () => [...hrmKeys.all, "plans"] as const,
 };

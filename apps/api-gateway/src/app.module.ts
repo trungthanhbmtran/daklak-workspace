@@ -10,6 +10,7 @@ import { AppController } from './modules/app/app.controller';
 import { MediaModule } from './modules/media/media.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -25,7 +26,8 @@ import { TranslateModule } from './modules/translate/translate.module';
     PostsModule,
     MediaModule,
     WorkflowModule,
-    TranslateModule
+    TranslateModule,
+    AiModule
   ],
   controllers: [AppController],
   providers: [],

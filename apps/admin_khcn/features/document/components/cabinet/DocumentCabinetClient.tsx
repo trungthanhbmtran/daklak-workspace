@@ -143,7 +143,7 @@ export function DocumentCabinetClient() {
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Folders (Dossiers) */}
         <div className="col-span-1 md:col-span-4 flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
-          <Card 
+          <Card
             onClick={() => setActiveFolder(null)}
             className={`min-w-[200px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === null ? 'bg-indigo-50 border-indigo-300' : ''}`}
           >
@@ -153,8 +153,8 @@ export function DocumentCabinetClient() {
             </CardContent>
           </Card>
           {dossiers.map((dossier, idx) => (
-            <Card 
-              key={idx} 
+            <Card
+              key={idx}
               onClick={() => setActiveFolder(dossier.id)}
               className={`min-w-[250px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === dossier.id ? 'bg-indigo-50 border-indigo-300' : ''}`}
             >

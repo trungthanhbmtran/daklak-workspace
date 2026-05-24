@@ -281,7 +281,7 @@ export function CreateUserModal({
                       {/* Kết quả tìm kiếm HRM */}
                       {hrmKeyword.trim().length >= 2 && hrmEmployees.length > 0 && (
                         <div className="rounded-md border bg-card max-h-[220px] overflow-y-auto shadow-md">
-                          {hrmEmployees.map((emp) => (
+                          {hrmEmployees.map((emp: HrmEmployee) => (
                             <button
                               key={emp.id}
                               type="button"
