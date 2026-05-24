@@ -140,10 +140,12 @@ export function DocumentCabinetClient() {
                 </Button>
               </div>
               <div className="mb-4 mt-2 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
-                {getFileIcon(file.type || 'pdf')}
+                {getFileIcon(file.fileType || file.type || 'pdf')}
               </div>
-              <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.name || file.fileName}>{file.name || file.fileName}</h4>
-              <p className="text-xs text-slate-500 mt-1">{Math.round(file.size / 1024 / 1024)} MB • {new Date(file.createdAt || file.date).toLocaleDateString('vi-VN')}</p>
+              <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.fileName || file.name}>{file.fileName || file.name}</h4>
+              <p className="text-xs text-slate-500 mt-1">
+                {Math.round((file.fileSize || file.size || 0) / 1024 / 1024 * 10) / 10} MB • {new Date(file.createdAt || file.date).toLocaleDateString('vi-VN')}
+              </p>
               <div className="flex gap-1 mt-4 justify-center flex-wrap">
                 {(() => {
                   try {
