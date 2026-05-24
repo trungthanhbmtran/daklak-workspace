@@ -141,6 +141,11 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.dossierService.UpdateComponent({ id, ...body }));
   }
 
+  @Post('dossiers/from-template')
+  async createDossierFromTemplate(@Body() body: { procedureId: string, senderName: string }) {
+    return firstValueFrom(this.dossierService.CreateDossierFromTemplate(body));
+  }
+
   @Get(':id')
   async getDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.GetDocument({ id }));

@@ -1,98 +1,242 @@
 "use client";
 
-import React, { useState } from "react";
-import { Plus, Settings2, FileText, Trash2, Edit } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, Settings2, FileText, Trash2, Edit, Save, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import apiClient from "@/lib/axiosInstance";
+import { toast } from "sonner";
 
 export function ProcedureConfigClient() {
-  const [procedures, setProcedures] = useState([
-    {
-      id: "proc-1",
-      name: "Đăng ký đề tài Khoa học công nghệ cấp Tỉnh",
-      domain: "Khoa học công nghệ",
-      components: [
-        { id: "comp-1", name: "Đơn đăng ký đề tài", isRequired: true },
-        { id: "comp-2", name: "Thuyết minh đề tài nghiên cứu", isRequired: true },
-        { id: "comp-3", name: "Bản sao CCCD chủ nhiệm đề tài", isRequired: true },
-        { id: "comp-4", name: "Giấy tờ chứng minh năng lực (tùy chọn)", isRequired: false },
-      ]
-    },
-    {
-      id: "proc-2",
-      name: "Cấp giấy phép hoạt động đo lường",
-      domain: "Đo lường, Chất lượng",
-      components: [
-        { id: "comp-5", name: "Đơn đề nghị cấp giấy phép", isRequired: true },
-        { id: "comp-6", name: "Sơ đồ mặt bằng cơ sở", isRequired: true },
-      ]
-    }
+  const [procedures, setProcedures] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newProcName, setNewProcName] = useState("");
+  const [newProcCode, setNewProcCode] = useState("");
+  const [newProcCategory, setNewProcCategory] = useState("Khoa học công nghệ");
+  const [components, setComponents] = useState<{ id: string, name: string, isRequired: boolean }[]>([
+    { id: "1", name: "Đơn đăng ký", isRequired: true }
   ]);
 
+  useEffect(() => {
+    fetchProcedures();
+  }, []);
+
+  const fetchProcedures = async () => {
+    try {
+      setLoading(true);
+      const res: any = await apiClient.get('/documents/procedures/list');
+      if (res?.data) {
+        setProcedures(res.data);
+      }
+    } catch (e) {
+      toast.error("Không thể tải danh sách TTHC");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddComponent = () => {
+    setComponents([...components, { id: Date.now().toString(), name: "", isRequired: true }]);
+  };
+
+  const handleUpdateComponent = (id: string, name: string) => {
+    setComponents(components.map(c => c.id === id ? { ...c, name } : c));
+  };
+
+  const handleToggleRequired = (id: string) => {
+    setComponents(components.map(c => c.id === id ? { ...c, isRequired: !c.isRequired } : c));
+  };
+
+  const handleRemoveComponent = (id: string) => {
+    setComponents(components.filter(c => c.id !== id));
+  };
+
+  const handleSubmit = async () => {
+    if (!newProcName || !newProcCode) {
+      toast.error("Vui lòng điền đủ Tên và Mã thủ tục");
+      return;
+    }
+    const validComponents = components.filter(c => c.name.trim() !== "");
+    if (validComponents.length === 0) {
+      toast.error("Vui lòng thêm ít nhất 1 thành phần hồ sơ");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await apiClient.post('/documents/procedures', {
+        name: newProcName,
+        code: newProcCode,
+        category: newProcCategory,
+        requiredDocs: validComponents
+      });
+      toast.success("Đã lưu Mẫu hồ sơ thành công!");
+      setIsModalOpen(false);
+      fetchProcedures();
+    } catch (e) {
+      console.error(e);
+      toast.error("Lỗi khi lưu Mẫu hồ sơ");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const openCreateModal = () => {
+    setNewProcName("");
+    setNewProcCode(`TTHC-${Date.now().toString().slice(-4)}`);
+    setComponents([{ id: "1", name: "Đơn đăng ký", isRequired: true }]);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Bạn có chắc chắn muốn xóa mẫu hồ sơ này?")) return;
+    try {
+      await apiClient.delete(`/documents/procedures/${id}`);
+      toast.success("Xóa thành công");
+      fetchProcedures();
+    } catch (e) {
+      toast.error("Xóa thất bại");
+    }
+  };
+
   return (
-    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
+    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Cấu hình Thủ tục hành chính</h2>
-          <p className="text-slate-500 mt-2">Quản lý danh sách các thủ tục và biểu mẫu/thành phần hồ sơ yêu cầu.</p>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Cấu hình Mẫu hồ sơ (TTHC)</h2>
+          <p className="text-slate-500 mt-2">Định nghĩa danh sách các thủ tục và biểu mẫu, thành phần file yêu cầu.</p>
         </div>
-        <Button className="bg-indigo-600 hover:bg-indigo-700">
-          <Plus className="mr-2 h-4 w-4" /> Thêm TTHC mới
+        <Button onClick={openCreateModal} className="bg-indigo-600 hover:bg-indigo-700">
+          <Plus className="mr-2 h-4 w-4" /> Thêm Mẫu mới
         </Button>
       </div>
 
-      <div className="grid gap-6">
-        {procedures.map((proc) => (
-          <Card key={proc.id} className="border-slate-200 shadow-sm hover:shadow-md transition-all">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div>
-                <CardTitle className="text-xl font-bold text-slate-800">{proc.name}</CardTitle>
-                <div className="flex items-center gap-2 mt-2">
-                  <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">
-                    {proc.domain}
-                  </Badge>
-                  <span className="text-sm text-slate-500">{proc.components.length} thành phần hồ sơ</span>
+      {loading ? (
+        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-slate-400"/></div>
+      ) : (
+        <div className="grid gap-6">
+          {procedures.length === 0 ? (
+            <p className="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">Chưa có Mẫu hồ sơ nào được định nghĩa.</p>
+          ) : procedures.map((proc) => (
+            <Card key={proc.id} className="border-slate-200 shadow-sm hover:shadow-md transition-all">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="text-slate-500 bg-white">{proc.code}</Badge>
+                    <Badge variant="outline" className="text-indigo-600 border-indigo-200 bg-indigo-50">
+                      {proc.category}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl font-bold text-slate-800">{proc.name}</CardTitle>
                 </div>
-              </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon" className="text-slate-500 hover:text-indigo-600">
-                  <Edit className="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="icon" className="text-slate-500 hover:text-rose-600">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="mt-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <div className="flex justify-between items-center mb-4">
-                  <h4 className="font-semibold text-slate-700 flex items-center">
-                    <FileText className="mr-2 h-4 w-4 text-slate-400" />
-                    Thành phần hồ sơ yêu cầu
-                  </h4>
-                  <Button variant="outline" size="sm" className="h-8 text-xs">
-                    <Plus className="mr-1 h-3 w-3" /> Thêm thành phần
+                <div className="flex gap-2">
+                  <Button variant="ghost" size="icon" className="text-slate-500 hover:text-indigo-600">
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button onClick={() => handleDelete(proc.id)} variant="ghost" size="icon" className="text-slate-500 hover:text-rose-600">
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-                <ul className="space-y-2">
-                  {proc.components.map((comp) => (
-                    <li key={comp.id} className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
-                      <span className="text-sm font-medium text-slate-700">{comp.name}</span>
-                      {comp.isRequired ? (
-                        <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Bắt buộc</Badge>
-                      ) : (
-                        <Badge variant="outline" className="text-slate-500">Tùy chọn</Badge>
-                      )}
-                    </li>
-                  ))}
-                </ul>
+              </CardHeader>
+              <CardContent>
+                <div className="mt-4 bg-slate-50 rounded-xl p-4 border border-slate-100">
+                  <div className="flex justify-between items-center mb-4">
+                    <h4 className="font-semibold text-slate-700 flex items-center">
+                      <FileText className="mr-2 h-4 w-4 text-slate-400" />
+                      Thành phần hồ sơ yêu cầu ({proc.requiredDocs?.length || 0})
+                    </h4>
+                  </div>
+                  <ul className="space-y-2">
+                    {proc.requiredDocs?.map((comp: any, idx: number) => (
+                      <li key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
+                        <span className="text-sm font-medium text-slate-700">{comp.name}</span>
+                        {comp.isRequired ? (
+                          <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Bắt buộc</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-slate-500">Tùy chọn</Badge>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Modal Thêm Mẫu hồ sơ */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tạo Mẫu hồ sơ (Thủ tục) mới</DialogTitle>
+            <DialogDescription>Định nghĩa tên thủ tục và danh sách các file yêu cầu người nộp phải chuẩn bị.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Mã TTHC *</label>
+                <Input value={newProcCode} onChange={e => setNewProcCode(e.target.value)} placeholder="VD: TTHC-001" />
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-700">Lĩnh vực</label>
+                <Input value={newProcCategory} onChange={e => setNewProcCategory(e.target.value)} placeholder="Khoa học công nghệ" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700">Tên Mẫu hồ sơ / Thủ tục *</label>
+              <Input value={newProcName} onChange={e => setNewProcName(e.target.value)} placeholder="VD: Đăng ký đề tài KHCN" />
+            </div>
+
+            <div className="mt-6">
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm font-medium text-slate-700">Các thành phần hồ sơ yêu cầu</label>
+                <Button onClick={handleAddComponent} variant="outline" size="sm" className="h-8 text-xs">
+                  <Plus className="mr-1 h-3 w-3" /> Thêm tệp
+                </Button>
+              </div>
+              <div className="space-y-2 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                {components.map((c, index) => (
+                  <div key={c.id} className="flex items-center gap-2">
+                    <span className="text-xs font-mono text-slate-400 w-4">{index + 1}.</span>
+                    <Input 
+                      value={c.name} 
+                      onChange={e => handleUpdateComponent(c.id, e.target.value)} 
+                      placeholder="Tên tài liệu (VD: Đơn đăng ký)" 
+                      className="flex-1 bg-white"
+                    />
+                    <Button 
+                      onClick={() => handleToggleRequired(c.id)} 
+                      variant={c.isRequired ? "default" : "outline"}
+                      size="sm"
+                      className={c.isRequired ? "bg-rose-100 text-rose-700 hover:bg-rose-200" : "text-slate-500"}
+                    >
+                      {c.isRequired ? "Bắt buộc" : "Tùy chọn"}
+                    </Button>
+                    <Button onClick={() => handleRemoveComponent(c.id)} variant="ghost" size="icon" className="text-slate-400 hover:text-rose-600">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="mt-6">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
+            <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700">
+              {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin"/> : <Save className="h-4 w-4 mr-2"/>} Lưu Mẫu hồ sơ
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }

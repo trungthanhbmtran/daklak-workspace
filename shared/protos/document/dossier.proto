@@ -7,6 +7,12 @@ service DossierService {
   rpc GetDossier (DossierIdRequest) returns (DossierInfoResponse) {}
   rpc GetComponents (DossierIdRequest) returns (ComponentListResponse) {}
   rpc UpdateComponent (UpdateComponentRequest) returns (ComponentResponse) {}
+  rpc CreateDossierFromTemplate (CreateDossierFromTemplateRequest) returns (DossierInfoResponse) {}
+}
+
+message CreateDossierFromTemplateRequest {
+  string procedureId = 1;
+  string senderName = 2;
 }
 
 message EmptyRequest {}

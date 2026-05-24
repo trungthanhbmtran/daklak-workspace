@@ -27,4 +27,9 @@ export class DossiersController {
   async updateComponent(data: any) {
     return this.dossiersService.updateComponent(data.id, data);
   }
+
+  @GrpcMethod('DossierService', 'CreateDossierFromTemplate')
+  async createDossierFromTemplate(data: { procedureId: string, senderName: string }) {
+    return this.dossiersService.createDossierFromTemplate(data.procedureId, data.senderName);
+  }
 }
