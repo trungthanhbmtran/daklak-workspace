@@ -219,16 +219,27 @@ export function useCreateMasterPlan() {
 
     setIsGeneratingAI(true);
     try {
-      const prompt = `Bạn là một chuyên gia quản trị dự án, am hiểu về OKR và WBS.
-Tôi đang tạo một Kế hoạch:
+      let modelContext = "";
+      if (plan.type === "OKR") {
+        modelContext = "Tôi đang xây dựng kế hoạch theo mô hình OKR (Objective and Key Results). Hãy sinh ra các 'Kết quả then chốt' (Key Results) đo lường được để đạt được Mục tiêu (Objective) trên.";
+      } else if (plan.type === "PROJECT") {
+        modelContext = "Tôi đang xây dựng kế hoạch theo mô hình Quản lý Dự án (Project Management). Hãy sinh ra các 'Nhiệm vụ / Milestones' theo từng giai đoạn (Phân tích, Thiết kế, Triển khai, v.v.).";
+      } else {
+        modelContext = "Tôi đang xây dựng một Kế hoạch Tổng thể. Hãy phân rã công việc theo mô trúc WBS (Work Breakdown Structure).";
+      }
+
+      const prompt = `Bạn là một chuyên gia quản trị dự án cấp cao.
+${modelContext}
+
+Thông tin Kế hoạch:
 Tiêu đề: "${plan.title}"
 Mục tiêu: "${plan.objective}"
 
-Hãy sinh ra cho tôi một danh sách 5-10 phân việc (tasks) quan trọng nhất để hoàn thành kế hoạch này.
+Hãy sinh ra cho tôi một danh sách 5-10 phân việc quan trọng nhất.
 Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`json) là một mảng các đối tượng:
 [
   {
-    "title": "Tên công việc",
+    "title": "Tên công việc / Kết quả then chốt",
     "description": "Mô tả chi tiết",
     "priority": "HIGH",
     "weight": 10
