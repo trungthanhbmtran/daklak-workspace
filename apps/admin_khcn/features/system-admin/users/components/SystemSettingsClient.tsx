@@ -28,7 +28,7 @@ export function SystemSettingsClient() {
 
   const fetchConfigs = async () => {
     try {
-      const res = await apiClient.get('/admin/system-configs') as any;
+      const res = await apiClient.get('/system-configs') as any;
       if (res.status === 'success' && res.data) {
         const map: Record<string, string> = {};
         res.data.forEach((c: any) => {
@@ -84,7 +84,7 @@ export function SystemSettingsClient() {
     // Sort before save
     const sorted = [...aiProviders].sort((a, b) => a.priority - b.priority);
     try {
-      const res = await apiClient.put('/admin/system-configs', {
+      const res = await apiClient.put('/system-configs', {
         key: 'AI_PROVIDERS',
         value: JSON.stringify(sorted),
         description: 'Cấu hình AI Đa nền tảng & Cơ chế Failover'
@@ -106,7 +106,7 @@ export function SystemSettingsClient() {
   const handleSaveTranslation = async () => {
     setIsSaving(true);
     try {
-      const res = await apiClient.put('/admin/system-configs', {
+      const res = await apiClient.put('/system-configs', {
         key: 'TRANSLATE_SERVICE',
         value: configs['TRANSLATE_SERVICE'] || 'GOOGLE',
         description: 'Dịch vụ dịch thuật'
