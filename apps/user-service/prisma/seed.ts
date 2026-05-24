@@ -556,6 +556,7 @@ async function main() {
     { code: 'DOC_MENU_CATEGORIES', name: 'Danh mục dùng chung', route: 'categories', icon: 'settings-outline', order: 10, res: 'DOC_CATEGORIES' },
     { code: 'DOC_MENU_PROCEDURES', name: 'Thủ tục hành chính', route: 'procedures', icon: 'briefcase-outline', order: 11, res: 'DOC_INCOMING' },
     { code: 'DOC_MENU_DOSSIERS', name: 'Hồ sơ một cửa', route: 'dossiers', icon: 'folder-open-outline', order: 12, res: 'DOC_INCOMING' },
+    { code: 'DOC_MENU_CABINET', name: 'Tủ văn bản số', route: 'cabinet', icon: 'server-outline', order: 13, res: 'DOC_INCOMING' },
   ];
 
   for (const { res, ...m } of docMenus) {
@@ -581,6 +582,7 @@ async function main() {
     { code: 'HRM_MENU_PLANS', name: 'Chủ trương & Kế hoạch', route: 'plans', icon: 'layers-outline', order: 2, res: 'HRM_EMPLOYEE' },
     { code: 'HRM_MENU_TASKS', name: 'Phân công & Giao việc', route: 'tasks', icon: 'list-outline', order: 3, res: 'HRM_EMPLOYEE' },
     { code: 'HRM_MENU_KPI', name: 'Đánh giá Năng lực (KPI)', route: 'kpi', icon: 'settings-outline', order: 4, res: 'HRM_EMPLOYEE' },
+    { code: 'HRM_MENU_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'notifications-outline', order: 5, res: 'HRM_EMPLOYEE' },
   ];
 
   for (const { res, ...m } of hrmMenus) {
