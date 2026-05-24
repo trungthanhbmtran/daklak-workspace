@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { LayoutTemplate, Plus, Trash2, Save, Users, Target, Activity, Settings2, Clock, CheckCircle2 } from "lucide-react";
+import { LayoutTemplate, Plus, Trash2, Save, Users, Target, Activity, ArrowLeft, Settings2, Clock, CheckCircle2 } from "lucide-react";
 import { hrmPlansApi, hrmTasksApi } from "@/features/hrm/api";
 import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { toast } from "sonner";
@@ -34,11 +34,11 @@ export function CreateMasterPlanClient() {
 
   // Task Data
   const [tasks, setTasks] = useState<any[]>([
-    { 
-      title: '', 
-      description: '', 
-      priority: 'NORMAL', 
-      assigneeCode: '', 
+    {
+      title: '',
+      description: '',
+      priority: 'NORMAL',
+      assigneeCode: '',
       dueDate: '',
       baseScore: 10,
       weight: 100,
@@ -52,7 +52,7 @@ export function CreateMasterPlanClient() {
   // Modal State for Assignee Selection
   const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
   const [currentTaskIndex, setCurrentTaskIndex] = useState<number | null>(null);
-  
+
   // Fake data for assignee selection
   const departments = ["Phòng Kế hoạch", "Phòng Hành chính", "Phòng Chuyên môn", "Ban Giám đốc"];
   const fields = ["Chuyển đổi số", "Tổ chức cán bộ", "Tài chính", "Đầu tư"];
@@ -73,7 +73,7 @@ export function CreateMasterPlanClient() {
   };
 
   const addTask = () => {
-    setTasks([...tasks, { 
+    setTasks([...tasks, {
       title: '', description: '', priority: 'NORMAL', assigneeCode: '', dueDate: '',
       baseScore: 10, weight: 10, scoringMethod: 'MANUAL', bonusPerDay: 0, penaltyPerDay: 0, supervisorCode: ''
     }]);
@@ -197,7 +197,7 @@ export function CreateMasterPlanClient() {
                     className="h-14 text-lg font-bold bg-slate-50 focus:bg-white rounded-xl border-slate-200"
                   />
                 </div>
-                
+
                 <div className="space-y-2 md:col-span-2">
                   <Label className="font-bold text-slate-700">Mục tiêu Cốt lõi (Objective - O) <span className="text-rose-500">*</span></Label>
                   <Textarea
@@ -231,7 +231,7 @@ export function CreateMasterPlanClient() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="mt-8 flex justify-end border-t border-slate-100 pt-6">
                 <Button onClick={() => setActiveTab("kpi")} className="h-11 bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8">
                   Tiếp theo: Phân rã Mục tiêu <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
@@ -263,7 +263,7 @@ export function CreateMasterPlanClient() {
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
-                
+
                 <CardContent className="p-0">
                   <div className="grid grid-cols-1 lg:grid-cols-12">
                     {/* Phần 1: Thông tin Task & Phân công */}
@@ -272,26 +272,26 @@ export function CreateMasterPlanClient() {
                         <span className="bg-indigo-100 text-indigo-700 text-xs font-black px-2 py-1 rounded-md">KR {idx + 1}</span>
                         <h4 className="font-bold text-slate-800">Mục tiêu con / Nhiệm vụ</h4>
                       </div>
-                      
+
                       <div className="space-y-4">
-                        <Input 
-                          placeholder="VD: Triển khai thành công hệ thống ERP cho 100% nhân sự" 
-                          value={task.title} 
-                          onChange={e => handleTaskChange(idx, 'title', e.target.value)} 
-                          className="h-12 text-base font-semibold bg-slate-50/50 rounded-xl" 
+                        <Input
+                          placeholder="VD: Triển khai thành công hệ thống ERP cho 100% nhân sự"
+                          value={task.title}
+                          onChange={e => handleTaskChange(idx, 'title', e.target.value)}
+                          className="h-12 text-base font-semibold bg-slate-50/50 rounded-xl"
                         />
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label className="text-xs font-semibold text-slate-500 flex items-center gap-1">
                               <Users className="w-3 h-3" /> Người thực hiện (Assignee)
                             </Label>
                             <div className="flex gap-2">
-                              <Input 
-                                value={task.assigneeCode} 
-                                readOnly 
-                                placeholder="Chọn nhân sự..." 
-                                className="h-10 bg-slate-50 cursor-pointer" 
+                              <Input
+                                value={task.assigneeCode}
+                                readOnly
+                                placeholder="Chọn nhân sự..."
+                                className="h-10 bg-slate-50 cursor-pointer"
                                 onClick={() => openAssigneeModal(idx)}
                               />
                               <Button variant="outline" onClick={() => openAssigneeModal(idx)} className="h-10 px-3 shrink-0">Chọn</Button>
@@ -313,7 +313,7 @@ export function CreateMasterPlanClient() {
                         <Settings2 className="w-4 h-4 text-emerald-600" />
                         <h4 className="font-bold text-slate-800">Cấu hình tính điểm (KPI / Score)</h4>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-x-4 gap-y-4">
                         <div className="space-y-1.5">
                           <Label className="text-xs text-slate-500 font-medium">Trọng số (%)</Label>
@@ -326,7 +326,7 @@ export function CreateMasterPlanClient() {
                           <Label className="text-xs text-slate-500 font-medium">Điểm chuẩn (Base)</Label>
                           <Input type="number" value={task.baseScore} onChange={e => handleTaskChange(idx, 'baseScore', e.target.value)} className="h-9" />
                         </div>
-                        
+
                         <div className="col-span-2 space-y-1.5">
                           <Label className="text-xs text-slate-500 font-medium">Cách tính điểm</Label>
                           <Select value={task.scoringMethod} onValueChange={(val) => handleTaskChange(idx, 'scoringMethod', val)}>
@@ -423,8 +423,8 @@ export function CreateMasterPlanClient() {
                       <td className="px-4 py-3 font-bold text-slate-800">{emp.name}</td>
                       <td className="px-4 py-3 text-slate-600">{emp.dept}</td>
                       <td className="px-4 py-3 text-right">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           className="bg-white text-indigo-600 border border-indigo-200 hover:bg-indigo-600 hover:text-white"
                           onClick={() => selectAssignee(emp.code)}
                         >
