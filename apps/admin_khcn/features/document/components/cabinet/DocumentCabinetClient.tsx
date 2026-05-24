@@ -1,0 +1,89 @@
+"use client";
+
+import React, { useState } from "react";
+import { Folder, File, Upload, Search, Filter, MoreVertical, FileText, Image as ImageIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+
+export function DocumentCabinetClient() {
+  const [files, setFiles] = useState([
+    { id: "f1", name: "CCCD_NguyenVanA.pdf", type: "pdf", size: "2.4 MB", date: "2023-10-12", tags: ["Cá nhân", "Định danh"] },
+    { id: "f2", name: "GiayPhepKinhDoanh_CtyX.pdf", type: "pdf", size: "1.1 MB", date: "2023-10-10", tags: ["Doanh nghiệp"] },
+    { id: "f3", name: "BaoCaoTaiChinh_2023.xlsx", type: "excel", size: "5.6 MB", date: "2023-09-28", tags: ["Tài chính"] },
+    { id: "f4", name: "AnhMatTienCoSo.jpg", type: "image", size: "3.2 MB", date: "2023-09-25", tags: ["Khảo sát"] },
+  ]);
+
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case 'pdf': return <FileText className="h-8 w-8 text-rose-500" />;
+      case 'excel': return <File className="h-8 w-8 text-emerald-500" />;
+      case 'image': return <ImageIcon className="h-8 w-8 text-blue-500" />;
+      default: return <File className="h-8 w-8 text-slate-500" />;
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full space-y-6 animate-in fade-in duration-500">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900">Tủ văn bản số</h2>
+          <p className="text-slate-500 mt-2">Kho lưu trữ tài liệu dùng chung, tái sử dụng cho các thủ tục hành chính.</p>
+        </div>
+        <Button className="bg-indigo-600 hover:bg-indigo-700">
+          <Upload className="mr-2 h-4 w-4" /> Tải tài liệu lên
+        </Button>
+      </div>
+
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+        <div className="relative w-full sm:w-96">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input placeholder="Tìm kiếm tài liệu trong tủ..." className="pl-10 bg-slate-50 border-none" />
+        </div>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <Button variant="outline" size="sm" className="rounded-full"><Filter className="h-4 w-4 mr-2"/> Lọc theo nhãn</Button>
+          <Button variant="secondary" size="sm" className="rounded-full bg-slate-100">Cá nhân</Button>
+          <Button variant="ghost" size="sm" className="rounded-full">Cơ quan</Button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Folders (Mock) */}
+        <div className="col-span-1 md:col-span-4 flex gap-4 overflow-x-auto pb-2">
+          {['Tài liệu định danh', 'Hồ sơ doanh nghiệp', 'Báo cáo khoa học', 'Khảo sát thực địa'].map((folder, idx) => (
+            <Card key={idx} className="min-w-[200px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer">
+              <CardContent className="p-4 flex items-center gap-3">
+                <Folder className="h-8 w-8 text-amber-400 fill-amber-100" />
+                <span className="font-semibold text-slate-700">{folder}</span>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Files */}
+        {files.map((file) => (
+          <Card key={file.id} className="group border-slate-200 shadow-sm hover:shadow-md transition-all">
+            <CardContent className="p-5 flex flex-col items-center text-center">
+              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="mb-4 mt-2 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
+                {getFileIcon(file.type)}
+              </div>
+              <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.name}>{file.name}</h4>
+              <p className="text-xs text-slate-500 mt-1">{file.size} • {file.date}</p>
+              <div className="flex gap-1 mt-4 justify-center flex-wrap">
+                {file.tags.map(tag => (
+                  <Badge key={tag} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600">{tag}</Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
