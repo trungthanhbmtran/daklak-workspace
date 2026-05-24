@@ -158,7 +158,11 @@ export type KpiPeriodScalarFieldEnum = (typeof KpiPeriodScalarFieldEnum)[keyof t
 export const KpiCriteriaScalarFieldEnum = {
   id: 'id',
   name: 'name',
+  description: 'description',
   weight: 'weight',
+  baseScore: 'baseScore',
+  scoringMethod: 'scoringMethod',
+  categoryId: 'categoryId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -285,7 +289,9 @@ export type KpiPeriodOrderByRelevanceFieldEnum = (typeof KpiPeriodOrderByRelevan
 
 
 export const KpiCriteriaOrderByRelevanceFieldEnum = {
-  name: 'name'
+  name: 'name',
+  description: 'description',
+  scoringMethod: 'scoringMethod'
 } as const
 
 export type KpiCriteriaOrderByRelevanceFieldEnum = (typeof KpiCriteriaOrderByRelevanceFieldEnum)[keyof typeof KpiCriteriaOrderByRelevanceFieldEnum]

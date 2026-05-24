@@ -193,6 +193,14 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
         order: 10,
       });
     }
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/kpi-criteria"))) {
+      menuItems.push({
+        name: "Khung tiêu chí đánh giá",
+        href: `${config.basePath}/kpi-criteria`,
+        icon: Settings2,
+        order: 11,
+      });
+    }
   }
 
   return {

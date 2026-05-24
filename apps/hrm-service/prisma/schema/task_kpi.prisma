@@ -73,13 +73,18 @@ model KpiPeriod {
 }
 
 model KpiCriteria {
-  id          Int                   @id @default(autoincrement())
-  name        String                @map("name")
-  weight      Float                 @default(1.0) @map("weight")
-  details     KpiEvaluationDetail[]
+  id            Int                   @id @default(autoincrement())
+  name          String                @map("name")
+  description   String?               @db.Text
+  weight        Float                 @default(1.0) @map("weight")
+  baseScore     Float?                @map("base_score")
+  scoringMethod String                @default("MANUAL") @map("scoring_method")
+  categoryId    Int?                  @map("category_id")
+  
+  details       KpiEvaluationDetail[]
 
-  createdAt   DateTime              @default(now()) @map("created_at")
-  updatedAt   DateTime              @updatedAt @map("updated_at")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
 
   @@map("kpi_criteria")
 }

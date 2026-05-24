@@ -1,0 +1,244 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { hrmKpiCriteriaApi } from "@/features/hrm/api";
+import { toast } from "sonner";
+import { Plus, Settings2, Edit, Trash2, Library, Info, Activity, Calculator } from "lucide-react";
+
+export function KpiCriteriaClient() {
+  const [criteriaList, setCriteriaList] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    weight: 10,
+    baseScore: 100,
+    scoringMethod: "MANUAL",
+  });
+
+  const fetchData = async () => {
+    try {
+      setIsLoading(true);
+      const res = await hrmKpiCriteriaApi.list();
+      setCriteriaList(res.data || []);
+    } catch (err) {
+      toast.error("Không thể tải danh sách tiêu chí");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const openModal = (item?: any) => {
+    if (item) {
+      setEditingId(item.id);
+      setFormData({
+        name: item.name,
+        description: item.description || "",
+        weight: item.weight || 10,
+        baseScore: item.baseScore || 100,
+        scoringMethod: item.scoringMethod || "MANUAL",
+      });
+    } else {
+      setEditingId(null);
+      setFormData({
+        name: "",
+        description: "",
+        weight: 10,
+        baseScore: 100,
+        scoringMethod: "MANUAL",
+      });
+    }
+    setIsModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Vui lòng nhập tên tiêu chí");
+      return;
+    }
+
+    try {
+      if (editingId) {
+        await hrmKpiCriteriaApi.update(editingId, formData);
+        toast.success("Cập nhật tiêu chí thành công");
+      } else {
+        await hrmKpiCriteriaApi.create(formData);
+        toast.success("Tạo tiêu chí mới thành công");
+      }
+      setIsModalOpen(false);
+      fetchData();
+    } catch (err) {
+      toast.error("Đã xảy ra lỗi khi lưu");
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa tiêu chí này?")) {
+      try {
+        await hrmKpiCriteriaApi.deleteOne(id);
+        toast.success("Đã xóa tiêu chí");
+        fetchData();
+      } catch (err) {
+        toast.error("Đã xảy ra lỗi khi xóa");
+      }
+    }
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto space-y-6 p-4 md:p-8 bg-slate-50 min-h-screen">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 flex items-center gap-2">
+            <Library className="w-8 h-8 text-indigo-600" />
+            Khung Tiêu chí & Công thức tính điểm
+          </h1>
+          <p className="text-slate-500 font-medium mt-2">
+            Quản lý tập trung các bộ tiêu chí đánh giá KPI để áp dụng thống nhất cho toàn bộ hệ thống.
+          </p>
+        </div>
+        <Button onClick={() => openModal()} className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/20 px-6">
+          <Plus className="w-5 h-5 mr-2" /> Tạo Tiêu chí mới
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center p-12"><Activity className="animate-spin text-indigo-500" /></div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {criteriaList.map((item) => (
+            <Card key={item.id} className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
+              <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
+              <CardContent className="p-6">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-bold text-slate-800 line-clamp-2" title={item.name}>{item.name}</h3>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 bg-indigo-50/0 hover:bg-indigo-50 rounded-lg" onClick={() => openModal(item)}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 bg-rose-50/0 hover:bg-rose-50 rounded-lg" onClick={() => handleDelete(item.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="space-y-3 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Settings2 className="w-4 h-4 text-emerald-500" />
+                    <span>Phương pháp: <strong className="text-slate-800">{item.scoringMethod === 'MANUAL' ? 'Đánh giá thủ công' : item.scoringMethod === 'AUTO_DEADLINE' ? 'Theo tiến độ' : 'Theo kết quả'}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Calculator className="w-4 h-4 text-amber-500" />
+                    <span>Điểm chuẩn: <strong className="text-slate-800">{item.baseScore}</strong> | Trọng số mặc định: <strong className="text-slate-800">{item.weight}%</strong></span>
+                  </div>
+                </div>
+
+                <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                  <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                    <Info className="w-4 h-4 inline-block mr-1 -mt-0.5 text-indigo-400" />
+                    {item.description || "Chưa có mô tả hướng dẫn."}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* MODAL TẠO / SỬA TIÊU CHÍ */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden bg-slate-50 rounded-2xl">
+          <DialogHeader className="p-6 bg-white border-b border-slate-100">
+            <DialogTitle className="text-xl font-bold flex items-center gap-2 text-slate-800">
+              <Settings2 className="w-6 h-6 text-indigo-600" /> 
+              {editingId ? "Cập nhật Khung tiêu chí" : "Tạo Khung tiêu chí mới"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="p-6 space-y-6">
+            <div className="space-y-2">
+              <Label className="font-bold text-slate-700">Tên tiêu chí / Khung đánh giá <span className="text-rose-500">*</span></Label>
+              <Input 
+                placeholder="VD: Thái độ làm việc, Chất lượng dịch vụ..." 
+                value={formData.name} 
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
+                className="h-12 bg-white rounded-xl font-semibold" 
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="font-bold text-slate-700">Trọng số mặc định (%)</Label>
+                <Input 
+                  type="number" 
+                  value={formData.weight} 
+                  onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })} 
+                  className="h-12 bg-white rounded-xl" 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="font-bold text-slate-700">Điểm chuẩn (Base Score)</Label>
+                <Input 
+                  type="number" 
+                  value={formData.baseScore} 
+                  onChange={(e) => setFormData({ ...formData, baseScore: Number(e.target.value) })} 
+                  className="h-12 bg-white rounded-xl" 
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-bold text-slate-700">Mô hình tính điểm</Label>
+              <Select value={formData.scoringMethod} onValueChange={(val) => setFormData({ ...formData, scoringMethod: val })}>
+                <SelectTrigger className="h-12 bg-white rounded-xl font-medium">
+                  <SelectValue placeholder="Chọn phương pháp" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="MANUAL">Đánh giá thủ công (Bởi Giám sát viên)</SelectItem>
+                  <SelectItem value="AUTO_DEADLINE">Tính điểm tự động (Dựa trên Hạn chót/Deadline)</SelectItem>
+                  <SelectItem value="AUTO_RESULT">Tính điểm tự động (Dựa trên Số lượng/Kết quả đầu ra)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="font-bold text-slate-700">Mô tả chi tiết / Hướng dẫn chấm điểm</Label>
+              <div className="relative">
+                <Textarea 
+                  placeholder="Nhập hướng dẫn để chuyên viên đánh giá biết cách cho điểm (VD: 100đ = Hoàn thành xuất sắc, 50đ = Cần cố gắng)..." 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                  className="min-h-[120px] bg-white rounded-xl resize-none p-4 pb-8 leading-relaxed" 
+                />
+                <Info className="absolute bottom-3 right-3 w-4 h-4 text-slate-300" />
+              </div>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Gợi ý: Cung cấp barem điểm rõ ràng sẽ giúp việc đánh giá khách quan và minh bạch hơn.
+              </p>
+            </div>
+          </div>
+          <DialogFooter className="p-6 bg-slate-50 border-t border-slate-200">
+            <Button variant="outline" onClick={() => setIsModalOpen(false)} className="rounded-xl h-11 border-slate-300 text-slate-600 font-bold">
+              Hủy bỏ
+            </Button>
+            <Button onClick={handleSave} className="rounded-xl h-11 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/20 px-8 font-bold">
+              Lưu cấu hình
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
