@@ -37,6 +37,7 @@ export type OneStopDossierSumAggregateOutputType = {
 export type OneStopDossierMinAggregateOutputType = {
   id: string | null
   code: string | null
+  procedureName: string | null
   senderName: string | null
   receiveDate: Date | null
   dueDate: Date | null
@@ -50,6 +51,7 @@ export type OneStopDossierMinAggregateOutputType = {
 export type OneStopDossierMaxAggregateOutputType = {
   id: string | null
   code: string | null
+  procedureName: string | null
   senderName: string | null
   receiveDate: Date | null
   dueDate: Date | null
@@ -63,6 +65,7 @@ export type OneStopDossierMaxAggregateOutputType = {
 export type OneStopDossierCountAggregateOutputType = {
   id: number
   code: number
+  procedureName: number
   senderName: number
   receiveDate: number
   dueDate: number
@@ -86,6 +89,7 @@ export type OneStopDossierSumAggregateInputType = {
 export type OneStopDossierMinAggregateInputType = {
   id?: true
   code?: true
+  procedureName?: true
   senderName?: true
   receiveDate?: true
   dueDate?: true
@@ -99,6 +103,7 @@ export type OneStopDossierMinAggregateInputType = {
 export type OneStopDossierMaxAggregateInputType = {
   id?: true
   code?: true
+  procedureName?: true
   senderName?: true
   receiveDate?: true
   dueDate?: true
@@ -112,6 +117,7 @@ export type OneStopDossierMaxAggregateInputType = {
 export type OneStopDossierCountAggregateInputType = {
   id?: true
   code?: true
+  procedureName?: true
   senderName?: true
   receiveDate?: true
   dueDate?: true
@@ -212,6 +218,7 @@ export type OneStopDossierGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type OneStopDossierGroupByOutputType = {
   id: string
   code: string
+  procedureName: string | null
   senderName: string
   receiveDate: Date
   dueDate: Date
@@ -248,6 +255,7 @@ export type OneStopDossierWhereInput = {
   NOT?: Prisma.OneStopDossierWhereInput | Prisma.OneStopDossierWhereInput[]
   id?: Prisma.StringFilter<"OneStopDossier"> | string
   code?: Prisma.StringFilter<"OneStopDossier"> | string
+  procedureName?: Prisma.StringNullableFilter<"OneStopDossier"> | string | null
   senderName?: Prisma.StringFilter<"OneStopDossier"> | string
   receiveDate?: Prisma.DateTimeFilter<"OneStopDossier"> | Date | string
   dueDate?: Prisma.DateTimeFilter<"OneStopDossier"> | Date | string
@@ -261,6 +269,7 @@ export type OneStopDossierWhereInput = {
 export type OneStopDossierOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
+  procedureName?: Prisma.SortOrderInput | Prisma.SortOrder
   senderName?: Prisma.SortOrder
   receiveDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
@@ -278,6 +287,7 @@ export type OneStopDossierWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.OneStopDossierWhereInput | Prisma.OneStopDossierWhereInput[]
   OR?: Prisma.OneStopDossierWhereInput[]
   NOT?: Prisma.OneStopDossierWhereInput | Prisma.OneStopDossierWhereInput[]
+  procedureName?: Prisma.StringNullableFilter<"OneStopDossier"> | string | null
   senderName?: Prisma.StringFilter<"OneStopDossier"> | string
   receiveDate?: Prisma.DateTimeFilter<"OneStopDossier"> | Date | string
   dueDate?: Prisma.DateTimeFilter<"OneStopDossier"> | Date | string
@@ -291,6 +301,7 @@ export type OneStopDossierWhereUniqueInput = Prisma.AtLeast<{
 export type OneStopDossierOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
+  procedureName?: Prisma.SortOrderInput | Prisma.SortOrder
   senderName?: Prisma.SortOrder
   receiveDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
@@ -312,6 +323,7 @@ export type OneStopDossierScalarWhereWithAggregatesInput = {
   NOT?: Prisma.OneStopDossierScalarWhereWithAggregatesInput | Prisma.OneStopDossierScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"OneStopDossier"> | string
   code?: Prisma.StringWithAggregatesFilter<"OneStopDossier"> | string
+  procedureName?: Prisma.StringNullableWithAggregatesFilter<"OneStopDossier"> | string | null
   senderName?: Prisma.StringWithAggregatesFilter<"OneStopDossier"> | string
   receiveDate?: Prisma.DateTimeWithAggregatesFilter<"OneStopDossier"> | Date | string
   dueDate?: Prisma.DateTimeWithAggregatesFilter<"OneStopDossier"> | Date | string
@@ -325,6 +337,7 @@ export type OneStopDossierScalarWhereWithAggregatesInput = {
 export type OneStopDossierCreateInput = {
   id?: string
   code: string
+  procedureName?: string | null
   senderName: string
   receiveDate: Date | string
   dueDate: Date | string
@@ -338,6 +351,7 @@ export type OneStopDossierCreateInput = {
 export type OneStopDossierUncheckedCreateInput = {
   id?: string
   code: string
+  procedureName?: string | null
   senderName: string
   receiveDate: Date | string
   dueDate: Date | string
@@ -351,6 +365,7 @@ export type OneStopDossierUncheckedCreateInput = {
 export type OneStopDossierUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
+  procedureName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   senderName?: Prisma.StringFieldUpdateOperationsInput | string
   receiveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -364,6 +379,7 @@ export type OneStopDossierUpdateInput = {
 export type OneStopDossierUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
+  procedureName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   senderName?: Prisma.StringFieldUpdateOperationsInput | string
   receiveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -377,6 +393,7 @@ export type OneStopDossierUncheckedUpdateInput = {
 export type OneStopDossierCreateManyInput = {
   id?: string
   code: string
+  procedureName?: string | null
   senderName: string
   receiveDate: Date | string
   dueDate: Date | string
@@ -390,6 +407,7 @@ export type OneStopDossierCreateManyInput = {
 export type OneStopDossierUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
+  procedureName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   senderName?: Prisma.StringFieldUpdateOperationsInput | string
   receiveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -403,6 +421,7 @@ export type OneStopDossierUpdateManyMutationInput = {
 export type OneStopDossierUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
+  procedureName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   senderName?: Prisma.StringFieldUpdateOperationsInput | string
   receiveDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   dueDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -422,6 +441,7 @@ export type OneStopDossierOrderByRelevanceInput = {
 export type OneStopDossierCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
+  procedureName?: Prisma.SortOrder
   senderName?: Prisma.SortOrder
   receiveDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
@@ -439,6 +459,7 @@ export type OneStopDossierAvgOrderByAggregateInput = {
 export type OneStopDossierMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
+  procedureName?: Prisma.SortOrder
   senderName?: Prisma.SortOrder
   receiveDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
@@ -452,6 +473,7 @@ export type OneStopDossierMaxOrderByAggregateInput = {
 export type OneStopDossierMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   code?: Prisma.SortOrder
+  procedureName?: Prisma.SortOrder
   senderName?: Prisma.SortOrder
   receiveDate?: Prisma.SortOrder
   dueDate?: Prisma.SortOrder
@@ -471,6 +493,7 @@ export type OneStopDossierSumOrderByAggregateInput = {
 export type OneStopDossierSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   code?: boolean
+  procedureName?: boolean
   senderName?: boolean
   receiveDate?: boolean
   dueDate?: boolean
@@ -486,6 +509,7 @@ export type OneStopDossierSelect<ExtArgs extends runtime.Types.Extensions.Intern
 export type OneStopDossierSelectScalar = {
   id?: boolean
   code?: boolean
+  procedureName?: boolean
   senderName?: boolean
   receiveDate?: boolean
   dueDate?: boolean
@@ -496,7 +520,7 @@ export type OneStopDossierSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OneStopDossierOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "senderName" | "receiveDate" | "dueDate" | "status" | "currentStep" | "stepDetails" | "createdAt" | "updatedAt", ExtArgs["result"]["oneStopDossier"]>
+export type OneStopDossierOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "procedureName" | "senderName" | "receiveDate" | "dueDate" | "status" | "currentStep" | "stepDetails" | "createdAt" | "updatedAt", ExtArgs["result"]["oneStopDossier"]>
 
 export type $OneStopDossierPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "OneStopDossier"
@@ -504,6 +528,7 @@ export type $OneStopDossierPayload<ExtArgs extends runtime.Types.Extensions.Inte
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     code: string
+    procedureName: string | null
     senderName: string
     receiveDate: Date
     dueDate: Date
@@ -883,6 +908,7 @@ export interface Prisma__OneStopDossierClient<T, Null = never, ExtArgs extends r
 export interface OneStopDossierFieldRefs {
   readonly id: Prisma.FieldRef<"OneStopDossier", 'String'>
   readonly code: Prisma.FieldRef<"OneStopDossier", 'String'>
+  readonly procedureName: Prisma.FieldRef<"OneStopDossier", 'String'>
   readonly senderName: Prisma.FieldRef<"OneStopDossier", 'String'>
   readonly receiveDate: Prisma.FieldRef<"OneStopDossier", 'DateTime'>
   readonly dueDate: Prisma.FieldRef<"OneStopDossier", 'DateTime'>

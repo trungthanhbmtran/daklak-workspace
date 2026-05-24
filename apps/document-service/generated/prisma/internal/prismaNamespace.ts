@@ -1253,6 +1253,7 @@ export type AdministrativeProcedureScalarFieldEnum = (typeof AdministrativeProce
 export const OneStopDossierScalarFieldEnum = {
   id: 'id',
   code: 'code',
+  procedureName: 'procedureName',
   senderName: 'senderName',
   receiveDate: 'receiveDate',
   dueDate: 'dueDate',
@@ -1273,6 +1274,7 @@ export const DossierComponentScalarFieldEnum = {
   isRequired: 'isRequired',
   status: 'status',
   fileUrl: 'fileUrl',
+  sampleFileUrl: 'sampleFileUrl',
   source: 'source',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1426,6 +1428,7 @@ export type AdministrativeProcedureOrderByRelevanceFieldEnum = (typeof Administr
 export const OneStopDossierOrderByRelevanceFieldEnum = {
   id: 'id',
   code: 'code',
+  procedureName: 'procedureName',
   senderName: 'senderName',
   status: 'status',
   stepDetails: 'stepDetails'
@@ -1440,6 +1443,7 @@ export const DossierComponentOrderByRelevanceFieldEnum = {
   name: 'name',
   status: 'status',
   fileUrl: 'fileUrl',
+  sampleFileUrl: 'sampleFileUrl',
   source: 'source'
 } as const
 

@@ -31,6 +31,7 @@ export type DossierComponentMinAggregateOutputType = {
   isRequired: boolean | null
   status: string | null
   fileUrl: string | null
+  sampleFileUrl: string | null
   source: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -43,6 +44,7 @@ export type DossierComponentMaxAggregateOutputType = {
   isRequired: boolean | null
   status: string | null
   fileUrl: string | null
+  sampleFileUrl: string | null
   source: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -55,6 +57,7 @@ export type DossierComponentCountAggregateOutputType = {
   isRequired: number
   status: number
   fileUrl: number
+  sampleFileUrl: number
   source: number
   createdAt: number
   updatedAt: number
@@ -69,6 +72,7 @@ export type DossierComponentMinAggregateInputType = {
   isRequired?: true
   status?: true
   fileUrl?: true
+  sampleFileUrl?: true
   source?: true
   createdAt?: true
   updatedAt?: true
@@ -81,6 +85,7 @@ export type DossierComponentMaxAggregateInputType = {
   isRequired?: true
   status?: true
   fileUrl?: true
+  sampleFileUrl?: true
   source?: true
   createdAt?: true
   updatedAt?: true
@@ -93,6 +98,7 @@ export type DossierComponentCountAggregateInputType = {
   isRequired?: true
   status?: true
   fileUrl?: true
+  sampleFileUrl?: true
   source?: true
   createdAt?: true
   updatedAt?: true
@@ -178,6 +184,7 @@ export type DossierComponentGroupByOutputType = {
   isRequired: boolean
   status: string
   fileUrl: string | null
+  sampleFileUrl: string | null
   source: string | null
   createdAt: Date
   updatedAt: Date
@@ -211,6 +218,7 @@ export type DossierComponentWhereInput = {
   isRequired?: Prisma.BoolFilter<"DossierComponent"> | boolean
   status?: Prisma.StringFilter<"DossierComponent"> | string
   fileUrl?: Prisma.StringNullableFilter<"DossierComponent"> | string | null
+  sampleFileUrl?: Prisma.StringNullableFilter<"DossierComponent"> | string | null
   source?: Prisma.StringNullableFilter<"DossierComponent"> | string | null
   createdAt?: Prisma.DateTimeFilter<"DossierComponent"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DossierComponent"> | Date | string
@@ -223,6 +231,7 @@ export type DossierComponentOrderByWithRelationInput = {
   isRequired?: Prisma.SortOrder
   status?: Prisma.SortOrder
   fileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  sampleFileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -239,6 +248,7 @@ export type DossierComponentWhereUniqueInput = Prisma.AtLeast<{
   isRequired?: Prisma.BoolFilter<"DossierComponent"> | boolean
   status?: Prisma.StringFilter<"DossierComponent"> | string
   fileUrl?: Prisma.StringNullableFilter<"DossierComponent"> | string | null
+  sampleFileUrl?: Prisma.StringNullableFilter<"DossierComponent"> | string | null
   source?: Prisma.StringNullableFilter<"DossierComponent"> | string | null
   createdAt?: Prisma.DateTimeFilter<"DossierComponent"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"DossierComponent"> | Date | string
@@ -251,6 +261,7 @@ export type DossierComponentOrderByWithAggregationInput = {
   isRequired?: Prisma.SortOrder
   status?: Prisma.SortOrder
   fileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  sampleFileUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   source?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -269,6 +280,7 @@ export type DossierComponentScalarWhereWithAggregatesInput = {
   isRequired?: Prisma.BoolWithAggregatesFilter<"DossierComponent"> | boolean
   status?: Prisma.StringWithAggregatesFilter<"DossierComponent"> | string
   fileUrl?: Prisma.StringNullableWithAggregatesFilter<"DossierComponent"> | string | null
+  sampleFileUrl?: Prisma.StringNullableWithAggregatesFilter<"DossierComponent"> | string | null
   source?: Prisma.StringNullableWithAggregatesFilter<"DossierComponent"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"DossierComponent"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"DossierComponent"> | Date | string
@@ -281,6 +293,7 @@ export type DossierComponentCreateInput = {
   isRequired?: boolean
   status?: string
   fileUrl?: string | null
+  sampleFileUrl?: string | null
   source?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -293,6 +306,7 @@ export type DossierComponentUncheckedCreateInput = {
   isRequired?: boolean
   status?: string
   fileUrl?: string | null
+  sampleFileUrl?: string | null
   source?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -305,6 +319,7 @@ export type DossierComponentUpdateInput = {
   isRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sampleFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -317,6 +332,7 @@ export type DossierComponentUncheckedUpdateInput = {
   isRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sampleFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -329,6 +345,7 @@ export type DossierComponentCreateManyInput = {
   isRequired?: boolean
   status?: string
   fileUrl?: string | null
+  sampleFileUrl?: string | null
   source?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -341,6 +358,7 @@ export type DossierComponentUpdateManyMutationInput = {
   isRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sampleFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -353,6 +371,7 @@ export type DossierComponentUncheckedUpdateManyInput = {
   isRequired?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   fileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sampleFileUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   source?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -371,6 +390,7 @@ export type DossierComponentCountOrderByAggregateInput = {
   isRequired?: Prisma.SortOrder
   status?: Prisma.SortOrder
   fileUrl?: Prisma.SortOrder
+  sampleFileUrl?: Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -383,6 +403,7 @@ export type DossierComponentMaxOrderByAggregateInput = {
   isRequired?: Prisma.SortOrder
   status?: Prisma.SortOrder
   fileUrl?: Prisma.SortOrder
+  sampleFileUrl?: Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -395,6 +416,7 @@ export type DossierComponentMinOrderByAggregateInput = {
   isRequired?: Prisma.SortOrder
   status?: Prisma.SortOrder
   fileUrl?: Prisma.SortOrder
+  sampleFileUrl?: Prisma.SortOrder
   source?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -409,6 +431,7 @@ export type DossierComponentSelect<ExtArgs extends runtime.Types.Extensions.Inte
   isRequired?: boolean
   status?: boolean
   fileUrl?: boolean
+  sampleFileUrl?: boolean
   source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -423,12 +446,13 @@ export type DossierComponentSelectScalar = {
   isRequired?: boolean
   status?: boolean
   fileUrl?: boolean
+  sampleFileUrl?: boolean
   source?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DossierComponentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "dossierId" | "name" | "isRequired" | "status" | "fileUrl" | "source" | "createdAt" | "updatedAt", ExtArgs["result"]["dossierComponent"]>
+export type DossierComponentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "dossierId" | "name" | "isRequired" | "status" | "fileUrl" | "sampleFileUrl" | "source" | "createdAt" | "updatedAt", ExtArgs["result"]["dossierComponent"]>
 
 export type $DossierComponentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "DossierComponent"
@@ -440,6 +464,7 @@ export type $DossierComponentPayload<ExtArgs extends runtime.Types.Extensions.In
     isRequired: boolean
     status: string
     fileUrl: string | null
+    sampleFileUrl: string | null
     source: string | null
     createdAt: Date
     updatedAt: Date
@@ -818,6 +843,7 @@ export interface DossierComponentFieldRefs {
   readonly isRequired: Prisma.FieldRef<"DossierComponent", 'Boolean'>
   readonly status: Prisma.FieldRef<"DossierComponent", 'String'>
   readonly fileUrl: Prisma.FieldRef<"DossierComponent", 'String'>
+  readonly sampleFileUrl: Prisma.FieldRef<"DossierComponent", 'String'>
   readonly source: Prisma.FieldRef<"DossierComponent", 'String'>
   readonly createdAt: Prisma.FieldRef<"DossierComponent", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"DossierComponent", 'DateTime'>
