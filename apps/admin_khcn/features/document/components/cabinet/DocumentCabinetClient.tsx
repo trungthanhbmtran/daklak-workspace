@@ -4,17 +4,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { Folder, File, Upload, Search, Filter, MoreVertical, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 export function DocumentCabinetClient() {
   const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, isUploading } = useFileUpload();
 
   useEffect(() => {
     fetchCabinet();
@@ -51,45 +51,27 @@ export function DocumentCabinetClient() {
     if (!selectedFile) return;
 
     try {
-      setUploading(true);
       toast.info("Đang xử lý tải lên...");
 
-      // 1. Lấy Pre-signed URL từ Media Service
-      const reqUpload: any = await apiClient.post('/media/request-upload', {
-        filename: selectedFile.name,
-        contentType: selectedFile.type,
-        size: selectedFile.size,
-        module: 'cabinet'
-      });
+      // 1. Dùng chung hook uploadFile đã có
+      const mediaInfo = await uploadFile(selectedFile);
+      if (!mediaInfo) throw new Error("Upload thất bại từ hook");
 
-      if (!reqUpload?.uploadUrl) throw new Error("Không lấy được đường dẫn upload");
-
-      // 2. Upload file trực tiếp lên MinIO thông qua Pre-signed URL
-      await axios.put(reqUpload.uploadUrl, selectedFile, {
-        headers: { 'Content-Type': selectedFile.type }
-      });
-
-      // 3. Confirm upload với Media Service
-      const confirmedData: any = await apiClient.post('/media/confirm-upload', {
-        fileId: reqUpload.fileId
-      });
-
-      // 4. Lưu vào cơ sở dữ liệu Cabinet (Document Service)
+      // 2. Lưu vào cơ sở dữ liệu Cabinet (Document Service)
       await apiClient.post('/documents/cabinet', {
         userId: '1', // Test user id
         fileName: selectedFile.name,
-        fileUrl: confirmedData?.downloadUrl || confirmedData?.fileUrl || `/admin/media/download/${reqUpload.fileId}`,
+        fileUrl: mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`,
         fileType: selectedFile.name.split('.').pop()?.toLowerCase() || 'unknown',
         fileSize: selectedFile.size
       });
 
-      toast.success("Tải tài liệu lên tủ văn bản thành công!");
+      toast.success("Đã thêm vào tủ văn bản thành công!");
       fetchCabinet(); // Cập nhật lại danh sách tủ
     } catch (error) {
       console.error(error);
-      toast.error("Tải tài liệu thất bại!");
+      toast.error("Thêm vào tủ văn bản thất bại!");
     } finally {
-      setUploading(false);
       // Xoá trắng giá trị input để có thể chọn lại file cũ nếu muốn
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -117,9 +99,9 @@ export function DocumentCabinetClient() {
           className="hidden"
           onChange={handleFileChange}
         />
-        <Button onClick={handleUpload} disabled={uploading} className="bg-indigo-600 hover:bg-indigo-700 min-w-[150px]">
-          {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-          {uploading ? "Đang tải..." : "Tải tài liệu lên"}
+        <Button onClick={handleUpload} disabled={isUploading} className="bg-indigo-600 hover:bg-indigo-700 min-w-[150px]">
+          {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
+          {isUploading ? "Đang tải..." : "Tải tài liệu lên"}
         </Button>
       </div>
 
