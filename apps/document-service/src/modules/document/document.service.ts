@@ -569,6 +569,7 @@ export class DocumentService {
     return {
       id: item.id,
       code: item.code,
+      procedureName: item.procedureName || "",
       senderName: item.senderName,
       receiveDate: item.receiveDate instanceof Date ? item.receiveDate.toISOString() : (item.receiveDate || ""),
       dueDate: item.dueDate instanceof Date ? item.dueDate.toISOString() : (item.dueDate || ""),

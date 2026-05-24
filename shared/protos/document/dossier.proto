@@ -34,6 +34,7 @@ message DossierInfoResponse {
   string senderName = 3;
   string status = 4;
   string createdAt = 5;
+  string procedureName = 6;
 }
 
 message DossierListResponse {
@@ -48,6 +49,7 @@ message ComponentResponse {
   string status = 5;
   string fileUrl = 6;
   string source = 7;
+  string sampleFileUrl = 8;
 }
 
 message ComponentListResponse {

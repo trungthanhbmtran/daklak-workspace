@@ -202,7 +202,14 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                         )}
                       </div>
                     ) : (
-                      <p className="text-sm text-slate-400 mt-1 italic">Chưa có tài liệu đính kèm.</p>
+                      <div className="flex flex-col gap-1 mt-1">
+                        <p className="text-sm text-slate-400 italic">Chưa có tài liệu đính kèm.</p>
+                        {comp.sampleFileUrl && (
+                          <a href={comp.sampleFileUrl} target="_blank" rel="noreferrer" className="text-xs text-indigo-600 hover:underline flex items-center gap-1 w-fit">
+                            <Download className="h-3 w-3" /> Tải xuống biểu mẫu mẫu
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>

@@ -17,16 +17,17 @@ model AdministrativeProcedure {
 }
 
 model OneStopDossier {
-  id          String   @id @default(uuid())
-  code        String   @unique // e.g. "DK-2026-888"
-  senderName  String   @map("sender_name")
-  receiveDate DateTime @map("receive_date")
-  dueDate     DateTime @map("due_date")
-  status      String   @default("RECEIVED") // RECEIVED, PROCESSING, RESOLVED, RETURNED
-  currentStep Int      @default(1) @map("current_step") // 1 to 4
-  stepDetails String?  @db.Text @map("step_details") // JSON array of step timeline
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id            String   @id @default(uuid())
+  code          String   @unique // e.g. "DK-2026-888"
+  procedureName String?  @map("procedure_name")
+  senderName    String   @map("sender_name")
+  receiveDate   DateTime @map("receive_date")
+  dueDate       DateTime @map("due_date")
+  status        String   @default("RECEIVED") // RECEIVED, PROCESSING, RESOLVED, RETURNED
+  currentStep   Int      @default(1) @map("current_step") // 1 to 4
+  stepDetails   String?  @db.Text @map("step_details") // JSON array of step timeline
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
   @@index([code])
   @@index([status])
@@ -34,14 +35,15 @@ model OneStopDossier {
 }
 
 model DossierComponent {
-  id          String   @id @default(uuid())
-  dossierId   String   @map("dossier_id")
-  name        String
-  isRequired  Boolean  @default(true) @map("is_required")
-  status      String   @default("MISSING") // VALID, MISSING, PENDING_REVIEW
-  fileUrl     String?  @map("file_url")
-  source      String?  // UPLOAD, CABINET
-  createdAt   DateTime @default(now()) @map("created_at")
+  id            String   @id @default(uuid())
+  dossierId     String   @map("dossier_id")
+  name          String
+  isRequired    Boolean  @default(true) @map("is_required")
+  status        String   @default("MISSING") // VALID, MISSING, PENDING_REVIEW
+  fileUrl       String?  @map("file_url")
+  sampleFileUrl String?  @db.Text @map("sample_file_url")
+  source        String?  // UPLOAD, CABINET
+  createdAt     DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([dossierId])

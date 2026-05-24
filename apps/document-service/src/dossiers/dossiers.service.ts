@@ -49,6 +49,7 @@ export class DossiersService {
     const dossier = await this.prisma.oneStopDossier.create({
       data: {
         code: `HS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        procedureName: procedure.name,
         senderName: senderName || "Người nộp",
         receiveDate: new Date(),
         dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Mặc định 7 ngày
@@ -65,6 +66,7 @@ export class DossiersService {
           dossierId: dossier.id,
           name: doc.name || "Tài liệu",
           isRequired: doc.isRequired !== undefined ? doc.isRequired : true,
+          sampleFileUrl: doc.sampleFileUrl || null,
           status: "MISSING",
         }))
       });
@@ -73,6 +75,7 @@ export class DossiersService {
     return {
       id: dossier.id,
       code: dossier.code,
+      procedureName: dossier.procedureName,
       senderName: dossier.senderName,
       status: dossier.status,
       createdAt: dossier.createdAt.toISOString()

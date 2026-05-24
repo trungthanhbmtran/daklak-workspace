@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Settings2, FileText, Trash2, Edit, Save, Loader2 } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Plus, Settings2, FileText, Trash2, Edit, Save, Loader2, Upload, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 export function ProcedureConfigClient() {
   const [procedures, setProcedures] = useState<any[]>([]);
@@ -20,9 +21,13 @@ export function ProcedureConfigClient() {
   const [newProcName, setNewProcName] = useState("");
   const [newProcCode, setNewProcCode] = useState("");
   const [newProcCategory, setNewProcCategory] = useState("Khoa học công nghệ");
-  const [components, setComponents] = useState<{ id: string, name: string, isRequired: boolean }[]>([
+  const [components, setComponents] = useState<{ id: string, name: string, isRequired: boolean, sampleFileUrl?: string }>([
     { id: "1", name: "Đơn đăng ký", isRequired: true }
   ]);
+
+  const { uploadFile, isUploading } = useFileUpload();
+  const [uploadingCompId, setUploadingCompId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchProcedures();
@@ -56,6 +61,33 @@ export function ProcedureConfigClient() {
 
   const handleRemoveComponent = (id: string) => {
     setComponents(components.filter(c => c.id !== id));
+  };
+
+  const handleUploadSampleClick = (id: string) => {
+    setUploadingCompId(id);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile || !uploadingCompId) return;
+
+    try {
+      toast.info("Đang tải file mẫu lên...");
+      const mediaInfo = await uploadFile(selectedFile);
+      if (!mediaInfo) throw new Error("Upload thất bại");
+
+      const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
+      
+      setComponents(components.map(c => c.id === uploadingCompId ? { ...c, sampleFileUrl: fileUrl } : c));
+      toast.success("Đã tải biểu mẫu lên!");
+    } catch (error) {
+      console.error(error);
+      toast.error("Tải biểu mẫu thất bại!");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setUploadingCompId(null);
+    }
   };
 
   const handleSubmit = async () => {
@@ -156,7 +188,14 @@ export function ProcedureConfigClient() {
                   <ul className="space-y-2">
                     {proc.requiredDocs?.map((comp: any, idx: number) => (
                       <li key={idx} className="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200">
-                        <span className="text-sm font-medium text-slate-700">{comp.name}</span>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-medium text-slate-700">{comp.name}</span>
+                          {comp.sampleFileUrl && (
+                            <span className="text-xs text-indigo-600 flex items-center gap-1">
+                              <Paperclip className="h-3 w-3" /> Đã đính kèm file mẫu
+                            </span>
+                          )}
+                        </div>
                         {comp.isRequired ? (
                           <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Bắt buộc</Badge>
                         ) : (
@@ -206,21 +245,38 @@ export function ProcedureConfigClient() {
                 {components.map((c, index) => (
                   <div key={c.id} className="flex items-center gap-2">
                     <span className="text-xs font-mono text-slate-400 w-4">{index + 1}.</span>
-                    <Input 
-                      value={c.name} 
-                      onChange={e => handleUpdateComponent(c.id, e.target.value)} 
-                      placeholder="Tên tài liệu (VD: Đơn đăng ký)" 
-                      className="flex-1 bg-white"
-                    />
+                    <div className="flex-1 flex flex-col gap-2">
+                      <Input 
+                        value={c.name} 
+                        onChange={e => handleUpdateComponent(c.id, e.target.value)} 
+                        placeholder="Tên tài liệu (VD: Đơn đăng ký)" 
+                        className="bg-white"
+                      />
+                      {c.sampleFileUrl && (
+                        <span className="text-xs text-emerald-600 font-medium flex items-center gap-1 bg-emerald-50 px-2 py-1 rounded w-fit">
+                          <Paperclip className="h-3 w-3"/> Mẫu: {c.sampleFileUrl.split('/').pop()}
+                        </span>
+                      )}
+                    </div>
+                    <Button 
+                      onClick={() => handleUploadSampleClick(c.id)} 
+                      disabled={isUploading && uploadingCompId === c.id}
+                      variant="outline"
+                      size="sm"
+                      title="Upload biểu mẫu"
+                      className="text-slate-500 shrink-0"
+                    >
+                      {isUploading && uploadingCompId === c.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    </Button>
                     <Button 
                       onClick={() => handleToggleRequired(c.id)} 
                       variant={c.isRequired ? "default" : "outline"}
                       size="sm"
-                      className={c.isRequired ? "bg-rose-100 text-rose-700 hover:bg-rose-200" : "text-slate-500"}
+                      className={`shrink-0 ${c.isRequired ? "bg-rose-100 text-rose-700 hover:bg-rose-200" : "text-slate-500"}`}
                     >
                       {c.isRequired ? "Bắt buộc" : "Tùy chọn"}
                     </Button>
-                    <Button onClick={() => handleRemoveComponent(c.id)} variant="ghost" size="icon" className="text-slate-400 hover:text-rose-600">
+                    <Button onClick={() => handleRemoveComponent(c.id)} variant="ghost" size="icon" className="shrink-0 text-slate-400 hover:text-rose-600">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
@@ -236,7 +292,8 @@ export function ProcedureConfigClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
+      
+      <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
     </div>
   );
 }
