@@ -335,57 +335,35 @@ export const hrmTasksApi = {
   }
 };
 
-let mockKpiCriteria = [
-  { id: 1, name: "Thái độ làm việc", description: "Đánh giá mức độ tích cực, chủ động trong công việc. 100đ = Luôn tích cực, 50đ = Cần nhắc nhở.", weight: 10, baseScore: 100, scoringMethod: "MANUAL", categoryId: null, difficulty: "NORMAL", difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 },
-  { id: 2, name: "Tiến độ công việc", description: "Tính tự động dựa trên số ngày trễ hạn.", weight: 50, baseScore: 100, scoringMethod: "AUTO_DEADLINE", categoryId: null, difficulty: "NORMAL", difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 },
-  { id: 3, name: "Chất lượng sản phẩm", description: "Đánh giá qua số lỗi hoặc feedback khách hàng.", weight: 40, baseScore: 100, scoringMethod: "AUTO_RESULT", categoryId: null, difficulty: "NORMAL", difficultyMultiplier: 1.0, bonusThresholdDays: 0, bonusPerDay: 0, penaltyPerDay: 0 }
-];
-
 export const hrmKpiCriteriaApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          data: [...mockKpiCriteria],
-          meta: { total: mockKpiCriteria.length, page: 1, pageSize: 20, totalPages: 1 }
-        });
-      }, 300);
+    return apiClient.get('/hrm/kpis/criteria', { params }).then((res: any) => {
+      // res từ gateway: { criteria: [...] } hoặc { data: { criteria: [...] } }
+      const data = res?.criteria || res?.data?.criteria || [];
+      return {
+        data,
+        meta: { total: data.length, page: 1, pageSize: 20, totalPages: 1 }
+      };
     });
   },
 
   create(payload: any): Promise<{ success: boolean; data?: any }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const newObj = {
-          id: Date.now(),
-          ...payload
-        };
-        mockKpiCriteria.push(newObj);
-        resolve({ success: true, data: newObj });
-      }, 400);
-    });
+    return apiClient.post('/hrm/kpis/criteria', payload).then((res: any) => ({
+      success: true,
+      data: res
+    }));
   },
 
   update(id: number, payload: any): Promise<{ success: boolean; data?: any }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const index = mockKpiCriteria.findIndex(c => c.id === id);
-        if (index > -1) {
-          mockKpiCriteria[index] = { ...mockKpiCriteria[index], ...payload };
-          resolve({ success: true, data: mockKpiCriteria[index] });
-        } else {
-          resolve({ success: false });
-        }
-      }, 400);
-    });
+    return apiClient.put(`/hrm/kpis/criteria/${id}`, payload).then((res: any) => ({
+      success: true,
+      data: res
+    }));
   },
 
   deleteOne(id: number): Promise<{ success: boolean }> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        mockKpiCriteria = mockKpiCriteria.filter(c => c.id !== id);
-        resolve({ success: true });
-      }, 300);
-    });
+    return apiClient.delete(`/hrm/kpis/criteria/${id}`).then((res: any) => ({
+      success: res?.success ?? true
+    }));
   }
 };

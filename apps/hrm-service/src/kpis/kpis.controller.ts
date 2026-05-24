@@ -38,6 +38,25 @@ export class KpisController {
     return { criteria };
   }
 
+  @GrpcMethod('KpiService', 'CreateCriterion')
+  async createCriterion(data: any) {
+    const criterion = await this.kpisService.createCriterion(data);
+    return criterion;
+  }
+
+  @GrpcMethod('KpiService', 'UpdateCriterion')
+  async updateCriterion(data: any) {
+    const { id, ...updateData } = data;
+    const criterion = await this.kpisService.updateCriterion(id, updateData);
+    return criterion;
+  }
+
+  @GrpcMethod('KpiService', 'DeleteCriterion')
+  async deleteCriterion(data: { id: number }) {
+    await this.kpisService.deleteCriterion(data.id);
+    return { success: true };
+  }
+
   @GrpcMethod('KpiService', 'CreateEvaluation')
   async createEvaluation(data: {
     employeeCode: string;

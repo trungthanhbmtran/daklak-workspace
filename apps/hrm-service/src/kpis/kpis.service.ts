@@ -17,6 +17,24 @@ export class KpisService {
     return this.prisma.kpiCriteria.findMany();
   }
 
+  async createCriterion(data: any) {
+    return this.prisma.kpiCriteria.create({ data });
+  }
+
+  async updateCriterion(id: number, data: any) {
+    return this.prisma.kpiCriteria.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deleteCriterion(id: number) {
+    await this.prisma.kpiCriteria.delete({
+      where: { id },
+    });
+    return { success: true };
+  }
+
   async createEvaluation(data: {
     employeeCode: string;
     periodId: number;

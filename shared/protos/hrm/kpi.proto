@@ -6,6 +6,9 @@ service KpiService {
   rpc FindPeriods (FindPeriodsRequest) returns (PeriodsResponse) {}
   rpc CreatePeriod (CreatePeriodRequest) returns (PeriodResponse) {}
   rpc FindCriteria (FindCriteriaRequest) returns (CriteriaResponse) {}
+  rpc CreateCriterion (CreateCriterionRequest) returns (CriterionResponse) {}
+  rpc UpdateCriterion (UpdateCriterionRequest) returns (CriterionResponse) {}
+  rpc DeleteCriterion (DeleteCriterionRequest) returns (DeleteCriterionResponse) {}
   rpc CreateEvaluation (CreateEvaluationRequest) returns (EvaluationResponse) {}
   rpc FindEvaluations (FindEvaluationsRequest) returns (EvaluationsResponse) {}
 }
@@ -35,10 +38,56 @@ message CriterionResponse {
   int32 id = 1;
   string name = 2;
   float weight = 3;
+  string description = 4;
+  float baseScore = 5;
+  string scoringMethod = 6;
+  string difficulty = 7;
+  float difficultyMultiplier = 8;
+  int32 bonusThresholdDays = 9;
+  float bonusPerDay = 10;
+  float penaltyPerDay = 11;
+  optional int32 categoryId = 12;
 }
 
 message CriteriaResponse {
   repeated CriterionResponse criteria = 1;
+}
+
+message CreateCriterionRequest {
+  string name = 1;
+  optional string description = 2;
+  optional float weight = 3;
+  optional float baseScore = 4;
+  optional string scoringMethod = 5;
+  optional string difficulty = 6;
+  optional float difficultyMultiplier = 7;
+  optional int32 bonusThresholdDays = 8;
+  optional float bonusPerDay = 9;
+  optional float penaltyPerDay = 10;
+  optional int32 categoryId = 11;
+}
+
+message UpdateCriterionRequest {
+  int32 id = 1;
+  optional string name = 2;
+  optional string description = 3;
+  optional float weight = 4;
+  optional float baseScore = 5;
+  optional string scoringMethod = 6;
+  optional string difficulty = 7;
+  optional float difficultyMultiplier = 8;
+  optional int32 bonusThresholdDays = 9;
+  optional float bonusPerDay = 10;
+  optional float penaltyPerDay = 11;
+  optional int32 categoryId = 12;
+}
+
+message DeleteCriterionRequest {
+  int32 id = 1;
+}
+
+message DeleteCriterionResponse {
+  bool success = 1;
 }
 
 message CreateEvaluationRequest {

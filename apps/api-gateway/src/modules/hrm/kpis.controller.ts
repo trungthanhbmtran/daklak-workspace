@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Inject, UseGuards, OnModuleInit, Param, Put, Delete } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -32,6 +32,21 @@ export class KpisController implements OnModuleInit {
   @Get('criteria')
   async findCriteria() {
     return firstValueFrom(this.kpiService.FindCriteria({}));
+  }
+
+  @Post('criteria')
+  async createCriterion(@Body() body: any) {
+    return firstValueFrom(this.kpiService.CreateCriterion(body));
+  }
+
+  @Put('criteria/:id')
+  async updateCriterion(@Param('id') id: string, @Body() body: any) {
+    return firstValueFrom(this.kpiService.UpdateCriterion({ id: Number(id), ...body }));
+  }
+
+  @Delete('criteria/:id')
+  async deleteCriterion(@Param('id') id: string) {
+    return firstValueFrom(this.kpiService.DeleteCriterion({ id: Number(id) }));
   }
 
   @Post('evaluations')
