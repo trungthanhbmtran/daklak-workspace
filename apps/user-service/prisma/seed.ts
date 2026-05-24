@@ -60,7 +60,8 @@ async function main() {
     { code: 'WORKFLOW', name: 'Quy trình nghiệp vụ' },
   ];
 
-  const resources: Record<string, { id: number; code: string; name: string }> = {};
+  const resources: Record<string, { id: number; code: string; name: string }> =
+    {};
   for (const res of resourcesData) {
     const created = await prisma.resource.upsert({
       where: { code: res.code },
@@ -73,13 +74,23 @@ async function main() {
   // ==========================================================
   // 2. PERMISSIONS (CRUD for all)
   // ==========================================================
-  const actions = ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'APPROVE', 'PUBLISH', 'MANAGE'];
+  const actions = [
+    'CREATE',
+    'READ',
+    'UPDATE',
+    'DELETE',
+    'VIEW',
+    'APPROVE',
+    'PUBLISH',
+    'MANAGE',
+  ];
   const allPermissions: { id: number }[] = [];
 
   for (const res of Object.values(resources)) {
     for (const action of actions) {
       // Logic constraint: SYSTEM only has VIEW/MANAGE
-      if (res.code === 'SYSTEM' && !['VIEW', 'MANAGE'].includes(action)) continue;
+      if (res.code === 'SYSTEM' && !['VIEW', 'MANAGE'].includes(action))
+        continue;
 
       const perm = await prisma.permission.upsert({
         where: { action_resourceId: { action, resourceId: res.id } },
@@ -95,229 +106,1691 @@ async function main() {
   // ==========================================================
   const categoriesData = [
     // --- SYSTEM & MANAGEMENT ---
-    { group: 'STATUS', code: 'ACTIVE', order: 1, nameVi: 'Hoạt động', nameEn: 'Active' },
-    { group: 'STATUS', code: 'INACTIVE', order: 2, nameVi: 'Ngưng hoạt động', nameEn: 'Inactive' },
-    { group: 'STATUS', code: 'PENDING', order: 3, nameVi: 'Chờ xử lý', nameEn: 'Pending' },
-    { group: 'STATUS', code: 'LOCKED', order: 4, nameVi: 'Đã khóa', nameEn: 'Locked' },
+    {
+      group: 'STATUS',
+      code: 'ACTIVE',
+      order: 1,
+      nameVi: 'Hoạt động',
+      nameEn: 'Active',
+    },
+    {
+      group: 'STATUS',
+      code: 'INACTIVE',
+      order: 2,
+      nameVi: 'Ngưng hoạt động',
+      nameEn: 'Inactive',
+    },
+    {
+      group: 'STATUS',
+      code: 'PENDING',
+      order: 3,
+      nameVi: 'Chờ xử lý',
+      nameEn: 'Pending',
+    },
+    {
+      group: 'STATUS',
+      code: 'LOCKED',
+      order: 4,
+      nameVi: 'Đã khóa',
+      nameEn: 'Locked',
+    },
 
-    { group: 'ACTION_LOG', code: 'LOGIN', order: 1, nameVi: 'Đăng nhập', nameEn: 'Login' },
-    { group: 'ACTION_LOG', code: 'LOGOUT', order: 2, nameVi: 'Đăng xuất', nameEn: 'Logout' },
-    { group: 'ACTION_LOG', code: 'CREATE', order: 3, nameVi: 'Tạo mới', nameEn: 'Create' },
-    { group: 'ACTION_LOG', code: 'UPDATE', order: 4, nameVi: 'Cập nhật', nameEn: 'Update' },
-    { group: 'ACTION_LOG', code: 'DELETE', order: 5, nameVi: 'Xóa', nameEn: 'Delete' },
+    {
+      group: 'ACTION_LOG',
+      code: 'LOGIN',
+      order: 1,
+      nameVi: 'Đăng nhập',
+      nameEn: 'Login',
+    },
+    {
+      group: 'ACTION_LOG',
+      code: 'LOGOUT',
+      order: 2,
+      nameVi: 'Đăng xuất',
+      nameEn: 'Logout',
+    },
+    {
+      group: 'ACTION_LOG',
+      code: 'CREATE',
+      order: 3,
+      nameVi: 'Tạo mới',
+      nameEn: 'Create',
+    },
+    {
+      group: 'ACTION_LOG',
+      code: 'UPDATE',
+      order: 4,
+      nameVi: 'Cập nhật',
+      nameEn: 'Update',
+    },
+    {
+      group: 'ACTION_LOG',
+      code: 'DELETE',
+      order: 5,
+      nameVi: 'Xóa',
+      nameEn: 'Delete',
+    },
 
-    { group: 'MICROSERVICE', code: 'USER_SERVICE', order: 1, nameVi: 'Dịch vụ Người dùng', nameEn: 'User Service' },
-    { group: 'MICROSERVICE', code: 'HRM_SERVICE', order: 2, nameVi: 'Dịch vụ Nhân sự', nameEn: 'HRM Service' },
-    { group: 'MICROSERVICE', code: 'DOCUMENT_SERVICE', order: 3, nameVi: 'Dịch vụ Văn bản', nameEn: 'Document Service' },
-    { group: 'MICROSERVICE', code: 'POST_SERVICE', order: 4, nameVi: 'Dịch vụ Nội dung', nameEn: 'Content Service' },
-    { group: 'MICROSERVICE', code: 'WORKFLOW_SERVICE', order: 5, nameVi: 'Dịch vụ Quy trình', nameEn: 'Workflow Service' },
+    {
+      group: 'MICROSERVICE',
+      code: 'USER_SERVICE',
+      order: 1,
+      nameVi: 'Dịch vụ Người dùng',
+      nameEn: 'User Service',
+    },
+    {
+      group: 'MICROSERVICE',
+      code: 'HRM_SERVICE',
+      order: 2,
+      nameVi: 'Dịch vụ Nhân sự',
+      nameEn: 'HRM Service',
+    },
+    {
+      group: 'MICROSERVICE',
+      code: 'DOCUMENT_SERVICE',
+      order: 3,
+      nameVi: 'Dịch vụ Văn bản',
+      nameEn: 'Document Service',
+    },
+    {
+      group: 'MICROSERVICE',
+      code: 'POST_SERVICE',
+      order: 4,
+      nameVi: 'Dịch vụ Nội dung',
+      nameEn: 'Content Service',
+    },
+    {
+      group: 'MICROSERVICE',
+      code: 'WORKFLOW_SERVICE',
+      order: 5,
+      nameVi: 'Dịch vụ Quy trình',
+      nameEn: 'Workflow Service',
+    },
 
     // --- GEOGRAPHIC DATA ---
-    { group: 'PROVINCE', code: '47', order: 1, nameVi: 'Tỉnh Đắk Lắk', nameEn: 'Dak Lak Province' },
-    { group: 'PROVINCE', code: '01', order: 2, nameVi: 'Thành phố Hà Nội', nameEn: 'Hanoi City' },
-    { group: 'PROVINCE', code: '79', order: 3, nameVi: 'Thành phố Hồ Chí Minh', nameEn: 'Ho Chi Minh City' },
+    {
+      group: 'PROVINCE',
+      code: '47',
+      order: 1,
+      nameVi: 'Tỉnh Đắk Lắk',
+      nameEn: 'Dak Lak Province',
+    },
+    {
+      group: 'PROVINCE',
+      code: '01',
+      order: 2,
+      nameVi: 'Thành phố Hà Nội',
+      nameEn: 'Hanoi City',
+    },
+    {
+      group: 'PROVINCE',
+      code: '79',
+      order: 3,
+      nameVi: 'Thành phố Hồ Chí Minh',
+      nameEn: 'Ho Chi Minh City',
+    },
 
-    { group: 'WARD', code: '24001', order: 1, nameVi: 'Phường Buôn Ma Thuột', nameEn: 'Buon Ma Thuot Ward' },
-    { group: 'WARD', code: '24002', order: 2, nameVi: 'Phường Tân An', nameEn: 'Tan An Ward' },
-    { group: 'WARD', code: '24003', order: 3, nameVi: 'Phường Tân Lập', nameEn: 'Tan Lap Ward' },
-    { group: 'WARD', code: '24004', order: 4, nameVi: 'Phường Thành Nhất', nameEn: 'Thanh Nhat Ward' },
-    { group: 'WARD', code: '24005', order: 5, nameVi: 'Xã Hòa Phú', nameEn: 'Hoa Phu Commune' },
-    { group: 'WARD', code: '24006', order: 6, nameVi: 'Phường Ea Kao', nameEn: 'Ea Kao Ward' },
-    { group: 'WARD', code: '24007', order: 7, nameVi: 'Xã Ea Súp', nameEn: 'Ea Sup Commune' },
-    { group: 'WARD', code: '24008', order: 8, nameVi: 'Xã Ea Rốk', nameEn: 'Ea Rok Commune' },
-    { group: 'WARD', code: '24009', order: 9, nameVi: 'Xã Ea Bung', nameEn: 'Ea Bung Commune' },
-    { group: 'WARD', code: '24010', order: 10, nameVi: 'Xã Ia Rvê', nameEn: 'Ia Rve Commune' },
-    { group: 'WARD', code: '24011', order: 11, nameVi: 'Xã Ia Lốp', nameEn: 'Ia Lop Commune' },
-    { group: 'WARD', code: '24012', order: 12, nameVi: 'Xã Ea Ning', nameEn: 'Ea Ning Commune' },
-    { group: 'WARD', code: '24013', order: 13, nameVi: 'Xã Dray Bhăng', nameEn: 'Dray Bhang Commune' },
-    { group: 'WARD', code: '24014', order: 14, nameVi: 'Xã Ea Ktur', nameEn: 'Ea Ktur Commune' },
-    { group: 'WARD', code: '24015', order: 15, nameVi: 'Xã Buôn Đôn', nameEn: 'Buon Don Commune' },
-    { group: 'WARD', code: '24016', order: 16, nameVi: 'Xã Ea Wer', nameEn: 'Ea Wer Commune' },
-    { group: 'WARD', code: '24017', order: 17, nameVi: 'Xã Ea Nuôl', nameEn: 'Ea Nuol Commune' },
-    { group: 'WARD', code: '24018', order: 18, nameVi: 'Xã Quảng Phú', nameEn: 'Quang Phu Commune' },
-    { group: 'WARD', code: '24019', order: 19, nameVi: 'Xã Ea Kiết', nameEn: 'Ea Kiet Commune' },
-    { group: 'WARD', code: '24020', order: 20, nameVi: 'Xã Ea Tul', nameEn: 'Ea Tul Commune' },
-    { group: 'WARD', code: '24021', order: 21, nameVi: 'Xã Cư M’gar', nameEn: 'Cu Mgar Commune' },
-    { group: 'WARD', code: '24022', order: 22, nameVi: 'Xã Ea M’Droh', nameEn: 'Ea MDroh Commune' },
-    { group: 'WARD', code: '24023', order: 23, nameVi: 'Xã Cuôr Đăng', nameEn: 'Cuor Dang Commune' },
-    { group: 'WARD', code: '24024', order: 24, nameVi: 'Xã Krông Búk', nameEn: 'Krong Buk Commune' },
-    { group: 'WARD', code: '24025', order: 25, nameVi: 'Xã Cư Pơng', nameEn: 'Cu Pong Commune' },
-    { group: 'WARD', code: '24026', order: 26, nameVi: 'Phường Buôn Hồ', nameEn: 'Buon Ho Ward' },
-    { group: 'WARD', code: '24027', order: 27, nameVi: 'Phường Cư Bao', nameEn: 'Cu Bao Ward' },
-    { group: 'WARD', code: '24028', order: 28, nameVi: 'Xã Ea Drông', nameEn: 'Ea Drong Commune' },
-    { group: 'WARD', code: '24029', order: 29, nameVi: 'Xã Krông Năng', nameEn: 'Krong Nang Commune' },
-    { group: 'WARD', code: '24030', order: 30, nameVi: 'Xã Dliê Ya', nameEn: 'Dlie Ya Commune' },
+    {
+      group: 'WARD',
+      code: '24001',
+      order: 1,
+      nameVi: 'Phường Buôn Ma Thuột',
+      nameEn: 'Buon Ma Thuot Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24002',
+      order: 2,
+      nameVi: 'Phường Tân An',
+      nameEn: 'Tan An Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24003',
+      order: 3,
+      nameVi: 'Phường Tân Lập',
+      nameEn: 'Tan Lap Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24004',
+      order: 4,
+      nameVi: 'Phường Thành Nhất',
+      nameEn: 'Thanh Nhat Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24005',
+      order: 5,
+      nameVi: 'Xã Hòa Phú',
+      nameEn: 'Hoa Phu Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24006',
+      order: 6,
+      nameVi: 'Phường Ea Kao',
+      nameEn: 'Ea Kao Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24007',
+      order: 7,
+      nameVi: 'Xã Ea Súp',
+      nameEn: 'Ea Sup Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24008',
+      order: 8,
+      nameVi: 'Xã Ea Rốk',
+      nameEn: 'Ea Rok Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24009',
+      order: 9,
+      nameVi: 'Xã Ea Bung',
+      nameEn: 'Ea Bung Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24010',
+      order: 10,
+      nameVi: 'Xã Ia Rvê',
+      nameEn: 'Ia Rve Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24011',
+      order: 11,
+      nameVi: 'Xã Ia Lốp',
+      nameEn: 'Ia Lop Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24012',
+      order: 12,
+      nameVi: 'Xã Ea Ning',
+      nameEn: 'Ea Ning Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24013',
+      order: 13,
+      nameVi: 'Xã Dray Bhăng',
+      nameEn: 'Dray Bhang Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24014',
+      order: 14,
+      nameVi: 'Xã Ea Ktur',
+      nameEn: 'Ea Ktur Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24015',
+      order: 15,
+      nameVi: 'Xã Buôn Đôn',
+      nameEn: 'Buon Don Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24016',
+      order: 16,
+      nameVi: 'Xã Ea Wer',
+      nameEn: 'Ea Wer Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24017',
+      order: 17,
+      nameVi: 'Xã Ea Nuôl',
+      nameEn: 'Ea Nuol Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24018',
+      order: 18,
+      nameVi: 'Xã Quảng Phú',
+      nameEn: 'Quang Phu Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24019',
+      order: 19,
+      nameVi: 'Xã Ea Kiết',
+      nameEn: 'Ea Kiet Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24020',
+      order: 20,
+      nameVi: 'Xã Ea Tul',
+      nameEn: 'Ea Tul Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24021',
+      order: 21,
+      nameVi: 'Xã Cư M’gar',
+      nameEn: 'Cu Mgar Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24022',
+      order: 22,
+      nameVi: 'Xã Ea M’Droh',
+      nameEn: 'Ea MDroh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24023',
+      order: 23,
+      nameVi: 'Xã Cuôr Đăng',
+      nameEn: 'Cuor Dang Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24024',
+      order: 24,
+      nameVi: 'Xã Krông Búk',
+      nameEn: 'Krong Buk Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24025',
+      order: 25,
+      nameVi: 'Xã Cư Pơng',
+      nameEn: 'Cu Pong Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24026',
+      order: 26,
+      nameVi: 'Phường Buôn Hồ',
+      nameEn: 'Buon Ho Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24027',
+      order: 27,
+      nameVi: 'Phường Cư Bao',
+      nameEn: 'Cu Bao Ward',
+    },
+    {
+      group: 'WARD',
+      code: '24028',
+      order: 28,
+      nameVi: 'Xã Ea Drông',
+      nameEn: 'Ea Drong Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24029',
+      order: 29,
+      nameVi: 'Xã Krông Năng',
+      nameEn: 'Krong Nang Commune',
+    },
+    {
+      group: 'WARD',
+      code: '24030',
+      order: 30,
+      nameVi: 'Xã Dliê Ya',
+      nameEn: 'Dlie Ya Commune',
+    },
 
     // ===== PHÚ YÊN CŨ =====
 
-    { group: 'WARD', code: '25001', order: 69, nameVi: 'Phường Xuân Đài', nameEn: 'Xuan Dai Ward' },
-    { group: 'WARD', code: '25002', order: 70, nameVi: 'Phường Bình Kiến', nameEn: 'Binh Kien Ward' },
-    { group: 'WARD', code: '25003', order: 71, nameVi: 'Phường Tuy Hòa', nameEn: 'Tuy Hoa Ward' },
-    { group: 'WARD', code: '25004', order: 72, nameVi: 'Phường Phú Yên', nameEn: 'Phu Yen Ward' },
-    { group: 'WARD', code: '25005', order: 73, nameVi: 'Phường Hòa Hiệp', nameEn: 'Hoa Hiep Ward' },
-    { group: 'WARD', code: '25006', order: 74, nameVi: 'Phường Đông Hòa', nameEn: 'Dong Hoa Ward' },
-    { group: 'WARD', code: '25007', order: 75, nameVi: 'Xã Sông Cầu', nameEn: 'Song Cau Commune' },
-    { group: 'WARD', code: '25008', order: 76, nameVi: 'Xã Xuân Thọ', nameEn: 'Xuan Tho Commune' },
-    { group: 'WARD', code: '25009', order: 77, nameVi: 'Xã Xuân Cảnh', nameEn: 'Xuan Canh Commune' },
-    { group: 'WARD', code: '25010', order: 78, nameVi: 'Xã Xuân Lộc', nameEn: 'Xuan Loc Commune' },
-    { group: 'WARD', code: '25011', order: 79, nameVi: 'Xã Xuân Phước', nameEn: 'Xuan Phuoc Commune' },
-    { group: 'WARD', code: '25012', order: 80, nameVi: 'Xã Đồng Xuân', nameEn: 'Dong Xuan Commune' },
-    { group: 'WARD', code: '25013', order: 81, nameVi: 'Xã La Hai', nameEn: 'La Hai Commune' },
-    { group: 'WARD', code: '25014', order: 82, nameVi: 'Xã Tuy An', nameEn: 'Tuy An Commune' },
-    { group: 'WARD', code: '25015', order: 83, nameVi: 'Xã Chí Thạnh', nameEn: 'Chi Thanh Commune' },
-    { group: 'WARD', code: '25016', order: 84, nameVi: 'Xã An Mỹ', nameEn: 'An My Commune' },
-    { group: 'WARD', code: '25017', order: 85, nameVi: 'Xã An Chấn', nameEn: 'An Chan Commune' },
-    { group: 'WARD', code: '25018', order: 86, nameVi: 'Xã An Ninh', nameEn: 'An Ninh Commune' },
-    { group: 'WARD', code: '25019', order: 87, nameVi: 'Xã An Lĩnh', nameEn: 'An Linh Commune' },
-    { group: 'WARD', code: '25020', order: 88, nameVi: 'Xã Tây Hòa', nameEn: 'Tay Hoa Commune' },
-    { group: 'WARD', code: '25021', order: 89, nameVi: 'Xã Sơn Thành', nameEn: 'Son Thanh Commune' },
-    { group: 'WARD', code: '25022', order: 90, nameVi: 'Xã Hòa Mỹ', nameEn: 'Hoa My Commune' },
-    { group: 'WARD', code: '25023', order: 91, nameVi: 'Xã Hòa Thịnh', nameEn: 'Hoa Thinh Commune' },
-    { group: 'WARD', code: '25024', order: 92, nameVi: 'Xã Hòa Xuân', nameEn: 'Hoa Xuan Commune' },
-    { group: 'WARD', code: '25025', order: 93, nameVi: 'Xã Hòa Vinh', nameEn: 'Hoa Vinh Commune' },
-    { group: 'WARD', code: '25026', order: 94, nameVi: 'Xã Phú Hòa', nameEn: 'Phu Hoa Commune' },
-    { group: 'WARD', code: '25027', order: 95, nameVi: 'Xã Hòa Quang', nameEn: 'Hoa Quang Commune' },
-    { group: 'WARD', code: '25028', order: 96, nameVi: 'Xã Hòa Trị', nameEn: 'Hoa Tri Commune' },
-    { group: 'WARD', code: '25029', order: 97, nameVi: 'Xã Hòa Định', nameEn: 'Hoa Dinh Commune' },
-    { group: 'WARD', code: '25030', order: 98, nameVi: 'Xã Sơn Hòa', nameEn: 'Son Hoa Commune' },
-    { group: 'WARD', code: '25031', order: 99, nameVi: 'Xã Củng Sơn', nameEn: 'Cung Son Commune' },
-    { group: 'WARD', code: '25032', order: 100, nameVi: 'Xã Suối Bạc', nameEn: 'Suoi Bac Commune' },
-    { group: 'WARD', code: '25033', order: 101, nameVi: 'Xã Xuân Phương', nameEn: 'Xuan Phuong Commune' },
-    { group: 'WARD', code: '25034', order: 102, nameVi: 'Xã Xuân Hải', nameEn: 'Xuan Hai Commune' },
+    {
+      group: 'WARD',
+      code: '25001',
+      order: 69,
+      nameVi: 'Phường Xuân Đài',
+      nameEn: 'Xuan Dai Ward',
+    },
+    {
+      group: 'WARD',
+      code: '25002',
+      order: 70,
+      nameVi: 'Phường Bình Kiến',
+      nameEn: 'Binh Kien Ward',
+    },
+    {
+      group: 'WARD',
+      code: '25003',
+      order: 71,
+      nameVi: 'Phường Tuy Hòa',
+      nameEn: 'Tuy Hoa Ward',
+    },
+    {
+      group: 'WARD',
+      code: '25004',
+      order: 72,
+      nameVi: 'Phường Phú Yên',
+      nameEn: 'Phu Yen Ward',
+    },
+    {
+      group: 'WARD',
+      code: '25005',
+      order: 73,
+      nameVi: 'Phường Hòa Hiệp',
+      nameEn: 'Hoa Hiep Ward',
+    },
+    {
+      group: 'WARD',
+      code: '25006',
+      order: 74,
+      nameVi: 'Phường Đông Hòa',
+      nameEn: 'Dong Hoa Ward',
+    },
+    {
+      group: 'WARD',
+      code: '25007',
+      order: 75,
+      nameVi: 'Xã Sông Cầu',
+      nameEn: 'Song Cau Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25008',
+      order: 76,
+      nameVi: 'Xã Xuân Thọ',
+      nameEn: 'Xuan Tho Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25009',
+      order: 77,
+      nameVi: 'Xã Xuân Cảnh',
+      nameEn: 'Xuan Canh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25010',
+      order: 78,
+      nameVi: 'Xã Xuân Lộc',
+      nameEn: 'Xuan Loc Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25011',
+      order: 79,
+      nameVi: 'Xã Xuân Phước',
+      nameEn: 'Xuan Phuoc Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25012',
+      order: 80,
+      nameVi: 'Xã Đồng Xuân',
+      nameEn: 'Dong Xuan Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25013',
+      order: 81,
+      nameVi: 'Xã La Hai',
+      nameEn: 'La Hai Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25014',
+      order: 82,
+      nameVi: 'Xã Tuy An',
+      nameEn: 'Tuy An Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25015',
+      order: 83,
+      nameVi: 'Xã Chí Thạnh',
+      nameEn: 'Chi Thanh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25016',
+      order: 84,
+      nameVi: 'Xã An Mỹ',
+      nameEn: 'An My Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25017',
+      order: 85,
+      nameVi: 'Xã An Chấn',
+      nameEn: 'An Chan Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25018',
+      order: 86,
+      nameVi: 'Xã An Ninh',
+      nameEn: 'An Ninh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25019',
+      order: 87,
+      nameVi: 'Xã An Lĩnh',
+      nameEn: 'An Linh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25020',
+      order: 88,
+      nameVi: 'Xã Tây Hòa',
+      nameEn: 'Tay Hoa Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25021',
+      order: 89,
+      nameVi: 'Xã Sơn Thành',
+      nameEn: 'Son Thanh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25022',
+      order: 90,
+      nameVi: 'Xã Hòa Mỹ',
+      nameEn: 'Hoa My Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25023',
+      order: 91,
+      nameVi: 'Xã Hòa Thịnh',
+      nameEn: 'Hoa Thinh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25024',
+      order: 92,
+      nameVi: 'Xã Hòa Xuân',
+      nameEn: 'Hoa Xuan Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25025',
+      order: 93,
+      nameVi: 'Xã Hòa Vinh',
+      nameEn: 'Hoa Vinh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25026',
+      order: 94,
+      nameVi: 'Xã Phú Hòa',
+      nameEn: 'Phu Hoa Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25027',
+      order: 95,
+      nameVi: 'Xã Hòa Quang',
+      nameEn: 'Hoa Quang Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25028',
+      order: 96,
+      nameVi: 'Xã Hòa Trị',
+      nameEn: 'Hoa Tri Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25029',
+      order: 97,
+      nameVi: 'Xã Hòa Định',
+      nameEn: 'Hoa Dinh Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25030',
+      order: 98,
+      nameVi: 'Xã Sơn Hòa',
+      nameEn: 'Son Hoa Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25031',
+      order: 99,
+      nameVi: 'Xã Củng Sơn',
+      nameEn: 'Cung Son Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25032',
+      order: 100,
+      nameVi: 'Xã Suối Bạc',
+      nameEn: 'Suoi Bac Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25033',
+      order: 101,
+      nameVi: 'Xã Xuân Phương',
+      nameEn: 'Xuan Phuong Commune',
+    },
+    {
+      group: 'WARD',
+      code: '25034',
+      order: 102,
+      nameVi: 'Xã Xuân Hải',
+      nameEn: 'Xuan Hai Commune',
+    },
 
-    { group: 'GEO_AREA', code: 'TAY_NGUYEN', order: 1, nameVi: 'Khu vực Tây Nguyên', nameEn: 'Central Highlands Region' },
-    { group: 'GEO_AREA', code: 'MIEN_TRUNG', order: 2, nameVi: 'Khu vực Miền Trung', nameEn: 'Central Region' },
+    {
+      group: 'GEO_AREA',
+      code: 'TAY_NGUYEN',
+      order: 1,
+      nameVi: 'Khu vực Tây Nguyên',
+      nameEn: 'Central Highlands Region',
+    },
+    {
+      group: 'GEO_AREA',
+      code: 'MIEN_TRUNG',
+      order: 2,
+      nameVi: 'Khu vực Miền Trung',
+      nameEn: 'Central Region',
+    },
 
     // --- DOCUMENTS ---
-    { group: 'DOCUMENT_TYPE', code: 'QUYET_DINH', order: 1, nameVi: 'Quyết định', nameEn: 'Decision' },
-    { group: 'DOCUMENT_TYPE', code: 'NGHI_QUYET', order: 2, nameVi: 'Nghị quyết', nameEn: 'Resolution' },
-    { group: 'DOCUMENT_TYPE', code: 'CONG_VAN', order: 3, nameVi: 'Công văn', nameEn: 'Official Letter' },
-    { group: 'DOCUMENT_TYPE', code: 'TO_TRINH', order: 4, nameVi: 'Tờ trình', nameEn: 'Proposal' },
-    { group: 'DOCUMENT_TYPE', code: 'BAO_CAO', order: 5, nameVi: 'Báo cáo', nameEn: 'Report' },
+    {
+      group: 'DOCUMENT_TYPE',
+      code: 'QUYET_DINH',
+      order: 1,
+      nameVi: 'Quyết định',
+      nameEn: 'Decision',
+    },
+    {
+      group: 'DOCUMENT_TYPE',
+      code: 'NGHI_QUYET',
+      order: 2,
+      nameVi: 'Nghị quyết',
+      nameEn: 'Resolution',
+    },
+    {
+      group: 'DOCUMENT_TYPE',
+      code: 'CONG_VAN',
+      order: 3,
+      nameVi: 'Công văn',
+      nameEn: 'Official Letter',
+    },
+    {
+      group: 'DOCUMENT_TYPE',
+      code: 'TO_TRINH',
+      order: 4,
+      nameVi: 'Tờ trình',
+      nameEn: 'Proposal',
+    },
+    {
+      group: 'DOCUMENT_TYPE',
+      code: 'BAO_CAO',
+      order: 5,
+      nameVi: 'Báo cáo',
+      nameEn: 'Report',
+    },
 
-    { group: 'URGENCY_LEVEL', code: 'THUONG', order: 1, nameVi: 'Thường', nameEn: 'Normal' },
-    { group: 'URGENCY_LEVEL', code: 'KHAN', order: 2, nameVi: 'Khẩn', nameEn: 'Urgent' },
-    { group: 'URGENCY_LEVEL', code: 'HOA_TOC', order: 3, nameVi: 'Hỏa tốc', nameEn: 'Express' },
+    {
+      group: 'URGENCY_LEVEL',
+      code: 'THUONG',
+      order: 1,
+      nameVi: 'Thường',
+      nameEn: 'Normal',
+    },
+    {
+      group: 'URGENCY_LEVEL',
+      code: 'KHAN',
+      order: 2,
+      nameVi: 'Khẩn',
+      nameEn: 'Urgent',
+    },
+    {
+      group: 'URGENCY_LEVEL',
+      code: 'HOA_TOC',
+      order: 3,
+      nameVi: 'Hỏa tốc',
+      nameEn: 'Express',
+    },
 
-    { group: 'SECURITY_LEVEL', code: 'THUONG', order: 1, nameVi: 'Thường', nameEn: 'Unclassified' },
-    { group: 'SECURITY_LEVEL', code: 'MAT', order: 2, nameVi: 'Mật', nameEn: 'Confidential' },
-    { group: 'SECURITY_LEVEL', code: 'TOI_MAT', order: 3, nameVi: 'Tối mật', nameEn: 'Secret' },
-    { group: 'SECURITY_LEVEL', code: 'TUYET_MAT', order: 4, nameVi: 'Tuyệt mật', nameEn: 'Top Secret' },
+    {
+      group: 'SECURITY_LEVEL',
+      code: 'THUONG',
+      order: 1,
+      nameVi: 'Thường',
+      nameEn: 'Unclassified',
+    },
+    {
+      group: 'SECURITY_LEVEL',
+      code: 'MAT',
+      order: 2,
+      nameVi: 'Mật',
+      nameEn: 'Confidential',
+    },
+    {
+      group: 'SECURITY_LEVEL',
+      code: 'TOI_MAT',
+      order: 3,
+      nameVi: 'Tối mật',
+      nameEn: 'Secret',
+    },
+    {
+      group: 'SECURITY_LEVEL',
+      code: 'TUYET_MAT',
+      order: 4,
+      nameVi: 'Tuyệt mật',
+      nameEn: 'Top Secret',
+    },
 
-    { group: 'DOCUMENT_DOMAIN', code: 'HANH_CHINH', order: 1, nameVi: 'Hành chính', nameEn: 'Administration' },
-    { group: 'DOCUMENT_DOMAIN', code: 'KHOA_HOC', order: 2, nameVi: 'Khoa học công nghệ', nameEn: 'Science & Technology' },
-    { group: 'DOCUMENT_DOMAIN', code: 'TAI_CHINH', order: 3, nameVi: 'Tài chính', nameEn: 'Finance' },
-    { group: 'DOCUMENT_DOMAIN', code: 'GIAO_THONG', order: 4, nameVi: 'Giao thông vận tải', nameEn: 'Transportation' },
-    { group: 'DOCUMENT_DOMAIN', code: 'Y_TE', order: 5, nameVi: 'Y tế', nameEn: 'Healthcare' },
+    // =========================
+    // ĐIỀU HÀNH - HÀNH CHÍNH
+    // =========================
 
-    { group: 'STORAGE_PERIOD', code: '5_YEARS', order: 1, nameVi: '05 năm', nameEn: '5 years' },
-    { group: 'STORAGE_PERIOD', code: '10_YEARS', order: 2, nameVi: '10 năm', nameEn: '10 years' },
-    { group: 'STORAGE_PERIOD', code: '20_YEARS', order: 3, nameVi: '20 năm', nameEn: '20 years' },
-    { group: 'STORAGE_PERIOD', code: 'PERMANENT', order: 4, nameVi: 'Vĩnh viễn', nameEn: 'Permanent' },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'DIEU_HANH_HANH_CHINH',
+      parentCode: null,
+      level: 1,
+      order: 1,
+      nameVi: 'Điều hành - Hành chính',
+      nameEn: 'Administration and Operations',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'VAN_THU',
+      parentCode: 'DIEU_HANH_HANH_CHINH',
+      level: 2,
+      order: 2,
+      nameVi: 'Văn thư',
+      nameEn: 'Clerical Affairs',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'LUU_TRU',
+      parentCode: 'DIEU_HANH_HANH_CHINH',
+      level: 2,
+      order: 3,
+      nameVi: 'Lưu trữ',
+      nameEn: 'Archives',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'MOT_CUA',
+      parentCode: 'DIEU_HANH_HANH_CHINH',
+      level: 2,
+      order: 4,
+      nameVi: 'Một cửa',
+      nameEn: 'One-stop Service',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'KIEM_SOAT_TTHC',
+      parentCode: 'DIEU_HANH_HANH_CHINH',
+      level: 2,
+      order: 5,
+      nameVi: 'Kiểm soát TTHC',
+      nameEn: 'Administrative Procedure Control',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'VAN_PHONG_UBND',
+      parentCode: 'DIEU_HANH_HANH_CHINH',
+      level: 2,
+      order: 6,
+      nameVi: 'Văn phòng UBND',
+      nameEn: 'People Committee Office',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'DIEU_HANH_TAC_NGHIEP',
+      parentCode: 'DIEU_HANH_HANH_CHINH',
+      level: 2,
+      order: 7,
+      nameVi: 'Điều hành tác nghiệp',
+      nameEn: 'Operational Management',
+    },
+
+    // =========================
+    // NỘI VỤ
+    // =========================
+
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'NOI_VU',
+      parentCode: null,
+      level: 1,
+      order: 10,
+      nameVi: 'Nội vụ',
+      nameEn: 'Home Affairs',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'TO_CHUC_BO_MAY',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 11,
+      nameVi: 'Tổ chức bộ máy',
+      nameEn: 'Organizational Structure',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'CAN_BO_CONG_CHUC',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 12,
+      nameVi: 'Cán bộ công chức',
+      nameEn: 'Civil Servants',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'VIEN_CHUC',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 13,
+      nameVi: 'Viên chức',
+      nameEn: 'Public Employees',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'BIEN_CHE',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 14,
+      nameVi: 'Biên chế',
+      nameEn: 'Staff Quota',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'THI_DUA_KHEN_THUONG',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 15,
+      nameVi: 'Thi đua khen thưởng',
+      nameEn: 'Commendation',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'TON_GIAO',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 16,
+      nameVi: 'Tôn giáo',
+      nameEn: 'Religious Affairs',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'DIA_GIOI_HANH_CHINH',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 17,
+      nameVi: 'Địa giới hành chính',
+      nameEn: 'Administrative Boundary',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'CHINH_QUYEN_DIA_PHUONG',
+      parentCode: 'NOI_VU',
+      level: 2,
+      order: 18,
+      nameVi: 'Chính quyền địa phương',
+      nameEn: 'Local Government',
+    },
+
+    // =========================
+    // TƯ PHÁP
+    // =========================
+
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'TU_PHAP',
+      parentCode: null,
+      level: 1,
+      order: 20,
+      nameVi: 'Tư pháp',
+      nameEn: 'Justice',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'HO_TICH',
+      parentCode: 'TU_PHAP',
+      level: 2,
+      order: 21,
+      nameVi: 'Hộ tịch',
+      nameEn: 'Civil Status',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'CHUNG_THUC',
+      parentCode: 'TU_PHAP',
+      level: 2,
+      order: 22,
+      nameVi: 'Chứng thực',
+      nameEn: 'Authentication',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'PHO_BIEN_PHAP_LUAT',
+      parentCode: 'TU_PHAP',
+      level: 2,
+      order: 23,
+      nameVi: 'Phổ biến pháp luật',
+      nameEn: 'Legal Dissemination',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'HOA_GIAI_CO_SO',
+      parentCode: 'TU_PHAP',
+      level: 2,
+      order: 24,
+      nameVi: 'Hòa giải cơ sở',
+      nameEn: 'Grassroots Mediation',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'THEO_DOI_THI_HANH_PHAP_LUAT',
+      parentCode: 'TU_PHAP',
+      level: 2,
+      order: 25,
+      nameVi: 'Theo dõi thi hành pháp luật',
+      nameEn: 'Law Enforcement Monitoring',
+    },
+
+    // =========================
+    // THANH TRA
+    // =========================
+
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'THANH_TRA',
+      parentCode: null,
+      level: 1,
+      order: 30,
+      nameVi: 'Thanh tra',
+      nameEn: 'Inspection',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'THANH_TRA_HANH_CHINH',
+      parentCode: 'THANH_TRA',
+      level: 2,
+      order: 31,
+      nameVi: 'Thanh tra hành chính',
+      nameEn: 'Administrative Inspection',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'THANH_TRA_CHUYEN_NGANH',
+      parentCode: 'THANH_TRA',
+      level: 2,
+      order: 32,
+      nameVi: 'Thanh tra chuyên ngành',
+      nameEn: 'Specialized Inspection',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'KHIEU_NAI',
+      parentCode: 'THANH_TRA',
+      level: 2,
+      order: 33,
+      nameVi: 'Khiếu nại',
+      nameEn: 'Complaint',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'TO_CAO',
+      parentCode: 'THANH_TRA',
+      level: 2,
+      order: 34,
+      nameVi: 'Tố cáo',
+      nameEn: 'Denunciation',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'PHONG_CHONG_THAM_NHUNG',
+      parentCode: 'THANH_TRA',
+      level: 2,
+      order: 35,
+      nameVi: 'Phòng chống tham nhũng',
+      nameEn: 'Anti Corruption',
+    },
+
+    // =========================
+    // KINH TẾ - TÀI CHÍNH
+    // =========================
+
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'KINH_TE_TAI_CHINH',
+      parentCode: null,
+      level: 1,
+      order: 40,
+      nameVi: 'Kinh tế - Tài chính',
+      nameEn: 'Economy and Finance',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'NGAN_SACH',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 41,
+      nameVi: 'Ngân sách',
+      nameEn: 'Budget',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'TAI_SAN_CONG',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 42,
+      nameVi: 'Tài sản công',
+      nameEn: 'Public Assets',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'GIA_CONG_SAN',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 43,
+      nameVi: 'Giá công sản',
+      nameEn: 'Public Asset Pricing',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'THUE',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 44,
+      nameVi: 'Thuế',
+      nameEn: 'Taxation',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'PHI_LE_PHI',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 45,
+      nameVi: 'Phí lệ phí',
+      nameEn: 'Fees and Charges',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'DAU_TU_CONG',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 46,
+      nameVi: 'Đầu tư công',
+      nameEn: 'Public Investment',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'DAU_THAU',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 47,
+      nameVi: 'Đấu thầu',
+      nameEn: 'Procurement',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'DOANH_NGHIEP',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 48,
+      nameVi: 'Doanh nghiệp',
+      nameEn: 'Enterprise',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'HOP_TAC_XA',
+      parentCode: 'KINH_TE_TAI_CHINH',
+      level: 2,
+      order: 49,
+      nameVi: 'Hợp tác xã',
+      nameEn: 'Cooperative',
+    },
+
+    // =========================
+    // XÂY DỰNG - HẠ TẦNG
+    // =========================
+
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'XAY_DUNG_HA_TANG',
+      parentCode: null,
+      level: 1,
+      order: 50,
+      nameVi: 'Xây dựng - Hạ tầng',
+      nameEn: 'Construction and Infrastructure',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'QUY_HOACH_DO_THI',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 51,
+      nameVi: 'Quy hoạch đô thị',
+      nameEn: 'Urban Planning',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'CAP_PHEP_XAY_DUNG',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 52,
+      nameVi: 'Cấp phép xây dựng',
+      nameEn: 'Construction Permit',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'NHA_O',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 53,
+      nameVi: 'Nhà ở',
+      nameEn: 'Housing',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'HA_TANG_KY_THUAT',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 54,
+      nameVi: 'Hạ tầng kỹ thuật',
+      nameEn: 'Technical Infrastructure',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'CAP_THOAT_NUOC',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 55,
+      nameVi: 'Cấp thoát nước',
+      nameEn: 'Water Supply and Drainage',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'CHIEU_SANG_DO_THI',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 56,
+      nameVi: 'Chiếu sáng đô thị',
+      nameEn: 'Urban Lighting',
+    },
+    {
+      group: 'DOCUMENT_DOMAIN',
+      code: 'GIAO_THONG',
+      parentCode: 'XAY_DUNG_HA_TANG',
+      level: 2,
+      order: 57,
+      nameVi: 'Giao thông',
+      nameEn: 'Transportation',
+    },
+
+    {
+      group: 'STORAGE_PERIOD',
+      code: '5_YEARS',
+      order: 1,
+      nameVi: '05 năm',
+      nameEn: '5 years',
+    },
+    {
+      group: 'STORAGE_PERIOD',
+      code: '10_YEARS',
+      order: 2,
+      nameVi: '10 năm',
+      nameEn: '10 years',
+    },
+    {
+      group: 'STORAGE_PERIOD',
+      code: '20_YEARS',
+      order: 3,
+      nameVi: '20 năm',
+      nameEn: '20 years',
+    },
+    {
+      group: 'STORAGE_PERIOD',
+      code: 'PERMANENT',
+      order: 4,
+      nameVi: 'Vĩnh viễn',
+      nameEn: 'Permanent',
+    },
 
     // --- HRM & PERSONAL ---
     { group: 'GENDER', code: 'NAM', order: 1, nameVi: 'Nam', nameEn: 'Male' },
     { group: 'GENDER', code: 'NU', order: 2, nameVi: 'Nữ', nameEn: 'Female' },
-    { group: 'GENDER', code: 'KHAC', order: 3, nameVi: 'Khác', nameEn: 'Other' },
+    {
+      group: 'GENDER',
+      code: 'KHAC',
+      order: 3,
+      nameVi: 'Khác',
+      nameEn: 'Other',
+    },
 
-    { group: 'ETHNICITY', code: 'KINH', order: 1, nameVi: 'Kinh', nameEn: 'Kinh' },
-    { group: 'ETHNICITY', code: 'EDE', order: 2, nameVi: 'Ê-đê', nameEn: 'Ede' },
-    { group: 'ETHNICITY', code: 'M_NONG', order: 3, nameVi: 'M\'Nông', nameEn: 'M\'Nong' },
+    {
+      group: 'ETHNICITY',
+      code: 'KINH',
+      order: 1,
+      nameVi: 'Kinh',
+      nameEn: 'Kinh',
+    },
+    {
+      group: 'ETHNICITY',
+      code: 'EDE',
+      order: 2,
+      nameVi: 'Ê-đê',
+      nameEn: 'Ede',
+    },
+    {
+      group: 'ETHNICITY',
+      code: 'M_NONG',
+      order: 3,
+      nameVi: "M'Nông",
+      nameEn: "M'Nong",
+    },
 
-    { group: 'RELIGION', code: 'KHONG', order: 1, nameVi: 'Không', nameEn: 'None' },
-    { group: 'RELIGION', code: 'PHAT_GIAO', order: 2, nameVi: 'Phật giáo', nameEn: 'Buddhism' },
-    { group: 'RELIGION', code: 'CONG_GIAO', order: 3, nameVi: 'Công giáo', nameEn: 'Catholicism' },
+    {
+      group: 'RELIGION',
+      code: 'KHONG',
+      order: 1,
+      nameVi: 'Không',
+      nameEn: 'None',
+    },
+    {
+      group: 'RELIGION',
+      code: 'PHAT_GIAO',
+      order: 2,
+      nameVi: 'Phật giáo',
+      nameEn: 'Buddhism',
+    },
+    {
+      group: 'RELIGION',
+      code: 'CONG_GIAO',
+      order: 3,
+      nameVi: 'Công giáo',
+      nameEn: 'Catholicism',
+    },
 
-    { group: 'IDENTITY_TYPE', code: 'CCCD', order: 1, nameVi: 'Căn cước công dân', nameEn: 'Citizen Identity Card' },
-    { group: 'IDENTITY_TYPE', code: 'PASSPORT', order: 2, nameVi: 'Hộ chiếu', nameEn: 'Passport' },
+    {
+      group: 'IDENTITY_TYPE',
+      code: 'CCCD',
+      order: 1,
+      nameVi: 'Căn cước công dân',
+      nameEn: 'Citizen Identity Card',
+    },
+    {
+      group: 'IDENTITY_TYPE',
+      code: 'PASSPORT',
+      order: 2,
+      nameVi: 'Hộ chiếu',
+      nameEn: 'Passport',
+    },
 
-    { group: 'POSITION', code: 'GIAM_DOC', order: 1, nameVi: 'Giám đốc', nameEn: 'Director' },
-    { group: 'POSITION', code: 'PHO_GIAM_DOC', order: 2, nameVi: 'Phó Giám đốc', nameEn: 'Deputy Director' },
-    { group: 'POSITION', code: 'TRUONG_PHONG', order: 3, nameVi: 'Trưởng phòng', nameEn: 'Head of Department' },
-    { group: 'POSITION', code: 'PHO_TRUONG_PHONG', order: 4, nameVi: 'Phó Trưởng phòng', nameEn: 'Deputy Head of Department' },
-    { group: 'POSITION', code: 'CHANH_VAN_PHONG', order: 5, nameVi: 'Chánh Văn phòng', nameEn: 'Chief of Office' },
-    { group: 'POSITION', code: 'PHO_CHANH_VAN_PHONG', order: 6, nameVi: 'Phó Chánh Văn phòng', nameEn: 'Deputy Chief of Office' },
-    { group: 'POSITION', code: 'CHANH_THANH_TRA', order: 7, nameVi: 'Chánh Thanh tra', nameEn: 'Chief Inspector' },
-    { group: 'POSITION', code: 'PHO_CHANH_THANH_TRA', order: 8, nameVi: 'Phó Chánh Thanh tra', nameEn: 'Deputy Chief Inspector' },
-    { group: 'POSITION', code: 'CHUYEN_VIEN', order: 9, nameVi: 'Chuyên viên', nameEn: 'Expert' },
+    {
+      group: 'POSITION',
+      code: 'GIAM_DOC',
+      order: 1,
+      nameVi: 'Giám đốc',
+      nameEn: 'Director',
+    },
+    {
+      group: 'POSITION',
+      code: 'PHO_GIAM_DOC',
+      order: 2,
+      nameVi: 'Phó Giám đốc',
+      nameEn: 'Deputy Director',
+    },
+    {
+      group: 'POSITION',
+      code: 'TRUONG_PHONG',
+      order: 3,
+      nameVi: 'Trưởng phòng',
+      nameEn: 'Head of Department',
+    },
+    {
+      group: 'POSITION',
+      code: 'PHO_TRUONG_PHONG',
+      order: 4,
+      nameVi: 'Phó Trưởng phòng',
+      nameEn: 'Deputy Head of Department',
+    },
+    {
+      group: 'POSITION',
+      code: 'CHANH_VAN_PHONG',
+      order: 5,
+      nameVi: 'Chánh Văn phòng',
+      nameEn: 'Chief of Office',
+    },
+    {
+      group: 'POSITION',
+      code: 'PHO_CHANH_VAN_PHONG',
+      order: 6,
+      nameVi: 'Phó Chánh Văn phòng',
+      nameEn: 'Deputy Chief of Office',
+    },
+    {
+      group: 'POSITION',
+      code: 'CHANH_THANH_TRA',
+      order: 7,
+      nameVi: 'Chánh Thanh tra',
+      nameEn: 'Chief Inspector',
+    },
+    {
+      group: 'POSITION',
+      code: 'PHO_CHANH_THANH_TRA',
+      order: 8,
+      nameVi: 'Phó Chánh Thanh tra',
+      nameEn: 'Deputy Chief Inspector',
+    },
+    {
+      group: 'POSITION',
+      code: 'CHUYEN_VIEN',
+      order: 9,
+      nameVi: 'Chuyên viên',
+      nameEn: 'Expert',
+    },
 
-    { group: 'CIVIL_SERVANT_RANK', code: 'CVC_CAO_CAP', order: 1, nameVi: 'Chuyên viên cao cấp', nameEn: 'Senior Expert' },
-    { group: 'CIVIL_SERVANT_RANK', code: 'CVC_CHINH', order: 2, nameVi: 'Chuyên viên chính', nameEn: 'Principal Expert' },
-    { group: 'CIVIL_SERVANT_RANK', code: 'CHUYEN_VIEN', order: 3, nameVi: 'Chuyên viên', nameEn: 'Expert' },
+    {
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'CVC_CAO_CAP',
+      order: 1,
+      nameVi: 'Chuyên viên cao cấp',
+      nameEn: 'Senior Expert',
+    },
+    {
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'CVC_CHINH',
+      order: 2,
+      nameVi: 'Chuyên viên chính',
+      nameEn: 'Principal Expert',
+    },
+    {
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'CHUYEN_VIEN',
+      order: 3,
+      nameVi: 'Chuyên viên',
+      nameEn: 'Expert',
+    },
 
-    { group: 'ACADEMIC_RANK', code: 'TIEN_SI', order: 1, nameVi: 'Tiến sĩ', nameEn: 'Doctor of Philosophy' },
-    { group: 'ACADEMIC_RANK', code: 'THAC_SI', order: 2, nameVi: 'Thạc sĩ', nameEn: 'Master of Science' },
-    { group: 'ACADEMIC_RANK', code: 'GIAO_SU', order: 3, nameVi: 'Giáo sư', nameEn: 'Professor' },
-    { group: 'ACADEMIC_RANK', code: 'PHO_GIAO_SU', order: 4, nameVi: 'Phó Giáo sư', nameEn: 'Associate Professor' },
+    {
+      group: 'ACADEMIC_RANK',
+      code: 'TIEN_SI',
+      order: 1,
+      nameVi: 'Tiến sĩ',
+      nameEn: 'Doctor of Philosophy',
+    },
+    {
+      group: 'ACADEMIC_RANK',
+      code: 'THAC_SI',
+      order: 2,
+      nameVi: 'Thạc sĩ',
+      nameEn: 'Master of Science',
+    },
+    {
+      group: 'ACADEMIC_RANK',
+      code: 'GIAO_SU',
+      order: 3,
+      nameVi: 'Giáo sư',
+      nameEn: 'Professor',
+    },
+    {
+      group: 'ACADEMIC_RANK',
+      code: 'PHO_GIAO_SU',
+      order: 4,
+      nameVi: 'Phó Giáo sư',
+      nameEn: 'Associate Professor',
+    },
 
-    { group: 'POLITICAL_THEORY', code: 'CAO_CAP', order: 1, nameVi: 'Cao cấp', nameEn: 'Advanced' },
-    { group: 'POLITICAL_THEORY', code: 'TRUNG_CAP', order: 2, nameVi: 'Trung cấp', nameEn: 'Intermediate' },
-    { group: 'POLITICAL_THEORY', code: 'SO_CAP', order: 3, nameVi: 'Sơ cấp', nameEn: 'Elementary' },
+    {
+      group: 'POLITICAL_THEORY',
+      code: 'CAO_CAP',
+      order: 1,
+      nameVi: 'Cao cấp',
+      nameEn: 'Advanced',
+    },
+    {
+      group: 'POLITICAL_THEORY',
+      code: 'TRUNG_CAP',
+      order: 2,
+      nameVi: 'Trung cấp',
+      nameEn: 'Intermediate',
+    },
+    {
+      group: 'POLITICAL_THEORY',
+      code: 'SO_CAP',
+      order: 3,
+      nameVi: 'Sơ cấp',
+      nameEn: 'Elementary',
+    },
 
-    { group: 'STATE_MANAGEMENT', code: 'CHUYEN_VIEN_CAO_CAP', order: 1, nameVi: 'Chuyên viên cao cấp', nameEn: 'Senior Management Expert' },
-    { group: 'STATE_MANAGEMENT', code: 'CHUYEN_VIEN_CHINH', order: 2, nameVi: 'Chuyên viên chính', nameEn: 'Principal Management Expert' },
-    { group: 'STATE_MANAGEMENT', code: 'CHUYEN_VIEN', order: 3, nameVi: 'Chuyên viên', nameEn: 'Management Expert' },
+    {
+      group: 'STATE_MANAGEMENT',
+      code: 'CHUYEN_VIEN_CAO_CAP',
+      order: 1,
+      nameVi: 'Chuyên viên cao cấp',
+      nameEn: 'Senior Management Expert',
+    },
+    {
+      group: 'STATE_MANAGEMENT',
+      code: 'CHUYEN_VIEN_CHINH',
+      order: 2,
+      nameVi: 'Chuyên viên chính',
+      nameEn: 'Principal Management Expert',
+    },
+    {
+      group: 'STATE_MANAGEMENT',
+      code: 'CHUYEN_VIEN',
+      order: 3,
+      nameVi: 'Chuyên viên',
+      nameEn: 'Management Expert',
+    },
 
-    { group: 'IT_SKILL', code: 'CO_BAN', order: 1, nameVi: 'Cơ bản', nameEn: 'Basic' },
-    { group: 'IT_SKILL', code: 'NANG_CAO', order: 2, nameVi: 'Nâng cao', nameEn: 'Advanced' },
+    {
+      group: 'IT_SKILL',
+      code: 'CO_BAN',
+      order: 1,
+      nameVi: 'Cơ bản',
+      nameEn: 'Basic',
+    },
+    {
+      group: 'IT_SKILL',
+      code: 'NANG_CAO',
+      order: 2,
+      nameVi: 'Nâng cao',
+      nameEn: 'Advanced',
+    },
 
-    { group: 'LANGUAGE_SKILL', code: 'ENGLISH_B1', order: 1, nameVi: 'Tiếng Anh B1', nameEn: 'English B1' },
-    { group: 'LANGUAGE_SKILL', code: 'ENGLISH_B2', order: 2, nameVi: 'Tiếng Anh B2', nameEn: 'English B2' },
+    {
+      group: 'LANGUAGE_SKILL',
+      code: 'ENGLISH_B1',
+      order: 1,
+      nameVi: 'Tiếng Anh B1',
+      nameEn: 'English B1',
+    },
+    {
+      group: 'LANGUAGE_SKILL',
+      code: 'ENGLISH_B2',
+      order: 2,
+      nameVi: 'Tiếng Anh B2',
+      nameEn: 'English B2',
+    },
 
     // --- SYSTEM LANGUAGES ---
-    { group: 'LANGUAGE', code: 'vi', order: 1, nameVi: 'Tiếng Việt', nameEn: 'Vietnamese' },
-    { group: 'LANGUAGE', code: 'en', order: 2, nameVi: 'Tiếng Anh', nameEn: 'English' },
+    {
+      group: 'LANGUAGE',
+      code: 'vi',
+      order: 1,
+      nameVi: 'Tiếng Việt',
+      nameEn: 'Vietnamese',
+    },
+    {
+      group: 'LANGUAGE',
+      code: 'en',
+      order: 2,
+      nameVi: 'Tiếng Anh',
+      nameEn: 'English',
+    },
 
     // --- OTHER ---
-    { group: 'DOMAIN', code: 'KHCN', order: 1, nameVi: 'Khoa học công nghệ', nameEn: 'Science & Technology' },
-    { group: 'DOMAIN', code: 'GIAO_DUC', order: 2, nameVi: 'Giáo dục', nameEn: 'Education' },
-    { group: 'DOMAIN', code: 'Y_TE', order: 3, nameVi: 'Y tế', nameEn: 'Healthcare' },
-    { group: 'DOMAIN', code: 'NONG_NGHIEP', order: 4, nameVi: 'Nông nghiệp & PTNT', nameEn: 'Agriculture & Rural Development' },
-    { group: 'DOMAIN', code: 'CONG_THUONG', order: 5, nameVi: 'Công thương', nameEn: 'Industry & Trade' },
+    {
+      group: 'DOMAIN',
+      code: 'KHCN',
+      order: 1,
+      nameVi: 'Khoa học công nghệ',
+      nameEn: 'Science & Technology',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'GIAO_DUC',
+      order: 2,
+      nameVi: 'Giáo dục',
+      nameEn: 'Education',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'Y_TE',
+      order: 3,
+      nameVi: 'Y tế',
+      nameEn: 'Healthcare',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'NONG_NGHIEP',
+      order: 4,
+      nameVi: 'Nông nghiệp & PTNT',
+      nameEn: 'Agriculture & Rural Development',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'CONG_THUONG',
+      order: 5,
+      nameVi: 'Công thương',
+      nameEn: 'Industry & Trade',
+    },
 
-    { group: 'CONTENT_TYPE', code: 'ARTICLE', order: 1, nameVi: 'Bài viết', nameEn: 'Article' },
-    { group: 'CONTENT_TYPE', code: 'NOTIF', order: 2, nameVi: 'Thông báo', nameEn: 'Notification' },
-    { group: 'CONTENT_TYPE', code: 'POLICY', order: 3, nameVi: 'Văn bản chỉ đạo', nameEn: 'Policy Instruction' },
+    {
+      group: 'CONTENT_TYPE',
+      code: 'ARTICLE',
+      order: 1,
+      nameVi: 'Bài viết',
+      nameEn: 'Article',
+    },
+    {
+      group: 'CONTENT_TYPE',
+      code: 'NOTIF',
+      order: 2,
+      nameVi: 'Thông báo',
+      nameEn: 'Notification',
+    },
+    {
+      group: 'CONTENT_TYPE',
+      code: 'POLICY',
+      order: 3,
+      nameVi: 'Văn bản chỉ đạo',
+      nameEn: 'Policy Instruction',
+    },
 
-    { group: 'DEPARTMENT', code: 'VAN_PHONG', order: 1, nameVi: 'Văn phòng Sở', nameEn: 'Department Office' },
-    { group: 'DEPARTMENT', code: 'PHONG_KE_HOACH', order: 2, nameVi: 'Phòng Kế hoạch - Tài chính', nameEn: 'Planning & Finance Division' },
+    {
+      group: 'DEPARTMENT',
+      code: 'VAN_PHONG',
+      order: 1,
+      nameVi: 'Văn phòng Sở',
+      nameEn: 'Department Office',
+    },
+    {
+      group: 'DEPARTMENT',
+      code: 'PHONG_KE_HOACH',
+      order: 2,
+      nameVi: 'Phòng Kế hoạch - Tài chính',
+      nameEn: 'Planning & Finance Division',
+    },
 
     // --- WORKFLOW ---
-    { group: 'WORKFLOW_TRIGGER', code: 'MANUAL', order: 1, nameVi: 'Kích hoạt thủ công', nameEn: 'Manual Trigger' },
-    { group: 'WORKFLOW_TRIGGER', code: 'POST_SUBMIT', order: 2, nameVi: 'Khi gửi duyệt bài viết', nameEn: 'On Article Submitted' },
-    { group: 'WORKFLOW_TRIGGER', code: 'DOC_RECEIVED', order: 3, nameVi: 'Khi nhận văn bản mới', nameEn: 'On Document Received' },
-    { group: 'WORKFLOW_TRIGGER', code: 'USER_CREATED', order: 4, nameVi: 'Khi tạo tài khoản mới', nameEn: 'On User Account Created' },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'MANUAL',
+      order: 1,
+      nameVi: 'Kích hoạt thủ công',
+      nameEn: 'Manual Trigger',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'POST_SUBMIT',
+      order: 2,
+      nameVi: 'Khi gửi duyệt bài viết',
+      nameEn: 'On Article Submitted',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'DOC_RECEIVED',
+      order: 3,
+      nameVi: 'Khi nhận văn bản mới',
+      nameEn: 'On Document Received',
+    },
+    {
+      group: 'WORKFLOW_TRIGGER',
+      code: 'USER_CREATED',
+      order: 4,
+      nameVi: 'Khi tạo tài khoản mới',
+      nameEn: 'On User Account Created',
+    },
 
-    { group: 'WORKFLOW_ACTION', code: 'APPROVE', order: 1, nameVi: 'Phê duyệt', nameEn: 'Approve' },
-    { group: 'WORKFLOW_ACTION', code: 'REJECT', order: 2, nameVi: 'Từ chối', nameEn: 'Reject' },
-    { group: 'WORKFLOW_ACTION', code: 'PUBLISH', order: 3, nameVi: 'Xuất bản', nameEn: 'Publish' },
-    { group: 'WORKFLOW_ACTION', code: 'REQUEST_INFO', order: 4, nameVi: 'Yêu cầu bổ sung', nameEn: 'Request More Info' },
+    {
+      group: 'WORKFLOW_ACTION',
+      code: 'APPROVE',
+      order: 1,
+      nameVi: 'Phê duyệt',
+      nameEn: 'Approve',
+    },
+    {
+      group: 'WORKFLOW_ACTION',
+      code: 'REJECT',
+      order: 2,
+      nameVi: 'Từ chối',
+      nameEn: 'Reject',
+    },
+    {
+      group: 'WORKFLOW_ACTION',
+      code: 'PUBLISH',
+      order: 3,
+      nameVi: 'Xuất bản',
+      nameEn: 'Publish',
+    },
+    {
+      group: 'WORKFLOW_ACTION',
+      code: 'REQUEST_INFO',
+      order: 4,
+      nameVi: 'Yêu cầu bổ sung',
+      nameEn: 'Request More Info',
+    },
 
     // --- BANNER POSITIONS ---
-    { group: 'BANNER_POSITION', code: 'top', order: 1, nameVi: 'Đầu trang (Header)', nameEn: 'Top (Header)' },
-    { group: 'BANNER_POSITION', code: 'middle_1', order: 2, nameVi: 'Giữa trang - Vị trí 1', nameEn: 'Middle - Position 1' },
-    { group: 'BANNER_POSITION', code: 'middle_2', order: 3, nameVi: 'Giữa trang - Vị trí 2', nameEn: 'Middle - Position 2' },
-    { group: 'BANNER_POSITION', code: 'middle_3', order: 4, nameVi: 'Giữa trang - Vị trí 3', nameEn: 'Middle - Position 3' },
-    { group: 'BANNER_POSITION', code: 'middle', order: 5, nameVi: 'Thân trang (Sidebar)', nameEn: 'Sidebar (Middle)' },
-    { group: 'BANNER_POSITION', code: 'bottom', order: 6, nameVi: 'Cuối trang (Footer)', nameEn: 'Bottom (Footer)' },
-    { group: 'BANNER_POSITION', code: 'custom', order: 7, nameVi: 'Khẩu hiệu chính', nameEn: 'Custom Slogan' },
+    {
+      group: 'BANNER_POSITION',
+      code: 'top',
+      order: 1,
+      nameVi: 'Đầu trang (Header)',
+      nameEn: 'Top (Header)',
+    },
+    {
+      group: 'BANNER_POSITION',
+      code: 'middle_1',
+      order: 2,
+      nameVi: 'Giữa trang - Vị trí 1',
+      nameEn: 'Middle - Position 1',
+    },
+    {
+      group: 'BANNER_POSITION',
+      code: 'middle_2',
+      order: 3,
+      nameVi: 'Giữa trang - Vị trí 2',
+      nameEn: 'Middle - Position 2',
+    },
+    {
+      group: 'BANNER_POSITION',
+      code: 'middle_3',
+      order: 4,
+      nameVi: 'Giữa trang - Vị trí 3',
+      nameEn: 'Middle - Position 3',
+    },
+    {
+      group: 'BANNER_POSITION',
+      code: 'middle',
+      order: 5,
+      nameVi: 'Thân trang (Sidebar)',
+      nameEn: 'Sidebar (Middle)',
+    },
+    {
+      group: 'BANNER_POSITION',
+      code: 'bottom',
+      order: 6,
+      nameVi: 'Cuối trang (Footer)',
+      nameEn: 'Bottom (Footer)',
+    },
+    {
+      group: 'BANNER_POSITION',
+      code: 'custom',
+      order: 7,
+      nameVi: 'Khẩu hiệu chính',
+      nameEn: 'Custom Slogan',
+    },
 
     // --- PORTAL APPEARANCE CONFIGURATIONS ---
-    { group: 'font_family', code: "'Times New Roman', Times, serif", order: 1, nameVi: 'Serif Uy Nghiêm (Government)', nameEn: 'Government Serif' },
-    { group: 'font_family', code: "'Inter', sans-serif", order: 2, nameVi: 'Sans-Serif Hiện Đại (Inter)', nameEn: 'Modern Sans-Serif' },
-    { group: 'font_family', code: "'Outfit', 'Inter', sans-serif", order: 3, nameVi: 'Trẻ Trung (Outfit)', nameEn: 'Outfit Sans-Serif' },
-    { group: 'font_family', code: "'Roboto Mono', monospace", order: 4, nameVi: 'Tối Giản Hướng Công Nghệ', nameEn: 'Monospace Minimal' },
+    {
+      group: 'font_family',
+      code: "'Times New Roman', Times, serif",
+      order: 1,
+      nameVi: 'Serif Uy Nghiêm (Government)',
+      nameEn: 'Government Serif',
+    },
+    {
+      group: 'font_family',
+      code: "'Inter', sans-serif",
+      order: 2,
+      nameVi: 'Sans-Serif Hiện Đại (Inter)',
+      nameEn: 'Modern Sans-Serif',
+    },
+    {
+      group: 'font_family',
+      code: "'Outfit', 'Inter', sans-serif",
+      order: 3,
+      nameVi: 'Trẻ Trung (Outfit)',
+      nameEn: 'Outfit Sans-Serif',
+    },
+    {
+      group: 'font_family',
+      code: "'Roboto Mono', monospace",
+      order: 4,
+      nameVi: 'Tối Giản Hướng Công Nghệ',
+      nameEn: 'Monospace Minimal',
+    },
 
-    { group: 'border_radius', code: '0px', order: 1, nameVi: 'Không bo góc (0px)', nameEn: 'No border radius (0px)' },
-    { group: 'border_radius', code: '4px', order: 2, nameVi: 'Bo góc nhỏ (4px)', nameEn: 'Small radius (4px)' },
-    { group: 'border_radius', code: '8px', order: 3, nameVi: 'Bo góc trung bình (8px)', nameEn: 'Medium radius (8px)' },
-    { group: 'border_radius', code: '12px', order: 4, nameVi: 'Bo góc tròn (12px)', nameEn: 'Round radius (12px)' },
-    { group: 'border_radius', code: '16px', order: 5, nameVi: 'Bo góc lớn (16px)', nameEn: 'Large radius (16px)' },
+    {
+      group: 'border_radius',
+      code: '0px',
+      order: 1,
+      nameVi: 'Không bo góc (0px)',
+      nameEn: 'No border radius (0px)',
+    },
+    {
+      group: 'border_radius',
+      code: '4px',
+      order: 2,
+      nameVi: 'Bo góc nhỏ (4px)',
+      nameEn: 'Small radius (4px)',
+    },
+    {
+      group: 'border_radius',
+      code: '8px',
+      order: 3,
+      nameVi: 'Bo góc trung bình (8px)',
+      nameEn: 'Medium radius (8px)',
+    },
+    {
+      group: 'border_radius',
+      code: '12px',
+      order: 4,
+      nameVi: 'Bo góc tròn (12px)',
+      nameEn: 'Round radius (12px)',
+    },
+    {
+      group: 'border_radius',
+      code: '16px',
+      order: 5,
+      nameVi: 'Bo góc lớn (16px)',
+      nameEn: 'Large radius (16px)',
+    },
   ];
 
-  console.log(`📦 Seeding ${categoriesData.length} categories with dual translations...`);
+  console.log(
+    `📦 Seeding ${categoriesData.length} categories with dual translations...`,
+  );
   try {
-    await prisma.$executeRawUnsafe('ALTER TABLE sys_categories DROP COLUMN name, DROP COLUMN description;');
+    await prisma.$executeRawUnsafe(
+      'ALTER TABLE sys_categories DROP COLUMN name, DROP COLUMN description;',
+    );
     console.log('✅ Dropped unused legacy columns from sys_categories');
   } catch (e) {
     // Ignore if already dropped
@@ -326,34 +1799,41 @@ async function main() {
     const category = await prisma.category.upsert({
       where: { group_code: { group: cat.group, code: cat.code } },
       update: { order: cat.order },
-      create: { group: cat.group, code: cat.code, order: cat.order, isSystem: true },
+      create: {
+        group: cat.group,
+        code: cat.code,
+        order: cat.order,
+        isSystem: true,
+      },
     });
 
     // Seed default Vietnamese translation
     await prisma.categoryTranslation.upsert({
-      where: { categoryId_langCode: { categoryId: category.id, langCode: 'vi' } },
+      where: {
+        categoryId_langCode: { categoryId: category.id, langCode: 'vi' },
+      },
       update: { name: cat.nameVi },
       create: {
         categoryId: category.id,
         langCode: 'vi',
         name: cat.nameVi,
-      }
+      },
     });
 
     // Seed English translation
     await prisma.categoryTranslation.upsert({
-      where: { categoryId_langCode: { categoryId: category.id, langCode: 'en' } },
+      where: {
+        categoryId_langCode: { categoryId: category.id, langCode: 'en' },
+      },
       update: { name: cat.nameEn },
       create: {
         categoryId: category.id,
         langCode: 'en',
         name: cat.nameEn,
-      }
+      },
     });
   }
   console.log('✅ Categories and dual Vietnamese/English translations seeded');
-
-
 
   // ==========================================================
   // 3.2 CATEGORY GROUPS (For friendly names)
@@ -415,7 +1895,11 @@ async function main() {
     { code: 'UBND_HUYEN', name: 'UBND Cấp Huyện', level: 2 },
     { code: 'HDND_HUYEN', name: 'HĐND Cấp Huyện', level: 2 },
     { code: 'PHONG_BAN_SO', name: 'Phòng chuyên môn cấp Sở', level: 3 },
-    { code: 'PHONG_BAN_HUYEN', name: 'Phòng, Ban chuyên môn cấp Huyện', level: 3 },
+    {
+      code: 'PHONG_BAN_HUYEN',
+      name: 'Phòng, Ban chuyên môn cấp Huyện',
+      level: 3,
+    },
     { code: 'VAN_PHONG', name: 'Văn phòng', level: 3 },
     { code: 'THANH_TRA', name: 'Thanh tra', level: 3 },
     { code: 'UBND_XA', name: 'UBND Cấp Xã/Phường', level: 3 },
@@ -469,12 +1953,27 @@ async function main() {
 
   // --- CMS ROLES ---
   const cmsRoles = [
-    { code: 'AUTHOR', name: 'Biên tập viên', permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW'] },
-    { code: 'REVIEWER', name: 'Thẩm định & Phê duyệt', permissions: ['READ', 'VIEW', 'UPDATE', 'APPROVE', 'REJECT'] },
-    { code: 'PUBLISHER', name: 'Cán bộ xuất bản', permissions: ['READ', 'VIEW', 'PUBLISH'] },
+    {
+      code: 'AUTHOR',
+      name: 'Biên tập viên',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW'],
+    },
+    {
+      code: 'REVIEWER',
+      name: 'Thẩm định & Phê duyệt',
+      permissions: ['READ', 'VIEW', 'UPDATE', 'APPROVE', 'REJECT'],
+    },
+    {
+      code: 'PUBLISHER',
+      name: 'Cán bộ xuất bản',
+      permissions: ['READ', 'VIEW', 'PUBLISH'],
+    },
   ];
 
-  const roleMap: Record<string, any> = { SUPER_ADMIN: superAdminRole, ADMIN: adminRole };
+  const roleMap: Record<string, any> = {
+    SUPER_ADMIN: superAdminRole,
+    ADMIN: adminRole,
+  };
 
   for (const r of cmsRoles) {
     const rolePerms: { id: number }[] = [];
@@ -482,7 +1981,12 @@ async function main() {
 
     for (const action of r.permissions) {
       const perm = await prisma.permission.findUnique({
-        where: { action_resourceId: { action: action === 'REJECT' ? 'UPDATE' : action, resourceId: postResId } }
+        where: {
+          action_resourceId: {
+            action: action === 'REJECT' ? 'UPDATE' : action,
+            resourceId: postResId,
+          },
+        },
       });
       if (perm) rolePerms.push({ id: perm.id });
     }
@@ -490,7 +1994,11 @@ async function main() {
     const createdRole = await prisma.role.upsert({
       where: { code: r.code },
       update: { name: r.name, permissions: { set: rolePerms } },
-      create: { code: r.code, name: r.name, permissions: { connect: rolePerms } },
+      create: {
+        code: r.code,
+        name: r.name,
+        permissions: { connect: rolePerms },
+      },
     });
     roleMap[r.code] = createdRole;
   }
@@ -511,35 +2019,86 @@ async function main() {
   });
 
   // Helper to link menu to resource permission
-  const linkMenuPBAC = async (menuId: number, resCode: string, action: string = 'READ') => {
+  const linkMenuPBAC = async (
+    menuId: number,
+    resCode: string,
+    action: string = 'READ',
+  ) => {
     const resId = resources[resCode]?.id;
     if (!resId) return;
     const perm = await prisma.permission.findUnique({
-      where: { action_resourceId: { action, resourceId: resId } }
+      where: { action_resourceId: { action, resourceId: resId } },
     });
     if (perm) {
       await prisma.menuRequiredPermission.upsert({
         where: { menuId_permissionId: { menuId, permissionId: perm.id } },
         update: {},
-        create: { menuId, permissionId: perm.id }
+        create: { menuId, permissionId: perm.id },
       });
     }
   };
 
   // --- SERVICE ROOTS ---
   const services = [
-    { code: 'USER_SERVICE_ROOT', name: 'Quản trị Hệ thống', icon: 'shield-checkmark-outline', service: 'USER_SERVICE', color: '#3b82f6', order: 1, res: 'USER' },
-    { code: 'HRM_SERVICE_ROOT', name: 'Quản lý Nhân sự', icon: 'people-outline', service: 'HRM_SERVICE', color: '#10b981', order: 2, res: 'HRM_EMPLOYEE' },
-    { code: 'DOCUMENT_SERVICE_ROOT', name: 'Quản lý Văn bản', icon: 'document-text-outline', service: 'DOCUMENT_SERVICE', color: '#f59e0b', order: 3, res: 'DOC_INCOMING' },
-    { code: 'CONTENT_SERVICE_ROOT', name: 'Quản lý Nội dung', icon: 'newspaper-outline', service: 'CONTENT_SERVICE', color: '#ec4899', order: 4, res: 'POST' },
-    { code: 'WORKFLOW_SERVICE_ROOT', name: 'Quy trình Nghiệp vụ', icon: 'layers-outline', service: 'WORKFLOW_SERVICE', color: '#8b5cf6', order: 5, res: 'WORKFLOW' },
+    {
+      code: 'USER_SERVICE_ROOT',
+      name: 'Quản trị Hệ thống',
+      icon: 'shield-checkmark-outline',
+      service: 'USER_SERVICE',
+      color: '#3b82f6',
+      order: 1,
+      res: 'USER',
+    },
+    {
+      code: 'HRM_SERVICE_ROOT',
+      name: 'Quản lý Nhân sự',
+      icon: 'people-outline',
+      service: 'HRM_SERVICE',
+      color: '#10b981',
+      order: 2,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'DOCUMENT_SERVICE_ROOT',
+      name: 'Quản lý Văn bản',
+      icon: 'document-text-outline',
+      service: 'DOCUMENT_SERVICE',
+      color: '#f59e0b',
+      order: 3,
+      res: 'DOC_INCOMING',
+    },
+    {
+      code: 'CONTENT_SERVICE_ROOT',
+      name: 'Quản lý Nội dung',
+      icon: 'newspaper-outline',
+      service: 'CONTENT_SERVICE',
+      color: '#ec4899',
+      order: 4,
+      res: 'POST',
+    },
+    {
+      code: 'WORKFLOW_SERVICE_ROOT',
+      name: 'Quy trình Nghiệp vụ',
+      icon: 'layers-outline',
+      service: 'WORKFLOW_SERVICE',
+      color: '#8b5cf6',
+      order: 5,
+      res: 'WORKFLOW',
+    },
   ];
 
   const serviceNodes: Record<string, any> = {};
   for (const sys of services) {
     const node = await prisma.menu.upsert({
       where: { code: sys.code },
-      update: { parentId: rootMenu.id, name: sys.name, icon: sys.icon, iconColor: sys.color, order: sys.order, service: sys.service },
+      update: {
+        parentId: rootMenu.id,
+        name: sys.name,
+        icon: sys.icon,
+        iconColor: sys.color,
+        order: sys.order,
+        service: sys.service,
+      },
       create: {
         code: sys.code,
         name: sys.name,
@@ -559,37 +2118,124 @@ async function main() {
 
   // 1. Admin Module
   const adminMenus = [
-    { code: 'ADMIN_USERS', name: 'Người dùng', route: 'users', icon: 'person-outline', order: 1, res: 'USER' },
-    { code: 'ADMIN_ROLES', name: 'Vai trò & Quyền', route: 'roles', icon: 'lock-closed-outline', order: 2, res: 'ROLE' },
-    { code: 'ADMIN_RESOURCES', name: 'Tài nguyên', route: 'resources', icon: 'shield-checkmark-outline', order: 3, res: 'RESOURCE' },
-    { code: 'ADMIN_MENUS', name: 'Cấu hình Menu', route: 'menus', icon: 'list-outline', order: 4, res: 'MENU' },
-    { code: 'ADMIN_ORGANIZATION', name: 'Đơn vị & Phòng ban', route: 'organization', icon: 'apartment', order: 5, res: 'ORGANIZATION' },
-    { code: 'ADMIN_CATEGORIES', name: 'Danh mục hệ thống', route: 'categories', icon: 'cog-outline', order: 6, res: 'CATEGORY' },
-    { code: 'ADMIN_SETTINGS', name: 'Thiết lập hệ thống', route: 'settings', icon: 'settings-outline', order: 7, res: 'SYSTEM' },
+    {
+      code: 'ADMIN_USERS',
+      name: 'Người dùng',
+      route: 'users',
+      icon: 'person-outline',
+      order: 1,
+      res: 'USER',
+    },
+    {
+      code: 'ADMIN_ROLES',
+      name: 'Vai trò & Quyền',
+      route: 'roles',
+      icon: 'lock-closed-outline',
+      order: 2,
+      res: 'ROLE',
+    },
+    {
+      code: 'ADMIN_RESOURCES',
+      name: 'Tài nguyên',
+      route: 'resources',
+      icon: 'shield-checkmark-outline',
+      order: 3,
+      res: 'RESOURCE',
+    },
+    {
+      code: 'ADMIN_MENUS',
+      name: 'Cấu hình Menu',
+      route: 'menus',
+      icon: 'list-outline',
+      order: 4,
+      res: 'MENU',
+    },
+    {
+      code: 'ADMIN_ORGANIZATION',
+      name: 'Đơn vị & Phòng ban',
+      route: 'organization',
+      icon: 'apartment',
+      order: 5,
+      res: 'ORGANIZATION',
+    },
+    {
+      code: 'ADMIN_CATEGORIES',
+      name: 'Danh mục hệ thống',
+      route: 'categories',
+      icon: 'cog-outline',
+      order: 6,
+      res: 'CATEGORY',
+    },
+    {
+      code: 'ADMIN_SETTINGS',
+      name: 'Thiết lập hệ thống',
+      route: 'settings',
+      icon: 'settings-outline',
+      order: 7,
+      res: 'SYSTEM',
+    },
   ];
 
   for (const { res, ...m } of adminMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
-      update: { parentId: serviceNodes['USER_SERVICE'].id, order: m.order, route: m.route, icon: m.icon, name: m.name },
-      create: { ...m, parentId: serviceNodes['USER_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'USER_SERVICE' },
+      update: {
+        parentId: serviceNodes['USER_SERVICE'].id,
+        order: m.order,
+        route: m.route,
+        icon: m.icon,
+        name: m.name,
+      },
+      create: {
+        ...m,
+        parentId: serviceNodes['USER_SERVICE'].id,
+        application: 'ADMIN_PORTAL',
+        service: 'USER_SERVICE',
+      },
     });
     await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // Admin Sub-menus for Settings
-  const adminSettingsNode = await prisma.menu.findUnique({ where: { code: 'ADMIN_SETTINGS' } });
+  const adminSettingsNode = await prisma.menu.findUnique({
+    where: { code: 'ADMIN_SETTINGS' },
+  });
   if (adminSettingsNode) {
     const adminSettingsSubMenus = [
-      { code: 'ADMIN_SETTINGS_GENERAL', name: 'Thông số chung', route: 'settings', icon: 'options-outline', order: 1, res: 'SYSTEM' },
-      { code: 'ADMIN_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'megaphone-outline', order: 2, res: 'NOTIFICATION' },
+      {
+        code: 'ADMIN_SETTINGS_GENERAL',
+        name: 'Thông số chung',
+        route: 'settings',
+        icon: 'options-outline',
+        order: 1,
+        res: 'SYSTEM',
+      },
+      {
+        code: 'ADMIN_NOTIFICATIONS',
+        name: 'Thông báo',
+        route: 'notifications',
+        icon: 'megaphone-outline',
+        order: 2,
+        res: 'NOTIFICATION',
+      },
     ];
 
     for (const { res, ...m } of adminSettingsSubMenus) {
       const node = await prisma.menu.upsert({
         where: { code: m.code },
-        update: { parentId: adminSettingsNode.id, order: m.order, route: m.route, icon: m.icon, name: m.name },
-        create: { ...m, parentId: adminSettingsNode.id, application: 'ADMIN_PORTAL', service: 'USER_SERVICE' },
+        update: {
+          parentId: adminSettingsNode.id,
+          order: m.order,
+          route: m.route,
+          icon: m.icon,
+          name: m.name,
+        },
+        create: {
+          ...m,
+          parentId: adminSettingsNode.id,
+          application: 'ADMIN_PORTAL',
+          service: 'USER_SERVICE',
+        },
       });
       await linkMenuPBAC(node.id, res, 'READ');
     }
@@ -597,26 +2243,127 @@ async function main() {
 
   // 2. Document Module
   const docMenus = [
-    { code: 'DOC_MENU_INCOMING', name: 'Văn bản đến', route: 'incoming', icon: 'document-attach-outline', order: 1, res: 'DOC_INCOMING' },
-    { code: 'DOC_MENU_OUTGOING', name: 'Văn bản đi', route: 'outgoing', icon: 'document-attach-outline', order: 2, res: 'DOC_OUTGOING' },
-    { code: 'DOC_MENU_PROCESSING', name: 'Xử lý văn bản', route: 'processing', icon: 'document-text-outline', order: 3, res: 'DOC_PROCESSING' },
-    { code: 'DOC_MENU_PUBLISH', name: 'Phát hành', route: 'publish', icon: 'globe-outline', order: 4, res: 'DOC_PUBLISH' },
-    { code: 'DOC_MENU_TRANSPARENCY', name: 'Công khai văn bản', route: 'transparency', icon: 'folder-outline', order: 5, res: 'DOC_TRANSPARENCY' },
-    { code: 'DOC_MENU_FINANCE', name: 'Công khai Tài chính', route: 'transparency/finance', icon: 'cash-outline', order: 6, res: 'DOC_TRANSPARENCY' },
-    { code: 'DOC_MENU_CONSULTATION', name: 'Lấy ý kiến dự thảo', route: 'consultations', icon: 'people-outline', order: 7, res: 'DOC_CONSULTATION' },
-    { code: 'DOC_MENU_FEEDBACKS', name: 'Duyệt Góp ý Công chúng', route: 'consultations/public-feedbacks', icon: 'megaphone-outline', order: 8, res: 'DOC_CONSULTATION' },
-    { code: 'DOC_MENU_MINUTES', name: 'Biên bản cuộc họp', route: 'minutes', icon: 'list-outline', order: 9, res: 'DOC_MINUTES' },
-    { code: 'DOC_MENU_CATEGORIES', name: 'Danh mục dùng chung', route: 'categories', icon: 'settings-outline', order: 10, res: 'DOC_CATEGORIES' },
-    { code: 'DOC_MENU_PROCEDURES', name: 'Thủ tục hành chính', route: 'procedures', icon: 'briefcase-outline', order: 11, res: 'DOC_INCOMING' },
-    { code: 'DOC_MENU_DOSSIERS', name: 'Hồ sơ một cửa', route: 'dossiers', icon: 'folder-open-outline', order: 12, res: 'DOC_INCOMING' },
-    { code: 'DOC_MENU_CABINET', name: 'Tủ văn bản số', route: 'cabinet', icon: 'server-outline', order: 13, res: 'DOC_INCOMING' },
+    {
+      code: 'DOC_MENU_INCOMING',
+      name: 'Văn bản đến',
+      route: 'incoming',
+      icon: 'document-attach-outline',
+      order: 1,
+      res: 'DOC_INCOMING',
+    },
+    {
+      code: 'DOC_MENU_OUTGOING',
+      name: 'Văn bản đi',
+      route: 'outgoing',
+      icon: 'document-attach-outline',
+      order: 2,
+      res: 'DOC_OUTGOING',
+    },
+    {
+      code: 'DOC_MENU_PROCESSING',
+      name: 'Xử lý văn bản',
+      route: 'processing',
+      icon: 'document-text-outline',
+      order: 3,
+      res: 'DOC_PROCESSING',
+    },
+    {
+      code: 'DOC_MENU_PUBLISH',
+      name: 'Phát hành',
+      route: 'publish',
+      icon: 'globe-outline',
+      order: 4,
+      res: 'DOC_PUBLISH',
+    },
+    {
+      code: 'DOC_MENU_TRANSPARENCY',
+      name: 'Công khai văn bản',
+      route: 'transparency',
+      icon: 'folder-outline',
+      order: 5,
+      res: 'DOC_TRANSPARENCY',
+    },
+    {
+      code: 'DOC_MENU_FINANCE',
+      name: 'Công khai Tài chính',
+      route: 'transparency/finance',
+      icon: 'cash-outline',
+      order: 6,
+      res: 'DOC_TRANSPARENCY',
+    },
+    {
+      code: 'DOC_MENU_CONSULTATION',
+      name: 'Lấy ý kiến dự thảo',
+      route: 'consultations',
+      icon: 'people-outline',
+      order: 7,
+      res: 'DOC_CONSULTATION',
+    },
+    {
+      code: 'DOC_MENU_FEEDBACKS',
+      name: 'Duyệt Góp ý Công chúng',
+      route: 'consultations/public-feedbacks',
+      icon: 'megaphone-outline',
+      order: 8,
+      res: 'DOC_CONSULTATION',
+    },
+    {
+      code: 'DOC_MENU_MINUTES',
+      name: 'Biên bản cuộc họp',
+      route: 'minutes',
+      icon: 'list-outline',
+      order: 9,
+      res: 'DOC_MINUTES',
+    },
+    {
+      code: 'DOC_MENU_CATEGORIES',
+      name: 'Danh mục dùng chung',
+      route: 'categories',
+      icon: 'settings-outline',
+      order: 10,
+      res: 'DOC_CATEGORIES',
+    },
+    {
+      code: 'DOC_MENU_PROCEDURES',
+      name: 'Thủ tục hành chính',
+      route: 'procedures',
+      icon: 'briefcase-outline',
+      order: 11,
+      res: 'DOC_INCOMING',
+    },
+    {
+      code: 'DOC_MENU_DOSSIERS',
+      name: 'Hồ sơ một cửa',
+      route: 'dossiers',
+      icon: 'folder-open-outline',
+      order: 12,
+      res: 'DOC_INCOMING',
+    },
+    {
+      code: 'DOC_MENU_CABINET',
+      name: 'Tủ văn bản số',
+      route: 'cabinet',
+      icon: 'server-outline',
+      order: 13,
+      res: 'DOC_INCOMING',
+    },
   ];
 
   for (const { res, ...m } of docMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
-      update: { parentId: serviceNodes['DOCUMENT_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
-      create: { ...m, parentId: serviceNodes['DOCUMENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'DOCUMENT_SERVICE' },
+      update: {
+        parentId: serviceNodes['DOCUMENT_SERVICE'].id,
+        order: m.order,
+        route: m.route,
+        icon: m.icon,
+      },
+      create: {
+        ...m,
+        parentId: serviceNodes['DOCUMENT_SERVICE'].id,
+        application: 'ADMIN_PORTAL',
+        service: 'DOCUMENT_SERVICE',
+      },
     });
     await linkMenuPBAC(node.id, res, 'READ');
   }
@@ -624,62 +2371,198 @@ async function main() {
   await prisma.menu.deleteMany({
     where: {
       code: {
-        in: ['HRM_MENU_DEPARTMENTS', 'HRM_MENU_ATTENDANCE', 'HRM_MENU_CONTRACTS', 'HRM_MENU_LEAVE', 'HRM_MENU_PAYROLL']
-      }
-    }
+        in: [
+          'HRM_MENU_DEPARTMENTS',
+          'HRM_MENU_ATTENDANCE',
+          'HRM_MENU_CONTRACTS',
+          'HRM_MENU_LEAVE',
+          'HRM_MENU_PAYROLL',
+        ],
+      },
+    },
   });
 
   // 3. HRM Module
   const hrmMenus = [
-    { code: 'HRM_MENU_EMPLOYEE_LIST', name: 'Danh sách cán bộ', route: 'employees', icon: 'people-outline', order: 1, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_PLANS', name: 'Chủ trương & Kế hoạch', route: 'plans', icon: 'layers-outline', order: 2, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_TASKS', name: 'Phân công & Giao việc', route: 'tasks', icon: 'list-outline', order: 3, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_KPI', name: 'Đánh giá Năng lực (KPI)', route: 'kpi', icon: 'settings-outline', order: 4, res: 'HRM_EMPLOYEE' },
-    { code: 'HRM_MENU_NOTIFICATIONS', name: 'Thông báo', route: 'notifications', icon: 'notifications-outline', order: 5, res: 'HRM_EMPLOYEE' },
+    {
+      code: 'HRM_MENU_EMPLOYEE_LIST',
+      name: 'Danh sách cán bộ',
+      route: 'employees',
+      icon: 'people-outline',
+      order: 1,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'HRM_MENU_PLANS',
+      name: 'Chủ trương & Kế hoạch',
+      route: 'plans',
+      icon: 'layers-outline',
+      order: 2,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'HRM_MENU_TASKS',
+      name: 'Phân công & Giao việc',
+      route: 'tasks',
+      icon: 'list-outline',
+      order: 3,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'HRM_MENU_KPI',
+      name: 'Đánh giá Năng lực (KPI)',
+      route: 'kpi',
+      icon: 'settings-outline',
+      order: 4,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'HRM_MENU_NOTIFICATIONS',
+      name: 'Thông báo',
+      route: 'notifications',
+      icon: 'notifications-outline',
+      order: 5,
+      res: 'HRM_EMPLOYEE',
+    },
   ];
 
   for (const { res, ...m } of hrmMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
-      update: { parentId: serviceNodes['HRM_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
-      create: { ...m, parentId: serviceNodes['HRM_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'HRM_SERVICE' },
+      update: {
+        parentId: serviceNodes['HRM_SERVICE'].id,
+        order: m.order,
+        route: m.route,
+        icon: m.icon,
+      },
+      create: {
+        ...m,
+        parentId: serviceNodes['HRM_SERVICE'].id,
+        application: 'ADMIN_PORTAL',
+        service: 'HRM_SERVICE',
+      },
     });
     await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // 4. Content Module
   const postMenus = [
-    { code: 'CONTENT_MENU_POSTS', name: 'Danh sách bài viết', route: '', icon: 'newspaper-outline', order: 1, res: 'POST' },
-    { code: 'CONTENT_MENU_CATEGORIES', name: 'Chuyên mục', route: 'categories', icon: 'list-outline', order: 2, res: 'POST_CATEGORY' },
-    { code: 'CONTENT_MENU_PORTAL', name: 'Cấu hình Portal Menu', route: 'portal-menu', icon: 'menu-outline', order: 3, res: 'PORTAL_MENU' },
-    { code: 'CONTENT_MENU_INTERACTIONS', name: 'Tương tác công dân', route: 'interactions', icon: 'chatbubbles-outline', order: 4, res: 'CITIZEN_INTERACTION' },
-    { code: 'CONTENT_MENU_BANNERS', name: 'Banner & Quảng cáo', route: 'banners', icon: 'layers-outline', order: 5, res: 'BANNER' },
-    { code: 'CONTENT_MENU_PORTAL_CONFIG', name: 'Cấu hình chung đơn vị', route: 'portal-config', icon: 'settings-outline', order: 6, res: 'PORTAL_MENU' },
+    {
+      code: 'CONTENT_MENU_POSTS',
+      name: 'Danh sách bài viết',
+      route: '',
+      icon: 'newspaper-outline',
+      order: 1,
+      res: 'POST',
+    },
+    {
+      code: 'CONTENT_MENU_CATEGORIES',
+      name: 'Chuyên mục',
+      route: 'categories',
+      icon: 'list-outline',
+      order: 2,
+      res: 'POST_CATEGORY',
+    },
+    {
+      code: 'CONTENT_MENU_PORTAL',
+      name: 'Cấu hình Portal Menu',
+      route: 'portal-menu',
+      icon: 'menu-outline',
+      order: 3,
+      res: 'PORTAL_MENU',
+    },
+    {
+      code: 'CONTENT_MENU_INTERACTIONS',
+      name: 'Tương tác công dân',
+      route: 'interactions',
+      icon: 'chatbubbles-outline',
+      order: 4,
+      res: 'CITIZEN_INTERACTION',
+    },
+    {
+      code: 'CONTENT_MENU_BANNERS',
+      name: 'Banner & Quảng cáo',
+      route: 'banners',
+      icon: 'layers-outline',
+      order: 5,
+      res: 'BANNER',
+    },
+    {
+      code: 'CONTENT_MENU_PORTAL_CONFIG',
+      name: 'Cấu hình chung đơn vị',
+      route: 'portal-config',
+      icon: 'settings-outline',
+      order: 6,
+      res: 'PORTAL_MENU',
+    },
   ];
 
   for (const { res, ...m } of postMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
-      update: { parentId: serviceNodes['CONTENT_SERVICE'].id, order: m.order, route: m.route, icon: m.icon },
-      create: { ...m, parentId: serviceNodes['CONTENT_SERVICE'].id, application: 'ADMIN_PORTAL', service: 'CONTENT_SERVICE' },
+      update: {
+        parentId: serviceNodes['CONTENT_SERVICE'].id,
+        order: m.order,
+        route: m.route,
+        icon: m.icon,
+      },
+      create: {
+        ...m,
+        parentId: serviceNodes['CONTENT_SERVICE'].id,
+        application: 'ADMIN_PORTAL',
+        service: 'CONTENT_SERVICE',
+      },
     });
     await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // Sub-menus for Interactions
-  const interactionParent = await prisma.menu.findUnique({ where: { code: 'CONTENT_MENU_INTERACTIONS' } });
+  const interactionParent = await prisma.menu.findUnique({
+    where: { code: 'CONTENT_MENU_INTERACTIONS' },
+  });
   if (interactionParent) {
     const interactionSubMenus = [
-      { code: 'CONTENT_MENU_COMMENTS', name: 'Kiểm duyệt bình luận', route: 'interactions/comments', icon: 'chatbox-outline', order: 1, res: 'CITIZEN_INTERACTION' },
-      { code: 'CONTENT_MENU_QUESTIONS', name: 'Hỏi đáp công dân', route: 'interactions/questions', icon: 'help-circle-outline', order: 2, res: 'CITIZEN_INTERACTION' },
-      { code: 'CONTENT_MENU_FEEDBACKS', name: 'Góp ý dự thảo', route: 'interactions/feedbacks', icon: 'create-outline', order: 3, res: 'CITIZEN_INTERACTION' },
+      {
+        code: 'CONTENT_MENU_COMMENTS',
+        name: 'Kiểm duyệt bình luận',
+        route: 'interactions/comments',
+        icon: 'chatbox-outline',
+        order: 1,
+        res: 'CITIZEN_INTERACTION',
+      },
+      {
+        code: 'CONTENT_MENU_QUESTIONS',
+        name: 'Hỏi đáp công dân',
+        route: 'interactions/questions',
+        icon: 'help-circle-outline',
+        order: 2,
+        res: 'CITIZEN_INTERACTION',
+      },
+      {
+        code: 'CONTENT_MENU_FEEDBACKS',
+        name: 'Góp ý dự thảo',
+        route: 'interactions/feedbacks',
+        icon: 'create-outline',
+        order: 3,
+        res: 'CITIZEN_INTERACTION',
+      },
     ];
 
     for (const { res, ...m } of interactionSubMenus) {
       const node = await prisma.menu.upsert({
         where: { code: m.code },
-        update: { parentId: interactionParent.id, order: m.order, route: m.route, icon: m.icon },
-        create: { ...m, parentId: interactionParent.id, application: 'ADMIN_PORTAL', service: 'CONTENT_SERVICE' },
+        update: {
+          parentId: interactionParent.id,
+          order: m.order,
+          route: m.route,
+          icon: m.icon,
+        },
+        create: {
+          ...m,
+          parentId: interactionParent.id,
+          application: 'ADMIN_PORTAL',
+          service: 'CONTENT_SERVICE',
+        },
       });
       await linkMenuPBAC(node.id, res, 'READ');
     }
@@ -707,17 +2590,45 @@ async function main() {
 
   // --- CMS USERS ---
   const cmsUsers = [
-    { email: 'author@daklak.gov.vn', username: 'author', fullName: 'Nguyễn Văn Biên Tập', role: 'AUTHOR' },
-    { email: 'reviewer@daklak.gov.vn', username: 'reviewer', fullName: 'Lê Văn Thẩm Định', role: 'REVIEWER' },
-    { email: 'approver@daklak.gov.vn', username: 'approver', fullName: 'Phạm Phê Duyệt', role: 'REVIEWER' },
-    { email: 'publisher@daklak.gov.vn', username: 'publisher', fullName: 'Trần Xuất Bản', role: 'PUBLISHER' },
-    { email: 'trungthanh@daklak.gov.vn', username: 'trungthanh', fullName: 'Trần Trung Thành', role: 'ADMIN' },
+    {
+      email: 'author@daklak.gov.vn',
+      username: 'author',
+      fullName: 'Nguyễn Văn Biên Tập',
+      role: 'AUTHOR',
+    },
+    {
+      email: 'reviewer@daklak.gov.vn',
+      username: 'reviewer',
+      fullName: 'Lê Văn Thẩm Định',
+      role: 'REVIEWER',
+    },
+    {
+      email: 'approver@daklak.gov.vn',
+      username: 'approver',
+      fullName: 'Phạm Phê Duyệt',
+      role: 'REVIEWER',
+    },
+    {
+      email: 'publisher@daklak.gov.vn',
+      username: 'publisher',
+      fullName: 'Trần Xuất Bản',
+      role: 'PUBLISHER',
+    },
+    {
+      email: 'trungthanh@daklak.gov.vn',
+      username: 'trungthanh',
+      fullName: 'Trần Trung Thành',
+      role: 'ADMIN',
+    },
   ];
 
   for (const u of cmsUsers) {
     const user = await prisma.user.upsert({
       where: { email: u.email },
-      update: { fullName: u.fullName, roles: { set: [{ id: roleMap[u.role].id }] } },
+      update: {
+        fullName: u.fullName,
+        roles: { set: [{ id: roleMap[u.role].id }] },
+      },
       create: {
         email: u.email,
         username: u.username,
@@ -738,43 +2649,234 @@ async function main() {
   // ==========================================================
   console.log('📦 Seeding Job Titles...');
   const jobTitlesData = [
-    { code: 'CHU_TICH', name: 'Chủ tịch', category: 'EXECUTIVE', rank: 1, type: 'GOVERNMENT' },
-    { code: 'PHO_CHU_TICH', name: 'Phó Chủ tịch', category: 'EXECUTIVE', rank: 2, type: 'GOVERNMENT' },
-    { code: 'GIAM_DOC', name: 'Giám đốc', category: 'EXECUTIVE', rank: 1, type: 'GOVERNMENT' },
-    { code: 'PHO_GIAM_DOC', name: 'Phó Giám đốc', category: 'EXECUTIVE', rank: 2, type: 'GOVERNMENT' },
-    { code: 'TRUONG_PHONG', name: 'Trưởng phòng', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
-    { code: 'PHO_PHONG', name: 'Phó Trưởng phòng', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
-    { code: 'CHANH_VAN_PHONG', name: 'Chánh Văn phòng', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
-    { code: 'PHO_CHANH_VAN_PHONG', name: 'Phó Chánh Văn phòng', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
-    { code: 'CHANH_THANH_TRA', name: 'Chánh Thanh tra', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
-    { code: 'PHO_CHANH_THANH_TRA', name: 'Phó Chánh Thanh tra', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
-    { code: 'THANH_TRA_VIEN', name: 'Thanh tra viên', category: 'STAFF', rank: 3, type: 'RANK' },
-    { code: 'THANH_TRA_VIEN_CHINH', name: 'Thanh tra viên chính', category: 'STAFF', rank: 2, type: 'RANK' },
-    { code: 'THANH_TRA_VIEN_CAO_CAP', name: 'Thanh tra viên cao cấp', category: 'STAFF', rank: 1, type: 'RANK' },
-    { code: 'UY_VIEN_UBND', name: 'Ủy viên UBND', category: 'EXECUTIVE', rank: 3, type: 'GOVERNMENT' },
-    { code: 'CHUYEN_VIEN', name: 'Chuyên viên', category: 'STAFF', rank: 3, type: 'RANK' },
-    { code: 'CHUYEN_VIEN_CAO_CAP', name: 'Chuyên viên cao cấp', category: 'STAFF', rank: 1, type: 'RANK' },
-    { code: 'CHUYEN_VIEN_CHINH', name: 'Chuyên viên chính', category: 'STAFF', rank: 2, type: 'RANK' },
-    { code: 'CAN_SU', name: 'Cán sự', category: 'STAFF', rank: 4, type: 'RANK' },
-    { code: 'NHAN_VIEN', name: 'Nhân viên', category: 'SUPPORT', rank: 5, type: 'RANK' },
-    { code: 'CONG_CHUC_PHU_TRACH', name: 'Công chức phụ trách', category: 'STAFF', rank: 3, type: 'GOVERNMENT' },
-    { code: 'CAN_BO_PHU_TRACH', name: 'Cán bộ phụ trách', category: 'STAFF', rank: 3, type: 'GOVERNMENT' },
-    { code: 'BI_THU_DANG_BO', name: 'Bí thư Đảng bộ', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
-    { code: 'PHO_BI_THU_DANG_BO', name: 'Phó Bí thư Đảng bộ', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
-    { code: 'BI_THU_CHI_BO', name: 'Bí thư Chi bộ', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
-    { code: 'PHO_BI_THU_CHI_BO', name: 'Phó Bí thư Chi bộ', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
-    { code: 'DANG_UY_VIEN', name: 'Đảng ủy viên', category: 'EXECUTIVE', rank: 3, type: 'PARTY' },
-    { code: 'CHI_UY_VIEN', name: 'Chi ủy viên', category: 'EXECUTIVE', rank: 3, type: 'PARTY' },
-    { code: 'BI_THU', name: 'Bí thư', category: 'EXECUTIVE', rank: 1, type: 'PARTY' },
-    { code: 'PHO_BI_THU', name: 'Phó Bí thư', category: 'EXECUTIVE', rank: 2, type: 'PARTY' },
-    { code: 'TRUONG_BAN', name: 'Trưởng ban', category: 'MANAGER', rank: 1, type: 'GOVERNMENT' },
-    { code: 'PHO_TRUONG_BAN', name: 'Phó Trưởng ban', category: 'MANAGER', rank: 2, type: 'GOVERNMENT' },
+    {
+      code: 'CHU_TICH',
+      name: 'Chủ tịch',
+      category: 'EXECUTIVE',
+      rank: 1,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'PHO_CHU_TICH',
+      name: 'Phó Chủ tịch',
+      category: 'EXECUTIVE',
+      rank: 2,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'GIAM_DOC',
+      name: 'Giám đốc',
+      category: 'EXECUTIVE',
+      rank: 1,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'PHO_GIAM_DOC',
+      name: 'Phó Giám đốc',
+      category: 'EXECUTIVE',
+      rank: 2,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'TRUONG_PHONG',
+      name: 'Trưởng phòng',
+      category: 'MANAGER',
+      rank: 1,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'PHO_PHONG',
+      name: 'Phó Trưởng phòng',
+      category: 'MANAGER',
+      rank: 2,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'CHANH_VAN_PHONG',
+      name: 'Chánh Văn phòng',
+      category: 'MANAGER',
+      rank: 1,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'PHO_CHANH_VAN_PHONG',
+      name: 'Phó Chánh Văn phòng',
+      category: 'MANAGER',
+      rank: 2,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'CHANH_THANH_TRA',
+      name: 'Chánh Thanh tra',
+      category: 'MANAGER',
+      rank: 1,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'PHO_CHANH_THANH_TRA',
+      name: 'Phó Chánh Thanh tra',
+      category: 'MANAGER',
+      rank: 2,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'THANH_TRA_VIEN',
+      name: 'Thanh tra viên',
+      category: 'STAFF',
+      rank: 3,
+      type: 'RANK',
+    },
+    {
+      code: 'THANH_TRA_VIEN_CHINH',
+      name: 'Thanh tra viên chính',
+      category: 'STAFF',
+      rank: 2,
+      type: 'RANK',
+    },
+    {
+      code: 'THANH_TRA_VIEN_CAO_CAP',
+      name: 'Thanh tra viên cao cấp',
+      category: 'STAFF',
+      rank: 1,
+      type: 'RANK',
+    },
+    {
+      code: 'UY_VIEN_UBND',
+      name: 'Ủy viên UBND',
+      category: 'EXECUTIVE',
+      rank: 3,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'CHUYEN_VIEN',
+      name: 'Chuyên viên',
+      category: 'STAFF',
+      rank: 3,
+      type: 'RANK',
+    },
+    {
+      code: 'CHUYEN_VIEN_CAO_CAP',
+      name: 'Chuyên viên cao cấp',
+      category: 'STAFF',
+      rank: 1,
+      type: 'RANK',
+    },
+    {
+      code: 'CHUYEN_VIEN_CHINH',
+      name: 'Chuyên viên chính',
+      category: 'STAFF',
+      rank: 2,
+      type: 'RANK',
+    },
+    {
+      code: 'CAN_SU',
+      name: 'Cán sự',
+      category: 'STAFF',
+      rank: 4,
+      type: 'RANK',
+    },
+    {
+      code: 'NHAN_VIEN',
+      name: 'Nhân viên',
+      category: 'SUPPORT',
+      rank: 5,
+      type: 'RANK',
+    },
+    {
+      code: 'CONG_CHUC_PHU_TRACH',
+      name: 'Công chức phụ trách',
+      category: 'STAFF',
+      rank: 3,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'CAN_BO_PHU_TRACH',
+      name: 'Cán bộ phụ trách',
+      category: 'STAFF',
+      rank: 3,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'BI_THU_DANG_BO',
+      name: 'Bí thư Đảng bộ',
+      category: 'EXECUTIVE',
+      rank: 1,
+      type: 'PARTY',
+    },
+    {
+      code: 'PHO_BI_THU_DANG_BO',
+      name: 'Phó Bí thư Đảng bộ',
+      category: 'EXECUTIVE',
+      rank: 2,
+      type: 'PARTY',
+    },
+    {
+      code: 'BI_THU_CHI_BO',
+      name: 'Bí thư Chi bộ',
+      category: 'EXECUTIVE',
+      rank: 1,
+      type: 'PARTY',
+    },
+    {
+      code: 'PHO_BI_THU_CHI_BO',
+      name: 'Phó Bí thư Chi bộ',
+      category: 'EXECUTIVE',
+      rank: 2,
+      type: 'PARTY',
+    },
+    {
+      code: 'DANG_UY_VIEN',
+      name: 'Đảng ủy viên',
+      category: 'EXECUTIVE',
+      rank: 3,
+      type: 'PARTY',
+    },
+    {
+      code: 'CHI_UY_VIEN',
+      name: 'Chi ủy viên',
+      category: 'EXECUTIVE',
+      rank: 3,
+      type: 'PARTY',
+    },
+    {
+      code: 'BI_THU',
+      name: 'Bí thư',
+      category: 'EXECUTIVE',
+      rank: 1,
+      type: 'PARTY',
+    },
+    {
+      code: 'PHO_BI_THU',
+      name: 'Phó Bí thư',
+      category: 'EXECUTIVE',
+      rank: 2,
+      type: 'PARTY',
+    },
+    {
+      code: 'TRUONG_BAN',
+      name: 'Trưởng ban',
+      category: 'MANAGER',
+      rank: 1,
+      type: 'GOVERNMENT',
+    },
+    {
+      code: 'PHO_TRUONG_BAN',
+      name: 'Phó Trưởng ban',
+      category: 'MANAGER',
+      rank: 2,
+      type: 'GOVERNMENT',
+    },
   ];
 
   for (const jt of jobTitlesData) {
     await prisma.jobTitle.upsert({
       where: { code: jt.code },
-      update: { name: jt.name, category: jt.category, rank: jt.rank, type: jt.type },
+      update: {
+        name: jt.name,
+        category: jt.category,
+        rank: jt.rank,
+        type: jt.type,
+      },
       create: jt,
     });
   }
@@ -784,13 +2886,51 @@ async function main() {
   await prisma.unitTypeJobTemplate.deleteMany({});
 
   const links = [
-    { jt: 'CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
-    { jt: 'PHO_CHU_TICH', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'HDND_TINH', 'HDND_HUYEN', 'HDND_XA'] },
+    {
+      jt: 'CHU_TICH',
+      types: [
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+        'HDND_TINH',
+        'HDND_HUYEN',
+        'HDND_XA',
+      ],
+    },
+    {
+      jt: 'PHO_CHU_TICH',
+      types: [
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+        'HDND_TINH',
+        'HDND_HUYEN',
+        'HDND_XA',
+      ],
+    },
     { jt: 'UY_VIEN_UBND', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
     { jt: 'GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'TRUONG_PHONG', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'PHO_PHONG', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
+    {
+      jt: 'TRUONG_PHONG',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'DVSN',
+        'TRUNG_TAM',
+        'CHI_CUC',
+      ],
+    },
+    {
+      jt: 'PHO_PHONG',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'DVSN',
+        'TRUNG_TAM',
+        'CHI_CUC',
+      ],
+    },
     { jt: 'CHANH_VAN_PHONG', types: ['VAN_PHONG'] },
     { jt: 'PHO_CHANH_VAN_PHONG', types: ['VAN_PHONG'] },
     { jt: 'CHANH_THANH_TRA', types: ['THANH_TRA'] },
@@ -798,19 +2938,153 @@ async function main() {
     { jt: 'THANH_TRA_VIEN', types: ['THANH_TRA'] },
     { jt: 'THANH_TRA_VIEN_CHINH', types: ['THANH_TRA'] },
     { jt: 'THANH_TRA_VIEN_CAO_CAP', types: ['THANH_TRA'] },
-    { jt: 'CHUYEN_VIEN', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
-    { jt: 'CHUYEN_VIEN_CAO_CAP', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'] },
-    { jt: 'CHUYEN_VIEN_CHINH', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'] },
-    { jt: 'CAN_SU', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'NHAN_VIEN', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'CONG_CHUC_PHU_TRACH', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'CAN_BO_PHU_TRACH', types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'DVSN', 'TRUNG_TAM'] },
-    { jt: 'BI_THU_DANG_BO', types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'DVSN', 'CHI_CUC'] },
-    { jt: 'PHO_BI_THU_DANG_BO', types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'DVSN', 'CHI_CUC'] },
-    { jt: 'DANG_UY_VIEN', types: ['CQ_DANG', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA', 'DVSN', 'CHI_CUC'] },
-    { jt: 'BI_THU_CHI_BO', types: ['CQ_DANG', 'PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
-    { jt: 'PHO_BI_THU_CHI_BO', types: ['CQ_DANG', 'PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
-    { jt: 'CHI_UY_VIEN', types: ['CQ_DANG', 'PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'THANH_TRA', 'DVSN', 'TRUNG_TAM', 'CHI_CUC', 'SO_NGANH', 'UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    {
+      jt: 'CHUYEN_VIEN',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'DVSN',
+        'TRUNG_TAM',
+        'CHI_CUC',
+      ],
+    },
+    {
+      jt: 'CHUYEN_VIEN_CAO_CAP',
+      types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
+    },
+    {
+      jt: 'CHUYEN_VIEN_CHINH',
+      types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
+    },
+    {
+      jt: 'CAN_SU',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'NHAN_VIEN',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'CONG_CHUC_PHU_TRACH',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'CAN_BO_PHU_TRACH',
+      types: [
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'DVSN',
+        'TRUNG_TAM',
+      ],
+    },
+    {
+      jt: 'BI_THU_DANG_BO',
+      types: [
+        'CQ_DANG',
+        'SO_NGANH',
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+        'DVSN',
+        'CHI_CUC',
+      ],
+    },
+    {
+      jt: 'PHO_BI_THU_DANG_BO',
+      types: [
+        'CQ_DANG',
+        'SO_NGANH',
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+        'DVSN',
+        'CHI_CUC',
+      ],
+    },
+    {
+      jt: 'DANG_UY_VIEN',
+      types: [
+        'CQ_DANG',
+        'SO_NGANH',
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+        'DVSN',
+        'CHI_CUC',
+      ],
+    },
+    {
+      jt: 'BI_THU_CHI_BO',
+      types: [
+        'CQ_DANG',
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+        'CHI_CUC',
+        'SO_NGANH',
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+      ],
+    },
+    {
+      jt: 'PHO_BI_THU_CHI_BO',
+      types: [
+        'CQ_DANG',
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+        'CHI_CUC',
+        'SO_NGANH',
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+      ],
+    },
+    {
+      jt: 'CHI_UY_VIEN',
+      types: [
+        'CQ_DANG',
+        'PHONG_BAN_HUYEN',
+        'PHONG_BAN_SO',
+        'VAN_PHONG',
+        'THANH_TRA',
+        'DVSN',
+        'TRUNG_TAM',
+        'CHI_CUC',
+        'SO_NGANH',
+        'UBND_TINH',
+        'UBND_HUYEN',
+        'UBND_XA',
+      ],
+    },
     { jt: 'BI_THU', types: ['CQ_DANG'] },
     { jt: 'PHO_BI_THU', types: ['CQ_DANG'] },
     { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
@@ -818,13 +3092,20 @@ async function main() {
   ];
 
   for (const link of links) {
-    const jobTitle = await prisma.jobTitle.findUnique({ where: { code: link.jt } });
+    const jobTitle = await prisma.jobTitle.findUnique({
+      where: { code: link.jt },
+    });
     if (jobTitle) {
       for (const typeCode of link.types) {
         const typeId = unitTypeMap[typeCode]?.id;
         if (typeId) {
           await prisma.unitTypeJobTemplate.upsert({
-            where: { unitTypeId_jobTitleId: { unitTypeId: typeId, jobTitleId: jobTitle.id } },
+            where: {
+              unitTypeId_jobTitleId: {
+                unitTypeId: typeId,
+                jobTitleId: jobTitle.id,
+              },
+            },
             update: {},
             create: { unitTypeId: typeId, jobTitleId: jobTitle.id },
           });
@@ -848,11 +3129,20 @@ async function main() {
   const province = await prisma.organizationUnit.upsert({
     where: { code: 'UBND_TINH_DAKLAK' },
     update: { name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTinhTypeId },
-    create: { code: 'UBND_TINH_DAKLAK', name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTinhTypeId, shortName: 'UBND Tỉnh' },
+    create: {
+      code: 'UBND_TINH_DAKLAK',
+      name: 'UBND Tỉnh Đắk Lắk',
+      typeId: ubndTinhTypeId,
+      shortName: 'UBND Tỉnh',
+    },
   });
 
   const depts = [
-    { code: 'SO_KHCN', name: 'Sở Khoa học và Công nghệ', shortName: 'Sở KH&CN' },
+    {
+      code: 'SO_KHCN',
+      name: 'Sở Khoa học và Công nghệ',
+      shortName: 'Sở KH&CN',
+    },
     { code: 'SO_GTVT', name: 'Sở Giao thông vận tải', shortName: 'Sở GTVT' },
     { code: 'SO_YTE', name: 'Sở Y tế', shortName: 'Sở Y tế' },
     { code: 'SO_GDDT', name: 'Sở Giáo dục và Đào tạo', shortName: 'Sở GD&ĐT' },
@@ -861,9 +3151,17 @@ async function main() {
     { code: 'SO_NV', name: 'Sở Nội vụ', shortName: 'Sở Nội vụ' },
     { code: 'SO_XD', name: 'Sở Xây dựng', shortName: 'Sở Xây dựng' },
     { code: 'SO_TP', name: 'Sở Tư pháp', shortName: 'Sở Tư pháp' },
-    { code: 'SO_VHTT', name: 'Sở Văn hóa - Thể thao và Du lịch', shortName: 'Sở VHTTDL' },
+    {
+      code: 'SO_VHTT',
+      name: 'Sở Văn hóa - Thể thao và Du lịch',
+      shortName: 'Sở VHTTDL',
+    },
     { code: 'SO_CT', name: 'Sở Công thương', shortName: 'Sở Công thương' },
-    { code: 'SO_NN', name: 'Sở Nông nghiệp và Phát triển nông thôn', shortName: 'Sở NN&PTNT' },
+    {
+      code: 'SO_NN',
+      name: 'Sở Nông nghiệp và Phát triển nông thôn',
+      shortName: 'Sở NN&PTNT',
+    },
     { code: 'SO_DT', name: 'Sở Dân tộc và Tôn giáo', shortName: 'Sở Dân tộc' },
     { code: 'TT_TINH', name: 'Thanh tra Tỉnh', shortName: 'Thanh tra Tỉnh' },
     { code: 'VP_UBND', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND' },
@@ -881,51 +3179,98 @@ async function main() {
   await prisma.organizationUnit.upsert({
     where: { code: 'UBND_XA_TAN_LOI' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: { code: 'UBND_XA_TAN_LOI', name: 'UBND Phường Tân Lợi', parentId: province.id, typeId: ubndXaTypeId },
+    create: {
+      code: 'UBND_XA_TAN_LOI',
+      name: 'UBND Phường Tân Lợi',
+      parentId: province.id,
+      typeId: ubndXaTypeId,
+    },
   });
   await prisma.organizationUnit.upsert({
     where: { code: 'UBND_XA_TAN_LAP' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: { code: 'UBND_XA_TAN_LAP', name: 'UBND Phường Tân Lập', parentId: province.id, typeId: ubndXaTypeId },
+    create: {
+      code: 'UBND_XA_TAN_LAP',
+      name: 'UBND Phường Tân Lập',
+      parentId: province.id,
+      typeId: ubndXaTypeId,
+    },
   });
   await prisma.organizationUnit.upsert({
     where: { code: 'UBND_XA_TAN_AN' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: { code: 'UBND_XA_TAN_AN', name: 'UBND Phường Tân An', parentId: province.id, typeId: ubndXaTypeId },
+    create: {
+      code: 'UBND_XA_TAN_AN',
+      name: 'UBND Phường Tân An',
+      parentId: province.id,
+      typeId: ubndXaTypeId,
+    },
   });
   await prisma.organizationUnit.upsert({
     where: { code: 'UBND_XA_THANH_NHAT' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: { code: 'UBND_XA_THANH_NHAT', name: 'UBND Phường Thành Nhất', parentId: province.id, typeId: ubndXaTypeId },
+    create: {
+      code: 'UBND_XA_THANH_NHAT',
+      name: 'UBND Phường Thành Nhất',
+      parentId: province.id,
+      typeId: ubndXaTypeId,
+    },
   });
   await prisma.organizationUnit.upsert({
     where: { code: 'UBND_XA_HOA_PHU' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: { code: 'UBND_XA_HOA_PHU', name: 'UBND Xã Hòa Phú', parentId: province.id, typeId: ubndXaTypeId },
+    create: {
+      code: 'UBND_XA_HOA_PHU',
+      name: 'UBND Xã Hòa Phú',
+      parentId: province.id,
+      typeId: ubndXaTypeId,
+    },
   });
   await prisma.organizationUnit.upsert({
     where: { code: 'UBND_XA_EA_KAO' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: { code: 'UBND_XA_EA_KAO', name: 'UBND Phường Ea Kao', parentId: province.id, typeId: ubndXaTypeId },
+    create: {
+      code: 'UBND_XA_EA_KAO',
+      name: 'UBND Phường Ea Kao',
+      parentId: province.id,
+      typeId: ubndXaTypeId,
+    },
   });
 
   // Thêm Đơn vị sự nghiệp tiêu biểu
-  const soKhcn = await prisma.organizationUnit.findUnique({ where: { code: 'SO_KHCN' } });
+  const soKhcn = await prisma.organizationUnit.findUnique({
+    where: { code: 'SO_KHCN' },
+  });
   if (soKhcn) {
     await prisma.organizationUnit.upsert({
       where: { code: 'TT_DMSM' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
-      create: { code: 'TT_DMSM', name: 'Trung tâm Đổi mới Sáng tạo', parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: {
+        code: 'TT_DMSM',
+        name: 'Trung tâm Đổi mới Sáng tạo',
+        parentId: soKhcn.id,
+        typeId: trungTamTypeId,
+      },
     });
     await prisma.organizationUnit.upsert({
       where: { code: 'TT_IOC' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
-      create: { code: 'TT_IOC', name: 'Trung tâm Giám sát, Điều hành Đô thị Thông minh (IOC)', parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: {
+        code: 'TT_IOC',
+        name: 'Trung tâm Giám sát, Điều hành Đô thị Thông minh (IOC)',
+        parentId: soKhcn.id,
+        typeId: trungTamTypeId,
+      },
     });
     await prisma.organizationUnit.upsert({
       where: { code: 'TT_KTTDC' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
-      create: { code: 'TT_KTTDC', name: 'Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng', parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: {
+        code: 'TT_KTTDC',
+        name: 'Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng',
+        parentId: soKhcn.id,
+        typeId: trungTamTypeId,
+      },
     });
   }
 
@@ -935,7 +3280,10 @@ async function main() {
   console.log('📦 Seeding Departments for Organizations...');
 
   // helper tạo phòng ban
-  const createDept = async (parentCode: string, dept: { code: string; name: string; typeCode?: string }) => {
+  const createDept = async (
+    parentCode: string,
+    dept: { code: string; name: string; typeCode?: string },
+  ) => {
     const parent = await prisma.organizationUnit.findUnique({
       where: { code: parentCode },
     });
@@ -958,54 +3306,164 @@ async function main() {
   // ==========================
   // 1. SỞ KHOA HỌC & CÔNG NGHỆ
   // ==========================
-  await createDept('SO_KHCN', { code: 'SO_KHCN_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_QLKH', name: 'Phòng Quản lý Khoa học', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_CDS', name: 'Phòng Chuyển đổi số', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_QLCN', name: 'Phòng Quản lý Công nghệ và Đổi mới sáng tạo', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_KHCN', { code: 'SO_KHCN_TDC', name: 'Phòng Quản lý Tiêu chuẩn - Đo lường - Chất lượng', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_VP',
+    name: 'Văn phòng Sở',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_TT',
+    name: 'Thanh tra Sở',
+    typeCode: 'THANH_TRA',
+  });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_KHTC',
+    name: 'Phòng Kế hoạch - Tài chính',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_QLKH',
+    name: 'Phòng Quản lý Khoa học',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_CDS',
+    name: 'Phòng Chuyển đổi số',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_QLCN',
+    name: 'Phòng Quản lý Công nghệ và Đổi mới sáng tạo',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_KHCN', {
+    code: 'SO_KHCN_TDC',
+    name: 'Phòng Quản lý Tiêu chuẩn - Đo lường - Chất lượng',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // Các phòng thuộc Trung tâm Đổi mới Sáng tạo
-  await createDept('TT_DMSM', { code: 'TT_DMSM_HC', name: 'Phòng Hành chính - Tổng hợp', typeCode: 'VAN_PHONG' });
-  await createDept('TT_DMSM', { code: 'TT_DMSM_UT', name: 'Phòng Ươm tạo và Phát triển', typeCode: 'PHONG_BAN_SO' });
+  await createDept('TT_DMSM', {
+    code: 'TT_DMSM_HC',
+    name: 'Phòng Hành chính - Tổng hợp',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('TT_DMSM', {
+    code: 'TT_DMSM_UT',
+    name: 'Phòng Ươm tạo và Phát triển',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // Các phòng thuộc Trung tâm IOC
-  await createDept('TT_IOC', { code: 'TT_IOC_HC', name: 'Phòng Hành chính - Quản trị', typeCode: 'VAN_PHONG' });
-  await createDept('TT_IOC', { code: 'TT_IOC_CN', name: 'Phòng Công nghệ và Hạ tầng', typeCode: 'PHONG_BAN_SO' });
+  await createDept('TT_IOC', {
+    code: 'TT_IOC_HC',
+    name: 'Phòng Hành chính - Quản trị',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('TT_IOC', {
+    code: 'TT_IOC_CN',
+    name: 'Phòng Công nghệ và Hạ tầng',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // Các phòng thuộc Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng
-  await createDept('TT_KTTDC', { code: 'TT_KTTDC_HC', name: 'Phòng Hành chính - Tổ chức', typeCode: 'VAN_PHONG' });
-  await createDept('TT_KTTDC', { code: 'TT_KTTDC_DL', name: 'Phòng Đo lường', typeCode: 'PHONG_BAN_SO' });
-  await createDept('TT_KTTDC', { code: 'TT_KTTDC_TN', name: 'Phòng Thử nghiệm', typeCode: 'PHONG_BAN_SO' });
+  await createDept('TT_KTTDC', {
+    code: 'TT_KTTDC_HC',
+    name: 'Phòng Hành chính - Tổ chức',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('TT_KTTDC', {
+    code: 'TT_KTTDC_DL',
+    name: 'Phòng Đo lường',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('TT_KTTDC', {
+    code: 'TT_KTTDC_TN',
+    name: 'Phòng Thử nghiệm',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // ==========================
   // 2. SỞ Y TẾ
   // ==========================
-  await createDept('SO_YTE', { code: 'SO_YTE_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
-  await createDept('SO_YTE', { code: 'SO_YTE_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
-  await createDept('SO_YTE', { code: 'SO_YTE_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_YTE', { code: 'SO_YTE_NVY', name: 'Phòng Nghiệp vụ Y', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_YTE', { code: 'SO_YTE_DUOC', name: 'Phòng Quản lý Dược', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_YTE', {
+    code: 'SO_YTE_VP',
+    name: 'Văn phòng Sở',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('SO_YTE', {
+    code: 'SO_YTE_TT',
+    name: 'Thanh tra Sở',
+    typeCode: 'THANH_TRA',
+  });
+  await createDept('SO_YTE', {
+    code: 'SO_YTE_KHTC',
+    name: 'Phòng Kế hoạch - Tài chính',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_YTE', {
+    code: 'SO_YTE_NVY',
+    name: 'Phòng Nghiệp vụ Y',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_YTE', {
+    code: 'SO_YTE_DUOC',
+    name: 'Phòng Quản lý Dược',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // ==========================
   // 3. SỞ GIÁO DỤC
   // ==========================
-  await createDept('SO_GDDT', { code: 'SO_GDDT_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_KHTC', name: 'Phòng Kế hoạch - Tài chính', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_TCCB', name: 'Phòng Tổ chức Cán bộ', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_GDDT', { code: 'SO_GDDT_GDTRH', name: 'Phòng Giáo dục Trung học', typeCode: 'PHONG_BAN_SO' });
+  await createDept('SO_GDDT', {
+    code: 'SO_GDDT_VP',
+    name: 'Văn phòng Sở',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('SO_GDDT', {
+    code: 'SO_GDDT_TT',
+    name: 'Thanh tra Sở',
+    typeCode: 'THANH_TRA',
+  });
+  await createDept('SO_GDDT', {
+    code: 'SO_GDDT_KHTC',
+    name: 'Phòng Kế hoạch - Tài chính',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_GDDT', {
+    code: 'SO_GDDT_TCCB',
+    name: 'Phòng Tổ chức Cán bộ',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_GDDT', {
+    code: 'SO_GDDT_GDTRH',
+    name: 'Phòng Giáo dục Trung học',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // ==========================
   // 4. SỞ TÀI CHÍNH
   // ==========================
-  await createDept('SO_TC', { code: 'SO_TC_VP', name: 'Văn phòng Sở', typeCode: 'VAN_PHONG' });
-  await createDept('SO_TC', { code: 'SO_TC_TT', name: 'Thanh tra Sở', typeCode: 'THANH_TRA' });
-  await createDept('SO_TC', { code: 'SO_TC_NS', name: 'Phòng Ngân sách', typeCode: 'PHONG_BAN_SO' });
-  await createDept('SO_TC', { code: 'SO_TC_HCSN', name: 'Phòng Hành chính sự nghiệp', typeCode: 'PHONG_BAN_SO' });
-
-
+  await createDept('SO_TC', {
+    code: 'SO_TC_VP',
+    name: 'Văn phòng Sở',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('SO_TC', {
+    code: 'SO_TC_TT',
+    name: 'Thanh tra Sở',
+    typeCode: 'THANH_TRA',
+  });
+  await createDept('SO_TC', {
+    code: 'SO_TC_NS',
+    name: 'Phòng Ngân sách',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('SO_TC', {
+    code: 'SO_TC_HCSN',
+    name: 'Phòng Hành chính sự nghiệp',
+    typeCode: 'PHONG_BAN_SO',
+  });
 
   // ==========================================================
   // 9. JOB POSITIONS
@@ -1018,7 +3476,7 @@ async function main() {
     fullName: string,
     unitCode: string,
     jobTitleCode: string,
-    isUnitLeader: boolean
+    isUnitLeader: boolean,
   ) => {
     // We assume DEFAULT_PASSWORD is still in scope
     const user = await prisma.user.upsert({
@@ -1040,8 +3498,12 @@ async function main() {
       create: { userId: user.id, passwordHash },
     });
 
-    const unit = await prisma.organizationUnit.findUnique({ where: { code: unitCode } });
-    const jobTitle = await prisma.jobTitle.findUnique({ where: { code: jobTitleCode } });
+    const unit = await prisma.organizationUnit.findUnique({
+      where: { code: unitCode },
+    });
+    const jobTitle = await prisma.jobTitle.findUnique({
+      where: { code: jobTitleCode },
+    });
 
     if (unit && jobTitle) {
       const existingPosition = await prisma.jobPosition.findFirst({
@@ -1058,78 +3520,368 @@ async function main() {
             isDeputyLeader: jobTitleCode.includes('PHO_'),
           },
         });
-        console.log(`✅ Created job position for ${fullName} at ${unit.name} (${jobTitle.name})`);
+        console.log(
+          `✅ Created job position for ${fullName} at ${unit.name} (${jobTitle.name})`,
+        );
       }
     }
   };
 
   // 1. UBND Tỉnh Đắk Lắk
-  await assignLeader('dohuuhuy@daklak.gov.vn', 'dohuuhuy', 'Đỗ Hữu Huy', 'UBND_TINH_DAKLAK', 'CHU_TICH', true);
+  await assignLeader(
+    'dohuuhuy@daklak.gov.vn',
+    'dohuuhuy',
+    'Đỗ Hữu Huy',
+    'UBND_TINH_DAKLAK',
+    'CHU_TICH',
+    true,
+  );
   // 2. Sở Nội vụ
-  await assignLeader('truongngoctuan@daklak.gov.vn', 'truongngoctuan', 'Trương Ngọc Tuấn', 'SO_NV', 'GIAM_DOC', true);
+  await assignLeader(
+    'truongngoctuan@daklak.gov.vn',
+    'truongngoctuan',
+    'Trương Ngọc Tuấn',
+    'SO_NV',
+    'GIAM_DOC',
+    true,
+  );
   // 3. Sở Khoa học & Công nghệ
-  await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'GIAM_DOC', true);
-  await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_GIAM_DOC', true);
-  await assignLeader('ralantruongthanhha@daklak.gov.vn', 'ralantruongthanhha', 'Ra Lan Trương Thanh Hà', 'SO_KHCN', 'PHO_GIAM_DOC', true);
-  await assignLeader('tranvanson@daklak.gov.vn', 'tranvanson', 'Trần Văn Sơn', 'SO_KHCN', 'PHO_GIAM_DOC', true);
-  await assignLeader('lamvumyhanh@daklak.gov.vn', 'lamvumyhanh', 'Lâm Vũ Mỹ Hạnh', 'SO_KHCN', 'PHO_GIAM_DOC', true);
+  await assignLeader(
+    'buithanhtoan@daklak.gov.vn',
+    'buithanhtoan',
+    'Bùi Thanh Toàn',
+    'SO_KHCN',
+    'GIAM_DOC',
+    true,
+  );
+  await assignLeader(
+    'phamgiaviet@daklak.gov.vn',
+    'phamgiaviet',
+    'Phạm Gia Việt',
+    'SO_KHCN',
+    'PHO_GIAM_DOC',
+    true,
+  );
+  await assignLeader(
+    'ralantruongthanhha@daklak.gov.vn',
+    'ralantruongthanhha',
+    'Ra Lan Trương Thanh Hà',
+    'SO_KHCN',
+    'PHO_GIAM_DOC',
+    true,
+  );
+  await assignLeader(
+    'tranvanson@daklak.gov.vn',
+    'tranvanson',
+    'Trần Văn Sơn',
+    'SO_KHCN',
+    'PHO_GIAM_DOC',
+    true,
+  );
+  await assignLeader(
+    'lamvumyhanh@daklak.gov.vn',
+    'lamvumyhanh',
+    'Lâm Vũ Mỹ Hạnh',
+    'SO_KHCN',
+    'PHO_GIAM_DOC',
+    true,
+  );
   // Bí thư Đảng bộ thường là Giám đốc
-  await assignLeader('buithanhtoan@daklak.gov.vn', 'buithanhtoan', 'Bùi Thanh Toàn', 'SO_KHCN', 'BI_THU_DANG_BO', true);
-  await assignLeader('phamgiaviet@daklak.gov.vn', 'phamgiaviet', 'Phạm Gia Việt', 'SO_KHCN', 'PHO_BI_THU_DANG_BO', true);
+  await assignLeader(
+    'buithanhtoan@daklak.gov.vn',
+    'buithanhtoan',
+    'Bùi Thanh Toàn',
+    'SO_KHCN',
+    'BI_THU_DANG_BO',
+    true,
+  );
+  await assignLeader(
+    'phamgiaviet@daklak.gov.vn',
+    'phamgiaviet',
+    'Phạm Gia Việt',
+    'SO_KHCN',
+    'PHO_BI_THU_DANG_BO',
+    true,
+  );
 
   // Lãnh đạo các phòng ban Sở KHCN
-  await assignLeader('nguyenvana@daklak.gov.vn', 'nguyenvana', 'Nguyễn Văn A', 'SO_KHCN_VP', 'CHANH_VAN_PHONG', true);
-  await assignLeader('lethib@daklak.gov.vn', 'lethib', 'Lê Thị B', 'SO_KHCN_KHTC', 'TRUONG_PHONG', true);
-  await assignLeader('tranvanc@daklak.gov.vn', 'tranvanc', 'Trần Văn C', 'SO_KHCN_QLKH', 'TRUONG_PHONG', true);
-  await assignLeader('phamthid@daklak.gov.vn', 'phamthid', 'Phạm Thị D', 'SO_KHCN_CDS', 'TRUONG_PHONG', true);
-  await assignLeader('hoangvane@daklak.gov.vn', 'hoangvane', 'Hoàng Văn E', 'SO_KHCN_QLCN', 'TRUONG_PHONG', true);
-  await assignLeader('vuthif@daklak.gov.vn', 'vuthif', 'Vũ Thị F', 'SO_KHCN_TDC', 'TRUONG_PHONG', true);
+  await assignLeader(
+    'nguyenvana@daklak.gov.vn',
+    'nguyenvana',
+    'Nguyễn Văn A',
+    'SO_KHCN_VP',
+    'CHANH_VAN_PHONG',
+    true,
+  );
+  await assignLeader(
+    'lethib@daklak.gov.vn',
+    'lethib',
+    'Lê Thị B',
+    'SO_KHCN_KHTC',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'tranvanc@daklak.gov.vn',
+    'tranvanc',
+    'Trần Văn C',
+    'SO_KHCN_QLKH',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'phamthid@daklak.gov.vn',
+    'phamthid',
+    'Phạm Thị D',
+    'SO_KHCN_CDS',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'hoangvane@daklak.gov.vn',
+    'hoangvane',
+    'Hoàng Văn E',
+    'SO_KHCN_QLCN',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'vuthif@daklak.gov.vn',
+    'vuthif',
+    'Vũ Thị F',
+    'SO_KHCN_TDC',
+    'TRUONG_PHONG',
+    true,
+  );
 
   // Lãnh đạo các Trung tâm thuộc Sở KHCN
-  await assignLeader('dovang@daklak.gov.vn', 'dovang', 'Đỗ Văn G', 'TT_DMSM', 'GIAM_DOC', true);
-  await assignLeader('ngothih@daklak.gov.vn', 'ngothih', 'Ngô Thị H', 'TT_IOC', 'GIAM_DOC', true);
-  await assignLeader('lyvani@daklak.gov.vn', 'lyvani', 'Lý Văn I', 'TT_KTTDC', 'GIAM_DOC', true);
+  await assignLeader(
+    'dovang@daklak.gov.vn',
+    'dovang',
+    'Đỗ Văn G',
+    'TT_DMSM',
+    'GIAM_DOC',
+    true,
+  );
+  await assignLeader(
+    'ngothih@daklak.gov.vn',
+    'ngothih',
+    'Ngô Thị H',
+    'TT_IOC',
+    'GIAM_DOC',
+    true,
+  );
+  await assignLeader(
+    'lyvani@daklak.gov.vn',
+    'lyvani',
+    'Lý Văn I',
+    'TT_KTTDC',
+    'GIAM_DOC',
+    true,
+  );
 
   // Lãnh đạo các phòng thuộc Trung tâm
-  await assignLeader('truongphonghc_dmsm@daklak.gov.vn', 'truongphonghc_dmsm', 'Hoàng Văn HC', 'TT_DMSM_HC', 'TRUONG_PHONG', true);
-  await assignLeader('truongphongut_dmsm@daklak.gov.vn', 'truongphongut_dmsm', 'Lê Thị UT', 'TT_DMSM_UT', 'TRUONG_PHONG', true);
-  await assignLeader('truongphonghc_ioc@daklak.gov.vn', 'truongphonghc_ioc', 'Trần Văn HC', 'TT_IOC_HC', 'TRUONG_PHONG', true);
-  await assignLeader('truongphongcn_ioc@daklak.gov.vn', 'truongphongcn_ioc', 'Phạm Thị CN', 'TT_IOC_CN', 'TRUONG_PHONG', true);
-  await assignLeader('truongphonghc_kttdc@daklak.gov.vn', 'truongphonghc_kttdc', 'Nguyễn Văn HC', 'TT_KTTDC_HC', 'TRUONG_PHONG', true);
-  await assignLeader('truongphongdl_kttdc@daklak.gov.vn', 'truongphongdl_kttdc', 'Đinh Thị DL', 'TT_KTTDC_DL', 'TRUONG_PHONG', true);
-  await assignLeader('truongphongtn_kttdc@daklak.gov.vn', 'truongphongtn_kttdc', 'Vũ Văn TN', 'TT_KTTDC_TN', 'TRUONG_PHONG', true);
+  await assignLeader(
+    'truongphonghc_dmsm@daklak.gov.vn',
+    'truongphonghc_dmsm',
+    'Hoàng Văn HC',
+    'TT_DMSM_HC',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'truongphongut_dmsm@daklak.gov.vn',
+    'truongphongut_dmsm',
+    'Lê Thị UT',
+    'TT_DMSM_UT',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'truongphonghc_ioc@daklak.gov.vn',
+    'truongphonghc_ioc',
+    'Trần Văn HC',
+    'TT_IOC_HC',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'truongphongcn_ioc@daklak.gov.vn',
+    'truongphongcn_ioc',
+    'Phạm Thị CN',
+    'TT_IOC_CN',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'truongphonghc_kttdc@daklak.gov.vn',
+    'truongphonghc_kttdc',
+    'Nguyễn Văn HC',
+    'TT_KTTDC_HC',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'truongphongdl_kttdc@daklak.gov.vn',
+    'truongphongdl_kttdc',
+    'Đinh Thị DL',
+    'TT_KTTDC_DL',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'truongphongtn_kttdc@daklak.gov.vn',
+    'truongphongtn_kttdc',
+    'Vũ Văn TN',
+    'TT_KTTDC_TN',
+    'TRUONG_PHONG',
+    true,
+  );
 
   // Thêm một số Phó Trưởng phòng (Ví dụ)
-  await assignLeader('phochvp_khcn@daklak.gov.vn', 'phochvp_khcn', 'Trương Văn Phó 1', 'SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', false);
-  await assignLeader('photp_khtc_khcn@daklak.gov.vn', 'photp_khtc_khcn', 'Ngô Thị Phó 2', 'SO_KHCN_KHTC', 'PHO_TRUONG_PHONG', false);
+  await assignLeader(
+    'phochvp_khcn@daklak.gov.vn',
+    'phochvp_khcn',
+    'Trương Văn Phó 1',
+    'SO_KHCN_VP',
+    'PHO_CHANH_VAN_PHONG',
+    false,
+  );
+  await assignLeader(
+    'photp_khtc_khcn@daklak.gov.vn',
+    'photp_khtc_khcn',
+    'Ngô Thị Phó 2',
+    'SO_KHCN_KHTC',
+    'PHO_TRUONG_PHONG',
+    false,
+  );
 
   // 4. Sở Tài chính
-  await assignLeader('tranvantan@daklak.gov.vn', 'tranvantan', 'Trần Văn Tân', 'SO_TC', 'GIAM_DOC', true);
+  await assignLeader(
+    'tranvantan@daklak.gov.vn',
+    'tranvantan',
+    'Trần Văn Tân',
+    'SO_TC',
+    'GIAM_DOC',
+    true,
+  );
   // 5. Existing test user
-  await assignLeader('trungthanh@daklak.gov.vn', 'trungthanh', 'Trần Trung Thành', 'SO_KHCN', 'CONG_CHUC_PHU_TRACH', false);
+  await assignLeader(
+    'trungthanh@daklak.gov.vn',
+    'trungthanh',
+    'Trần Trung Thành',
+    'SO_KHCN',
+    'CONG_CHUC_PHU_TRACH',
+    false,
+  );
   // 6. Phường Tân Lập
-  await assignLeader('vuvanhung@daklak.gov.vn', 'vuvanhung', 'Vũ Văn Hưng', 'UBND_XA_TAN_LAP', 'BI_THU_DANG_BO', true);
-  await assignLeader('tranducnhat@daklak.gov.vn', 'tranducnhat', 'Trần Đức Nhật', 'UBND_XA_TAN_LAP', 'CHU_TICH', true);
+  await assignLeader(
+    'vuvanhung@daklak.gov.vn',
+    'vuvanhung',
+    'Vũ Văn Hưng',
+    'UBND_XA_TAN_LAP',
+    'BI_THU_DANG_BO',
+    true,
+  );
+  await assignLeader(
+    'tranducnhat@daklak.gov.vn',
+    'tranducnhat',
+    'Trần Đức Nhật',
+    'UBND_XA_TAN_LAP',
+    'CHU_TICH',
+    true,
+  );
   // 7. Phường Tân An
-  await assignLeader('nguyenducvinh@daklak.gov.vn', 'nguyenducvinh', 'Nguyễn Đức Vinh', 'UBND_XA_TAN_AN', 'BI_THU_DANG_BO', true);
-  await assignLeader('phamtrungnghia@daklak.gov.vn', 'phamtrungnghia', 'Phạm Trung Nghĩa', 'UBND_XA_TAN_AN', 'CHU_TICH', true);
+  await assignLeader(
+    'nguyenducvinh@daklak.gov.vn',
+    'nguyenducvinh',
+    'Nguyễn Đức Vinh',
+    'UBND_XA_TAN_AN',
+    'BI_THU_DANG_BO',
+    true,
+  );
+  await assignLeader(
+    'phamtrungnghia@daklak.gov.vn',
+    'phamtrungnghia',
+    'Phạm Trung Nghĩa',
+    'UBND_XA_TAN_AN',
+    'CHU_TICH',
+    true,
+  );
   // 9. Các giám đốc Sở mới (cập nhật từ 2026)
-  await assignLeader('caodinhhuy@daklak.gov.vn', 'caodinhhuy', 'Cao Đình Huy', 'SO_XD', 'GIAM_DOC', true);
+  await assignLeader(
+    'caodinhhuy@daklak.gov.vn',
+    'caodinhhuy',
+    'Cao Đình Huy',
+    'SO_XD',
+    'GIAM_DOC',
+    true,
+  );
   // 10. Các phường/xã còn lại
-  await assignLeader('nguyenthanhliem@daklak.gov.vn', 'nguyenthanhliem', 'Nguyễn Thanh Liêm', 'UBND_XA_THANH_NHAT', 'BI_THU_DANG_BO', true);
-  await assignLeader('nguyendinhtam@daklak.gov.vn', 'nguyendinhtam', 'Nguyễn Đình Tâm', 'UBND_XA_THANH_NHAT', 'CHU_TICH', true);
-  await assignLeader('phamtienhung@daklak.gov.vn', 'phamtienhung', 'Phạm Tiến Hưng', 'UBND_XA_HOA_PHU', 'BI_THU_DANG_BO', true);
-  await assignLeader('nguyenthehau@daklak.gov.vn', 'nguyenthehau', 'Nguyễn Thế Hậu', 'UBND_XA_HOA_PHU', 'CHU_TICH', true);
-  await assignLeader('danggiaduan@daklak.gov.vn', 'danggiaduan', 'Đặng Gia Duẩn', 'UBND_XA_EA_KAO', 'BI_THU_DANG_BO', true);
-  await assignLeader('ledaithang@daklak.gov.vn', 'ledaithang', 'Lê Đại Thắng', 'UBND_XA_EA_KAO', 'CHU_TICH', true);
+  await assignLeader(
+    'nguyenthanhliem@daklak.gov.vn',
+    'nguyenthanhliem',
+    'Nguyễn Thanh Liêm',
+    'UBND_XA_THANH_NHAT',
+    'BI_THU_DANG_BO',
+    true,
+  );
+  await assignLeader(
+    'nguyendinhtam@daklak.gov.vn',
+    'nguyendinhtam',
+    'Nguyễn Đình Tâm',
+    'UBND_XA_THANH_NHAT',
+    'CHU_TICH',
+    true,
+  );
+  await assignLeader(
+    'phamtienhung@daklak.gov.vn',
+    'phamtienhung',
+    'Phạm Tiến Hưng',
+    'UBND_XA_HOA_PHU',
+    'BI_THU_DANG_BO',
+    true,
+  );
+  await assignLeader(
+    'nguyenthehau@daklak.gov.vn',
+    'nguyenthehau',
+    'Nguyễn Thế Hậu',
+    'UBND_XA_HOA_PHU',
+    'CHU_TICH',
+    true,
+  );
+  await assignLeader(
+    'danggiaduan@daklak.gov.vn',
+    'danggiaduan',
+    'Đặng Gia Duẩn',
+    'UBND_XA_EA_KAO',
+    'BI_THU_DANG_BO',
+    true,
+  );
+  await assignLeader(
+    'ledaithang@daklak.gov.vn',
+    'ledaithang',
+    'Lê Đại Thắng',
+    'UBND_XA_EA_KAO',
+    'CHU_TICH',
+    true,
+  );
 
   // ==========================
   // STAFFING (Định biên)
   // ==========================
   console.log('📦 Seeding Staffing (Định biên)...');
-  const setStaffing = async (unitCode: string, jobTitleCode: string, quantity: number) => {
-    const unit = await prisma.organizationUnit.findUnique({ where: { code: unitCode } });
-    const jobTitle = await prisma.jobTitle.findUnique({ where: { code: jobTitleCode } });
+  const setStaffing = async (
+    unitCode: string,
+    jobTitleCode: string,
+    quantity: number,
+  ) => {
+    const unit = await prisma.organizationUnit.findUnique({
+      where: { code: unitCode },
+    });
+    const jobTitle = await prisma.jobTitle.findUnique({
+      where: { code: jobTitleCode },
+    });
     if (unit && jobTitle) {
       await prisma.organizationStaffing.upsert({
         where: {
@@ -1154,7 +3906,13 @@ async function main() {
   await setStaffing('SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', 2);
   await setStaffing('SO_KHCN_VP', 'CHUYEN_VIEN', 5);
 
-  const phongBanCodes = ['SO_KHCN_KHTC', 'SO_KHCN_QLKH', 'SO_KHCN_CDS', 'SO_KHCN_QLCN', 'SO_KHCN_TDC'];
+  const phongBanCodes = [
+    'SO_KHCN_KHTC',
+    'SO_KHCN_QLKH',
+    'SO_KHCN_CDS',
+    'SO_KHCN_QLCN',
+    'SO_KHCN_TDC',
+  ];
   for (const code of phongBanCodes) {
     await setStaffing(code, 'TRUONG_PHONG', 1);
     await setStaffing(code, 'PHO_TRUONG_PHONG', 2);
@@ -1170,9 +3928,13 @@ async function main() {
 
   // Các phòng thuộc Trung tâm
   const phongTrungTamCodes = [
-    'TT_DMSM_HC', 'TT_DMSM_UT',
-    'TT_IOC_HC', 'TT_IOC_CN',
-    'TT_KTTDC_HC', 'TT_KTTDC_DL', 'TT_KTTDC_TN'
+    'TT_DMSM_HC',
+    'TT_DMSM_UT',
+    'TT_IOC_HC',
+    'TT_IOC_CN',
+    'TT_KTTDC_HC',
+    'TT_KTTDC_DL',
+    'TT_KTTDC_TN',
   ];
   for (const code of phongTrungTamCodes) {
     await setStaffing(code, 'TRUONG_PHONG', 1);
