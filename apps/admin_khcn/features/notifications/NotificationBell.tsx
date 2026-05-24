@@ -12,6 +12,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import Link from "next/link";
 import { getNotifications, markNotificationRead, type NotificationItem } from "./api";
 
 const NOTIFICATIONS_KEY = ["notifications"];
@@ -95,15 +96,22 @@ export function NotificationBell() {
             </div>
           ) : (
             list.map((item) => (
-              <NotificationRow
-                key={item.id}
-                item={item}
-                onMarkRead={(id) => markRead.mutate(id)}
-              />
-            ))
-          )}
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
-  );
-}
+                <NotificationRow
+                  key={item.id}
+                  item={item}
+                  onMarkRead={(id) => markRead.mutate(id)}
+                />
+              ))
+            )}
+          </ScrollArea>
+          <div className="p-2 border-t border-border">
+            <Link href="/services/hrm/notifications" className="block">
+              <Button variant="ghost" className="w-full text-xs font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+                Xem tất cả thông báo
+              </Button>
+            </Link>
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  }

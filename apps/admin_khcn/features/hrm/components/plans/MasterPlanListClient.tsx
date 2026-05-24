@@ -12,6 +12,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { Guard } from "@/features/auth/components/Guard";
 
 export const MasterPlanListClient = () => {
   const [plans, setPlans] = useState<any[]>([]);
@@ -92,11 +93,13 @@ export const MasterPlanListClient = () => {
           <Button variant="outline" className="rounded-full shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-slate-900">
             <Zap className="mr-2 h-4 w-4 text-amber-500" /> AI Tạo kế hoạch
           </Button>
-          <Link href="/services/hrm/plans/create">
-            <Button className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
-              <Plus className="mr-2 h-5 w-5" /> Thêm Kế hoạch
-            </Button>
-          </Link>
+          <Guard checkFn={(user) => true /* TODO: Replace with real permission check like user.roles.some(...) */}>
+            <Link href="/services/hrm/plans/create">
+              <Button className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
+                <Plus className="mr-2 h-5 w-5" /> Thêm Kế hoạch
+              </Button>
+            </Link>
+          </Guard>
         </div>
       </div>
 
@@ -219,9 +222,11 @@ export const MasterPlanListClient = () => {
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:bg-white rounded-full bg-white/50">
                         <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-600 hover:bg-white rounded-full bg-white/50">
-                        <Edit className="h-4 w-4" />
-                      </Button>
+                      <Guard checkFn={(user) => true /* TODO: Replace with real permission check */}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-600 hover:bg-white rounded-full bg-white/50">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Guard>
                     </div>
                     <Link href={`/services/hrm/plans/${plan.id}`}>
                       <Button variant="link" className="px-0 text-indigo-600 font-semibold group-hover:translate-x-1 transition-transform">
