@@ -4,32 +4,58 @@ import { DossiersService } from './dossiers.service';
 
 @Controller()
 export class DossiersController {
-  constructor(private readonly dossiersService: DossiersService) {}
+  constructor(private readonly dossiersService: DossiersService) { }
 
   @GrpcMethod('DossierService', 'GetDossiers')
   async getDossiers() {
     const res = await this.dossiersService.getDossiers();
-    return { data: res };
+    return {
+      data: res.map(d => ({
+        ...d,
+        createdAt: d.createdAt.toISOString(),
+        updatedAt: d.updatedAt.toISOString(),
+      }))
+    };
   }
 
   @GrpcMethod('DossierService', 'GetDossier')
   async getDossier(data: { id: string }) {
-    return this.dossiersService.getDossier(data.id);
+    const d = await this.dossiersService.getDossier(data.id);
+    if (!d) return null;
+    return {
+      ...d,
+      createdAt: d.createdAt.toISOString(),
+      updatedAt: d.updatedAt.toISOString(),
+    };
   }
 
   @GrpcMethod('DossierService', 'GetComponents')
   async getComponents(data: { id: string }) {
     const res = await this.dossiersService.getComponents(data.id);
-    return { data: res };
+    return {
+      data: res.map(c => ({
+        ...c,
+        createdAt: c.createdAt.toISOString(),
+        updatedAt: c.updatedAt.toISOString(),
+      }))
+    };
   }
 
   @GrpcMethod('DossierService', 'UpdateComponent')
   async updateComponent(data: any) {
-    return this.dossiersService.updateComponent(data.id, data);
+    const c = await this.dossiersService.updateComponent(data.id, data);
+    return {
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+      updatedAt: c.updatedAt.toISOString(),
+    };
   }
 
   @GrpcMethod('DossierService', 'CreateDossierFromTemplate')
   async createDossierFromTemplate(data: { procedureId: string, senderName: string }) {
+    // createDossierFromTemplate in service already returns strings for dates, wait!
+    // No, createDossierFromTemplate in service: `createdAt: dossier.createdAt.toISOString()`
+    // So it's already strings!
     return this.dossiersService.createDossierFromTemplate(data.procedureId, data.senderName);
   }
 
@@ -40,6 +66,11 @@ export class DossiersController {
 
   @GrpcMethod('DossierService', 'AddComponentFromCabinet')
   async addComponentFromCabinet(data: { dossierId: string, name: string, fileUrl: string }) {
-    return this.dossiersService.addComponentFromCabinet(data.dossierId, data.name, data.fileUrl);
+    const c = await this.dossiersService.addComponentFromCabinet(data.dossierId, data.name, data.fileUrl);
+    return {
+      ...c,
+      createdAt: c.createdAt.toISOString(),
+      updatedAt: c.updatedAt.toISOString(),
+    };
   }
 }
