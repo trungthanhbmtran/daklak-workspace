@@ -146,6 +146,16 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.dossierService.CreateDossierFromTemplate(body));
   }
 
+  @Post('dossiers/create-blank')
+  async createBlankDossier(@Body() body: { procedureName: string, senderName: string }) {
+    return firstValueFrom(this.dossierService.CreateBlankDossier(body));
+  }
+
+  @Post('dossiers/:id/components')
+  async addComponentFromCabinet(@Param('id') dossierId: string, @Body() body: { name: string, fileUrl: string }) {
+    return firstValueFrom(this.dossierService.AddComponentFromCabinet({ dossierId, ...body }));
+  }
+
   @Get(':id')
   async getDocument(@Param('id') id: string) {
     return firstValueFrom(this.documentService.GetDocument({ id }));

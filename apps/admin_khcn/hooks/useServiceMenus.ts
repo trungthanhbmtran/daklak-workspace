@@ -152,15 +152,6 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
       (a, b) => a.order - b.order
     );
 
-    if (serviceKey === "documents" && !menuItems.some((item) => item.href.endsWith("/procedures"))) {
-      menuItems.push({
-        name: "Cấu hình TTHC",
-        href: `${config.basePath}/procedures`,
-        icon: Settings2,
-        order: 99,
-      });
-    }
-
     if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/portal-config"))) {
       menuItems.push({
         name: "Cấu hình đơn vị",

@@ -32,4 +32,14 @@ export class DossiersController {
   async createDossierFromTemplate(data: { procedureId: string, senderName: string }) {
     return this.dossiersService.createDossierFromTemplate(data.procedureId, data.senderName);
   }
+
+  @GrpcMethod('DossierService', 'CreateBlankDossier')
+  async createBlankDossier(data: { procedureName: string, senderName: string }) {
+    return this.dossiersService.createBlankDossier(data.procedureName, data.senderName);
+  }
+
+  @GrpcMethod('DossierService', 'AddComponentFromCabinet')
+  async addComponentFromCabinet(data: { dossierId: string, name: string, fileUrl: string }) {
+    return this.dossiersService.addComponentFromCabinet(data.dossierId, data.name, data.fileUrl);
+  }
 }

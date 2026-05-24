@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Plus } from "lucide-react";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
@@ -25,6 +26,7 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
   const [components, setComponents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
+  const [isAddComponentModalOpen, setIsAddComponentModalOpen] = useState(false);
   const [cabinetFiles, setCabinetFiles] = useState<any[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
   
@@ -126,6 +128,26 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
     }
   };
 
+  const handleAddFromCabinetClick = () => {
+    fetchCabinetFiles();
+    setIsAddComponentModalOpen(true);
+  };
+
+  const handleSelectComponentFromCabinet = async (fileUrl: string, fileName: string) => {
+    try {
+      await apiClient.post(`/documents/dossiers/${dossierId}/components`, {
+        name: fileName,
+        fileUrl: fileUrl
+      });
+      toast.success("Đã thêm thành phần hồ sơ mới!");
+      setIsAddComponentModalOpen(false);
+      fetchDossierAndComponents();
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi thêm thành phần hồ sơ");
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch(status) {
       case 'VALID': return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
@@ -172,7 +194,12 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
         <CardHeader className="bg-slate-50 border-b border-slate-100 rounded-t-xl pb-4">
           <div className="flex justify-between items-center">
             <CardTitle className="text-lg font-bold text-slate-800">Thành phần hồ sơ</CardTitle>
-            <span className="text-sm font-medium text-slate-500">Tiến độ: 3/4 tài liệu</span>
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-slate-500">Tiến độ: {components.filter(c => c.status === 'VALID').length}/{components.length} tài liệu</span>
+              <Button onClick={handleAddFromCabinetClick} size="sm" className="bg-indigo-600 hover:bg-indigo-700">
+                <Plus className="mr-2 h-4 w-4" /> Thêm yêu cầu từ Tủ VB
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="p-0">
@@ -245,11 +272,11 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
       {/* Hidden file input for direct upload */}
       <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
 
-      {/* Modal Chọn từ Tủ văn bản */}
+      {/* Modal Chọn từ Tủ văn bản để ĐÍNH KÈM cho Component có sẵn */}
       <Dialog open={isCabinetModalOpen} onOpenChange={setIsCabinetModalOpen}>
         <DialogContent className="sm:max-w-[700px]">
           <DialogHeader>
-            <DialogTitle>Chọn tài liệu từ Tủ văn bản</DialogTitle>
+            <DialogTitle>Chọn tài liệu từ Tủ văn bản để đính kèm</DialogTitle>
           </DialogHeader>
           <div className="max-h-[500px] overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
             {cabinetFiles.length === 0 ? (
@@ -272,6 +299,37 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
           </div>
           <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setIsCabinetModalOpen(false)}>Hủy bỏ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Chọn từ Tủ văn bản để THÊM MỚI Thành phần hồ sơ */}
+      <Dialog open={isAddComponentModalOpen} onOpenChange={setIsAddComponentModalOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Thêm thành phần yêu cầu từ Tủ văn bản</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[500px] overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {cabinetFiles.length === 0 ? (
+              <p className="text-center text-slate-500 col-span-2 py-8">Tủ văn bản hiện đang trống.</p>
+            ) : (
+              cabinetFiles.map((f) => (
+                <Card key={`add-${f.id}`} className="cursor-pointer hover:border-emerald-500 hover:shadow-md transition-all border-slate-200" onClick={() => handleSelectComponentFromCabinet(f.fileUrl, f.fileName || f.name)}>
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <div className="p-3 bg-slate-100 rounded-lg">
+                      <FileText className="h-6 w-6 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 text-sm line-clamp-1" title={f.fileName || f.name}>{f.fileName || f.name}</p>
+                      <p className="text-xs text-slate-500 mt-1">{new Date(f.createdAt || f.date).toLocaleDateString('vi-VN')} • {Math.round((f.fileSize || f.size || 0) / 1024 / 1024 * 10) / 10} MB</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setIsAddComponentModalOpen(false)}>Hủy bỏ</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

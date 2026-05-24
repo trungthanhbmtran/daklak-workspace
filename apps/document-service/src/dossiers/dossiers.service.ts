@@ -81,4 +81,41 @@ export class DossiersService {
       createdAt: dossier.createdAt.toISOString()
     };
   }
+
+  async createBlankDossier(procedureName: string, senderName: string) {
+    const dossier = await this.prisma.oneStopDossier.create({
+      data: {
+        code: `HS-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        procedureName: procedureName || "Hồ sơ mới",
+        senderName: senderName || "Người nộp",
+        receiveDate: new Date(),
+        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // Mặc định 7 ngày
+        status: "PROCESSING",
+        currentStep: 1,
+        stepDetails: "[]",
+      }
+    });
+
+    return {
+      id: dossier.id,
+      code: dossier.code,
+      procedureName: dossier.procedureName,
+      senderName: dossier.senderName,
+      status: dossier.status,
+      createdAt: dossier.createdAt.toISOString()
+    };
+  }
+
+  async addComponentFromCabinet(dossierId: string, name: string, fileUrl: string) {
+    return this.prisma.dossierComponent.create({
+      data: {
+        dossierId,
+        name: name || "Thành phần hồ sơ",
+        isRequired: true,
+        sampleFileUrl: fileUrl,
+        status: "MISSING",
+      }
+    });
+  }
 }
+

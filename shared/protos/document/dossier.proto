@@ -8,11 +8,24 @@ service DossierService {
   rpc GetComponents (DossierIdRequest) returns (ComponentListResponse) {}
   rpc UpdateComponent (UpdateComponentRequest) returns (ComponentResponse) {}
   rpc CreateDossierFromTemplate (CreateDossierFromTemplateRequest) returns (DossierInfoResponse) {}
+  rpc CreateBlankDossier(CreateBlankDossierRequest) returns (DossierInfoResponse) {}
+  rpc AddComponentFromCabinet(AddComponentRequest) returns (ComponentResponse) {}
 }
 
 message CreateDossierFromTemplateRequest {
   string procedureId = 1;
   string senderName = 2;
+}
+
+message CreateBlankDossierRequest {
+  string procedureName = 1;
+  string senderName = 2;
+}
+
+message AddComponentRequest {
+  string dossierId = 1;
+  string name = 2;
+  string fileUrl = 3;
 }
 
 message EmptyRequest {}
