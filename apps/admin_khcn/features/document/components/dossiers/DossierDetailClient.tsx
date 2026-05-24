@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
+import { useFileUpload } from "@/hooks/useFileUpload";
 
 export function DossierDetailClient({ dossierId }: { dossierId: string }) {
   // Mock data
@@ -22,6 +24,12 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
 
   const [components, setComponents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
+  const [cabinetFiles, setCabinetFiles] = useState<any[]>([]);
+  const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
+  
+  const { uploadFile, isUploading } = useFileUpload();
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchDossierAndComponents();
@@ -50,8 +58,73 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
     }
   };
 
-  const handleUploadClick = () => toast.success("Gọi /admin/media/request-upload...");
-  const handleCabinetClick = () => toast.success("Mở modal chọn file từ Tủ văn bản số...");
+  const fetchCabinetFiles = async () => {
+    try {
+      const res: any = await apiClient.get('/documents/cabinet?userId=1');
+      if (res?.data) {
+        setCabinetFiles(res.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Không thể tải danh sách Tủ văn bản");
+    }
+  };
+
+  const handleUploadClick = (compId: string) => {
+    setSelectedCompId(compId);
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (!selectedFile || !selectedCompId) return;
+
+    try {
+      toast.info("Đang xử lý tải lên...");
+      const mediaInfo = await uploadFile(selectedFile);
+      if (!mediaInfo) throw new Error("Upload thất bại");
+
+      const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
+      
+      await apiClient.put(`/documents/dossiers/components/${selectedCompId}`, {
+        status: 'VALID',
+        fileUrl,
+        source: 'UPLOAD'
+      });
+
+      toast.success("Tải tài liệu thành công!");
+      fetchDossierAndComponents(); // Tải lại danh sách
+    } catch (error) {
+      console.error(error);
+      toast.error("Tải tài liệu thất bại!");
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedCompId(null);
+    }
+  };
+
+  const handleCabinetClick = (compId: string) => {
+    setSelectedCompId(compId);
+    fetchCabinetFiles();
+    setIsCabinetModalOpen(true);
+  };
+
+  const handleSelectFromCabinet = async (fileUrl: string) => {
+    if (!selectedCompId) return;
+    try {
+      await apiClient.put(`/documents/dossiers/components/${selectedCompId}`, {
+        status: 'VALID',
+        fileUrl,
+        source: 'CABINET'
+      });
+      toast.success("Đã đính kèm tài liệu từ Tủ văn bản!");
+      setIsCabinetModalOpen(false);
+      fetchDossierAndComponents();
+    } catch (error) {
+      console.error(error);
+      toast.error("Lỗi khi đính kèm tài liệu");
+    }
+  };
 
   const getStatusIcon = (status: string) => {
     switch(status) {
@@ -137,10 +210,10 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
                 <div className="flex gap-2 w-full md:w-auto">
                   {!comp.fileUrl ? (
                     <>
-                      <Button onClick={handleUploadClick} variant="outline" size="sm" className="flex-1 md:flex-none border-indigo-200 text-indigo-700 hover:bg-indigo-50">
-                        <Upload className="mr-2 h-3 w-3" /> Tải lên
+                      <Button onClick={() => handleUploadClick(comp.id)} disabled={isUploading && selectedCompId === comp.id} variant="outline" size="sm" className="flex-1 md:flex-none border-indigo-200 text-indigo-700 hover:bg-indigo-50">
+                        <Upload className="mr-2 h-3 w-3" /> {isUploading && selectedCompId === comp.id ? "Đang tải..." : "Tải lên"}
                       </Button>
-                      <Button onClick={handleCabinetClick} variant="secondary" size="sm" className="flex-1 md:flex-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
+                      <Button onClick={() => handleCabinetClick(comp.id)} disabled={isUploading && selectedCompId === comp.id} variant="secondary" size="sm" className="flex-1 md:flex-none bg-emerald-50 text-emerald-700 hover:bg-emerald-100">
                         <LinkIcon className="mr-2 h-3 w-3" /> Từ Tủ VB
                       </Button>
                     </>
@@ -162,6 +235,39 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
         </CardContent>
       </Card>
 
+      {/* Hidden file input for direct upload */}
+      <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+
+      {/* Modal Chọn từ Tủ văn bản */}
+      <Dialog open={isCabinetModalOpen} onOpenChange={setIsCabinetModalOpen}>
+        <DialogContent className="sm:max-w-[700px]">
+          <DialogHeader>
+            <DialogTitle>Chọn tài liệu từ Tủ văn bản</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[500px] overflow-y-auto pr-2 grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            {cabinetFiles.length === 0 ? (
+              <p className="text-center text-slate-500 col-span-2 py-8">Tủ văn bản hiện đang trống.</p>
+            ) : (
+              cabinetFiles.map((f) => (
+                <Card key={f.id} className="cursor-pointer hover:border-indigo-500 hover:shadow-md transition-all border-slate-200" onClick={() => handleSelectFromCabinet(f.fileUrl)}>
+                  <CardContent className="p-4 flex items-center gap-4">
+                    <div className="p-3 bg-slate-100 rounded-lg">
+                      <FileText className="h-6 w-6 text-indigo-500" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 text-sm line-clamp-1" title={f.fileName || f.name}>{f.fileName || f.name}</p>
+                      <p className="text-xs text-slate-500 mt-1">{new Date(f.createdAt || f.date).toLocaleDateString('vi-VN')} • {Math.round((f.fileSize || f.size || 0) / 1024 / 1024 * 10) / 10} MB</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setIsCabinetModalOpen(false)}>Hủy bỏ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
