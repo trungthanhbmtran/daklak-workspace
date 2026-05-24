@@ -117,20 +117,73 @@ async function main() {
     { group: 'PROVINCE', code: '01', order: 2, nameVi: 'Thành phố Hà Nội', nameEn: 'Hanoi City' },
     { group: 'PROVINCE', code: '79', order: 3, nameVi: 'Thành phố Hồ Chí Minh', nameEn: 'Ho Chi Minh City' },
 
-    { group: 'DISTRICT', code: '47_01', order: 1, nameVi: 'Thành phố Buôn Ma Thuột', nameEn: 'Buon Ma Thuot City' },
-    { group: 'DISTRICT', code: '47_02', order: 2, nameVi: 'Thị xã Buôn Hồ', nameEn: 'Buon Ho Town' },
-    { group: 'DISTRICT', code: '47_03', order: 3, nameVi: 'Huyện Krông Pắc', nameEn: 'Krong Pac District' },
-    { group: 'DISTRICT', code: '47_04', order: 4, nameVi: 'Huyện Krông Năng', nameEn: 'Krong Nang District' },
-    { group: 'DISTRICT', code: '47_05', order: 5, nameVi: 'Huyện Ea H\'leo', nameEn: 'Ea H\'leo District' },
-    { group: 'DISTRICT', code: '47_06', order: 6, nameVi: 'Huyện Buôn Đôn', nameEn: 'Buon Don District' },
-    { group: 'DISTRICT', code: '47_07', order: 7, nameVi: 'Huyện Cư M\'gar', nameEn: 'Cu M\'gar District' },
-    { group: 'DISTRICT', code: '47_08', order: 8, nameVi: 'Huyện Ea Kar', nameEn: 'Ea Kar District' },
+    { group: 'WARD', code: '24001', order: 1, nameVi: 'Phường Buôn Ma Thuột', nameEn: 'Buon Ma Thuot Ward' },
+    { group: 'WARD', code: '24002', order: 2, nameVi: 'Phường Tân An', nameEn: 'Tan An Ward' },
+    { group: 'WARD', code: '24003', order: 3, nameVi: 'Phường Tân Lập', nameEn: 'Tan Lap Ward' },
+    { group: 'WARD', code: '24004', order: 4, nameVi: 'Phường Thành Nhất', nameEn: 'Thanh Nhat Ward' },
+    { group: 'WARD', code: '24005', order: 5, nameVi: 'Xã Hòa Phú', nameEn: 'Hoa Phu Commune' },
+    { group: 'WARD', code: '24006', order: 6, nameVi: 'Phường Ea Kao', nameEn: 'Ea Kao Ward' },
+    { group: 'WARD', code: '24007', order: 7, nameVi: 'Xã Ea Súp', nameEn: 'Ea Sup Commune' },
+    { group: 'WARD', code: '24008', order: 8, nameVi: 'Xã Ea Rốk', nameEn: 'Ea Rok Commune' },
+    { group: 'WARD', code: '24009', order: 9, nameVi: 'Xã Ea Bung', nameEn: 'Ea Bung Commune' },
+    { group: 'WARD', code: '24010', order: 10, nameVi: 'Xã Ia Rvê', nameEn: 'Ia Rve Commune' },
+    { group: 'WARD', code: '24011', order: 11, nameVi: 'Xã Ia Lốp', nameEn: 'Ia Lop Commune' },
+    { group: 'WARD', code: '24012', order: 12, nameVi: 'Xã Ea Ning', nameEn: 'Ea Ning Commune' },
+    { group: 'WARD', code: '24013', order: 13, nameVi: 'Xã Dray Bhăng', nameEn: 'Dray Bhang Commune' },
+    { group: 'WARD', code: '24014', order: 14, nameVi: 'Xã Ea Ktur', nameEn: 'Ea Ktur Commune' },
+    { group: 'WARD', code: '24015', order: 15, nameVi: 'Xã Buôn Đôn', nameEn: 'Buon Don Commune' },
+    { group: 'WARD', code: '24016', order: 16, nameVi: 'Xã Ea Wer', nameEn: 'Ea Wer Commune' },
+    { group: 'WARD', code: '24017', order: 17, nameVi: 'Xã Ea Nuôl', nameEn: 'Ea Nuol Commune' },
+    { group: 'WARD', code: '24018', order: 18, nameVi: 'Xã Quảng Phú', nameEn: 'Quang Phu Commune' },
+    { group: 'WARD', code: '24019', order: 19, nameVi: 'Xã Ea Kiết', nameEn: 'Ea Kiet Commune' },
+    { group: 'WARD', code: '24020', order: 20, nameVi: 'Xã Ea Tul', nameEn: 'Ea Tul Commune' },
+    { group: 'WARD', code: '24021', order: 21, nameVi: 'Xã Cư M’gar', nameEn: 'Cu Mgar Commune' },
+    { group: 'WARD', code: '24022', order: 22, nameVi: 'Xã Ea M’Droh', nameEn: 'Ea MDroh Commune' },
+    { group: 'WARD', code: '24023', order: 23, nameVi: 'Xã Cuôr Đăng', nameEn: 'Cuor Dang Commune' },
+    { group: 'WARD', code: '24024', order: 24, nameVi: 'Xã Krông Búk', nameEn: 'Krong Buk Commune' },
+    { group: 'WARD', code: '24025', order: 25, nameVi: 'Xã Cư Pơng', nameEn: 'Cu Pong Commune' },
+    { group: 'WARD', code: '24026', order: 26, nameVi: 'Phường Buôn Hồ', nameEn: 'Buon Ho Ward' },
+    { group: 'WARD', code: '24027', order: 27, nameVi: 'Phường Cư Bao', nameEn: 'Cu Bao Ward' },
+    { group: 'WARD', code: '24028', order: 28, nameVi: 'Xã Ea Drông', nameEn: 'Ea Drong Commune' },
+    { group: 'WARD', code: '24029', order: 29, nameVi: 'Xã Krông Năng', nameEn: 'Krong Nang Commune' },
+    { group: 'WARD', code: '24030', order: 30, nameVi: 'Xã Dliê Ya', nameEn: 'Dlie Ya Commune' },
 
-    { group: 'WARD', code: '47_01_01', order: 1, nameVi: 'Phường Tân Lợi', nameEn: 'Tan Loi Ward' },
-    { group: 'WARD', code: '47_01_02', order: 2, nameVi: 'Phường Tân Hòa', nameEn: 'Tan Hoa Ward' },
-    { group: 'WARD', code: '47_01_03', order: 3, nameVi: 'Phường Tân Lập', nameEn: 'Tan Lap Ward' },
-    { group: 'WARD', code: '47_01_04', order: 4, nameVi: 'Phường Tân An', nameEn: 'Tan An Ward' },
-    { group: 'WARD', code: '47_01_05', order: 5, nameVi: 'Phường Thắng Lợi', nameEn: 'Thang Loi Ward' },
+    // ===== PHÚ YÊN CŨ =====
+
+    { group: 'WARD', code: '25001', order: 69, nameVi: 'Phường Xuân Đài', nameEn: 'Xuan Dai Ward' },
+    { group: 'WARD', code: '25002', order: 70, nameVi: 'Phường Bình Kiến', nameEn: 'Binh Kien Ward' },
+    { group: 'WARD', code: '25003', order: 71, nameVi: 'Phường Tuy Hòa', nameEn: 'Tuy Hoa Ward' },
+    { group: 'WARD', code: '25004', order: 72, nameVi: 'Phường Phú Yên', nameEn: 'Phu Yen Ward' },
+    { group: 'WARD', code: '25005', order: 73, nameVi: 'Phường Hòa Hiệp', nameEn: 'Hoa Hiep Ward' },
+    { group: 'WARD', code: '25006', order: 74, nameVi: 'Phường Đông Hòa', nameEn: 'Dong Hoa Ward' },
+    { group: 'WARD', code: '25007', order: 75, nameVi: 'Xã Sông Cầu', nameEn: 'Song Cau Commune' },
+    { group: 'WARD', code: '25008', order: 76, nameVi: 'Xã Xuân Thọ', nameEn: 'Xuan Tho Commune' },
+    { group: 'WARD', code: '25009', order: 77, nameVi: 'Xã Xuân Cảnh', nameEn: 'Xuan Canh Commune' },
+    { group: 'WARD', code: '25010', order: 78, nameVi: 'Xã Xuân Lộc', nameEn: 'Xuan Loc Commune' },
+    { group: 'WARD', code: '25011', order: 79, nameVi: 'Xã Xuân Phước', nameEn: 'Xuan Phuoc Commune' },
+    { group: 'WARD', code: '25012', order: 80, nameVi: 'Xã Đồng Xuân', nameEn: 'Dong Xuan Commune' },
+    { group: 'WARD', code: '25013', order: 81, nameVi: 'Xã La Hai', nameEn: 'La Hai Commune' },
+    { group: 'WARD', code: '25014', order: 82, nameVi: 'Xã Tuy An', nameEn: 'Tuy An Commune' },
+    { group: 'WARD', code: '25015', order: 83, nameVi: 'Xã Chí Thạnh', nameEn: 'Chi Thanh Commune' },
+    { group: 'WARD', code: '25016', order: 84, nameVi: 'Xã An Mỹ', nameEn: 'An My Commune' },
+    { group: 'WARD', code: '25017', order: 85, nameVi: 'Xã An Chấn', nameEn: 'An Chan Commune' },
+    { group: 'WARD', code: '25018', order: 86, nameVi: 'Xã An Ninh', nameEn: 'An Ninh Commune' },
+    { group: 'WARD', code: '25019', order: 87, nameVi: 'Xã An Lĩnh', nameEn: 'An Linh Commune' },
+    { group: 'WARD', code: '25020', order: 88, nameVi: 'Xã Tây Hòa', nameEn: 'Tay Hoa Commune' },
+    { group: 'WARD', code: '25021', order: 89, nameVi: 'Xã Sơn Thành', nameEn: 'Son Thanh Commune' },
+    { group: 'WARD', code: '25022', order: 90, nameVi: 'Xã Hòa Mỹ', nameEn: 'Hoa My Commune' },
+    { group: 'WARD', code: '25023', order: 91, nameVi: 'Xã Hòa Thịnh', nameEn: 'Hoa Thinh Commune' },
+    { group: 'WARD', code: '25024', order: 92, nameVi: 'Xã Hòa Xuân', nameEn: 'Hoa Xuan Commune' },
+    { group: 'WARD', code: '25025', order: 93, nameVi: 'Xã Hòa Vinh', nameEn: 'Hoa Vinh Commune' },
+    { group: 'WARD', code: '25026', order: 94, nameVi: 'Xã Phú Hòa', nameEn: 'Phu Hoa Commune' },
+    { group: 'WARD', code: '25027', order: 95, nameVi: 'Xã Hòa Quang', nameEn: 'Hoa Quang Commune' },
+    { group: 'WARD', code: '25028', order: 96, nameVi: 'Xã Hòa Trị', nameEn: 'Hoa Tri Commune' },
+    { group: 'WARD', code: '25029', order: 97, nameVi: 'Xã Hòa Định', nameEn: 'Hoa Dinh Commune' },
+    { group: 'WARD', code: '25030', order: 98, nameVi: 'Xã Sơn Hòa', nameEn: 'Son Hoa Commune' },
+    { group: 'WARD', code: '25031', order: 99, nameVi: 'Xã Củng Sơn', nameEn: 'Cung Son Commune' },
+    { group: 'WARD', code: '25032', order: 100, nameVi: 'Xã Suối Bạc', nameEn: 'Suoi Bac Commune' },
+    { group: 'WARD', code: '25033', order: 101, nameVi: 'Xã Xuân Phương', nameEn: 'Xuan Phuong Commune' },
+    { group: 'WARD', code: '25034', order: 102, nameVi: 'Xã Xuân Hải', nameEn: 'Xuan Hai Commune' },
 
     { group: 'GEO_AREA', code: 'TAY_NGUYEN', order: 1, nameVi: 'Khu vực Tây Nguyên', nameEn: 'Central Highlands Region' },
     { group: 'GEO_AREA', code: 'MIEN_TRUNG', order: 2, nameVi: 'Khu vực Miền Trung', nameEn: 'Central Region' },
@@ -1095,7 +1148,7 @@ async function main() {
   // Sở KHCN
   await setStaffing('SO_KHCN', 'GIAM_DOC', 1);
   await setStaffing('SO_KHCN', 'PHO_GIAM_DOC', 4);
-  
+
   // Các phòng ban thuộc Sở
   await setStaffing('SO_KHCN_VP', 'CHANH_VAN_PHONG', 1);
   await setStaffing('SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', 2);
@@ -1131,7 +1184,7 @@ async function main() {
   // 10. CATEGORIES (Danh mục dùng chung)
   // ==========================================================
   console.log('🔹 Seeding Categories...');
-  
+
   await prisma.categoryGroup.upsert({
     where: { code: 'PLAN_FRAMEWORK' },
     update: { name: 'Mô hình Quản trị / Kế hoạch' },
@@ -1157,7 +1210,7 @@ async function main() {
       update: { order: fw.order },
       create: { group: 'PLAN_FRAMEWORK', code: fw.code, order: fw.order },
     });
-    
+
     await prisma.categoryTranslation.upsert({
       where: { categoryId_langCode: { categoryId: cat.id, langCode: 'vi' } },
       update: { name: fw.name },
