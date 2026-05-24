@@ -8,6 +8,7 @@ import { hrmKeys } from '@/features/hrm/keys';
 import type { PlanBasicInfoData } from '../CreatePlan/PlanBasicInfoForm';
 import type { TaskItemData } from '../CreatePlan/PlanTaskConfigList';
 import { useGetCategories } from '@/features/system-admin/categories/hooks/useCategoryApi';
+import apiClient from "@/lib/axiosInstance";
 
 export function useCreateMasterPlan() {
   const router = useRouter();
@@ -16,6 +17,7 @@ export function useCreateMasterPlan() {
   const [activeTab, setActiveTab] = useState('info');
   const [isAssigneeModalOpen, setIsAssigneeModalOpen] = useState(false);
   const [currentTaskIndex, setCurrentTaskIndex] = useState<number | null>(null);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [plan, setPlan] = useState<PlanBasicInfoData>({
@@ -209,6 +211,80 @@ export function useCreateMasterPlan() {
     reader.readAsBinaryString(file);
   };
 
+  const generateTasksWithAI = async () => {
+    if (!plan.title.trim() || !plan.objective.trim()) {
+      toast.error('Vui lòng nhập đầy đủ Tiêu đề và Mục tiêu Kế hoạch trước khi nhờ AI phân việc.');
+      return;
+    }
+
+    setIsGeneratingAI(true);
+    try {
+      const prompt = `Bạn là một chuyên gia quản trị dự án, am hiểu về OKR và WBS.
+Tôi đang tạo một Kế hoạch:
+Tiêu đề: "${plan.title}"
+Mục tiêu: "${plan.objective}"
+
+Hãy sinh ra cho tôi một danh sách 5-10 phân việc (tasks) quan trọng nhất để hoàn thành kế hoạch này.
+Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`json) là một mảng các đối tượng:
+[
+  {
+    "title": "Tên công việc",
+    "description": "Mô tả chi tiết",
+    "priority": "HIGH",
+    "weight": 10
+  }
+]`;
+
+      const res = await apiClient.post('/ai/generate', { prompt }) as any;
+      if (res.status === 'success' && res.data) {
+        let jsonStr = res.data;
+        if (jsonStr.startsWith('```json')) {
+          jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+        } else if (jsonStr.startsWith('```')) {
+          jsonStr = jsonStr.replace(/```/g, '').trim();
+        }
+
+        const parsed = JSON.parse(jsonStr);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const newTasks = parsed.map((item: any) => ({
+            title: item.title || '',
+            description: item.description || '',
+            priority: item.priority || 'NORMAL',
+            assigneeCode: '',
+            dueDate: '',
+            baseScore: 100,
+            weight: item.weight || 10,
+            scoringMethod: 'MANUAL',
+            difficulty: 'NORMAL',
+            difficultyMultiplier: 1.0,
+            bonusThresholdDays: 0,
+            bonusPerDay: 0,
+            penaltyPerDay: 0,
+            supervisorCode: '',
+            isKpiLocked: false,
+            kpiCriteriaId: null
+          }));
+          
+          if (tasks.length === 1 && tasks[0].title === "") {
+            setTasks(newTasks);
+          } else {
+            setTasks([...tasks, ...newTasks]);
+          }
+          toast.success(`AI đã tạo thành công ${newTasks.length} phân việc!`);
+        } else {
+          throw new Error('Dữ liệu AI trả về không hợp lệ');
+        }
+      } else {
+        throw new Error(res.message || 'Lỗi từ AI');
+      }
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Có lỗi xảy ra khi gọi AI: ' + (err.message || 'Xin thử lại'));
+    } finally {
+      setIsGeneratingAI(false);
+    }
+  };
+
   // Mutation for saving
   const saveMutation = useMutation({
     mutationFn: async () => {
@@ -280,6 +356,8 @@ export function useCreateMasterPlan() {
     selectAssignee,
     applyKpiCriteria,
     handleExcelUpload,
+    isGeneratingAI,
+    generateTasksWithAI,
     handleSave: () => saveMutation.mutate(),
   };
 }

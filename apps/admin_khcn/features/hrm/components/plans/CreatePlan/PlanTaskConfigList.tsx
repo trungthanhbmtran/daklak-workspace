@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Plus, Trash2, Users, Clock, Settings2, Target } from "lucide-react";
+import { Plus, Trash2, Users, Clock, Settings2, Target, Wand2, Loader2 } from "lucide-react";
 
 export interface TaskItemData {
   title: string;
@@ -35,6 +35,8 @@ interface PlanTaskConfigListProps {
   onApplyKpiCriteria: (taskIndex: number, criteriaId: string) => void;
   onOpenAssigneeModal: (index: number) => void;
   onImportExcel?: () => void;
+  isGeneratingAI?: boolean;
+  onGenerateWithAI?: () => void;
 }
 
 export function PlanTaskConfigList({
@@ -47,6 +49,8 @@ export function PlanTaskConfigList({
   onApplyKpiCriteria,
   onOpenAssigneeModal,
   onImportExcel,
+  isGeneratingAI,
+  onGenerateWithAI,
 }: PlanTaskConfigListProps) {
   return (
     <>
@@ -56,13 +60,26 @@ export function PlanTaskConfigList({
           <p className="text-slate-500 font-medium">Thiết lập các {uiLabels.taskTitle}, giao việc và cài đặt công thức tính điểm.</p>
         </div>
         <div className="flex gap-2">
-          {onImportExcel && (
-            <Button onClick={onImportExcel} variant="outline" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 rounded-xl">
-              Import từ Excel
+          {onGenerateWithAI && (
+            <Button 
+              onClick={onGenerateWithAI} 
+              disabled={isGeneratingAI}
+              className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-200"
+            >
+              {isGeneratingAI ? (
+                <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Đang phân tích...</>
+              ) : (
+                <><Wand2 className="w-4 h-4 mr-2" /> Nhờ AI Phân việc</>
+              )}
             </Button>
           )}
-          <Button onClick={onAddTask} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-lg shadow-emerald-600/20">
-            <Plus className="w-5 h-5 mr-2" /> Thêm {uiLabels.taskTitle}
+          {onImportExcel && (
+            <Button onClick={onImportExcel} variant="outline" className="text-emerald-700 border-emerald-200 hover:bg-emerald-50 rounded-xl">
+              Import Excel
+            </Button>
+          )}
+          <Button onClick={onAddTask} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-200">
+            <Plus className="w-4 h-4 mr-2" /> Thêm thủ công
           </Button>
         </div>
       </div>

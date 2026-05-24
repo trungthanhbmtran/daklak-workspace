@@ -35,6 +35,8 @@ export function CreateMasterPlanClient() {
     selectAssignee,
     applyKpiCriteria,
     handleExcelUpload,
+    isGeneratingAI,
+    generateTasksWithAI,
     handleSave,
   } = useCreateMasterPlan();
 
@@ -83,6 +85,8 @@ export function CreateMasterPlanClient() {
             onApplyKpiCriteria={applyKpiCriteria}
             onOpenAssigneeModal={openAssigneeModal}
             onImportExcel={() => fileInputRef.current?.click()}
+            isGeneratingAI={isGeneratingAI}
+            onGenerateWithAI={generateTasksWithAI}
           />
           <input type="file" ref={fileInputRef} onChange={handleExcelUpload} accept=".xlsx, .xls" className="hidden" />
         </TabsContent>
