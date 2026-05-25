@@ -1,0 +1,31 @@
+"use client";
+
+import React, { useState } from "react";
+
+export function AdvancedCssEditor() {
+    const [code, setCode] = useState(`/* Thêm CSS tùy biến của bạn tại đây */\n.cms-custom-header {\n    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n    color: #ffffff;\n}`);
+
+    return (
+        <div className="space-y-3">
+            <div className="relative rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 text-slate-200 font-mono text-xs">
+                {/* Thanh header nhỏ của editor mô phỏng IDE */}
+                <div className="bg-slate-900 px-4 py-2 border-b border-slate-800/80 flex justify-between items-center text-[11px] text-slate-400">
+                    <span>custom-styles.css</span>
+                    <span className="text-emerald-400 text-xs">● CSS Validated</span>
+                </div>
+
+                {/* Khu vực gõ Code */}
+                <textarea
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    rows={10}
+                    spellCheck={false}
+                    className="w-full bg-slate-950 p-4 focus:outline-none font-mono text-xs leading-relaxed resize-y custom-scrollbar text-emerald-400 dark:text-emerald-500"
+                />
+            </div>
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-600 dark:text-amber-400 leading-normal">
+                ⚠️ <strong>Lưu ý:</strong> Mã CSS tùy chỉnh viết ở đây sẽ có độ ưu tiên cao nhất (Override) và tác động trực tiếp đến toàn bộ giao diện người dùng bên ngoài trang chủ. Hãy kiểm tra kỹ cú pháp.
+            </div>
+        </div>
+    );
+}
