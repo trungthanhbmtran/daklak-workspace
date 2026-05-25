@@ -27,7 +27,7 @@ export function usePortalBuilder(languages: any[]) {
     const { data: dbConfigs, isLoading, refetch } = useQuery({
         queryKey: ["portal-configs"],
         queryFn: async () => {
-            const res: any = await apiClient.get("/portal-configs");
+            const res: any = await apiClient.get("/admin/portal-configs");
             return res || [];
         }
     });
@@ -101,15 +101,16 @@ export function usePortalBuilder(languages: any[]) {
             for (const item of itemsToSave) {
                 const existing = dbConfigs?.find((c: any) => c.code === item.code);
                 if (existing) {
-                    await apiClient.put(`/portal-configs/${existing.id}`, item);
+                    await apiClient.put(`/admin/portal-configs/${existing.id}`, item);
                 } else {
-                    await apiClient.post("/portal-configs", item);
+                    await apiClient.post("/admin/portal-configs", item);
                 }
             }
 
             toast.success(`Xuất bản thành công "${targetPageMeta?.title?.vi || targetPageId}"!`);
             refetch();
         } catch (error) {
+
             toast.error("Không thể lưu trang. Vui lòng thử lại.");
         } finally {
             setIsSaving(false);
@@ -136,7 +137,7 @@ export function usePortalBuilder(languages: any[]) {
 
             const layoutConfig = dbConfigs?.find((c: any) => c.code === `custom_page_layout_${pageId}`);
             if (layoutConfig) {
-                await apiClient.delete(`/portal-configs/${layoutConfig.id}`);
+                await apiClient.delete(`/admin/portal-configs/${layoutConfig.id}`);
             }
 
             toast.success("Đã xóa trang tùy chỉnh thành công!");
