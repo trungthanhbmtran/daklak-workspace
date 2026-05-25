@@ -1,33 +1,50 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useImperativeHandle, forwardRef, useMemo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Layout } from "lucide-react";
 import { MultiLangTitleSlug } from "@/components/shared/MultiLangTitleSlug";
+import { toast } from "sonner";
 import { CustomPageMeta } from "./hooks/usePortalBuilder";
 
-interface PageMetaModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    mode: "ADD" | "EDIT";
-    pageMeta?: CustomPageMeta;
-    activeLangs: any[];
-    onSubmit: (id: string, titles: Record<string, string>, isActive: boolean) => void;
+export interface PageMetaModalRef {
+    openAdd: () => void;
+    openEdit: (page: CustomPageMeta) => void;
 }
 
-export function PageMetaModal({ isOpen, onClose, mode, pageMeta, activeLangs, onSubmit }: PageMetaModalProps) {
+interface PageMetaModalProps {
+    pagesList: CustomPageMeta[];
+    activeLangs: any[];
+    onSaveSuccess: (id: string, titles: Record<string, string>, isActive: boolean, mode: "ADD" | "EDIT") => Promise<void>;
+}
+
+export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({ pagesList, activeLangs, onSaveSuccess }, ref) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const [mode, setMode] = useState<"ADD" | "EDIT">("ADD");
+
+    // State gõ chữ biệt lập - re-render chỉ xảy ra ở đây khi người dùng nhập dữ liệu
     const [pageId, setPageId] = useState("");
     const [titles, setTitles] = useState<Record<string, string>>({});
     const [isActive, setIsActive] = useState(true);
 
-    useEffect(() => {
-        if (isOpen) {
-            setPageId(mode === "EDIT" ? pageMeta?.id || "" : "");
-            setTitles(mode === "EDIT" ? pageMeta?.title || {} : {});
-            setIsActive(mode === "EDIT" ? pageMeta?.isActive ?? true : true);
+    // Phơi bày hàm ra ngoài cho file cha gọi điều khiển thông qua Ref
+    useImperativeHandle(ref, () => ({
+        openAdd: () => {
+            setMode("ADD");
+            setPageId("");
+            setTitles({});
+            setIsActive(true);
+            setIsOpen(true);
+        },
+        openEdit: (page) => {
+            setMode("EDIT");
+            setPageId(page.id);
+            setTitles(page.title || {});
+            setIsActive(page.isActive ?? true);
+            setIsOpen(true);
         }
-    }, [isOpen, mode, pageMeta]);
+    }));
 
     const multiLangValue = useMemo(() => {
         const result: Record<string, any> = {};
@@ -37,12 +54,26 @@ export function PageMetaModal({ isOpen, onClose, mode, pageMeta, activeLangs, on
         return result;
     }, [titles, activeLangs]);
 
-    const handleSave = () => {
-        onSubmit(pageId, titles, isActive);
+    const handleSave = async () => {
+        if (!pageId.trim()) return toast.error("Vui lòng nhập slug định danh trang");
+        const defaultLang = activeLangs[0]?.code || "vi";
+        if (!titles[defaultLang]?.trim()) {
+            return toast.error(`Vui lòng nhập tiêu đề (${activeLangs[0]?.name || "Mặc định"})`);
+        }
+
+        const cleanId = pageId.toLowerCase().trim().replace(/[^a-z0-9-_]/g, "");
+
+        if (mode === "ADD" && pagesList.some((p) => p.id === cleanId)) {
+            return toast.error("Mã định danh trang này đã tồn tại!");
+        }
+
+        setIsOpen(false);
+        // Báo hiệu ngược lại cho cha cập nhật API sau khi dữ liệu đã chuẩn hóa
+        await onSaveSuccess(cleanId, titles, isActive, mode);
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="max-w-md rounded-[32px] border-none p-0 overflow-hidden shadow-2xl">
                 <div className="p-8 bg-white dark:bg-[#0f172a]">
                     <DialogHeader className="mb-8">
@@ -90,7 +121,7 @@ export function PageMetaModal({ isOpen, onClose, mode, pageMeta, activeLangs, on
                 </div>
 
                 <div className="p-6 bg-slate-50 dark:bg-slate-900/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-4">
-                    <Button variant="ghost" onClick={onClose} className="rounded-xl text-[10px] font-black uppercase text-slate-400">Hủy bỏ</Button>
+                    <Button variant="ghost" onClick={() => setIsOpen(false)} className="rounded-xl text-[10px] font-black uppercase text-slate-400">Hủy bỏ</Button>
                     <Button onClick={handleSave} className="px-8 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-[10px] font-black uppercase tracking-[0.2em]">
                         {mode === "ADD" ? "Tạo Trang" : "Lưu Thay Đổi"}
                     </Button>
@@ -98,4 +129,6 @@ export function PageMetaModal({ isOpen, onClose, mode, pageMeta, activeLangs, on
             </DialogContent>
         </Dialog>
     );
-}
+});
+
+PageMetaModal.displayName = "PageMetaModal";

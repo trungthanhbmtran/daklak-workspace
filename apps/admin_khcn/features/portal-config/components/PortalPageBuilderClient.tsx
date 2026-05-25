@@ -1,16 +1,14 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useRef } from "react";
 import { ThemeProvider } from "@/features/posts/components/theme/ThemeProvider";
 import dynamic from "next/dynamic";
-import { toast } from "sonner";
-
 import { useLanguages } from "./hooks/useLanguages";
 import { usePortalBuilder, CustomPageMeta } from "./hooks/usePortalBuilder";
 
 import { BuilderHeader } from "./BuilderHeader";
 import { BuilderBottomBar } from "./BuilderBottomBar";
-import { PageMetaModal } from "./PageMetaModal";
+import { PageMetaModal, PageMetaModalRef } from "./PageMetaModal";
 import PagesSidebar from "./PagesSidebar";
 
 const PageBuilder = dynamic(
@@ -20,16 +18,10 @@ const PageBuilder = dynamic(
 
 export function PortalPageBuilderClient() {
   const rawLanguages = useLanguages();
-
-  // Khởi tạo các trạng thái và nghiệp vụ thông qua custom hook
   const builder = usePortalBuilder(rawLanguages);
 
-  // Quản lý trạng thái mở Modal cục bộ
-  const [modalState, setModalState] = useState<{
-    isOpen: boolean;
-    mode: "ADD" | "EDIT";
-    pageData?: CustomPageMeta;
-  }>({ isOpen: false, mode: "ADD" });
+  // Khởi tạo Ref để tương tác với các phương thức phơi bày của Modal
+  const modalRef = useRef<PageMetaModalRef>(null);
 
   if (builder.isLoading) {
     return (
@@ -45,26 +37,15 @@ export function PortalPageBuilderClient() {
     );
   }
 
-  const handleModalSubmit = async (id: string, titles: Record<string, string>, isActive: boolean) => {
-    if (!id.trim()) return toast.error("Vui lòng nhập slug định danh trang");
-
-    const cleanId = id.toLowerCase().trim().replace(/[^a-z0-9-_]/g, "");
-
-    if (modalState.mode === "ADD") {
-      if (builder.pagesList.some((p) => p.id === cleanId)) {
-        return toast.error("Mã định danh trang này đã tồn tại!");
-      }
-      const newPage: CustomPageMeta = { id: cleanId, title: titles, isActive };
-      setModalState({ isOpen: false, mode: "ADD" });
-      await builder.handleSaveLayout(cleanId, [], [...builder.pagesList, newPage]);
-      builder.setSelectedPageId(cleanId);
+  const handleModalSubmit = async (id: string, titles: Record<string, string>, isActive: boolean, mode: "ADD" | "EDIT") => {
+    if (mode === "ADD") {
+      const newPage: CustomPageMeta = { id, title: titles, isActive };
+      await builder.handleSaveLayout(id, [], [...builder.pagesList, newPage]);
+      builder.setSelectedPageId(id);
     } else {
-      const updatedList = builder.pagesList.map((p) =>
-        p.id === cleanId ? { ...p, title: titles, isActive } : p
-      );
+      const updatedList = builder.pagesList.map((p) => p.id === id ? { ...p, title: titles, isActive } : p);
       builder.setPagesList(updatedList);
-      setModalState({ isOpen: false, mode: "EDIT" });
-      await builder.handleSaveLayout(cleanId, builder.currentLayout, updatedList);
+      await builder.handleSaveLayout(id, builder.currentLayout, updatedList);
     }
     builder.refetch();
   };
@@ -73,7 +54,7 @@ export function PortalPageBuilderClient() {
     <ThemeProvider>
       <div className="h-screen flex flex-col overflow-hidden bg-white dark:bg-slate-950">
 
-        {/* 1. HEADER COMPONENT */}
+        {/* 1. HEADER */}
         <BuilderHeader
           selectedPageMeta={builder.selectedPageMeta}
           isSaving={builder.isSaving}
@@ -84,20 +65,20 @@ export function PortalPageBuilderClient() {
         />
 
         <div className="flex-1 flex overflow-hidden">
-          {/* 2. SIDEBAR QUẢN LÝ DANH SÁCH TRANG */}
+          {/* 2. SIDEBAR QUẢN LÝ TRANG (ĐÃ SỬA LỖI: Bổ sung 2 props định tuyến Ref điều khiển modal) */}
           {builder.showPagesSidebar && (
             <PagesSidebar
               pagesList={builder.pagesList}
               selectedPageId={builder.selectedPageId}
               setSelectedPageId={builder.setSelectedPageId}
               setShowPagesSidebar={builder.setShowPagesSidebar}
-              openAddPageModal={() => setModalState({ isOpen: true, mode: "ADD" })}
-              openEditPageModal={(page) => setModalState({ isOpen: true, mode: "EDIT", pageData: page })}
               handleDeletePage={builder.handleDeletePage}
+              onOpenAddPage={() => modalRef.current?.openAdd()}
+              onOpenEditPage={(page) => modalRef.current?.openEdit(page)}
             />
           )}
 
-          {/* 3. KHU VỰC THIẾT KẾ TRỰC QUAN (WORKFLOW VISUAL BUILDER) */}
+          {/* 3. WORKSPACE VISUAL BUILDER */}
           <div className="flex-1 flex flex-col relative overflow-hidden">
             <div className="flex-1 bg-[#f8fafc] dark:bg-[#020617] flex flex-col h-full overflow-hidden relative">
               <PageBuilder
@@ -122,14 +103,12 @@ export function PortalPageBuilderClient() {
           </div>
         </div>
 
-        {/* 5. MODAL METADATA ĐA NGÔN NGỮ */}
+        {/* 5. MODAL ĐA NGÔN NGỮ */}
         <PageMetaModal
-          isOpen={modalState.isOpen}
-          onClose={() => setModalState({ ...modalState, isOpen: false })}
-          mode={modalState.mode}
-          pageMeta={modalState.pageData}
+          ref={modalRef}
+          pagesList={builder.pagesList}
           activeLangs={builder.activeLangs}
-          onSubmit={handleModalSubmit}
+          onSaveSuccess={handleModalSubmit}
         />
       </div>
     </ThemeProvider>
