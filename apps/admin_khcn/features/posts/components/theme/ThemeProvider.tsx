@@ -25,9 +25,12 @@ export interface ThemeConfig {
   customCss: string;       // Mã CSS nâng cao do admin viết
 }
 
+
 interface ThemeContextProps extends ThemeConfig {
   setThemeMode: (mode: string) => void;
   setTemplate: (template: string) => void;
+  previewDevice: "desktop" | "tablet" | "mobile";
+  setPreviewDevice: (device: "desktop" | "tablet" | "mobile") => void;
   setStage: (stage: string) => void;
   setTypography: React.Dispatch<React.SetStateAction<TypographySettings>>;
   setLayout: React.Dispatch<React.SetStateAction<LayoutSettings>>;
@@ -50,6 +53,7 @@ const defaultThemeConfig: Omit<ThemeConfig, "stage" | "theme"> = {
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { theme, setTheme } = useTheme();
   const [stage, setStage] = useState<string>("default");
+  const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
   // State quản lý các cấu hình mở rộng
   const [template, setTemplateState] = useState<string>(defaultThemeConfig.template);
@@ -157,7 +161,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         layout,
         customCss,
         isDirty,
+        previewDevice,
         setThemeMode,
+        setPreviewDevice,
         setTemplate,
         setStage,
         setTypography: handleSetTypography,
