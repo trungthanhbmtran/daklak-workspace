@@ -391,6 +391,7 @@ export function PortalPageBuilderClient() {
       <aside>
 
         <PagesSidebar
+          showPagesSidebar={showPagesSidebar}
           pagesList={pagesList}
           selectedPageId={selectedPageId}
           setSelectedPageId={setSelectedPageId}

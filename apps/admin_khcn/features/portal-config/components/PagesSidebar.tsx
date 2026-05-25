@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { Plus, Globe, Settings2, Trash2, FileCode } from 'lucide-react';
+import { Plus, Globe, Settings2, Trash2, FileCode, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface PagesSidebarProps {
@@ -10,6 +10,7 @@ interface PagesSidebarProps {
   openAddPageModal: () => void;
   openEditPageModal: (page: any) => void;
   handleDeletePage: (pageId: string) => void;
+  showPagesSidebar: boolean;
 }
 
 export default function PagesSidebar({
@@ -20,12 +21,13 @@ export default function PagesSidebar({
   openAddPageModal,
   openEditPageModal,
   handleDeletePage,
+  showPagesSidebar,
 }: PagesSidebarProps) {
   return (
     <aside
       className={cn(
         'border-r border-slate-200/80 dark:border-slate-800 bg-slate-50/30 dark:bg-[#0f172a] flex flex-col z-30 shrink-0 transition-all duration-300',
-        'w-80'
+        showPagesSidebar ? 'w-80' : 'w-0 overflow-hidden opacity-0 border-none'
       )}
     >
       {/* Header */}
@@ -138,6 +140,19 @@ export default function PagesSidebar({
             </div>
           );
         })}
+      </div>
+
+      {/* AI Assist Block */}
+      <div className="p-6 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30">
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 flex items-center gap-4">
+          <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/30 rounded-xl flex items-center justify-center shrink-0">
+            <Sparkles className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black text-slate-800 dark:text-white uppercase tracking-tight">AI Assist</span>
+            <span className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Sẵn sàng tối ưu Layout</span>
+          </div>
+        </div>
       </div>
     </aside>
   );
