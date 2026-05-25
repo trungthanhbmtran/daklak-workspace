@@ -97,10 +97,9 @@ export function PortalPageBuilderClient() {
     }
   });
 
-  // 3. Process pages list and loaded layout based on selectedPageId
+  // 3. Process pages list from DB
   useEffect(() => {
     if (dbConfigs?.length) {
-      // Find pages metadata list key
       const listConfig = dbConfigs.find((c: any) => c.code === "custom_page_list");
       let parsedPages: CustomPageMeta[] = [];
 
@@ -112,7 +111,6 @@ export function PortalPageBuilderClient() {
         }
       }
 
-      // If pages list is empty, initialize with default about-page and contact-page
       if (parsedPages.length === 0) {
         parsedPages = [
           {
@@ -130,22 +128,23 @@ export function PortalPageBuilderClient() {
 
       setPagesList(parsedPages);
 
-      // Verify if selected page is still in the list, otherwise select first available
-      let currentId = selectedPageId;
       if (!parsedPages.some((p) => p.id === selectedPageId)) {
-        currentId = parsedPages[0]?.id || "about-page";
-        setSelectedPageId(currentId);
+        setSelectedPageId(parsedPages[0]?.id || "about-page");
       }
+    }
+  }, [dbConfigs]);
 
-      // Load layout for selected page
-      const layoutCode = currentId === "about-page" ? "custom_about_layout" : `custom_page_layout_${currentId}`;
+  // 4. Load layout when selectedPageId changes
+  useEffect(() => {
+    if (dbConfigs?.length && selectedPageId) {
+      const layoutCode = selectedPageId === "about-page" ? "custom_about_layout" : `custom_page_layout_${selectedPageId}`;
       const layoutConfig = dbConfigs.find((c: any) => c.code === layoutCode);
 
       if (layoutConfig && layoutConfig.description) {
         try {
           setCurrentLayout(JSON.parse(layoutConfig.description));
         } catch (e) {
-          console.error(`Failed to parse page layout for ${currentId}`, e);
+          console.error(`Failed to parse page layout for ${selectedPageId}`, e);
           setCurrentLayout([]);
         }
       } else {
@@ -232,12 +231,12 @@ export function PortalPageBuilderClient() {
         title: { ...modalTitles },
         isActive: modalIsActive
       };
-
-      const updatedList = [...pagesList, newPage];
-      setPagesList(updatedList);
+      // Close modal and save layout; rely on refetch to update pages list
       setIsPageModalOpen(false);
+      await handleSaveLayout(cleanId, [], [...pagesList, newPage]);
+      // Refresh pages from server
+      await refetch();
       setSelectedPageId(cleanId);
-      await handleSaveLayout(cleanId, [], updatedList);
     } else {
       const updatedList = pagesList.map((p) => {
         if (p.id === modalPageId) {
