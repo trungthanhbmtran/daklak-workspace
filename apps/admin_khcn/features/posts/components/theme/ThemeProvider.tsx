@@ -60,7 +60,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const [isDirty, setIsDirty] = useState<boolean>(false);
 
-  // 2. TỰ ĐỘNG LOAD CONFIG KHI THAY ĐỔI STAGE (Bảo vệ lỗi SSR bằng typeof window)
+  // 2. LOAD CONFIG KHI THAY ĐỔI STAGE + LOAD TỪ DB KHI KHỞI ĐỘNG
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -76,7 +76,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         setIsDirty(false);
       } catch (_) { }
     } else {
-      // Nếu stage chưa có config, trả về mặc định
       setTemplateState(defaultThemeConfig.template);
       setTypography(defaultThemeConfig.typography);
       setLayout(defaultThemeConfig.layout);
@@ -84,6 +83,42 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       setIsDirty(false);
     }
   }, [stage, setTheme]);
+
+  // Load saved theme from DB on first mount (stage = default)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const localKey = `themeConfig:${stage}`;
+    // Only fetch from DB if no local cache yet
+    if (localStorage.getItem(localKey)) return;
+
+    fetch("/api/theme")
+      .then((r) => r.json())
+      .then((res) => {
+        if (!res?.success || !res?.data) return;
+        const d = res.data;
+        // Map portal appearance config back to admin ThemeConfig
+        // colorMode / theme
+        if (d.colorMode) setTheme(d.colorMode);
+        // template (brand color id)
+        if (d.template) setTemplateState(d.template);
+        // typography
+        if (d.typography?.fontSize) {
+          setTypography((prev) => ({ ...prev, size: d.typography.fontSize }));
+        }
+        // layout
+        if (d.layout?.isCompact !== undefined) {
+          setLayout((prev) => ({ ...prev, isCompact: d.layout.isCompact }));
+        }
+        if (d.layout?.width) {
+          setLayout((prev) => ({ ...prev, width: d.layout.width }));
+        }
+        if (d.customCss) setCustomCss(d.customCss);
+        setIsDirty(false);
+      })
+      .catch(() => { /* network error, use defaults */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   // 3. CÁC HÀM SETTER ĐỒNG BỘ TRẠNG THÁI CHƯA LƯU & TỰ ĐỘNG MERGE STATE
   const setThemeMode = (mode: string) => {
@@ -142,22 +177,30 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       customCss
     };
 
+    // Luôn lưu vào localStorage trước
     if (typeof window !== "undefined") {
       localStorage.setItem(`themeConfig:${stage}`, JSON.stringify(cfg));
     }
 
+    // Luôn lưu lên DB qua API route
     try {
-      await fetch("/api/theme", {
+      const res = await fetch("/api/theme", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cfg),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        console.error("[ThemeProvider] saveTheme API error:", err);
+      }
       setIsDirty(false);
-    } catch (_) {
-      // Mạng lỗi nhưng local đã lưu thành công thì vẫn cho là an toàn
+    } catch (err) {
+      console.error("[ThemeProvider] saveTheme network error:", err);
+      // Mạng lỗi nhưng local đã lưu thành công — không block UX
       setIsDirty(false);
     }
   };
+
 
   // 5. LOAD CẤU HÌNH TỪ STAGE KHÁC
   const loadSavedTheme = (targetStage: string) => {

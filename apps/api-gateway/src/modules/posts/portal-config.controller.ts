@@ -49,4 +49,11 @@ export class PortalConfigController {
     const res: any = await firstValueFrom(this.configService.update({ id, ...dto }));
     return { success: true, data: res.data };
   }
+
+  @Post('upsert')
+  @Roles(Role.ADMIN)
+  async upsert(@Body() dto: { code: string; name: string; description?: string }) {
+    const res: any = await firstValueFrom(this.configService.upsertByCode({ code: dto.code, name: dto.name, description: dto.description }));
+    return { success: true, data: res.data };
+  }
 }

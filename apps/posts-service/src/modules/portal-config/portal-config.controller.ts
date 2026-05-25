@@ -5,7 +5,7 @@ import { status } from '@grpc/grpc-js';
 
 @Controller()
 export class PortalConfigController {
-  constructor(private readonly configService: PortalConfigService) {}
+  constructor(private readonly configService: PortalConfigService) { }
 
   @GrpcMethod('PortalConfigService', 'Create')
   async create(data: { code: string; name: string; description?: string }) {
@@ -55,6 +55,22 @@ export class PortalConfigController {
       throw new RpcException({
         code: status.INTERNAL,
         message: e.message || 'Lỗi khi cập nhật cấu hình',
+      });
+    }
+  }
+
+  @GrpcMethod('PortalConfigService', 'UpsertByCode')
+  async upsertByCode(data: { code: string; name: string; description?: string }) {
+    try {
+      const result = await this.configService.upsertByCode(data.code, {
+        name: data.name,
+        description: data.description,
+      });
+      return { data: result, success: true, message: 'Upsert cấu hình thành công' };
+    } catch (e: any) {
+      throw new RpcException({
+        code: status.INTERNAL,
+        message: e.message || 'Lỗi khi upsert cấu hình',
       });
     }
   }
