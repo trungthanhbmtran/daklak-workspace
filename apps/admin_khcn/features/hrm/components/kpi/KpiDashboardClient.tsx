@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useMemo } from 'react';
 import { Plus, Target, TrendingUp, AlertTriangle, CheckCircle2, Trash2, Edit3 } from 'lucide-react';
 
