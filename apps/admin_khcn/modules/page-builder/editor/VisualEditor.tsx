@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { toast } from "sonner";
@@ -14,18 +16,17 @@ import {
   Monitor,
   Tablet,
   Smartphone,
-  Undo2,
-  Redo2,
   Columns,
   Settings,
-  Languages,
   Sparkles,
-  CheckCircle,
   Eye,
   Undo,
   Redo
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+// Khởi tạo context theme từ hệ thống quản lý CMS nâng cao của bạn
+import { useThemeConfig } from "@/features/posts/components/theme/ThemeProvider";
 
 // Auto-initialize block registry if empty
 if (BlockRegistry.getAllBlocks().length === 0) {
@@ -47,6 +48,13 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
 }) => {
   const sensors = useDndSensors();
 
+  // 1. Lấy dữ liệu cấu hình UI thời gian thực từ ThemeProvider toàn cục
+  const {
+    template,
+    typography,
+    layout: themeLayout
+  } = useThemeConfig();
+
   const {
     layout,
     viewport,
@@ -65,7 +73,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
     addWidget
   } = useEditorStore();
 
-  // 1. Initialize store state
+  // Initialize store state
   const isInitialized = React.useRef(false);
   React.useEffect(() => {
     if (!isInitialized.current) {
@@ -74,15 +82,55 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
     }
   }, [initialLayout, languages, initStore]);
 
-  // 2. Synchronize layout mutations back to external database onChange handlers
+  // Synchronize layout mutations back to database
   React.useEffect(() => {
-    // Only invoke callback if we have completed initialization
     if (isInitialized.current) {
       onChange(layout);
     }
   }, [layout, onChange]);
 
-  // 3. Handle Drag & Drop ends
+  // 2. Định nghĩa màu sắc thương hiệu của top bar đồng bộ với Theme màu sắc đang chọn
+  const getBrandColorClasses = () => {
+    switch (template) {
+      case "emerald":
+        return "from-emerald-600 to-teal-500 shadow-emerald-100 dark:shadow-none";
+      case "violet":
+        return "from-violet-600 to-purple-500 shadow-violet-100 dark:shadow-none";
+      case "amber":
+        return "from-amber-600 to-orange-500 shadow-amber-100 dark:shadow-none";
+      case "blue":
+      default:
+        return "from-indigo-600 to-indigo-500 shadow-indigo-100 dark:shadow-none";
+    }
+  };
+
+  // 3. Quy đổi độ bo góc (Radius) từ hệ thống cấu hình sang class Tailwind để áp dụng cho các khối chức năng
+  const getRadiusClass = () => {
+    switch (themeLayout.radius) {
+      case "Sharp": return "rounded-none";
+      case "Subtle": return "rounded-sm";
+      case "Full": return "rounded-3xl";
+      case "Medium":
+      default:
+        return "rounded-xl";
+    }
+  };
+
+  // 4. Quy đổi Font Family được cấu hình từ admin sang class font hệ thống
+  const getFontFamilyClass = () => {
+    switch (typography.heading) {
+      case "playfair":
+      case "merriweather":
+        return "font-serif";
+      case "Geist":
+        return "font-mono";
+      case "inter":
+      default:
+        return "font-sans";
+    }
+  };
+
+  // Handle Drag & Drop ends
   const handleDragEnd = (event: DragEndEvent) => {
     try {
       const { active, over } = event;
@@ -101,17 +149,15 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         return;
       }
 
-      // Check if target column already has a widget
       const targetRow = layout.find((r) => r.rowId === targetRowId);
       const targetCol = targetRow?.columns.find((c) => c.id === targetColId);
       const hasExistingWidget = targetCol && targetCol.widgets.length > 0;
 
       if (hasExistingWidget) {
         toast.warning("Bạn đã nhấn chồng!");
-        return; // Prevent crash / duplicate stacking
+        return;
       }
 
-      // Case A: Dragging a template card from LeftSidebar (adds new widget)
       if (activeData.isTemplate) {
         const blockType = activeData.blockType;
         const blockConfig = BlockRegistry.getBlock(blockType);
@@ -128,18 +174,15 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         addWidget(targetRowId, targetColId, newWidget);
         toast.success("Đã thêm widget mới thành công!");
       }
-      // Case B: Moving an existing widget within the canvas
       else {
         const { blockId, rowId: sourceRowId, colId: sourceColId } = activeData;
 
-        // Ensure block is moved to a different column or row location
         if (sourceRowId !== targetRowId || sourceColId !== targetColId) {
           const sourceRow = layout.find((r) => r.rowId === sourceRowId);
           const sourceCol = sourceRow?.columns.find((c) => c.id === sourceColId);
           const widget = sourceCol?.widgets.find((w) => w.id === blockId);
 
           if (widget) {
-            // Remove widget from source column
             const updatedLayoutWithDelete = layout.map((row) => {
               if (row.rowId === sourceRowId) {
                 return {
@@ -155,7 +198,6 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               return row;
             });
 
-            // Insert widget into target column
             const finalLayout = updatedLayoutWithDelete.map((row) => {
               if (row.rowId === targetRowId) {
                 return {
@@ -183,13 +225,21 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
   };
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-100 dark:bg-slate-950 font-sans overflow-hidden">
+    <div
+      className={cn(
+        "w-full h-full flex flex-col bg-slate-100 dark:bg-slate-950 overflow-hidden select-none",
+        getFontFamilyClass(), // Áp dụng font family động cho toàn hệ thống sandbox
+        themeLayout.isCompact && "cms-density-compact" // Nhúng class cờ hiệu nếu mở Compact Mode
+      )}
+      style={{ fontSize: `${typography.size}px` }} // Áp dụng kích thước phông nền động chuẩn xác
+    >
       {/* 1. TOP UTILITY TOOLBAR PANEL */}
       <header className="min-h-[64px] py-2 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-wrap md:flex-nowrap items-center justify-between px-4 lg:px-6 shrink-0 z-30 shadow-sm gap-4 overflow-x-auto scrollbar-hide">
         {/* Left Side: Brand Logo, Lang selector */}
         <div className="flex items-center gap-3 lg:gap-6 shrink-0">
           <div className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-100 dark:shadow-none shrink-0">
+            {/* Đổi màu background icon dựa trên template màu sắc đang chạy */}
+            <div className={cn("w-8 h-8 lg:w-9 lg:h-9 text-white flex items-center justify-center shadow-lg bg-gradient-to-tr shrink-0 transition-all", getBrandColorClasses(), getRadiusClass())}>
               <Sparkles className="w-4 h-4 lg:w-4.5 lg:h-4.5 animate-pulse" />
             </div>
             <div className="flex flex-col hidden sm:flex shrink-0">
@@ -201,13 +251,14 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
           <div className="h-6 w-px bg-slate-100 dark:bg-slate-850 shrink-0 hidden sm:block" />
 
           {/* Multilingual Selector */}
-          <div className="flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl p-1 shrink-0">
+          <div className={cn("flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 p-1 shrink-0", getRadiusClass())}>
             {languages.map((lang) => (
               <button
                 key={lang.code}
                 onClick={() => setActiveLang(lang.code)}
                 className={cn(
-                  "px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
+                  "px-2 lg:px-3 py-1 lg:py-1.5 text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
+                  getRadiusClass(),
                   activeLang === lang.code
                     ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm font-black border border-slate-100/50 dark:border-slate-850"
                     : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
@@ -220,55 +271,38 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         </div>
 
         {/* Center Side: Viewport Frame Breakpoints */}
-        <div className="flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 rounded-xl p-1 shrink-0">
-          <button
-            onClick={() => setViewport("desktop")}
-            className={cn(
-              "w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center transition-all",
-              viewport === "desktop"
-                ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
-            )}
-            title="Giao diện Máy tính"
-          >
-            <Monitor className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
-          </button>
-          <button
-            onClick={() => setViewport("tablet")}
-            className={cn(
-              "w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center transition-all",
-              viewport === "tablet"
-                ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
-            )}
-            title="Giao diện Máy tính bảng"
-          >
-            <Tablet className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
-          </button>
-          <button
-            onClick={() => setViewport("mobile")}
-            className={cn(
-              "w-8 h-8 lg:w-9 lg:h-9 rounded-lg flex items-center justify-center transition-all",
-              viewport === "mobile"
-                ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
-            )}
-            title="Giao diện Điện thoại"
-          >
-            <Smartphone className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
-          </button>
+        <div className={cn("flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 p-1 shrink-0", getRadiusClass())}>
+          {(["desktop", "tablet", "mobile"] as const).map((v) => {
+            const IconComponent = v === "desktop" ? Monitor : v === "tablet" ? Tablet : Smartphone;
+            const titleText = v === "desktop" ? "Máy tính" : v === "tablet" ? "Máy tính bảng" : "Điện thoại";
+            return (
+              <button
+                key={v}
+                onClick={() => setViewport(v)}
+                className={cn(
+                  "w-8 h-8 lg:w-9 lg:h-9 flex items-center justify-center transition-all",
+                  getRadiusClass(),
+                  viewport === v
+                    ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
+                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
+                )}
+                title={`Giao diện ${titleText}`}
+              >
+                <IconComponent className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
+              </button>
+            );
+          })}
         </div>
 
         {/* Right Side: History (Undo/Redo) & UI Layout toggles */}
         <div className="flex items-center gap-2 lg:gap-4 shrink-0">
-          {/* History control buttons */}
           <div className="flex gap-1">
             <Button
               variant="outline"
               size="icon"
               onClick={undo}
               disabled={history.past.length === 0}
-              className="w-9 h-9 rounded-xl border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 text-slate-500 disabled:opacity-40"
+              className={cn("w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 text-slate-500 disabled:opacity-40", getRadiusClass())}
               title="Hoàn tác (Undo)"
             >
               <Undo className="w-4 h-4" />
@@ -278,7 +312,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               size="icon"
               onClick={redo}
               disabled={history.future.length === 0}
-              className="w-9 h-9 rounded-xl border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 text-slate-500 disabled:opacity-40"
+              className={cn("w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 text-slate-500 disabled:opacity-40", getRadiusClass())}
               title="Làm lại (Redo)"
             >
               <Redo className="w-4 h-4" />
@@ -294,7 +328,8 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               size="icon"
               onClick={() => setShowLeftPanel(!showLeftPanel)}
               className={cn(
-                "w-9 h-9 rounded-xl border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 transition-all",
+                "w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 transition-all",
+                getRadiusClass(),
                 showLeftPanel ? "bg-slate-50 dark:bg-slate-900 border-indigo-200 text-indigo-650" : "text-slate-500"
               )}
               title="Ẩn/Hiện Thư viện trái"
@@ -306,7 +341,8 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
               size="icon"
               onClick={() => setShowRightPanel(!showRightPanel)}
               className={cn(
-                "w-9 h-9 rounded-xl border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 transition-all",
+                "w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 transition-all",
+                getRadiusClass(),
                 showRightPanel ? "bg-slate-50 dark:bg-slate-900 border-indigo-200 text-indigo-650" : "text-slate-500"
               )}
               title="Ẩn/Hiện Bảng thuộc tính phải"
@@ -319,7 +355,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
           {onPreview && (
             <Button
               onClick={onPreview}
-              className="h-10 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-850 flex items-center gap-1.5"
+              className={cn("h-10 px-4 text-xs font-black uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-850 flex items-center gap-1.5", getRadiusClass())}
             >
               <Eye className="w-4 h-4" /> Xem trước
             </Button>
@@ -332,6 +368,7 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
           {showLeftPanel && <LeftSidebar />}
 
+          {/* Khung Canvas nhận diện class bo góc và chiều rộng giới hạn của layout.width */}
           <EditorCanvas />
 
           {showRightPanel && <RightProperties />}
