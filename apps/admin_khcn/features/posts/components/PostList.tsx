@@ -241,7 +241,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
     const pages = [];
     const maxPageButtons = 5;
     let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+    const endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
 
     if (endPage - startPage + 1 < maxPageButtons) {
       startPage = Math.max(1, endPage - maxPageButtons + 1);

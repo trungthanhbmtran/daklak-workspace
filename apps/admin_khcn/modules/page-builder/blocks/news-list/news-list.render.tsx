@@ -50,14 +50,14 @@ export const NewsListRender: React.FC<NewsListRenderProps> = ({ widget, activeLa
       {/* Grid of articles */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {mockArticles.map((art) => (
-          <div 
-            key={art.id} 
+          <div
+            key={art.id}
             className="group rounded-3xl border border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col h-full"
           >
             <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-950">
-              <img 
-                src={art.img} 
-                alt="News" 
+              <img
+                src={art.img}
+                alt="News"
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="absolute top-3 left-3 px-3 py-1 bg-blue-600/90 backdrop-blur-md rounded-xl text-[8px] font-black text-white uppercase tracking-widest">

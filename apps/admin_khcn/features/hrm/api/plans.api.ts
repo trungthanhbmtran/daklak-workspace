@@ -9,12 +9,12 @@ const defaultPerspectives = [
   { id: "LEARNING_GROWTH", title: "Học hỏi & Phát triển", colorClass: "purple" }
 ];
 
-let mockPlans: HrmMasterPlan[] = [
+const mockPlans: HrmMasterPlan[] = [
   { id: 1, title: "Kế hoạch năm 2026", description: "Các nhiệm vụ trọng tâm 2026", startDate: "2026-01-01", endDate: "2026-12-31", status: "ACTIVE", createdAt: "2026-01-01T00:00:00Z", perspectives: [...defaultPerspectives] },
   { id: 2, title: "Kế hoạch Quý III/2026", description: "Đẩy mạnh chuyển đổi số", startDate: "2026-07-01", endDate: "2026-09-30", status: "ACTIVE", createdAt: "2026-06-25T00:00:00Z", perspectives: [...defaultPerspectives] }
 ];
 
-let mockObjectives: HrmPlanObjective[] = [
+const mockObjectives: HrmPlanObjective[] = [
   { id: 1, planId: 1, perspective: "FINANCIAL", title: "Tối ưu ngân sách Q3", metric: "Tỷ lệ tiết kiệm", target: "10%", weight: 30, status: "IN_PROGRESS", departmentIds: [4] },
   { id: 2, planId: 1, perspective: "CUSTOMER", title: "Nâng cao độ hài lòng", metric: "NPS Score", target: "> 85", weight: 20, status: "TODO", departmentIds: [5] },
   { id: 3, planId: 1, perspective: "INTERNAL_PROCESS", title: "Số hóa quy trình duyệt", metric: "Thời gian xử lý", target: "< 24h", weight: 30, status: "DONE", departmentIds: [2, 3] },

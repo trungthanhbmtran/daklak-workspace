@@ -1,7 +1,7 @@
 import apiClient from "@/lib/axiosInstance";
 import { HrmTaskTheme } from "../types";
 
-let mockTaskThemes: HrmTaskTheme[] = [
+const mockTaskThemes: HrmTaskTheme[] = [
   {
     id: 1,
     title: "Tuyển dụng nhân sự mới",
