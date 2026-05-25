@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useTheme } from "next-themes";
 
-// 1. ĐỊNH NGHĨA STRUCT DATA ĐẦY ĐỦ CHO THEME SYSTEM
 export interface TypographySettings {
   heading: string;
   body: string;
@@ -17,14 +16,13 @@ export interface LayoutSettings {
 }
 
 export interface ThemeConfig {
-  theme: string;           // 'light' | 'dark' | 'system'
-  template: string;        // 'blue' | 'emerald' | 'violet' | 'amber' v.v.
-  stage: string;           // custom stage identifier (ví dụ: 'production', 'draft')
+  theme: string;
+  template: string;
+  stage: string;
   typography: TypographySettings;
   layout: LayoutSettings;
-  customCss: string;       // Mã CSS nâng cao do admin viết
+  customCss: string;
 }
-
 
 interface ThemeContextProps extends ThemeConfig {
   setThemeMode: (mode: string) => void;
@@ -32,17 +30,17 @@ interface ThemeContextProps extends ThemeConfig {
   previewDevice: "desktop" | "tablet" | "mobile";
   setPreviewDevice: (device: "desktop" | "tablet" | "mobile") => void;
   setStage: (stage: string) => void;
-  setTypography: React.Dispatch<React.SetStateAction<TypographySettings>>;
-  setLayout: React.Dispatch<React.SetStateAction<LayoutSettings>>;
+  // Thay đổi kiểu định nghĩa setter để các page con cập nhật thuộc tính lẻ cực kỳ dễ dàng
+  setTypography: (settings: Partial<TypographySettings>) => void;
+  setLayout: (settings: Partial<LayoutSettings>) => void;
   setCustomCss: (css: string) => void;
   saveTheme: () => Promise<void>;
   loadSavedTheme: (stage: string) => void;
-  isDirty: boolean;        // Trạng thái kiểm tra xem người dùng có thay đổi gì mà chưa lưu không
+  isDirty: boolean;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
 
-// GIÁ TRỊ KHỞI TẠO MẶC ĐỊNH (DEFAULT SETTINGS)
 const defaultThemeConfig: Omit<ThemeConfig, "stage" | "theme"> = {
   template: "blue",
   typography: { heading: "inter", body: "inter", size: 14 },
@@ -55,55 +53,80 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [stage, setStage] = useState<string>("default");
   const [previewDevice, setPreviewDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
 
-  // State quản lý các cấu hình mở rộng
   const [template, setTemplateState] = useState<string>(defaultThemeConfig.template);
   const [typography, setTypography] = useState<TypographySettings>(defaultThemeConfig.typography);
   const [layout, setLayout] = useState<LayoutSettings>(defaultThemeConfig.layout);
   const [customCss, setCustomCss] = useState<string>(defaultThemeConfig.customCss);
 
-  // Quản lý trạng thái "Chưa lưu dữ liệu" (Dirty State)
   const [isDirty, setIsDirty] = useState<boolean>(false);
 
-  // 2. TỰ ĐỘNG LOAD CONFIG KHI THAY ĐỔI STAGE
+  // 2. TỰ ĐỘNG LOAD CONFIG KHI THAY ĐỔI STAGE (Bảo vệ lỗi SSR bằng typeof window)
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const stored = localStorage.getItem(`themeConfig:${stage}`);
     if (stored) {
       try {
         const cfg: ThemeConfig = JSON.parse(stored);
-        setTheme(cfg.theme);
-        setTemplateState(cfg.template ?? defaultThemeConfig.template);
-        setTypography(cfg.typography ?? defaultThemeConfig.typography);
-        setLayout(cfg.layout ?? defaultThemeConfig.layout);
-        setCustomCss(cfg.customCss ?? defaultThemeConfig.customCss);
-        setIsDirty(false); // Reset trạng thái dirty sau khi load từ gốc thành công
+        if (cfg.theme) setTheme(cfg.theme);
+        if (cfg.template) setTemplateState(cfg.template);
+        if (cfg.typography) setTypography(cfg.typography);
+        if (cfg.layout) setLayout(cfg.layout);
+        if (cfg.customCss) setCustomCss(cfg.customCss);
+        setIsDirty(false);
       } catch (_) { }
+    } else {
+      // Nếu stage chưa có config, trả về mặc định
+      setTemplateState(defaultThemeConfig.template);
+      setTypography(defaultThemeConfig.typography);
+      setLayout(defaultThemeConfig.layout);
+      setCustomCss(defaultThemeConfig.customCss);
+      setIsDirty(false);
     }
   }, [stage, setTheme]);
 
-  // 3. CÁC HÀM SETTER ĐỒNG BỘ TRẠNG THÁI CHƯA LƯU (DIRTY CONTROL)
+  // 3. CÁC HÀM SETTER ĐỒNG BỘ TRẠNG THÁI CHƯA LƯU & TỰ ĐỘNG MERGE STATE
   const setThemeMode = (mode: string) => {
+    if (theme === mode) return;
     const prev = theme;
-    if (prev) localStorage.setItem(`previousTheme:${stage}`, prev);
+    if (prev && typeof window !== "undefined") {
+      localStorage.setItem(`previousTheme:${stage}`, prev);
+    }
     setTheme(mode);
     setIsDirty(true);
   };
 
   const setTemplate = (tpl: string) => {
+    if (template === tpl) return;
     setTemplateState(tpl);
     setIsDirty(true);
   };
 
-  const handleSetTypography: React.Dispatch<React.SetStateAction<TypographySettings>> = (value) => {
-    setTypography(value);
-    setIsDirty(true);
+  // Hàm tối ưu: Cho phép cập nhật lẻ tẻ kiểu setTypography({ size: 16 }) mà không làm mất font heading/body
+  const handleSetTypography = (newSettings: Partial<TypographySettings>) => {
+    setTypography((prev) => {
+      const updated = { ...prev, ...newSettings };
+      // Kiểm tra xem thực sự có thay đổi so với state cũ hay không mới bật flag dirty
+      if (JSON.stringify(prev) !== JSON.stringify(updated)) {
+        setIsDirty(true);
+      }
+      return updated;
+    });
   };
 
-  const handleSetLayout: React.Dispatch<React.SetStateAction<LayoutSettings>> = (value) => {
-    setLayout(value);
-    setIsDirty(true);
+  // Hàm tối ưu: Cho phép cập nhật lẻ tẻ kiểu setLayout({ isCompact: true }) mà không làm vỡ radius/width
+  const handleSetLayout = (newSettings: Partial<LayoutSettings>) => {
+    setLayout((prev) => {
+      const updated = { ...prev, ...newSettings };
+      if (JSON.stringify(prev) !== JSON.stringify(updated)) {
+        setIsDirty(true);
+      }
+      return updated;
+    });
   };
 
   const handleSetCustomCss = (css: string) => {
+    if (customCss === css) return;
     setCustomCss(css);
     setIsDirty(true);
   };
@@ -119,7 +142,9 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       customCss
     };
 
-    localStorage.setItem(`themeConfig:${stage}`, JSON.stringify(cfg));
+    if (typeof window !== "undefined") {
+      localStorage.setItem(`themeConfig:${stage}`, JSON.stringify(cfg));
+    }
 
     try {
       await fetch("/api/theme", {
@@ -127,27 +152,37 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cfg),
       });
-      setIsDirty(false); // Lưu thành công, tắt cảnh báo chưa lưu
+      setIsDirty(false);
     } catch (_) {
-      // Fallback thành công trên LocalStorage vẫn giữ flag hoặc thông báo tùy ý
+      // Mạng lỗi nhưng local đã lưu thành công thì vẫn cho là an toàn
       setIsDirty(false);
     }
   };
 
-  // 5. LOAD CẤU HÌNH TỪ STAGE KHÁC (VD: Sao chép từ Live sang Draft)
+  // 5. LOAD CẤU HÌNH TỪ STAGE KHÁC
   const loadSavedTheme = (targetStage: string) => {
+    if (typeof window === "undefined") return;
+
     const stored = localStorage.getItem(`themeConfig:${targetStage}`);
+    setStage(targetStage); // Chuyển môi trường làm việc kể cả khi chưa có dữ liệu cấu hình cũ
+
     if (stored) {
       try {
         const cfg: ThemeConfig = JSON.parse(stored);
-        setStage(targetStage);
-        setTheme(cfg.theme);
-        setTemplateState(cfg.template);
-        setTypography(cfg.typography);
-        setLayout(cfg.layout);
-        setCustomCss(cfg.customCss);
+        if (cfg.theme) setTheme(cfg.theme);
+        setTemplateState(cfg.template ?? defaultThemeConfig.template);
+        setTypography(cfg.typography ?? defaultThemeConfig.typography);
+        setLayout(cfg.layout ?? defaultThemeConfig.layout);
+        setCustomCss(cfg.customCss ?? defaultThemeConfig.customCss);
         setIsDirty(false);
       } catch (_) { }
+    } else {
+      // Môi trường mới tinh, nạp cấu hình trắng
+      setTemplateState(defaultThemeConfig.template);
+      setTypography(defaultThemeConfig.typography);
+      setLayout(defaultThemeConfig.layout);
+      setCustomCss(defaultThemeConfig.customCss);
+      setIsDirty(false);
     }
   };
 
@@ -173,9 +208,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         loadSavedTheme,
       }}
     >
-      {/* Inject Custom CSS trực tiếp vào DOM để Preview áp dụng được ngay lập tức */}
       <style id="cms-custom-theme-styles">{customCss}</style>
-
       {children}
     </ThemeContext.Provider>
   );
