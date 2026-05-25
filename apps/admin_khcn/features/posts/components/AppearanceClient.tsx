@@ -68,7 +68,7 @@ export function AppearanceClient() {
                     {activeTab === "library" ? (
                         /* KHO GIAO DIỆN (Dạng Lưới - Toàn màn hình) */
                         <div className="animate-in fade-in duration-300">
-                            <ThemeMarketplace />
+                            <ThemeMarketplace onCustomizeClick={() => setActiveTab("customize")} />
                         </div>
                     ) : (
                         /* BỘ TÙY BIẾN & THIẾT LẬP NÂNG CAO (Bố cục 2 cột Split-Screen chuẩn Studio) */
