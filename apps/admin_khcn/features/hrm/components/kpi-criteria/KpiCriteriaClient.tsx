@@ -12,7 +12,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-import { KPI } from './types';
+export interface KPI {
+  id: string;
+  name: string;
+  weight: number; // Phần trăm trọng số (ví dụ: 30)
+  target: number; // Chỉ tiêu đặt ra
+  actual: number; // Thực tế đạt được
+  unit: string;   // Đơn vị tính (VND, %, Đại lý,...)
+  category: 'Financial' | 'Customer' | 'Internal' | 'Growth'; // 4 khía cạnh BSC
+  dueDate: string;
+}
+
+export interface KPIStats {
+  totalKPIs: number;
+  averageCompletion: number;
+  atRiskCount: number;
+  excellentCount: number;
+}
 
 const initialKPIs: KPI[] = [
   { id: '1', name: 'Doanh thu phát triển phần mềm', weight: 40, target: 1000, actual: 850, unit: 'Triệu VND', category: 'Financial', dueDate: '2026-06-30' },
