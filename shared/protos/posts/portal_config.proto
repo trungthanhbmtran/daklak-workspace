@@ -9,6 +9,7 @@ service PortalConfigService {
   rpc GetByCode(GetByCodeRequest) returns (PortalConfigResponse) {}
   rpc GetAll(GetAllRequest) returns (GetAllResponse) {}
   rpc Update(UpdateRequest) returns (PortalConfigResponse) {}
+  rpc UpsertByCode(UpsertByCodeRequest) returns (PortalConfigResponse) {}
 }
 
 // ====================== Object ======================
@@ -45,8 +46,15 @@ message UpdateRequest {
   string description = 4;
 }
 
+message UpsertByCodeRequest {
+  string code = 1;
+  string name = 2;
+  string description = 3;
+}
+
 message PortalConfigResponse {
   PortalConfig data = 1;
   bool success = 2;
   string message = 3;
 }
+
