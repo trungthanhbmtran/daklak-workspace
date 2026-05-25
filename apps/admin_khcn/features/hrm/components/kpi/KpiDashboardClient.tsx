@@ -1,309 +1,330 @@
 "use client";
 import React, { useState, useMemo } from 'react';
-import { Plus, Target, TrendingUp, AlertTriangle, CheckCircle2, Trash2, Edit3 } from 'lucide-react';
+import {
+  Target, TrendingUp, AlertTriangle, CheckCircle2,
+  Calendar, Download, Filter, Search, Building2
+} from 'lucide-react';
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
+} from 'recharts';
 
-// Giả định các thành phần Shadcn/ui đã được export từ thư mục ui
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export interface KPI {
-  id: string;
-  name: string;
-  weight: number; // Phần trăm trọng số (ví dụ: 30)
-  target: number; // Chỉ tiêu đặt ra
-  actual: number; // Thực tế đạt được
-  unit: string;   // Đơn vị tính (VND, %, Đại lý,...)
-  category: 'Financial' | 'Customer' | 'Internal' | 'Growth'; // 4 khía cạnh BSC
-  dueDate: string;
-}
-
-export interface KPIStats {
-  totalKPIs: number;
-  averageCompletion: number;
-  atRiskCount: number;
-  excellentCount: number;
-}
-
-const initialKPIs: KPI[] = [
-  { id: '1', name: 'Doanh thu phát triển phần mềm', weight: 40, target: 1000, actual: 850, unit: 'Triệu VND', category: 'Financial', dueDate: '2026-06-30' },
-  { id: '2', name: 'Tỷ lệ uptime hệ thống Microservices', weight: 30, target: 99.9, actual: 99.5, unit: '%', category: 'Internal', dueDate: '2026-12-31' },
-  { id: '3', name: 'Số lượng đại lý/đối tác tích hợp LGSP mới', weight: 20, target: 10, actual: 12, unit: 'Đơn vị', category: 'Customer', dueDate: '2026-09-30' },
-  { id: '4', name: 'Đào tạo chứng chỉ Kubernetes (CKA) cho team', weight: 10, target: 5, actual: 2, unit: 'Nhân sự', category: 'Growth', dueDate: '2026-11-15' },
+// --- MOCK DATA ---
+const trendData = [
+  { month: 'T1', performance: 85, target: 100 },
+  { month: 'T2', performance: 88, target: 100 },
+  { month: 'T3', performance: 92, target: 100 },
+  { month: 'T4', performance: 87, target: 100 },
+  { month: 'T5', performance: 95, target: 100 },
+  { month: 'T6', performance: 102, target: 100 },
 ];
 
-export default function KpiDashboardClient() {
-  const [kpis, setKPIs] = useState<KPI[]>(initialKPIs);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingKpi, setEditingKpi] = useState<KPI | null>(null);
+const deptData = [
+  { name: 'Trung tâm IOC', score: 105, completed: 24, total: 25 },
+  { name: 'Phòng Quản lý CN', score: 92, completed: 15, total: 18 },
+  { name: 'Văn phòng Sở', score: 88, completed: 18, total: 22 },
+  { name: 'Thanh tra Sở', score: 95, completed: 10, total: 10 },
+];
 
-  // Trạng thái Form
-  const [formData, setFormData] = useState<Omit<KPI, 'id'>>({
-    name: '', weight: 0, target: 0, actual: 0, unit: '', category: 'Financial', dueDate: ''
-  });
+const COLORS = ['#16a34a', '#eab308', '#ef4444', '#8b5cf6'];
 
-  // Tự động tính toán các chỉ số tổng quan thông qua useMemo
-  const stats = useMemo(() => {
-    if (kpis.length === 0) return { totalKPIs: 0, averageCompletion: 0, atRiskCount: 0, excellentCount: 0 };
+const kpiDetails = [
+  { id: '1', dept: 'Trung tâm IOC', name: 'Tỷ lệ uptime hạ tầng trục liên thông LGSP', weight: 30, target: 99.9, actual: 99.95, unit: '%', status: 'Xuất sắc' },
+  { id: '2', dept: 'Văn phòng Sở', name: 'Tỷ lệ xử lý văn bản iDesk đúng hạn', weight: 40, target: 100, actual: 95, unit: '%', status: 'Khá' },
+  { id: '3', dept: 'Phòng Quản lý CN', name: 'Số lượng đề tài NCKH được nghiệm thu', weight: 25, target: 5, actual: 3, unit: 'Đề tài', status: 'Cần cố gắng' },
+  { id: '4', dept: 'Trung tâm IOC', name: 'Số lượng API Gateway được tích hợp mới', weight: 20, target: 15, actual: 18, unit: 'API', status: 'Xuất sắc' },
+];
 
-    let totalWeightedCompletion = 0;
-    let totalWeight = 0;
-    let atRisk = 0;
-    let excellent = 0;
+export default function ExecutiveKPIDashboard() {
+  const [selectedPeriod, setSelectedPeriod] = useState('Q2-2026');
+  const [searchQuery, setSearchQuery] = useState('');
 
-    kpis.forEach(kpi => {
-      const completion = Math.min((kpi.actual / kpi.target) * 100, 150); // Giới hạn max 150% để tránh lệch phổ điểm
-      totalWeightedCompletion += completion * (kpi.weight / 100);
-      totalWeight += kpi.weight;
+  // Tính toán dữ liệu cho biểu đồ tròn (Phân bổ trạng thái)
+  const statusDistribution = useMemo(() => {
+    const dist = { 'Xuất sắc': 0, 'Tốt': 0, 'Khá': 0, 'Cần cố gắng': 0 };
+    kpiDetails.forEach(k => { dist[k.status as keyof typeof dist]++; });
+    return Object.entries(dist).map(([name, value]) => ({ name, value }));
+  }, []);
 
-      if (completion < 80) atRisk++;
-      if (completion >= 110) excellent++;
-    });
-
-    return {
-      totalKPIs: kpis.length,
-      // Tính toán trên tổng trọng số thực tế để tránh lỗi khi tổng weight chưa đủ 100%
-      averageCompletion: totalWeight > 0 ? (totalWeightedCompletion / (totalWeight / 100)) : 0,
-      atRiskCount: atRisk,
-      excellentCount: excellent,
-    };
-  }, [kpis]);
-
-  const totalWeightCheck = useMemo(() => kpis.reduce((acc, k) => acc + k.weight, 0), [kpis]);
-
-  // Xử lý Thêm / Sửa
-  const handleSaveKPI = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (editingKpi) {
-      setKPIs(kpis.map(k => k.id === editingKpi.id ? { ...formData, id: editingKpi.id } : k));
-    } else {
-      setKPIs([...kpis, { ...formData, id: crypto.randomUUID() }]);
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Xuất sắc': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'Tốt': return 'bg-green-100 text-green-700 border-green-200';
+      case 'Khá': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'Cần cố gắng': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
-    handleCloseDialog();
-  };
-
-  const handleOpenEdit = (kpi: KPI) => {
-    setEditingKpi(kpi);
-    setFormData({ ...kpi });
-    setIsDialogOpen(true);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa chỉ số KPI này?')) {
-      setKPIs(kpis.filter(k => k.id !== id));
-    }
-  };
-
-  const handleCloseDialog = () => {
-    setIsDialogOpen(false);
-    setEditingKpi(null);
-    setFormData({ name: '', weight: 0, target: 0, actual: 0, unit: '', category: 'Financial', dueDate: '' });
-  };
-
-  const getStatusBadge = (completion: number) => {
-    if (completion < 80) return <Badge variant="destructive">Cần cố gắng</Badge>;
-    if (completion < 100) return <Badge className="bg-yellow-500 text-white hover:bg-yellow-600">Khá</Badge>;
-    if (completion < 110) return <Badge className="bg-green-600 text-white hover:bg-green-700">Tốt</Badge>;
-    return <Badge className="bg-purple-600 text-white hover:bg-purple-700">Xuất sắc</Badge>;
   };
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Hệ thống Quản lý KPI</h1>
-          <p className="text-muted-foreground">Theo dõi, phân bổ và đánh giá mục tiêu hiệu suất thời gian thực.</p>
-        </div>
+    <div className="min-h-screen bg-slate-50/50 p-6">
+      <div className="max-w-[1400px] mx-auto space-y-6">
 
-        <Dialog open={isDialogOpen} onOpenChange={(open) => !open && handleCloseDialog()}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setIsDialogOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" /> Thêm KPI Mục tiêu
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border shadow-sm">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Sở Khoa học và Công nghệ tỉnh Đắk Lắk</h1>
+            <p className="text-sm text-slate-500">Bảng điều khiển Giám sát Hiệu suất Tổng thể (Executive Dashboard)</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-[160px] bg-white">
+                <Calendar className="mr-2 h-4 w-4 text-slate-500" />
+                <SelectValue placeholder="Chọn kỳ đánh giá" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Q1-2026">Quý 1 / 2026</SelectItem>
+                <SelectItem value="Q2-2026">Quý 2 / 2026</SelectItem>
+                <SelectItem value="2026">Toàn năm 2026</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" /> Báo cáo
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>{editingKpi ? 'Cập nhật chỉ số KPI' : 'Thiết lập KPI mới'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSaveKPI} className="space-y-4 pt-2">
-              <div className="space-y-1">
-                <Label htmlFor="name">Tên chỉ số (SMART)</Label>
-                <Input id="name" required value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="category">Khía cạnh (BSC)</Label>
-                  <Select value={formData.category} onValueChange={(val: any) => setFormData({ ...formData, category: val })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Financial">Tài chính (Financial)</SelectItem>
-                      <SelectItem value="Customer">Khách hàng (Customer)</SelectItem>
-                      <SelectItem value="Internal">Quy trình nội bộ (Internal)</SelectItem>
-                      <SelectItem value="Growth">Học hỏi & Phát triển (Growth)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="weight">Trọng số (%)</Label>
-                  <Input id="weight" type="number" min="1" max="100" required value={formData.weight || ''} onChange={e => setFormData({ ...formData, weight: Number(e.target.value) })} />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-1">
-                  <Label htmlFor="target">Chỉ tiêu (Target)</Label>
-                  <Input id="target" type="number" step="any" required value={formData.target || ''} onChange={e => setFormData({ ...formData, target: Number(e.target.value) })} />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="actual">Thực tế (Actual)</Label>
-                  <Input id="actual" type="number" step="any" required value={formData.actual ?? ''} onChange={e => setFormData({ ...formData, actual: Number(e.target.value) })} />
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="unit">Đơn vị tính</Label>
-                  <Input id="unit" placeholder="%, VND..." required value={formData.unit} onChange={e => setFormData({ ...formData, unit: e.target.value })} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="dueDate">Hạn hoàn thành</Label>
-                <Input id="dueDate" type="date" required value={formData.dueDate} onChange={e => setFormData({ ...formData, dueDate: e.target.value })} />
-              </div>
-              <DialogFooter className="pt-4">
-                <Button type="button" variant="outline" onClick={handleCloseDialog}>Hủy</Button>
-                <Button type="submit">Lưu cấu hình</Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Cảnh báo phân bổ trọng số nếu chưa tối ưu */}
-      {totalWeightCheck !== 100 && (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg flex items-center gap-3 text-sm">
-          <AlertTriangle className="h-5 w-5 text-yellow-600 shrink-0" />
-          <span><strong>Lưu ý cấu hình:</strong> Tổng trọng số hiện tại của hệ thống đang là <strong>{totalWeightCheck}%</strong>. Hãy điều chỉnh tổng trọng số của các mục tiêu về đúng <strong>100%</strong> để đảm bảo điểm số quy đổi cuối cùng chính xác nhất.</span>
+          </div>
         </div>
-      )}
 
-      {/* 4 Thẻ chỉ số tổng quan */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mục tiêu đang quản lý</CardTitle>
-            <Target className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalKPIs}</div>
-            <p className="text-xs text-muted-foreground">Chỉ số KPI được phân rã</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hiệu suất tổng thể (Weighted)</CardTitle>
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <div className="text-2xl font-bold">{stats.averageCompletion.toFixed(1)}%</div>
-            <Progress value={Math.min(stats.averageCompletion, 100)} className="h-2" />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Mục tiêu Xuất sắc</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.excellentCount}</div>
-            <p className="text-xs text-muted-foreground">Đạt tiến độ từ 110% trở lên</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Chỉ số cần lưu ý</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-destructive" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">{stats.atRiskCount}</div>
-            <p className="text-xs text-muted-foreground">Hiệu suất đang dưới mức 80%</p>
-          </CardContent>
-        </Card>
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-white border shadow-sm p-1">
+            <TabsTrigger value="overview" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Tổng quan Cơ quan
+            </TabsTrigger>
+            <TabsTrigger value="departments" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Chi tiết Đơn vị trực thuộc
+            </TabsTrigger>
+          </TabsList>
+
+          {/* TAB 1: EXECUTIVE OVERVIEW */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Top Metric Cards */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-500">Điểm hiệu suất trung bình</p>
+                      <p className="text-3xl font-bold text-slate-900">96.8%</p>
+                    </div>
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-green-600 font-medium">
+                    <span>+2.4%</span>
+                    <span className="text-slate-400 ml-2 font-normal">so với quý trước</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-500">Tổng Mục tiêu (KPIs)</p>
+                      <p className="text-3xl font-bold text-slate-900">85</p>
+                    </div>
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Target className="h-5 w-5 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-slate-500">
+                    <span>60 Đã hoàn thành / 25 Đang xử lý</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-500">Đơn vị Xuất sắc</p>
+                      <p className="text-3xl font-bold text-purple-700">Trung tâm IOC</p>
+                    </div>
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Building2 className="h-5 w-5 text-purple-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-purple-600 font-medium">
+                    <span>105%</span>
+                    <span className="text-slate-400 ml-2 font-normal">tỷ lệ hoàn thành</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm border-red-100 bg-red-50/30">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-red-600">Chỉ số rủi ro cao</p>
+                      <p className="text-3xl font-bold text-red-700">03</p>
+                    </div>
+                    <div className="p-2 bg-red-100 rounded-lg">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-red-600">
+                    <span>Cần ban giám đốc can thiệp</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid gap-6 lg:grid-cols-7">
+              {/* Trend Chart */}
+              <Card className="lg:col-span-4 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Biểu đồ xu hướng hiệu suất (2026)</CardTitle>
+                  <CardDescription>Theo dõi biến động điểm KPI trung bình toàn cơ quan qua các tháng.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={trendData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} domain={[0, 120]} />
+                        <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <Legend />
+                        <Line type="monotone" name="Hiệu suất thực tế (%)" dataKey="performance" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                        <Line type="monotone" name="Mục tiêu chuẩn (100%)" dataKey="target" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Distribution & Dept Ranking */}
+              <div className="lg:col-span-3 space-y-6">
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Phân bổ chất lượng Mục tiêu</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center">
+                    <div className="h-[180px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={statusDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                            {statusDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-2 text-sm w-1/2">
+                      {statusDistribution.map((stat, i) => (
+                        <div key={stat.name} className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i] }}></span>
+                            {stat.name}
+                          </span>
+                          <span className="font-medium">{stat.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Top Đơn vị Dẫn đầu</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {deptData.map((dept) => (
+                      <div key={dept.name} className="space-y-1.5">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium text-slate-700">{dept.name}</span>
+                          <span className="font-bold text-slate-900">{dept.score}%</span>
+                        </div>
+                        <Progress value={Math.min(dept.score, 100)} className="h-2" />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB 2: DETAILED DATA TABLE */}
+          <TabsContent value="departments">
+            <Card className="shadow-sm">
+              <CardHeader className="border-b bg-slate-50/50 rounded-t-xl pb-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                  <div>
+                    <CardTitle>Bảng chi tiết chỉ tiêu theo Đơn vị</CardTitle>
+                    <CardDescription>Tìm kiếm, lọc và xuất dữ liệu báo cáo chi tiết từng mục tiêu.</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                      <Input
+                        placeholder="Tìm tên chỉ số..."
+                        className="pl-8 w-[250px] bg-white"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                      <TableHead className="font-semibold text-slate-900">Đơn vị / Phòng ban</TableHead>
+                      <TableHead className="font-semibold text-slate-900 w-[35%]">Tên chỉ số KPI</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-center">Trọng số</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-right">Chỉ tiêu / Thực tế</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-center">Tiến độ</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-center">Xếp loại</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {kpiDetails
+                      .filter(kpi => kpi.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((kpi) => {
+                        const completion = (kpi.actual / kpi.target) * 100;
+                        return (
+                          <TableRow key={kpi.id} className="hover:bg-slate-50/80 transition-colors">
+                            <TableCell className="font-medium text-slate-600">{kpi.dept}</TableCell>
+                            <TableCell className="font-medium text-slate-900">{kpi.name}</TableCell>
+                            <TableCell className="text-center font-medium">{kpi.weight}%</TableCell>
+                            <TableCell className="text-right font-mono text-sm">
+                              <span className="text-slate-500">{kpi.target}</span>
+                              <span className="mx-1">/</span>
+                              <span className="font-bold text-primary">{kpi.actual}</span>
+                              <span className="text-xs text-slate-400 ml-1">{kpi.unit}</span>
+                            </TableCell>
+                            <TableCell className="text-center font-mono font-medium">
+                              {completion.toFixed(1)}%
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className={`${getStatusColor(kpi.status)} font-medium border`}>
+                                {kpi.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-
-      {/* Bảng chi tiết KPI */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Chi tiết phân bổ và tiến độ mục tiêu</CardTitle>
-          <CardDescription>Bảng thống kê hiệu suất thực tế so với mục tiêu cam kết theo mô hình Balanced Scorecard.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[30%]">Tên chỉ số KPI</TableHead>
-                <TableHead>Khía cạnh</TableHead>
-                <TableHead className="text-center">Trọng số</TableHead>
-                <TableHead className="text-right">Mục tiêu / Thực tế</TableHead>
-                <TableHead className="w-[20%]">Tiến độ hoàn thành</TableHead>
-                <TableHead className="text-center">Xếp loại</TableHead>
-                <TableHead className="w-[80px] text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {kpis.map((kpi) => {
-                const completionRate = kpi.target > 0 ? (kpi.actual / kpi.target) * 100 : 0;
-                return (
-                  <TableRow key={kpi.id}>
-                    <TableCell className="font-medium">
-                      <div>{kpi.name}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5">Hạn: {kpi.dueDate}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="capitalize">{kpi.category}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center font-semibold">{kpi.weight}%</TableCell>
-                    <TableCell className="text-right font-mono text-sm">
-                      <span className="text-muted-foreground">{kpi.target}</span>
-                      <span className="mx-1">/</span>
-                      <span className="font-bold text-primary">{kpi.actual}</span>
-                      <span className="text-xs text-muted-foreground ml-1">{kpi.unit}</span>
-                    </TableCell>
-                    <TableCell className="space-y-1.5">
-                      <div className="flex justify-between text-xs font-mono">
-                        <span>{completionRate.toFixed(1)}%</span>
-                      </div>
-                      <Progress value={Math.min(completionRate, 100)} className="h-2" />
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {getStatusBadge(completionRate)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => handleOpenEdit(kpi)}>
-                          <Edit3 className="h-4 w-4 text-muted-foreground hover:text-primary" />
-                        </Button>
-                        <Button variant="ghost" size="icon" onClick={() => handleDelete(kpi.id)}>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-              {kpis.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                    Chưa có mục tiêu KPI nào được thiết lập. Ấn "Thêm KPI Mục tiêu" để bắt đầu.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
     </div>
   );
 }
