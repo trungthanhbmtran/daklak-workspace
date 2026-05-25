@@ -37,7 +37,7 @@ const initialKPIs: KPI[] = [
   { id: '4', name: 'Đào tạo chứng chỉ Kubernetes (CKA) cho team', weight: 10, target: 5, actual: 2, unit: 'Nhân sự', category: 'Growth', dueDate: '2026-11-15' },
 ];
 
-export default function KPIDashboard() {
+export default function KpiDashboardClient() {
   const [kpis, setKPIs] = useState<KPI[]>(initialKPIs);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingKpi, setEditingKpi] = useState<KPI | null>(null);

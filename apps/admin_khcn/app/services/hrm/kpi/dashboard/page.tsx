@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import { KpiDashboardClient } from '@/features/hrm/components/kpi/KpiDashboardClient';
+import KpiDashboardClient from '@/features/hrm/components/kpi/KpiDashboardClient';
 
 export const metadata: Metadata = {
   title: 'Giám sát KPI Tổng thể | Command Center',
