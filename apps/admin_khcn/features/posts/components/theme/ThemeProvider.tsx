@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useTheme } from "next-themes";
+import axios from "axios";
+import apiClient from "@/lib/axiosInstance";
 
 export interface TypographySettings {
   heading: string;
@@ -48,6 +50,78 @@ const defaultThemeConfig: Omit<ThemeConfig, "stage" | "theme"> = {
   customCss: "/* Thêm CSS tùy biến tại đây */"
 };
 
+// ====================================================================
+// MAPPING ThemeConfig (admin) ↔ ThemeAppearanceConfig (portal DB)
+// ====================================================================
+
+const TEMPLATE_COLORS: Record<string, { primary: string; primaryHover: string; secondary: string; background: string }> = {
+  blue: { primary: "#1d4ed8", primaryHover: "#1e40af", secondary: "#eff6ff", background: "#f8fafc" },
+  emerald: { primary: "#059669", primaryHover: "#047857", secondary: "#ecfdf5", background: "#f8fafb" },
+  violet: { primary: "#7c3aed", primaryHover: "#6d28d9", secondary: "#f5f3ff", background: "#faf9ff" },
+  amber: { primary: "#d97706", primaryHover: "#b45309", secondary: "#fffbeb", background: "#fffdf5" },
+};
+
+const FONT_MAP: Record<string, string> = {
+  inter: "'Inter', 'Segoe UI', sans-serif",
+  playfair: "'Playfair Display', 'Georgia', serif",
+  merriweather: "'Merriweather', 'Times New Roman', serif",
+  Geist: "'Geist Mono', monospace",
+};
+
+const RADIUS_MAP: Record<string, string> = {
+  Sharp: "0px",
+  Subtle: "4px",
+  Medium: "8px",
+  Full: "24px",
+};
+
+/** Admin ThemeConfig → portal ThemeAppearanceConfig (stored as JSON in description field) */
+function mapConfigToAppearance(cfg: ThemeConfig) {
+  const colors = TEMPLATE_COLORS[cfg.template] || TEMPLATE_COLORS["blue"];
+  const fontFamily = FONT_MAP[cfg.typography?.heading] || FONT_MAP[cfg.typography?.body] || "'Inter', sans-serif";
+  const borderRadius = RADIUS_MAP[cfg.layout?.radius] || "8px";
+
+  return {
+    theme: "government",
+    colorMode: cfg.theme || "light",
+    template: cfg.template,
+    colors,
+    typography: { fontFamily, fontSize: cfg.typography?.size || 14 },
+    layout: {
+      headerStyle: "standard",
+      footerStyle: "standard",
+      homepageLayout: "grid",
+      width: cfg.layout?.width || "1280",
+      isCompact: cfg.layout?.isCompact || false,
+    },
+    branding: { logo: "", favicon: "", borderRadius },
+    customCss: cfg.customCss || "",
+    stage: cfg.stage || "default",
+    savedAt: new Date().toISOString(),
+  };
+}
+
+/** Portal ThemeAppearanceConfig (từ DB description) → Admin ThemeConfig */
+function mapAppearanceToConfig(data: any): Partial<ThemeConfig> {
+  const result: Partial<ThemeConfig> = {};
+  if (data.colorMode) result.theme = data.colorMode;
+  if (data.template) result.template = data.template;
+  if (data.typography?.fontSize) {
+    result.typography = { ...(defaultThemeConfig.typography), size: data.typography.fontSize };
+  }
+  if (data.layout) {
+    result.layout = {
+      ...(defaultThemeConfig.layout),
+      ...(data.layout.isCompact !== undefined ? { isCompact: data.layout.isCompact } : {}),
+      ...(data.layout.width ? { width: data.layout.width } : {}),
+    };
+  }
+  if (data.customCss) result.customCss = data.customCss;
+  return result;
+}
+
+// ====================================================================
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const { theme, setTheme } = useTheme();
   const [stage, setStage] = useState<string>("default");
@@ -60,7 +134,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
 
   const [isDirty, setIsDirty] = useState<boolean>(false);
 
-  // 2. LOAD CONFIG KHI THAY ĐỔI STAGE + LOAD TỪ DB KHI KHỞI ĐỘNG
+  // 2. LOAD CONFIG KHI THAY ĐỔI STAGE
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -84,41 +158,35 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [stage, setTheme]);
 
-  // Load saved theme from DB on first mount (stage = default)
+  // 2b. LOAD TỪ DB KHI KHỞI ĐỘNG (nếu chưa có local cache) — qua API gateway
   useEffect(() => {
     if (typeof window === "undefined") return;
     const localKey = `themeConfig:${stage}`;
-    // Only fetch from DB if no local cache yet
     if (localStorage.getItem(localKey)) return;
 
-    fetch("/api/theme")
-      .then((r) => r.json())
-      .then((res) => {
-        if (!res?.success || !res?.data) return;
-        const d = res.data;
-        // Map portal appearance config back to admin ThemeConfig
-        // colorMode / theme
-        if (d.colorMode) setTheme(d.colorMode);
-        // template (brand color id)
-        if (d.template) setTemplateState(d.template);
-        // typography
-        if (d.typography?.fontSize) {
-          setTypography((prev) => ({ ...prev, size: d.typography.fontSize }));
-        }
-        // layout
-        if (d.layout?.isCompact !== undefined) {
-          setLayout((prev) => ({ ...prev, isCompact: d.layout.isCompact }));
-        }
-        if (d.layout?.width) {
-          setLayout((prev) => ({ ...prev, width: d.layout.width }));
-        }
-        if (d.customCss) setCustomCss(d.customCss);
-        setIsDirty(false);
+    // Gọi public endpoint qua axios trực tiếp (base path khác với admin apiClient)
+    axios
+      .get("/api/v1/public/portal-configs", { withCredentials: true })
+      .then((res: any) => {
+        const body = res?.data; // axios response.data
+        const configs = Array.isArray(body?.data) ? body.data : [];
+        const found = configs.find((c: any) => c.code === "theme_appearance");
+        if (!found?.description) return;
+
+        try {
+          const parsed = JSON.parse(found.description);
+          const mapped = mapAppearanceToConfig(parsed);
+          if (mapped.theme) setTheme(mapped.theme);
+          if (mapped.template) setTemplateState(mapped.template);
+          if (mapped.typography) setTypography(mapped.typography);
+          if (mapped.layout) setLayout(mapped.layout);
+          if (mapped.customCss) setCustomCss(mapped.customCss);
+          setIsDirty(false);
+        } catch (_) { }
       })
-      .catch(() => { /* network error, use defaults */ });
+      .catch(() => { /* network error, dùng default */ });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
 
   // 3. CÁC HÀM SETTER ĐỒNG BỘ TRẠNG THÁI CHƯA LƯU & TỰ ĐỘNG MERGE STATE
   const setThemeMode = (mode: string) => {
@@ -166,7 +234,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     setIsDirty(true);
   };
 
-  // 4. LƯU TOÀN BỘ CẤU HÌNH XUỐNG LOCALSTORAGE & API DATABASE
+  // 4. LƯU TOÀN BỘ CẤU HÌNH XUỐNG LOCALSTORAGE & API DATABASE (qua apiClient)
   const saveTheme = async () => {
     const cfg: ThemeConfig = {
       theme: theme ?? "system",
@@ -177,30 +245,26 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       customCss
     };
 
-    // Luôn lưu vào localStorage trước
+    // Lưu vào localStorage
     if (typeof window !== "undefined") {
       localStorage.setItem(`themeConfig:${stage}`, JSON.stringify(cfg));
     }
 
-    // Luôn lưu lên DB qua API route
+    // Lưu lên DB qua apiClient → gateway → posts-service
     try {
-      const res = await fetch("/api/theme", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(cfg),
+      const appearanceConfig = mapConfigToAppearance(cfg);
+      await apiClient.post("/portal-configs/upsert", {
+        code: "theme_appearance",
+        name: "Cấu hình giao diện Portal",
+        description: JSON.stringify(appearanceConfig),
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        console.error("[ThemeProvider] saveTheme API error:", err);
-      }
       setIsDirty(false);
     } catch (err) {
-      console.error("[ThemeProvider] saveTheme network error:", err);
+      console.error("[ThemeProvider] saveTheme API error:", err);
       // Mạng lỗi nhưng local đã lưu thành công — không block UX
       setIsDirty(false);
     }
   };
-
 
   // 5. LOAD CẤU HÌNH TỪ STAGE KHÁC
   const loadSavedTheme = (targetStage: string) => {
