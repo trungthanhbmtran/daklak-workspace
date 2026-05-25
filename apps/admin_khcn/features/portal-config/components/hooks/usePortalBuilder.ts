@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { Row } from "@/modules/page-builder/core/types";
@@ -13,8 +13,10 @@ export interface CustomPageMeta {
 }
 
 export function usePortalBuilder(languages: any[]) {
+    const queryClient = useQueryClient();
     const [isSaving, setIsSaving] = useState(false);
-    const [pagesList, setPagesList] = useState<CustomPageMeta[]>([]);
+
+    // Chỉ giữ lại State cho các tương tác UI tức thời
     const [selectedPageId, setSelectedPageId] = useState<string>("");
     const [currentLayout, setCurrentLayout] = useState<Row[]>([]);
     const [showPagesSidebar, setShowPagesSidebar] = useState(true);
@@ -23,7 +25,7 @@ export function usePortalBuilder(languages: any[]) {
         ? languages
         : [{ code: "vi", name: "Tiếng Việt" }, { code: "en", name: "English" }];
 
-    // Fetch dữ liệu cấu hình từ API
+    // 1. LẤY DỮ LIỆU TỪ SERVER (Source of Truth)
     const { data: dbConfigs, isLoading, refetch } = useQuery({
         queryKey: ["portal-configs"],
         queryFn: async () => {
@@ -32,53 +34,64 @@ export function usePortalBuilder(languages: any[]) {
         }
     });
 
-    // Xử lý danh sách trang từ DB
-    useEffect(() => {
-        if (dbConfigs?.length) {
-            const listConfig = dbConfigs.find((c: any) => c.code === "custom_page_list");
-            let parsedPages: CustomPageMeta[] = [];
+    // 2. DERIVED STATE: Tự động tính toán Danh sách trang từ Cache (Không dùng useEffect & useState)
+    const pagesList = useMemo<CustomPageMeta[]>(() => {
+        if (!dbConfigs?.length) return [];
+        const listConfig = dbConfigs.find((c: any) => c.code === "custom_page_list");
 
-            if (listConfig?.description) {
-                try {
-                    parsedPages = JSON.parse(listConfig.description);
-                } catch (e) {
-                    console.error("Failed to parse custom page list", e);
-                }
-            }
-
-            if (parsedPages.length === 0) {
-                parsedPages = [
-                    { id: "about-page", title: { vi: "Trang giới thiệu chung", en: "General Introduction" }, isActive: true },
-                    { id: "contact-page", title: { vi: "Trang liên hệ", en: "Contact Page" }, isActive: true }
-                ];
-            }
-
-            setPagesList(parsedPages);
-            if (!parsedPages.some((p) => p.id === selectedPageId)) {
-                setSelectedPageId(parsedPages[0]?.id || "about-page");
+        if (listConfig?.description) {
+            try {
+                const parsed = JSON.parse(listConfig.description);
+                if (parsed.length > 0) return parsed;
+            } catch (e) {
+                console.error("Failed to parse custom page list", e);
             }
         }
+        // Fallback mặc định
+        return [
+            { id: "about-page", title: { vi: "Trang giới thiệu chung", en: "General Introduction" }, isActive: true },
+            { id: "contact-page", title: { vi: "Trang liên hệ", en: "Contact Page" }, isActive: true }
+        ];
     }, [dbConfigs]);
 
-    // Xử lý nạp Layout tương ứng với trang đang chọn
-    useEffect(() => {
-        if (dbConfigs?.length && selectedPageId) {
-            const layoutCode = selectedPageId === "about-page" ? "custom_about_layout" : `custom_page_layout_${selectedPageId}`;
-            const layoutConfig = dbConfigs.find((c: any) => c.code === layoutCode);
+    // 3. Tự động chọn Page ID hiển thị
+    const activePageId = selectedPageId || (pagesList.length > 0 ? pagesList[0].id : "about-page");
 
-            if (layoutConfig?.description) {
-                try {
-                    setCurrentLayout(JSON.parse(layoutConfig.description));
-                } catch (e) {
-                    setCurrentLayout([]);
-                }
-            } else {
-                setCurrentLayout([]);
-            }
+    // 4. DERIVED STATE: Tính toán Layout đã lưu trên DB cho Page đang mở
+    const savedLayout = useMemo<Row[]>(() => {
+        if (!dbConfigs?.length) return [];
+        const layoutCode = activePageId === "about-page" ? "custom_about_layout" : `custom_page_layout_${activePageId}`;
+        const layoutConfig = dbConfigs.find((c: any) => c.code === layoutCode);
+
+        if (layoutConfig?.description) {
+            try { return JSON.parse(layoutConfig.description); } catch (e) { }
         }
-    }, [dbConfigs, selectedPageId]);
+        return [];
+    }, [dbConfigs, activePageId]);
 
-    // Hàm lưu / xuất bản cấu trúc Layout
+    // 5. ĐỒNG BỘ LOCAL STATE (Duy nhất 1 useEffect để nạp Layout DB vào Canvas Editor)
+    useEffect(() => {
+        setCurrentLayout(savedLayout);
+    }, [savedLayout]);
+
+    // 6. OPTIMISTIC UPDATE: Hàm giả lập setPagesList thao tác thẳng vào Cache của React Query
+    // Đảm bảo UI update tức thì mà không cần re-render do chờ State
+    const setPagesList = (newList: CustomPageMeta[]) => {
+        queryClient.setQueryData(["portal-configs"], (oldData: any[]) => {
+            if (!oldData) return oldData;
+            const existingIdx = oldData.findIndex(c => c.code === "custom_page_list");
+            const newConfig = { code: "custom_page_list", description: JSON.stringify(newList) };
+
+            if (existingIdx >= 0) {
+                const newData = [...oldData];
+                newData[existingIdx] = { ...newData[existingIdx], ...newConfig };
+                return newData;
+            }
+            return [...oldData, newConfig];
+        });
+    };
+
+    // 7. CÁC NGHIỆP VỤ LƯU / XÓA
     const handleSaveLayout = async (targetPageId: string, updatedLayout: Row[], updatedPagesList?: CustomPageMeta[]) => {
         setIsSaving(true);
         try {
@@ -98,6 +111,7 @@ export function usePortalBuilder(languages: any[]) {
                 });
             }
 
+            // Gọi tuần tự API để lưu cấu hình
             for (const item of itemsToSave) {
                 const existing = dbConfigs?.find((c: any) => c.code === item.code);
                 if (existing) {
@@ -110,7 +124,6 @@ export function usePortalBuilder(languages: any[]) {
             toast.success(`Xuất bản thành công "${targetPageMeta?.title?.vi || targetPageId}"!`);
             refetch();
         } catch (error) {
-
             toast.error("Không thể lưu trang. Vui lòng thử lại.");
         } finally {
             setIsSaving(false);
@@ -122,14 +135,15 @@ export function usePortalBuilder(languages: any[]) {
             toast.error("Không thể xóa các trang mặc định của hệ thống.");
             return;
         }
-
         if (!confirm("Bạn có chắc chắn muốn xóa trang này?")) return;
 
         try {
             const updatedList = pagesList.filter((p) => p.id !== pageId);
+
+            // UI cập nhật ngay lập tức nhờ Cache Mutation
             setPagesList(updatedList);
 
-            await apiClient.post("/portal-configs", {
+            await apiClient.post("/admin/portal-configs", {
                 code: "custom_page_list",
                 name: "Danh sách trang thiết kế trực quan",
                 description: JSON.stringify(updatedList)
@@ -141,7 +155,8 @@ export function usePortalBuilder(languages: any[]) {
             }
 
             toast.success("Đã xóa trang tùy chỉnh thành công!");
-            if (selectedPageId === pageId) {
+
+            if (activePageId === pageId) {
                 setSelectedPageId(updatedList[0]?.id || "about-page");
             }
             refetch();
@@ -150,16 +165,17 @@ export function usePortalBuilder(languages: any[]) {
         }
     };
 
+    // Chọn ra metadata của trang hiện tại đang Active để truyền cho UI Header
     const selectedPageMeta = useMemo(() => {
-        return pagesList.find((p) => p.id === selectedPageId) || pagesList[0];
-    }, [pagesList, selectedPageId]);
+        return pagesList.find((p) => p.id === activePageId) || pagesList[0];
+    }, [pagesList, activePageId]);
 
     return {
         isLoading,
         isSaving,
         pagesList,
-        setPagesList,
-        selectedPageId,
+        setPagesList, // Bây giờ nó chỉnh sửa thẳng vào Cache React Query thay vì useState
+        selectedPageId: activePageId,
         setSelectedPageId,
         currentLayout,
         setCurrentLayout,
