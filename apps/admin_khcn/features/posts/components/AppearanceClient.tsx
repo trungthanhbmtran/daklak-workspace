@@ -1,6 +1,7 @@
 "use client";
 
 import { ThemeProvider } from "./theme/ThemeProvider";
+import { ThemeStageSelector } from "./theme/ThemeStageSelector";
 import { ThemeTemplateSelector } from "./theme/ThemeTemplateSelector";
 import { ThemeSelector } from "./theme/ThemeSelector";
 import { ThemePreview } from "./theme/ThemePreview";
@@ -19,6 +20,8 @@ export function AppearanceClient() {
                 </div>
                 {/* Template Selector */}
                 <ThemeTemplateSelector />
+                {/* Stage Selector */}
+                <ThemeStageSelector />
                 {/* Theme selector (light/dark/system) */}
                 <ThemeSelector />
                 {/* Preview */}
