@@ -1,34 +1,18 @@
 "use client";
 
 import React from "react";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import { toast } from "sonner";
-import { useEditorStore } from "../store/editorStore";
-import { BlockRegistry } from "../core/registry";
-import { initializeBlockRegistry } from "../blocks";
-import { useDndSensors } from "../dnd/DndWrapper";
-import { LeftSidebar } from "./components/LeftSidebar";
-import { EditorCanvas } from "./components/EditorCanvas";
-import { RightProperties } from "./components/RightProperties";
-import { Row, PageLanguage } from "../core/types";
 import { cn } from "@/lib/utils";
-import {
-  Monitor,
-  Tablet,
-  Smartphone,
-  Columns,
-  Settings,
-  Sparkles,
-  Eye,
-  Undo,
-  Redo
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Row, PageLanguage } from "../core/types";
+import { initializeBlockRegistry } from "../blocks";
+import { BlockRegistry } from "../core/registry";
 
-// Khởi tạo context theme từ hệ thống quản lý CMS nâng cao của bạn
+// Import hệ thống quản lý Theme toàn cục và sub-modules rã nhỏ
 import { useThemeConfig } from "@/features/posts/components/theme/ThemeProvider";
+import { useVisualEditor } from "../hooks/useVisualEditor";
+import { EditorToolbar } from "./components/EditorToolbar";
+import { EditorSandbox } from "./components/EditorSandbox";
 
-// Auto-initialize block registry if empty
+// Auto-initialize block registry nếu trống
 if (BlockRegistry.getAllBlocks().length === 0) {
   initializeBlockRegistry();
 }
@@ -46,181 +30,43 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
   languages = [],
   onPreview
 }) => {
-  const sensors = useDndSensors();
+  // 1. Gọi hook phân rã logic hoạt động
+  const { sensors, store, handleDragEnd } = useVisualEditor(initialLayout, languages, onChange);
 
-  // 1. Lấy dữ liệu cấu hình UI thời gian thực từ ThemeProvider toàn cục
-  const {
-    template,
-    typography,
-    layout: themeLayout
-  } = useThemeConfig();
+  // 2. Gọi hook đồng bộ Theme trực tiếp
+  const { template, typography, layout: themeLayout } = useThemeConfig();
 
-  const {
-    layout,
-    viewport,
-    activeLang,
-    showLeftPanel,
-    showRightPanel,
-    history,
-    initStore,
-    setLayout,
-    setViewport,
-    setActiveLang,
-    setShowLeftPanel,
-    setShowRightPanel,
-    undo,
-    redo,
-    addWidget
-  } = useEditorStore();
-
-  // Initialize store state
-  const isInitialized = React.useRef(false);
-  React.useEffect(() => {
-    if (!isInitialized.current) {
-      initStore(initialLayout, languages);
-      isInitialized.current = true;
-    }
-  }, [initialLayout, languages, initStore]);
-
-  // Synchronize layout mutations back to database
-  React.useEffect(() => {
-    if (isInitialized.current) {
-      onChange(layout);
-    }
-  }, [layout, onChange]);
-
-  // 2. Định nghĩa màu sắc thương hiệu của top bar đồng bộ với Theme màu sắc đang chọn
+  // Tạo class màu sắc thương hiệu đồng bộ theo Theme cấu hình màu
   const getBrandColorClasses = () => {
     switch (template) {
-      case "emerald":
-        return "from-emerald-600 to-teal-500 shadow-emerald-100 dark:shadow-none";
-      case "violet":
-        return "from-violet-600 to-purple-500 shadow-violet-100 dark:shadow-none";
-      case "amber":
-        return "from-amber-600 to-orange-500 shadow-amber-100 dark:shadow-none";
+      case "emerald": return "from-emerald-600 to-teal-500 shadow-emerald-100 dark:shadow-none";
+      case "violet": return "from-violet-600 to-purple-500 shadow-violet-100 dark:shadow-none";
+      case "amber": return "from-amber-600 to-orange-500 shadow-amber-100 dark:shadow-none";
       case "blue":
       default:
         return "from-indigo-600 to-indigo-500 shadow-indigo-100 dark:shadow-none";
     }
   };
 
-  // 3. Quy đổi độ bo góc (Radius) từ hệ thống cấu hình sang class Tailwind để áp dụng cho các khối chức năng
+  // Tạo class bo góc đồng bộ hệ thống mẫu cấu hình UI
   const getRadiusClass = () => {
     switch (themeLayout.radius) {
       case "Sharp": return "rounded-none";
       case "Subtle": return "rounded-sm";
       case "Full": return "rounded-3xl";
       case "Medium":
-      default:
-        return "rounded-xl";
+      default: return "rounded-xl";
     }
   };
 
-  // 4. Quy đổi Font Family được cấu hình từ admin sang class font hệ thống
+  // Tạo class font-family đồng bộ hệ thống mẫu cấu hình UI
   const getFontFamilyClass = () => {
     switch (typography.heading) {
       case "playfair":
-      case "merriweather":
-        return "font-serif";
-      case "Geist":
-        return "font-mono";
+      case "merriweather": return "font-serif";
+      case "Geist": return "font-mono";
       case "inter":
-      default:
-        return "font-sans";
-    }
-  };
-
-  // Handle Drag & Drop ends
-  const handleDragEnd = (event: DragEndEvent) => {
-    try {
-      const { active, over } = event;
-      if (!over) return;
-
-      const activeData = active.data.current;
-      const overData = over.data.current;
-
-      if (!activeData || !overData) return;
-
-      const targetRowId = overData.rowId;
-      const targetColId = overData.colId;
-
-      if (!targetRowId || !targetColId) {
-        toast.warning("Bạn đã nhấn chồng!");
-        return;
-      }
-
-      const targetRow = layout.find((r) => r.rowId === targetRowId);
-      const targetCol = targetRow?.columns.find((c) => c.id === targetColId);
-      const hasExistingWidget = targetCol && targetCol.widgets.length > 0;
-
-      if (hasExistingWidget) {
-        toast.warning("Bạn đã nhấn chồng!");
-        return;
-      }
-
-      if (activeData.isTemplate) {
-        const blockType = activeData.blockType;
-        const blockConfig = BlockRegistry.getBlock(blockType);
-        if (!blockConfig) return;
-
-        const newWidget = {
-          id: `widget-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          type: blockType,
-          title: { vi: blockConfig.name.vi, en: blockConfig.name.en },
-          data: JSON.parse(JSON.stringify(blockConfig.defaultData)),
-          settings: {},
-        };
-
-        addWidget(targetRowId, targetColId, newWidget);
-        toast.success("Đã thêm widget mới thành công!");
-      }
-      else {
-        const { blockId, rowId: sourceRowId, colId: sourceColId } = activeData;
-
-        if (sourceRowId !== targetRowId || sourceColId !== targetColId) {
-          const sourceRow = layout.find((r) => r.rowId === sourceRowId);
-          const sourceCol = sourceRow?.columns.find((c) => c.id === sourceColId);
-          const widget = sourceCol?.widgets.find((w) => w.id === blockId);
-
-          if (widget) {
-            const updatedLayoutWithDelete = layout.map((row) => {
-              if (row.rowId === sourceRowId) {
-                return {
-                  ...row,
-                  columns: row.columns.map((col) => {
-                    if (col.id === sourceColId) {
-                      return { ...col, widgets: col.widgets.filter((w) => w.id !== blockId) };
-                    }
-                    return col;
-                  }),
-                };
-              }
-              return row;
-            });
-
-            const finalLayout = updatedLayoutWithDelete.map((row) => {
-              if (row.rowId === targetRowId) {
-                return {
-                  ...row,
-                  columns: row.columns.map((col) => {
-                    if (col.id === targetColId) {
-                      return { ...col, widgets: [...col.widgets, widget] };
-                    }
-                    return col;
-                  }),
-                };
-              }
-              return row;
-            });
-
-            setLayout(finalLayout);
-            toast.success("Đã di chuyển vị trí widget thành công!");
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Drag and drop handler error caught safely:", error);
-      toast.warning("Bạn đã nhấn chồng!");
+      default: return "font-sans";
     }
   };
 
@@ -228,152 +74,37 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
     <div
       className={cn(
         "w-full h-full flex flex-col bg-slate-100 dark:bg-slate-950 overflow-hidden select-none",
-        getFontFamilyClass(), // Áp dụng font family động cho toàn hệ thống sandbox
-        themeLayout.isCompact && "cms-density-compact" // Nhúng class cờ hiệu nếu mở Compact Mode
+        getFontFamilyClass(),
+        themeLayout.isCompact && "cms-density-compact"
       )}
-      style={{ fontSize: `${typography.size}px` }} // Áp dụng kích thước phông nền động chuẩn xác
+      style={{ fontSize: `${typography.size}px` }}
     >
-      {/* 1. TOP UTILITY TOOLBAR PANEL */}
-      <header className="min-h-[64px] py-2 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 flex flex-wrap md:flex-nowrap items-center justify-between px-4 lg:px-6 shrink-0 z-30 shadow-sm gap-4 overflow-x-auto scrollbar-hide">
-        {/* Left Side: Brand Logo, Lang selector */}
-        <div className="flex items-center gap-3 lg:gap-6 shrink-0">
-          <div className="flex items-center gap-2 shrink-0">
-            {/* Đổi màu background icon dựa trên template màu sắc đang chạy */}
-            <div className={cn("w-8 h-8 lg:w-9 lg:h-9 text-white flex items-center justify-center shadow-lg bg-gradient-to-tr shrink-0 transition-all", getBrandColorClasses(), getRadiusClass())}>
-              <Sparkles className="w-4 h-4 lg:w-4.5 lg:h-4.5 animate-pulse" />
-            </div>
-            <div className="flex flex-col hidden sm:flex shrink-0">
-              <span className="text-[9px] lg:text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none whitespace-nowrap">Headless Visual CMS</span>
-              <span className="text-[10px] lg:text-xs font-black text-slate-800 dark:text-white uppercase tracking-tight mt-0.5 whitespace-nowrap">Page Builder</span>
-            </div>
-          </div>
+      {/* A. HIỂN THỊ PHÂN HỆ BANEL TOOLBAR ĐIỀU KHIỂN */}
+      <EditorToolbar
+        languages={languages}
+        activeLang={store.activeLang}
+        setActiveLang={store.setActiveLang}
+        viewport={store.viewport}
+        setViewport={store.setViewport}
+        history={store.history}
+        undo={store.undo}
+        redo={store.redo}
+        showLeftPanel={store.showLeftPanel}
+        setShowLeftPanel={store.setShowLeftPanel}
+        showRightPanel={store.showRightPanel}
+        setShowRightPanel={store.setShowRightPanel}
+        brandColorClass={getBrandColorClasses()}
+        radiusClass={getRadiusClass()}
+        onPreview={onPreview}
+      />
 
-          <div className="h-6 w-px bg-slate-100 dark:bg-slate-850 shrink-0 hidden sm:block" />
-
-          {/* Multilingual Selector */}
-          <div className={cn("flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 p-1 shrink-0", getRadiusClass())}>
-            {languages.map((lang) => (
-              <button
-                key={lang.code}
-                onClick={() => setActiveLang(lang.code)}
-                className={cn(
-                  "px-2 lg:px-3 py-1 lg:py-1.5 text-[9px] font-black uppercase tracking-wider transition-all whitespace-nowrap",
-                  getRadiusClass(),
-                  activeLang === lang.code
-                    ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm font-black border border-slate-100/50 dark:border-slate-850"
-                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-                )}
-              >
-                {lang.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Center Side: Viewport Frame Breakpoints */}
-        <div className={cn("flex bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-850 p-1 shrink-0", getRadiusClass())}>
-          {(["desktop", "tablet", "mobile"] as const).map((v) => {
-            const IconComponent = v === "desktop" ? Monitor : v === "tablet" ? Tablet : Smartphone;
-            const titleText = v === "desktop" ? "Máy tính" : v === "tablet" ? "Máy tính bảng" : "Điện thoại";
-            return (
-              <button
-                key={v}
-                onClick={() => setViewport(v)}
-                className={cn(
-                  "w-8 h-8 lg:w-9 lg:h-9 flex items-center justify-center transition-all",
-                  getRadiusClass(),
-                  viewport === v
-                    ? "bg-white dark:bg-slate-950 text-indigo-600 dark:text-white shadow-sm border border-slate-100/50 dark:border-slate-850"
-                    : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-350"
-                )}
-                title={`Giao diện ${titleText}`}
-              >
-                <IconComponent className="w-4 h-4 lg:w-4.5 lg:h-4.5" />
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Right Side: History (Undo/Redo) & UI Layout toggles */}
-        <div className="flex items-center gap-2 lg:gap-4 shrink-0">
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={undo}
-              disabled={history.past.length === 0}
-              className={cn("w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 text-slate-500 disabled:opacity-40", getRadiusClass())}
-              title="Hoàn tác (Undo)"
-            >
-              <Undo className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={redo}
-              disabled={history.future.length === 0}
-              className={cn("w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 text-slate-500 disabled:opacity-40", getRadiusClass())}
-              title="Làm lại (Redo)"
-            >
-              <Redo className="w-4 h-4" />
-            </Button>
-          </div>
-
-          <div className="h-6 w-px bg-slate-100 dark:bg-slate-850 shrink-0" />
-
-          {/* Toggle Panels visibility */}
-          <div className="flex gap-1">
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowLeftPanel(!showLeftPanel)}
-              className={cn(
-                "w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 transition-all",
-                getRadiusClass(),
-                showLeftPanel ? "bg-slate-50 dark:bg-slate-900 border-indigo-200 text-indigo-650" : "text-slate-500"
-              )}
-              title="Ẩn/Hiện Thư viện trái"
-            >
-              <Columns className="w-4.5 h-4.5 rotate-180" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowRightPanel(!showRightPanel)}
-              className={cn(
-                "w-9 h-9 border-slate-150 dark:border-slate-850 bg-white dark:bg-slate-950 transition-all",
-                getRadiusClass(),
-                showRightPanel ? "bg-slate-50 dark:bg-slate-900 border-indigo-200 text-indigo-650" : "text-slate-500"
-              )}
-              title="Ẩn/Hiện Bảng thuộc tính phải"
-            >
-              <Settings className="w-4.5 h-4.5" />
-            </Button>
-          </div>
-
-          {/* Preview button */}
-          {onPreview && (
-            <Button
-              onClick={onPreview}
-              className={cn("h-10 px-4 text-xs font-black uppercase tracking-wider bg-slate-900 text-white hover:bg-slate-850 flex items-center gap-1.5", getRadiusClass())}
-            >
-              <Eye className="w-4 h-4" /> Xem trước
-            </Button>
-          )}
-        </div>
-      </header>
-
-      {/* 2. MIDDLE visual sandbox workspace */}
-      <div className="flex-1 flex overflow-hidden w-full relative">
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          {showLeftPanel && <LeftSidebar />}
-
-          {/* Khung Canvas nhận diện class bo góc và chiều rộng giới hạn của layout.width */}
-          <EditorCanvas />
-
-          {showRightPanel && <RightProperties />}
-        </DndContext>
-      </div>
+      {/* B. HIỂN THỊ KHU VỰC THAO TÁC KÉO THẢ (SANDBOX) */}
+      <EditorSandbox
+        sensors={sensors}
+        onDragEnd={handleDragEnd}
+        showLeftPanel={store.showLeftPanel}
+        showRightPanel={store.showRightPanel}
+      />
     </div>
   );
 };
