@@ -267,6 +267,11 @@ export class OrganizationsService {
           orderBy: { slotOrder: 'asc' },
           include: {
             geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
+            geographicAreas: {
+              include: {
+                geographicArea: { include: { translations: { where: { langCode: 'vi' } } } }
+              }
+            },
             domains: {
               include: {
                 domain: { include: { translations: { where: { langCode: 'vi' } } } }
@@ -352,26 +357,36 @@ export class OrganizationsService {
     staffingId: number;
     slotOrder: number;
     description?: string | null;
-    geographicAreaId?: number | null;
+    geographicAreaId?: number | null;   // deprecated
+    geographicAreaIds?: number[];        // mới: nhiều khu vực
     domainIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const { staffingId, slotOrder, description, geographicAreaId, domainIds, monitoredUnitIds } = dto;
+    const { staffingId, slotOrder, description, geographicAreaIds, domainIds, monitoredUnitIds } = dto;
     const slot = await this.prisma.staffingSlot.upsert({
       where: {
         staffingId_slotOrder: { staffingId, slotOrder },
       },
       update: {
         description: description ?? undefined,
-        geographicAreaId: geographicAreaId === 0 ? null : geographicAreaId ?? undefined,
       },
       create: {
         staffingId,
         slotOrder,
         description: description ?? undefined,
-        geographicAreaId: geographicAreaId === 0 ? null : geographicAreaId ?? undefined,
       },
     });
+    // Xử lý nhiều khu vực địa lý (geographicAreaIds)
+    if (geographicAreaIds !== undefined) {
+      await this.prisma.staffingSlotGeographicArea.deleteMany({ where: { slotId: slot.id } });
+      const validIds = geographicAreaIds.filter((id) => id > 0);
+      if (validIds.length > 0) {
+        await this.prisma.staffingSlotGeographicArea.createMany({
+          data: validIds.map((geographicAreaId) => ({ slotId: slot.id, geographicAreaId })),
+          skipDuplicates: true,
+        });
+      }
+    }
     if (domainIds !== undefined) {
       await this.prisma.staffingSlotDomain.deleteMany({ where: { slotId: slot.id } });
       if (domainIds.length > 0) {
@@ -392,6 +407,11 @@ export class OrganizationsService {
       where: { id: slot.id },
       include: {
         geographicArea: { include: { translations: { where: { langCode: 'vi' } } } },
+        geographicAreas: {
+          include: {
+            geographicArea: { include: { translations: { where: { langCode: 'vi' } } } }
+          }
+        },
         domains: {
           include: {
             domain: { include: { translations: { where: { langCode: 'vi' } } } }

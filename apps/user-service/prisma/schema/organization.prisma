@@ -107,8 +107,9 @@ model StaffingSlot {
   staffingId        Int      @map("staffing_id")
   slotOrder         Int      @map("slot_order")   
   description       String?  @map("description")  
-  geographicAreaId  Int?     @map("geographic_area_id")
+  geographicAreaId  Int?     @map("geographic_area_id") // deprecated: dùng geographicAreas
   geographicArea    Category? @relation("StaffingSlotGeographicArea", fields: [geographicAreaId], references: [id])
+  geographicAreas   StaffingSlotGeographicArea[]
   domains           StaffingSlotDomain[]
   monitoredUnits    StaffingSlotMonitoredUnit[]
   staffing          OrganizationStaffing @relation(fields: [staffingId], references: [id], onDelete: Cascade)
@@ -133,4 +134,13 @@ model StaffingSlotMonitoredUnit {
   unit   OrganizationUnit     @relation(fields: [unitId], references: [id], onDelete: Cascade)
   @@id([slotId, unitId])
   @@map("staffing_slot_monitored_units")
+}
+
+model StaffingSlotGeographicArea {
+  slotId           Int      @map("slot_id")
+  geographicAreaId Int      @map("geographic_area_id")
+  slot             StaffingSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  geographicArea   Category     @relation("StaffingSlotGeographicAreas", fields: [geographicAreaId], references: [id], onDelete: Cascade)
+  @@id([slotId, geographicAreaId])
+  @@map("staffing_slot_geographic_areas")
 }

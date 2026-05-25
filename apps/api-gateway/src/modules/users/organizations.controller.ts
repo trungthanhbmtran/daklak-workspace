@@ -192,6 +192,7 @@ export class OrganizationsController implements OnModuleInit {
       slotOrder: number;
       description?: string;
       geographicAreaId?: number;
+      geographicAreaIds?: number[];
       domainIds?: number[];
       monitoredUnitIds?: number[];
     },
@@ -202,6 +203,7 @@ export class OrganizationsController implements OnModuleInit {
         slotOrder: body.slotOrder,
         description: body.description,
         geographicAreaId: body.geographicAreaId,
+        geographicAreaIds: body.geographicAreaIds,
         domainIds: body.domainIds,
         monitoredUnitIds: body.monitoredUnitIds,
       }),

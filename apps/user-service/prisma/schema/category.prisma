@@ -12,6 +12,7 @@ model Category {
   jobTitlesDomain         JobTitle[]         @relation("JobTitleDomain") 
   jobTitlesGeographicArea JobTitle[]         @relation("JobTitleGeographicArea") 
   staffingSlotsGeographicArea StaffingSlot[]  @relation("StaffingSlotGeographicArea") 
+  staffingSlotGeographicAreas StaffingSlotGeographicArea[] @relation("StaffingSlotGeographicAreas")
   staffingSlotDomains         StaffingSlotDomain[]  
   translations            CategoryTranslation[]
 

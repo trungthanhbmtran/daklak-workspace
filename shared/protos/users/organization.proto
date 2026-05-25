@@ -140,21 +140,24 @@ message StaffingSlotItem {
   int32 staffing_id = 2;
   int32 slot_order = 3;
   string description = 4;                    // Nhiệm vụ được giao
-  int32 geographic_area_id = 5;
-  string geographic_area_name = 6;
+  int32 geographic_area_id = 5;              // deprecated: dùng geographic_area_ids
+  string geographic_area_name = 6;           // deprecated
   repeated int32 domain_ids = 7;
   repeated string domain_names = 8;
   repeated int32 monitored_unit_ids = 9;
   repeated string monitored_unit_names = 10;
+  repeated int32 geographic_area_ids = 11;   // Nhiều khu vực địa lý
+  repeated string geographic_area_names = 12;
 }
 
 message SetStaffingSlotRequest {
   int32 staffing_id = 1;
   int32 slot_order = 2;                      // 1, 2, 3... (Phó thứ nhất, hai, ba)
   string description = 3;
-  int32 geographic_area_id = 4;             // 0 = bỏ chọn
+  int32 geographic_area_id = 4;              // deprecated: dùng geographic_area_ids
   repeated int32 domain_ids = 5;
   repeated int32 monitored_unit_ids = 6;
+  repeated int32 geographic_area_ids = 7;    // Nhiều khu vực địa lý
 }
 
 message StaffingReportResponse {

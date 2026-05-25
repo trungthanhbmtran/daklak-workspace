@@ -265,8 +265,8 @@ export function OrganizationStaffing() {
                   {(j.domainName ||
                     j.geographicAreaName ||
                     (j.monitoredUnitNames?.length ?? 0) > 0) && (
-                    <span className="ml-1.5 text-muted-foreground">•</span>
-                  )}
+                      <span className="ml-1.5 text-muted-foreground">•</span>
+                    )}
                 </Button>
               ))}
             </div>

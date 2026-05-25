@@ -53,8 +53,10 @@ export interface StaffingSlotItem {
   staffingId: number;
   slotOrder: number;
   description?: string;
-  geographicAreaId?: number;
-  geographicAreaName?: string;
+  geographicAreaId?: number;       // deprecated
+  geographicAreaName?: string;     // deprecated
+  geographicAreaIds?: number[];    // mới: nhiều khu vực
+  geographicAreaNames?: string[];  // mới
   domainIds?: number[];
   domainNames?: string[];
   monitoredUnitIds?: number[];
@@ -96,7 +98,7 @@ export interface SetStaffingSlotPayload {
   staffingId: number;
   slotOrder: number;
   description?: string;
-  geographicAreaId?: number;
+  geographicAreaIds?: number[];  // nhiều khu vực địa lý
   domainIds?: number[];
   monitoredUnitIds?: number[];
 }

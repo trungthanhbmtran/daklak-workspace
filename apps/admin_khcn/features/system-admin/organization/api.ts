@@ -131,6 +131,8 @@ function normalizeStaffingSlotItem(s: any): StaffingSlotItem {
     description: s.description,
     geographicAreaId: s.geographicAreaId ?? s.geographic_area_id,
     geographicAreaName: s.geographicAreaName ?? s.geographic_area_name,
+    geographicAreaIds: s.geographicAreaIds ?? s.geographic_area_ids ?? [],
+    geographicAreaNames: s.geographicAreaNames ?? s.geographic_area_names ?? [],
     domainIds: s.domainIds ?? s.domain_ids ?? [],
     domainNames: s.domainNames ?? s.domain_names ?? [],
     monitoredUnitIds: s.monitoredUnitIds ?? s.monitored_unit_ids ?? [],

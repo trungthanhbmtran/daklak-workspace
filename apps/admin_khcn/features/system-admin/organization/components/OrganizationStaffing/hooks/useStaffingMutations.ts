@@ -32,7 +32,7 @@ export function useStaffingMutations(unitId: number | null) {
       staffingId: number;
       slotOrder: number;
       description?: string;
-      geographicAreaId?: number;
+      geographicAreaIds?: number[];
       domainIds?: number[];
       monitoredUnitIds?: number[];
     }) => organizationApi.setStaffingSlot(payload),

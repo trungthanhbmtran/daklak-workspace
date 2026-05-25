@@ -184,6 +184,8 @@ export class OrganizationsController {
             domainNames: (slot.domains ?? []).map((d: any) => this.getCatName(d.domain)),
             monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
             monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
+            geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
+            geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) => this.getCatName(ga.geographicArea)),
           })),
         };
       }),
@@ -196,14 +198,18 @@ export class OrganizationsController {
     slotOrder: number;
     description?: string;
     geographicAreaId?: number;
+    geographicAreaIds?: number[];
     domainIds?: number[];
     monitoredUnitIds?: number[];
   }) {
+    const geographicAreaIds = Array.isArray(data.geographicAreaIds) && data.geographicAreaIds.length > 0
+      ? data.geographicAreaIds
+      : (data.geographicAreaId && data.geographicAreaId > 0 ? [data.geographicAreaId] : []);
     const slot = await this.orgService.setStaffingSlot({
       staffingId: data.staffingId,
       slotOrder: data.slotOrder,
       description: data.description,
-      geographicAreaId: data.geographicAreaId,
+      geographicAreaIds,
       domainIds: data.domainIds,
       monitoredUnitIds: data.monitoredUnitIds,
     });
@@ -218,6 +224,8 @@ export class OrganizationsController {
       domainNames: (slot.domains ?? []).map((d: any) => this.getCatName(d.domain)),
       monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
       monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
+      geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
+      geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) => this.getCatName(ga.geographicArea)),
     };
   }
 

@@ -27,7 +27,7 @@ type StaffingTableProps = {
     staffingId: number;
     slotOrder: number;
     description?: string;
-    geographicAreaId?: number;
+    geographicAreaIds?: number[];
     domainIds?: number[];
     monitoredUnitIds?: number[];
   }) => void;
