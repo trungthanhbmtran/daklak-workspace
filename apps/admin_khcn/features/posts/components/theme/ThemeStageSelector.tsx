@@ -1,29 +1,68 @@
-// "use client"
+"use client";
 
+import React from "react";
 import { useThemeConfig } from "./ThemeProvider";
 
-export function ThemeStageSelector() {
-  const { stage, setStage } = useThemeConfig();
+interface StageOption {
+  id: string;
+  name: string;
+  description: string;
+  badgeClass: string;
+}
 
-  // Example stage list; replace with dynamic source if needed
-  const stages = ["default", "stage1", "stage2"];
+const stages: StageOption[] = [
+  {
+    id: "default",
+    name: "Môi trường Nháp (Draft)",
+    description: "Lưu tạm cấu hình để thiết kế và thử nghiệm.",
+    badgeClass: "bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-400"
+  },
+  {
+    id: "production",
+    name: "Môi trường Live (Production)",
+    description: "Giao diện chính thức áp dụng cho người dùng bên ngoài.",
+    badgeClass: "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-400"
+  },
+];
+
+export function ThemeStageSelector() {
+  const { stage, loadSavedTheme } = useThemeConfig();
 
   return (
-    <div className="my-4">
-      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-        Chọn giai đoạn cấu hình
+    <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800/60">
+      <label className="block text-xs font-medium text-slate-500 dark:text-slate-400">
+        Môi trường áp dụng cấu hình (Stage)
       </label>
-      <select
-        value={stage}
-        onChange={(e) => setStage(e.target.value)}
-        className="w-full rounded-md border-gray-300 dark:border-gray-700 bg-slate-50 dark:bg-slate-900 p-2 text-sm"
-      >
-        {stages.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
-        ))}
-      </select>
+      <div className="space-y-2">
+        {stages.map((item) => {
+          const isSelected = stage === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => loadSavedTheme(item.id)}
+              className={`w-full flex flex-col p-3 text-left border rounded-lg transition-all gap-1 ${isSelected
+                ? "border-blue-500 bg-blue-50/50 dark:bg-blue-950/20 ring-1 ring-blue-500"
+                : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                }`}
+            >
+              <div className="flex items-center justify-between w-full">
+                <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  {item.name}
+                </span>
+                {isSelected && (
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badgeClass}`}>
+                    Đang mở
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 dark:text-slate-500 font-light">
+                {item.description}
+              </p>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
