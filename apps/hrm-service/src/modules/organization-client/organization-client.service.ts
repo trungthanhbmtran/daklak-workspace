@@ -1,16 +1,13 @@
-import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
-import { firstValueFrom, Observable } from 'rxjs';
-import { ORGANIZATION_GRPC_CLIENT } from './organization-client.module';
+import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import { join } from 'path';
+import * as grpc from '@grpc/grpc-js';
+import * as protoLoader from '@grpc/proto-loader';
 
 // ─── gRPC contract types (phản ánh organization.proto) ────────────────────────
 interface JobTitleItem {
   id: number;
   code: string;
   name: string;
-  category?: string;
-  rank?: number;
-  type?: string;
 }
 
 interface OrganizationUnitNode {
@@ -26,16 +23,11 @@ interface ListJobTitlesResponse {
   items: JobTitleItem[];
 }
 
-interface OrganizationTreeResponse {
+interface GetFullTreeResponse {
   nodes: OrganizationUnitNode[];
 }
 
-interface IOrganizationGrpcService {
-  ListJobTitles(req: { unitId?: number }): Observable<ListJobTitlesResponse>;
-  GetFullTree(req: Record<string, never>): Observable<OrganizationTreeResponse>;
-}
-
-// ─── Cache entry ──────────────────────────────────────────────────────────────
+// ─── Cache ────────────────────────────────────────────────────────────────────
 interface CacheEntry<T> {
   data: T;
   expiresAt: number;
@@ -46,47 +38,71 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 phút
 /**
  * OrganizationClientService
  *
- * Gọi user-service (OrganizationService) qua gRPC để lấy:
- *   - Danh sách chức danh (job_titles) — dùng cho jobTitle, civilServantRank, partyTitle
- *   - Cây tổ chức (organization_units) — dùng cho department
+ * Gọi user-service (OrganizationService) qua gRPC native API (@grpc/grpc-js)
+ * để lấy tên đơn vị (organization_units) và chức danh (job_titles).
  *
- * Kết quả được cache in-memory với TTL 5 phút để tránh gọi lặp lại trên mỗi request.
- * Đây là pattern chuẩn trong large-scale microservices: service-to-service gRPC + local cache.
+ * Không dùng NestJS ClientsModule để tránh circular dependency trong NestJS 11.
+ * Kết quả được cache in-memory TTL 5 phút.
  */
 @Injectable()
-export class OrganizationClientService implements OnModuleInit {
+export class OrganizationClientService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(OrganizationClientService.name);
-  private orgService!: IOrganizationGrpcService;
 
-  // In-memory cache
+  private stub: any = null;
+
+  // Cache
   private jobTitleCache: CacheEntry<Map<number, { name: string; code: string }>> | null = null;
   private unitCache: CacheEntry<Map<number, { name: string; code: string }>> | null = null;
 
-  constructor(
-    @Inject(ORGANIZATION_GRPC_CLIENT) private readonly client: ClientGrpc,
-  ) {}
-
   onModuleInit() {
-    this.orgService = this.client.getService<IOrganizationGrpcService>(
-      'OrganizationService',
-    );
+    try {
+      const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', 'protos');
+      const protoPath = join(protoRoot, 'users', 'organization.proto');
+      const userServiceAddr = process.env.USER_SERVICE_ADDR ?? 'user-service:50051';
+
+      const packageDef = protoLoader.loadSync(protoPath, {
+        keepCase: false,
+        longs: String,
+        enums: String,
+        defaults: true,
+        includeDirs: [protoRoot],
+      });
+
+      const grpcObject = grpc.loadPackageDefinition(packageDef) as any;
+      const OrganizationService = grpcObject?.organization?.OrganizationService;
+
+      if (!OrganizationService) {
+        this.logger.warn('OrganizationService not found in proto — enrichment disabled');
+        return;
+      }
+
+      this.stub = new OrganizationService(
+        userServiceAddr,
+        grpc.credentials.createInsecure(),
+        { 'grpc.enable_retries': 1, 'grpc.service_config': JSON.stringify({ retryPolicy: { maxAttempts: 3, initialBackoff: '0.5s', maxBackoff: '5s', backoffMultiplier: 2, retryableStatusCodes: ['UNAVAILABLE'] } }) },
+      );
+      this.logger.log(`OrganizationClientService connected to ${userServiceAddr}`);
+    } catch (err) {
+      this.logger.warn('OrganizationClientService init failed — enrichment disabled', err);
+    }
+  }
+
+  onModuleDestroy() {
+    if (this.stub) {
+      grpc.closeClient(this.stub);
+    }
   }
 
   // ─── Public API ─────────────────────────────────────────────────────────────
 
-  /**
-   * Lấy Map<id, {name, code}> của tất cả chức danh từ user-service.
-   * Dùng chung cho jobTitleId, civilServantRankId, partyTitleId vì
-   * tất cả đều tham chiếu bảng job_titles.
-   */
+  /** Map<id, {name,code}> của tất cả chức danh/ngạch/đảng */
   async getJobTitleMap(): Promise<Map<number, { name: string; code: string }>> {
     if (this.jobTitleCache && Date.now() < this.jobTitleCache.expiresAt) {
       return this.jobTitleCache.data;
     }
+    if (!this.stub) return new Map();
     try {
-      const res = await firstValueFrom(
-        this.orgService.ListJobTitles({}),
-      );
+      const res = await this.callGrpc<ListJobTitlesResponse>('listJobTitles', {});
       const map = new Map<number, { name: string; code: string }>(
         (res.items ?? []).map((jt) => [jt.id, { name: jt.name ?? '', code: jt.code ?? '' }]),
       );
@@ -94,41 +110,45 @@ export class OrganizationClientService implements OnModuleInit {
       this.logger.debug(`JobTitle cache refreshed: ${map.size} entries`);
       return map;
     } catch (err) {
-      this.logger.warn('Không thể lấy job titles từ user-service, trả Map rỗng', err);
+      this.logger.warn('getJobTitleMap failed', err);
       return this.jobTitleCache?.data ?? new Map();
     }
   }
 
-  /**
-   * Lấy Map<id, {name, code}> của tất cả đơn vị tổ chức từ user-service.
-   */
+  /** Map<id, {name,code}> của tất cả đơn vị tổ chức */
   async getUnitMap(): Promise<Map<number, { name: string; code: string }>> {
     if (this.unitCache && Date.now() < this.unitCache.expiresAt) {
       return this.unitCache.data;
     }
+    if (!this.stub) return new Map();
     try {
-      const res = await firstValueFrom(
-        this.orgService.GetFullTree({}),
-      );
+      const res = await this.callGrpc<GetFullTreeResponse>('getFullTree', {});
       const map = new Map<number, { name: string; code: string }>();
       this.flattenNodes(res.nodes ?? [], map);
       this.unitCache = { data: map, expiresAt: Date.now() + CACHE_TTL_MS };
       this.logger.debug(`Unit cache refreshed: ${map.size} entries`);
       return map;
     } catch (err) {
-      this.logger.warn('Không thể lấy organization tree từ user-service, trả Map rỗng', err);
+      this.logger.warn('getUnitMap failed', err);
       return this.unitCache?.data ?? new Map();
     }
   }
 
-  /** Chủ động xóa cache khi cần invalidate (VD: sau khi user-service cập nhật dữ liệu) */
   invalidateCache() {
     this.jobTitleCache = null;
     this.unitCache = null;
-    this.logger.debug('OrganizationClient cache invalidated');
   }
 
-  // ─── Private helpers ─────────────────────────────────────────────────────────
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+
+  private callGrpc<T>(method: string, request: object): Promise<T> {
+    return new Promise((resolve, reject) => {
+      this.stub[method](request, (err: Error | null, response: T) => {
+        if (err) reject(err);
+        else resolve(response);
+      });
+    });
+  }
 
   private flattenNodes(
     nodes: OrganizationUnitNode[],

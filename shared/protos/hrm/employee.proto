@@ -6,19 +6,6 @@ import "common/common.proto"; // Import Meta pagination
 
 // ---------------- MODELS ----------------
 
-// Object phụ để hiển thị thông tin rút gọn của Phòng ban/Chức vụ
-message DepartmentPreview {
-  int32 id = 1;
-  string name = 2;
-  string code = 3;
-}
-
-message JobTitlePreview {
-  int32 id = 1;
-  string name = 2;
-  string code = 3;
-}
-
 message Employee {
   int32 id = 1;
   string firstname = 2;
@@ -38,17 +25,11 @@ message Employee {
   int32 jobTitleId = 14;
   string startDate = 15;     // Ngày vào làm/biên chế
 
-  // Dữ liệu Include (Để hiển thị tên phòng/chức vụ thay vì chỉ hiện ID)
-  DepartmentPreview department = 16;
-  JobTitlePreview jobTitle = 17;
-  
   string createdAt = 18;
   string updatedAt = 19;
 
   int32 civilServantRankId = 20;
   int32 partyTitleId = 21;
-  JobTitlePreview civilServantRank = 22;
-  JobTitlePreview partyTitle = 23;
 }
 
 // ---------------- REQUESTS ----------------
@@ -114,6 +95,9 @@ message ListEmployeesRequest {
   // true: Lấy nhân viên của phòng này VÀ các phòng con
   // false: Chỉ lấy nhân viên của phòng này
   bool includeChildren = 7;  
+
+  int32 civilServantRankId = 8;
+  int32 partyTitleId = 9;
 }
 
 // ---------------- RESPONSES ----------------
