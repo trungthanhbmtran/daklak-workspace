@@ -91,7 +91,7 @@ export default function CreateEmployeePage() {
         departmentId: parseInt(form.departmentId, 10),
         jobTitleId: finalJobTitleId,
         civilServantRankId: parseInt(form.civilServantRankId, 10),
-        partyTitleId: form.partyTitleId ? parseInt(form.partyTitleId, 10) : undefined,
+        partyTitleId: form.partyTitleId ? parseInt(form.partyTitleId, 10) : 0,
       });
       queryClient.invalidateQueries({ queryKey: hrmKeys.employees() });
       toast.success("Thêm nhân sự thành công");

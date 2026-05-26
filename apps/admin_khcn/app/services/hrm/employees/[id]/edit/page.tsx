@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef, useEffect, use } from "react";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
 import { useRouter } from "next/navigation";
 import {
@@ -33,8 +33,9 @@ function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): a
   return acc;
 }
 
-export default function EditEmployeePage({ params }: { params: { id: string } }) {
-  const employeeId = parseInt(params.id, 10);
+export default function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
+  const employeeId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
   const queryClient = useQueryClient();
   const [submitting, setSubmitting] = useState(false);
@@ -60,10 +61,10 @@ export default function EditEmployeePage({ params }: { params: { id: string } })
         email: employee.email || "",
         phone: employee.phone || "",
         identityCard: employee.identityCard || "",
-        departmentId: employee.departmentId?.toString() || "",
-        jobTitleId: employee.jobTitleId?.toString() || "",
-        civilServantRankId: employee.civilServantRankId?.toString() || "",
-        partyTitleId: employee.partyTitleId?.toString() || "",
+        departmentId: (employee.departmentId && employee.departmentId > 0) ? employee.departmentId.toString() : "",
+        jobTitleId: (employee.jobTitleId && employee.jobTitleId > 0) ? employee.jobTitleId.toString() : "",
+        civilServantRankId: (employee.civilServantRankId && employee.civilServantRankId > 0) ? employee.civilServantRankId.toString() : "",
+        partyTitleId: (employee.partyTitleId && employee.partyTitleId > 0) ? employee.partyTitleId.toString() : "",
         startDate: employee.startDate ? employee.startDate.toString().slice(0, 10) : new Date().toISOString().slice(0, 10),
         birthday: employee.birthday ? employee.birthday.toString().slice(0, 10) : "",
         avatar: employee.avatar || "",
@@ -118,7 +119,7 @@ export default function EditEmployeePage({ params }: { params: { id: string } })
           departmentId: parseInt(form.departmentId, 10),
           jobTitleId: finalJobTitleId,
           civilServantRankId: parseInt(form.civilServantRankId, 10),
-          partyTitleId: form.partyTitleId ? parseInt(form.partyTitleId, 10) : undefined,
+          partyTitleId: form.partyTitleId ? parseInt(form.partyTitleId, 10) : 0,
         }
       });
       toast.success("Cập nhật hồ sơ thành công");
