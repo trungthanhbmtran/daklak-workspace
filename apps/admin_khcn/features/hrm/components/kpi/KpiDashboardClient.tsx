@@ -1,299 +1,329 @@
 "use client";
 import React, { useState, useMemo } from 'react';
 import {
-  ChevronRight, ChevronDown, History, Layers,
-  TrendingUp, Target, ShieldCheck, AlertTriangle, RefreshCw
+  Target, TrendingUp, AlertTriangle, CheckCircle2,
+  Calendar, Download, Filter, Search, Building2
 } from 'lucide-react';
+import {
+  LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell
+} from 'recharts';
 
-// --- MOCK DATA TĨNH BAN ĐẦU ---
-interface KpiNode {
-  id: string;
-  name: string;
-  weight: number;
-  target: number;
-  actual: number;
-  unit: string;
-  deptName: string;
-  parentId: string | null;
-  childrenIds: string[];
-}
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-const initialKpis: Record<string, KpiNode> = {
-  'root-1': {
-    id: 'root-1',
-    name: 'Chuyển đổi số và liên thông dữ liệu hành chính toàn ngành',
-    weight: 100, target: 100, actual: 94.9, unit: '%', deptName: 'Ban Giám Đốc Sở',
-    parentId: null, childrenIds: ['child-1.1', 'child-1.2']
-  },
-  'child-1.1': {
-    id: 'child-1.1',
-    name: 'Trục liên thông dữ liệu LGSP hoạt động ổn định',
-    weight: 60, target: 100, actual: 97.4, unit: '%', deptName: 'Trung tâm IOC',
-    parentId: 'root-1', childrenIds: ['sub-1.1.1', 'sub-1.1.2']
-  },
-  'sub-1.1.1': {
-    id: 'sub-1.1.1',
-    name: 'Tích hợp phân hệ gRPC Gateway phục vụ kết nối camera',
-    weight: 50, target: 10, actual: 9, unit: 'Gateway', deptName: 'Đội Kỹ thuật IOC',
-    parentId: 'child-1.1', childrenIds: []
-  },
-  'sub-1.1.2': {
-    id: 'sub-1.1.2',
-    name: 'Tối ưu cụm Microservices chạy trên hạ tầng Kubernetes',
-    weight: 50, target: 100, actual: 96, unit: '%', deptName: 'Đội Kỹ thuật IOC',
-    parentId: 'child-1.1', childrenIds: []
-  },
-  'child-1.2': {
-    id: 'child-1.2',
-    name: 'Nâng cao tỷ lệ xử lý hồ sơ, văn bản đúng hạn trên iDesk',
-    weight: 40, target: 100, actual: 91, unit: '%', deptName: 'Văn phòng Sở',
-    parentId: 'root-1', childrenIds: []
-  }
-};
+// --- MOCK DATA ---
+const trendData = [
+  { month: 'T1', performance: 85, target: 100 },
+  { month: 'T2', performance: 88, target: 100 },
+  { month: 'T3', performance: 92, target: 100 },
+  { month: 'T4', performance: 87, target: 100 },
+  { month: 'T5', performance: 95, target: 100 },
+  { month: 'T6', performance: 102, target: 100 },
+];
 
-interface AuditLog {
-  id: string;
-  kpiName: string;
-  changedBy: string;
-  oldActual: number;
-  newActual: number;
-  timestamp: string;
-}
+const deptData = [
+  { name: 'Trung tâm IOC', score: 105, completed: 24, total: 25 },
+  { name: 'Phòng Quản lý CN', score: 92, completed: 15, total: 18 },
+  { name: 'Văn phòng Sở', score: 88, completed: 18, total: 22 },
+  { name: 'Thanh tra Sở', score: 95, completed: 10, total: 10 },
+];
 
-export default function EnterpriseKpiPreview() {
-  const [kpis, setKPIs] = useState<Record<string, KpiNode>>(initialKpis);
-  const [expandedRows, setExpandedRows] = useState<Record<string, boolean>>({
-    'root-1': true,
-    'child-1.1': true
-  });
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([
-    { id: '1', kpiName: 'Tích hợp phân hệ gRPC Gateway...', changedBy: 'Hệ thống (Cron)', oldActual: 8, newActual: 9, timestamp: '10:15 - 25/05/2026' }
-  ]);
+const COLORS = ['#16a34a', '#eab308', '#ef4444', '#8b5cf6'];
 
-  // --- HÀM TỰ ĐỘNG TÍNH TOÁN LAN TRUYỀN (ROLL-UP LOGIC SIMULATION) ---
-  const recalculateKpiTree = (currentKpis: Record<string, KpiNode>, updatedId: string, newActual: number): Record<string, KpiNode> => {
-    const cloned = { ...currentKpis };
-    cloned[updatedId] = { ...cloned[updatedId], actual: newActual };
+const kpiDetails = [
+  { id: '1', dept: 'Trung tâm IOC', name: 'Tỷ lệ uptime hạ tầng trục liên thông LGSP', weight: 30, target: 99.9, actual: 99.95, unit: '%', status: 'Xuất sắc' },
+  { id: '2', dept: 'Văn phòng Sở', name: 'Tỷ lệ xử lý văn bản iDesk đúng hạn', weight: 40, target: 100, actual: 95, unit: '%', status: 'Khá' },
+  { id: '3', dept: 'Phòng Quản lý CN', name: 'Số lượng đề tài NCKH được nghiệm thu', weight: 25, target: 5, actual: 3, unit: 'Đề tài', status: 'Cần cố gắng' },
+  { id: '4', dept: 'Trung tâm IOC', name: 'Số lượng API Gateway được tích hợp mới', weight: 20, target: 15, actual: 18, unit: 'API', status: 'Xuất sắc' },
+];
 
-    let currentParentId = cloned[updatedId].parentId;
+export default function ExecutiveKPIDashboard() {
+  const [selectedPeriod, setSelectedPeriod] = useState('Q2-2026');
+  const [searchQuery, setSearchQuery] = useState('');
 
-    while (currentParentId) {
-      const parent = cloned[currentParentId];
-      let totalWeightedCompletion = 0;
+  // Tính toán dữ liệu cho biểu đồ tròn (Phân bổ trạng thái)
+  const statusDistribution = useMemo(() => {
+    const dist = { 'Xuất sắc': 0, 'Tốt': 0, 'Khá': 0, 'Cần cố gắng': 0 };
+    kpiDetails.forEach(k => { dist[k.status as keyof typeof dist]++; });
+    return Object.entries(dist).map(([name, value]) => ({ name, value }));
+  }, []);
 
-      parent.childrenIds.forEach(childId => {
-        const child = cloned[childId];
-        const completion = child.target > 0 ? (child.actual / child.target) : 0;
-        // Giới hạn hiệu suất tối đa 150% để tránh lệch phổ điểm
-        const cappedCompletion = Math.min(completion, 1.5);
-        totalWeightedCompletion += cappedCompletion * (child.weight / 100);
-      });
-
-      const newParentActual = Number((parent.target * totalWeightedCompletion).toFixed(1));
-      cloned[currentParentId] = { ...parent, actual: newParentActual };
-
-      currentParentId = parent.parentId; // Tiếp tục lặp ngược lên đỉnh cây
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Xuất sắc': return 'bg-purple-100 text-purple-700 border-purple-200';
+      case 'Tốt': return 'bg-green-100 text-green-700 border-green-200';
+      case 'Khá': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+      case 'Cần cố gắng': return 'bg-red-100 text-red-700 border-red-200';
+      default: return 'bg-gray-100 text-gray-700 border-gray-200';
     }
-
-    return cloned;
-  };
-
-  // Thay đổi giá trị Input trực tiếp trên bảng
-  const handleActualChange = (id: string, value: string) => {
-    const numValue = value === '' ? 0 : Number(value);
-    const oldActual = kpis[id].actual;
-
-    if (numValue === oldActual) return;
-
-    const updatedTree = recalculateKpiTree(kpis, id, numValue);
-    setKPIs(updatedTree);
-
-    // Ghi nhận Audit Log giả lập
-    const newLog: AuditLog = {
-      id: crypto.randomUUID(),
-      kpiName: kpis[id].name,
-      changedBy: 'Trưởng phòng (Quản trị viên)',
-      oldActual: oldActual,
-      newActual: numValue,
-      timestamp: new Date().toLocaleTimeString() + ' - Hôm nay'
-    };
-    setAuditLogs(prev => [newLog, ...prev]);
-  };
-
-  const getStatus = (actual: number, target: number) => {
-    const rate = target > 0 ? (actual / target) * 100 : 0;
-    if (rate < 80) return { label: 'Cần cố gắng', color: 'bg-red-50 text-red-700 border-red-200' };
-    if (rate < 95) return { label: 'Khá', color: 'bg-amber-50 text-amber-700 border-amber-200' };
-    if (rate < 110) return { label: 'Tốt', color: 'bg-green-50 text-green-700 border-green-200' };
-    return { label: 'Xuất sắc', color: 'bg-purple-50 text-purple-700 border-purple-200' };
-  };
-
-  // Render cấu trúc cây đệ quy xuống HTML Table Rows
-  const renderTreeRows = (nodeId: string, depth = 0): React.ReactNode[] => {
-    const node = kpis[nodeId];
-    if (!node) return [];
-
-    const hasChildren = node.childrenIds.length > 0;
-    const isExpanded = !!expandedRows[node.id];
-    const statusInfo = getStatus(node.actual, node.target);
-    const completionRate = node.target > 0 ? (node.actual / node.target) * 100 : 0;
-
-    const row = (
-      <tr key={node.id} className="border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
-        <td style={{ paddingLeft: `${depth * 24 + 16}px` }} className="py-3.5 pr-4 font-medium text-slate-900">
-          <div className="flex items-center gap-2">
-            {hasChildren ? (
-              <button
-                onClick={() => setExpandedRows(p => ({ ...p, [node.id]: !p[node.id] }))}
-                className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"
-              >
-                {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
-              </button>
-            ) : (
-              <span className="w-6" />
-            )}
-            <span className="text-sm line-clamp-2 md:line-clamp-none">{node.name}</span>
-          </div>
-        </td>
-        <td className="py-3.5 px-4">
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800">
-            {node.deptName}
-          </span>
-        </td>
-        <td className="py-3.5 px-4 text-center font-semibold text-slate-600 text-sm">{node.weight}%</td>
-        <td className="py-3.5 px-4 text-right font-mono text-sm text-slate-500">
-          {node.target} <span className="text-slate-300 mx-1">/</span>
-          {hasChildren ? (
-            <span className="font-bold text-slate-900 bg-slate-100/80 px-2 py-1 rounded">{node.actual}</span>
-          ) : (
-            <input
-              type="number"
-              className="w-16 px-1.5 py-0.5 font-bold text-right text-blue-600 bg-blue-50/50 border border-blue-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-              value={node.actual}
-              onChange={(e) => handleActualChange(node.id, e.target.value)}
-            />
-          )}
-          <span className="text-xs text-slate-400 ml-1">{node.unit}</span>
-        </td>
-        <td className="py-3.5 px-4">
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs font-semibold text-slate-600 w-10 text-right">{completionRate.toFixed(1)}%</span>
-            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-              <div className="bg-blue-600 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(completionRate, 100)}%` }} />
-            </div>
-          </div>
-        </td>
-        <td className="py-3.5 px-4 text-center">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded border text-xs font-medium shadow-sm ${statusInfo.color}`}>
-            {statusInfo.label}
-          </span>
-        </td>
-      </tr>
-    );
-
-    let result: any = [row];
-    if (hasChildren && isExpanded) {
-      node.childrenIds.forEach(childId => {
-        result = [...result, ...renderTreeRows(childId, depth + 1)];
-      });
-    }
-    return result;
   };
 
   return (
-    <div className="p-6 bg-slate-900 text-slate-100 min-h-screen">
+    <div className="min-h-screen bg-slate-50/50 p-6">
       <div className="max-w-[1400px] mx-auto space-y-6">
 
-        {/* Top bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl gap-4">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-xl border shadow-sm">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-blue-400">Enterprise Edition • Live Preview</span>
-            <h1 className="text-2xl font-bold tracking-tight">Hệ thống Giám sát Hiệu suất Chỉ tiêu Toàn ngành</h1>
-            <p className="text-sm text-slate-400">Dữ liệu giả lập mô hình phân rã mục tiêu (Cascading) và tính toán ngược (Roll-up) tự động.</p>
+            <h1 className="text-2xl font-bold text-slate-900">Sở Khoa học và Công nghệ tỉnh Đắk Lắk</h1>
+            <p className="text-sm text-slate-500">Bảng điều khiển Giám sát Hiệu suất Tổng thể (Executive Dashboard)</p>
           </div>
-          <div className="flex items-center gap-2 bg-slate-900/50 p-2 rounded-xl border border-slate-700 text-xs text-slate-300">
-            <RefreshCw className="h-4 w-4 text-green-400 animate-spin" />
-            <span>Đang lắng nghe thay đổi số liệu</span>
+          <div className="flex items-center gap-3">
+            <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
+              <SelectTrigger className="w-[160px] bg-white">
+                <Calendar className="mr-2 h-4 w-4 text-slate-500" />
+                <SelectValue placeholder="Chọn kỳ đánh giá" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Q1-2026">Quý 1 / 2026</SelectItem>
+                <SelectItem value="Q2-2026">Quý 2 / 2026</SelectItem>
+                <SelectItem value="2026">Toàn năm 2026</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" /> Báo cáo
+            </Button>
           </div>
         </div>
 
-        {/* Dashboard grid layout */}
-        <div className="grid gap-6 lg:grid-cols-4">
+        <Tabs defaultValue="overview" className="space-y-6">
+          <TabsList className="bg-white border shadow-sm p-1">
+            <TabsTrigger value="overview" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Tổng quan Cơ quan
+            </TabsTrigger>
+            <TabsTrigger value="departments" className="px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              Chi tiết Đơn vị trực thuộc
+            </TabsTrigger>
+          </TabsList>
 
-          {/* Main Matrix Table */}
-          <div className="lg:col-span-3 space-y-4">
-            <div className="bg-white text-slate-900 rounded-2xl border border-slate-200 shadow-xl overflow-hidden">
-              <div className="p-5 border-b bg-slate-50 flex items-center gap-2">
-                <Layers className="h-5 w-5 text-blue-600" />
-                <div>
-                  <h2 className="font-semibold text-slate-900">Ma trận Mục tiêu Đệ quy</h2>
-                  <p className="text-xs text-slate-500">Thử thay đổi số liệu tại các ô <span className="text-blue-600 font-bold">màu xanh</span> để xem điểm số cấp trên tự động cập nhật.</p>
-                </div>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse text-left">
-                  <thead>
-                    <tr className="bg-slate-50 text-slate-500 text-xs font-semibold uppercase border-b border-slate-200">
-                      <th className="py-3 px-4 w-[45%]">Cấu trúc cây chỉ tiêu</th>
-                      <th className="py-3 px-4">Đơn vị phụ trách</th>
-                      <th className="py-3 px-4 text-center">Trọng số</th>
-                      <th className="py-3 px-4 text-right">Chỉ tiêu / Thực tế</th>
-                      <th className="py-3 px-4 w-[20%]">Hiệu suất</th>
-                      <th className="py-3 px-4 text-center">Xếp loại</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {renderTreeRows('root-1')}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-
-          {/* Audit Logs Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl space-y-4">
-              <div className="flex items-center gap-2 border-b border-slate-700 pb-3">
-                <History className="h-5 w-5 text-amber-400" />
-                <div>
-                  <h3 className="font-semibold text-slate-100">Vết thay đổi dữ liệu</h3>
-                  <p className="text-xs text-slate-400">Audit Trail thời gian thực</p>
-                </div>
-              </div>
-
-              <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
-                {auditLogs.map((log) => (
-                  <div key={log.id} className="p-3 bg-slate-900/60 border border-slate-700 rounded-xl text-xs space-y-2">
-                    <div className="flex justify-between text-slate-400">
-                      <span className="font-medium text-slate-300">{log.changedBy}</span>
-                      <span>{log.timestamp}</span>
+          {/* TAB 1: EXECUTIVE OVERVIEW */}
+          <TabsContent value="overview" className="space-y-6">
+            {/* Top Metric Cards */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-500">Điểm hiệu suất trung bình</p>
+                      <p className="text-3xl font-bold text-slate-900">96.8%</p>
                     </div>
-                    <p className="text-slate-200 line-clamp-1 italic">"{log.kpiName}"</p>
-                    <div className="flex items-center gap-2 font-mono text-slate-400 pt-1 border-t border-slate-800">
-                      <span>Thay đổi: {log.oldActual}</span>
-                      <span className="text-amber-400">→</span>
-                      <span className="text-green-400 font-bold">{log.newActual}</span>
+                    <div className="p-2 bg-green-100 rounded-lg">
+                      <TrendingUp className="h-5 w-5 text-green-600" />
                     </div>
                   </div>
-                ))}
+                  <div className="mt-4 flex items-center text-sm text-green-600 font-medium">
+                    <span>+2.4%</span>
+                    <span className="text-slate-400 ml-2 font-normal">so với quý trước</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-500">Tổng Mục tiêu (KPIs)</p>
+                      <p className="text-3xl font-bold text-slate-900">85</p>
+                    </div>
+                    <div className="p-2 bg-blue-100 rounded-lg">
+                      <Target className="h-5 w-5 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-slate-500">
+                    <span>60 Đã hoàn thành / 25 Đang xử lý</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-slate-500">Đơn vị Xuất sắc</p>
+                      <p className="text-3xl font-bold text-purple-700">Trung tâm IOC</p>
+                    </div>
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Building2 className="h-5 w-5 text-purple-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-purple-600 font-medium">
+                    <span>105%</span>
+                    <span className="text-slate-400 ml-2 font-normal">tỷ lệ hoàn thành</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="shadow-sm border-red-100 bg-red-50/30">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-red-600">Chỉ số rủi ro cao</p>
+                      <p className="text-3xl font-bold text-red-700">03</p>
+                    </div>
+                    <div className="p-2 bg-red-100 rounded-lg">
+                      <AlertTriangle className="h-5 w-5 text-red-600" />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex items-center text-sm text-red-600">
+                    <span>Cần ban giám đốc can thiệp</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Charts Section */}
+            <div className="grid gap-6 lg:grid-cols-7">
+              {/* Trend Chart */}
+              <Card className="lg:col-span-4 shadow-sm">
+                <CardHeader>
+                  <CardTitle>Biểu đồ xu hướng hiệu suất (2026)</CardTitle>
+                  <CardDescription>Theo dõi biến động điểm KPI trung bình toàn cơ quan qua các tháng.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={trendData} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#64748b' }} domain={[0, 120]} />
+                        <Tooltip contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                        <Legend />
+                        <Line type="monotone" name="Hiệu suất thực tế (%)" dataKey="performance" stroke="#2563eb" strokeWidth={3} dot={{ r: 4, strokeWidth: 2 }} activeDot={{ r: 6 }} />
+                        <Line type="monotone" name="Mục tiêu chuẩn (100%)" dataKey="target" stroke="#94a3b8" strokeWidth={2} strokeDasharray="5 5" dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Distribution & Dept Ranking */}
+              <div className="lg:col-span-3 space-y-6">
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Phân bổ chất lượng Mục tiêu</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex items-center justify-center">
+                    <div className="h-[180px] w-full">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie data={statusDistribution} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                            {statusDistribution.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="space-y-2 text-sm w-1/2">
+                      {statusDistribution.map((stat, i) => (
+                        <div key={stat.name} className="flex items-center justify-between">
+                          <span className="flex items-center gap-2">
+                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i] }}></span>
+                            {stat.name}
+                          </span>
+                          <span className="font-medium">{stat.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Top Đơn vị Dẫn đầu</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {deptData.map((dept) => (
+                      <div key={dept.name} className="space-y-1.5">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium text-slate-700">{dept.name}</span>
+                          <span className="font-bold text-slate-900">{dept.score}%</span>
+                        </div>
+                        <Progress value={Math.min(dept.score, 100)} className="h-2" />
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
               </div>
             </div>
+          </TabsContent>
 
-            {/* Architecture Tip */}
-            <div className="bg-gradient-to-br from-blue-900/40 to-slate-800 border border-blue-800/40 rounded-2xl p-5 text-xs text-slate-300 space-y-2">
-              <h4 className="font-bold text-blue-400 flex items-center gap-1.5">
-                <ShieldCheck className="h-4 w-4" /> Mô hình vận hành thực tế
-              </h4>
-              <p className="leading-relaxed text-slate-400">
-                Khi tích hợp vào kiến trúc Microservices, sự kiện cập nhật giá trị (Inline Input) sẽ phát một lệnh <code className="text-slate-200 bg-slate-900 px-1 rounded">PATCH</code> qua API Gateway.
-                Hệ thống backend sử dụng Database Transaction để ghi đồng thời nhật ký thay đổi và tính toán đệ quy đẩy ngược dữ liệu lên các node cha trước khi đồng bộ về Client thông qua Server-Sent Events (SSE).
-              </p>
-            </div>
-
-          </div>
-
-        </div>
-
+          {/* TAB 2: DETAILED DATA TABLE */}
+          <TabsContent value="departments">
+            <Card className="shadow-sm">
+              <CardHeader className="border-b bg-slate-50/50 rounded-t-xl pb-4">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                  <div>
+                    <CardTitle>Bảng chi tiết chỉ tiêu theo Đơn vị</CardTitle>
+                    <CardDescription>Tìm kiếm, lọc và xuất dữ liệu báo cáo chi tiết từng mục tiêu.</CardDescription>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+                      <Input
+                        placeholder="Tìm tên chỉ số..."
+                        className="pl-8 w-[250px] bg-white"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                    <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50 hover:bg-slate-50">
+                      <TableHead className="font-semibold text-slate-900">Đơn vị / Phòng ban</TableHead>
+                      <TableHead className="font-semibold text-slate-900 w-[35%]">Tên chỉ số KPI</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-center">Trọng số</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-right">Chỉ tiêu / Thực tế</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-center">Tiến độ</TableHead>
+                      <TableHead className="font-semibold text-slate-900 text-center">Xếp loại</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {kpiDetails
+                      .filter(kpi => kpi.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((kpi) => {
+                        const completion = (kpi.actual / kpi.target) * 100;
+                        return (
+                          <TableRow key={kpi.id} className="hover:bg-slate-50/80 transition-colors">
+                            <TableCell className="font-medium text-slate-600">{kpi.dept}</TableCell>
+                            <TableCell className="font-medium text-slate-900">{kpi.name}</TableCell>
+                            <TableCell className="text-center font-medium">{kpi.weight}%</TableCell>
+                            <TableCell className="text-right font-mono text-sm">
+                              <span className="text-slate-500">{kpi.target}</span>
+                              <span className="mx-1">/</span>
+                              <span className="font-bold text-primary">{kpi.actual}</span>
+                              <span className="text-xs text-slate-400 ml-1">{kpi.unit}</span>
+                            </TableCell>
+                            <TableCell className="text-center font-mono font-medium">
+                              {completion.toFixed(1)}%
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge variant="outline" className={`${getStatusColor(kpi.status)} font-medium border`}>
+                                {kpi.status}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
