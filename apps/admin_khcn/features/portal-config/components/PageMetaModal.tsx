@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useImperativeHandle, forwardRef, useMemo } from "react";
+import React, { useState, useImperativeHandle, forwardRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Layout } from "lucide-react";
 import { MultiLangTitleSlug } from "@/components/shared/MultiLangTitleSlug";
+import { useMultiLangTitleSlugState } from "@/components/shared/hooks/useMultiLangTitleSlugState";
 import { toast } from "sonner";
 import { CustomPageMeta } from "./hooks/usePortalBuilder";
 
@@ -23,36 +24,30 @@ export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({
     const [isOpen, setIsOpen] = useState(false);
     const [mode, setMode] = useState<"ADD" | "EDIT">("ADD");
 
-    // State gõ chữ biệt lập - re-render chỉ xảy ra ở đây khi người dùng nhập dữ liệu
-    const [pageId, setPageId] = useState("");
-    const [titles, setTitles] = useState<Record<string, string>>({});
+    // Thay vì tự quản lý state thủ công, ta gọi công cụ dùng chung
+    const { titles, slug: pageId, multiLangValue, handleMultiLangChange, setTitles, setSlug } = useMultiLangTitleSlugState({
+        activeLangs,
+        isEditMode: mode === "EDIT"
+    });
+
     const [isActive, setIsActive] = useState(true);
 
-    // Phơi bày hàm ra ngoài cho file cha gọi điều khiển thông qua Ref
     useImperativeHandle(ref, () => ({
         openAdd: () => {
             setMode("ADD");
-            setPageId("");
+            setSlug("");
             setTitles({});
             setIsActive(true);
             setIsOpen(true);
         },
         openEdit: (page) => {
             setMode("EDIT");
-            setPageId(page.id);
+            setSlug(page.id);
             setTitles(page.title || {});
             setIsActive(page.isActive ?? true);
             setIsOpen(true);
         }
     }));
-
-    const multiLangValue = useMemo(() => {
-        const result: Record<string, any> = {};
-        for (const lang of activeLangs) {
-            result[lang.code] = { title: titles[lang.code] || "", slug: lang.code === 'vi' ? pageId : "" };
-        }
-        return result;
-    }, [titles, activeLangs, pageId]);
 
     const handleSave = async () => {
         if (!pageId.trim()) return toast.error("Vui lòng nhập slug định danh trang");
@@ -68,7 +63,6 @@ export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({
         }
 
         setIsOpen(false);
-        // Báo hiệu ngược lại cho cha cập nhật API sau khi dữ liệu đã chuẩn hóa
         await onSaveSuccess(cleanId, titles, isActive, mode);
     };
 
@@ -91,16 +85,7 @@ export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({
                     <div className="space-y-6">
                         <MultiLangTitleSlug
                             value={multiLangValue}
-                            onChange={(newVal: any) => {
-                                const newTitles: Record<string, string> = {};
-                                for (const code in newVal) {
-                                    newTitles[code] = newVal[code].title;
-                                }
-                                setTitles(newTitles);
-                                if (mode === "ADD" && newVal['vi']?.slug) {
-                                    setPageId(newVal['vi'].slug);
-                                }
-                            }}
+                            onChange={handleMultiLangChange}
                             disabledSlug={mode === "EDIT"}
                         />
 
