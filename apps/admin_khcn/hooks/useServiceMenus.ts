@@ -177,28 +177,52 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
       });
     }
 
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/tasks"))) {
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/master-plans"))) {
       menuItems.push({
-        name: "Giao việc",
-        href: `${config.basePath}/tasks`,
+        name: "Kế hoạch công tác",
+        href: `${config.basePath}/work-plans/master-plans`,
         icon: ListTree,
+        order: 8,
+      });
+    }
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/rank-templates"))) {
+      menuItems.push({
+        name: "Cấu hình Ngạch",
+        href: `${config.basePath}/work-plans/rank-templates`,
+        icon: Settings2,
         order: 9,
       });
     }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/kpi"))) {
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/manual-selector"))) {
       menuItems.push({
-        name: "Đánh giá KPI",
-        href: `${config.basePath}/kpi`,
-        icon: Settings2,
+        name: "Gán việc theo Ngạch",
+        href: `${config.basePath}/work-plans/manual-selector`,
+        icon: ListTree,
         order: 10,
       });
     }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/kpi-criteria"))) {
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/tasks"))) {
+      menuItems.push({
+        name: "Giao việc",
+        href: `${config.basePath}/work-plans/tasks`,
+        icon: ListTree,
+        order: 11,
+      });
+    }
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/performance/evaluations"))) {
+      menuItems.push({
+        name: "Đánh giá KPI",
+        href: `${config.basePath}/performance/evaluations`,
+        icon: Settings2,
+        order: 12,
+      });
+    }
+    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/performance/criteria"))) {
       menuItems.push({
         name: "Khung tiêu chí đánh giá",
-        href: `${config.basePath}/kpi-criteria`,
+        href: `${config.basePath}/performance/criteria`,
         icon: Settings2,
-        order: 11,
+        order: 13,
       });
     }
   }
