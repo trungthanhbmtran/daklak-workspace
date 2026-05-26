@@ -185,7 +185,7 @@ export default function CreateEmployeePage() {
                   </div>
                 )}
 
-                 {/* Chức danh */}
+                {/* Chức danh */}
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">2. Chức vụ chính quyền (Không bắt buộc)</Label>
