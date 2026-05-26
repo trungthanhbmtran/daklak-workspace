@@ -49,10 +49,10 @@ export const PageMetaModal = forwardRef<PageMetaModalRef, PageMetaModalProps>(({
     const multiLangValue = useMemo(() => {
         const result: Record<string, any> = {};
         for (const lang of activeLangs) {
-            result[lang.code] = { title: titles[lang.code] || "", slug: "" };
+            result[lang.code] = { title: titles[lang.code] || "", slug: lang.code === 'vi' ? pageId : "" };
         }
         return result;
-    }, [titles, activeLangs]);
+    }, [titles, activeLangs, pageId]);
 
     const handleSave = async () => {
         if (!pageId.trim()) return toast.error("Vui lòng nhập slug định danh trang");

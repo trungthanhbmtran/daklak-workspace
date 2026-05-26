@@ -30,7 +30,7 @@ export function usePortalBuilder(languages: any[]) {
         queryKey: ["portal-configs"],
         queryFn: async () => {
             const res: any = await apiClient.get("/portal-configs");
-            return res || [];
+            return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
         }
     });
 
