@@ -15,7 +15,7 @@ export {
 export { HrmDashboardClient } from "./components/HrmDashboardClient";
 export { EmployeeListClient } from "./components/EmployeeListClient";
 export { TaskListClient } from "./components/tasks/TaskListClient";
-export { KpiDashboardClient } from "./components/kpi/KpiDashboardClient";
+export { default as KpiDashboardClient } from "./components/kpi/KpiDashboardClient";
 
 export {
   hrmDepartmentsApi,

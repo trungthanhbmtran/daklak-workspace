@@ -13,6 +13,7 @@ import { ThemeSaveButton } from "./theme/ThemeSaveButton";
 import { ThemeMarketplace } from "./theme/ThemeMarketplace";
 import { TypographyConfig } from "./theme/TypographyConfig";
 import { LayoutConfig } from "./theme/LayoutConfig";
+import { BrandingConfig } from "./theme/BrandingConfig";
 import { AdvancedCssEditor } from "./theme/AdvancedCssEditor";
 
 export function AppearanceClient() {
@@ -102,6 +103,12 @@ export function AppearanceClient() {
                                         <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
                                             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Bố cục & Bo góc (Radius)</h3>
                                             <LayoutConfig />
+                                        </div>
+
+                                        {/* Phân đoạn 5: Nhận diện thương hiệu (Logo & Favicon) */}
+                                        <div className="p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-4">
+                                            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">Nhận diện thương hiệu</h3>
+                                            <BrandingConfig />
                                         </div>
                                     </div>
                                 )}

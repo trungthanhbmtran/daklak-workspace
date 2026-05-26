@@ -395,8 +395,8 @@ export function MasterPlanListClient() {
                     <tr key={item.id} className="hover:bg-slate-50/50 transition-colors group">
                       <td className="py-3.5 px-4 space-y-1">
                         <div className="font-bold text-slate-900 leading-relaxed flex items-start gap-1.5">
-                          {item.aiStatus === 'VERIFIED' && <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" title="Đã được hệ thống kiểm chứng" />}
-                          {item.aiStatus === 'RECOMMENDED' && <Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" title="Do AI thông minh đề xuất" />}
+                          {item.aiStatus === 'VERIFIED' && <span title="Đã được hệ thống kiểm chứng"><ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" /></span>}
+                          {item.aiStatus === 'RECOMMENDED' && <span title="Do AI thông minh đề xuất"><Sparkles className="w-3.5 h-3.5 text-indigo-500 shrink-0 mt-0.5" /></span>}
                           {item.title}
                         </div>
                         <div className="text-[10px] text-slate-400 font-mono flex items-center gap-1">

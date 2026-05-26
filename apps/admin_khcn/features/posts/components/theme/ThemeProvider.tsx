@@ -17,12 +17,18 @@ export interface LayoutSettings {
   isCompact: boolean;
 }
 
+export interface BrandingSettings {
+  logo: string;
+  favicon: string;
+}
+
 export interface ThemeConfig {
   theme: string;
   template: string;
   stage: string;
   typography: TypographySettings;
   layout: LayoutSettings;
+  branding: BrandingSettings;
   customCss: string;
 }
 
@@ -36,6 +42,7 @@ interface ThemeContextProps extends ThemeConfig {
   setTypography: (settings: Partial<TypographySettings>) => void;
   setLayout: (settings: Partial<LayoutSettings>) => void;
   setCustomCss: (css: string) => void;
+  setBranding: (settings: Partial<BrandingSettings>) => void;
   saveTheme: () => Promise<void>;
   loadSavedTheme: (stage: string) => void;
   isDirty: boolean;
@@ -47,6 +54,7 @@ const defaultThemeConfig: Omit<ThemeConfig, "stage" | "theme"> = {
   template: "blue",
   typography: { heading: "inter", body: "inter", size: 14 },
   layout: { radius: "Medium", width: "1280", isCompact: false },
+  branding: { logo: "", favicon: "" },
   customCss: "/* Thêm CSS tùy biến tại đây */"
 };
 
@@ -94,7 +102,7 @@ function mapConfigToAppearance(cfg: ThemeConfig) {
       width: cfg.layout?.width || "1280",
       isCompact: cfg.layout?.isCompact || false,
     },
-    branding: { logo: "", favicon: "", borderRadius },
+    branding: { logo: cfg.branding?.logo || "", favicon: cfg.branding?.favicon || "", borderRadius },
     customCss: cfg.customCss || "",
     stage: cfg.stage || "default",
     savedAt: new Date().toISOString(),
@@ -116,6 +124,13 @@ function mapAppearanceToConfig(data: any): Partial<ThemeConfig> {
       ...(data.layout.width ? { width: data.layout.width } : {}),
     };
   }
+  if (data.branding) {
+    result.branding = {
+      ...(defaultThemeConfig.branding),
+      ...(data.branding.logo ? { logo: data.branding.logo } : {}),
+      ...(data.branding.favicon ? { favicon: data.branding.favicon } : {}),
+    };
+  }
   if (data.customCss) result.customCss = data.customCss;
   return result;
 }
@@ -130,6 +145,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const [template, setTemplateState] = useState<string>(defaultThemeConfig.template);
   const [typography, setTypography] = useState<TypographySettings>(defaultThemeConfig.typography);
   const [layout, setLayout] = useState<LayoutSettings>(defaultThemeConfig.layout);
+  const [branding, setBranding] = useState<BrandingSettings>(defaultThemeConfig.branding);
   const [customCss, setCustomCss] = useState<string>(defaultThemeConfig.customCss);
 
   const [isDirty, setIsDirty] = useState<boolean>(false);
@@ -146,6 +162,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         if (cfg.template) setTemplateState(cfg.template);
         if (cfg.typography) setTypography(cfg.typography);
         if (cfg.layout) setLayout(cfg.layout);
+        if (cfg.branding) setBranding(cfg.branding);
         if (cfg.customCss) setCustomCss(cfg.customCss);
         setIsDirty(false);
       } catch (_) { }
@@ -153,6 +170,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       setTemplateState(defaultThemeConfig.template);
       setTypography(defaultThemeConfig.typography);
       setLayout(defaultThemeConfig.layout);
+      setBranding(defaultThemeConfig.branding);
       setCustomCss(defaultThemeConfig.customCss);
       setIsDirty(false);
     }
@@ -180,6 +198,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
           if (mapped.template) setTemplateState(mapped.template);
           if (mapped.typography) setTypography(mapped.typography);
           if (mapped.layout) setLayout(mapped.layout);
+          if (mapped.branding) setBranding(mapped.branding);
           if (mapped.customCss) setCustomCss(mapped.customCss);
           setIsDirty(false);
         } catch (_) { }
@@ -228,6 +247,16 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
+  const handleSetBranding = (newSettings: Partial<BrandingSettings>) => {
+    setBranding((prev) => {
+      const updated = { ...prev, ...newSettings };
+      if (JSON.stringify(prev) !== JSON.stringify(updated)) {
+        setIsDirty(true);
+      }
+      return updated;
+    });
+  };
+
   const handleSetCustomCss = (css: string) => {
     if (customCss === css) return;
     setCustomCss(css);
@@ -242,6 +271,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       stage,
       typography,
       layout,
+      branding,
       customCss
     };
 
@@ -280,6 +310,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         setTemplateState(cfg.template ?? defaultThemeConfig.template);
         setTypography(cfg.typography ?? defaultThemeConfig.typography);
         setLayout(cfg.layout ?? defaultThemeConfig.layout);
+        setBranding(cfg.branding ?? defaultThemeConfig.branding);
         setCustomCss(cfg.customCss ?? defaultThemeConfig.customCss);
         setIsDirty(false);
       } catch (_) { }
@@ -288,6 +319,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       setTemplateState(defaultThemeConfig.template);
       setTypography(defaultThemeConfig.typography);
       setLayout(defaultThemeConfig.layout);
+      setBranding(defaultThemeConfig.branding);
       setCustomCss(defaultThemeConfig.customCss);
       setIsDirty(false);
     }
@@ -301,6 +333,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         stage,
         typography,
         layout,
+        branding,
         customCss,
         isDirty,
         previewDevice,
@@ -310,6 +343,7 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
         setStage,
         setTypography: handleSetTypography,
         setLayout: handleSetLayout,
+        setBranding: handleSetBranding,
         setCustomCss: handleSetCustomCss,
         saveTheme,
         loadSavedTheme,
