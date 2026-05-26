@@ -46,12 +46,11 @@ export default function EmployeeDetailPage({ params }: { params: Promise<{ id: s
 
   const govtTitleName = useMemo(() => {
     const title = employee?.jobTitle;
-    if (title && title.type === "GOVERNMENT") return title.name;
+    if (title) return title.name;
     if (!employee?.jobTitleId) return "—";
     const items = jobTitlesRes?.items ?? [];
     const found = items.find((j: { id: number }) => j.id === employee.jobTitleId);
-    if (found && found.type === "GOVERNMENT") return found.name;
-    return "—";
+    return found?.name ?? "—";
   }, [employee, jobTitlesRes]);
 
   const rankTitleName = useMemo(() => {

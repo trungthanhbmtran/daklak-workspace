@@ -20,10 +20,10 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
     partyTitleId: row.partyTitleId != null ? Number(row.partyTitleId) : row.party_title_id != null ? Number(row.party_title_id) : undefined,
     startDate: String(row.startDate ?? row.start_date ?? ""),
     birthday: String(row.birthday ?? ""),
-    department: row.department as HrmEmployee["department"],
-    jobTitle: row.jobTitle as HrmEmployee["jobTitle"],
-    civilServantRank: row.civilServantRank as HrmEmployee["civilServantRank"],
-    partyTitle: row.partyTitle as HrmEmployee["partyTitle"],
+    department: (row.department ?? row.department_info ?? row.departmentInfo) as HrmEmployee["department"],
+    jobTitle: (row.jobTitle ?? row.job_title ?? row.jobTitleInfo) as HrmEmployee["jobTitle"],
+    civilServantRank: (row.civilServantRank ?? row.civil_servant_rank ?? row.civilServantRankInfo) as HrmEmployee["civilServantRank"],
+    partyTitle: (row.partyTitle ?? row.party_title ?? row.partyTitleInfo) as HrmEmployee["partyTitle"],
     currentTaskCount: Math.floor(Math.random() * 5),
   };
 }

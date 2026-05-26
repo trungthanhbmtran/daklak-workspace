@@ -185,25 +185,34 @@ export function EmployeeListClient() {
                           {(() => {
                             const { govt, rank, party } = getJobTitleGroups(emp, jobTitleMap);
                             return (
-                              <>
-                                <div className="flex items-start">
-                                  <Briefcase className="h-3.5 w-3.5 mr-2 text-blue-500 mt-0.5 shrink-0" /> 
-                                  <div className="flex flex-col">
-                                    <span className="text-sm text-slate-800 font-bold">{govt || "Chưa bổ nhiệm (CQ)"}</span>
-                                    {rank && rank !== govt && <span className="text-xs text-slate-500">Ngạch: {rank}</span>}
-                                  </div>
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {govt ? (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200/60">
+                                      {govt}
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-50 text-slate-500 border border-slate-200/60">
+                                      Chưa bổ nhiệm (CQ)
+                                    </span>
+                                  )}
+                                  
+                                  {party && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200/60">
+                                      {party}
+                                    </span>
+                                  )}
                                 </div>
-                                {party && (
-                                  <div className="flex items-start">
-                                    <Briefcase className="h-3.5 w-3.5 mr-2 text-red-500 mt-0.5 shrink-0" />
-                                    <span className="text-xs text-slate-700 font-medium">Đảng: {party}</span>
+                                {rank && rank !== govt && (
+                                  <div className="flex items-center text-xs text-slate-500">
+                                    Ngạch: <span className="font-medium text-slate-700 ml-1">{rank}</span>
                                   </div>
                                 )}
-                              </>
+                              </div>
                             );
                           })()}
-                          <div className="flex items-center text-xs text-slate-500 pt-1 border-t border-slate-100">
-                            <Building2 className="h-3.5 w-3.5 mr-2 text-slate-400" /> {getUnitName(emp, unitMap)}
+                          <div className="flex items-center text-xs text-slate-500 pt-2 mt-1 border-t border-slate-100">
+                            <Building2 className="h-3.5 w-3.5 mr-1.5 text-slate-400" /> {getUnitName(emp, unitMap)}
                           </div>
                         </div>
                       </TableCell>
