@@ -17,6 +17,7 @@ import { MasterPlansController } from './master-plans.controller';
     registerGrpcService(MICROSERVICES.TASK),
     registerGrpcService(MICROSERVICES.KPI),
     registerGrpcService(MICROSERVICES.MASTER_PLAN),
+    registerGrpcService(MICROSERVICES.SYS_CATEGORY),
   ],
   controllers: [
     DepartmentController,

@@ -11,15 +11,18 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 export class EmployeeController implements OnModuleInit {
   private employeeService: any;
   private orgService: any;
+  private catService: any;
 
   constructor(
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
+    @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
   ) { }
 
   onModuleInit() {
     this.employeeService = this.client.getService(MICROSERVICES.EMPLOYEE.SERVICE);
     this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.catService = this.catClient.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
   }
 
   /**
@@ -27,12 +30,14 @@ export class EmployeeController implements OnModuleInit {
    */
   private async fetchDictionaries() {
     try {
-      const [jobTitlesRes, treeRes] = await Promise.all([
+      const [jobTitlesRes, treeRes, catRes] = await Promise.all([
         firstValueFrom(this.orgService.ListJobTitles({})) as Promise<any>,
         firstValueFrom(this.orgService.GetFullTree({})) as Promise<any>,
-      ]).catch(() => [{ items: [] }, { nodes: [] }]);
+        firstValueFrom(this.catService.ListCategories({})) as Promise<any>,
+      ]).catch(() => [{ items: [] }, { nodes: [] }, { items: [] }]);
 
       const jtMap = new Map((jobTitlesRes?.items || []).map((jt: any) => [jt.id, { name: jt.name, code: jt.code }]));
+      const catMap = new Map((catRes?.items || []).map((c: any) => [c.id, { name: c.name, code: c.code }]));
       const unitMap = new Map();
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
@@ -42,16 +47,16 @@ export class EmployeeController implements OnModuleInit {
       };
       flattenNodes(treeRes?.nodes || []);
 
-      return { jtMap, unitMap };
+      return { jtMap, unitMap, catMap };
     } catch (error) {
-      return { jtMap: new Map(), unitMap: new Map() };
+      return { jtMap: new Map(), unitMap: new Map(), catMap: new Map() };
     }
   }
 
   /**
    * Ánh xạ thông tin chức danh, phòng ban vào nhân viên
    */
-  private enrichEmployee(emp: any, jtMap: Map<number, any>, unitMap: Map<number, any>) {
+  private enrichEmployee(emp: any, jtMap: Map<number, any>, unitMap: Map<number, any>, catMap: Map<number, any>) {
     if (!emp) return emp;
     const lookup = (map: Map<number, any>, id?: number) => id && id > 0 ? map.get(id) || { name: '', code: '' } : { name: '', code: '' };
 
@@ -59,7 +64,7 @@ export class EmployeeController implements OnModuleInit {
       ...emp,
       department: { id: emp.departmentId, ...lookup(unitMap, emp.departmentId) },
       jobTitle: { id: emp.jobTitleId, ...lookup(jtMap, emp.jobTitleId) },
-      civilServantRank: { id: emp.civilServantRankId, ...lookup(jtMap, emp.civilServantRankId) },
+      civilServantRank: { id: emp.civilServantRankId, ...lookup(catMap, emp.civilServantRankId) },
       partyTitle: { id: emp.partyTitleId, ...lookup(jtMap, emp.partyTitleId) },
     };
   }
@@ -80,7 +85,7 @@ export class EmployeeController implements OnModuleInit {
     ]);
 
     if (res && res.data) {
-      res.data = res.data.map((e: any) => this.enrichEmployee(e, dicts.jtMap, dicts.unitMap));
+      res.data = res.data.map((e: any) => this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap));
     }
     return res;
   }
@@ -93,7 +98,7 @@ export class EmployeeController implements OnModuleInit {
     ]);
 
     if (res && res.data) {
-      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap);
+      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap, dicts.catMap);
     }
     return res;
   }
@@ -106,7 +111,7 @@ export class EmployeeController implements OnModuleInit {
     ]);
 
     if (res && res.data) {
-      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap);
+      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap, dicts.catMap);
     }
     return res;
   }
@@ -120,7 +125,7 @@ export class EmployeeController implements OnModuleInit {
     ]);
 
     if (res && res.data) {
-      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap);
+      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap, dicts.catMap);
     }
     return res;
   }

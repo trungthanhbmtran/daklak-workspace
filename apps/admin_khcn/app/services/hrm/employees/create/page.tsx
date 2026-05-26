@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { hrmApi, hrmKeys } from "@/features/hrm";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { cn } from "@/lib/utils";
 
 function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): any[] {
@@ -67,11 +68,13 @@ export default function CreateEmployeePage() {
     enabled: !!form.departmentId,
   });
 
+  const { data: allCategories = [] } = useGetCategories();
+  const rankTitles = useMemo(() => allCategories.filter((c: any) => c.group === "CIVIL_SERVANT_RANK"), [allCategories]);
+
   const selectedUnit = units.find(u => u.id.toString() === form.departmentId);
   const jobTitles = jobTitlesRes?.items ?? [];
 
   const govtTitles = useMemo(() => jobTitles.filter(j => j.type === "GOVERNMENT" || !j.type), [jobTitles]);
-  const rankTitles = useMemo(() => jobTitles.filter(j => j.type === "RANK"), [jobTitles]);
   const partyTitles = useMemo(() => jobTitles.filter(j => j.type === "PARTY"), [jobTitles]);
 
   const handleSubmit = async (e: React.FormEvent) => {
