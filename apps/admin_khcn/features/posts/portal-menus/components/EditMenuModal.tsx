@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Settings2, Sparkles, Loader2, Search, Link } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { categoryApi } from "@/features/system-admin/categories/api";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
 import apiClient from "@/lib/axiosInstance";
@@ -34,12 +33,12 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const [isTranslating, setIsTranslating] = useState(false);
   const [postSearch, setPostSearch] = useState("");
 
-  // Tải danh sách chuyên mục động từ API
+  // Tải danh sách chuyên mục động từ API (Posts Service)
   const { data: dynamicCategories } = useQuery({
-    queryKey: ["categories-for-menu"],
+    queryKey: ["categories-for-menu-posts"],
     queryFn: async () => {
-      const res = await categoryApi.fetchAll();
-      return res || [];
+      const res = await postsApi.getCategories({ page: 1, limit: 100 });
+      return res?.data || [];
     },
     enabled: isOpen,
   });
