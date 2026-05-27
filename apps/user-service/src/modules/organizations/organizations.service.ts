@@ -293,7 +293,7 @@ export class OrganizationsService {
       monitoredUnits: { include: { unit: true } },
     };
     let items;
-    if (unitId == null) {
+    if (!unitId || unitId === 0) {
       items = await this.prisma.jobTitle.findMany({ orderBy: { code: 'asc' }, include });
     } else {
       const unit = await this.prisma.organizationUnit.findUnique({
