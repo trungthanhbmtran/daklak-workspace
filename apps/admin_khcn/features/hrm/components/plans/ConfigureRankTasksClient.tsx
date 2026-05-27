@@ -6,9 +6,8 @@ import { useTaskTemplatesList, useCreateTaskTemplate, useDeleteTaskTemplate, use
 import { categoryApi } from '@/features/system-admin/categories/api';
 import { CategoryItem } from '@/features/system-admin/categories/types';
 
-// Định nghĩa kiểu dữ liệu chuẩn ngạch công vụ
 export type GovClassification = 'CONG_CHUC' | 'VIEN_CHUC';
-export type GovRank = 'CHUYEN_VIEN_CAO_CAP' | 'CHUYEN_VIEN_CHINH' | 'CHUYEN_VIEN' | 'CÁN_BỘ_SỰ_NGHIỆP';
+export type GovRank = 'CHUYEN_VIEN_CAO_CAP' | 'CHUYEN_VIEN_CHINH' | 'CHUYEN_VIEN' | 'CAN_SU' | 'NHAN_VIEN' | 'VIEN_CHUC_HANG_1' | 'VIEN_CHUC_HANG_2' | 'VIEN_CHUC_HANG_3' | 'VIEN_CHUC_HANG_4';
 
 
 export function ConfigureRankTasksClient() {
@@ -47,7 +46,7 @@ export function ConfigureRankTasksClient() {
 
         const payload = {
             classification: selectedClass,
-            rank: selectedClass === 'VIEN_CHUC' ? 'CÁN_BỘ_SỰ_NGHIỆP' : selectedRank,
+            rank: selectedRank,
             taskName: newTaskName.trim(),
             defaultUnit: newUnit
         };
@@ -75,7 +74,7 @@ export function ConfigureRankTasksClient() {
                 id: editingId,
                 payload: {
                     classification: selectedClass,
-                    rank: selectedClass === 'VIEN_CHUC' ? 'CÁN_BỘ_SỰ_NGHIỆP' : selectedRank,
+                    rank: selectedRank,
                     taskName: editTaskName.trim(),
                     defaultUnit: editUnit,
                 }
@@ -106,7 +105,7 @@ export function ConfigureRankTasksClient() {
                     <Shield className="w-4 h-4" /> KHỐI CÔNG CHỨC (Hành chính công)
                 </button>
                 <button
-                    onClick={() => { setSelectedClass('VIEN_CHUC'); setSelectedRank('CÁN_BỘ_SỰ_NGHIỆP'); }}
+                    onClick={() => { setSelectedClass('VIEN_CHUC'); setSelectedRank('VIEN_CHUC_HANG_3'); }}
                     className={`py-2.5 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${selectedClass === 'VIEN_CHUC' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-500'}`}
                 >
                     <Users className="w-4 h-4" /> KHỐI VIÊN CHỨC (Đơn vị sự nghiệp/Kỹ thuật)
@@ -116,22 +115,35 @@ export function ConfigureRankTasksClient() {
             {/* FORM THIẾT LẬP CHI TIẾT */}
             <form onSubmit={handleAddTemplate} className="space-y-4 bg-slate-50/50 p-4 rounded-xl border border-slate-200">
                 <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                    {selectedClass === 'CONG_CHUC' && (
-                        <div className="md:col-span-3 space-y-1">
-                            <label className="text-[10px] font-black text-slate-500 uppercase">Ngạch công chức</label>
-                            <select
-                                value={selectedRank}
-                                onChange={e => setSelectedRank(e.target.value as GovRank)}
-                                className="w-full h-10 text-xs border rounded-lg px-3 bg-white border-slate-200 font-bold text-slate-700 focus:outline-none"
-                            >
-                                <option value="CHUYEN_VIEN_CAO_CAP">Chuyên viên Cao cấp</option>
-                                <option value="CHUYEN_VIEN_CHINH">Chuyên viên Chính</option>
-                                <option value="CHUYEN_VIEN">Chuyên viên</option>
-                            </select>
-                        </div>
-                    )}
+                    <div className="md:col-span-3 space-y-1">
+                        <label className="text-[10px] font-black text-slate-500 uppercase">
+                            {selectedClass === 'CONG_CHUC' ? 'Ngạch công chức' : 'Chức danh nghề nghiệp'}
+                        </label>
+                        <select
+                            value={selectedRank}
+                            onChange={e => setSelectedRank(e.target.value as GovRank)}
+                            className="w-full h-10 text-xs border rounded-lg px-3 bg-white border-slate-200 font-bold text-slate-700 focus:outline-none"
+                        >
+                            {selectedClass === 'CONG_CHUC' ? (
+                                <>
+                                    <option value="CHUYEN_VIEN_CAO_CAP">Chuyên viên Cao cấp</option>
+                                    <option value="CHUYEN_VIEN_CHINH">Chuyên viên Chính</option>
+                                    <option value="CHUYEN_VIEN">Chuyên viên</option>
+                                    <option value="CAN_SU">Cán sự</option>
+                                    <option value="NHAN_VIEN">Nhân viên</option>
+                                </>
+                            ) : (
+                                <>
+                                    <option value="VIEN_CHUC_HANG_1">Viên chức Hạng I</option>
+                                    <option value="VIEN_CHUC_HANG_2">Viên chức Hạng II</option>
+                                    <option value="VIEN_CHUC_HANG_3">Viên chức Hạng III</option>
+                                    <option value="VIEN_CHUC_HANG_4">Viên chức Hạng IV</option>
+                                </>
+                            )}
+                        </select>
+                    </div>
 
-                    <div className={selectedClass === 'CONG_CHUC' ? 'md:col-span-6 space-y-1' : 'md:col-span-9 space-y-1'}>
+                    <div className="md:col-span-6 space-y-1">
                         <label className="text-[10px] font-black text-slate-500 uppercase">Nhiệm vụ định biên mẫu bám sát tiêu chuẩn ngạch</label>
                         <input
                             type="text"

@@ -20,7 +20,7 @@ export function ManualPlanSelectorByRankClient() {
         { id: 'tr-4', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CHINH', taskName: 'Xử lý, thẩm tra và đưa ra ý kiến pháp lý đối với phiếu chuyển, đơn thư phức tạp', defaultUnit: 'Hồ sơ xử lý' },
         { id: 'tr-5', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN', taskName: 'Tiếp nhận, phân loại và luân chuyển văn bản đi/đến trên trục iDesk', defaultUnit: 'Văn bản' },
         { id: 'tr-6', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN', taskName: 'Trực tiếp xử lý hồ sơ dịch vụ công trực tuyến một cửa', defaultUnit: 'Hồ sơ' },
-        { id: 'tr-7', classification: 'VIEN_CHUC', rank: 'CÁN_BỘ_SỰ_NGHIỆP', taskName: 'Vận hành kỹ thuật, trực giám sát an toàn thông tin hệ thống IOC / LGSP', defaultUnit: 'Ca trực' },
+        { id: 'tr-7', classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_3', taskName: 'Vận hành kỹ thuật, trực giám sát an toàn thông tin hệ thống IOC / LGSP', defaultUnit: 'Ca trực' },
     ];
 
     const [activeRankFilter, setActiveRankFilter] = useState<string>('CHUYEN_VIEN_CHINH');
@@ -64,7 +64,12 @@ export function ManualPlanSelectorByRankClient() {
                             { key: 'CHUYEN_VIEN_CAO_CAP', label: 'Chuyên viên Cao cấp', desc: 'Đề án chiến lược, văn bản quy phạm vĩ mô' },
                             { key: 'CHUYEN_VIEN_CHINH', label: 'Chuyên viên Chính', desc: 'Tham mưu tổng hợp, tờ trình, thẩm định sở' },
                             { key: 'CHUYEN_VIEN', label: 'Chuyên viên', desc: 'Thực thi tác nghiệp, xử lý hồ sơ, phiếu chuyển' },
-                            { key: 'CÁN_BỘ_SỰ_NGHIỆP', label: 'Khối Viên chức Kỹ thuật', desc: 'Vận hành liên thông trục dữ liệu, phần mềm số' },
+                            { key: 'CAN_SU', label: 'Cán sự', desc: 'Hỗ trợ nghiệp vụ, lưu trữ, thống kê' },
+                            { key: 'NHAN_VIEN', label: 'Nhân viên', desc: 'Thực hiện các công việc thừa hành, phục vụ' },
+                            { key: 'VIEN_CHUC_HANG_1', label: 'Viên chức Hạng I', desc: 'Chủ trì đề án khoa học, công nghệ cấp bộ/tỉnh' },
+                            { key: 'VIEN_CHUC_HANG_2', label: 'Viên chức Hạng II', desc: 'Thực hiện nhiệm vụ chuyên môn phức tạp' },
+                            { key: 'VIEN_CHUC_HANG_3', label: 'Viên chức Hạng III', desc: 'Thực hành chuyên môn nghiệp vụ cơ bản' },
+                            { key: 'VIEN_CHUC_HANG_4', label: 'Viên chức Hạng IV', desc: 'Hỗ trợ kỹ thuật, nghiệp vụ đơn giản' },
                         ].map((rank) => (
                             <button
                                 key={rank.key}
