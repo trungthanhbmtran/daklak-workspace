@@ -16,11 +16,19 @@ export class TaskTemplatesService {
     });
 
     return {
-      templates: templates.map(t => ({
+      success: true,
+      message: 'Lấy danh sách nhiệm vụ mẫu thành công',
+      data: templates.map(t => ({
         ...t,
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',
-      }))
+      })),
+      meta: {
+        total: templates.length,
+        page: 1,
+        pageSize: templates.length,
+        totalPages: 1
+      }
     };
   }
 
@@ -35,9 +43,13 @@ export class TaskTemplatesService {
       }
     });
     return {
-      ...t,
-      createdAt: t.createdAt?.toISOString() || '',
-      updatedAt: t.updatedAt?.toISOString() || '',
+      success: true,
+      message: 'Thêm nhiệm vụ mẫu thành công',
+      data: {
+        ...t,
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+      }
     };
   }
 
@@ -53,14 +65,18 @@ export class TaskTemplatesService {
       }
     });
     return {
-      ...t,
-      createdAt: t.createdAt?.toISOString() || '',
-      updatedAt: t.updatedAt?.toISOString() || '',
+      success: true,
+      message: 'Cập nhật nhiệm vụ mẫu thành công',
+      data: {
+        ...t,
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+      }
     };
   }
 
   async delete(id: number) {
     await this.prisma.taskRankTemplate.delete({ where: { id } });
-    return { success: true };
+    return { success: true, message: 'Xóa nhiệm vụ mẫu thành công' };
   }
 }

@@ -1,6 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
 import { HrmMasterPlan, HrmPlanObjective } from "../types";
-import { unwrapData, unwrapMeta } from "./utils";
 
 export const hrmPlansApi = {
   aiGenerate(payload: { text: string }): Promise<any> {
@@ -9,8 +8,8 @@ export const hrmPlansApi = {
 
   list(params: any = {}): Promise<{ data: HrmMasterPlan[]; meta: any }> {
     return apiClient.get('/hrm/master-plans', { params }).then((res: any) => ({
-      data: unwrapData(res) || [],
-      meta: unwrapMeta(res) || { total: 0 }
+      data: res.data || [],
+      meta: res.meta || { total: 0 }
     }));
   },
   
@@ -19,7 +18,7 @@ export const hrmPlansApi = {
   },
   
   getOne(id: number): Promise<HrmMasterPlan | null> {
-    return apiClient.get(`/hrm/master-plans/${id}`).then((res: any) => (unwrapData(res) as unknown as HrmMasterPlan) || null);
+    return apiClient.get(`/hrm/master-plans/${id}`).then((res: any) => (res.data as unknown as HrmMasterPlan) || null);
   },
 
   update(id: number, payload: Partial<HrmMasterPlan>): Promise<{ success: boolean; data?: HrmMasterPlan }> {
@@ -30,7 +29,7 @@ export const hrmPlansApi = {
 export const hrmObjectivesApi = {
   list(planId: number): Promise<{ data: HrmPlanObjective[] }> {
     return apiClient.get(`/hrm/master-plans/${planId}/objectives`).then((res: any) => ({
-      data: unwrapData(res) || []
+      data: res.data || []
     }));
   },
   

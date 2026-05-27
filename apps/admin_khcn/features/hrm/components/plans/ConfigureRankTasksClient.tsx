@@ -4,8 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { Settings2, Shield, Users, Save } from 'lucide-react';
 import { CivilServantTaskConfig } from './CivilServantTaskConfig';
 import { PublicEmployeeTaskConfig } from './PublicEmployeeTaskConfig';
-import { categoryApi } from '@/features/system-admin/categories/api';
-import { CategoryItem } from '@/features/system-admin/categories/types';
 import { useConfigureRankTasks } from './hooks/useConfigureRankTasks';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";

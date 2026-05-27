@@ -1,13 +1,13 @@
 import apiClient from "@/lib/axiosInstance";
-import { unwrapData, unwrapMeta } from "./utils";
+
 
 export const hrmKpiCriteriaApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get('/hrm/kpis/criteria', { params }).then((res: any) => {
-      const data = res?.criteria || res?.data?.criteria || unwrapData(res) || [];
+      const data = res.data || [];
       return {
         data,
-        meta: unwrapMeta(res) || { total: data.length, page: 1, pageSize: 20, totalPages: 1 }
+        meta: res.meta || { total: data.length, page: 1, pageSize: 20, totalPages: 1 }
       };
     });
   },
@@ -42,8 +42,8 @@ export const hrmKpiPlansApi = {
 export const hrmKpiEvaluationsApi = {
   list(params: any = {}): Promise<{ data: any; meta: any }> {
     return apiClient.get('/hrm/kpi-evaluations', { params }).then((res: any) => ({
-      data: res?.data || unwrapData(res) || {},
-      meta: unwrapMeta(res) || { total: 0 }
+      data: res.data || {},
+      meta: res.meta || { total: 0 }
     }));
   }
 };

@@ -1,5 +1,4 @@
 import apiClient from "@/lib/axiosInstance";
-import { unwrapData, unwrapMeta } from "./utils";
 
 export const hrmDepartmentsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
@@ -23,8 +22,8 @@ export const hrmDepartmentsApi = {
 export const hrmLeaveApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/leaves", { params }).then((res: any) => ({
-      data: unwrapData(res),
-      meta: unwrapMeta(res) || { total: 0 },
+      data: res.data || [],
+      meta: res.meta || { total: 0 },
     }));
   }
 };
@@ -32,8 +31,8 @@ export const hrmLeaveApi = {
 export const hrmAttendanceApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/attendance", { params }).then((res: any) => ({
-      data: unwrapData(res),
-      meta: unwrapMeta(res) || { total: 0 },
+      data: res.data || [],
+      meta: res.meta || { total: 0 },
     }));
   }
 };
@@ -41,8 +40,8 @@ export const hrmAttendanceApi = {
 export const hrmContractsApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/contracts", { params }).then((res: any) => ({
-      data: unwrapData(res),
-      meta: unwrapMeta(res) || { total: 0 },
+      data: res.data || [],
+      meta: res.meta || { total: 0 },
     }));
   }
 };
@@ -56,8 +55,8 @@ export * from "./task-templates.api";
 export const hrmPayrollApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get("/hrm/payroll", { params }).then((res: any) => ({
-      data: unwrapData(res),
-      meta: unwrapMeta(res) || { total: 0 },
+      data: res.data || [],
+      meta: res.meta || { total: 0 },
     }));
   }
 };

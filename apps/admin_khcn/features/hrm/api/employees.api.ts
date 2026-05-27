@@ -1,6 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
 import type { HrmEmployee, HrmEmployeesListParams, HrmEmployeesListResponse } from "../types";
-import { unwrapData, unwrapMeta } from "./utils";
 
 const HRM_EMPLOYEES_PATH = "/hrm/employees";
 
@@ -30,11 +29,11 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
 
 export const hrmApi = {
   list(params: HrmEmployeesListParams = {}): Promise<HrmEmployeesListResponse> {
-    return apiClient.get(HRM_EMPLOYEES_PATH, { params }).then((res: unknown) => {
-      const data = unwrapData(res);
+    return apiClient.get(HRM_EMPLOYEES_PATH, { params }).then((res: any) => {
+      const data = res.data || [];
       return {
         data: data.map((row: unknown) => parseEmployeeRow(row as Record<string, unknown>)),
-        meta: unwrapMeta(res),
+        meta: res.meta || {},
       };
     });
   },
@@ -43,8 +42,8 @@ export const hrmApi = {
     if (!keyword?.trim()) return Promise.resolve([]);
     return apiClient
       .get(HRM_EMPLOYEES_PATH, { params: { keyword: keyword.trim(), pageSize } })
-      .then((res: unknown) => {
-        const data = unwrapData(res);
+      .then((res: any) => {
+        const data = res.data || [];
         return data.map((row: unknown) => parseEmployeeRow(row as Record<string, unknown>));
       });
   },

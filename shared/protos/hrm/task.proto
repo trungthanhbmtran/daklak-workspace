@@ -2,6 +2,7 @@ syntax = "proto3";
 
 package task;
 
+import "common/common.proto";
 service TaskService {
   rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {}
   rpc ListTasks (ListTasksRequest) returns (ListTasksResponse) {}
@@ -10,9 +11,15 @@ service TaskService {
 
 service TaskTemplateService {
   rpc FindAll (FindAllTemplatesRequest) returns (FindAllTemplatesResponse) {}
-  rpc Create (CreateTemplateRequest) returns (TaskTemplateResponse) {}
-  rpc Update (UpdateTemplateRequest) returns (TaskTemplateResponse) {}
+  rpc Create (CreateTemplateRequest) returns (TaskTemplateDataResponse) {}
+  rpc Update (UpdateTemplateRequest) returns (TaskTemplateDataResponse) {}
   rpc Delete (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}
+}
+
+message TaskTemplateDataResponse {
+  bool success = 1;
+  string message = 2;
+  TaskTemplateResponse data = 3;
 }
 
 message TaskResponse {
@@ -81,7 +88,10 @@ message FindAllTemplatesRequest {
 }
 
 message FindAllTemplatesResponse {
-  repeated TaskTemplateResponse templates = 1;
+  bool success = 1;
+  string message = 2;
+  repeated TaskTemplateResponse data = 3;
+  common.Meta meta = 4;
 }
 
 message CreateTemplateRequest {
@@ -107,4 +117,5 @@ message DeleteTemplateRequest {
 
 message DeleteTemplateResponse {
   bool success = 1;
+  string message = 2;
 }
