@@ -14,23 +14,22 @@ import type { HrmEmployee } from "@/features/hrm/types";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery } from "@tanstack/react-query";
 
-function flattenUnits(nodes: unknown[], acc: { id: number; name: string }[] = []): { id: number; name: string }[] {
-  for (const n of nodes || []) {
-    const node = n as { id?: number | string; name?: string; children?: unknown[] };
-    if (node.id != null) acc.push({ id: Number(node.id), name: node.name ?? "" });
-    flattenUnits(node.children ?? [], acc);
-  }
+function flattenUnits(nodes: any[], acc: { id: string | number; name: string }[] = []) {
+  nodes?.forEach(node => {
+    if (node.id != null) acc.push({ id: node.id, name: node.name || "" });
+    flattenUnits(node.children, acc);
+  });
   return acc;
 }
 
-function getUnitName(emp: HrmEmployee, unitMap: Map<number, string>) {
-  return emp.department?.name || (emp.departmentId != null ? unitMap.get(emp.departmentId) : null) || "—";
+function getUnitName(emp: HrmEmployee, unitMap: Record<string, string>) {
+  return emp.department?.name || (emp.departmentId != null ? unitMap[emp.departmentId as any] : null) || "—";
 }
-function getJobTitleGroups(emp: HrmEmployee, jobTitleMap: Map<number, string>) {
-  const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleMap.get(emp.jobTitleId) : null);
-  const rank = emp.civilServantRank?.name || (emp.civilServantRankId != null ? jobTitleMap.get(emp.civilServantRankId) : null);
-  const party = emp.partyTitle?.name || (emp.partyTitleId != null ? jobTitleMap.get(emp.partyTitleId) : null);
-  
+function getJobTitleGroups(emp: HrmEmployee, jobTitleMap: Record<string, string>) {
+  const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleMap[emp.jobTitleId as any] : null);
+  const rank = emp.civilServantRank?.name || (emp.civilServantRankId != null ? jobTitleMap[emp.civilServantRankId as any] : null);
+  const party = emp.partyTitle?.name || (emp.partyTitleId != null ? jobTitleMap[emp.partyTitleId as any] : null);
+
   return { govt, rank, party };
 }
 
@@ -39,7 +38,7 @@ export function EmployeeListClient() {
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 10;
-  
+
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const { mutate: deleteEmployee, isPending: isDeleting } = useDeleteHrmEmployee();
 
@@ -49,7 +48,7 @@ export function EmployeeListClient() {
     keyword: keyword || undefined,
   });
 
-  const { data: treeNodes } = useQuery({
+  const { data: treeNodes }: any = useQuery({
     queryKey: ["organizations", "tree"],
     queryFn: () => organizationApi.getTree(),
   });
@@ -59,18 +58,17 @@ export function EmployeeListClient() {
   });
 
   const unitMap = useMemo(() => {
-    const m = new Map<number, string>();
-    if (!Array.isArray(treeNodes)) return m;
-    flattenUnits(treeNodes).forEach((u) => m.set(u.id, u.name));
+    const m: Record<string, string> = {};
+    flattenUnits(treeNodes).forEach((u) => { m[u.id] = u.name; });
     return m;
   }, [treeNodes]);
   const jobTitleMap = useMemo(() => {
-    const m = new Map<number, string>();
-    (jobTitlesRes?.items ?? []).forEach((j: { id: number | string; name: string }) => m.set(Number(j.id), j.name));
+    const m: Record<string, string> = {};
+    jobTitlesRes?.items?.forEach((j: any) => { m[j.id] = j.name; });
     return m;
   }, [jobTitlesRes]);
 
-  const employees = listRes?.data ?? [];
+  const employees = listRes?.data;
   const pagination = listRes?.meta?.pagination;
   const total = pagination?.total ?? 0;
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
@@ -147,7 +145,7 @@ export function EmployeeListClient() {
                     Lỗi tải dữ liệu. Kiểm tra kết nối API và gateway.
                   </TableCell>
                 </TableRow>
-              ) : employees.length === 0 ? (
+              ) : !employees?.length ? (
                 <TableRow>
                   <TableCell colSpan={4} className="h-40 text-center text-slate-500">
                     Không có nhân viên. Thêm nhân sự hoặc thử từ khóa tìm kiếm khác.
@@ -196,7 +194,7 @@ export function EmployeeListClient() {
                                       Chưa bổ nhiệm (CQ)
                                     </span>
                                   )}
-                                  
+
                                   {party && (
                                     <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200/60">
                                       {party}
@@ -233,11 +231,11 @@ export function EmployeeListClient() {
                               <Edit className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             onClick={() => setDeleteId(emp.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full" 
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
                             title="Xóa"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -281,7 +279,7 @@ export function EmployeeListClient() {
         )}
       </div>
 
-      <ConfirmDeleteModal 
+      <ConfirmDeleteModal
         isOpen={deleteId !== null}
         onClose={() => setDeleteId(null)}
         onConfirm={handleDelete}
