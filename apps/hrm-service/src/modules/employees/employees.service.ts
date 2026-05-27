@@ -140,7 +140,7 @@ export class EmployeesService {
         ...(data.email != null && { email: data.email }),
         ...(data.phone != null && { phone: data.phone }),
         ...(data.gender != null && { gender: data.gender }),
-        ...(data.birthday != null && { birthday: new Date(data.birthday) }),
+        ...(data.birthday !== undefined && { birthday: data.birthday ? new Date(data.birthday) : null }),
         ...(data.identityCard != null && { identityCard: data.identityCard }),
         ...(data.departmentId != null && { departmentId: data.departmentId }),
         ...(data.jobTitleId != null && { jobTitleId: data.jobTitleId }),
@@ -149,7 +149,7 @@ export class EmployeesService {
         ...(data.status != null && { status: data.status }),
         ...(data.address != null && { address: data.address }),
         ...(data.avatar != null && { avatar: data.avatar }),
-        ...(data.startDate != null && { startDate: new Date(data.startDate) }),
+        ...(data.startDate !== undefined && { startDate: data.startDate ? new Date(data.startDate) : undefined }),
       },
     });
     return { success: true, message: 'Cập nhật hồ sơ thành công', data: this.toEmployee(updated) };

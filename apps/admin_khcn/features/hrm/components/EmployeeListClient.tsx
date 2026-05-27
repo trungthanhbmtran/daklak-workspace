@@ -16,8 +16,8 @@ import { useQuery } from "@tanstack/react-query";
 
 function flattenUnits(nodes: unknown[], acc: { id: number; name: string }[] = []): { id: number; name: string }[] {
   for (const n of nodes || []) {
-    const node = n as { id?: number; name?: string; children?: unknown[] };
-    if (node.id != null) acc.push({ id: node.id, name: node.name ?? "" });
+    const node = n as { id?: number | string; name?: string; children?: unknown[] };
+    if (node.id != null) acc.push({ id: Number(node.id), name: node.name ?? "" });
     flattenUnits(node.children ?? [], acc);
   }
   return acc;
@@ -66,7 +66,7 @@ export function EmployeeListClient() {
   }, [treeNodes]);
   const jobTitleMap = useMemo(() => {
     const m = new Map<number, string>();
-    (jobTitlesRes?.items ?? []).forEach((j: { id: number; name: string }) => m.set(j.id, j.name));
+    (jobTitlesRes?.items ?? []).forEach((j: { id: number | string; name: string }) => m.set(Number(j.id), j.name));
     return m;
   }, [jobTitlesRes]);
 
