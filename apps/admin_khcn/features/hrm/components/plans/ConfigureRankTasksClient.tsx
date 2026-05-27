@@ -19,7 +19,7 @@ interface TaskRankTemplate {
 export function ConfigureRankTasksClient() {
     const { data, isLoading } = useTaskTemplatesList();
     const templates = data?.data || [];
-    
+
     const { mutateAsync: createTemplate } = useCreateTaskTemplate();
     const { mutateAsync: deleteTemplate } = useDeleteTaskTemplate();
 
@@ -32,6 +32,11 @@ export function ConfigureRankTasksClient() {
     const handleAddTemplate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTaskName.trim()) return;
+
+        console.log(selectedClass);
+        console.log(selectedRank);
+        console.log(newTaskName);
+        console.log(newUnit);
 
         const payload = {
             classification: selectedClass,
