@@ -6,7 +6,7 @@ import { CivilServantTaskConfig } from './CivilServantTaskConfig';
 import { PublicEmployeeTaskConfig } from './PublicEmployeeTaskConfig';
 import { categoryApi } from '@/features/system-admin/categories/api';
 import { CategoryItem } from '@/features/system-admin/categories/types';
-import { useTaskTemplatesList } from '../../hooks';
+import { useConfigureRankTasks } from './hooks/useConfigureRankTasks';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -15,30 +15,11 @@ import { Button } from "@/components/ui/button";
 export type GovClassification = 'CONG_CHUC' | 'VIEN_CHUC';
 
 export function ConfigureRankTasksClient() {
-    const [selectedClass, setSelectedClass] = useState<GovClassification>('CONG_CHUC');
-    const [isSaved, setIsSaved] = useState(false);
-
-    const { data: templatesData } = useTaskTemplatesList();
-    const templates = templatesData?.data || [];
-
-    const [units, setUnits] = useState<CategoryItem[]>([]);
-    const [congChucRanks, setCongChucRanks] = useState<CategoryItem[]>([]);
-    const [vienChucRanks, setVienChucRanks] = useState<CategoryItem[]>([]);
-    
-    useEffect(() => {
-        Promise.all([
-            categoryApi.fetchByGroup('UNIT'),
-            categoryApi.fetchByGroup('RANK_CONG_CHUC'),
-            categoryApi.fetchByGroup('RANK_VIEN_CHUC')
-        ]).then(([unitsData, congChucData, vienChucData]) => {
-            setUnits(unitsData);
-            setCongChucRanks(congChucData);
-            setVienChucRanks(vienChucData);
-        });
-    }, []);
-
-    const congChucTemplates = templates.filter(t => t.classification === 'CONG_CHUC');
-    const vienChucTemplates = templates.filter(t => t.classification === 'VIEN_CHUC');
+    const {
+        selectedClass, setSelectedClass, isSaved, handleSave,
+        units, congChucRanks, vienChucRanks,
+        congChucTemplates, vienChucTemplates, isLoading
+    } = useConfigureRankTasks();
 
     return (
         <Card className="max-w-5xl mx-auto mt-6 shadow-sm border-slate-200">
@@ -81,7 +62,7 @@ export function ConfigureRankTasksClient() {
 
             <CardFooter className="flex justify-end pt-4 pb-4 border-t bg-slate-50/50 rounded-b-2xl">
                 <Button
-                    onClick={() => { setIsSaved(true); setTimeout(() => setIsSaved(false), 2000); }}
+                    onClick={handleSave}
                     className="gap-2 font-bold text-xs h-10 px-6 rounded-xl"
                 >
                     <Save className="w-4 h-4" /> LƯU ĐỒNG BỘ THƯ VIỆN NGẠCH

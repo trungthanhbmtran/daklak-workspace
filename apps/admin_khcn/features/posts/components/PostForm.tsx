@@ -138,15 +138,15 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const all = await categoryApi.fetchAll();
-        const langs = all.filter((c: any) => c.group === 'LANGUAGE' && c.active === 1);
-        setLanguages(langs);
+        const langs = await categoryApi.fetchByGroup('LANGUAGE');
+        const activeLangs = langs.filter((c: any) => c.active === 1);
+        setLanguages(activeLangs);
 
         // Đảm bảo translations object có đầy đủ keys cho các ngôn ngữ
         const currentTranslations = form.getValues("translations") || {};
         const newTranslations = { ...currentTranslations };
         let hasNew = false;
-        langs.forEach(l => {
+        activeLangs.forEach(l => {
           if (l.code !== 'vi' && !newTranslations[l.code]) {
             newTranslations[l.code] = { title: "", description: "", content: "" };
             hasNew = true;

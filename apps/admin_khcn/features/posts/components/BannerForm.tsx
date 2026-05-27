@@ -134,9 +134,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
   useEffect(() => {
     const fetchLanguages = async () => {
       try {
-        const all = await categoryApi.fetchAll();
-        const langs = all.filter((c: any) => c.group === 'LANGUAGE' && c.active === 1);
-        setLanguages(langs);
+        const langs = await categoryApi.fetchByGroup('LANGUAGE');
+        setLanguages(langs.filter((c: any) => c.active === 1));
       } catch (error) {
         console.error("Error fetching languages:", error);
       }

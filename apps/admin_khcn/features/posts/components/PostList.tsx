@@ -134,7 +134,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const { data: systemCategories } = useQuery({
     queryKey: ["system-categories"],
     queryFn: async () => {
-      const res = await categoryApi.fetchAll();
+      const res = await categoryApi.fetchByGroup('POST_STATUS');
       return res || [];
     }
   });
@@ -148,10 +148,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
     }
   });
 
-  const postStatusCategories = systemCategories?.filter((c: any) => c.group === "POST_STATUS" && c.active === 1) || [];
+  const postStatusCategories = systemCategories?.filter((c: any) => c.active === 1) || [];
 
   const getStatusLabel = (status: PostStatus) => {
-    const matched = systemCategories?.find((c: any) => c.group === "POST_STATUS" && c.code === status);
+    const matched = systemCategories?.find((c: any) => c.code === status);
     return matched ? matched.name : (STATUS_CONFIG[status]?.label || status);
   };
 

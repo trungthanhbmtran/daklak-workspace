@@ -32,13 +32,13 @@ export function usePortalMenu() {
 
   const fetchLanguages = async () => {
     try {
-      const allCategories = await categoryApi.fetchAll();
-      const langs = allCategories.filter(c => c.group === 'LANGUAGE' && c.active === 1);
-      const activeLanguages = langs.length > 0 ? langs : [
+      const langs = await categoryApi.fetchByGroup('LANGUAGE');
+      const activeLanguages = langs.filter(c => c.active === 1);
+      const finalLanguages = activeLanguages.length > 0 ? activeLanguages : [
         { id: 1, group: 'LANGUAGE', code: 'vi', name: 'Tiếng Việt', sort: 1, active: 1 },
         { id: 2, group: 'LANGUAGE', code: 'en', name: 'English', sort: 2, active: 1 }
       ];
-      setLanguages(activeLanguages);
+      setLanguages(finalLanguages);
     } catch (error) {
       console.error("Error fetching languages:", error);
       setLanguages([

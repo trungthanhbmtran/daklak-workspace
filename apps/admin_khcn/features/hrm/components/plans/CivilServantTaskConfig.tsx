@@ -2,77 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Trash2, Save, Award, Edit2, X } from 'lucide-react';
-import { useCreateTaskTemplate, useDeleteTaskTemplate, useUpdateTaskTemplate } from '../../hooks';
 import { CategoryItem } from '@/features/system-admin/categories/types';
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+import { useTaskConfigForm } from './hooks/useTaskConfigForm';
+
 export function CivilServantTaskConfig({ templates, units, ranks }: { templates: any[], units: CategoryItem[], ranks: CategoryItem[] }) {
-    const { mutateAsync: createTemplate } = useCreateTaskTemplate();
-    const { mutateAsync: deleteTemplate } = useDeleteTaskTemplate();
-    const { mutateAsync: updateTemplate } = useUpdateTaskTemplate();
-
-    const [selectedRank, setSelectedRank] = useState<string>('CHUYEN_VIEN');
-    const [newTaskName, setNewTaskName] = useState('');
-    const [newUnit, setNewUnit] = useState('');
-
-    const [editingId, setEditingId] = useState<string | null>(null);
-    const [editTaskName, setEditTaskName] = useState('');
-    const [editUnit, setEditUnit] = useState('');
-
-    useEffect(() => {
-        if (ranks.length > 0 && !ranks.find(r => r.code === selectedRank)) {
-            setSelectedRank(ranks[0].code);
-        }
-    }, [ranks, selectedRank]);
-
-    const handleAddTemplate = async () => {
-        if (!newTaskName.trim() || !newUnit) return;
-
-        const payload = {
-            classification: 'CONG_CHUC',
-            rank: selectedRank,
-            taskName: newTaskName.trim(),
-            defaultUnit: newUnit
-        };
-
-        try {
-            await createTemplate(payload);
-            setNewTaskName('');
-        } catch (error) {
-            console.error('Error adding template', error);
-        }
-    };
-
-    const handleDeleteTemplate = async (id: string) => {
-        try {
-            await deleteTemplate(id);
-        } catch (error) {
-            console.error('Error deleting template', error);
-        }
-    };
-
-    const handleSaveEdit = async () => {
-        if (!editingId || !editTaskName.trim()) return;
-        const currentItem = templates.find(t => t.id === editingId);
-        if (!currentItem) return;
-        try {
-            await updateTemplate({
-                id: editingId,
-                payload: {
-                    classification: 'CONG_CHUC',
-                    rank: currentItem.rank,
-                    taskName: editTaskName.trim(),
-                    defaultUnit: editUnit,
-                }
-            });
-            setEditingId(null);
-        } catch (error) {
-            console.error('Error updating template', error);
-        }
-    };
+    const {
+        selectedRank, setSelectedRank,
+        newTaskName, setNewTaskName,
+        newUnit, setNewUnit,
+        editingId,
+        editTaskName, setEditTaskName,
+        editUnit, setEditUnit,
+        handleAddTemplate,
+        handleDeleteTemplate,
+        handleStartEdit,
+        handleSaveEdit,
+        handleCancelEdit
+    } = useTaskConfigForm({
+        templates,
+        ranks,
+        classification: 'CONG_CHUC',
+        defaultRank: 'CHUYEN_VIEN'
+    });
 
     return (
         <div className="space-y-4">
@@ -178,7 +134,7 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
                                         <Button variant="ghost" size="icon" onClick={handleSaveEdit} className="text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 h-8 w-8">
                                             <Save className="w-4 h-4" />
                                         </Button>
-                                        <Button variant="ghost" size="icon" onClick={() => setEditingId(null)} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 h-8 w-8">
+                                        <Button variant="ghost" size="icon" onClick={handleCancelEdit} className="text-slate-400 hover:text-slate-600 hover:bg-slate-100 h-8 w-8">
                                             <X className="w-4 h-4" />
                                         </Button>
                                     </>
@@ -187,11 +143,7 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
                                         <span className="bg-slate-100 font-mono font-bold text-slate-600 px-2.5 py-0.5 rounded text-[10px] mr-2">
                                             Chuẩn đầu ra: {item.defaultUnit}
                                         </span>
-                                        <Button variant="ghost" size="icon" onClick={() => {
-                                            setEditingId(item.id);
-                                            setEditTaskName(item.taskName);
-                                            setEditUnit(item.defaultUnit);
-                                        }} className="text-slate-400 hover:text-indigo-600 h-8 w-8">
+                                        <Button variant="ghost" size="icon" onClick={() => handleStartEdit(item)} className="text-slate-400 hover:text-indigo-600 h-8 w-8">
                                             <Edit2 className="w-4 h-4" />
                                         </Button>
                                         <Button variant="ghost" size="icon" onClick={() => handleDeleteTemplate(item.id)} className="text-slate-400 hover:text-red-600 h-8 w-8">
