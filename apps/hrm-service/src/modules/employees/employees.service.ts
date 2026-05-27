@@ -110,6 +110,7 @@ export class EmployeesService {
       firstname: string;
       lastname: string;
       employeeCode: string;
+      startDate: string;
       email: string;
       phone: string;
       gender: string;
@@ -148,6 +149,7 @@ export class EmployeesService {
         ...(data.status != null && { status: data.status }),
         ...(data.address != null && { address: data.address }),
         ...(data.avatar != null && { avatar: data.avatar }),
+        ...(data.startDate != null && { startDate: new Date(data.startDate) }),
       },
     });
     return { success: true, message: 'Cập nhật hồ sơ thành công', data: this.toEmployee(updated) };

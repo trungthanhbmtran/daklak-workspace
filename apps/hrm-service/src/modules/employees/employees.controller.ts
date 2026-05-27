@@ -29,7 +29,7 @@ export class EmployeesController {
   }
 
   @GrpcMethod('EmployeeHandlers', 'UpdateEmployee')
-  update(data: { id: number; firstname?: string; lastname?: string; email?: string; phone?: string; gender?: string; birthday?: string; identityCard?: string; departmentId?: number; jobTitleId?: number; civilServantRankId?: number; partyTitleId?: number; status?: string; address?: string; avatar?: string }) {
+  update(data: { id: number; firstname?: string; lastname?: string; employeeCode?: string; startDate?: string; email?: string; phone?: string; gender?: string; birthday?: string; identityCard?: string; departmentId?: number; jobTitleId?: number; civilServantRankId?: number; partyTitleId?: number; status?: string; address?: string; avatar?: string }) {
     return this.employees.update(data.id, data);
   }
 

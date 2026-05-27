@@ -34,7 +34,7 @@ function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): a
 }
 
 export default function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+  const resolvedParams = typeof (params as Promise<{ id: string }>).then === "function" ? use(params as Promise<{ id: string }>) : (params as { id: string });
   const employeeId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -54,6 +54,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
 
   useEffect(() => {
     if (employee) {
+      console.log("Loaded employee:", employee);
       setForm({
         firstname: employee.firstname || "",
         lastname: employee.lastname || "",
@@ -69,6 +70,8 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
         birthday: employee.birthday ? employee.birthday.toString().slice(0, 10) : "",
         avatar: employee.avatar || "",
       });
+    } else if (employee === null) {
+      toast.error("Không tìm thấy thông tin nhân sự!");
     }
   }, [employee]);
 

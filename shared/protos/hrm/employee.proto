@@ -68,6 +68,8 @@ message UpdateEmployeeRequest {
   string status = 11;
   string address = 12;
   string avatar = 13;
+  string employeeCode = 14;
+  string startDate = 15;
   int32 civilServantRankId = 20;
   int32 partyTitleId = 21;
 }
