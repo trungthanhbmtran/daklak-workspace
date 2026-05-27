@@ -8,6 +8,12 @@ service TaskService {
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
 }
 
+service TaskTemplateService {
+  rpc FindAll (FindAllTemplatesRequest) returns (FindAllTemplatesResponse) {}
+  rpc Create (CreateTemplateRequest) returns (TaskTemplateResponse) {}
+  rpc Delete (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}
+}
+
 message TaskResponse {
   int32 id = 1;
   string title = 2;
@@ -55,4 +61,40 @@ message ListTasksResponse {
 message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
+}
+
+message TaskTemplateResponse {
+  int32 id = 1;
+  string classification = 2;
+  string rank = 3;
+  string taskName = 4;
+  string defaultUnit = 5;
+  float defaultWeight = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+message FindAllTemplatesRequest {
+  string classification = 1;
+  string rank = 2;
+}
+
+message FindAllTemplatesResponse {
+  repeated TaskTemplateResponse templates = 1;
+}
+
+message CreateTemplateRequest {
+  string classification = 1;
+  string rank = 2;
+  string taskName = 3;
+  string defaultUnit = 4;
+  float defaultWeight = 5;
+}
+
+message DeleteTemplateRequest {
+  int32 id = 1;
+}
+
+message DeleteTemplateResponse {
+  bool success = 1;
 }
