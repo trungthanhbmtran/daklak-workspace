@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class TaskTemplatesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(query: any) {
     const where: any = {};
