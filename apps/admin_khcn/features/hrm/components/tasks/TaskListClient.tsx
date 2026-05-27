@@ -4,10 +4,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { 
-  Plus, Eye, Edit, Trash2, 
-  CheckCircle2, Clock, PlayCircle, 
-  AlertCircle, Search, Filter, 
+import {
+  Plus, Eye, Edit, Trash2,
+  CheckCircle2, Clock, PlayCircle,
+  AlertCircle, Search, Filter,
   LayoutGrid, List as ListIcon,
   Calendar, User
 } from 'lucide-react';
@@ -98,7 +98,7 @@ export const TaskListClient = () => {
       due.setHours(0, 0, 0, 0);
       return due < now;
     }
-    
+
     if (activeFilter === 'dueIn3Days') {
       if (t.status === 'OVERDUE') return false;
       if (!t.dueDate) return false;
@@ -133,7 +133,7 @@ export const TaskListClient = () => {
   });
 
   const getStatusBadge = (status: string) => {
-    switch(status) {
+    switch (status) {
       case 'DONE': return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200">Hoàn thành</Badge>;
       case 'IN_PROGRESS': return <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200">Đang xử lý</Badge>;
       case 'TODO': return <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200">Cần làm</Badge>;
@@ -143,7 +143,7 @@ export const TaskListClient = () => {
   };
 
   const getPriorityColor = (priority: string) => {
-    switch(priority) {
+    switch (priority) {
       case 'HIGH': return 'text-rose-500';
       case 'MEDIUM': return 'text-amber-500';
       case 'LOW': return 'text-emerald-500';
@@ -173,8 +173,8 @@ export const TaskListClient = () => {
       {/* Stats Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat, idx) => (
-          <Card 
-            key={idx} 
+          <Card
+            key={idx}
             className={`border-none shadow-md transition-all duration-300 overflow-hidden group cursor-pointer ${activeFilter === stat.id ? 'ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'hover:shadow-xl'}`}
             onClick={() => setActiveFilter(activeFilter === stat.id ? null : stat.id)}
           >
@@ -198,8 +198,8 @@ export const TaskListClient = () => {
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
         <div className="relative w-full sm:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input 
-            placeholder="Tìm kiếm công việc..." 
+          <Input
+            placeholder="Tìm kiếm công việc..."
             className="pl-10 rounded-full bg-slate-50 border-none focus-visible:ring-1 focus-visible:ring-indigo-500"
           />
         </div>
@@ -208,17 +208,17 @@ export const TaskListClient = () => {
             <Filter className="mr-2 h-4 w-4 text-slate-500" /> Bộ lọc
           </Button>
           <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1">
-            <Button 
-              variant={viewMode === 'grid' ? 'default' : 'ghost'} 
-              size="sm" 
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
               className={`rounded-full px-3 ${viewMode === 'grid' ? 'shadow-sm' : ''}`}
               onClick={() => setViewMode('grid')}
             >
               <LayoutGrid className="h-4 w-4" />
             </Button>
-            <Button 
-              variant={viewMode === 'list' ? 'default' : 'ghost'} 
-              size="sm" 
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
               className={`rounded-full px-3 ${viewMode === 'list' ? 'shadow-sm' : ''}`}
               onClick={() => setViewMode('list')}
             >
@@ -263,7 +263,7 @@ export const TaskListClient = () => {
                   <p className="text-sm text-slate-500 line-clamp-2 mb-6 min-h-[40px]">
                     {task.description || 'Chưa có mô tả chi tiết cho công việc này.'}
                   </p>
-                  
+
                   <div className="space-y-3">
                     <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
                       <User className="h-4 w-4 mr-2 text-indigo-500" />
@@ -314,7 +314,7 @@ export const TaskListClient = () => {
                       {getStatusBadge(task.status || 'TODO')}
                     </td>
                     <td className="px-6 py-4">
-                       <span className={`font-semibold ${getPriorityColor(task.priority)}`}>{task.priority || 'MEDIUM'}</span>
+                      <span className={`font-semibold ${getPriorityColor(task.priority)}`}>{task.priority || 'MEDIUM'}</span>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center">
