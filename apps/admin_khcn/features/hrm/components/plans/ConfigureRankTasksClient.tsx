@@ -33,10 +33,10 @@ export function ConfigureRankTasksClient() {
         e.preventDefault();
         if (!newTaskName.trim()) return;
 
-        console.log(selectedClass);
-        console.log(selectedRank);
-        console.log(newTaskName);
-        console.log(newUnit);
+        console.log('classification', selectedClass);
+        console.log('rank', selectedRank);
+        console.log('taskName', newTaskName);
+        console.log('defaultUnit', newUnit);
 
         const payload = {
             classification: selectedClass,
