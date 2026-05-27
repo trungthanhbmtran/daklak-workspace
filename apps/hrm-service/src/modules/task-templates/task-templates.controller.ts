@@ -12,8 +12,14 @@ export class TaskTemplatesController {
   }
 
   @GrpcMethod('TaskTemplateService', 'Create')
-  create(data: any) {
-    return this.taskTemplatesService.create(data);
+  async create(data: any) {
+    try {
+      console.log('CreateTemplate payload:', data);
+      return await this.taskTemplatesService.create(data);
+    } catch (error) {
+      console.error('Error creating template:', error);
+      throw error;
+    }
   }
 
   @GrpcMethod('TaskTemplateService', 'Delete')
