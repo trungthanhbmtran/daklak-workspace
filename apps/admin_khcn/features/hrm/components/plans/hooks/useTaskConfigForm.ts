@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useCreateTaskTemplate, useDeleteTaskTemplate, useUpdateTaskTemplate } from '@/features/hrm/hooks';
 import { CategoryItem } from '@/features/system-admin/categories/types';
 
@@ -29,7 +30,10 @@ export function useTaskConfigForm({ templates, ranks, classification, defaultRan
     }, [ranks, selectedRank]);
 
     const handleAddTemplate = async () => {
-        if (!newTaskName.trim() || !newUnit) return;
+        if (!newTaskName.trim() || !newUnit) {
+            toast.error("Vui lòng nhập tên nhiệm vụ và chọn đơn vị tính");
+            return;
+        }
         try {
             await createTemplate({
                 classification,
@@ -37,17 +41,21 @@ export function useTaskConfigForm({ templates, ranks, classification, defaultRan
                 taskName: newTaskName.trim(),
                 defaultUnit: newUnit
             });
+            toast.success("Thêm nhiệm vụ mẫu thành công!");
             setNewTaskName('');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error adding template', error);
+            toast.error(error?.message || 'Không thể thêm nhiệm vụ mẫu');
         }
     };
 
     const handleDeleteTemplate = async (id: string) => {
         try {
             await deleteTemplate(id);
-        } catch (error) {
+            toast.success("Xóa nhiệm vụ mẫu thành công!");
+        } catch (error: any) {
             console.error('Error deleting template', error);
+            toast.error(error?.message || 'Không thể xóa nhiệm vụ mẫu');
         }
     };
 
@@ -72,8 +80,10 @@ export function useTaskConfigForm({ templates, ranks, classification, defaultRan
                 }
             });
             setEditingId(null);
-        } catch (error) {
+            toast.success("Cập nhật nhiệm vụ mẫu thành công!");
+        } catch (error: any) {
             console.error('Error updating template', error);
+            toast.error(error?.message || 'Không thể cập nhật nhiệm vụ mẫu');
         }
     };
 
