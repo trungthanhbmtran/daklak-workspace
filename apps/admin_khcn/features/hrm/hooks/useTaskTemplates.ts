@@ -30,3 +30,13 @@ export function useDeleteTaskTemplate() {
     },
   });
 }
+
+export function useUpdateTaskTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: string, payload: any }) => hrmTaskTemplatesApi.update(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: hrmKeys.taskTemplates() });
+    },
+  });
+}

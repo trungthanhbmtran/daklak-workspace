@@ -22,6 +22,17 @@ export class TaskTemplatesController {
     }
   }
 
+  @GrpcMethod('TaskTemplateService', 'Update')
+  async update(data: any) {
+    try {
+      console.log('UpdateTemplate payload:', data);
+      return await this.taskTemplatesService.update(data.id, data);
+    } catch (error) {
+      console.error('Error updating template:', error);
+      throw error;
+    }
+  }
+
   @GrpcMethod('TaskTemplateService', 'Delete')
   delete(data: { id: number }) {
     return this.taskTemplatesService.delete(data.id);

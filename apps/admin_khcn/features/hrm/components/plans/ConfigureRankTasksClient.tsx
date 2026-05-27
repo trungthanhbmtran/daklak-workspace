@@ -1,20 +1,15 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Settings2, Shield, Plus, Trash2, Save, CheckCircle2, Award, Users } from 'lucide-react';
-import { useTaskTemplatesList, useCreateTaskTemplate, useDeleteTaskTemplate } from '../../hooks';
+import React, { useState, useEffect } from 'react';
+import { Settings2, Shield, Plus, Trash2, Save, CheckCircle2, Award, Users, Edit2, X } from 'lucide-react';
+import { useTaskTemplatesList, useCreateTaskTemplate, useDeleteTaskTemplate, useUpdateTaskTemplate } from '../../hooks';
+import { categoryApi } from '@/features/system-admin/categories/api';
+import { CategoryItem } from '@/features/system-admin/categories/types';
 
 // Định nghĩa kiểu dữ liệu chuẩn ngạch công vụ
 export type GovClassification = 'CONG_CHUC' | 'VIEN_CHUC';
 export type GovRank = 'CHUYEN_VIEN_CAO_CAP' | 'CHUYEN_VIEN_CHINH' | 'CHUYEN_VIEN' | 'CÁN_BỘ_SỰ_NGHIỆP';
 
-interface TaskRankTemplate {
-    id: string;
-    classification: GovClassification;
-    rank: GovRank;
-    taskName: string;
-    defaultUnit: string;
-}
 
 export function ConfigureRankTasksClient() {
     const { data, isLoading } = useTaskTemplatesList();
@@ -22,12 +17,24 @@ export function ConfigureRankTasksClient() {
 
     const { mutateAsync: createTemplate } = useCreateTaskTemplate();
     const { mutateAsync: deleteTemplate } = useDeleteTaskTemplate();
+    const { mutateAsync: updateTemplate } = useUpdateTaskTemplate();
+
+    const [units, setUnits] = useState<CategoryItem[]>([]);
+    useEffect(() => {
+        categoryApi.fetchAll().then(data => {
+            setUnits(data.filter(c => c.group === 'UNIT'));
+        });
+    }, []);
 
     const [selectedClass, setSelectedClass] = useState<GovClassification>('CONG_CHUC');
     const [selectedRank, setSelectedRank] = useState<GovRank>('CHUYEN_VIEN');
     const [newTaskName, setNewTaskName] = useState('');
-    const [newUnit, setNewUnit] = useState('Hồ sơ');
+    const [newUnit, setNewUnit] = useState('');
     const [isSaved, setIsSaved] = useState(false);
+
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editTaskName, setEditTaskName] = useState('');
+    const [editUnit, setEditUnit] = useState('');
 
     const handleAddTemplate = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,6 +65,24 @@ export function ConfigureRankTasksClient() {
             await deleteTemplate(id);
         } catch (error) {
             console.error('Error deleting template', error);
+        }
+    };
+
+    const handleSaveEdit = async () => {
+        if (!editingId || !editTaskName.trim()) return;
+        try {
+            await updateTemplate({
+                id: editingId,
+                payload: {
+                    classification: selectedClass,
+                    rank: selectedClass === 'VIEN_CHUC' ? 'CÁN_BỘ_SỰ_NGHIỆP' : selectedRank,
+                    taskName: editTaskName.trim(),
+                    defaultUnit: editUnit,
+                }
+            });
+            setEditingId(null);
+        } catch (error) {
+            console.error('Error updating template', error);
         }
     };
 
@@ -120,13 +145,17 @@ export function ConfigureRankTasksClient() {
 
                     <div className="md:col-span-2 space-y-1">
                         <label className="text-[10px] font-black text-slate-500 uppercase">Đơn vị tính</label>
-                        <input
-                            type="text"
+                        <select
                             value={newUnit}
                             onChange={e => setNewUnit(e.target.value)}
-                            className="w-full h-10 text-xs border rounded-lg px-3 bg-white border-slate-200 text-center font-bold focus:outline-none"
+                            className="w-full h-10 text-xs border rounded-lg px-3 bg-white border-slate-200 font-bold focus:outline-none"
                             required
-                        />
+                        >
+                            <option value="">-- Chọn ĐVT --</option>
+                            {units.map(u => (
+                                <option key={u.id} value={u.name}>{u.name}</option>
+                            ))}
+                        </select>
                     </div>
 
                     <div className="md:col-span-1">
@@ -148,8 +177,29 @@ export function ConfigureRankTasksClient() {
                         .filter(t => t.classification === selectedClass)
                         .map(item => (
                             <div key={item.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50/60 transition-colors text-xs">
-                                <div className="space-y-1">
-                                    <div className="font-bold text-slate-900 leading-relaxed">{item.taskName}</div>
+                                <div className="space-y-1 w-full sm:w-auto flex-1">
+                                    {editingId === item.id ? (
+                                        <div className="flex flex-col sm:flex-row gap-2 w-full">
+                                            <input
+                                                type="text"
+                                                value={editTaskName}
+                                                onChange={e => setEditTaskName(e.target.value)}
+                                                className="h-8 text-xs border rounded px-2 flex-1 font-semibold focus:outline-none"
+                                            />
+                                            <select
+                                                value={editUnit}
+                                                onChange={e => setEditUnit(e.target.value)}
+                                                className="h-8 text-xs border rounded px-2 font-bold focus:outline-none"
+                                            >
+                                                <option value="">-- Chọn ĐVT --</option>
+                                                {units.map(u => (
+                                                    <option key={u.id} value={u.name}>{u.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ) : (
+                                        <div className="font-bold text-slate-900 leading-relaxed">{item.taskName}</div>
+                                    )}
                                     <div className="flex items-center gap-2">
                                         <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${item.rank === 'CHUYEN_VIEN_CAO_CAP' ? 'bg-red-50 border-red-200 text-red-700' :
                                             item.rank === 'CHUYEN_VIEN_CHINH' ? 'bg-amber-50 border-amber-200 text-amber-700' :
@@ -160,13 +210,33 @@ export function ConfigureRankTasksClient() {
                                         </span>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4 shrink-0 self-end sm:self-center">
-                                    <span className="bg-slate-100 font-mono font-bold text-slate-600 px-2.5 py-0.5 rounded text-[10px]">
-                                        Chuẩn đầu ra: {item.defaultUnit}
-                                    </span>
-                                    <button onClick={() => handleDeleteTemplate(item.id)} className="text-slate-400 hover:text-red-600 p-1">
-                                        <Trash2 className="w-4 h-4" />
-                                    </button>
+                                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                    {editingId === item.id ? (
+                                        <>
+                                            <button onClick={handleSaveEdit} className="text-indigo-600 hover:text-indigo-800 p-1 bg-indigo-50 rounded">
+                                                <Save className="w-4 h-4" />
+                                            </button>
+                                            <button onClick={() => setEditingId(null)} className="text-slate-400 hover:text-slate-600 p-1 bg-slate-100 rounded">
+                                                <X className="w-4 h-4" />
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="bg-slate-100 font-mono font-bold text-slate-600 px-2.5 py-0.5 rounded text-[10px] mr-2">
+                                                Chuẩn đầu ra: {item.defaultUnit}
+                                            </span>
+                                            <button onClick={() => {
+                                                setEditingId(item.id);
+                                                setEditTaskName(item.taskName);
+                                                setEditUnit(item.defaultUnit);
+                                            }} className="text-slate-400 hover:text-indigo-600 p-1">
+                                                <Edit2 className="w-4 h-4" />
+                                            </button>
+                                            <button onClick={() => handleDeleteTemplate(item.id)} className="text-slate-400 hover:text-red-600 p-1">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </>
+                                    )}
                                 </div>
                             </div>
                         ))}

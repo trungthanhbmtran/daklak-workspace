@@ -41,6 +41,24 @@ export class TaskTemplatesService {
     };
   }
 
+  async update(id: number, data: any) {
+    const t = await this.prisma.taskRankTemplate.update({
+      where: { id },
+      data: {
+        classification: data.classification,
+        rank: data.rank,
+        taskName: data.taskName,
+        defaultUnit: data.defaultUnit,
+        defaultWeight: data.defaultWeight,
+      }
+    });
+    return {
+      ...t,
+      createdAt: t.createdAt?.toISOString() || '',
+      updatedAt: t.updatedAt?.toISOString() || '',
+    };
+  }
+
   async delete(id: number) {
     await this.prisma.taskRankTemplate.delete({ where: { id } });
     return { success: true };

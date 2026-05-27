@@ -770,6 +770,50 @@ async function main() {
       nameEn: 'Top Secret',
     },
 
+    // --- UNIT OF MEASURE (NĐ 335/2025/NĐ-CP) ---
+    {
+      group: 'UNIT',
+      code: 'UNIT_HO_SO',
+      order: 1,
+      nameVi: 'Hồ sơ',
+      nameEn: 'Dossier',
+    },
+    {
+      group: 'UNIT',
+      code: 'UNIT_BAO_CAO',
+      order: 2,
+      nameVi: 'Báo cáo',
+      nameEn: 'Report',
+    },
+    {
+      group: 'UNIT',
+      code: 'UNIT_VAN_BAN',
+      order: 3,
+      nameVi: 'Văn bản',
+      nameEn: 'Document',
+    },
+    {
+      group: 'UNIT',
+      code: 'UNIT_GIO_CONG',
+      order: 4,
+      nameVi: 'Giờ công',
+      nameEn: 'Man-hour',
+    },
+    {
+      group: 'UNIT',
+      code: 'UNIT_CHUYEN_DE',
+      order: 5,
+      nameVi: 'Chuyên đề',
+      nameEn: 'Thematic',
+    },
+    {
+      group: 'UNIT',
+      code: 'UNIT_LUOT',
+      order: 6,
+      nameVi: 'Lượt',
+      nameEn: 'Turn',
+    },
+
     // =========================
     // ĐIỀU HÀNH - HÀNH CHÍNH
     // =========================

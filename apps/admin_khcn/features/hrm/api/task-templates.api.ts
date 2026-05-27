@@ -13,5 +13,8 @@ export const hrmTaskTemplatesApi = {
   },
   delete(id: string): Promise<any> {
     return apiClient.delete(`/hrm/task-templates/${id}`).then((res: any) => res);
+  },
+  update(id: string, payload: any): Promise<any> {
+    return apiClient.put(`/hrm/task-templates/${id}`, payload).then((res: any) => res);
   }
 };
