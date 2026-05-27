@@ -814,6 +814,73 @@ async function main() {
       nameEn: 'Turn',
     },
 
+    // --- RANK_CONG_CHUC ---
+    {
+      group: 'RANK_CONG_CHUC',
+      code: 'CHUYEN_VIEN_CAO_CAP',
+      order: 1,
+      nameVi: 'Chuyên viên Cao cấp',
+      nameEn: 'Senior Specialist',
+    },
+    {
+      group: 'RANK_CONG_CHUC',
+      code: 'CHUYEN_VIEN_CHINH',
+      order: 2,
+      nameVi: 'Chuyên viên Chính',
+      nameEn: 'Principal Specialist',
+    },
+    {
+      group: 'RANK_CONG_CHUC',
+      code: 'CHUYEN_VIEN',
+      order: 3,
+      nameVi: 'Chuyên viên',
+      nameEn: 'Specialist',
+    },
+    {
+      group: 'RANK_CONG_CHUC',
+      code: 'CAN_SU',
+      order: 4,
+      nameVi: 'Cán sự',
+      nameEn: 'Officer',
+    },
+    {
+      group: 'RANK_CONG_CHUC',
+      code: 'NHAN_VIEN',
+      order: 5,
+      nameVi: 'Nhân viên',
+      nameEn: 'Staff',
+    },
+
+    // --- RANK_VIEN_CHUC ---
+    {
+      group: 'RANK_VIEN_CHUC',
+      code: 'VIEN_CHUC_HANG_1',
+      order: 1,
+      nameVi: 'Viên chức Hạng I',
+      nameEn: 'Grade I Public Employee',
+    },
+    {
+      group: 'RANK_VIEN_CHUC',
+      code: 'VIEN_CHUC_HANG_2',
+      order: 2,
+      nameVi: 'Viên chức Hạng II',
+      nameEn: 'Grade II Public Employee',
+    },
+    {
+      group: 'RANK_VIEN_CHUC',
+      code: 'VIEN_CHUC_HANG_3',
+      order: 3,
+      nameVi: 'Viên chức Hạng III',
+      nameEn: 'Grade III Public Employee',
+    },
+    {
+      group: 'RANK_VIEN_CHUC',
+      code: 'VIEN_CHUC_HANG_4',
+      order: 4,
+      nameVi: 'Viên chức Hạng IV',
+      nameEn: 'Grade IV Public Employee',
+    },
+
     // =========================
     // ĐIỀU HÀNH - HÀNH CHÍNH
     // =========================
