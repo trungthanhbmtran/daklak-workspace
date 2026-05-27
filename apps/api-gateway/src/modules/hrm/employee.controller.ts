@@ -36,9 +36,9 @@ export class EmployeeController implements OnModuleInit {
         firstValueFrom(this.catService.GetAllCategories({})),
       ]);
 
-      const jobTitlesRes = results[0].status === 'fulfilled' ? results[0].value : { items: [] };
-      const treeRes = results[1].status === 'fulfilled' ? results[1].value : { nodes: [] };
-      const catRes = results[2].status === 'fulfilled' ? results[2].value : { data: [] };
+      const jobTitlesRes: any = results[0].status === 'fulfilled' ? results[0].value : { items: [] };
+      const treeRes: any = results[1].status === 'fulfilled' ? results[1].value : { nodes: [] };
+      const catRes: any = results[2].status === 'fulfilled' ? results[2].value : { data: [] };
 
       const jtMap: Record<string, any> = {};
       (jobTitlesRes?.items || []).forEach((jt: any) => { jtMap[jt.id] = { name: jt.name, code: jt.code }; });
