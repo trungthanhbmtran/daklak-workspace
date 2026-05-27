@@ -131,3 +131,17 @@ model KpiEvaluationDetail {
 
   @@map("kpi_evaluation_details")
 }
+
+model TaskRankTemplate {
+  id              Int      @id @default(autoincrement())
+  classification  String   @map("classification") // CONG_CHUC, VIEN_CHUC
+  rank            String   @map("rank")           // CHUYEN_VIEN_CAO_CAP, vv
+  taskName        String   @map("task_name")
+  defaultUnit     String   @map("default_unit")
+  defaultWeight   Float?   @map("default_weight")
+  
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("task_rank_templates")
+}

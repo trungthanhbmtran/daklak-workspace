@@ -16,17 +16,21 @@ interface TaskRankTemplate {
 }
 
 export function ConfigureRankTasksClient() {
-    // Kho dữ liệu mẫu ban đầu phân rã nghiêm ngặt theo ngạch bậc hành chính
-    const [templates, setTemplates] = useState<TaskRankTemplate[]>([
-        { id: 'tr-1', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CAO_CAP', taskName: 'Chủ trì nghiên cứu, xây dựng Nghị quyết, Quyết định quy phạm pháp luật cấp Tỉnh', defaultUnit: 'Đề án/Văn bản' },
-        { id: 'tr-2', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CAO_CAP', taskName: 'Chủ trì thẩm định quy hoạch, kiến trúc số, đề án liên ngành', defaultUnit: 'Văn bản thẩm định' },
-        { id: 'tr-3', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CHINH', taskName: 'Tham mưu biên soạn tờ trình, công văn hướng dẫn nghiệp vụ quy mô Sở', defaultUnit: 'Tờ trình' },
-        { id: 'tr-4', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CHINH', taskName: 'Xử lý, thẩm tra và đưa ra ý kiến pháp lý đối với phiếu chuyển, đơn thư phức tạp', defaultUnit: 'Hồ sơ xử lý' },
-        { id: 'tr-5', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN', taskName: 'Tiếp nhận, phân loại và luân chuyển văn bản đi/đến trên trục iDesk', defaultUnit: 'Văn bản' },
-        { id: 'tr-6', classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN', taskName: 'Trực tiếp xử lý hồ sơ dịch vụ công trực tuyến một cửa', defaultUnit: 'Hồ sơ' },
-        { id: 'tr-7', classification: 'VIEN_CHUC', rank: 'CÁN_BỘ_SỰ_NGHIỆP', taskName: 'Vận hành kỹ thuật, trực giám sát an toàn thông tin hệ thống IOC / LGSP', defaultUnit: 'Ca trực' },
-        { id: 'tr-8', classification: 'VIEN_CHUC', rank: 'CÁN_BỘ_SỰ_NGHIỆP', taskName: 'Phát triển module phần mềm, tích hợp gRPC API camera giám sát', defaultUnit: 'API' },
-    ]);
+    const [templates, setTemplates] = useState<TaskRankTemplate[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    React.useEffect(() => {
+        setIsLoading(true);
+        fetch('/api/admin/hrm/task-templates')
+            .then(res => res.json())
+            .then(data => {
+                if (data?.data) {
+                    setTemplates(data.data.templates || []);
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => setIsLoading(false));
+    }, []);
 
     const [selectedClass, setSelectedClass] = useState<GovClassification>('CONG_CHUC');
     const [selectedRank, setSelectedRank] = useState<GovRank>('CHUYEN_VIEN');
@@ -34,20 +38,42 @@ export function ConfigureRankTasksClient() {
     const [newUnit, setNewUnit] = useState('Hồ sơ');
     const [isSaved, setIsSaved] = useState(false);
 
-    const handleAddTemplate = (e: React.FormEvent) => {
+    const handleAddTemplate = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newTaskName.trim()) return;
 
-        const newTemplate: TaskRankTemplate = {
-            id: `tr-${crypto.randomUUID()}`,
+        const payload = {
             classification: selectedClass,
             rank: selectedClass === 'VIEN_CHUC' ? 'CÁN_BỘ_SỰ_NGHIỆP' : selectedRank,
             taskName: newTaskName.trim(),
             defaultUnit: newUnit
         };
 
-        setTemplates([...templates, newTemplate]);
-        setNewTaskName('');
+        try {
+            const res = await fetch('/api/admin/hrm/task-templates', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+            if (data?.data) {
+                setTemplates([...templates, data.data]);
+                setNewTaskName('');
+            }
+        } catch (error) {
+            console.error('Error adding template', error);
+        }
+    };
+
+    const handleDeleteTemplate = async (id: string) => {
+        try {
+            await fetch(`/api/admin/hrm/task-templates/${id}`, {
+                method: 'DELETE',
+            });
+            setTemplates(templates.filter(t => t.id !== id));
+        } catch (error) {
+            console.error('Error deleting template', error);
+        }
     };
 
     return (
@@ -153,7 +179,7 @@ export function ConfigureRankTasksClient() {
                                     <span className="bg-slate-100 font-mono font-bold text-slate-600 px-2.5 py-0.5 rounded text-[10px]">
                                         Chuẩn đầu ra: {item.defaultUnit}
                                     </span>
-                                    <button onClick={() => setTemplates(templates.filter(t => t.id !== item.id))} className="text-slate-400 hover:text-red-600 p-1">
+                                    <button onClick={() => handleDeleteTemplate(item.id)} className="text-slate-400 hover:text-red-600 p-1">
                                         <Trash2 className="w-4 h-4" />
                                     </button>
                                 </div>

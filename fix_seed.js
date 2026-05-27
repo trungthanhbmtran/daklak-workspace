@@ -1,0 +1,1 @@
+const fs = require('fs'); let content = fs.readFileSync('apps/user-service/prisma/seed.ts', 'utf8'); content = content.replace('for (const cat of categoriesData) {', 'let currentGroup = \\;\n  for (const cat of categoriesData) {\n    if (cat.group) currentGroup = cat.group;\n    cat.group = currentGroup;'); fs.writeFileSync('apps/user-service/prisma/seed.ts', content);

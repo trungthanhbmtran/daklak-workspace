@@ -18,8 +18,8 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// --- MOCK DATA ---
-const trendData = [
+// --- INITIAL MOCK DATA FALLBACK ---
+const initialTrendData = [
   { month: 'T1', performance: 85, target: 100 },
   { month: 'T2', performance: 88, target: 100 },
   { month: 'T3', performance: 92, target: 100 },
@@ -28,7 +28,7 @@ const trendData = [
   { month: 'T6', performance: 102, target: 100 },
 ];
 
-const deptData = [
+const initialDeptData = [
   { name: 'Trung tâm IOC', score: 105, completed: 24, total: 25 },
   { name: 'Phòng Quản lý CN', score: 92, completed: 15, total: 18 },
   { name: 'Văn phòng Sở', score: 88, completed: 18, total: 22 },
@@ -37,7 +37,7 @@ const deptData = [
 
 const COLORS = ['#16a34a', '#eab308', '#ef4444', '#8b5cf6'];
 
-const kpiDetails = [
+const initialKpiDetails = [
   { id: '1', dept: 'Trung tâm IOC', name: 'Tỷ lệ uptime hạ tầng trục liên thông LGSP', weight: 30, target: 99.9, actual: 99.95, unit: '%', status: 'Xuất sắc' },
   { id: '2', dept: 'Văn phòng Sở', name: 'Tỷ lệ xử lý văn bản iDesk đúng hạn', weight: 40, target: 100, actual: 95, unit: '%', status: 'Khá' },
   { id: '3', dept: 'Phòng Quản lý CN', name: 'Số lượng đề tài NCKH được nghiệm thu', weight: 25, target: 5, actual: 3, unit: 'Đề tài', status: 'Cần cố gắng' },
@@ -47,13 +47,32 @@ const kpiDetails = [
 export default function ExecutiveKPIDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('Q2-2026');
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Real Data States
+  const [isLoading, setIsLoading] = useState(true);
+  const [trendData, setTrendData] = useState(initialTrendData);
+  const [deptData, setDeptData] = useState(initialDeptData);
+  const [kpiDetails, setKpiDetails] = useState(initialKpiDetails);
+  
+  React.useEffect(() => {
+    setIsLoading(true);
+    fetch(`/api/admin/hrm/kpi-evaluations?period=${selectedPeriod}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.kpiDetails) setKpiDetails(data.kpiDetails);
+        if (data?.deptData) setDeptData(data.deptData);
+        if (data?.trendData) setTrendData(data.trendData);
+      })
+      .catch(err => console.error("Error fetching KPI Data:", err))
+      .finally(() => setIsLoading(false));
+  }, [selectedPeriod]);
 
   // Tính toán dữ liệu cho biểu đồ tròn (Phân bổ trạng thái)
   const statusDistribution = useMemo(() => {
     const dist = { 'Xuất sắc': 0, 'Tốt': 0, 'Khá': 0, 'Cần cố gắng': 0 };
-    kpiDetails.forEach(k => { dist[k.status as keyof typeof dist]++; });
+    kpiDetails.forEach(k => { if(dist[k.status as keyof typeof dist] !== undefined) dist[k.status as keyof typeof dist]++; });
     return Object.entries(dist).map(([name, value]) => ({ name, value }));
-  }, []);
+  }, [kpiDetails]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -104,7 +123,7 @@ export default function ExecutiveKPIDashboard() {
           </TabsList>
 
           {/* TAB 1: EXECUTIVE OVERVIEW */}
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className={`space-y-6 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
             {/* Top Metric Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <Card className="shadow-sm">
@@ -257,7 +276,7 @@ export default function ExecutiveKPIDashboard() {
           </TabsContent>
 
           {/* TAB 2: DETAILED DATA TABLE */}
-          <TabsContent value="departments">
+          <TabsContent value="departments" className={isLoading ? 'opacity-50 pointer-events-none' : ''}>
             <Card className="shadow-sm">
               <CardHeader className="border-b bg-slate-50/50 rounded-t-xl pb-4">
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">

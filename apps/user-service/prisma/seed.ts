@@ -2169,7 +2169,10 @@ async function main() {
   } catch (e) {
     // Ignore if already dropped
   }
+  let currentGroup = '';
   for (const cat of categoriesData) {
+    if (cat.group) currentGroup = cat.group;
+    cat.group = currentGroup;
     const category = await prisma.category.upsert({
       where: { group_code: { group: cat.group!, code: cat.code! } },
       update: { order: cat.order },
@@ -2199,11 +2202,11 @@ async function main() {
       where: {
         categoryId_langCode: { categoryId: category.id, langCode: 'en' },
       },
-      update: { name: cat.nameEn! },
+      update: { name: cat.nameEn || cat.nameVi! },
       create: {
         categoryId: category.id,
         langCode: 'en',
-        name: cat.nameEn!,
+        name: cat.nameEn || cat.nameVi!,
       },
     });
   }
@@ -2769,7 +2772,7 @@ async function main() {
     {
       code: 'HRM_MENU_PLANS',
       name: 'Chủ trương & Kế hoạch',
-      route: 'plans',
+      route: 'work-plans/master-plans',
       icon: 'layers-outline',
       order: 2,
       res: 'HRM_EMPLOYEE',
@@ -2777,7 +2780,7 @@ async function main() {
     {
       code: 'HRM_MENU_TASKS',
       name: 'Phân công & Giao việc',
-      route: 'tasks',
+      route: 'work-plans/tasks',
       icon: 'list-outline',
       order: 3,
       res: 'HRM_EMPLOYEE',
@@ -2785,7 +2788,7 @@ async function main() {
     {
       code: 'HRM_MENU_KPI',
       name: 'Đánh giá Năng lực (KPI)',
-      route: 'kpi',
+      route: 'performance/evaluations',
       icon: 'settings-outline',
       order: 4,
       res: 'HRM_EMPLOYEE',

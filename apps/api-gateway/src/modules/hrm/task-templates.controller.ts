@@ -1,0 +1,36 @@
+import { Controller, Get, Post, Delete, Param, Body, Query, Inject, OnModuleInit, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { firstValueFrom } from 'rxjs';
+import { MICROSERVICES } from '../../core/constants/services';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+
+@ApiTags('HRM - Task Templates')
+@Controller('admin/hrm/task-templates')
+@UseGuards(JwtAuthGuard)
+@ApiBearerAuth('JWT-auth')
+export class TaskTemplatesController implements OnModuleInit {
+  private taskTemplateService: any;
+
+  constructor(
+    @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
+  ) {}
+
+  onModuleInit() {
+    this.taskTemplateService = this.client.getService('TaskTemplateService');
+  }
+
+  @Get()
+  async findAll(@Query('classification') classification?: string, @Query('rank') rank?: string) {
+    return firstValueFrom(this.taskTemplateService.FindAll({ classification, rank }));
+  }
+
+  @Post()
+  async create(@Body() body: any) {
+    return firstValueFrom(this.taskTemplateService.Create(body));
+  }
+
+  @Delete(':id')
+  async remove(@Param('id') id: string) {
+    return firstValueFrom(this.taskTemplateService.Delete({ id: Number(id) }));
+  }
+}

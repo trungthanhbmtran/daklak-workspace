@@ -9,6 +9,7 @@ import { PublicHrmController } from './public-hrm.controller';
 import { TasksController } from './tasks.controller';
 import { KpisController } from './kpis.controller';
 import { MasterPlansController } from './master-plans.controller';
+import { TaskTemplatesController } from './task-templates.controller';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { MasterPlansController } from './master-plans.controller';
     TasksController,
     KpisController,
     MasterPlansController,
+    TaskTemplatesController,
   ],
 })
 export class HrmModule {}

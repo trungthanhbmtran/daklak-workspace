@@ -116,11 +116,34 @@ export function CreateKpiClient() {
     }
 
     setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
+    try {
+      const payload = {
+        title: planInfo.title,
+        department: planInfo.department,
+        owner: planInfo.owner,
+        type: framework,
+        tasks: targets.map(t => ({
+          title: t.title,
+          parentGoal: t.parentGoal,
+          weight: t.weightOrConfidence,
+          targetValue: t.targetValue,
+          unit: t.unit
+        }))
+      };
+
+      await fetch('/api/admin/hrm/kpi-plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
       toast.success(`Ban hành kế hoạch theo chuẩn ${framework === "MBO_KPI" ? "KPI/MBO" : "OKRs"} thành công!`);
       router.push("/services/hrm/kpi");
-    }, 1500);
+    } catch (error) {
+      toast.error('Lỗi khi ban hành kế hoạch');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (

@@ -27,6 +27,8 @@ interface TargetPlanItem {
   aiStatus: 'RECOMMENDED' | 'VERIFIED' | 'CUSTOM';
 }
 
+import { toast } from 'sonner';
+
 export function MasterPlanListClient() {
   const [framework, setFramework] = useState<ManagementFramework>('BSC_KPI');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
@@ -130,6 +132,69 @@ export function MasterPlanListClient() {
     }, 1000);
   };
 
+  // --- XỬ LÝ SỰ KIỆN FORM ---
+  const handleAddItem = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+
+    const newItem: TargetPlanItem = {
+      id: `custom-${Date.now()}`,
+      title: newTitle,
+      framework: framework,
+      perspective: newPerspective,
+      legalBasis: newLegalBasis || 'Chưa có',
+      metricFactor: newMetricFactor,
+      targetValue: newTargetValue,
+      unit: newUnit,
+      supervisor: newSupervisor || 'Chưa phân công',
+      aiStatus: 'CUSTOM'
+    };
+
+    setItems([...items, newItem]);
+    setNewTitle('');
+    toast.success('Đã thêm chỉ tiêu mới vào danh mục liên thông');
+  };
+
+  const handlePublish = async () => {
+    if (items.length === 0) {
+      toast.error('Cần ít nhất 1 chỉ tiêu để ban hành kế hoạch!');
+      return;
+    }
+    
+    // Validate weight for BSC_KPI
+    const totalWeight = items.reduce((sum, item) => sum + item.metricFactor, 0);
+    if (framework === 'BSC_KPI' && totalWeight !== 100) {
+      toast.error('Trọng số BSC KPI chưa đạt 100%. Vui lòng điều chỉnh!');
+      return;
+    }
+
+    try {
+      const payload = {
+        title: `Kế hoạch ${framework} - Quý ${Math.floor(new Date().getMonth() / 3) + 1}/${new Date().getFullYear()}`,
+        type: framework,
+        tasks: items.map(item => ({
+          title: item.title,
+          weight: item.metricFactor,
+          targetValue: item.targetValue,
+          unit: item.unit,
+          supervisor: item.supervisor,
+        }))
+      };
+
+      // Mock API call to hrm-service
+      await fetch('/api/admin/hrm/master-plans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      toast.success(`Đã ban hành kế hoạch ${framework} thành công!`);
+      setItems([]);
+    } catch (error) {
+      toast.error('Lỗi khi ban hành kế hoạch');
+    }
+  };
+
   // --- KIỂM TRA SỨC KHỎE KẾ HOẠCH THEO ĐẶC THÙ MÔ HÌNH ---
   const healthMetrics = useMemo(() => {
     const totalWeight = items.reduce((sum, item) => sum + item.metricFactor, 0);
@@ -223,7 +288,7 @@ export function MasterPlanListClient() {
               Khởi tạo mục tiêu định biên thuộc phân hệ {framework.replace('_', ' ')}
             </h3>
 
-            <form onSubmit={() => alert("1")} className="space-y-4">
+            <form onSubmit={handleAddItem} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
                 <div className="md:col-span-8 space-y-1.5">
                   <label className="font-bold text-slate-700 text-xs block">Nội dung chỉ tiêu / Hành động thực thi</label>
@@ -366,7 +431,7 @@ export function MasterPlanListClient() {
                         {item.targetValue} <span className="text-[10px] text-slate-400 font-sans font-normal">{item.unit}</span>
                       </td>
                       <td className="py-3.5 px-4 text-center">
-                        <button type="button" onClick={() => alert("3333")} className="text-slate-400 hover:text-red-600 p-1">
+                        <button type="button" onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-slate-400 hover:text-red-600 p-1">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </td>
@@ -419,7 +484,8 @@ export function MasterPlanListClient() {
             <div className="p-5 space-y-4 bg-slate-50/80">
               <button
                 type="button"
-                className="w-full inline-flex items-center justify-center gap-1.5 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md uppercase tracking-wider"
+                onClick={handlePublish}
+                className="w-full inline-flex items-center justify-center gap-1.5 h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs rounded-xl shadow-md uppercase tracking-wider transition-all"
               >
                 <ClipboardCheck className="w-4 h-4" /> Phê duyệt & Số hóa dữ liệu kế hoạch
               </button>
