@@ -11,24 +11,14 @@ import { useHrmEmployeesList, useDeleteHrmEmployee } from "@/features/hrm/hooks/
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { toast } from "sonner";
 import type { HrmEmployee } from "@/features/hrm/types";
-import { organizationApi } from "@/features/system-admin/organization/api";
-import { useQuery } from "@tanstack/react-query";
 
-function flattenUnits(nodes: any[], acc: { id: string | number; name: string }[] = []) {
-  nodes?.forEach(node => {
-    if (node.id != null) acc.push({ id: node.id, name: node.name || "" });
-    flattenUnits(node.children, acc);
-  });
-  return acc;
+function getUnitName(emp: HrmEmployee) {
+  return emp.department?.name || "—";
 }
-
-function getUnitName(emp: HrmEmployee, unitMap: Record<string, string>) {
-  return emp.department?.name || (emp.departmentId != null ? unitMap[emp.departmentId as any] : null) || "—";
-}
-function getJobTitleGroups(emp: HrmEmployee, jobTitleMap: Record<string, string>) {
-  const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleMap[emp.jobTitleId as any] : null);
-  const rank = emp.civilServantRank?.name || (emp.civilServantRankId != null ? jobTitleMap[emp.civilServantRankId as any] : null);
-  const party = emp.partyTitle?.name || (emp.partyTitleId != null ? jobTitleMap[emp.partyTitleId as any] : null);
+function getJobTitleGroups(emp: HrmEmployee) {
+  const govt = emp.jobTitle?.name;
+  const rank = emp.civilServantRank?.name;
+  const party = emp.partyTitle?.name;
 
   return { govt, rank, party };
 }
@@ -48,25 +38,6 @@ export function EmployeeListClient() {
     keyword: keyword || undefined,
   });
 
-  const { data: treeNodes }: any = useQuery({
-    queryKey: ["organizations", "tree"],
-    queryFn: () => organizationApi.getTree(),
-  });
-  const { data: jobTitlesRes } = useQuery({
-    queryKey: ["organizations", "job-titles"],
-    queryFn: () => organizationApi.getJobTitles(),
-  });
-
-  const unitMap = useMemo(() => {
-    const m: Record<string, string> = {};
-    flattenUnits(treeNodes).forEach((u) => { m[u.id] = u.name; });
-    return m;
-  }, [treeNodes]);
-  const jobTitleMap = useMemo(() => {
-    const m: Record<string, string> = {};
-    jobTitlesRes?.items?.forEach((j: any) => { m[j.id] = j.name; });
-    return m;
-  }, [jobTitlesRes]);
 
   const employees = listRes?.data;
   const pagination = listRes?.meta?.pagination;
@@ -181,7 +152,7 @@ export function EmployeeListClient() {
                       <TableCell>
                         <div className="flex flex-col space-y-2">
                           {(() => {
-                            const { govt, rank, party } = getJobTitleGroups(emp, jobTitleMap);
+                            const { govt, rank, party } = getJobTitleGroups(emp);
                             return (
                               <div className="space-y-1.5">
                                 <div className="flex items-center gap-1.5 flex-wrap">
@@ -210,7 +181,7 @@ export function EmployeeListClient() {
                             );
                           })()}
                           <div className="flex items-center text-xs text-slate-500 pt-2 mt-1 border-t border-slate-100">
-                            <Building2 className="h-3.5 w-3.5 mr-1.5 text-slate-400" /> {getUnitName(emp, unitMap)}
+                            <Building2 className="h-3.5 w-3.5 mr-1.5 text-slate-400" /> {getUnitName(emp)}
                           </div>
                         </div>
                       </TableCell>

@@ -36,12 +36,16 @@ export class EmployeeController implements OnModuleInit {
         firstValueFrom(this.catService.ListCategories({})) as Promise<any>,
       ]).catch(() => [{ items: [] }, { nodes: [] }, { items: [] }]);
 
-      const jtMap = new Map((jobTitlesRes?.items || []).map((jt: any) => [jt.id, { name: jt.name, code: jt.code }]));
-      const catMap = new Map((catRes?.items || []).map((c: any) => [c.id, { name: c.name, code: c.code }]));
-      const unitMap = new Map();
+      const jtMap: Record<string, any> = {};
+      (jobTitlesRes?.items || []).forEach((jt: any) => { jtMap[jt.id] = { name: jt.name, code: jt.code }; });
+      
+      const catMap: Record<string, any> = {};
+      (catRes?.items || []).forEach((c: any) => { catMap[c.id] = { name: c.name, code: c.code }; });
+      
+      const unitMap: Record<string, any> = {};
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
-          if (n.id) unitMap.set(n.id, { name: n.name, code: n.code });
+          if (n.id) unitMap[n.id] = { name: n.name, code: n.code };
           if (n.children?.length) flattenNodes(n.children);
         }
       };
@@ -49,16 +53,16 @@ export class EmployeeController implements OnModuleInit {
 
       return { jtMap, unitMap, catMap };
     } catch (error) {
-      return { jtMap: new Map(), unitMap: new Map(), catMap: new Map() };
+      return { jtMap: {}, unitMap: {}, catMap: {} };
     }
   }
 
   /**
    * Ánh xạ thông tin chức danh, phòng ban vào nhân viên
    */
-  private enrichEmployee(emp: any, jtMap: Map<number, any>, unitMap: Map<number, any>, catMap: Map<number, any>) {
+  private enrichEmployee(emp: any, jtMap: Record<string, any>, unitMap: Record<string, any>, catMap: Record<string, any>) {
     if (!emp) return emp;
-    const lookup = (map: Map<number, any>, id?: number) => id && id > 0 ? map.get(id) || { name: '', code: '' } : { name: '', code: '' };
+    const lookup = (map: Record<string, any>, id?: number) => id && id > 0 ? map[id as any] || { name: '', code: '' } : { name: '', code: '' };
 
     return {
       ...emp,
