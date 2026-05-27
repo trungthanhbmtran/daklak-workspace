@@ -33,14 +33,14 @@ export class EmployeeController implements OnModuleInit {
       const [jobTitlesRes, treeRes, catRes] = await Promise.all([
         firstValueFrom(this.orgService.ListJobTitles({})) as Promise<any>,
         firstValueFrom(this.orgService.GetFullTree({})) as Promise<any>,
-        firstValueFrom(this.catService.ListCategories({})) as Promise<any>,
-      ]).catch(() => [{ items: [] }, { nodes: [] }, { items: [] }]);
+        firstValueFrom(this.catService.GetAllCategories({})) as Promise<any>,
+      ]).catch(() => [{ items: [] }, { nodes: [] }, { data: [] }]);
 
       const jtMap: Record<string, any> = {};
       (jobTitlesRes?.items || []).forEach((jt: any) => { jtMap[jt.id] = { name: jt.name, code: jt.code }; });
       
       const catMap: Record<string, any> = {};
-      (catRes?.items || []).forEach((c: any) => { catMap[c.id] = { name: c.name, code: c.code }; });
+      (catRes?.data || []).forEach((c: any) => { catMap[c.id] = { name: c.name, code: c.code }; });
       
       const unitMap: Record<string, any> = {};
       const flattenNodes = (nodes: any[]) => {
