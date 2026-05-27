@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -13,29 +13,14 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { useTasksList } from '../../hooks';
 
 export const TaskListClient = () => {
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetch('/api/admin/hrm/tasks')
-      .then(res => res.json())
-      .then(data => {
-        if (data && data.tasks) {
-          setTasks(data.tasks);
-        }
-      })
-      .catch(err => {
-        console.error(err);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, []);
+  const { data, isLoading } = useTasksList();
+  const tasks = data?.data || [];
 
   const now = new Date();
   now.setHours(0, 0, 0, 0);

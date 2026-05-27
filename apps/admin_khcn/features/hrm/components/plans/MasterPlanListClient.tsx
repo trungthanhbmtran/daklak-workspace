@@ -28,10 +28,12 @@ interface TargetPlanItem {
 }
 
 import { toast } from 'sonner';
+import { useCreateMasterPlan } from '../../hooks';
 
 export function MasterPlanListClient() {
   const [framework, setFramework] = useState<ManagementFramework>('BSC_KPI');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const { mutateAsync: createMasterPlan } = useCreateMasterPlan();
 
   // Dữ liệu ma trận tích hợp liên thông
   const [items, setItems] = useState<TargetPlanItem[]>([
@@ -181,12 +183,7 @@ export function MasterPlanListClient() {
         }))
       };
 
-      // Mock API call to hrm-service
-      await fetch('/api/admin/hrm/master-plans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      await createMasterPlan(payload);
 
       toast.success(`Đã ban hành kế hoạch ${framework} thành công!`);
       setItems([]);

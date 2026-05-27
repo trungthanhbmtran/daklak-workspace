@@ -34,7 +34,7 @@ function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): a
 }
 
 export default function EditEmployeePage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = typeof (params as Promise<{ id: string }>).then === "function" ? use(params as Promise<{ id: string }>) : (params as { id: string });
+  const resolvedParams = typeof (params as Promise<{ id: string }>).then === "function" ? use(params as Promise<{ id: string }>) : (params as unknown as { id: string });
   const employeeId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
   const queryClient = useQueryClient();

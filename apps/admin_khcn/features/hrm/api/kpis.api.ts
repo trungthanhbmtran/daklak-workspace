@@ -1,12 +1,13 @@
 import apiClient from "@/lib/axiosInstance";
+import { unwrapData, unwrapMeta } from "./utils";
 
 export const hrmKpiCriteriaApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {
     return apiClient.get('/hrm/kpis/criteria', { params }).then((res: any) => {
-      const data = res?.criteria || res?.data?.criteria || [];
+      const data = res?.criteria || res?.data?.criteria || unwrapData(res) || [];
       return {
         data,
-        meta: { total: data.length, page: 1, pageSize: 20, totalPages: 1 }
+        meta: unwrapMeta(res) || { total: data.length, page: 1, pageSize: 20, totalPages: 1 }
       };
     });
   },
@@ -28,6 +29,21 @@ export const hrmKpiCriteriaApi = {
   deleteOne(id: number): Promise<{ success: boolean }> {
     return apiClient.delete(`/hrm/kpis/criteria/${id}`).then((res: any) => ({
       success: res?.success ?? true
+    }));
+  }
+};
+
+export const hrmKpiPlansApi = {
+  create(payload: any): Promise<any> {
+    return apiClient.post('/hrm/kpi-plans', payload).then((res: any) => res);
+  }
+};
+
+export const hrmKpiEvaluationsApi = {
+  list(params: any = {}): Promise<{ data: any; meta: any }> {
+    return apiClient.get('/hrm/kpi-evaluations', { params }).then((res: any) => ({
+      data: res?.data || unwrapData(res) || {},
+      meta: unwrapMeta(res) || { total: 0 }
     }));
   }
 };

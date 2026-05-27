@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
+import { useCreateKpiPlan } from "../../hooks";
 
 // --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
 type FrameworkMode = "MBO_KPI" | "OKRS";
@@ -33,6 +34,7 @@ export function CreateKpiClient() {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
   const [framework, setFramework] = useState<FrameworkMode>("MBO_KPI");
+  const { mutateAsync: createKpiPlan } = useCreateKpiPlan();
 
   // Thông tin chung của kế hoạch ban hành
   const [planInfo, setPlanInfo] = useState({
@@ -131,11 +133,7 @@ export function CreateKpiClient() {
         }))
       };
 
-      await fetch('/api/admin/hrm/kpi-plans', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      await createKpiPlan(payload);
 
       toast.success(`Ban hành kế hoạch theo chuẩn ${framework === "MBO_KPI" ? "KPI/MBO" : "OKRs"} thành công!`);
       router.push("/services/hrm/kpi");

@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useKpiEvaluations } from '../../hooks';
 
 // --- INITIAL MOCK DATA FALLBACK ---
 const initialTrendData = [
@@ -48,29 +49,16 @@ export default function ExecutiveKPIDashboard() {
   const [selectedPeriod, setSelectedPeriod] = useState('Q2-2026');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Real Data States
-  const [isLoading, setIsLoading] = useState(true);
-  const [trendData, setTrendData] = useState(initialTrendData);
-  const [deptData, setDeptData] = useState(initialDeptData);
-  const [kpiDetails, setKpiDetails] = useState(initialKpiDetails);
+  const { data, isLoading } = useKpiEvaluations(selectedPeriod);
   
-  React.useEffect(() => {
-    setIsLoading(true);
-    fetch(`/api/admin/hrm/kpi-evaluations?period=${selectedPeriod}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data?.kpiDetails) setKpiDetails(data.kpiDetails);
-        if (data?.deptData) setDeptData(data.deptData);
-        if (data?.trendData) setTrendData(data.trendData);
-      })
-      .catch(err => console.error("Error fetching KPI Data:", err))
-      .finally(() => setIsLoading(false));
-  }, [selectedPeriod]);
+  const kpiDetails = data?.data?.kpiDetails || initialKpiDetails;
+  const deptData = data?.data?.deptData || initialDeptData;
+  const trendData = data?.data?.trendData || initialTrendData;
 
   // Tính toán dữ liệu cho biểu đồ tròn (Phân bổ trạng thái)
   const statusDistribution = useMemo(() => {
     const dist = { 'Xuất sắc': 0, 'Tốt': 0, 'Khá': 0, 'Cần cố gắng': 0 };
-    kpiDetails.forEach(k => { if(dist[k.status as keyof typeof dist] !== undefined) dist[k.status as keyof typeof dist]++; });
+    kpiDetails.forEach((k: any) => { if(dist[k.status as keyof typeof dist] !== undefined) dist[k.status as keyof typeof dist]++; });
     return Object.entries(dist).map(([name, value]) => ({ name, value }));
   }, [kpiDetails]);
 
@@ -260,7 +248,7 @@ export default function ExecutiveKPIDashboard() {
                     <CardTitle className="text-base">Top Đơn vị Dẫn đầu</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {deptData.map((dept) => (
+                    {deptData.map((dept: any) => (
                       <div key={dept.name} className="space-y-1.5">
                         <div className="flex justify-between text-sm">
                           <span className="font-medium text-slate-700">{dept.name}</span>
@@ -312,8 +300,8 @@ export default function ExecutiveKPIDashboard() {
                   </TableHeader>
                   <TableBody>
                     {kpiDetails
-                      .filter(kpi => kpi.name.toLowerCase().includes(searchQuery.toLowerCase()))
-                      .map((kpi) => {
+                      .filter((kpi: any) => kpi.name.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((kpi: any) => {
                         const completion = (kpi.actual / kpi.target) * 100;
                         return (
                           <TableRow key={kpi.id} className="hover:bg-slate-50/80 transition-colors">

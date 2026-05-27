@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Settings2, Shield, Plus, Trash2, Save, CheckCircle2, Award, Users } from 'lucide-react';
+import { useTaskTemplatesList, useCreateTaskTemplate, useDeleteTaskTemplate } from '../../hooks';
 
 // Định nghĩa kiểu dữ liệu chuẩn ngạch công vụ
 export type GovClassification = 'CONG_CHUC' | 'VIEN_CHUC';
@@ -16,21 +17,11 @@ interface TaskRankTemplate {
 }
 
 export function ConfigureRankTasksClient() {
-    const [templates, setTemplates] = useState<TaskRankTemplate[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-    React.useEffect(() => {
-        setIsLoading(true);
-        fetch('/api/admin/hrm/task-templates')
-            .then(res => res.json())
-            .then(data => {
-                if (data?.data) {
-                    setTemplates(data.data.templates || []);
-                }
-            })
-            .catch(err => console.error(err))
-            .finally(() => setIsLoading(false));
-    }, []);
+    const { data, isLoading } = useTaskTemplatesList();
+    const templates = data?.data || [];
+    
+    const { mutateAsync: createTemplate } = useCreateTaskTemplate();
+    const { mutateAsync: deleteTemplate } = useDeleteTaskTemplate();
 
     const [selectedClass, setSelectedClass] = useState<GovClassification>('CONG_CHUC');
     const [selectedRank, setSelectedRank] = useState<GovRank>('CHUYEN_VIEN');
@@ -50,16 +41,8 @@ export function ConfigureRankTasksClient() {
         };
 
         try {
-            const res = await fetch('/api/admin/hrm/task-templates', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (data?.data) {
-                setTemplates([...templates, data.data]);
-                setNewTaskName('');
-            }
+            await createTemplate(payload);
+            setNewTaskName('');
         } catch (error) {
             console.error('Error adding template', error);
         }
@@ -67,10 +50,7 @@ export function ConfigureRankTasksClient() {
 
     const handleDeleteTemplate = async (id: string) => {
         try {
-            await fetch(`/api/admin/hrm/task-templates/${id}`, {
-                method: 'DELETE',
-            });
-            setTemplates(templates.filter(t => t.id !== id));
+            await deleteTemplate(id);
         } catch (error) {
             console.error('Error deleting template', error);
         }

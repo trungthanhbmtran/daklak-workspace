@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Target, Users, Scale, FileSignature, Save, X, Plus, Trash2, ListChecks, Sparkles } from "lucide-react";
-import { hrmApi, hrmObjectivesApi, hrmTaskThemesApi, hrmDepartmentsApi } from "@/features/hrm/api";
+import { hrmApi, hrmObjectivesApi, hrmTaskTemplatesApi, hrmDepartmentsApi } from "@/features/hrm/api";
 import type { HrmEmployee, HrmTaskTheme, HrmDepartment } from "@/features/hrm/types";
 
 interface PlanTaskAssignDrawerProps {
@@ -74,7 +74,7 @@ export const PlanTaskAssignDrawer = ({ isOpen, onClose, planId, perspectiveId, p
       setLoadingEmployees(true);
       Promise.all([
         hrmApi.list({ pageSize: 100 }),
-        hrmTaskThemesApi.list(),
+        hrmTaskTemplatesApi.list(),
         hrmDepartmentsApi.list()
       ]).then(([empRes, themeRes, deptRes]) => {
         setEmployees(empRes.data);

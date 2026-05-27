@@ -8,13 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target } from 'lucide-react';
+import { useTaskTemplatesList, useCreateTask } from '../../hooks';
 
 export function TaskCreateClient() {
   const [assignee, setAssignee] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
   const [taskName, setTaskName] = useState('');
-  
-  const [templates, setTemplates] = useState<any[]>([]);
+
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
   // Mock nhân sự để minh họa logic Ngạch
@@ -24,17 +24,11 @@ export function TaskCreateClient() {
   ];
 
   const selectedEmp = employees.find(e => e.code === assignee);
-  
-  React.useEffect(() => {
-    if (selectedEmp?.rank) {
-      fetch(`/api/admin/hrm/task-templates?rank=${selectedEmp.rank}`)
-        .then(res => res.json())
-        .then(data => setTemplates(data?.data?.templates || []))
-        .catch(console.error);
-    } else {
-      setTemplates([]);
-    }
-  }, [selectedEmp]);
+
+  const { data } = useTaskTemplatesList(selectedEmp?.rank);
+  const templates = data?.data || [];
+
+  const { mutateAsync: createTask } = useCreateTask();
 
   const handleTemplateChange = (templateId: string) => {
     setSelectedTemplateId(templateId);
@@ -47,12 +41,17 @@ export function TaskCreateClient() {
   const newLoad = selectedEmp ? selectedEmp.currentLoad + taskWeight : 0;
   const isOverload = selectedEmp ? newLoad > selectedEmp.rankLimit : false;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isOverload) {
       toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức ngạch của nhân sự!');
     } else {
-      toast.success('Giao việc thành công!');
+      try {
+        await createTask({ assignee, taskName, weight: taskWeight, templateId: selectedTemplateId });
+        toast.success('Giao việc thành công!');
+      } catch (err) {
+        toast.error('Lỗi khi giao việc');
+      }
     }
   };
 
@@ -75,14 +74,14 @@ export function TaskCreateClient() {
               <form id="taskForm" onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-slate-700">Tên công việc</label>
-                  <Input 
-                    placeholder="Nhập tên công việc hoặc chọn từ định biên bên dưới..." 
+                  <Input
+                    placeholder="Nhập tên công việc hoặc chọn từ định biên bên dưới..."
                     value={taskName}
                     onChange={(e) => setTaskName(e.target.value)}
-                    required 
+                    required
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700">Hạn chót</label>
@@ -176,7 +175,7 @@ export function TaskCreateClient() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs font-bold">
                       <span className="text-slate-600">Khối lượng (Workload)</span>
@@ -185,8 +184,8 @@ export function TaskCreateClient() {
                       </span>
                     </div>
                     <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                      <div 
-                        className={`h-full ${isOverload ? 'bg-red-500' : 'bg-indigo-500'}`} 
+                      <div
+                        className={`h-full ${isOverload ? 'bg-red-500' : 'bg-indigo-500'}`}
                         style={{ width: `${Math.min((newLoad / selectedEmp.rankLimit) * 100, 100)}%` }}
                       />
                     </div>
