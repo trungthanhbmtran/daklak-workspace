@@ -7,7 +7,7 @@ import { hrmPlansApi, hrmTasksApi, hrmKpiCriteriaApi, hrmApi, hrmDepartmentsApi 
 import { hrmKeys } from '@/features/hrm/keys';
 import type { PlanBasicInfoData } from '../CreatePlan/PlanBasicInfoForm';
 import type { TaskItemData } from '../CreatePlan/PlanTaskConfigList';
-import { useGetCategories } from '@/features/system-admin/categories/hooks/useCategoryApi';
+import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 import apiClient from "@/lib/axiosInstance";
 
 export function useCreateMasterPlan() {
@@ -36,8 +36,7 @@ export function useCreateMasterPlan() {
   }]);
 
   // Data fetching using React Query
-  const { data: categories = [] } = useGetCategories();
-  const planFrameworkCategories = categories.filter((c: any) => c.group === "PLAN_FRAMEWORK");
+  const { data: planFrameworkCategories = [] } = useGetCategoryByGroup("PLAN_FRAMEWORK");
 
   const { data: criteriaLibrary = [] } = useQuery({
     queryKey: hrmKeys.kpis(),

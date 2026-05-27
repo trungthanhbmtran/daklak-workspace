@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { hrmApi, hrmKeys } from "@/features/hrm";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { cn } from "@/lib/utils";
 
 function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): any[] {
@@ -68,8 +68,7 @@ export function EmployeeCreateClient() {
     enabled: !!form.departmentId,
   });
 
-  const { data: allCategories = [] } = useGetCategories();
-  const rankTitles = useMemo(() => allCategories.filter((c: any) => c.group === "CIVIL_SERVANT_RANK"), [allCategories]);
+  const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
 
   const selectedUnit = units.find(u => u.id.toString() === form.departmentId);
   const jobTitles = jobTitlesRes?.items ?? [];

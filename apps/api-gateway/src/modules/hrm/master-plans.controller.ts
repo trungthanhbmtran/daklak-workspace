@@ -14,12 +14,7 @@ export class MasterPlansController implements OnModuleInit {
 
   @Get()
   async findAll(@Query('type') type?: string, @Query('status') status?: string) {
-    const response = (await firstValueFrom(this.masterPlanService.FindAll({ type, status }))) as any;
-    return {
-      status: 'success',
-      data: response.masterPlans || [],
-      message: 'Lấy danh sách Kế hoạch thành công'
-    };
+    return firstValueFrom(this.masterPlanService.FindAll({ type, status }));
   }
 
   @Get(':id')

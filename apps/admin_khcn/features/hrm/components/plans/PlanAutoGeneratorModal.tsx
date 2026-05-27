@@ -9,7 +9,7 @@ import { hrmPlansApi, hrmObjectivesApi } from "@/features/hrm/api";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { HrmMasterPlan } from "@/features/hrm/types";
-import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 interface PlanAutoGeneratorModalProps {
   isOpen: boolean;
@@ -99,8 +99,7 @@ export const PlanAutoGeneratorModal = ({ isOpen, onClose, plan, onSuccess }: Pla
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingText, setLoadingText] = useState("Khởi tạo AI Engine...");
 
-  const { data: categories = [] } = useGetCategories();
-  const planFrameworkCategories = categories.filter((c: any) => c.group === "PLAN_FRAMEWORK");
+  const { data: planFrameworkCategories = [] } = useGetCategoryByGroup("PLAN_FRAMEWORK");
 
   const displayFrameworks = FRAMEWORKS.map(fw => {
     const dbCat = planFrameworkCategories.find((c: any) => c.code === fw.id);

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import {
   FormControl,
   FormField,
@@ -41,7 +41,7 @@ export function BannerBasicInfo({
   designType,
   setDesignType
 }: BannerBasicInfoProps) {
-  const { data: categories = [] } = useGetCategories();
+  const { data: categories = [] } = useGetCategoryByGroup("BANNER_POSITION");
 
   const renderPositions = React.useMemo(() => {
     return categories

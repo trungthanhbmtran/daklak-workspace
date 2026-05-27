@@ -15,12 +15,24 @@ export class TasksService {
     });
 
     return {
-      tasks: tasks.map(t => ({
+      success: true,
+      message: 'Lấy danh sách nhiệm vụ thành công',
+      data: tasks.map(t => ({
         ...t,
         dueDate: t.dueDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',
-      }))
+      })),
+      meta: {
+        pagination: {
+          total: tasks.length,
+          page: 1,
+          pageSize: tasks.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
+      }
     };
   }
 

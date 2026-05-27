@@ -12,7 +12,9 @@ export const hrmDepartmentsApi = {
             { id: 4, name: "Phòng Kế Toán", code: "ACC" },
             { id: 5, name: "Phòng Kinh Doanh", code: "SALE" }
           ],
-          meta: { total: 5, page: 1, pageSize: 20, totalPages: 1 }
+          meta: {
+            pagination: { total: 5, page: 1, pageSize: 20, totalPages: 1 }
+          }
         });
       }, 300);
     });

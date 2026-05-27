@@ -63,7 +63,10 @@ message ListTasksRequest {
 }
 
 message ListTasksResponse {
-  repeated TaskResponse tasks = 1;
+  bool success = 1;
+  string message = 2;
+  repeated TaskResponse data = 3;
+  common.Meta meta = 4;
 }
 
 message UpdateTaskStatusRequest {

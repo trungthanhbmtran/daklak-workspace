@@ -7,7 +7,7 @@ export const hrmKpiCriteriaApi = {
       const data = res.data || [];
       return {
         data,
-        meta: res.meta || { total: data.length, page: 1, pageSize: 20, totalPages: 1 }
+        meta: res.meta || { pagination: { total: data.length, page: 1, pageSize: 20, totalPages: 1 } }
       };
     });
   },
@@ -43,7 +43,7 @@ export const hrmKpiEvaluationsApi = {
   list(params: any = {}): Promise<{ data: any; meta: any }> {
     return apiClient.get('/hrm/kpi-evaluations', { params }).then((res: any) => ({
       data: res.data || {},
-      meta: res.meta || { total: 0 }
+      meta: res.meta || { pagination: { total: 0 } }
     }));
   }
 };

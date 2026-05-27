@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package hrm;
 
+import "common/common.proto";
+
 service MasterPlanService {
   rpc FindAll (FindAllMasterPlansRequest) returns (MasterPlanList) {}
   rpc FindById (FindMasterPlanByIdRequest) returns (MasterPlan) {}
@@ -26,7 +28,10 @@ message MasterPlan {
 }
 
 message MasterPlanList {
-  repeated MasterPlan masterPlans = 1;
+  bool success = 1;
+  string message = 2;
+  repeated MasterPlan data = 3;
+  common.Meta meta = 4;
 }
 
 message FindAllMasterPlansRequest {

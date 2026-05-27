@@ -19,7 +19,9 @@ export class MasterPlansService {
     });
 
     return {
-      masterPlans: masterPlans.map(mp => ({
+      success: true,
+      message: 'Lấy danh sách Kế hoạch thành công',
+      data: masterPlans.map(mp => ({
         ...mp,
         startDate: mp.startDate?.toISOString() || '',
         endDate: mp.endDate?.toISOString() || '',
@@ -27,7 +29,17 @@ export class MasterPlansService {
         updatedAt: mp.updatedAt?.toISOString() || '',
         totalTasks: mp.tasks.length,
         completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
-      }))
+      })),
+      meta: {
+        pagination: {
+          total: masterPlans.length,
+          page: 1,
+          pageSize: masterPlans.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
+      }
     };
   }
 

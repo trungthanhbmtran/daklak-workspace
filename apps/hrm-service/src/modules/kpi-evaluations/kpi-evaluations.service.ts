@@ -10,11 +10,23 @@ export class KpiEvaluationsService {
       orderBy: { startDate: 'desc' },
     });
     return {
-      periods: periods.map(p => ({
+      success: true,
+      message: 'Lấy danh sách kỳ đánh giá thành công',
+      data: periods.map(p => ({
         ...p,
         startDate: p.startDate?.toISOString() || '',
         endDate: p.endDate?.toISOString() || '',
-      }))
+      })),
+      meta: {
+        pagination: {
+          total: periods.length,
+          page: 1,
+          pageSize: periods.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
+      }
     };
   }
 
@@ -35,7 +47,21 @@ export class KpiEvaluationsService {
 
   async findCriteria() {
     const criteria = await this.prisma.kpiCriteria.findMany();
-    return { criteria };
+    return {
+      success: true,
+      message: 'Lấy danh sách tiêu chí thành công',
+      data: criteria,
+      meta: {
+        pagination: {
+          total: criteria.length,
+          page: 1,
+          pageSize: criteria.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
+      }
+    };
   }
 
   async createCriterion(data: any) {
@@ -109,6 +135,20 @@ export class KpiEvaluationsService {
       where,
       orderBy: { createdAt: 'desc' },
     });
-    return { evaluations };
+    return {
+      success: true,
+      message: 'Lấy danh sách đánh giá thành công',
+      data: evaluations,
+      meta: {
+        pagination: {
+          total: evaluations.length,
+          page: 1,
+          pageSize: evaluations.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
+      }
+    };
   }
 }

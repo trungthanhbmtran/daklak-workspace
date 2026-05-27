@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package kpi;
 
+import "common/common.proto";
+
 service KpiService {
   rpc FindPeriods (FindPeriodsRequest) returns (PeriodsResponse) {}
   rpc CreatePeriod (CreatePeriodRequest) returns (PeriodResponse) {}
@@ -23,7 +25,10 @@ message PeriodResponse {
 }
 
 message PeriodsResponse {
-  repeated PeriodResponse periods = 1;
+  bool success = 1;
+  string message = 2;
+  repeated PeriodResponse data = 3;
+  common.Meta meta = 4;
 }
 
 message CreatePeriodRequest {
@@ -50,7 +55,10 @@ message CriterionResponse {
 }
 
 message CriteriaResponse {
-  repeated CriterionResponse criteria = 1;
+  bool success = 1;
+  string message = 2;
+  repeated CriterionResponse data = 3;
+  common.Meta meta = 4;
 }
 
 message CreateCriterionRequest {
@@ -114,5 +122,8 @@ message FindEvaluationsRequest {
 }
 
 message EvaluationsResponse {
-  repeated EvaluationResponse evaluations = 1;
+  bool success = 1;
+  string message = 2;
+  repeated EvaluationResponse data = 3;
+  common.Meta meta = 4;
 }

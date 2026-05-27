@@ -9,7 +9,7 @@ export const hrmPlansApi = {
   list(params: any = {}): Promise<{ data: HrmMasterPlan[]; meta: any }> {
     return apiClient.get('/hrm/master-plans', { params }).then((res: any) => ({
       data: res.data || [],
-      meta: res.meta || { total: 0 }
+      meta: res.meta || { pagination: { total: 0 } }
     }));
   },
   

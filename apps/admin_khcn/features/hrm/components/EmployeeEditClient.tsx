@@ -19,7 +19,7 @@ import { hrmKeys } from "@/features/hrm";
 import { useHrmEmployee, useUpdateHrmEmployee } from "@/features/hrm/hooks/useHrmEmployees";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useGetCategories } from "@/features/system-admin/categories/hooks/useCategoryApi";
+import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 import { cn } from "@/lib/utils";
 
 function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): any[] {
@@ -97,8 +97,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
     enabled: !!form.departmentId,
   });
 
-  const { data: allCategories = [] } = useGetCategories();
-  const rankTitles = useMemo(() => allCategories.filter((c: any) => c.group === "CIVIL_SERVANT_RANK"), [allCategories]);
+  const { data: rankTitles = [] } = useGetCategoryByGroup("CIVIL_SERVANT_RANK");
 
   const selectedUnit = units.find(u => u.id.toString() === form.departmentId);
   const jobTitles = jobTitlesRes?.items ?? [];

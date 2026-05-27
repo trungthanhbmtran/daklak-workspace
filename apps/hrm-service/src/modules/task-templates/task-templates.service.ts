@@ -24,10 +24,14 @@ export class TaskTemplatesService {
         updatedAt: t.updatedAt?.toISOString() || '',
       })),
       meta: {
-        total: templates.length,
-        page: 1,
-        pageSize: templates.length,
-        totalPages: 1
+        pagination: {
+          total: templates.length,
+          page: 1,
+          pageSize: templates.length,
+          totalPages: 1,
+          hasNext: false,
+          hasPrev: false
+        }
       }
     };
   }

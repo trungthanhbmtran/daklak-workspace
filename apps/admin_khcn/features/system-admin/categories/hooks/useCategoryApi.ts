@@ -12,6 +12,15 @@ export function useGetCategories() {
   });
 }
 
+export function useGetCategoryByGroup(group: string) {
+  return useQuery({
+    queryKey: [CATEGORY_KEYS.all, "group", group],
+    queryFn: () => categoryApi.fetchByGroup(group),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!group,
+  });
+}
+
 export function useGetCategoryGroups() {
   return useQuery({
     queryKey: [CATEGORY_KEYS.all, "groups"],
