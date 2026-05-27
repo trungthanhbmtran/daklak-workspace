@@ -36,28 +36,7 @@ export function MasterPlanListClient() {
   const { mutateAsync: createMasterPlan } = useCreateMasterPlan();
 
   // Dữ liệu ma trận tích hợp liên thông
-  const [items, setItems] = useState<TargetPlanItem[]>([
-    {
-      id: 'gov-1',
-      title: 'Đảm bảo tỷ lệ uptime hệ thống Trục liên thông dữ liệu LGSP tỉnh',
-      framework: 'BSC_KPI',
-      perspective: 'DIGITAL_TRANSFORM',
-      legalBasis: 'QĐ 124/QĐ-UBND về Kiến trúc Chính quyền số',
-      metricFactor: 40, targetValue: 99.9, unit: '%',
-      supervisor: 'Trung tâm Giám sát điều hành đô thị thông minh (IOC)',
-      aiStatus: 'VERIFIED'
-    },
-    {
-      id: 'gov-2',
-      title: 'Tích hợp phân hệ gRPC API kết nối camera giám sát tập trung về Trung tâm IOC',
-      framework: 'BSC_KPI',
-      perspective: 'DIGITAL_TRANSFORM',
-      legalBasis: 'Kế hoạch 45-KH/STTTT thúc đẩy chuyển đổi số',
-      metricFactor: 35, targetValue: 12, unit: 'API',
-      supervisor: 'Phòng Hạ tầng số & An toàn thông tin',
-      aiStatus: 'VERIFIED'
-    },
-  ]);
+  const [items, setItems] = useState<TargetPlanItem[]>([]);
 
   // States của Form nhập liệu
   const [newTitle, setNewTitle] = useState('');

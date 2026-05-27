@@ -44,11 +44,7 @@ export function CreateKpiClient() {
   });
 
   // Danh sách chỉ tiêu/Mục tiêu khởi tạo sẵn
-  const [targets, setTargets] = useState<TargetItem[]>([
-    { id: "t-1", title: "Đảm bảo uptime hệ thống Trục liên thông dữ liệu LGSP", parentGoal: "Số hóa hạ tầng dữ liệu dùng chung toàn tỉnh", weightOrConfidence: 40, targetValue: 99.9, unit: "%" },
-    { id: "t-2", title: "Phát triển phân hệ Microservices gRPC kết nối API camera giám sát", parentGoal: "Nâng cao năng lực giám sát điều hành IOC", weightOrConfidence: 35, targetValue: 12, unit: "API" },
-    { id: "t-3", title: "Triển khai hạ tầng ảo hóa tối ưu cụm Kubernetes (K8s)", parentGoal: "Số hóa hạ tầng dữ liệu dùng chung toàn tỉnh", weightOrConfidence: 25, targetValue: 100, unit: "%" },
-  ]);
+  const [targets, setTargets] = useState<TargetItem[]>([]);
 
   // State cho dòng nhập liệu mới
   const [newTitle, setNewTitle] = useState("");
