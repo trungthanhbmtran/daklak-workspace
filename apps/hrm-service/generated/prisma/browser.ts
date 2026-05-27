@@ -52,3 +52,8 @@ export type KpiEvaluation = Prisma.KpiEvaluationModel
  * 
  */
 export type KpiEvaluationDetail = Prisma.KpiEvaluationDetailModel
+/**
+ * Model TaskRankTemplate
+ * 
+ */
+export type TaskRankTemplate = Prisma.TaskRankTemplateModel

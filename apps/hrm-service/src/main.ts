@@ -10,13 +10,14 @@ const protoPath = [
   join(hrmDir, 'employee.proto'),
   join(hrmDir, 'task.proto'),
   join(hrmDir, 'kpi.proto'),
+  join(hrmDir, 'master_plan.proto'),
 ];
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
     transport: Transport.GRPC,
     options: {
-      package: ['employee', 'task', 'kpi'],
+      package: ['employee', 'task', 'kpi', 'hrm'],
       protoPath,
       url: process.env.GRPC_URL ?? '0.0.0.0:50052',
       loader: {

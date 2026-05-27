@@ -57,7 +57,8 @@ export const ModelName = {
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
   KpiEvaluation: 'KpiEvaluation',
-  KpiEvaluationDetail: 'KpiEvaluationDetail'
+  KpiEvaluationDetail: 'KpiEvaluationDetail',
+  TaskRankTemplate: 'TaskRankTemplate'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -203,6 +204,20 @@ export const KpiEvaluationDetailScalarFieldEnum = {
 export type KpiEvaluationDetailScalarFieldEnum = (typeof KpiEvaluationDetailScalarFieldEnum)[keyof typeof KpiEvaluationDetailScalarFieldEnum]
 
 
+export const TaskRankTemplateScalarFieldEnum = {
+  id: 'id',
+  classification: 'classification',
+  rank: 'rank',
+  taskName: 'taskName',
+  defaultUnit: 'defaultUnit',
+  defaultWeight: 'defaultWeight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskRankTemplateScalarFieldEnum = (typeof TaskRankTemplateScalarFieldEnum)[keyof typeof TaskRankTemplateScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -317,4 +332,14 @@ export const KpiEvaluationDetailOrderByRelevanceFieldEnum = {
 } as const
 
 export type KpiEvaluationDetailOrderByRelevanceFieldEnum = (typeof KpiEvaluationDetailOrderByRelevanceFieldEnum)[keyof typeof KpiEvaluationDetailOrderByRelevanceFieldEnum]
+
+
+export const TaskRankTemplateOrderByRelevanceFieldEnum = {
+  classification: 'classification',
+  rank: 'rank',
+  taskName: 'taskName',
+  defaultUnit: 'defaultUnit'
+} as const
+
+export type TaskRankTemplateOrderByRelevanceFieldEnum = (typeof TaskRankTemplateOrderByRelevanceFieldEnum)[keyof typeof TaskRankTemplateOrderByRelevanceFieldEnum]
 

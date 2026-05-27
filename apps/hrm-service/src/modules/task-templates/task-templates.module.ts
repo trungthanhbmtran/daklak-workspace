@@ -4,6 +4,6 @@ import { TaskTemplatesService } from './task-templates.service';
 
 @Module({
   controllers: [TaskTemplatesController],
-  providers: [TaskTemplatesService],
+  providers: [TaskTemplatesService]
 })
 export class TaskTemplatesModule {}

@@ -2,12 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@/config/config.module';
 import { PrismaModule } from '@/database/prisma.module';
 import { EmployeesModule } from '@/modules/employees/employees.module';
-import { TasksModule } from './tasks/tasks.module';
-import { KpisModule } from './kpis/kpis.module';
-import { PlansModule } from './plans/plans.module';
-import { TaskTemplatesModule } from './task-templates/task-templates.module';
+import { TasksModule } from './modules/tasks/tasks.module';
+import { MasterPlansModule } from './modules/master-plans/master-plans.module';
+import { TaskTemplatesModule } from './modules/task-templates/task-templates.module';
+import { KpiEvaluationsModule } from './modules/kpi-evaluations/kpi-evaluations.module';
 
 @Module({
-  imports: [ConfigModule, PrismaModule, EmployeesModule, TasksModule, KpisModule, PlansModule, TaskTemplatesModule],
+  imports: [ConfigModule, PrismaModule, EmployeesModule, TasksModule, TaskTemplatesModule, MasterPlansModule, KpiEvaluationsModule],
 })
 export class AppModule {}
