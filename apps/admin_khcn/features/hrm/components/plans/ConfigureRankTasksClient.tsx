@@ -21,15 +21,21 @@ export function ConfigureRankTasksClient() {
     const { data: templatesData } = useTaskTemplatesList();
     const templates = templatesData?.data || [];
 
-    const [categories, setCategories] = useState<CategoryItem[]>([]);
-
+    const [units, setUnits] = useState<CategoryItem[]>([]);
+    const [congChucRanks, setCongChucRanks] = useState<CategoryItem[]>([]);
+    const [vienChucRanks, setVienChucRanks] = useState<CategoryItem[]>([]);
+    
     useEffect(() => {
-        categoryApi.fetchAll().then(data => setCategories(data));
+        Promise.all([
+            categoryApi.fetchByGroup('UNIT'),
+            categoryApi.fetchByGroup('RANK_CONG_CHUC'),
+            categoryApi.fetchByGroup('RANK_VIEN_CHUC')
+        ]).then(([unitsData, congChucData, vienChucData]) => {
+            setUnits(unitsData);
+            setCongChucRanks(congChucData);
+            setVienChucRanks(vienChucData);
+        });
     }, []);
-
-    const units = categories.filter(c => c.group === 'UNIT');
-    const congChucRanks = categories.filter(c => c.group === 'RANK_CONG_CHUC');
-    const vienChucRanks = categories.filter(c => c.group === 'RANK_VIEN_CHUC');
 
     const congChucTemplates = templates.filter(t => t.classification === 'CONG_CHUC');
     const vienChucTemplates = templates.filter(t => t.classification === 'VIEN_CHUC');
