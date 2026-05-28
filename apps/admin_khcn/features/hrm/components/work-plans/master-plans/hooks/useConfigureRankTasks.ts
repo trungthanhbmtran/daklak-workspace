@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 import { categoryApi } from '@/features/system-admin/categories/api';
 import { useTaskTemplatesList } from '@/features/hrm/hooks';
@@ -35,13 +36,20 @@ export function useConfigureRankTasks() {
 
     const isLoading = isLoadingTemplates || isLoadingUnits || isLoadingCC || isLoadingVC;
 
+    const [isSaving, setIsSaving] = useState(false);
+
     const handleSave = async () => {
+        setIsSaving(true);
         try {
             await hrmTaskTemplatesApi.bulkUpdate([...congChucTemplates, ...vienChucTemplates]);
             setIsSaved(true);
+            toast.success("Đồng bộ thư viện ngạch thành công!");
             setTimeout(() => setIsSaved(false), 2000);
         } catch (error) {
             console.error("Lỗi khi lưu cấu hình:", error);
+            toast.error("Có lỗi xảy ra khi đồng bộ thư viện.");
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -49,6 +57,7 @@ export function useConfigureRankTasks() {
         selectedClass,
         setSelectedClass,
         isSaved,
+        isSaving,
         handleSave,
         units,
         congChucRanks,

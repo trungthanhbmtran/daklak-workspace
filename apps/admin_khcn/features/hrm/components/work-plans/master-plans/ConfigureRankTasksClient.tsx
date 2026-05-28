@@ -14,7 +14,7 @@ export type GovClassification = 'CONG_CHUC' | 'VIEN_CHUC';
 
 export function ConfigureRankTasksClient() {
     const {
-        selectedClass, setSelectedClass, isSaved, handleSave,
+        selectedClass, setSelectedClass, isSaved, isSaving, handleSave,
         units, congChucRanks, vienChucRanks,
         congChucTemplates, vienChucTemplates, isLoading
     } = useConfigureRankTasks();
@@ -61,9 +61,14 @@ export function ConfigureRankTasksClient() {
             <CardFooter className="flex justify-end pt-4 pb-4 border-t bg-slate-50/50 rounded-b-2xl">
                 <Button
                     onClick={handleSave}
+                    disabled={isSaving}
                     className="gap-2 font-bold text-xs h-10 px-6 rounded-xl"
                 >
-                    <Save className="w-4 h-4" /> LƯU ĐỒNG BỘ THƯ VIỆN NGẠCH
+                    {isSaving ? (
+                        <>Đang lưu...</>
+                    ) : (
+                        <><Save className="w-4 h-4" /> LƯU ĐỒNG BỘ THƯ VIỆN NGẠCH</>
+                    )}
                 </Button>
             </CardFooter>
         </Card>
