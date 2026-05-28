@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target } from 'lucide-react';
-import { useTaskTemplatesList, useCreateTask } from '../../hooks';
+import { useTaskTemplatesList, useCreateTask } from '../../../hooks';
 
 export function TaskCreateClient() {
   const [assignee, setAssignee] = useState('');
