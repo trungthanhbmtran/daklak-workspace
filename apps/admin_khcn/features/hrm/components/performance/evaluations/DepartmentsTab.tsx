@@ -2,7 +2,6 @@
 "use client";
 import { Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Search } from '@/components/ui/search';
 import { Button } from '@/components/ui/button';
 import { useSearchParams } from 'next/navigation';

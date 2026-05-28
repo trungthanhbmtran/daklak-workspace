@@ -16,7 +16,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from "recharts";
-import { useCreateKpiPlan } from "../../hooks";
+import { useCreateKpiPlan } from "../../../hooks";
 
 // --- ĐỊNH NGHĨA KIỂU DỮ LIỆU ---
 type FrameworkMode = "MBO_KPI" | "OKRS";
