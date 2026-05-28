@@ -91,7 +91,7 @@ export class AiService implements OnModuleInit {
         'Authorization': `Bearer ${config.apiKey}`
       },
       body: JSON.stringify({
-        model: config.model || 'gpt-4o',
+        model: config.model || 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -148,5 +148,43 @@ export class AiService implements OnModuleInit {
     
     const data = await response.json();
     return data.content?.[0]?.text || '';
+  }
+
+  async listModels(provider: string, apiKey: string): Promise<string[]> {
+    if (!apiKey) {
+      throw new Error('API Key is required to fetch models');
+    }
+    
+    switch (provider) {
+      case 'OPENAI': {
+        const res = await fetch('https://api.openai.com/v1/models', {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`
+          }
+        });
+        if (!res.ok) throw new Error('OpenAI API Error: ' + await res.text());
+        const data = await res.json();
+        return data.data?.map((m: any) => m.id).filter((id: string) => id.includes('gpt') || id.includes('o1')) || [];
+      }
+      case 'GEMINI': {
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+        if (!res.ok) throw new Error('Gemini API Error: ' + await res.text());
+        const data = await res.json();
+        return data.models?.map((m: any) => m.name.replace('models/', '')) || [];
+      }
+      case 'CLAUDE': {
+        const res = await fetch('https://api.anthropic.com/v1/models', {
+          headers: {
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01'
+          }
+        });
+        if (!res.ok) throw new Error('Claude API Error: ' + await res.text());
+        const data = await res.json();
+        return data.data?.map((m: any) => m.id) || [];
+      }
+      default:
+        throw new Error(`Unsupported AI provider: ${provider}`);
+    }
   }
 }

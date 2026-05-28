@@ -20,4 +20,18 @@ export class AiController {
       return { status: 'error', message: err.message };
     }
   }
+
+  @Post('models')
+  async listModels(@Body() body: { provider: string; apiKey: string }) {
+    if (!body.provider || !body.apiKey) {
+      return { status: 'error', message: 'Provider and apiKey are required' };
+    }
+
+    try {
+      const models = await this.aiService.listModels(body.provider, body.apiKey);
+      return { status: 'success', data: models };
+    } catch (err: any) {
+      return { status: 'error', message: err.message };
+    }
+  }
 }
