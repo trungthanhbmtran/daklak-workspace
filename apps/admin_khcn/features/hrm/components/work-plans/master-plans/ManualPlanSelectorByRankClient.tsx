@@ -5,6 +5,7 @@ import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight } from 
 import { useQuery } from '@tanstack/react-query';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
 import { categoryApi } from "@/features/system-admin/categories/api";
+import { useTaskTemplatesList } from '@/features/hrm/hooks';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -43,13 +44,8 @@ export function ManualPlanSelectorByRankClient() {
         staleTime: 5 * 60 * 1000,
     });
 
-    const { data: serverTemplates = [] } = useQuery({
-        queryKey: ['task-templates'],
-        queryFn: async () => {
-            const res = await hrmTaskTemplatesApi.list({ pageSize: 1000 });
-            return res.data || [];
-        }
-    });
+    const { data: templatesData } = useTaskTemplatesList();
+    const serverTemplates = templatesData?.data || [];
 
     const rankTasksRepository = serverTemplates.map((t: any) => ({
         id: t.id.toString(),
