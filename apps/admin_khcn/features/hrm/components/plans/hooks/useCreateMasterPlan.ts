@@ -9,6 +9,7 @@ import type { PlanBasicInfoData } from '../CreatePlan/PlanBasicInfoForm';
 import type { TaskItemData } from '../CreatePlan/PlanTaskConfigList';
 import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 import apiClient from "@/lib/axiosInstance";
+import { aiApi } from "@/features/hrm/api/ai.api";
 
 export function useCreateMasterPlan() {
   const router = useRouter();
@@ -218,44 +219,13 @@ export function useCreateMasterPlan() {
 
     setIsGeneratingAI(true);
     try {
-      let modelContext = "";
-      if (plan.type === "OKR") {
-        modelContext = "Tôi đang xây dựng kế hoạch theo mô hình OKR (Objective and Key Results). Hãy sinh ra các 'Kết quả then chốt' (Key Results) đo lường được để đạt được Mục tiêu (Objective) trên.";
-      } else if (plan.type === "PROJECT") {
-        modelContext = "Tôi đang xây dựng kế hoạch theo mô hình Quản lý Dự án (Project Management). Hãy sinh ra các 'Nhiệm vụ / Milestones' theo từng giai đoạn (Phân tích, Thiết kế, Triển khai, v.v.).";
-      } else {
-        modelContext = "Tôi đang xây dựng một Kế hoạch Tổng thể. Hãy phân rã công việc theo mô trúc WBS (Work Breakdown Structure).";
-      }
+      const parsed = await aiApi.generateProjectTasks({
+        title: plan.title,
+        objective: plan.objective,
+        type: plan.type
+      });
 
-      const prompt = `Bạn là một chuyên gia quản trị dự án cấp cao.
-${modelContext}
-
-Thông tin Kế hoạch:
-Tiêu đề: "${plan.title}"
-Mục tiêu: "${plan.objective}"
-
-Hãy sinh ra cho tôi một danh sách 5-10 phân việc quan trọng nhất.
-Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`json) là một mảng các đối tượng:
-[
-  {
-    "title": "Tên công việc / Kết quả then chốt",
-    "description": "Mô tả chi tiết",
-    "priority": "HIGH",
-    "weight": 10
-  }
-]`;
-
-      const res = await apiClient.post('/ai/generate', { prompt }) as any;
-      if (res.status === 'success' && res.data) {
-        let jsonStr = res.data;
-        if (jsonStr.startsWith('```json')) {
-          jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        } else if (jsonStr.startsWith('```')) {
-          jsonStr = jsonStr.replace(/```/g, '').trim();
-        }
-
-        const parsed = JSON.parse(jsonStr);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length > 0) {
           const newTasks = parsed.map((item: any) => ({
             title: item.title || '',
             description: item.description || '',
@@ -282,11 +252,8 @@ Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`j
           }
           toast.success(`AI đã tạo thành công ${newTasks.length} phân việc!`);
         } else {
-          throw new Error('Dữ liệu AI trả về không hợp lệ');
+          toast.error("AI không trả về danh sách công việc hợp lệ");
         }
-      } else {
-        throw new Error(res.message || 'Lỗi từ AI');
-      }
     } catch (err: any) {
       console.error(err);
       toast.error('Có lỗi xảy ra khi gọi AI: ' + (err.message || 'Xin thử lại'));

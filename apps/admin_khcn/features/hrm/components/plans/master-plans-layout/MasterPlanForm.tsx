@@ -1,16 +1,16 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
-  FolderPlus, Sparkles, GitMerge, Eye, Trash2, ClipboardCheck
+  FolderPlus, Sparkles, GitMerge, Trash2, ClipboardCheck
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMasterPlanContext, type ManagementFramework, type GovPerspective } from './MasterPlanContext';
 import { useMutation } from '@tanstack/react-query';
 import { hrmPlansApi } from '@/features/hrm/api';
+import { aiApi } from '@/features/hrm/api/ai.api';
 import { Button } from "@/components/ui/button";
 import { organizationApi } from '@/features/system-admin/organization/api';
-import apiClient from '@/lib/axiosInstance';
 
 interface TargetPlanItem {
   id: string;
@@ -64,67 +64,41 @@ export function MasterPlanForm() {
       const orgContext = orgTree.map(o => o.name).join(', ');
       const rolesContext = jobTitles.map(r => r.name).join(', ');
 
-      const prompt = `Bạn là chuyên gia Quản trị nhân sự và Xây dựng Kế hoạch. 
-Hãy sinh ra một danh sách 3-5 chỉ tiêu/hành động chính cho Kế hoạch thuộc mô hình ${framework}.
-Tên kế hoạch: "${planTitle}"
-Mục tiêu: "${planObjective}"
-Các phòng ban hiện có: ${orgContext}
-Các chức danh/ngạch hiện có: ${rolesContext}
+      const parsed = await aiApi.generateMasterPlanTasks({
+        framework,
+        planTitle,
+        planObjective,
+        orgContext,
+        rolesContext
+      });
 
-Trả về một mảng JSON thuần túy (KHÔNG CÓ markdown format \`\`\`json, chỉ mảng []) với cấu trúc:
-[
-  {
-    "title": "Tên hành động/chỉ tiêu",
-    "perspective": "DIGITAL_TRANSFORM", // hoặc STRATEGIC_GOAL, OPERATIONAL_REFORM, RESOURCE_FINANCE
-    "legalBasis": "Căn cứ pháp lý (nếu có)",
-    "metricFactor": 20, // Trọng số hoặc Mức độ ưu tiên
-    "targetValue": 100, // Định mức mục tiêu
-    "unit": "Tỉ lệ % hoặc số lượng",
-    "supervisor": "Tên phòng ban giám sát",
-    "rankType": "Tên Ngạch/Chức danh phù hợp nhất"
-  }
-]`;
+      if (Array.isArray(parsed)) {
+        const aiItems: TargetPlanItem[] = parsed.map((item: any, index: number) => {
+          // Tìm rankId tương ứng với rankType AI trả về, nếu không có thì lấy 0 (Tất cả)
+          const matchedRank = state.ranks.find((r: any) =>
+            r.name.toLowerCase().includes((item.rankType || '').toLowerCase()) ||
+            (item.rankType || '').toLowerCase().includes(r.name.toLowerCase())
+          );
 
-      const res = await apiClient.post('/admin/ai/generate', { prompt }) as any;
-      if (res.status === 'success' && res.data) {
-        let jsonStr = res.data;
-        if (jsonStr.startsWith('```json')) {
-          jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-        } else if (jsonStr.startsWith('```')) {
-          jsonStr = jsonStr.replace(/```/g, '').trim();
-        }
-
-        const parsed = JSON.parse(jsonStr);
-        if (Array.isArray(parsed)) {
-          const aiItems: TargetPlanItem[] = parsed.map((item, index) => {
-             // Tìm rankId tương ứng với rankType AI trả về, nếu không có thì lấy 0 (Tất cả)
-             const matchedRank = state.ranks.find((r: any) => 
-               r.name.toLowerCase().includes((item.rankType || '').toLowerCase()) ||
-               (item.rankType || '').toLowerCase().includes(r.name.toLowerCase())
-             );
-             
-             return {
-                id: `ai-${Date.now()}-${index}`,
-                title: item.title || '',
-                framework: framework,
-                perspective: item.perspective || 'DIGITAL_TRANSFORM',
-                legalBasis: item.legalBasis || 'N/A',
-                metricFactor: item.metricFactor || 10,
-                targetValue: item.targetValue || 100,
-                unit: item.unit || '%',
-                supervisor: item.supervisor || 'N/A',
-                rankType: matchedRank ? matchedRank.code : (item.rankType || 'ALL'),
-                rankId: matchedRank ? matchedRank.id : 0,
-                aiStatus: 'RECOMMENDED'
-             };
-          });
-          setItems(aiItems);
-          toast.success("AI đã sinh thành công danh mục chỉ tiêu!");
-        } else {
-          throw new Error("Dữ liệu trả về không phải là mảng JSON");
-        }
+          return {
+            id: `ai-${Date.now()}-${index}`,
+            title: item.title || '',
+            framework: framework,
+            perspective: item.perspective || 'DIGITAL_TRANSFORM',
+            legalBasis: item.legalBasis || 'N/A',
+            metricFactor: item.metricFactor || 10,
+            targetValue: item.targetValue || 100,
+            unit: item.unit || '%',
+            supervisor: item.supervisor || 'N/A',
+            rankType: matchedRank ? matchedRank.code : (item.rankType || 'ALL'),
+            rankId: matchedRank ? matchedRank.id : 0,
+            aiStatus: 'RECOMMENDED'
+          };
+        });
+        setItems(aiItems);
+        toast.success("AI đã sinh thành công danh mục chỉ tiêu!");
       } else {
-        throw new Error(res.message || "Lỗi khi gọi AI");
+        throw new Error("Dữ liệu trả về không phải là mảng JSON");
       }
     } catch (error: any) {
       console.error(error);
