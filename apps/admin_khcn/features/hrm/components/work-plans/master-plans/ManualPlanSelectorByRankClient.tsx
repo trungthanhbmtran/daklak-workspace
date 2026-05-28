@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
+import { categoryApi } from "@/features/system-admin/categories/api";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,18 @@ interface SelectedPlanItem {
 }
 
 export function ManualPlanSelectorByRankClient() {
+    const { data: congChucRanks = [] } = useQuery({
+        queryKey: ['categories', 'RANK_CONG_CHUC'],
+        queryFn: () => categoryApi.fetchByGroup('RANK_CONG_CHUC'),
+        staleTime: 5 * 60 * 1000,
+    });
+
+    const { data: vienChucRanks = [] } = useQuery({
+        queryKey: ['categories', 'RANK_VIEN_CHUC'],
+        queryFn: () => categoryApi.fetchByGroup('RANK_VIEN_CHUC'),
+        staleTime: 5 * 60 * 1000,
+    });
+
     const { data: serverTemplates = [] } = useQuery({
         queryKey: ['task-templates'],
         queryFn: async () => {
@@ -96,56 +109,45 @@ export function ManualPlanSelectorByRankClient() {
                                 <TabsTrigger value="cong-chuc" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">Công chức</TabsTrigger>
                                 <TabsTrigger value="vien-chuc" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">Viên chức</TabsTrigger>
                             </TabsList>
-                            
+
                             <TabsContent value="cong-chuc" className="flex flex-col gap-1.5 mt-0">
-                                {[
-                                    { key: 'CHUYEN_VIEN_CAO_CAP', label: 'Chuyên viên Cao cấp', desc: 'Đề án chiến lược, văn bản quy phạm vĩ mô' },
-                                    { key: 'CHUYEN_VIEN_CHINH', label: 'Chuyên viên Chính', desc: 'Tham mưu tổng hợp, tờ trình, thẩm định sở' },
-                                    { key: 'CHUYEN_VIEN', label: 'Chuyên viên', desc: 'Thực thi tác nghiệp, xử lý hồ sơ, phiếu chuyển' },
-                                    { key: 'CAN_SU', label: 'Cán sự', desc: 'Hỗ trợ nghiệp vụ, lưu trữ, thống kê' },
-                                    { key: 'NHAN_VIEN', label: 'Nhân viên', desc: 'Thực hiện các công việc thừa hành, phục vụ' },
-                                ].map((rank) => (
+                                {congChucRanks.map((rank: any) => (
                                     <button
-                                        key={rank.key}
+                                        key={rank.code}
                                         type="button"
-                                        onClick={() => setActiveRankFilter(rank.key)}
+                                        onClick={() => setActiveRankFilter(rank.code)}
                                         className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group
-                                            ${activeRankFilter === rank.key 
-                                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]' 
+                                            ${activeRankFilter === rank.code
+                                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]'
                                                 : 'bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:bg-indigo-50/30 text-slate-700'
                                             }`}
                                     >
                                         <div className="space-y-1">
-                                            <div className="text-xs font-bold tracking-wide">{rank.label}</div>
-                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.key ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.desc}</div>
+                                            <div className="text-xs font-bold tracking-wide">{rank.name}</div>
+                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.code ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.description || 'Chưa có mô tả'}</div>
                                         </div>
-                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.key ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
+                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.code ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
                                     </button>
                                 ))}
                             </TabsContent>
-                            
+
                             <TabsContent value="vien-chuc" className="flex flex-col gap-1.5 mt-0">
-                                {[
-                                    { key: 'VIEN_CHUC_HANG_1', label: 'Viên chức Hạng I', desc: 'Chủ trì đề án khoa học, công nghệ cấp bộ/tỉnh' },
-                                    { key: 'VIEN_CHUC_HANG_2', label: 'Viên chức Hạng II', desc: 'Thực hiện nhiệm vụ chuyên môn phức tạp' },
-                                    { key: 'VIEN_CHUC_HANG_3', label: 'Viên chức Hạng III', desc: 'Thực hành chuyên môn nghiệp vụ cơ bản' },
-                                    { key: 'VIEN_CHUC_HANG_4', label: 'Viên chức Hạng IV', desc: 'Hỗ trợ kỹ thuật, nghiệp vụ đơn giản' },
-                                ].map((rank) => (
+                                {vienChucRanks.map((rank: any) => (
                                     <button
-                                        key={rank.key}
+                                        key={rank.code}
                                         type="button"
-                                        onClick={() => setActiveRankFilter(rank.key)}
+                                        onClick={() => setActiveRankFilter(rank.code)}
                                         className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group
-                                            ${activeRankFilter === rank.key 
-                                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]' 
+                                            ${activeRankFilter === rank.code
+                                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]'
                                                 : 'bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:bg-indigo-50/30 text-slate-700'
                                             }`}
                                     >
                                         <div className="space-y-1">
-                                            <div className="text-xs font-bold tracking-wide">{rank.label}</div>
-                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.key ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.desc}</div>
+                                            <div className="text-xs font-bold tracking-wide">{rank.name}</div>
+                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.code ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.description || 'Chưa có mô tả'}</div>
                                         </div>
-                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.key ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
+                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.code ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
                                     </button>
                                 ))}
                             </TabsContent>
@@ -173,8 +175,8 @@ export function ManualPlanSelectorByRankClient() {
                                                 key={task.id}
                                                 onClick={() => !added && handleQuickAdd(task.taskName, task.defaultUnit)}
                                                 className={`p-3.5 border rounded-2xl flex items-center justify-between transition-all duration-300 text-xs font-semibold group
-                                                    ${added 
-                                                        ? 'bg-slate-50/80 border-slate-100 opacity-50 cursor-not-allowed' 
+                                                    ${added
+                                                        ? 'bg-slate-50/80 border-slate-100 opacity-50 cursor-not-allowed'
                                                         : 'bg-white border-slate-200 hover:border-indigo-400 hover:shadow-md hover:bg-gradient-to-r hover:from-white hover:to-indigo-50 cursor-pointer'
                                                     }`}
                                             >
