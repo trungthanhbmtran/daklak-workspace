@@ -125,17 +125,17 @@ export const TaskListClient = () => {
         {stats.map((stat, idx) => (
           <Card
             key={idx}
-            className={`relative border border-white/20 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-500 overflow-hidden group cursor-pointer rounded-3xl ${activeFilter === stat.id ? 'ring-2 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-950 ring-indigo-500 scale-105' : 'hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]'}`}
+            className={`relative border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 overflow-hidden group cursor-pointer rounded-3xl bg-gradient-to-br ${stat.color} ${activeFilter === stat.id ? 'ring-4 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-950 ring-indigo-500 scale-105' : 'hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.2)] hover:brightness-110'}`}
             onClick={() => setActiveFilter(activeFilter === stat.id ? null : stat.id)}
           >
-            <CardContent className="p-6 relative">
-              <div className={`absolute right-0 top-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 dark:opacity-20 rounded-bl-full group-hover:scale-125 transition-transform duration-700`} />
+            <CardContent className="p-6 relative text-white">
+              <div className="absolute right-0 top-0 w-32 h-32 bg-white/20 rounded-bl-full group-hover:scale-125 transition-transform duration-700" />
               <div className="flex justify-between items-start relative z-10">
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.label}</p>
-                  <p className="text-5xl font-black text-slate-800 dark:text-slate-100 tracking-tighter group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">{stat.value}</p>
+                  <p className="text-sm font-bold uppercase tracking-wider text-white/90 drop-shadow-sm">{stat.label}</p>
+                  <p className="text-5xl font-black text-white tracking-tighter drop-shadow-md">{stat.value}</p>
                 </div>
-                <div className={`p-4 rounded-2xl bg-gradient-to-br ${stat.color} text-white shadow-xl shadow-indigo-500/20 group-hover:-rotate-12 transition-transform duration-500`}>
+                <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-md shadow-xl group-hover:-rotate-12 transition-transform duration-500 text-white">
                   {stat.icon}
                 </div>
               </div>
@@ -323,44 +323,92 @@ export const TaskListClient = () => {
 
       {/* Task Detail Dialog */}
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-        <DialogContent className="max-w-2xl font-sans">
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-bold">{selectedTask?.title}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-3xl font-sans p-0 overflow-hidden rounded-[2rem] border-0 shadow-2xl bg-white dark:bg-slate-900">
           {selectedTask && (
-            <div className="space-y-6 mt-4">
-              <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Trạng thái</p>
-                  {getStatusBadge(selectedTask.status || 'TODO')}
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Ưu tiên</p>
-                  <span className={`font-semibold ${getPriorityColor(selectedTask.priority)}`}>{selectedTask.priority || 'MEDIUM'}</span>
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500 mb-1">Hạn chót</p>
-                  <p className="font-semibold text-slate-800">{selectedTask.dueDate ? new Date(selectedTask.dueDate).toLocaleDateString('vi-VN') : 'Không có'}</p>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Người nhận</h4>
-                <div className="flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex justify-center items-center font-bold mr-3">
-                    {(selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?'}
+            <div className="flex flex-col h-full">
+              {/* Cover/Header area */}
+              <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 pb-12 relative text-white">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
+                      {selectedTask.priority || 'MEDIUM'} PRIORITY
+                    </span>
+                    {selectedTask.status === 'DONE' && (
+                      <span className="px-3 py-1 bg-emerald-500/80 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest flex items-center border border-emerald-400">
+                        <CheckCircle2 className="w-3 h-3 mr-1" /> HOÀN THÀNH
+                      </span>
+                    )}
                   </div>
-                  <div>
-                    <p className="font-bold text-slate-800">{selectedTask.assigneeName || selectedTask.assigneeCode || 'N/A'}</p>
-                    <p className="text-sm text-slate-500">Mã NV: {selectedTask.assigneeCode}</p>
-                  </div>
+                  <DialogTitle className="text-3xl md:text-4xl font-black leading-tight drop-shadow-md mb-2">
+                    {selectedTask.title}
+                  </DialogTitle>
                 </div>
               </div>
 
-              <div>
-                <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Mô tả công việc</h4>
-                <div className="bg-slate-50 p-4 rounded-xl text-slate-700 whitespace-pre-wrap min-h-[100px]">
-                  {selectedTask.description || 'Chưa có mô tả chi tiết.'}
+              {/* Content area */}
+              <div className="p-8 -mt-8 relative z-20">
+                <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-xl shadow-indigo-900/5 border border-slate-100 dark:border-slate-700 p-6 flex justify-between items-center mb-8 gap-4 flex-wrap">
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Trạng thái</p>
+                    <div className="scale-110 origin-left mt-2">
+                      {getStatusBadge(selectedTask.status || 'TODO')}
+                    </div>
+                  </div>
+                  <div className="w-px h-12 bg-slate-100 dark:bg-slate-700 hidden md:block"></div>
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Hạn chót</p>
+                    <div className="flex items-center text-slate-800 dark:text-slate-100 font-bold text-lg">
+                      <Calendar className="w-5 h-5 text-rose-500 mr-2" />
+                      {selectedTask.dueDate ? new Date(selectedTask.dueDate).toLocaleDateString('vi-VN') : 'Không có thời hạn'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="md:col-span-2 space-y-6">
+                    <div>
+                      <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
+                        <span className="w-2 h-6 bg-indigo-500 rounded-full mr-3"></span>
+                        Mô tả chi tiết
+                      </h4>
+                      <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl text-slate-700 dark:text-slate-300 whitespace-pre-wrap min-h-[150px] leading-relaxed border border-slate-100 dark:border-slate-800">
+                        {selectedTask.description || 'Chưa có mô tả chi tiết cho công việc này.'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div>
+                      <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
+                        <span className="w-2 h-6 bg-rose-500 rounded-full mr-3"></span>
+                        Người tiếp nhận
+                      </h4>
+                      <div className="bg-gradient-to-b from-indigo-50 to-white dark:from-indigo-900/20 dark:to-slate-800/50 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center text-center">
+                        <div className="w-20 h-20 rounded-full bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex justify-center items-center font-black text-3xl mb-4 shadow-xl shadow-indigo-200/50 border-4 border-indigo-50 dark:border-indigo-900/50">
+                          {(selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?'}
+                        </div>
+                        <p className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-1">
+                          {selectedTask.assigneeName || selectedTask.assigneeCode || 'Chưa phân công'}
+                        </p>
+                        {selectedTask.assigneeCode && (
+                          <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-100/50 dark:bg-indigo-900/50 px-3 py-1 rounded-full uppercase tracking-wider">
+                            ID: {selectedTask.assigneeCode}
+                          </p>
+                        )}
+                        {!selectedTask.assigneeCode && (
+                          <Button 
+                            className="mt-4 rounded-full w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
+                            onClick={() => setTaskToAssign(selectedTask)}
+                          >
+                            <PlayCircle className="w-4 h-4 mr-2" /> Giao việc ngay
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
