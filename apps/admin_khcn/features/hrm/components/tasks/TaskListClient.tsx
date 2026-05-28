@@ -97,38 +97,45 @@ export const TaskListClient = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 font-sans">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+            </span>
+            HRM WORKSPACE
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-indigo-800 to-slate-900 dark:from-white dark:via-indigo-300 dark:to-white">
             Trung tâm Giao việc
           </h1>
-          <p className="text-muted-foreground mt-1 text-lg">
+          <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">
             Điều phối, theo dõi và quản lý tiến độ công việc toàn diện
           </p>
         </div>
         <Link href="/services/hrm/tasks/create">
-          <Button className="rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700">
-            <Plus className="mr-2 h-5 w-5" /> Giao việc mới
+          <Button className="rounded-full h-12 px-8 text-base shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-300 hover:-translate-y-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 border-none group">
+            <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> Giao việc mới
           </Button>
         </Link>
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
         {stats.map((stat, idx) => (
           <Card
             key={idx}
-            className={`border-none shadow-md transition-all duration-300 overflow-hidden group cursor-pointer ${activeFilter === stat.id ? 'ring-4 ring-offset-2 ring-indigo-500 scale-105' : 'hover:shadow-xl'}`}
+            className={`relative border border-white/20 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] transition-all duration-500 overflow-hidden group cursor-pointer rounded-3xl ${activeFilter === stat.id ? 'ring-2 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-950 ring-indigo-500 scale-105' : 'hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)]'}`}
             onClick={() => setActiveFilter(activeFilter === stat.id ? null : stat.id)}
           >
             <CardContent className="p-6 relative">
-              <div className={`absolute right-0 top-0 w-24 h-24 bg-gradient-to-br ${stat.color} opacity-10 rounded-bl-full group-hover:scale-110 transition-transform duration-500`} />
-              <div className="flex justify-between items-start">
+              <div className={`absolute right-0 top-0 w-32 h-32 bg-gradient-to-br ${stat.color} opacity-10 dark:opacity-20 rounded-bl-full group-hover:scale-125 transition-transform duration-700`} />
+              <div className="flex justify-between items-start relative z-10">
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{stat.label}</p>
-                  <p className="text-4xl font-black text-slate-800 dark:text-slate-100">{stat.value}</p>
+                  <p className="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-5xl font-black text-slate-800 dark:text-slate-100 tracking-tighter group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-300">{stat.value}</p>
                 </div>
-                <div className={`p-3 rounded-2xl bg-gradient-to-br ${stat.color} text-white shadow-lg`}>
+                <div className={`p-4 rounded-2xl bg-gradient-to-br ${stat.color} text-white shadow-xl shadow-indigo-500/20 group-hover:-rotate-12 transition-transform duration-500`}>
                   {stat.icon}
                 </div>
               </div>
@@ -138,17 +145,17 @@ export const TaskListClient = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-        <Search placeholder="Tìm kiếm công việc..." className="w-full sm:w-96" />
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button variant="outline" className="rounded-full border-slate-200">
+      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-3xl shadow-sm border border-slate-200/50 dark:border-slate-800/50 relative z-10">
+        <Search placeholder="Tìm kiếm công việc..." className="w-full sm:w-96 rounded-2xl" />
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Button variant="outline" className="rounded-full border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800">
             <Filter className="mr-2 h-4 w-4 text-slate-500" /> Bộ lọc
           </Button>
-          <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-full p-1">
+          <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
-              className={`rounded-full px-3 ${viewMode === 'grid' ? 'shadow-sm' : ''}`}
+              className={`rounded-full px-4 transition-all duration-300 ${viewMode === 'grid' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
               onClick={() => setViewMode('grid')}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -156,7 +163,7 @@ export const TaskListClient = () => {
             <Button
               variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
-              className={`rounded-full px-3 ${viewMode === 'list' ? 'shadow-sm' : ''}`}
+              className={`rounded-full px-4 transition-all duration-300 ${viewMode === 'list' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
               onClick={() => setViewMode('list')}
             >
               <ListIcon className="h-4 w-4" />
@@ -183,11 +190,12 @@ export const TaskListClient = () => {
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
           {displayedTasks.map((task: any) => (
-            <Card key={task.id} className="group hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden">
-              <CardContent className="p-0">
-                <div className="p-6">
+            <Card key={task.id} className="group relative hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] transition-all duration-500 hover:-translate-y-2 border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <CardContent className="p-0 relative z-10 flex flex-col h-full">
+                <div className="p-6 flex-1">
                   <div className="flex justify-between items-start mb-4">
                     {getStatusBadge(task.status || 'TODO')}
                     <div className="flex gap-2">
@@ -195,45 +203,52 @@ export const TaskListClient = () => {
                         <Button
                           variant="secondary"
                           size="sm"
-                          className="h-8 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={() => {
                             setTaskToAssign(task);
-                            // Initial fetch handled by a useEffect or manual call
                           }}
                         >
                           <PlayCircle className="w-3 h-3 mr-1" /> Phân công
                         </Button>
                       )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Edit className="h-4 w-4 text-slate-400 hover:text-indigo-600" />
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-slate-50 dark:bg-slate-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-indigo-50 hover:text-indigo-600">
+                        <Edit className="h-4 w-4 text-slate-400 group-hover:text-indigo-600" />
                       </Button>
                     </div>
                   </div>
-                  <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 leading-tight mb-2 line-clamp-2">
+                  <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 leading-tight mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-300">
                     {task.title}
                   </h3>
                   <p className="text-sm text-slate-500 line-clamp-2 mb-6 min-h-[40px]">
                     {task.description || 'Chưa có mô tả chi tiết cho công việc này.'}
                   </p>
 
-                  <div className="space-y-3">
-                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
-                      <User className="h-4 w-4 mr-2 text-indigo-500" />
-                      <span className="truncate">Người nhận: <span className="font-medium text-slate-800 dark:text-slate-200">{task.assigneeName || task.assigneeCode || 'Chưa phân công'}</span></span>
+                  <div className="space-y-3 mt-auto">
+                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-3 text-indigo-600 dark:text-indigo-400 font-bold text-xs shadow-sm">
+                        {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
+                      </div>
+                      <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">
+                        {task.assigneeName || task.assigneeCode || 'Chưa phân công'}
+                      </span>
                     </div>
-                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
-                      <Calendar className="h-4 w-4 mr-2 text-rose-500" />
-                      <span>Hạn chót: <span className="font-medium text-slate-800 dark:text-slate-200">{task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'Không có'}</span></span>
+                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-rose-50/50 dark:bg-rose-900/10 p-3 rounded-2xl border border-rose-100 dark:border-rose-900/20">
+                      <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center mr-3 text-rose-600 dark:text-rose-400 shadow-sm">
+                        <Calendar className="h-4 w-4" />
+                      </div>
+                      <span className="font-medium text-rose-600 dark:text-rose-400">
+                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'Không có hạn'}
+                      </span>
                     </div>
                   </div>
                 </div>
-                <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center transition-colors group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/20">
-                  <span className={`text-xs font-bold uppercase tracking-wider flex items-center ${getPriorityColor(task.priority)}`}>
-                    <div className={`w-2 h-2 rounded-full mr-2 bg-current animate-pulse`} />
+                <div className="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800/50 flex justify-between items-center group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 transition-colors duration-500">
+                  <span className={`text-xs font-black uppercase tracking-widest flex items-center ${getPriorityColor(task.priority)}`}>
+                    <div className={`w-2 h-2 rounded-full mr-2 bg-current animate-pulse shadow-sm shadow-current`} />
                     {task.priority || 'MEDIUM'} PRIORITY
                   </span>
-                  <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-semibold group-hover:translate-x-1 transition-transform">
-                    Xem chi tiết &rarr;
+                  <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-bold group-hover:translate-x-2 transition-transform duration-300">
+                    Chi tiết &rarr;
                   </Button>
                 </div>
               </CardContent>
@@ -241,56 +256,59 @@ export const TaskListClient = () => {
           ))}
         </div>
       ) : (
-        <Card className="border-slate-100 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-none rounded-2xl overflow-hidden">
+        <Card className="border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl overflow-hidden relative z-10">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-800/80">
+              <thead className="text-xs text-slate-500 uppercase bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50">
                 <tr>
-                  <th className="px-6 py-4 font-semibold">Tên công việc</th>
-                  <th className="px-6 py-4 font-semibold">Trạng thái</th>
-                  <th className="px-6 py-4 font-semibold">Mức độ ưu tiên</th>
-                  <th className="px-6 py-4 font-semibold">Người nhận</th>
-                  <th className="px-6 py-4 font-semibold">Hạn chót</th>
-                  <th className="px-6 py-4 text-right font-semibold">Thao tác</th>
+                  <th className="px-6 py-5 font-bold tracking-wider">Tên công việc</th>
+                  <th className="px-6 py-5 font-bold tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-5 font-bold tracking-wider">Mức độ ưu tiên</th>
+                  <th className="px-6 py-5 font-bold tracking-wider">Người nhận</th>
+                  <th className="px-6 py-5 font-bold tracking-wider">Hạn chót</th>
+                  <th className="px-6 py-5 text-right font-bold tracking-wider">Thao tác</th>
                 </tr>
               </thead>
               <tbody>
                 {displayedTasks.map((task: any) => (
-                  <tr key={task.id} className="bg-white dark:bg-slate-900 border-b border-slate-50 dark:border-slate-800 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors group">
-                    <td className="px-6 py-4 font-medium text-slate-900 dark:text-white max-w-xs truncate">
+                  <tr key={task.id} className="bg-transparent border-b border-slate-100/50 dark:border-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 group hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:hover:shadow-[0_4px_20px_rgb(0,0,0,0.2)]">
+                    <td className="px-6 py-5 font-semibold text-slate-900 dark:text-white max-w-xs truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {task.title}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5">
                       {getStatusBadge(task.status || 'TODO')}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`font-semibold ${getPriorityColor(task.priority)}`}>{task.priority || 'MEDIUM'}</span>
+                    <td className="px-6 py-5">
+                      <span className={`font-black tracking-widest text-xs flex items-center ${getPriorityColor(task.priority)}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current mr-2 animate-pulse"></span>
+                        {task.priority || 'MEDIUM'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5">
                       <div className="flex items-center">
-                        <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex justify-center items-center text-xs font-bold mr-2">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center text-xs font-bold mr-3 shadow-sm border border-indigo-100/50">
                           {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
                         </div>
-                        {task.assigneeName || task.assigneeCode || 'N/A'}
+                        <span className="font-medium">{task.assigneeName || task.assigneeCode || 'Chưa phân công'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-500">
+                    <td className="px-6 py-5 text-slate-500 font-medium">
                       {task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : '-'}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td className="px-6 py-5 text-right">
+                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         {!task.assigneeCode && (
-                          <Button variant="ghost" size="icon" onClick={() => setTaskToAssign(task)} className="h-8 w-8 text-indigo-600 hover:bg-indigo-50">
+                          <Button variant="ghost" size="icon" onClick={() => setTaskToAssign(task)} className="h-9 w-9 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors shadow-sm">
                             <PlayCircle className="h-4 w-4" />
                           </Button>
                         )}
-                        <Button variant="ghost" size="icon" onClick={() => setSelectedTask(task)} className="h-8 w-8 text-indigo-600 hover:bg-indigo-50">
+                        <Button variant="ghost" size="icon" onClick={() => setSelectedTask(task)} className="h-9 w-9 rounded-full bg-slate-50 text-indigo-600 hover:bg-indigo-50 transition-colors shadow-sm">
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-600 hover:bg-amber-50">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-slate-50 text-amber-600 hover:bg-amber-50 transition-colors shadow-sm">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-rose-600 hover:bg-rose-50">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full bg-slate-50 text-rose-600 hover:bg-rose-50 transition-colors shadow-sm">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -397,35 +415,55 @@ export const TaskListClient = () => {
             </div>
 
             <div>
-              <h4 className="text-sm font-bold text-slate-700 mb-3">Top 5 Đề xuất</h4>
+              <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
+                <span className="w-2 h-6 bg-indigo-500 rounded-full mr-2"></span> Top 5 Đề xuất
+              </h4>
               {isLoadingRecs ? (
-                <div className="flex justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                <div className="flex justify-center py-12">
+                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-indigo-100 border-t-indigo-600"></div>
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {recommendations.map((rec: any, idx: number) => (
-                    <div key={rec.employeeCode} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all group">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center font-bold text-sm">
-                          {rec.employeeName?.charAt(0) || '?'}
+                    <div key={rec.employeeCode} className="flex items-center justify-between p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300 group hover:-translate-y-1">
+                      <div className="flex items-center gap-4">
+                        <div className="relative">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold text-lg shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
+                            {rec.employeeName?.charAt(0) || '?'}
+                          </div>
+                          {idx === 0 && (
+                            <div className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 text-[10px] font-black px-1.5 py-0.5 rounded-full border-2 border-white shadow-sm">
+                              #1
+                            </div>
+                          )}
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-slate-800">{rec.employeeName}</p>
-                          <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
-                            <span title="Số điểm/trọng số công việc đang làm">Tải việc: <b>{rec.currentLoad}</b></span>
-                            <span title="Điểm hiệu suất trung bình">Hiệu suất: <b>{Math.round(rec.performanceScore)}</b></span>
+                          <p className="font-bold text-base text-slate-800">{rec.employeeName}</p>
+                          <div className="flex items-center gap-4 mt-1 text-xs text-slate-500 font-medium">
+                            <span title="Số điểm/trọng số công việc đang làm" className="flex items-center">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5"></span>
+                              Tải việc: <b className="ml-1 text-slate-700">{rec.currentLoad}</b>
+                            </span>
+                            <span title="Điểm hiệu suất trung bình" className="flex items-center">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                              Hiệu suất: <b className="ml-1 text-slate-700">{Math.round(rec.performanceScore)}</b>
+                            </span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <div className="text-right mr-2 hidden sm:block">
-                          <p className="text-xs text-slate-400">Độ phù hợp</p>
-                          <p className="font-bold text-indigo-600">{Math.round(rec.matchScore)}%</p>
+                      <div className="flex items-center gap-6">
+                        <div className="text-right hidden sm:block">
+                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">Độ phù hợp</p>
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full" style={{ width: `${Math.round(rec.matchScore)}%` }}></div>
+                            </div>
+                            <p className="font-black text-indigo-600 text-sm">{Math.round(rec.matchScore)}%</p>
+                          </div>
                         </div>
                         <Button 
                           size="sm"
-                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                          className="rounded-full px-6 font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-none hover:shadow-lg transition-all duration-300"
                           onClick={async () => {
                             try {
                               await hrmTasksApi.assignTask(taskToAssign.id, { assigneeCode: rec.employeeCode });
@@ -443,7 +481,12 @@ export const TaskListClient = () => {
                     </div>
                   ))}
                   {recommendations.length === 0 && !isLoadingRecs && (
-                    <p className="text-sm text-slate-500 text-center py-4">Không tìm thấy nhân sự phù hợp.</p>
+                    <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <div className="w-12 h-12 rounded-full bg-slate-200 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                        <AlertCircle className="w-6 h-6" />
+                      </div>
+                      <p className="text-sm font-medium text-slate-500">Không tìm thấy nhân sự phù hợp.</p>
+                    </div>
                   )}
                 </div>
               )}
