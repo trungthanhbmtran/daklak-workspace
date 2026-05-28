@@ -1277,28 +1277,6 @@ async function main() {
     },
 
     {
-      group: 'CIVIL_SERVANT_RANK',
-      code: 'CVC_CAO_CAP',
-      order: 1,
-      nameVi: 'Chuyên viên cao cấp',
-      nameEn: 'Senior Expert',
-    },
-    {
-      group: 'CIVIL_SERVANT_RANK',
-      code: 'CVC_CHINH',
-      order: 2,
-      nameVi: 'Chuyên viên chính',
-      nameEn: 'Principal Expert',
-    },
-    {
-      group: 'CIVIL_SERVANT_RANK',
-      code: 'CHUYEN_VIEN',
-      order: 3,
-      nameVi: 'Chuyên viên',
-      nameEn: 'Expert',
-    },
-
-    {
       group: 'ACADEMIC_RANK',
       code: 'TIEN_SI',
       order: 1,

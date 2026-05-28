@@ -32,14 +32,14 @@ interface SelectedPlanItem {
 
 export function ManualPlanSelectorByRankClient() {
     const { data: congChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'RANK_CONG_CHUC'],
-        queryFn: () => categoryApi.fetchByGroup('RANK_CONG_CHUC'),
+        queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
+        queryFn: () => categoryApi.fetchByGroup('CIVIL_SERVANT_RANK'),
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: vienChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'RANK_VIEN_CHUC'],
-        queryFn: () => categoryApi.fetchByGroup('RANK_VIEN_CHUC'),
+        queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
+        queryFn: () => categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK'),
         staleTime: 5 * 60 * 1000,
     });
 
@@ -59,7 +59,7 @@ export function ManualPlanSelectorByRankClient() {
         defaultUnit: t.defaultUnit || 'Lượt'
     }));
 
-    const [activeRankFilter, setActiveRankFilter] = useState<string>('CHUYEN_VIEN_CHINH');
+    const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [globalValue, setGlobalValue] = useState<number>(1);
 

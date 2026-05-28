@@ -106,26 +106,26 @@ async function main() {
 
   const RANK_TEMPLATES = [
     // KHỐI CÔNG CHỨC
-    { classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CAO_CAP', taskName: 'Chủ trì nghiên cứu, xây dựng Nghị quyết, Quyết định quy phạm pháp luật cấp Tỉnh', defaultUnit: 'Đề án', defaultWeight: 20 },
-    { classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CAO_CAP', taskName: 'Chủ trì thẩm định quy hoạch, kiến trúc số, đề án liên ngành', defaultUnit: 'Văn bản thẩm định', defaultWeight: 15 },
-    { classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CHINH', taskName: 'Tham mưu biên soạn tờ trình, công văn hướng dẫn nghiệp vụ quy mô Sở', defaultUnit: 'Tờ trình', defaultWeight: 10 },
-    { classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN_CHINH', taskName: 'Xử lý, thẩm tra và đưa ra ý kiến pháp lý đối với phiếu chuyển, đơn thư phức tạp', defaultUnit: 'Hồ sơ', defaultWeight: 10 },
-    { classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN', taskName: 'Tiếp nhận, phân loại và luân chuyển văn bản đi/đến trên hệ thống iDesk', defaultUnit: 'Văn bản', defaultWeight: 5 },
-    { classification: 'CONG_CHUC', rank: 'CHUYEN_VIEN', taskName: 'Trực tiếp xử lý hồ sơ dịch vụ công trực tuyến một cửa', defaultUnit: 'Hồ sơ', defaultWeight: 10 },
-    { classification: 'CONG_CHUC', rank: 'CAN_SU', taskName: 'Cập nhật dữ liệu, lập báo cáo thống kê định kỳ', defaultUnit: 'Báo cáo', defaultWeight: 5 },
-    { classification: 'CONG_CHUC', rank: 'CAN_SU', taskName: 'Soạn thảo văn bản hành chính thông thường', defaultUnit: 'Văn bản', defaultWeight: 5 },
-    { classification: 'CONG_CHUC', rank: 'NHAN_VIEN', taskName: 'Thực hiện công tác văn thư lưu trữ', defaultUnit: 'Hồ sơ lưu trữ', defaultWeight: 5 },
-    { classification: 'CONG_CHUC', rank: 'NHAN_VIEN', taskName: 'Đảm bảo cơ sở vật chất, hành chính quản trị', defaultUnit: 'Lượt', defaultWeight: 5 },
+    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', taskName: 'Chủ trì nghiên cứu, xây dựng Nghị quyết, Quyết định quy phạm pháp luật cấp Tỉnh', defaultUnit: 'Đề án', defaultWeight: 20 },
+    { classification: 'CONG_CHUC', rank: 'SENIOR_SPECIALIST', taskName: 'Chủ trì thẩm định quy hoạch, kiến trúc số, đề án liên ngành', defaultUnit: 'Văn bản thẩm định', defaultWeight: 15 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', taskName: 'Tham mưu biên soạn tờ trình, công văn hướng dẫn nghiệp vụ quy mô Sở', defaultUnit: 'Tờ trình', defaultWeight: 10 },
+    { classification: 'CONG_CHUC', rank: 'PRINCIPAL_SPECIALIST', taskName: 'Xử lý, thẩm tra và đưa ra ý kiến pháp lý đối với phiếu chuyển, đơn thư phức tạp', defaultUnit: 'Hồ sơ', defaultWeight: 10 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', taskName: 'Tiếp nhận, phân loại và luân chuyển văn bản đi/đến trên hệ thống iDesk', defaultUnit: 'Văn bản', defaultWeight: 5 },
+    { classification: 'CONG_CHUC', rank: 'SPECIALIST', taskName: 'Trực tiếp xử lý hồ sơ dịch vụ công trực tuyến một cửa', defaultUnit: 'Hồ sơ', defaultWeight: 10 },
+    { classification: 'CONG_CHUC', rank: 'OFFICER', taskName: 'Cập nhật dữ liệu, lập báo cáo thống kê định kỳ', defaultUnit: 'Báo cáo', defaultWeight: 5 },
+    { classification: 'CONG_CHUC', rank: 'OFFICER', taskName: 'Soạn thảo văn bản hành chính thông thường', defaultUnit: 'Văn bản', defaultWeight: 5 },
+    { classification: 'CONG_CHUC', rank: 'STAFF', taskName: 'Thực hiện công tác văn thư lưu trữ', defaultUnit: 'Hồ sơ lưu trữ', defaultWeight: 5 },
+    { classification: 'CONG_CHUC', rank: 'STAFF', taskName: 'Đảm bảo cơ sở vật chất, hành chính quản trị', defaultUnit: 'Lượt', defaultWeight: 5 },
 
     // KHỐI VIÊN CHỨC
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_1', taskName: 'Chủ trì đề tài nghiên cứu khoa học, công nghệ trọng điểm', defaultUnit: 'Đề tài', defaultWeight: 25 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_1', taskName: 'Trực tiếp tư vấn chuyên gia, thiết kế giải pháp kỹ thuật lớn', defaultUnit: 'Báo cáo tư vấn', defaultWeight: 20 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_2', taskName: 'Tham gia tổ chức thực hiện các đề án chuyên môn kỹ thuật', defaultUnit: 'Hạng mục', defaultWeight: 15 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_2', taskName: 'Viết bài báo cáo khoa học, chuyên đề nghiên cứu', defaultUnit: 'Bài viết', defaultWeight: 10 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_3', taskName: 'Vận hành kỹ thuật, trực giám sát an toàn thông tin hệ thống IOC / LGSP', defaultUnit: 'Ca trực', defaultWeight: 10 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_3', taskName: 'Thực hiện đo lường, kiểm định theo quy trình chuẩn', defaultUnit: 'Phiếu kiểm định', defaultWeight: 5 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_4', taskName: 'Ghi chép số liệu, hỗ trợ kỹ thuật viên chính', defaultUnit: 'Bản ghi', defaultWeight: 5 },
-    { classification: 'VIEN_CHUC', rank: 'VIEN_CHUC_HANG_4', taskName: 'Kiểm tra, bảo dưỡng thiết bị máy móc định kỳ', defaultUnit: 'Lượt', defaultWeight: 5 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_1', taskName: 'Chủ trì đề tài nghiên cứu khoa học, công nghệ trọng điểm', defaultUnit: 'Đề tài', defaultWeight: 25 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_1', taskName: 'Trực tiếp tư vấn chuyên gia, thiết kế giải pháp kỹ thuật lớn', defaultUnit: 'Báo cáo tư vấn', defaultWeight: 20 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_2', taskName: 'Tham gia tổ chức thực hiện các đề án chuyên môn kỹ thuật', defaultUnit: 'Hạng mục', defaultWeight: 15 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_2', taskName: 'Viết bài báo cáo khoa học, chuyên đề nghiên cứu', defaultUnit: 'Bài viết', defaultWeight: 10 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_3', taskName: 'Vận hành kỹ thuật, trực giám sát an toàn thông tin hệ thống IOC / LGSP', defaultUnit: 'Ca trực', defaultWeight: 10 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_3', taskName: 'Thực hiện đo lường, kiểm định theo quy trình chuẩn', defaultUnit: 'Phiếu kiểm định', defaultWeight: 5 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_4', taskName: 'Ghi chép số liệu, hỗ trợ kỹ thuật viên chính', defaultUnit: 'Bản ghi', defaultWeight: 5 },
+    { classification: 'VIEN_CHUC', rank: 'GRADE_4', taskName: 'Kiểm tra, bảo dưỡng thiết bị máy móc định kỳ', defaultUnit: 'Lượt', defaultWeight: 5 },
   ];
 
   await prisma.taskRankTemplate.createMany({ data: RANK_TEMPLATES });
