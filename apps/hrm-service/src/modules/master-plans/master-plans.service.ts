@@ -152,4 +152,58 @@ export class MasterPlansService {
     await this.prisma.masterPlan.delete({ where: { id } });
     return { success: true, message: 'Deleted successfully' };
   }
+
+  async getHistoricalFeasibility(query: any) {
+    // Tiêu chí: cùng một công việc (dựa vào title hoặc type), cùng thời gian yêu cầu (duration), thời gian gần nhất
+    const { title, type, durationDays } = query;
+    
+    let whereClause: any = {
+      status: 'COMPLETED' // Chỉ tính các kế hoạch đã xong để lấy dữ liệu thực tế
+    };
+    
+    if (type) whereClause.type = type;
+    if (title) whereClause.title = { contains: title };
+    
+    // Tìm các kế hoạch thoả mãn
+    const pastPlans = await this.prisma.masterPlan.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' }, // Thời gian gần nhất
+      take: 5, // Lấy 5 kế hoạch gần nhất để phân tích
+      include: {
+        tasks: true
+      }
+    });
+
+    let totalTasks = 0;
+    let completedTasks = 0;
+    let overdueTasks = 0;
+
+    // Lọc thêm theo duration nếu cần (hoặc AI tự phân tích)
+    // Tính toán số liệu thống kê
+    pastPlans.forEach(plan => {
+      totalTasks += plan.tasks.length;
+      plan.tasks.forEach(t => {
+        if (t.status === 'DONE') completedTasks++;
+        if (t.status === 'OVERDUE') overdueTasks++;
+      });
+    });
+
+    const feasibilityScore = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+
+    return {
+      success: true,
+      data: {
+        pastPlansCount: pastPlans.length,
+        totalTasks,
+        completedTasks,
+        overdueTasks,
+        feasibilityScore: Math.round(feasibilityScore),
+        historicalContext: pastPlans.map(p => ({
+          title: p.title,
+          total: p.tasks.length,
+          done: p.tasks.filter(t => t.status === 'DONE').length
+        }))
+      }
+    };
+  }
 }

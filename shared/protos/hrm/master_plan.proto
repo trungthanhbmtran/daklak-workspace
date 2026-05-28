@@ -11,6 +11,7 @@ service MasterPlanService {
   rpc Create (CreateMasterPlanRequest) returns (MasterPlan) {}
   rpc Update (UpdateMasterPlanRequest) returns (MasterPlan) {}
   rpc Delete (DeleteMasterPlanRequest) returns (DeleteMasterPlanResponse) {}
+  rpc GetHistoricalFeasibility (GetHistoricalFeasibilityRequest) returns (GetHistoricalFeasibilityResponse) {}
 }
 
 message MasterPlan {
@@ -83,4 +84,30 @@ message DeleteMasterPlanRequest {
 message DeleteMasterPlanResponse {
   bool success = 1;
   string message = 2;
+}
+
+message GetHistoricalFeasibilityRequest {
+  string type = 1;
+  string title = 2;
+  int32 durationDays = 3;
+}
+
+message HistoricalContext {
+  string title = 1;
+  int32 total = 2;
+  int32 done = 3;
+}
+
+message FeasibilityData {
+  int32 pastPlansCount = 1;
+  int32 totalTasks = 2;
+  int32 completedTasks = 3;
+  int32 overdueTasks = 4;
+  int32 feasibilityScore = 5;
+  repeated HistoricalContext historicalContext = 6;
+}
+
+message GetHistoricalFeasibilityResponse {
+  bool success = 1;
+  FeasibilityData data = 2;
 }

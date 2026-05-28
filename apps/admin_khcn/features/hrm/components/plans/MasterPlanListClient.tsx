@@ -6,7 +6,7 @@ import {
   FolderPlus, Trash2, ShieldAlert, CheckCircle2,
   Compass, BarChart3, HelpCircle, FileText,
   Sparkles, Network, ArrowRightCircle, ShieldCheck,
-  Activity, Eye, ClipboardCheck, Layers, GitMerge
+  Activity, Eye, ClipboardCheck, Layers, GitMerge, BrainCircuit
 } from 'lucide-react';
 import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
 
@@ -31,10 +31,12 @@ import { toast } from 'sonner';
 import { useCreateMasterPlan } from '../../hooks';
 import { useQuery } from '@tanstack/react-query';
 import { categoryApi } from '@/features/system-admin/categories/api';
+import { AdvancedAIPlanDialog } from './AdvancedAIPlanDialog';
 
 export function MasterPlanListClient() {
   const [framework, setFramework] = useState<ManagementFramework>('BSC_KPI');
   const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [isAdvancedAiOpen, setIsAdvancedAiOpen] = useState(false);
   const { mutateAsync: createMasterPlan } = useCreateMasterPlan();
 
   // Dữ liệu ma trận tích hợp liên thông
@@ -262,14 +264,23 @@ export function MasterPlanListClient() {
             </p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={handleAiGenerateFramework}
-          disabled={isAiProcessing}
-          className="w-full md:w-auto shrink-0 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all"
-        >
-          {isAiProcessing ? "Đang cấu hình dữ liệu..." : `AI Phân rã theo chuẩn ${framework.replace('_', ' ')}`}
-        </button>
+        <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+          <button
+            type="button"
+            onClick={() => setIsAdvancedAiOpen(true)}
+            className="w-full md:w-auto shrink-0 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-md transition-all"
+          >
+            <BrainCircuit className="w-4 h-4" /> Lập Kế hoạch AI Nâng cao (Dựa trên lịch sử)
+          </button>
+          <button
+            type="button"
+            onClick={handleAiGenerateFramework}
+            disabled={isAiProcessing}
+            className="w-full md:w-auto shrink-0 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 text-white text-xs font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all"
+          >
+            {isAiProcessing ? "Đang cấu hình dữ liệu..." : `AI Phân rã theo chuẩn ${framework.replace('_', ' ')}`}
+          </button>
+        </div>
       </div>
 
       {/* 3. LƯỚI GIAO DIỆN HOẠT ĐỘNG CHÍNH */}
@@ -513,6 +524,18 @@ export function MasterPlanListClient() {
 
       </div>
 
+      <AdvancedAIPlanDialog 
+        isOpen={isAdvancedAiOpen}
+        onClose={() => setIsAdvancedAiOpen(false)}
+        onSuccess={async (planData) => {
+          try {
+            await createMasterPlan(planData);
+            toast.success('Đã tạo kế hoạch thành công dựa trên gợi ý của AI!');
+          } catch (e) {
+            toast.error('Lỗi khi tạo kế hoạch');
+          }
+        }}
+      />
     </div>
   );
 }

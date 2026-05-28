@@ -30,4 +30,9 @@ export class MasterPlansController {
   delete(data: { id: number }) {
     return this.masterPlansService.delete(data.id);
   }
+
+  @GrpcMethod('MasterPlanService', 'GetHistoricalFeasibility')
+  getHistoricalFeasibility(data: any) {
+    return this.masterPlansService.getHistoricalFeasibility(data);
+  }
 }

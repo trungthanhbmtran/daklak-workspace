@@ -112,6 +112,84 @@ Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`j
   },
 
   /**
+   * Sinh Kế hoạch thông minh bằng cách đối chiếu Lịch sử và đánh giá Độ khả thi
+   */
+  async evaluatePlanFeasibility(payload: {
+    title: string;
+    type: string;
+    objective: string;
+    durationDays: number;
+    orgContext: string;
+    rolesContext: string;
+  }) {
+    // 1. Fetch Historical Feasibility Data
+    let historyStr = "Không tìm thấy dữ liệu lịch sử tương tự.";
+    try {
+      const histRes = await apiClient.get(`/hrm/master-plans/advanced/historical-feasibility`, {
+        params: {
+          title: payload.title,
+          type: payload.type,
+          durationDays: payload.durationDays
+        }
+      }) as any;
+      
+      if (histRes && histRes.data) {
+        const d = histRes.data;
+        if (d.pastPlansCount > 0) {
+          historyStr = `Dữ liệu lịch sử: Có ${d.pastPlansCount} kế hoạch tương tự.
+          Tổng số phân việc: ${d.totalTasks}, đã hoàn thành: ${d.completedTasks}, trễ hạn: ${d.overdueTasks}.
+          Tỷ lệ khả thi trung bình trong quá khứ: ${d.feasibilityScore}%.`;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch historical feasibility data", e);
+    }
+
+    // 2. Build Prompt cho AI
+    const defaultPrompt = `Bạn là chuyên gia Quản trị nhân sự và Xây dựng Kế hoạch có sử dụng dữ liệu lịch sử để đánh giá rủi ro.
+Hãy lập danh sách 3-5 công việc chính cho Kế hoạch sau:
+Tên kế hoạch: "{title}"
+Mục tiêu: "{objective}"
+Thời gian dự kiến: {durationDays} ngày
+Các phòng ban hiện có: {orgContext}
+Các chức danh/ngạch hiện có: {rolesContext}
+
+{historyStr}
+
+Dựa vào dữ liệu lịch sử, hãy phân tích độ khả thi của kế hoạch này và điều chỉnh phân việc / trọng số / người thực hiện cho phù hợp nhằm tối đa hóa tỷ lệ thành công.
+
+Trả về một mảng JSON thuần túy (chỉ bao gồm mảng [], không chứa text markdown) theo cấu trúc sau:
+[
+  {
+    "type": "FEASIBILITY_ANALYSIS",
+    "score": 85, // Điểm khả thi dự đoán (%)
+    "advice": "Nhận xét và lời khuyên dựa trên lịch sử để tăng tỷ lệ thành công."
+  },
+  {
+    "type": "TASK",
+    "title": "Tên công việc 1",
+    "priority": "HIGH",
+    "weight": 20,
+    "targetValue": 100,
+    "assigneeRole": "Tên Ngạch/Chức danh được đề xuất",
+    "reasoning": "Lý do giao việc này cho vị trí này dựa vào phân tích AI."
+  }
+]`;
+
+    let promptTemplate = await this.getPromptConfig('AI_PROMPT_EVALUATE_FEASIBILITY', defaultPrompt);
+    const prompt = promptTemplate
+      .replace(/{title}/g, payload.title)
+      .replace(/{objective}/g, payload.objective)
+      .replace(/{durationDays}/g, payload.durationDays.toString())
+      .replace(/{orgContext}/g, payload.orgContext)
+      .replace(/{rolesContext}/g, payload.rolesContext)
+      .replace(/{historyStr}/g, historyStr);
+
+    const res = await apiClient.post('/ai/generate', { prompt }) as any;
+    return this.parseJsonResponse(res);
+  },
+
+  /**
    * Hàm hỗ trợ parse chuỗi JSON từ AI
    */
   parseJsonResponse(res: any) {
