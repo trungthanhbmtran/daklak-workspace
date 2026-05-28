@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase } from "lucide-react";
+import { AdvancedAIPlanDialog } from "../AdvancedAIPlanDialog";
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,8 @@ export function MasterPlanSidebar() {
             <Briefcase className="w-4 h-4 text-indigo-600" />
             Kế hoạch & Phân bổ
           </h3>
+        <div className="flex items-center gap-2">
+          <AdvancedAIPlanDialog />
           <Button 
             size="sm" 
             className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm"
@@ -35,6 +38,7 @@ export function MasterPlanSidebar() {
             <Plus className="w-4 h-4 mr-1" />
             Tạo mới
           </Button>
+        </div>
         </div>
         
         <Search placeholder="Tìm kế hoạch..." className="w-full" />

@@ -425,7 +425,7 @@ export const TaskListClient = () => {
           }
         }}
       >
-        <DialogContent className="max-w-xl font-sans">
+        <DialogContent className="max-w-4xl font-sans">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold flex items-center">
               <PlayCircle className="w-5 h-5 mr-2 text-indigo-600" /> Phân công thông minh
