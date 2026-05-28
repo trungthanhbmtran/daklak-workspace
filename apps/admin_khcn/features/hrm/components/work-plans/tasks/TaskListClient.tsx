@@ -14,8 +14,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useTasksList } from '../../hooks';
-import { hrmTasksApi } from '../../api';
+import { useTasksList } from '../../../hooks';
+import { hrmTasksApi } from '../../../api';
 import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -29,7 +29,7 @@ export const TaskListClient = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<any>(null);
-  
+
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [assignStrategy, setAssignStrategy] = useState<string>('UNDER_QUOTA');
@@ -330,7 +330,7 @@ export const TaskListClient = () => {
               <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 pb-12 relative text-white">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3"></div>
-                
+
                 <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-4">
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
@@ -399,7 +399,7 @@ export const TaskListClient = () => {
                           </p>
                         )}
                         {!selectedTask.assigneeCode && (
-                          <Button 
+                          <Button
                             className="mt-4 rounded-full w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
                             onClick={() => setTaskToAssign(selectedTask)}
                           >
@@ -416,8 +416,8 @@ export const TaskListClient = () => {
         </DialogContent>
       </Dialog>
       {/* Smart Assign Dialog */}
-      <Dialog 
-        open={!!taskToAssign} 
+      <Dialog
+        open={!!taskToAssign}
         onOpenChange={(open) => {
           if (!open) {
             setTaskToAssign(null);
@@ -442,7 +442,7 @@ export const TaskListClient = () => {
             <div className="flex flex-col gap-3">
               <Label className="font-bold text-slate-700 mb-2">Chiến lược phân công ưu tiên</Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div 
+                <div
                   onClick={() => {
                     setAssignStrategy('HIGH_PERFORMANCE');
                     fetchRecommendations('HIGH_PERFORMANCE');
@@ -452,7 +452,7 @@ export const TaskListClient = () => {
                   <p className={`font-bold text-sm ${assignStrategy === 'HIGH_PERFORMANCE' ? 'text-indigo-700' : 'text-slate-700'}`}>🏆 Người giỏi nhất</p>
                   <p className="text-xs text-slate-500 mt-2 leading-relaxed">Đảm bảo chất lượng công việc cao nhất</p>
                 </div>
-                <div 
+                <div
                   onClick={() => {
                     setAssignStrategy('UNDER_QUOTA');
                     fetchRecommendations('UNDER_QUOTA');
@@ -462,7 +462,7 @@ export const TaskListClient = () => {
                   <p className={`font-bold text-sm ${assignStrategy === 'UNDER_QUOTA' ? 'text-emerald-700' : 'text-slate-700'}`}>⚖️ Chưa đủ hạn mức</p>
                   <p className="text-xs text-slate-500 mt-2 leading-relaxed">Ưu tiên người đang rảnh rỗi (Ít việc)</p>
                 </div>
-                <div 
+                <div
                   onClick={() => {
                     setAssignStrategy('LOW_PERFORMANCE');
                     fetchRecommendations('LOW_PERFORMANCE');
@@ -522,7 +522,7 @@ export const TaskListClient = () => {
                             <p className="font-black text-indigo-600 text-sm">{Math.round(rec.matchScore)}%</p>
                           </div>
                         </div>
-                        <Button 
+                        <Button
                           size="sm"
                           className="rounded-full px-6 font-bold bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white shadow-none hover:shadow-lg transition-all duration-300"
                           onClick={async () => {
