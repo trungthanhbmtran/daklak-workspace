@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { TaskCreateClient } from '@/features/hrm/components/tasks/TaskCreateClient';
 
-export default function CreateTaskRedirect() {
-  redirect('/services/hrm/plans/create');
+export default function TaskCreatePage() {
+  return <TaskCreateClient />;
 }

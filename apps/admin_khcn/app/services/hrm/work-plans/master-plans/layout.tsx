@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import { MasterPlanProvider } from '@/features/hrm/components/plans/master-plans-layout/MasterPlanContext';
-import { MasterPlanSidebar } from '@/features/hrm/components/plans/master-plans-layout/MasterPlanSidebar';
+import { MasterPlanProvider } from '@/features/hrm/components/work-plans/master-plans/master-plans-layout/MasterPlanContext';
+import { MasterPlanSidebar } from '@/features/hrm/components/work-plans/master-plans/master-plans-layout/MasterPlanSidebar';
 
 export default function MasterPlansLayout({ children }: { children: React.ReactNode }) {
   return (

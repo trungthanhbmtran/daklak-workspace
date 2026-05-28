@@ -6,7 +6,7 @@ import { Calendar, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useKpiEvaluations } from '../../hooks';
+import { useKpiEvaluations } from '../../../hooks';
 
 // Khai báo Dynamic Loading cho các Tab (Tính năng chia nhỏ code - Code Splitting)
 const OverviewTab = dynamic(() => import('./OverviewTab'), {
@@ -18,7 +18,7 @@ const DepartmentsTab = dynamic(() => import('./DepartmentsTab'), {
   loading: () => <div className="h-[400px] w-full bg-slate-100/50 animate-pulse rounded-xl flex items-center justify-center text-slate-400">Đang tải bảng danh sách đơn vị...</div>,
 });
 
-export default function ExecutiveKPIDashboard() {
+export default function PerformanceDashboardClient() {
   const [selectedPeriod, setSelectedPeriod] = useState('Q2-2026');
   const { data, isLoading } = useKpiEvaluations(selectedPeriod);
 

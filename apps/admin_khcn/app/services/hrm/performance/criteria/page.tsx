@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { KpiCriteriaClient } from "@/features/hrm/components/kpi-criteria/KpiCriteriaClient";
+import { KpiCriteriaClient } from "@/features/hrm/components/performance/criteria/KpiCriteriaClient";
 
 export const metadata: Metadata = {
   title: "Khung Tiêu chí & Công thức tính điểm | HRM",
