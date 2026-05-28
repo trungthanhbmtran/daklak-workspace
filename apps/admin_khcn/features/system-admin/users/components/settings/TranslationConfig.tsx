@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 export function TranslationConfig() {
   const { data: configs = {} } = useGetSystemConfigs();
   const updateConfig = useUpdateSystemConfig();
-  
+
   const [translateService, setTranslateService] = useState('GOOGLE');
 
   const { data: translationCategories = [] } = useGetCategoryByGroup("TRANSLATION_SERVICE_TYPE");
@@ -47,22 +47,14 @@ export function TranslationConfig() {
       <CardContent className="p-6">
         <div className="max-w-md space-y-2">
           <label className="text-sm font-bold text-slate-700">Dịch vụ Dịch thuật mặc định</label>
-          <select 
+          <select
             className="w-full h-12 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-slate-500 outline-none text-sm font-medium"
             value={translateService}
             onChange={(e) => setTranslateService(e.target.value)}
           >
-            {translationCategories.length > 0 ? (
-              translationCategories.map((cat: any) => (
-                <option key={cat.code} value={cat.code}>{cat.name}</option>
-              ))
-            ) : (
-              <>
-                <option value="GOOGLE">Google Translate API</option>
-                <option value="DEEPL">DeepL Pro</option>
-                <option value="AI_ROUTER">Dùng chung hệ thống AI Smart Router</option>
-              </>
-            )}
+            {translationCategories.map((cat: any) => (
+              <option key={cat.code} value={cat.code}>{cat.nameVi || cat.name}</option>
+            ))}
           </select>
         </div>
       </CardContent>

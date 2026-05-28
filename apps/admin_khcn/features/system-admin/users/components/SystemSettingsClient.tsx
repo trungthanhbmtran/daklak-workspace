@@ -1,10 +1,11 @@
 "use client";
 
 import React from 'react';
-import { Settings2 } from 'lucide-react';
+import { Settings2, Bot, Languages, MessageSquareCode } from 'lucide-react';
 import { AiRouterConfig } from './settings/AiRouterConfig';
 import { TranslationConfig } from './settings/TranslationConfig';
 import { AiPromptConfig } from './settings/AiPromptConfig';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export interface AiProviderConfig {
   id: string;
@@ -28,9 +29,40 @@ export function SystemSettingsClient() {
         </p>
       </div>
 
-      <AiRouterConfig />
-      <TranslationConfig />
-      <AiPromptConfig />
+      <Tabs defaultValue="ai-router" className="w-full">
+        <TabsList className="w-full h-auto flex-col sm:flex-row bg-slate-100 p-1.5 mb-6 rounded-2xl sm:rounded-full shadow-inner border border-slate-200/50">
+          <TabsTrigger value="ai-router" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 text-slate-600 transition-all">
+            <Bot className="w-4 h-4" />
+            AI Router & Models
+          </TabsTrigger>
+          <TabsTrigger value="translation" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 text-slate-600 transition-all">
+            <Languages className="w-4 h-4" />
+            Dịch thuật
+          </TabsTrigger>
+          <TabsTrigger value="prompts" className="w-full sm:w-auto flex-1 rounded-xl sm:rounded-full px-6 py-3 text-sm font-bold flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md data-[state=active]:text-indigo-600 text-slate-600 transition-all">
+            <MessageSquareCode className="w-4 h-4" />
+            Mẫu Prompts
+          </TabsTrigger>
+        </TabsList>
+
+        <div className="bg-white/50 backdrop-blur-sm rounded-3xl p-1 md:p-2 border border-slate-100 shadow-sm">
+          <TabsContent value="ai-router" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
+              <AiRouterConfig />
+            </div>
+          </TabsContent>
+          <TabsContent value="translation" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
+              <TranslationConfig />
+            </div>
+          </TabsContent>
+          <TabsContent value="prompts" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            <div className="animate-in slide-in-from-bottom-2 fade-in duration-300">
+              <AiPromptConfig />
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }

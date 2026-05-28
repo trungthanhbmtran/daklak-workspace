@@ -858,68 +858,68 @@ async function main() {
       nameEn: 'Turn',
     },
 
-    // --- RANK_CONG_CHUC ---
+    // --- CIVIL_SERVANT_RANK ---
     {
-      group: 'RANK_CONG_CHUC',
-      code: 'CHUYEN_VIEN_CAO_CAP',
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'SENIOR_SPECIALIST',
       order: 1,
       nameVi: 'Chuyên viên Cao cấp',
       nameEn: 'Senior Specialist',
     },
     {
-      group: 'RANK_CONG_CHUC',
-      code: 'CHUYEN_VIEN_CHINH',
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'PRINCIPAL_SPECIALIST',
       order: 2,
       nameVi: 'Chuyên viên Chính',
       nameEn: 'Principal Specialist',
     },
     {
-      group: 'RANK_CONG_CHUC',
-      code: 'CHUYEN_VIEN',
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'SPECIALIST',
       order: 3,
       nameVi: 'Chuyên viên',
       nameEn: 'Specialist',
     },
     {
-      group: 'RANK_CONG_CHUC',
-      code: 'CAN_SU',
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'OFFICER',
       order: 4,
       nameVi: 'Cán sự',
       nameEn: 'Officer',
     },
     {
-      group: 'RANK_CONG_CHUC',
-      code: 'NHAN_VIEN',
+      group: 'CIVIL_SERVANT_RANK',
+      code: 'STAFF',
       order: 5,
       nameVi: 'Nhân viên',
       nameEn: 'Staff',
     },
 
-    // --- RANK_VIEN_CHUC ---
+    // --- PUBLIC_EMPLOYEE_RANK ---
     {
-      group: 'RANK_VIEN_CHUC',
-      code: 'VIEN_CHUC_HANG_1',
+      group: 'PUBLIC_EMPLOYEE_RANK',
+      code: 'GRADE_1',
       order: 1,
       nameVi: 'Viên chức Hạng I',
       nameEn: 'Grade I Public Employee',
     },
     {
-      group: 'RANK_VIEN_CHUC',
-      code: 'VIEN_CHUC_HANG_2',
+      group: 'PUBLIC_EMPLOYEE_RANK',
+      code: 'GRADE_2',
       order: 2,
       nameVi: 'Viên chức Hạng II',
       nameEn: 'Grade II Public Employee',
     },
     {
-      group: 'RANK_VIEN_CHUC',
-      code: 'VIEN_CHUC_HANG_3',
+      group: 'PUBLIC_EMPLOYEE_RANK',
+      code: 'GRADE_3',
       order: 3,
       nameVi: 'Viên chức Hạng III',
       nameEn: 'Grade III Public Employee',
     },
     {
-      group: 'RANK_VIEN_CHUC',
-      code: 'VIEN_CHUC_HANG_4',
+      group: 'PUBLIC_EMPLOYEE_RANK',
+      code: 'GRADE_4',
       order: 4,
       nameVi: 'Viên chức Hạng IV',
       nameEn: 'Grade IV Public Employee',
@@ -2389,6 +2389,8 @@ async function main() {
     { code: 'IDENTITY_TYPE', name: 'Giấy tờ định danh' },
     { code: 'POSITION', name: 'Chức vụ' },
     { code: 'CIVIL_SERVANT_RANK', name: 'Ngạch công chức' },
+    { code: 'PUBLIC_EMPLOYEE_RANK', name: 'Ngạch viên chức' },
+    { code: 'UNIT', name: 'Đơn vị tính' },
     { code: 'ACADEMIC_RANK', name: 'Học hàm/Học vị' },
     { code: 'POLITICAL_THEORY', name: 'Lý luận chính trị' },
     { code: 'STATE_MANAGEMENT', name: 'Quản lý nhà nước' },
@@ -2403,6 +2405,8 @@ async function main() {
     { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
     { code: 'font_family', name: 'Phông chữ giao diện (Portal)' },
     { code: 'border_radius', name: 'Độ bo góc khối (Portal)' },
+    { code: 'AI_PROVIDER_TYPE', name: 'Nhà cung cấp AI (LLM)' },
+    { code: 'TRANSLATION_SERVICE_TYPE', name: 'Dịch vụ Dịch thuật' },
   ];
 
   console.log('📦 Seeding Category Groups...');

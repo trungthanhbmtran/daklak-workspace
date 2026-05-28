@@ -150,17 +150,9 @@ export function AiRouterConfig() {
                       value={provider.provider}
                       onChange={(e) => handleProviderChange(provider.id, 'provider', e.target.value)}
                     >
-                      {aiProviderCategories.length > 0 ? (
-                        aiProviderCategories.map((cat: any) => (
-                          <option key={cat.code} value={cat.code}>{cat.name}</option>
-                        ))
-                      ) : (
-                        <>
-                          <option value="OPENAI">OpenAI (GPT)</option>
-                          <option value="GEMINI">Google Gemini</option>
-                          <option value="CLAUDE">Anthropic Claude</option>
-                        </>
-                      )}
+                      {aiProviderCategories.map((cat: any) => (
+                        <option key={cat.code} value={cat.code}>{cat.nameVi || cat.name}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-1.5 flex flex-col justify-end">
