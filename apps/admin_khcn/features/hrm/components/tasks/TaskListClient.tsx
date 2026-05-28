@@ -32,7 +32,7 @@ export const TaskListClient = () => {
   
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
-  const [assignStrategy, setAssignStrategy] = useState<'LOW_PERFORMANCE' | 'HIGH_PERFORMANCE'>('LOW_PERFORMANCE');
+  const [assignStrategy, setAssignStrategy] = useState<string>('UNDER_QUOTA');
   const [recommendations, setRecommendations] = useState<any[]>([]);
   const [isLoadingRecs, setIsLoadingRecs] = useState(false);
 
@@ -439,26 +439,39 @@ export const TaskListClient = () => {
               </p>
             </div>
 
-            <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
-              <div className="space-y-1">
-                <Label className="font-bold text-slate-700">Chiến lược phân công</Label>
-                <p className="text-xs text-slate-500">
-                  {assignStrategy === 'LOW_PERFORMANCE' 
-                    ? 'Ưu tiên người Ít việc & Hiệu suất thấp (cần cải thiện)'
-                    : 'Ưu tiên người Ít việc & Giỏi nhất (đảm bảo chất lượng)'}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-slate-400">Cải thiện</span>
-                <Switch 
-                  checked={assignStrategy === 'HIGH_PERFORMANCE'}
-                  onCheckedChange={(v) => {
-                    const newStrategy = v ? 'HIGH_PERFORMANCE' : 'LOW_PERFORMANCE';
-                    setAssignStrategy(newStrategy);
-                    fetchRecommendations(newStrategy);
+            <div className="flex flex-col gap-3">
+              <Label className="font-bold text-slate-700 mb-2">Chiến lược phân công ưu tiên</Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div 
+                  onClick={() => {
+                    setAssignStrategy('HIGH_PERFORMANCE');
+                    fetchRecommendations('HIGH_PERFORMANCE');
                   }}
-                />
-                <span className="text-xs font-semibold text-indigo-600">Giỏi nhất</span>
+                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'HIGH_PERFORMANCE' ? 'border-indigo-500 bg-indigo-50 shadow-md scale-105 z-10' : 'border-slate-100 hover:border-indigo-200 bg-white'}`}
+                >
+                  <p className={`font-bold text-sm ${assignStrategy === 'HIGH_PERFORMANCE' ? 'text-indigo-700' : 'text-slate-700'}`}>🏆 Người giỏi nhất</p>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Đảm bảo chất lượng công việc cao nhất</p>
+                </div>
+                <div 
+                  onClick={() => {
+                    setAssignStrategy('UNDER_QUOTA');
+                    fetchRecommendations('UNDER_QUOTA');
+                  }}
+                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'UNDER_QUOTA' ? 'border-emerald-500 bg-emerald-50 shadow-md scale-105 z-10' : 'border-slate-100 hover:border-emerald-200 bg-white'}`}
+                >
+                  <p className={`font-bold text-sm ${assignStrategy === 'UNDER_QUOTA' ? 'text-emerald-700' : 'text-slate-700'}`}>⚖️ Chưa đủ hạn mức</p>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Ưu tiên người đang rảnh rỗi (Ít việc)</p>
+                </div>
+                <div 
+                  onClick={() => {
+                    setAssignStrategy('LOW_PERFORMANCE');
+                    fetchRecommendations('LOW_PERFORMANCE');
+                  }}
+                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'LOW_PERFORMANCE' ? 'border-amber-500 bg-amber-50 shadow-md scale-105 z-10' : 'border-slate-100 hover:border-amber-200 bg-white'}`}
+                >
+                  <p className={`font-bold text-sm ${assignStrategy === 'LOW_PERFORMANCE' ? 'text-amber-700' : 'text-slate-700'}`}>📈 Cần cải thiện</p>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Tạo cơ hội nâng cao hiệu suất</p>
+                </div>
               </div>
             </div>
 

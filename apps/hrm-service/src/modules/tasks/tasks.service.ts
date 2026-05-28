@@ -218,10 +218,17 @@ export class TasksService {
       // If HIGH_PERFORMANCE -> prioritize HIGH performanceScore
       // If LOW_PERFORMANCE -> prioritize LOW performanceScore (to give them a chance to improve)
       
-      const loadFactor = Math.max(0, 100 - currentLoad); // Less load = higher factor
+      let loadFactor = Math.max(0, 100 - currentLoad); // Less load = higher factor
       let perfFactor = performanceScore;
       if (strategy === 'LOW_PERFORMANCE') {
         perfFactor = 100 - performanceScore;
+      } else if (strategy === 'UNDER_QUOTA') {
+        // Hạn mức quy định tạm tính là 40 điểm
+        if (currentLoad < 40) {
+          loadFactor = 100; // Tối đa điểm cho người chưa đủ hạn mức
+        } else {
+          loadFactor = 0; // Không ưu tiên người đã đủ hoặc vượt hạn mức
+        }
       }
 
       const matchScore = (loadFactor * 0.6) + (perfFactor * 0.4);
