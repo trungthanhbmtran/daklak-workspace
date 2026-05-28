@@ -12,7 +12,6 @@ import {
   Calendar, User
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTasksList } from '../../../hooks';
 import { hrmTasksApi } from '../../../api';
