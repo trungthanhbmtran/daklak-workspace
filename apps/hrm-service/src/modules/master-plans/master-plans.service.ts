@@ -29,6 +29,13 @@ export class MasterPlansService {
         updatedAt: mp.updatedAt?.toISOString() || '',
         totalTasks: mp.tasks.length,
         completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
+        tasks: mp.tasks.map(t => ({
+          ...t,
+          dueDate: t.dueDate?.toISOString() || '',
+          completionDate: t.completionDate?.toISOString() || '',
+          createdAt: t.createdAt?.toISOString() || '',
+          updatedAt: t.updatedAt?.toISOString() || '',
+        })),
       })),
       meta: {
         pagination: {
@@ -57,6 +64,13 @@ export class MasterPlansService {
       updatedAt: mp.updatedAt?.toISOString() || '',
       totalTasks: mp.tasks.length,
       completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
+      tasks: mp.tasks.map(t => ({
+        ...t,
+        dueDate: t.dueDate?.toISOString() || '',
+        completionDate: t.completionDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+      })),
     };
   }
 

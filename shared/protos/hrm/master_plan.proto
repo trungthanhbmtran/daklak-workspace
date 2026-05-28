@@ -3,6 +3,7 @@ syntax = "proto3";
 package hrm;
 
 import "common/common.proto";
+import "hrm/task.proto";
 
 service MasterPlanService {
   rpc FindAll (FindAllMasterPlansRequest) returns (MasterPlanList) {}
@@ -25,6 +26,7 @@ message MasterPlan {
   string updatedAt = 10;
   int32 totalTasks = 11;
   int32 completedTasks = 12;
+  repeated task.TaskResponse tasks = 13;
 }
 
 message MasterPlanList {
