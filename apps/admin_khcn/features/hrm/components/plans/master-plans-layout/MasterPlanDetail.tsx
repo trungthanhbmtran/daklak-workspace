@@ -111,7 +111,14 @@ export function MasterPlanDetail() {
                 {selectedPlan.tasks && selectedPlan.tasks.length > 0 ? (
                   selectedPlan.tasks.map((task: any) => (
                     <tr key={task.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 font-medium text-slate-800">{task.title}</td>
+                      <td className="p-4">
+                        <div className="font-medium text-slate-800 mb-1">{task.title}</div>
+                        {task.description && (
+                          <div className="text-xs text-slate-500 whitespace-pre-wrap mt-2 bg-slate-50 p-2 rounded border border-slate-100">
+                            {task.description}
+                          </div>
+                        )}
+                      </td>
                       <td className="p-4">
                         <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold font-mono">
                           {task.assigneeCode || 'Chưa gán'}
