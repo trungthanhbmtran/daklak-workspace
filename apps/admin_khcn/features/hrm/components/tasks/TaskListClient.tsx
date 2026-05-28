@@ -13,11 +13,13 @@ import {
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTasksList } from '../../hooks';
 
 export const TaskListClient = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
 
   const { data, isLoading } = useTasksList();
   const tasks = data?.data || [];
@@ -252,7 +254,7 @@ export const TaskListClient = () => {
                   <div className="space-y-3">
                     <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
                       <User className="h-4 w-4 mr-2 text-indigo-500" />
-                      <span className="truncate">Người nhận: <span className="font-medium text-slate-800 dark:text-slate-200">{task.assigneeCode || 'Chưa phân công'}</span></span>
+                      <span className="truncate">Người nhận: <span className="font-medium text-slate-800 dark:text-slate-200">{task.assigneeName || task.assigneeCode || 'Chưa phân công'}</span></span>
                     </div>
                     <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
                       <Calendar className="h-4 w-4 mr-2 text-rose-500" />
@@ -265,11 +267,9 @@ export const TaskListClient = () => {
                     <div className={`w-2 h-2 rounded-full mr-2 bg-current animate-pulse`} />
                     {task.priority || 'MEDIUM'} PRIORITY
                   </span>
-                  <Link href={`/services/hrm/tasks/${task.id}`}>
-                    <Button variant="link" className="px-0 text-indigo-600 font-semibold group-hover:translate-x-1 transition-transform">
-                      Xem chi tiết &rarr;
-                    </Button>
-                  </Link>
+                  <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-semibold group-hover:translate-x-1 transition-transform">
+                    Xem chi tiết &rarr;
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -304,9 +304,9 @@ export const TaskListClient = () => {
                     <td className="px-6 py-4">
                       <div className="flex items-center">
                         <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-600 flex justify-center items-center text-xs font-bold mr-2">
-                          {task.assigneeCode?.charAt(0) || '?'}
+                          {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
                         </div>
-                        {task.assigneeCode || 'N/A'}
+                        {task.assigneeName || task.assigneeCode || 'N/A'}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-500">
@@ -314,7 +314,7 @@ export const TaskListClient = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-indigo-600 hover:bg-indigo-50">
+                        <Button variant="ghost" size="icon" onClick={() => setSelectedTask(task)} className="h-8 w-8 text-indigo-600 hover:bg-indigo-50">
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-600 hover:bg-amber-50">
@@ -332,6 +332,53 @@ export const TaskListClient = () => {
           </div>
         </Card>
       )}
+
+      {/* Task Detail Dialog */}
+      <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
+        <DialogContent className="max-w-2xl font-sans">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold">{selectedTask?.title}</DialogTitle>
+          </DialogHeader>
+          {selectedTask && (
+            <div className="space-y-6 mt-4">
+              <div className="flex justify-between items-center bg-slate-50 p-4 rounded-xl">
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Trạng thái</p>
+                  {getStatusBadge(selectedTask.status || 'TODO')}
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Ưu tiên</p>
+                  <span className={`font-semibold ${getPriorityColor(selectedTask.priority)}`}>{selectedTask.priority || 'MEDIUM'}</span>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500 mb-1">Hạn chót</p>
+                  <p className="font-semibold text-slate-800">{selectedTask.dueDate ? new Date(selectedTask.dueDate).toLocaleDateString('vi-VN') : 'Không có'}</p>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Người nhận</h4>
+                <div className="flex items-center">
+                  <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex justify-center items-center font-bold mr-3">
+                    {(selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?'}
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-800">{selectedTask.assigneeName || selectedTask.assigneeCode || 'N/A'}</p>
+                    <p className="text-sm text-slate-500">Mã NV: {selectedTask.assigneeCode}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">Mô tả công việc</h4>
+                <div className="bg-slate-50 p-4 rounded-xl text-slate-700 whitespace-pre-wrap min-h-[100px]">
+                  {selectedTask.description || 'Chưa có mô tả chi tiết.'}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

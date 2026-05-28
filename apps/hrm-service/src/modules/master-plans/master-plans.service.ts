@@ -14,7 +14,9 @@ export class MasterPlansService {
       where,
       orderBy: { createdAt: 'desc' },
       include: {
-        tasks: true,
+        tasks: {
+          include: { assignee: true }
+        },
       }
     });
 
@@ -29,8 +31,9 @@ export class MasterPlansService {
         updatedAt: mp.updatedAt?.toISOString() || '',
         totalTasks: mp.tasks.length,
         completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
-        tasks: mp.tasks.map(t => ({
+        tasks: mp.tasks.map((t: any) => ({
           ...t,
+          assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}` : t.assigneeCode,
           dueDate: t.dueDate?.toISOString() || '',
           completionDate: t.completionDate?.toISOString() || '',
           createdAt: t.createdAt?.toISOString() || '',
@@ -53,7 +56,11 @@ export class MasterPlansService {
   async findById(id: number) {
     const mp = await this.prisma.masterPlan.findUnique({
       where: { id },
-      include: { tasks: true }
+      include: { 
+        tasks: {
+          include: { assignee: true }
+        } 
+      }
     });
     if (!mp) return null;
     return {
@@ -64,8 +71,9 @@ export class MasterPlansService {
       updatedAt: mp.updatedAt?.toISOString() || '',
       totalTasks: mp.tasks.length,
       completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
-      tasks: mp.tasks.map(t => ({
+      tasks: mp.tasks.map((t: any) => ({
         ...t,
+        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}` : t.assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         completionDate: t.completionDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',

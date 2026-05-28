@@ -41,6 +41,7 @@ message TaskResponse {
   float penaltyPerDay = 14;
   string supervisorCode = 15;
   int32 planId = 16;
+  string assigneeName = 17;
 }
 
 message CreateTaskRequest {

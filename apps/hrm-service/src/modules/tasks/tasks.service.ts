@@ -12,13 +12,15 @@ export class TasksService {
     const tasks = await this.prisma.task.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      include: { assignee: true }
     });
 
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: tasks.map(t => ({
+      data: tasks.map((t: any) => ({
         ...t,
+        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}` : t.assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',
