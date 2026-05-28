@@ -120,8 +120,8 @@ export function MasterPlanDetail() {
                         )}
                       </td>
                       <td className="p-4">
-                        <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold font-mono">
-                          {task.assigneeCode || 'Chưa gán'}
+                        <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold">
+                          {task.assigneeName || task.assigneeCode || 'Chưa gán'}
                         </span>
                       </td>
                       <td className="p-4 text-center">

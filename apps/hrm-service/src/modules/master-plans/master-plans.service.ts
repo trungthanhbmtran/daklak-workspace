@@ -33,7 +33,7 @@ export class MasterPlansService {
         completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
         tasks: mp.tasks.map((t: any) => ({
           ...t,
-          assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}` : t.assigneeCode,
+          assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}` : t.assigneeCode,
           dueDate: t.dueDate?.toISOString() || '',
           completionDate: t.completionDate?.toISOString() || '',
           createdAt: t.createdAt?.toISOString() || '',
@@ -73,7 +73,7 @@ export class MasterPlansService {
       completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
       tasks: mp.tasks.map((t: any) => ({
         ...t,
-        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}` : t.assigneeCode,
+        assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}` : t.assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         completionDate: t.completionDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',

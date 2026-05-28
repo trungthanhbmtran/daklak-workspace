@@ -20,7 +20,7 @@ export class TasksService {
       message: 'Lấy danh sách nhiệm vụ thành công',
       data: tasks.map((t: any) => ({
         ...t,
-        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}` : t.assigneeCode,
+        assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}` : t.assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',

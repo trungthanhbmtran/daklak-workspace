@@ -11,6 +11,7 @@ export interface TaskItemData {
   description: string;
   priority: string;
   assigneeCode: string;
+  assigneeName?: string;
   dueDate: string;
   baseScore: number | string;
   weight: number | string;
@@ -118,7 +119,7 @@ export function PlanTaskConfigList({
                         </Label>
                         <div className="flex gap-2">
                           <Input
-                            value={task.assigneeCode}
+                            value={task.assigneeName || task.assigneeCode}
                             readOnly
                             placeholder="Chọn nhân sự..."
                             className="h-10 bg-slate-50 cursor-pointer"
