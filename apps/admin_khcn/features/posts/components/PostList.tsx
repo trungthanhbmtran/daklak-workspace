@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Search,
+  Search as SearchIcon,
   Plus,
   Edit,
   Trash2,
@@ -29,6 +30,7 @@ import {
   ChevronsRight
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -78,7 +80,7 @@ const STATUS_CONFIG: Record<PostStatus, { label: string; bg: string; text: strin
     bg: "bg-blue-50 dark:bg-blue-950/20 border-blue-100/50 dark:border-blue-900/30",
     text: "text-blue-700 dark:text-blue-400",
     dot: "bg-blue-500",
-    icon: Search
+    icon: SearchIcon
   },
   APPROVED: {
     label: "Đã phê duyệt",
@@ -119,7 +121,8 @@ const STATUS_CONFIG: Record<PostStatus, { label: string; bg: string; text: strin
 
 export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateToCreate: () => void, onNavigateToEdit: (id: string) => void }) {
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [deletingPostId, setDeletingPostId] = useState<string | null>(null);
   const [rejectingPostId, setRejectingPostId] = useState<string | null>(null);
@@ -129,6 +132,10 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const [sortOrder, setSortOrder] = useState("desc");
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchTerm]);
 
   // Tải danh sách danh mục dùng chung từ API (cho trạng thái bài viết)
   const { data: systemCategories } = useQuery({
@@ -331,18 +338,7 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
       {/* Bộ lọc & Công cụ */}
       <Card className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row gap-4 justify-between items-center rounded-2xl">
         <div className="flex flex-1 w-full flex-col sm:flex-row flex-wrap gap-3">
-          <div className="relative w-full sm:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Tìm theo tiêu đề bài viết..."
-              className="pl-9 h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 focus-visible:ring-blue-500/20 rounded-xl text-xs font-semibold"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(1);
-              }}
-            />
-          </div>
+          <Search placeholder="Tìm theo tiêu đề bài viết..." className="w-full sm:w-80" />
 
           <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setPage(1); }}>
             <SelectTrigger className="w-full sm:w-[160px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 rounded-xl text-xs font-semibold">

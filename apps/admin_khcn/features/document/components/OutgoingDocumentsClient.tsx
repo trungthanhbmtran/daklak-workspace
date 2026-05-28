@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useMemo } from "react";
 import {
-  Search, Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe
+  Filter, Eye, Plus, Send, Trash2, Building2, FileText, User, Calendar, Globe
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDocuments, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
@@ -13,9 +15,9 @@ import { DocumentUploadModal } from "@/features/document/components/DocumentUplo
 
 export function OutgoingDocumentsClient() {
   const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   const { deleteDocument } = useDocuments();
 
@@ -23,14 +25,8 @@ export function OutgoingDocumentsClient() {
     setMounted(true);
   }, []);
 
-  // Debounce search
-  useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
-    return () => clearTimeout(timer);
-  }, [searchTerm]);
-
   const { data: response, isLoading, error } = useListDocuments({
-    search: debouncedSearch,
+    search: searchTerm,
     isIncoming: false,
   });
 
@@ -77,15 +73,7 @@ export function OutgoingDocumentsClient() {
 
       <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
         <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo số ký hiệu, trích yếu, nơi nhận..."
-              className="pl-11 h-12 bg-muted/20 border-none rounded-2xl focus-visible:ring-emerald-500/20 font-medium"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm theo số ký hiệu, trích yếu, nơi nhận..." className="flex-1 min-w-[300px]" />
           <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10">
             <Filter className="h-4 w-4 mr-2" /> Bộ lọc
           </Button>

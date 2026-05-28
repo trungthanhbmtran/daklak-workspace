@@ -1,8 +1,10 @@
 import { useState, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import type { CategoryItem } from "../types";
 
 export function useCategoryUI(serverData: CategoryItem[] = [], groups: { code: string; name: string }[] = []) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [searchGroupTerm, setSearchGroupTerm] = useState("");
   const [activeGroup, setActiveGroup] = useState<string>("UNIT_TYPE");
 
@@ -35,7 +37,7 @@ export function useCategoryUI(serverData: CategoryItem[] = [], groups: { code: s
 
   return {
     state: { searchTerm, searchGroupTerm, activeGroup, isCreateOpen, editingItem },
-    setters: { setSearchTerm, setSearchGroupTerm, setActiveGroup, setIsCreateOpen, setEditingItem },
+    setters: { setSearchGroupTerm, setActiveGroup, setIsCreateOpen, setEditingItem },
     derived: { uniqueGroups, filteredGroups, filteredData }
   };
 }

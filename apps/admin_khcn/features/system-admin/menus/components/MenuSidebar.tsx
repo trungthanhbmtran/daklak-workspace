@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Plus, Search, ChevronRight, LayoutList, Layers, ChevronDown, Server, FolderTree } from "lucide-react";
+import { Plus, ChevronRight, LayoutList, Layers, ChevronDown, Server, FolderTree } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { MenuItem } from "../types";
@@ -30,7 +31,7 @@ interface MenuSidebarProps {
 }
 
 export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }: MenuSidebarProps) {
-  const { searchTerm, setSearchTerm, expandedRows, visibleIds, toggleExpand } = useSidebarLogic(menus);
+  const { searchTerm, expandedRows, visibleIds, toggleExpand } = useSidebarLogic(menus);
   
   // State quản lý chế độ xem: 'business' (Cây cha-con) hoặc 'service' (Nhóm theo API)
   const [viewMode, setViewMode] = useState<'business' | 'service'>('business');
@@ -228,15 +229,7 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
             </Button>
           </div>
 
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1.5 h-3.5 w-3.5 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm tên, mã..." 
-              className="pl-8 h-8 text-xs bg-background focus-visible:ring-1" 
-              value={searchTerm} 
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
-          </div>
+          <Search placeholder="Tìm tên, mã..." className="flex-1" />
         </div>
       </div>
       

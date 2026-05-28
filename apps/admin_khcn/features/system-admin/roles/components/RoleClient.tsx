@@ -13,7 +13,6 @@ export function RoleClient() {
     <div className="flex flex-col lg:flex-row gap-6 items-start h-[calc(100vh-120px)] overflow-hidden">
       <RoleSidebar 
         roles={state.roles}
-        searchTerm={state.searchTerm} setSearchTerm={state.setSearchTerm}
         selectedRoleId={state.selectedRole?.id}
         onSelect={state.handleSelectRole}
         onAdd={state.handleAddRole}

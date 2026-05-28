@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { Search, Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase } from "lucide-react";
+import { Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase } from "lucide-react";
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
+import { useSearchParams } from "next/navigation";
 
 export function MasterPlanSidebar() {
   const { state, actions } = useMasterPlanContext();
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
 
   const filteredPlans = state.masterPlans.filter(p => 
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -35,15 +37,7 @@ export function MasterPlanSidebar() {
           </Button>
         </div>
         
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input 
-            placeholder="Tìm kế hoạch..." 
-            className="pl-9 h-9 bg-white border-slate-200 focus-visible:ring-indigo-500 rounded-lg text-sm"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <Search placeholder="Tìm kế hoạch..." className="w-full" />
       </div>
 
       <div className="flex-1 overflow-y-auto p-2 space-y-1">

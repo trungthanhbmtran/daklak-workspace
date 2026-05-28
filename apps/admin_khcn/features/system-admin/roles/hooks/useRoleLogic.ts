@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { roleApi } from "../api";
@@ -39,7 +40,8 @@ export function useRoleLogic() {
     },
   });
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [createMode, setCreateMode] = useState<boolean>(false);
 
@@ -91,7 +93,6 @@ export function useRoleLogic() {
     permissions,
     isLoading: isLoadingRoles || isLoadingPerms,
     searchTerm,
-    setSearchTerm,
     selectedRole,
     handleSelectRole,
     createMode,

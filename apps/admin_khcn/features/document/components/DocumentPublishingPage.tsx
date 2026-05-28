@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo } from "react";
 import { 
   Globe, Link as LinkIcon, FileText, Calendar, 
-  CheckCircle2, Plus, X, Search, FileSignature, Layers,
+  CheckCircle2, Plus, X, Search as SearchIcon, FileSignature, Layers,
   Loader2, ArrowRight, Building2, Check, ExternalLink
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +21,10 @@ import apiClient from "@/lib/axiosInstance";
 
 export default function DocumentPublishingPage() {
   const [mounted, setMounted] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+  const searchTerm = searchParams.get('search') || "";
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   
   // Publication states
@@ -111,7 +116,9 @@ export default function DocumentPublishingPage() {
         <div className="flex gap-2 w-full sm:w-auto">
           <Button variant="outline" className="flex-1 sm:flex-none" onClick={() => {
             setSelectedDoc(null);
-            setSearchTerm("");
+            const params = new URLSearchParams(searchParams);
+            params.delete('search');
+            replace(`${pathname}?${params.toString()}`);
           }}>Chọn văn bản khác</Button>
           <Button 
             className="flex-1 sm:flex-none shadow-lg shadow-primary/20" 
@@ -129,20 +136,14 @@ export default function DocumentPublishingPage() {
         <Card className="border-2 border-dashed bg-muted/5">
           <CardContent className="p-10 flex flex-col items-center justify-center space-y-6">
             <div className="p-4 bg-primary/10 rounded-full text-primary">
-              <Search className="h-10 w-10" />
+              <SearchIcon className="h-10 w-10" />
             </div>
             <div className="text-center space-y-2 max-w-md">
               <h3 className="text-lg font-bold">Tìm kiếm văn bản cần xuất bản</h3>
               <p className="text-sm text-muted-foreground">Nhập số ký hiệu, trích yếu hoặc tên cơ quan ban hành để bắt đầu cấu hình xuất bản.</p>
             </div>
             <div className="w-full max-w-xl relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <Input 
-                placeholder="Ví dụ: 123/QĐ-SKHCN..." 
-                className="pl-10 h-12 text-base rounded-xl shadow-sm border-primary/20 focus:border-primary transition-all"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <Search placeholder="Ví dụ: 123/QĐ-SKHCN..." className="w-full" />
               
               {searchTerm.length > 0 && (
                 <Card className="absolute top-full left-0 right-0 mt-2 z-50 shadow-2xl border-primary/10 overflow-hidden">
@@ -284,8 +285,7 @@ export default function DocumentPublishingPage() {
                     </SelectContent>
                   </Select>
                   <div className="relative flex-1">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Nhập số ký hiệu văn bản cần liên kết..." className="h-9 pl-8 bg-background" />
+                    <Search placeholder="Nhập số ký hiệu văn bản cần liên kết..." className="w-full" />
                   </div>
                   <Button size="sm" className="h-9 font-bold px-4">Thêm</Button>
                 </div>

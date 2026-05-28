@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import {
-  KeyRound, Search, ArrowRight, Plus, Trash2, Loader2,
+  KeyRound, ArrowRight, Plus, Trash2, Loader2,
   ShieldAlert, Database, Component, Check
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +27,6 @@ export function ResourceClient() {
     isLoading,
     isError,
     searchTerm,
-    setSearchTerm,
     selectedResource,
     setSelectedResource,
     currentPermissions,
@@ -95,10 +95,7 @@ export function ResourceClient() {
             </h3>
             <Badge variant="secondary" className="font-mono">{allResources.length}</Badge>
           </div>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="Tìm theo tên hoặc mã..." className="pl-8 h-9 bg-background focus-visible:ring-ring" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          </div>
+          <Search placeholder="Tìm theo tên hoặc mã..." className="w-full" />
         </div>
         {/* Form thêm tài nguyên */}
         <div className="p-3 border-b bg-muted/20 shrink-0 space-y-2">

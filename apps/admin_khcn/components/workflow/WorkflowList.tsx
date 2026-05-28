@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { 
   Plus, 
-  Search, 
   MoreHorizontal, 
   Play, 
   Edit2, 
@@ -16,6 +15,7 @@ import {
   PlayCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
@@ -35,11 +35,13 @@ interface WorkflowListProps {
   onEdit: (id: string) => void;
   onCreate: () => void;
 }
+import { useSearchParams } from "next/navigation";
 
 const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
 
   const loadWorkflows = async () => {
     setIsLoading(true);
@@ -89,15 +91,7 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Tìm kiếm quy trình..." 
-            className="pl-10 rounded-xl bg-muted/40 border-none focus-visible:ring-primary/20"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <Search placeholder="Tìm kiếm quy trình..." className="flex-1 max-w-sm" />
         <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-lg py-1 px-3 bg-primary/5 text-primary border-primary/10">
                 {workflows.length} Tổng số

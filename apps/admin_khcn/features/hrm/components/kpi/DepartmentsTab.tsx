@@ -1,10 +1,11 @@
 // src/app/executive-kpi/_components/DepartmentsTab.tsx
 "use client";
-import React, { useState } from 'react';
-import { Search, Filter } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Search } from '@/components/ui/search';
 import { Button } from '@/components/ui/button';
+import { useSearchParams } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
@@ -23,7 +24,8 @@ const getStatusColor = (status: string) => {
 };
 
 export default function DepartmentsTab({ kpiDetails }: DepartmentsTabProps) {
-    const [searchQuery, setSearchQuery] = useState('');
+    const searchParams = useSearchParams();
+    const searchQuery = searchParams.get('search') || '';
 
     const filteredKpis = kpiDetails.filter((kpi: any) =>
         kpi.name?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -38,15 +40,7 @@ export default function DepartmentsTab({ kpiDetails }: DepartmentsTabProps) {
                         <CardDescription>Tìm kiếm, lọc và xuất dữ liệu báo cáo chi tiết từng mục tiêu.</CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                        <div className="relative">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
-                            <Input
-                                placeholder="Tìm tên chỉ số..."
-                                className="pl-8 w-[250px] bg-white"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
+                        <Search placeholder="Tìm tên chỉ số..." className="w-[250px]" />
                         <Button variant="outline" size="icon"><Filter className="h-4 w-4" /></Button>
                     </div>
                 </div>

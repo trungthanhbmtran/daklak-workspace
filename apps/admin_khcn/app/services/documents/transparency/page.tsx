@@ -2,13 +2,15 @@
 
 import { useMemo, useState, useEffect } from "react";
 import {
-  Search, Filter, Eye, Download, Calendar,
+  Filter, Eye, Download, Calendar,
   Building2, PieChart, ShieldCheck, FileText,
   TrendingUp, ArrowUpRight, Plus
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,7 +20,8 @@ import { DocumentUploadModal } from "@/features/document/components/DocumentUplo
 
 export default function TransparencyPage() {
   const [mounted, setMounted] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [fiscalYear, setFiscalYear] = useState("2026");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -134,15 +137,7 @@ export default function TransparencyPage() {
               </TabsList>
             </Tabs>
             <div className="flex gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Tìm báo cáo..."
-                  className="pl-9 h-10 bg-background border-muted rounded-xl"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
+              <Search placeholder="Tìm báo cáo..." className="flex-1 sm:w-64" />
               <Select value={fiscalYear} onValueChange={setFiscalYear}>
                 <SelectTrigger className="w-[110px] h-10 rounded-xl"><SelectValue /></SelectTrigger>
                 <SelectContent>

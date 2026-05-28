@@ -1,8 +1,8 @@
 "use client";
 
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
 import { useUserList, useUserDetail, useSetUserActive, useAssignRoles } from "./hooks/useUserApi";
 import { useUserUI } from "./hooks/useUserUI";
 import { UserTable } from "./components/UserTable";
@@ -25,15 +25,7 @@ export function UserClient() {
 
         {/* Thanh công cụ tìm kiếm và nút Thêm */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-4 rounded-lg border shadow-sm">
-          <div className="relative w-full sm:w-96">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm email, tên đăng nhập, họ tên..."
-              className="pl-8 bg-background"
-              value={ui.state.searchTerm}
-              onChange={(e) => ui.setters.setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm email, tên đăng nhập, họ tên..." className="w-full sm:w-96" />
           <Button className="shrink-0 w-full sm:w-auto" onClick={() => ui.setters.setIsCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" /> Thêm người dùng
           </Button>

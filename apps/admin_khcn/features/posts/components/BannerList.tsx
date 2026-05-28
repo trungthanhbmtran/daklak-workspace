@@ -4,13 +4,14 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Search, Plus, Edit, Trash2, Image as ImageIcon,
+  Plus, Edit, Trash2, Image as ImageIcon,
   ExternalLink, Link as LinkIcon, Loader2, MoreVertical,
   Calendar, MapPin, CheckCircle2, XCircle, Grid, Layers, Type, PlayCircle, Eye, Sliders
 } from "lucide-react";
 import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useSearchParams } from "next/navigation";
 
 interface BannerListProps {
   onNavigateToCreate: () => void;
@@ -42,7 +44,8 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
   const updateCategoryMutation = useUpdateCategory();
 
   const [showConfig, setShowConfig] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [activeTab, setActiveTab] = useState<string>("all");
   const [deletingBannerId, setDeletingBannerId] = useState<string | null>(null);
 
@@ -189,15 +192,7 @@ export function BannerList({ onNavigateToCreate, onNavigateToEdit }: BannerListP
           </Tabs>
 
           {/* Search Input bar */}
-          <div className="relative w-full lg:w-80 shrink-0">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
-              placeholder="Tìm theo tên banner..."
-              className="pl-9 h-10 bg-slate-50/50 focus-visible:ring-blue-500/30 rounded-xl border-slate-200"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm theo tên banner..." className="w-full lg:w-80 shrink-0" />
         </div>
 
         {/* Grid of Banners */}

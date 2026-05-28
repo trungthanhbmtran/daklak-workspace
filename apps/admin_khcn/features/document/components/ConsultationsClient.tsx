@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import {
-   Search, Filter, Plus, Clock,
+   Filter, Plus, Clock,
    MessageSquareShare, CheckCircle2,
    Users, Download,
    ChevronRight, ArrowRight, BarChart3,
@@ -11,8 +11,10 @@ import {
 import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
    Select, SelectContent, SelectItem,
@@ -26,7 +28,8 @@ import { ConsultationCreateModal } from "@/features/document/components/Consulta
 export function ConsultationsClient() {
    const [mounted, setMounted] = useState(false);
    const [isModalOpen, setIsModalOpen] = useState(false);
-   const [searchTerm, setSearchTerm] = useState("");
+   const searchParams = useSearchParams();
+   const searchTerm = searchParams.get('search') || "";
    const [statusFilter, setStatusFilter] = useState("OPEN");
 
    const { useListConsultations } = useDocuments();
@@ -107,15 +110,7 @@ export function ConsultationsClient() {
             <div className="flex flex-col lg:flex-row gap-4 items-center">
 
                {/* SEARCH BOX */}
-               <div className="relative flex-1 w-full">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                     value={searchTerm}
-                     onChange={(e) => setSearchTerm(e.target.value)}
-                     placeholder="Tìm kiếm theo tiêu đề dự thảo hoặc đơn vị..."
-                     className="pl-12 h-12 bg-muted/20 border-none rounded-xl focus-visible:ring-primary/30 font-medium"
-                  />
-               </div>
+               <Search placeholder="Tìm kiếm theo tiêu đề dự thảo hoặc đơn vị..." className="flex-1 w-full" />
 
                <div className="flex items-center gap-3 w-full lg:w-auto">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>

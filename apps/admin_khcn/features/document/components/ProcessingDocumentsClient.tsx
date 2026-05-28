@@ -3,15 +3,18 @@
 import { useState, useMemo } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
-import { Search, Filter, Plus, Clock, FileText, History, MessageSquare, ChevronRight } from "lucide-react";
+import { Filter, Plus, Clock, FileText, History, MessageSquare, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 
 export function ProcessingDocumentsClient() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [statusFilter, setStatusFilter] = useState("PROCESSING");
 
   const { data: documentsData, isLoading } = useListDocuments({
@@ -49,15 +52,7 @@ export function ProcessingDocumentsClient() {
 
       <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
         <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo trích yếu, người xử lý, bước hiện tại..."
-              className="pl-11 h-12 bg-muted/20 border-none rounded-2xl focus-visible:ring-primary/20 font-medium"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm theo trích yếu, người xử lý, bước hiện tại..." className="flex-1 min-w-[300px]" />
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px] h-12 rounded-2xl border-none bg-muted/20 font-bold">

@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import type { UserItem } from "../types";
 
 export function useUserUI(serverData: UserItem[] = []) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [detailId, setDetailId] = useState<number | null>(null);
 
@@ -18,7 +20,7 @@ export function useUserUI(serverData: UserItem[] = []) {
 
   return {
     state: { searchTerm, isCreateOpen, detailId },
-    setters: { setSearchTerm, setIsCreateOpen, setDetailId },
+    setters: { setIsCreateOpen, setDetailId },
     derived: { filteredData },
   };
 }

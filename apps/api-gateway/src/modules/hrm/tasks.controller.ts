@@ -25,9 +25,15 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get()
-  async list(@Query('assigneeCode') assigneeCode: string) {
+  async list(
+    @Query('assigneeCode') assigneeCode: string,
+    @Query('filter') filter: string,
+    @Query('search') search: string
+  ) {
     return firstValueFrom(this.taskService.ListTasks({
       assigneeCode,
+      filter,
+      search,
     }));
   }
 
@@ -36,6 +42,25 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(this.taskService.UpdateTaskStatus({
       id: parseInt(id, 10),
       status,
+    }));
+  }
+
+  @Get('recommend-assignees')
+  async recommendAssignees(
+    @Query('rankCode') rankCode: string,
+    @Query('strategy') strategy: string
+  ) {
+    return firstValueFrom(this.taskService.RecommendAssignees({
+      rankCode: rankCode || 'ALL',
+      strategy: strategy || 'LOW_PERFORMANCE',
+    }));
+  }
+
+  @Put(':id/assign')
+  async assignTask(@Param('id') id: string, @Body('assigneeCode') assigneeCode: string) {
+    return firstValueFrom(this.taskService.AssignTask({
+      id: parseInt(id, 10),
+      assigneeCode,
     }));
   }
 }

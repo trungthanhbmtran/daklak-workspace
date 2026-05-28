@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import {
-  Search, Plus, Filter, MessageSquareShare,
+  Plus, Filter, MessageSquareShare,
   Clock, CheckCircle2, Eye, AlertCircle, FileEdit,
   Building2, ChevronRight, BarChart3, Activity,
   RotateCcw, ListFilter, LayoutGrid, Calendar
@@ -12,7 +12,9 @@ import { cn } from "@/lib/utils";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
@@ -23,7 +25,10 @@ import { useListConsultations } from "@/features/document/hooks/useDocuments";
 
 export default function ConsultationManagePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
+  const router = useRouter();
+  const pathname = usePathname();
   const [statusFilter, setStatusFilter] = useState("ALL");
 
   const { data: consultationsData, isLoading } = useListConsultations({
@@ -43,7 +48,7 @@ export default function ConsultationManagePage() {
   }, [consultations]);
 
   const resetFilters = () => {
-    setSearchTerm("");
+    router.replace(pathname);
     setStatusFilter("ALL");
   };
 
@@ -108,15 +113,7 @@ export default function ConsultationManagePage() {
       {/* 3. FILTERS & TABLE */}
       <Card className="border-none shadow-2xl shadow-foreground/5 rounded-[32px] overflow-hidden bg-background/60 backdrop-blur-xl border border-white/20">
         <div className="p-6 border-b border-muted/50 flex flex-col lg:flex-row gap-4 items-center">
-          <div className="relative flex-1 w-full lg:w-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo tiêu đề văn bản dự thảo..."
-              className="pl-12 h-12 bg-muted/30 border-none rounded-2xl focus-visible:ring-primary/30 font-medium text-sm transition-all"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm theo tiêu đề văn bản dự thảo..." className="flex-1 w-full lg:w-auto" />
 
           <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -161,7 +158,9 @@ export default function ConsultationManagePage() {
           ) : consultations.length === 0 ? (
             <div className="p-32 text-center flex flex-col items-center justify-center space-y-6">
               <div className="p-8 bg-muted/20 rounded-[40px]">
-                <Search className="h-20 w-20 text-muted-foreground/30" />
+                <div className="h-20 w-20 flex items-center justify-center bg-muted rounded-full">
+                  <LayoutGrid className="h-10 w-10 text-muted-foreground/30" />
+                </div>
               </div>
               <div className="space-y-2">
                 <h3 className="text-2xl font-black text-foreground">Không tìm thấy dữ liệu</h3>

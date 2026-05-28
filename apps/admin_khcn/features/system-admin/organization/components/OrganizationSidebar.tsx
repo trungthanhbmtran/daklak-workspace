@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   DndContext,
   PointerSensor,
@@ -11,8 +12,9 @@ import {
   useDroppable,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import { Plus, Search, ChevronRight, Building2, ChevronDown, FolderOpen, GripVertical } from "lucide-react";
+import { Plus, Search as SearchIcon, ChevronRight, Building2, ChevronDown, FolderOpen, GripVertical } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -254,7 +256,8 @@ export function OrganizationSidebar() {
   const { flatUnits, mode, selectedId, parentId } = state;
   const activeId = mode === "create_child" ? parentId : selectedId;
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set());
 
   const toggleExpand = (id: number) => {
@@ -324,15 +327,7 @@ export function OrganizationSidebar() {
           </Button>
         </div>
 
-        <div className="relative group">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-          <Input
-            placeholder="Tìm tên hoặc mã đơn vị..."
-            className="pl-8 h-9 bg-background text-sm shadow-sm transition-colors border-muted-foreground/20 focus-visible:border-primary"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <Search placeholder="Tìm tên hoặc mã đơn vị..." className="w-full" />
       </div>
 
       <ScrollArea className="flex-1 min-h-0 bg-background">
@@ -349,7 +344,7 @@ export function OrganizationSidebar() {
             </div>
           ) : searchTerm.trim() && filtered.length === 0 ? (
             <div className="py-10 text-center text-sm text-muted-foreground flex flex-col items-center gap-2">
-              <Search className="h-6 w-6 text-muted-foreground/30" />
+              <SearchIcon className="h-6 w-6 text-muted-foreground/30" />
               <p>Không tìm thấy kết quả phù hợp.</p>
             </div>
           ) : (

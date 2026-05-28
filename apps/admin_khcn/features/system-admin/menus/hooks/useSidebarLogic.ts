@@ -1,8 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import { MenuItem } from "../types";
 
 export function useSidebarLogic(menus: MenuItem[]) {
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -34,5 +36,5 @@ export function useSidebarLogic(menus: MenuItem[]) {
     setExpandedRows(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
-  return { searchTerm, setSearchTerm, expandedRows, visibleIds, toggleExpand };
+  return { searchTerm, expandedRows, visibleIds, toggleExpand };
 }

@@ -7,12 +7,12 @@ import {
   CheckCircle2,
   AlertCircle,
   Play,
-  Search,
   RefreshCcw,
   ChevronRight,
   Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import { workflowApi, WorkflowInstance } from "@/features/workflow/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { useSearchParams } from "next/navigation";
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }> = {
   RUNNING: { label: "Đang chạy", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Play },
@@ -31,7 +32,8 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: any }>
 const WorkflowInstanceList = () => {
   const [instances, setInstances] = useState<WorkflowInstance[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
 
   const loadInstances = async () => {
     setIsLoading(true);
@@ -69,15 +71,7 @@ const WorkflowInstanceList = () => {
         </Button>
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input 
-          placeholder="Tìm theo ID hoặc tên quy trình..." 
-          className="pl-10 h-9 rounded-lg bg-muted/40 border-none focus-visible:ring-primary/20"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+      <Search placeholder="Tìm theo ID hoặc tên quy trình..." className="max-w-sm" />
 
       <div className="border border-border/60 rounded-xl overflow-hidden bg-card">
         <table className="w-full text-sm text-left">

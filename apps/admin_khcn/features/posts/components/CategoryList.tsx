@@ -2,12 +2,13 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
-  Plus, Search, Edit2, Trash2, Folder,
+  Plus, Edit2, Trash2, Folder,
   MoreHorizontal, ChevronRight, Loader2, Image as ImageIcon, FileText, Download
 } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -38,6 +39,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useSearchParams } from "next/navigation";
 
 interface CategoryListProps {
   onNavigateToCreate: () => void;
@@ -46,7 +48,8 @@ interface CategoryListProps {
 
 export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryListProps) {
   const queryClient = useQueryClient();
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [deletingCategoryId, setDeletingCategoryId] = useState<string | null>(null);
 
   const { data: categories, isLoading } = useQuery({
@@ -97,15 +100,7 @@ export function CategoryList({ onNavigateToCreate, onNavigateToEdit }: CategoryL
       <Card>
         <CardHeader className="pb-3 px-6 border-b bg-slate-50/50">
           <div className="flex items-center gap-3">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm tên chuyên mục..."
-                className="pl-9"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
+            <Search placeholder="Tìm tên chuyên mục..." className="flex-1 max-w-sm" />
           </div>
         </CardHeader>
         <CardContent className="p-0">

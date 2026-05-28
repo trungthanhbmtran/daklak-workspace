@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { resourceApi, matrixToResources, matrixToPermissions } from "../api";
 import { resourceKeys } from "../keys";
@@ -14,7 +15,8 @@ export function useResourceLogic() {
   const resources = matrixToResources(matrix);
   const permissions = matrixToPermissions(matrix);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
 
   const invalidateMatrix = () => queryClient.invalidateQueries({ queryKey: resourceKeys.matrix() });
@@ -67,7 +69,6 @@ export function useResourceLogic() {
     isLoading,
     isError,
     searchTerm,
-    setSearchTerm,
     selectedResource,
     setSelectedResource,
     currentPermissions,

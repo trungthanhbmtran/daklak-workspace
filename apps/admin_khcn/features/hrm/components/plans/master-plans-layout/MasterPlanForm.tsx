@@ -10,7 +10,19 @@ import { useMutation } from '@tanstack/react-query';
 import { hrmPlansApi } from '@/features/hrm/api';
 import { aiApi } from '@/features/hrm/api/ai.api';
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { organizationApi } from '@/features/system-admin/organization/api';
+import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 
 interface TargetPlanItem {
   id: string;
@@ -39,6 +51,8 @@ export function MasterPlanForm() {
 
   const [planTitle, setPlanTitle] = useState('');
   const [planObjective, setPlanObjective] = useState('');
+
+  const { data: units = [] } = useGetCategoryByGroup('UNIT');
 
   const [newTitle, setNewTitle] = useState('');
   const [newPerspective, setNewPerspective] = useState<GovPerspective>('DIGITAL_TRANSFORM');
@@ -187,23 +201,21 @@ export function MasterPlanForm() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-slate-100 pb-6">
           <div>
-            <label className="text-xs font-bold text-slate-700 mb-1.5 block">Tên Kế hoạch</label>
-            <input
-              type="text"
+            <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Tên Kế hoạch</Label>
+            <Input
               value={planTitle}
               onChange={e => setPlanTitle(e.target.value)}
               placeholder="VD: Kế hoạch Chuyển đổi số 2026..."
-              className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="h-10 text-sm focus-visible:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-700 mb-1.5 block">Mục tiêu tổng quát</label>
-            <input
-              type="text"
+            <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Mục tiêu tổng quát</Label>
+            <Input
               value={planObjective}
               onChange={e => setPlanObjective(e.target.value)}
               placeholder="VD: Hoàn thành 100% dịch vụ công trực tuyến..."
-              className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="h-10 text-sm focus-visible:ring-indigo-500"
             />
           </div>
         </div>
@@ -241,59 +253,75 @@ export function MasterPlanForm() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <div className="md:col-span-8">
-              <label className="text-xs font-bold text-slate-700 mb-1.5 block">Nội dung chỉ tiêu / Hành động</label>
-              <input
-                type="text"
+              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Nội dung chỉ tiêu / Hành động</Label>
+              <Input
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
-                className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm focus:ring-2 focus:ring-indigo-500"
+                className="h-10 text-sm focus-visible:ring-indigo-500"
                 required
               />
             </div>
             <div className="md:col-span-4">
-              <label className="text-xs font-bold text-slate-700 mb-1.5 block">Ngạch / Đối tượng phân bổ</label>
-              <select
-                value={newRankId}
-                onChange={e => setNewRankId(Number(e.target.value))}
-                className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm focus:ring-2 focus:ring-indigo-500 bg-white"
-              >
-                <option value={0}>Tất cả đối tượng</option>
-                {state.ranks.map((rank: any) => (
-                  <option key={rank.id} value={rank.id}>{rank.name}</option>
-                ))}
-              </select>
+              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Ngạch / Đối tượng phân bổ</Label>
+              <Select value={newRankId.toString()} onValueChange={v => setNewRankId(Number(v))}>
+                <SelectTrigger className="h-10 text-sm bg-white focus:ring-indigo-500">
+                  <SelectValue placeholder="Chọn Ngạch/Đối tượng" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Tất cả đối tượng</SelectItem>
+                  {state.congChucRanks.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel>Ngạch Công chức</SelectLabel>
+                      {state.congChucRanks.map((rank: any) => (
+                        <SelectItem key={rank.id} value={rank.id.toString()}>{rank.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                  {state.vienChucRanks.length > 0 && (
+                    <SelectGroup>
+                      <SelectLabel>Chức danh nghề nghiệp Viên chức</SelectLabel>
+                      {state.vienChucRanks.map((rank: any) => (
+                        <SelectItem key={rank.id} value={rank.id.toString()}>{rank.name}</SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-4">
-              <label className="text-xs font-bold text-slate-700 mb-1.5 block">
+              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">
                 {framework === 'BSC_KPI' ? 'Trọng số (%)' : 'Mức độ ưu tiên'}
-              </label>
-              <input
+              </Label>
+              <Input
                 type="number"
                 value={newMetricFactor}
                 onChange={e => setNewMetricFactor(Number(e.target.value))}
-                className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm font-mono text-center"
+                className="h-10 text-sm font-mono text-center focus-visible:ring-indigo-500"
                 required
               />
             </div>
             <div className="md:col-span-4">
-              <label className="text-xs font-bold text-slate-700 mb-1.5 block">Mục tiêu</label>
-              <input
+              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Mục tiêu</Label>
+              <Input
                 type="number"
                 value={newTargetValue}
                 onChange={e => setNewTargetValue(Number(e.target.value))}
-                className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm font-mono text-center"
+                className="h-10 text-sm font-mono text-center focus-visible:ring-indigo-500"
                 required
               />
             </div>
             <div className="md:col-span-4">
-              <label className="text-xs font-bold text-slate-700 mb-1.5 block">Đơn vị tính</label>
-              <input
-                type="text"
-                value={newUnit}
-                onChange={e => setNewUnit(e.target.value)}
-                className="w-full h-10 border border-slate-200 rounded-lg px-3 text-sm text-center bg-slate-50"
-                required
-              />
+              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Đơn vị tính</Label>
+              <Select value={newUnit} onValueChange={setNewUnit} required>
+                <SelectTrigger className="h-10 text-sm bg-white focus:ring-indigo-500 text-center">
+                  <SelectValue placeholder="Chọn đơn vị" />
+                </SelectTrigger>
+                <SelectContent>
+                  {units.map((u: any) => (
+                    <SelectItem key={u.code} value={u.nameVi || u.name}>{u.nameVi || u.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="md:col-span-12 text-right mt-2">
               <Button type="submit" variant="secondary">Thêm vào Kế hoạch</Button>

@@ -2,15 +2,16 @@
 
 import { useState, useMemo, useRef, useEffect, use } from "react";
 import { useImageUpload } from "@/features/posts/hooks/useImageUpload";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft, Save, User, Camera,
   Loader2, Mail, Phone, CreditCard, Calendar,
-  Building2, Search, Check, ChevronRight, Hash, AlertCircle
+  Building2, Check, ChevronRight, Hash, AlertCircle
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -38,8 +39,9 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
   const employeeId = parseInt(resolvedParams.id, 10);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [submitting, setSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: employee, isLoading: isLoadingEmployee } = useHrmEmployee(employeeId);
   const { mutateAsync: updateEmployee } = useUpdateHrmEmployee();
@@ -169,14 +171,7 @@ export default function EditEmployeePage({ params }: { params: Promise<{ id: str
                 {/* Tìm đơn vị */}
                 <div className="space-y-3">
                   <Label className="font-black text-slate-700 text-xs uppercase tracking-wider">1. Tìm đơn vị (Sở/Phòng/Ban)</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-                    <Input
-                      placeholder="Gõ tên đơn vị cần tìm..."
-                      className="pl-10 h-11 border-slate-300 focus:ring-blue-600"
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                    />
-                  </div>
+                  <Search placeholder="Gõ tên đơn vị cần tìm..." className="w-full" />
                   <div className="border border-slate-200 rounded-xl bg-slate-50 overflow-hidden">
                     <div className="max-h-[300px] overflow-y-auto p-1 custom-scrollbar">
                       {units.filter(u => u.fullPath.toLowerCase().includes(searchTerm.toLowerCase())).map((u) => (

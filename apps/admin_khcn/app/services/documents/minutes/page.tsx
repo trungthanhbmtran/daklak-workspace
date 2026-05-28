@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Plus, Filter, Eye, Download, Calendar, Users, ClipboardCheck, ArrowLeft, Clock, MapPin } from "lucide-react";
+
+import { Plus, Filter, Eye, Download, Calendar, Users, ClipboardCheck, ArrowLeft, Clock, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
+import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { MinutesForm } from "@/features/document/components/MinutesForm";
-
 import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 
 export default function MinutesPage() {
    const [view, setView] = useState<'LIST' | 'CREATE'>('LIST');
-   const [searchTerm, setSearchTerm] = useState("");
+   const searchParams = useSearchParams();
+   const searchTerm = searchParams.get('search') || "";
 
    const { useListMinutes } = useDocuments();
    const { data: minutesData, isLoading } = useListMinutes({
@@ -50,15 +52,7 @@ export default function MinutesPage() {
 
          <Card className="border-none shadow-xl shadow-foreground/5 bg-background/60 backdrop-blur-sm rounded-2xl overflow-hidden">
             <div className="p-5 border-b bg-background flex flex-wrap gap-3 items-center">
-               <div className="relative flex-1 min-w-[300px]">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                     placeholder="Tìm theo tiêu đề, địa điểm, thành phần tham dự..."
-                     className="pl-10 h-11 bg-muted/20 border-none rounded-xl focus-visible:ring-primary/20"
-                     value={searchTerm}
-                     onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-               </div>
+               <Search placeholder="Tìm theo tiêu đề, địa điểm, thành phần tham dự..." className="flex-1 min-w-[300px]" />
                <Button variant="outline" className="h-11 rounded-xl border-dashed border-2 hover:bg-muted/10 transition-colors">
                   <Filter className="h-4 w-4 mr-2" /> Bộ lọc
                </Button>

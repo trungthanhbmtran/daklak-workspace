@@ -1,8 +1,9 @@
 "use client";
 
-import { Search, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
 
 import { useGetCategories, useDeleteCategory, useGetCategoryGroups } from "./hooks/useCategoryApi";
@@ -37,7 +38,7 @@ export function CategoryClient() {
         filteredGroups={ui.derived.filteredGroups}
         activeGroup={ui.state.activeGroup}
         uniqueGroups={ui.derived.uniqueGroups}
-        onSelectGroup={(group) => { ui.setters.setActiveGroup(group); ui.setters.setSearchTerm(""); }}
+        onSelectGroup={(group) => { ui.setters.setActiveGroup(group); }}
       />
 
       <div className="flex-1 w-full space-y-4">
@@ -47,15 +48,7 @@ export function CategoryClient() {
             <p className="text-sm text-muted-foreground">Quản lý các giá trị thuộc nhóm này</p>
           </div>
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <div className="relative w-full sm:w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Tìm mã hoặc tên..."
-                className="pl-8 bg-background"
-                value={ui.state.searchTerm}
-                onChange={(e) => ui.setters.setSearchTerm(e.target.value)}
-              />
-            </div>
+            <Search placeholder="Tìm mã hoặc tên..." className="w-full sm:w-64" />
             <Button className="shrink-0" onClick={() => ui.setters.setIsCreateOpen(true)}>
               <Plus className="mr-2 h-4 w-4" /> Thêm
             </Button>

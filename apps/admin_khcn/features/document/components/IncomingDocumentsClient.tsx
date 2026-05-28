@@ -2,11 +2,13 @@
 
 import { useState, useMemo, useCallback, memo, useEffect } from "react";
 import dynamic from "next/dynamic";
-import { Inbox, Plus, FileText, Calendar, Building2, User, Search, Filter, RefreshCw } from "lucide-react";
+import { Inbox, Plus, FileText, Calendar, Building2, User, Filter, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
+import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDocuments, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
 
@@ -96,7 +98,8 @@ DocumentRow.displayName = "DocumentRow";
 
 export function IncomingDocumentsClient() {
   const [mounted, setMounted] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
@@ -172,15 +175,7 @@ export function IncomingDocumentsClient() {
 
       <Card className="border-none shadow-2xl shadow-foreground/5 bg-background/60 backdrop-blur-md rounded-3xl overflow-hidden">
         <div className="p-5 border-b bg-background flex flex-wrap gap-4 items-center">
-          <div className="relative flex-1 min-w-[300px]">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..."
-              className="pl-11 h-12 bg-muted/20 border-none rounded-2xl focus-visible:ring-blue-500/20 font-medium"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm theo số ký hiệu, trích yếu, cơ quan..." className="flex-1 min-w-[300px]" />
           <Button variant="outline" className="h-12 rounded-2xl border-dashed border-2 hover:bg-muted/10">
             <Filter className="h-4 w-4 mr-2" /> Bộ lọc
           </Button>

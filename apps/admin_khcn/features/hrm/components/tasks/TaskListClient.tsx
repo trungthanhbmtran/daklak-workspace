@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import {
   Plus, Eye, Edit, Trash2,
   CheckCircle2, Clock, PlayCircle,
-  AlertCircle, Search, Filter,
+  AlertCircle, Filter,
   LayoutGrid, List as ListIcon,
   Calendar, User
 } from 'lucide-react';
@@ -15,109 +15,65 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTasksList } from '../../hooks';
+import { hrmTasksApi } from '../../api';
+import { toast } from 'sonner';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { useSearchParams } from 'next/navigation';
+import { Search } from '@/components/ui/search';
 
 export const TaskListClient = () => {
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  
+  // Smart Assign states
+  const [taskToAssign, setTaskToAssign] = useState<any>(null);
+  const [assignStrategy, setAssignStrategy] = useState<'LOW_PERFORMANCE' | 'HIGH_PERFORMANCE'>('LOW_PERFORMANCE');
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
 
-  const { data, isLoading } = useTasksList();
+  const fetchRecommendations = async (strategy: string) => {
+    if (!taskToAssign) return;
+    setIsLoadingRecs(true);
+    try {
+      const res = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy });
+      if (res.success) {
+        setRecommendations(res.data);
+      }
+    } catch (e: any) {
+      toast.error('Lỗi khi lấy danh sách gợi ý');
+    } finally {
+      setIsLoadingRecs(false);
+    }
+  };
+
+  // Fetch recommendations automatically when task is selected
+  useEffect(() => {
+    if (taskToAssign) {
+      fetchRecommendations(assignStrategy);
+    }
+  }, [taskToAssign?.id, assignStrategy]);
+
+  // Server side filtering
+  const { data, isLoading, refetch } = useTasksList({
+    filter: activeFilter,
+    search: searchQuery,
+  });
   const tasks = data?.data || [];
-
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-
-  const activeTasks = tasks.filter(t => t.status !== 'DONE' && t.status !== 'ARCHIVED');
-
-  const overdueCount = activeTasks.filter(t => {
-    if (t.status === 'OVERDUE') return true;
-    if (!t.dueDate) return false;
-    const due = new Date(t.dueDate);
-    due.setHours(0, 0, 0, 0);
-    return due < now;
-  }).length;
-
-  const dueIn3DaysCount = activeTasks.filter(t => {
-    if (t.status === 'OVERDUE') return false;
-    if (!t.dueDate) return false;
-    const due = new Date(t.dueDate);
-    due.setHours(0, 0, 0, 0);
-    if (due < now) return false;
-    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays >= 0 && diffDays <= 3;
-  }).length;
-
-  const dueIn7DaysCount = activeTasks.filter(t => {
-    if (t.status === 'OVERDUE') return false;
-    if (!t.dueDate) return false;
-    const due = new Date(t.dueDate);
-    due.setHours(0, 0, 0, 0);
-    if (due < now) return false;
-    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays > 3 && diffDays <= 7;
-  }).length;
-
-  const dueOver7DaysCount = activeTasks.filter(t => {
-    if (t.status === 'OVERDUE') return false;
-    if (!t.dueDate) return true; // Tasks without deadline are technically safe
-    const due = new Date(t.dueDate);
-    due.setHours(0, 0, 0, 0);
-    if (due < now) return false;
-    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diffDays > 7;
-  }).length;
+  const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
 
   const stats = [
-    { id: 'overdue', label: 'Quá hạn xử lý', value: overdueCount, icon: <AlertCircle className="h-5 w-5" />, color: 'from-red-600 to-red-400 text-white' },
-    { id: 'dueIn3Days', label: 'Còn ≤ 3 ngày', value: dueIn3DaysCount, icon: <Clock className="h-5 w-5" />, color: 'from-orange-500 to-orange-400 text-white' },
-    { id: 'dueIn7Days', label: 'Còn 4-7 ngày', value: dueIn7DaysCount, icon: <Calendar className="h-5 w-5" />, color: 'from-yellow-500 to-yellow-400 text-white' },
-    { id: 'dueOver7Days', label: 'Còn > 7 ngày', value: dueOver7DaysCount, icon: <CheckCircle2 className="h-5 w-5" />, color: 'from-green-500 to-emerald-400 text-white' },
+    { id: 'overdue', label: 'Quá hạn xử lý', value: statsData.overdueCount, icon: <AlertCircle className="h-5 w-5" />, color: 'from-red-600 to-red-400 text-white' },
+    { id: 'dueIn3Days', label: 'Còn ≤ 3 ngày', value: statsData.dueIn3DaysCount, icon: <Clock className="h-5 w-5" />, color: 'from-orange-500 to-orange-400 text-white' },
+    { id: 'dueIn7Days', label: 'Còn 4-7 ngày', value: statsData.dueIn7DaysCount, icon: <Calendar className="h-5 w-5" />, color: 'from-yellow-500 to-yellow-400 text-white' },
+    { id: 'dueOver7Days', label: 'Còn > 7 ngày', value: statsData.dueOver7DaysCount, icon: <CheckCircle2 className="h-5 w-5" />, color: 'from-green-500 to-emerald-400 text-white' },
   ];
 
-  const displayedTasks = tasks.filter(t => {
-    if (!activeFilter) return true;
-    if (t.status === 'DONE' || t.status === 'ARCHIVED') return false;
-
-    if (activeFilter === 'overdue') {
-      if (t.status === 'OVERDUE') return true;
-      if (!t.dueDate) return false;
-      const due = new Date(t.dueDate);
-      due.setHours(0, 0, 0, 0);
-      return due < now;
-    }
-
-    if (activeFilter === 'dueIn3Days') {
-      if (t.status === 'OVERDUE') return false;
-      if (!t.dueDate) return false;
-      const due = new Date(t.dueDate);
-      due.setHours(0, 0, 0, 0);
-      if (due < now) return false;
-      const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      return diffDays >= 0 && diffDays <= 3;
-    }
-
-    if (activeFilter === 'dueIn7Days') {
-      if (t.status === 'OVERDUE') return false;
-      if (!t.dueDate) return false;
-      const due = new Date(t.dueDate);
-      due.setHours(0, 0, 0, 0);
-      if (due < now) return false;
-      const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      return diffDays > 3 && diffDays <= 7;
-    }
-
-    if (activeFilter === 'dueOver7Days') {
-      if (t.status === 'OVERDUE') return false;
-      if (!t.dueDate) return true;
-      const due = new Date(t.dueDate);
-      due.setHours(0, 0, 0, 0);
-      if (due < now) return false;
-      const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-      return diffDays > 7;
-    }
-
-    return true;
-  });
+  const displayedTasks = tasks;
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -183,13 +139,7 @@ export const TaskListClient = () => {
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
-        <div className="relative w-full sm:w-96">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <Input
-            placeholder="Tìm kiếm công việc..."
-            className="pl-10 rounded-full bg-slate-50 border-none focus-visible:ring-1 focus-visible:ring-indigo-500"
-          />
-        </div>
+        <Search placeholder="Tìm kiếm công việc..." className="w-full sm:w-96" />
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Button variant="outline" className="rounded-full border-slate-200">
             <Filter className="mr-2 h-4 w-4 text-slate-500" /> Bộ lọc
@@ -240,9 +190,24 @@ export const TaskListClient = () => {
                 <div className="p-6">
                   <div className="flex justify-between items-start mb-4">
                     {getStatusBadge(task.status || 'TODO')}
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Edit className="h-4 w-4 text-slate-400 hover:text-indigo-600" />
-                    </Button>
+                    <div className="flex gap-2">
+                      {!task.assigneeCode && (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="h-8 text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            setTaskToAssign(task);
+                            // Initial fetch handled by a useEffect or manual call
+                          }}
+                        >
+                          <PlayCircle className="w-3 h-3 mr-1" /> Phân công
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Edit className="h-4 w-4 text-slate-400 hover:text-indigo-600" />
+                      </Button>
+                    </div>
                   </div>
                   <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 leading-tight mb-2 line-clamp-2">
                     {task.title}
@@ -314,6 +279,11 @@ export const TaskListClient = () => {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {!task.assigneeCode && (
+                          <Button variant="ghost" size="icon" onClick={() => setTaskToAssign(task)} className="h-8 w-8 text-indigo-600 hover:bg-indigo-50">
+                            <PlayCircle className="h-4 w-4" />
+                          </Button>
+                        )}
                         <Button variant="ghost" size="icon" onClick={() => setSelectedTask(task)} className="h-8 w-8 text-indigo-600 hover:bg-indigo-50">
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -377,6 +347,108 @@ export const TaskListClient = () => {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+      {/* Smart Assign Dialog */}
+      <Dialog 
+        open={!!taskToAssign} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setTaskToAssign(null);
+            setRecommendations([]);
+          }
+        }}
+      >
+        <DialogContent className="max-w-xl font-sans">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold flex items-center">
+              <PlayCircle className="w-5 h-5 mr-2 text-indigo-600" /> Phân công thông minh
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-6 mt-4">
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+              <h4 className="font-semibold text-slate-800 mb-1">{taskToAssign?.title}</h4>
+              <p className="text-sm text-slate-500">
+                Hãy chọn người phù hợp nhất để giao việc. Hệ thống tự động tính toán dựa trên khối lượng công việc hiện tại và hiệu suất của nhân viên.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200">
+              <div className="space-y-1">
+                <Label className="font-bold text-slate-700">Chiến lược phân công</Label>
+                <p className="text-xs text-slate-500">
+                  {assignStrategy === 'LOW_PERFORMANCE' 
+                    ? 'Ưu tiên người Ít việc & Hiệu suất thấp (cần cải thiện)'
+                    : 'Ưu tiên người Ít việc & Giỏi nhất (đảm bảo chất lượng)'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-slate-400">Cải thiện</span>
+                <Switch 
+                  checked={assignStrategy === 'HIGH_PERFORMANCE'}
+                  onCheckedChange={(v) => {
+                    const newStrategy = v ? 'HIGH_PERFORMANCE' : 'LOW_PERFORMANCE';
+                    setAssignStrategy(newStrategy);
+                    fetchRecommendations(newStrategy);
+                  }}
+                />
+                <span className="text-xs font-semibold text-indigo-600">Giỏi nhất</span>
+              </div>
+            </div>
+
+            <div>
+              <h4 className="text-sm font-bold text-slate-700 mb-3">Top 5 Đề xuất</h4>
+              {isLoadingRecs ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recommendations.map((rec: any, idx: number) => (
+                    <div key={rec.employeeCode} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-indigo-200 hover:shadow-sm transition-all group">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center font-bold text-sm">
+                          {rec.employeeName?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-slate-800">{rec.employeeName}</p>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+                            <span title="Số điểm/trọng số công việc đang làm">Tải việc: <b>{rec.currentLoad}</b></span>
+                            <span title="Điểm hiệu suất trung bình">Hiệu suất: <b>{Math.round(rec.performanceScore)}</b></span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right mr-2 hidden sm:block">
+                          <p className="text-xs text-slate-400">Độ phù hợp</p>
+                          <p className="font-bold text-indigo-600">{Math.round(rec.matchScore)}%</p>
+                        </div>
+                        <Button 
+                          size="sm"
+                          className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm"
+                          onClick={async () => {
+                            try {
+                              await hrmTasksApi.assignTask(taskToAssign.id, { assigneeCode: rec.employeeCode });
+                              toast.success('Giao việc thành công!');
+                              setTaskToAssign(null);
+                              refetch();
+                            } catch (e: any) {
+                              toast.error('Giao việc thất bại');
+                            }
+                          }}
+                        >
+                          Giao việc
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                  {recommendations.length === 0 && !isLoadingRecs && (
+                    <p className="text-sm text-slate-500 text-center py-4">Không tìm thấy nhân sự phù hợp.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

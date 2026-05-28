@@ -17,6 +17,8 @@ interface MasterPlanState {
   isLoadingPlans: boolean;
   activeTab: string;
   ranks: any[];
+  congChucRanks: any[];
+  vienChucRanks: any[];
 }
 
 interface MasterPlanActions {
@@ -76,6 +78,8 @@ export function MasterPlanProvider({ children }: { children: React.ReactNode }) 
       isLoadingPlans,
       activeTab,
       ranks,
+      congChucRanks,
+      vienChucRanks,
     },
     actions: {
       select,

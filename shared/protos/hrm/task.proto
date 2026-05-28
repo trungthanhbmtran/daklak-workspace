@@ -7,6 +7,32 @@ service TaskService {
   rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {}
   rpc ListTasks (ListTasksRequest) returns (ListTasksResponse) {}
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
+  rpc RecommendAssignees (RecommendAssigneesRequest) returns (RecommendAssigneesResponse) {}
+  rpc AssignTask (AssignTaskRequest) returns (TaskResponse) {}
+}
+
+message AssignTaskRequest {
+  int32 id = 1;
+  string assigneeCode = 2;
+}
+
+message RecommendAssigneesRequest {
+  string rankCode = 1;
+  string strategy = 2; // "HIGH_PERFORMANCE" or "LOW_PERFORMANCE"
+}
+
+message AssigneeRecommendation {
+  string employeeCode = 1;
+  string employeeName = 2;
+  float currentLoad = 3;
+  float performanceScore = 4;
+  float matchScore = 5;
+}
+
+message RecommendAssigneesResponse {
+  bool success = 1;
+  string message = 2;
+  repeated AssigneeRecommendation data = 3;
 }
 
 service TaskTemplateService {
@@ -62,6 +88,15 @@ message CreateTaskRequest {
 
 message ListTasksRequest {
   string assigneeCode = 1; // optional
+  string filter = 2; // optional (overdue, dueIn3Days, dueIn7Days, dueOver7Days)
+  string search = 3; // optional
+}
+
+message TaskStats {
+  int32 overdueCount = 1;
+  int32 dueIn3DaysCount = 2;
+  int32 dueIn7DaysCount = 3;
+  int32 dueOver7DaysCount = 4;
 }
 
 message ListTasksResponse {
@@ -69,6 +104,7 @@ message ListTasksResponse {
   string message = 2;
   repeated TaskResponse data = 3;
   common.Meta meta = 4;
+  TaskStats stats = 5;
 }
 
 message UpdateTaskStatusRequest {

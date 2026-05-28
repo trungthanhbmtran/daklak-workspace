@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { 
-  Search, Plus, Filter, Download, FileText, 
+  Plus, Filter, Download, FileText, 
   PieChart, Building2, Calendar, CheckCircle2, 
   FileSpreadsheet, AlertCircle, Clock, TrendingUp,
   Globe2
@@ -10,7 +10,9 @@ import {
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Search } from "@/components/ui/search";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -26,7 +28,8 @@ const CATEGORY_CONFIG: Record<string, { label: string, color: string }> = {
 };
 
 export default function FinancialTransparencyPage() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
   const [yearFilter, setYearFilter] = useState("2026");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
 
@@ -103,15 +106,7 @@ export default function FinancialTransparencyPage() {
       {/* 2. KHU VỰC BỘ LỌC VÀ TÌM KIẾM */}
       <Card className="border shadow-sm">
         <div className="p-4 border-b bg-background flex flex-wrap gap-3 items-center rounded-t-xl">
-          <div className="relative flex-1 min-w-[280px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Tìm theo số ký hiệu, tên quyết định, báo cáo..." 
-              className="pl-9 h-10 bg-muted/20" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <Search placeholder="Tìm theo số ký hiệu, tên quyết định, báo cáo..." className="flex-1 min-w-[280px]" />
           
           <Select value={yearFilter} onValueChange={setYearFilter}>
             <SelectTrigger className="w-[140px] font-semibold h-10">
