@@ -18,6 +18,8 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 
 interface SelectedPlanItem {
     id: string;
@@ -88,37 +90,66 @@ export function ManualPlanSelectorByRankClient() {
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="p-5 space-y-4">
-                        {/* Cây danh mục ngạch bậc */}
-                        <div className="flex flex-col gap-1.5">
-                            {[
-                                { key: 'CHUYEN_VIEN_CAO_CAP', label: 'Chuyên viên Cao cấp', desc: 'Đề án chiến lược, văn bản quy phạm vĩ mô' },
-                                { key: 'CHUYEN_VIEN_CHINH', label: 'Chuyên viên Chính', desc: 'Tham mưu tổng hợp, tờ trình, thẩm định sở' },
-                                { key: 'CHUYEN_VIEN', label: 'Chuyên viên', desc: 'Thực thi tác nghiệp, xử lý hồ sơ, phiếu chuyển' },
-                                { key: 'CAN_SU', label: 'Cán sự', desc: 'Hỗ trợ nghiệp vụ, lưu trữ, thống kê' },
-                                { key: 'NHAN_VIEN', label: 'Nhân viên', desc: 'Thực hiện các công việc thừa hành, phục vụ' },
-                                { key: 'VIEN_CHUC_HANG_1', label: 'Viên chức Hạng I', desc: 'Chủ trì đề án khoa học, công nghệ cấp bộ/tỉnh' },
-                                { key: 'VIEN_CHUC_HANG_2', label: 'Viên chức Hạng II', desc: 'Thực hiện nhiệm vụ chuyên môn phức tạp' },
-                                { key: 'VIEN_CHUC_HANG_3', label: 'Viên chức Hạng III', desc: 'Thực hành chuyên môn nghiệp vụ cơ bản' },
-                                { key: 'VIEN_CHUC_HANG_4', label: 'Viên chức Hạng IV', desc: 'Hỗ trợ kỹ thuật, nghiệp vụ đơn giản' },
-                            ].map((rank) => (
-                                <button
-                                    key={rank.key}
-                                    type="button"
-                                    onClick={() => setActiveRankFilter(rank.key)}
-                                    className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group
-                                        ${activeRankFilter === rank.key 
-                                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]' 
-                                            : 'bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:bg-indigo-50/30 text-slate-700'
-                                        }`}
-                                >
-                                    <div className="space-y-1">
-                                        <div className="text-xs font-bold tracking-wide">{rank.label}</div>
-                                        <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.key ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.desc}</div>
-                                    </div>
-                                    <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.key ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
-                                </button>
-                            ))}
-                        </div>
+                        {/* Cây danh mục ngạch bậc bằng Tabs */}
+                        <Tabs defaultValue="cong-chuc" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 mb-4 bg-slate-100 rounded-xl p-1">
+                                <TabsTrigger value="cong-chuc" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">Công chức</TabsTrigger>
+                                <TabsTrigger value="vien-chuc" className="rounded-lg font-bold data-[state=active]:bg-white data-[state=active]:text-indigo-700 data-[state=active]:shadow-sm">Viên chức</TabsTrigger>
+                            </TabsList>
+                            
+                            <TabsContent value="cong-chuc" className="flex flex-col gap-1.5 mt-0">
+                                {[
+                                    { key: 'CHUYEN_VIEN_CAO_CAP', label: 'Chuyên viên Cao cấp', desc: 'Đề án chiến lược, văn bản quy phạm vĩ mô' },
+                                    { key: 'CHUYEN_VIEN_CHINH', label: 'Chuyên viên Chính', desc: 'Tham mưu tổng hợp, tờ trình, thẩm định sở' },
+                                    { key: 'CHUYEN_VIEN', label: 'Chuyên viên', desc: 'Thực thi tác nghiệp, xử lý hồ sơ, phiếu chuyển' },
+                                    { key: 'CAN_SU', label: 'Cán sự', desc: 'Hỗ trợ nghiệp vụ, lưu trữ, thống kê' },
+                                    { key: 'NHAN_VIEN', label: 'Nhân viên', desc: 'Thực hiện các công việc thừa hành, phục vụ' },
+                                ].map((rank) => (
+                                    <button
+                                        key={rank.key}
+                                        type="button"
+                                        onClick={() => setActiveRankFilter(rank.key)}
+                                        className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group
+                                            ${activeRankFilter === rank.key 
+                                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]' 
+                                                : 'bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:bg-indigo-50/30 text-slate-700'
+                                            }`}
+                                    >
+                                        <div className="space-y-1">
+                                            <div className="text-xs font-bold tracking-wide">{rank.label}</div>
+                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.key ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.desc}</div>
+                                        </div>
+                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.key ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
+                                    </button>
+                                ))}
+                            </TabsContent>
+                            
+                            <TabsContent value="vien-chuc" className="flex flex-col gap-1.5 mt-0">
+                                {[
+                                    { key: 'VIEN_CHUC_HANG_1', label: 'Viên chức Hạng I', desc: 'Chủ trì đề án khoa học, công nghệ cấp bộ/tỉnh' },
+                                    { key: 'VIEN_CHUC_HANG_2', label: 'Viên chức Hạng II', desc: 'Thực hiện nhiệm vụ chuyên môn phức tạp' },
+                                    { key: 'VIEN_CHUC_HANG_3', label: 'Viên chức Hạng III', desc: 'Thực hành chuyên môn nghiệp vụ cơ bản' },
+                                    { key: 'VIEN_CHUC_HANG_4', label: 'Viên chức Hạng IV', desc: 'Hỗ trợ kỹ thuật, nghiệp vụ đơn giản' },
+                                ].map((rank) => (
+                                    <button
+                                        key={rank.key}
+                                        type="button"
+                                        onClick={() => setActiveRankFilter(rank.key)}
+                                        className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group
+                                            ${activeRankFilter === rank.key 
+                                                ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]' 
+                                                : 'bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:bg-indigo-50/30 text-slate-700'
+                                            }`}
+                                    >
+                                        <div className="space-y-1">
+                                            <div className="text-xs font-bold tracking-wide">{rank.label}</div>
+                                            <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.key ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.desc}</div>
+                                        </div>
+                                        <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.key ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
+                                    </button>
+                                ))}
+                            </TabsContent>
+                        </Tabs>
 
                         <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
                             <span className="text-xs font-semibold text-slate-600">Định mức số lượng gán nhanh:</span>
