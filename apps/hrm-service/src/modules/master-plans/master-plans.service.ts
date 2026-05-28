@@ -89,6 +89,7 @@ export class MasterPlansService {
         for (const emp of employees) {
           taskData.push({
             title: task.title,
+            description: task.description,
             assigneeCode: emp.employeeCode,
             assignerCode: task.supervisor || emp.employeeCode,
             status: 'TODO',
