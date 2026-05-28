@@ -90,7 +90,7 @@ export class MasterPlansService {
           taskData.push({
             title: task.title,
             assigneeCode: emp.employeeCode,
-            assignerCode: 'SYSTEM',
+            assignerCode: task.supervisor || emp.employeeCode,
             status: 'TODO',
             priority: 'MEDIUM',
             weight: task.weight,
