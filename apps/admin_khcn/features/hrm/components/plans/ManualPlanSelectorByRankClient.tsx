@@ -60,17 +60,23 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     return (
-        <div className="space-y-6 max-w-[1600px] mx-auto p-6 bg-slate-50/50 min-h-screen text-slate-800 antialiased">
-            <Card className="bg-slate-950 text-white shadow-md border-slate-800">
-                <CardHeader>
-                    <CardTitle className="text-xl font-black tracking-tight flex items-center gap-2 text-white">
-                        <Network className="w-5 h-5 text-indigo-400" /> Bảng Phân rã Chỉ tiêu Định biên theo Tiêu chuẩn Ngạch Công vụ
-                    </CardTitle>
-                    <CardDescription className="text-slate-400 mt-1">
+        <div className="space-y-6 max-w-[1600px] mx-auto p-4 md:p-8 bg-slate-50/50 min-h-screen text-slate-800 antialiased">
+            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 shadow-xl border border-slate-800/50 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-8 opacity-10">
+                    <Network className="w-32 h-32 text-white" />
+                </div>
+                <div className="relative z-10">
+                    <h1 className="text-2xl md:text-3xl font-black tracking-tight flex items-center gap-3 text-white mb-2">
+                        <div className="bg-indigo-500/20 p-2 rounded-xl backdrop-blur-sm border border-indigo-500/30">
+                            <Network className="w-6 h-6 text-indigo-400" />
+                        </div>
+                        Phân bổ Chỉ tiêu Định biên theo Ngạch
+                    </h1>
+                    <p className="text-slate-400 text-sm max-w-2xl leading-relaxed">
                         Hệ thống hóa thao tác phân bổ thủ công. Chọn ngạch công vụ hành chính để truy xuất bộ nhiệm vụ đặc thù được quy định bởi pháp luật điều hành.
-                    </CardDescription>
-                </CardHeader>
-            </Card>
+                    </p>
+                </div>
+            </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
@@ -99,13 +105,17 @@ export function ManualPlanSelectorByRankClient() {
                                     key={rank.key}
                                     type="button"
                                     onClick={() => setActiveRankFilter(rank.key)}
-                                    className={`p-3 rounded-xl text-left border transition-all flex items-center justify-between ${activeRankFilter === rank.key ? 'border-slate-900 bg-slate-900 text-white shadow-sm' : 'border-slate-200 hover:bg-slate-50 bg-white'}`}
+                                    className={`p-3 rounded-2xl text-left transition-all duration-300 flex items-center justify-between group
+                                        ${activeRankFilter === rank.key 
+                                            ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-200 border-transparent scale-[1.02]' 
+                                            : 'bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md hover:bg-indigo-50/30 text-slate-700'
+                                        }`}
                                 >
-                                    <div className="space-y-0.5">
-                                        <div className="text-xs font-black">{rank.label}</div>
-                                        <div className={`text-[10px] ${activeRankFilter === rank.key ? 'text-slate-400' : 'text-slate-500'}`}>{rank.desc}</div>
+                                    <div className="space-y-1">
+                                        <div className="text-xs font-bold tracking-wide">{rank.label}</div>
+                                        <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.key ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.desc}</div>
                                     </div>
-                                    <ChevronRight className="w-4 h-4 opacity-50 shrink-0" />
+                                    <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.key ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
                                 </button>
                             ))}
                         </div>
@@ -131,10 +141,15 @@ export function ManualPlanSelectorByRankClient() {
                                             <div
                                                 key={task.id}
                                                 onClick={() => !added && handleQuickAdd(task.taskName, task.defaultUnit)}
-                                                className={`p-3 border rounded-xl flex items-center justify-between transition-all text-xs font-semibold ${added ? 'bg-slate-50 border-slate-100 opacity-40 cursor-not-allowed' : 'bg-white border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/10 cursor-pointer'}`}
+                                                className={`p-3.5 border rounded-2xl flex items-center justify-between transition-all duration-300 text-xs font-semibold group
+                                                    ${added 
+                                                        ? 'bg-slate-50/80 border-slate-100 opacity-50 cursor-not-allowed' 
+                                                        : 'bg-white border-slate-200 hover:border-indigo-400 hover:shadow-md hover:bg-gradient-to-r hover:from-white hover:to-indigo-50 cursor-pointer'
+                                                    }`}
                                             >
-                                                <div className="text-slate-800 leading-relaxed pr-3">{task.taskName}</div>
-                                                <Badge variant="outline" className="text-[9px] font-black font-mono text-indigo-600 bg-indigo-50 border-indigo-100 px-2 py-0.5 rounded shrink-0">
+                                                <div className="text-slate-800 leading-relaxed pr-3 group-hover:text-indigo-900 transition-colors">{task.taskName}</div>
+                                                <Badge variant="outline" className={`text-[10px] font-black font-mono px-2.5 py-1 rounded-lg shrink-0 transition-colors
+                                                    ${added ? 'text-slate-400 bg-slate-100 border-slate-200' : 'text-indigo-600 bg-indigo-50 border-indigo-200 group-hover:bg-indigo-600 group-hover:text-white'}`}>
                                                     +{task.defaultUnit}
                                                 </Badge>
                                             </div>
@@ -169,17 +184,17 @@ export function ManualPlanSelectorByRankClient() {
                             </TableHeader>
                             <TableBody>
                                 {addedPlans.map((plan) => (
-                                    <TableRow key={plan.id} className="hover:bg-slate-50/50 transition-colors group">
-                                        <TableCell className="font-bold text-slate-900 leading-relaxed text-xs">
+                                    <TableRow key={plan.id} className="hover:bg-indigo-50/30 transition-colors group">
+                                        <TableCell className="font-bold text-slate-800 leading-relaxed text-sm py-4">
                                             {plan.title}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="secondary" className="bg-slate-100 text-slate-800 text-[9px] font-black uppercase tracking-wider">
+                                            <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider border border-indigo-100 shadow-sm px-2.5 py-1">
                                                 {plan.rankType.replace(/_/g, ' ')}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <div className="inline-flex items-center gap-1.5 justify-end w-full">
+                                            <div className="inline-flex items-center gap-2 justify-end w-full">
                                                 <Input
                                                     type="number"
                                                     value={plan.targetValue}
@@ -187,9 +202,9 @@ export function ManualPlanSelectorByRankClient() {
                                                         const val = Number(e.target.value);
                                                         setAddedPlans(addedPlans.map(p => p.id === plan.id ? { ...p, targetValue: val } : p));
                                                     }}
-                                                    className="w-16 h-8 text-right font-mono font-black text-indigo-600 bg-white"
+                                                    className="w-20 h-9 text-center font-mono font-black text-indigo-700 bg-white border-slate-200 rounded-lg shadow-sm focus-visible:ring-indigo-500 transition-shadow"
                                                 />
-                                                <span className="text-[10px] text-slate-500 font-medium min-w-[45px] text-left">{plan.unit}</span>
+                                                <span className="text-[11px] text-slate-500 font-bold min-w-[45px] text-left uppercase tracking-wider bg-slate-100 px-2 py-1.5 rounded-md">{plan.unit}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-center">
@@ -197,7 +212,7 @@ export function ManualPlanSelectorByRankClient() {
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => setAddedPlans(addedPlans.filter(p => p.id !== plan.id))}
-                                                className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50"
+                                                className="h-9 w-9 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </Button>
@@ -206,8 +221,13 @@ export function ManualPlanSelectorByRankClient() {
                                 ))}
                                 {addedPlans.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={4} className="h-32 text-center text-slate-400 text-xs bg-slate-50/30">
-                                            Chưa có tác vụ ngạch nào được đưa vào ma trận thực thi.
+                                        <TableCell colSpan={4} className="h-48 text-center text-slate-500 text-sm bg-slate-50/50">
+                                            <div className="flex flex-col items-center justify-center gap-3">
+                                                <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                                                    <Target className="w-6 h-6 text-slate-300" />
+                                                </div>
+                                                <p>Chưa có tác vụ nào được chọn vào ma trận thực thi.</p>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 )}
