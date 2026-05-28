@@ -57,6 +57,30 @@ export class TaskTemplatesService {
     };
   }
 
+  async bulkUpdate(templates: any[]) {
+    // Để an toàn, chúng ta có thể xóa hết template hiện tại và tạo lại.
+    // Vì bảng này chỉ chứa cấu hình mẫu, không ảnh hưởng dữ liệu transaction.
+    await this.prisma.$transaction(async (tx) => {
+      await tx.taskRankTemplate.deleteMany({});
+      if (templates.length > 0) {
+        await tx.taskRankTemplate.createMany({
+          data: templates.map(t => ({
+            classification: t.classification,
+            rank: t.rank,
+            taskName: t.taskName,
+            defaultUnit: t.defaultUnit,
+            defaultWeight: t.defaultWeight,
+          }))
+        });
+      }
+    });
+    
+    return {
+      success: true,
+      message: 'Cập nhật thư viện định biên thành công',
+    };
+  }
+
   async update(id: number, data: any) {
     const t = await this.prisma.taskRankTemplate.update({
       where: { id },

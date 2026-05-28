@@ -29,6 +29,11 @@ export class TaskTemplatesController implements OnModuleInit {
     return firstValueFrom(this.taskTemplateService.Create(body));
   }
 
+  @Post('bulk')
+  async bulkUpdate(@Body() body: any) {
+    return firstValueFrom(this.taskTemplateService.BulkUpdate({ templates: body.templates }));
+  }
+
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(this.taskTemplateService.Update({ id: Number(id), ...body }));

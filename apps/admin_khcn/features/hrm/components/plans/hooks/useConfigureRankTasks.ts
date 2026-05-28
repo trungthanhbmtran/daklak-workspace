@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { categoryApi } from '@/features/system-admin/categories/api';
 import { useTaskTemplatesList } from '@/features/hrm/hooks';
 import { GovClassification } from '../ConfigureRankTasksClient';
+import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
 
 export function useConfigureRankTasks() {
     const [selectedClass, setSelectedClass] = useState<GovClassification>('CONG_CHUC');
@@ -34,9 +35,14 @@ export function useConfigureRankTasks() {
 
     const isLoading = isLoadingTemplates || isLoadingUnits || isLoadingCC || isLoadingVC;
 
-    const handleSave = () => {
-        setIsSaved(true);
-        setTimeout(() => setIsSaved(false), 2000);
+    const handleSave = async () => {
+        try {
+            await hrmTaskTemplatesApi.bulkUpdate([...congChucTemplates, ...vienChucTemplates]);
+            setIsSaved(true);
+            setTimeout(() => setIsSaved(false), 2000);
+        } catch (error) {
+            console.error("Lỗi khi lưu cấu hình:", error);
+        }
     };
 
     return {

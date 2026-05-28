@@ -71,6 +71,40 @@ export class MasterPlansService {
         documentId: data.documentId,
       }
     });
+
+    if (data.tasks && data.tasks.length > 0) {
+      const taskData: any[] = [];
+      for (const task of data.tasks) {
+        let employees: any[] = [];
+        if (task.rankId && task.rankId > 0) {
+          employees = await this.prisma.employee.findMany({
+            where: { civilServantRankId: task.rankId, status: 'active' }
+          });
+        } else {
+          employees = await this.prisma.employee.findMany({
+            where: { status: 'active' }
+          });
+        }
+
+        for (const emp of employees) {
+          taskData.push({
+            title: task.title,
+            assigneeCode: emp.employeeCode,
+            assignerCode: 'SYSTEM',
+            status: 'TODO',
+            priority: 'MEDIUM',
+            weight: task.weight,
+            baseScore: task.targetValue,
+            planId: mp.id,
+          });
+        }
+      }
+
+      if (taskData.length > 0) {
+        await this.prisma.task.createMany({ data: taskData });
+      }
+    }
+
     return this.findById(mp.id);
   }
 

@@ -29,6 +29,8 @@ interface TargetPlanItem {
 
 import { toast } from 'sonner';
 import { useCreateMasterPlan } from '../../hooks';
+import { useQuery } from '@tanstack/react-query';
+import { categoryApi } from '@/features/system-admin/categories/api';
 
 export function MasterPlanListClient() {
   const [framework, setFramework] = useState<ManagementFramework>('BSC_KPI');
@@ -46,6 +48,20 @@ export function MasterPlanListClient() {
   const [newTargetValue, setNewTargetValue] = useState(100);
   const [newUnit, setNewUnit] = useState('%');
   const [newSupervisor, setNewSupervisor] = useState('');
+  const [newRankId, setNewRankId] = useState<number>(0);
+
+  const { data: congChucRanks = [] } = useQuery({
+    queryKey: ['categories', 'RANK_CONG_CHUC'],
+    queryFn: () => categoryApi.fetchByGroup('RANK_CONG_CHUC'),
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: vienChucRanks = [] } = useQuery({
+    queryKey: ['categories', 'RANK_VIEN_CHUC'],
+    queryFn: () => categoryApi.fetchByGroup('RANK_VIEN_CHUC'),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const allRanks = useMemo(() => [...congChucRanks, ...vienChucRanks], [congChucRanks, vienChucRanks]);
 
   // --- AI ENGINE: TỰ ĐỘNG PHÂN RÃ KẾ HOẠCH THEO TỪNG MÔ HÌNH ---
   const handleAiGenerateFramework = () => {
@@ -128,8 +144,10 @@ export function MasterPlanListClient() {
       targetValue: newTargetValue,
       unit: newUnit,
       supervisor: newSupervisor || 'Chưa phân công',
+      rankType: newRankId > 0 ? allRanks.find((r: any) => r.id === newRankId)?.code || 'ALL' : 'ALL',
+      rankId: newRankId,
       aiStatus: 'CUSTOM'
-    };
+    } as any;
 
     setItems([...items, newItem]);
     setNewTitle('');
@@ -159,6 +177,8 @@ export function MasterPlanListClient() {
           targetValue: item.targetValue,
           unit: item.unit,
           supervisor: item.supervisor,
+          rankCode: (item as any).rankType || 'ALL',
+          rankId: (item as any).rankId || 0,
         }))
       };
 
@@ -316,37 +336,53 @@ export function MasterPlanListClient() {
                   />
                 </div>
 
-                <div className="md:col-span-2 space-y-1.5">
-                  <label className="font-bold text-slate-700 text-xs block">
-                    {framework === 'BSC_KPI' ? 'Trọng số (%)' : framework === 'OKRS' ? 'Độ tự tin (1-10)' : 'Ưu tiên (1-10)'}
-                  </label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={newMetricFactor}
-                    onChange={e => setNewMetricFactor(Number(e.target.value))}
-                    className="w-full h-10 text-xs border rounded-xl px-3 py-2 font-mono font-bold text-center border-slate-200"
-                    required
-                  />
+                <div className="md:col-span-4 space-y-1.5">
+                  <label className="font-bold text-slate-700 text-xs block">Ngạch / Đối tượng phân bổ</label>
+                  <select
+                    value={newRankId}
+                    onChange={e => setNewRankId(Number(e.target.value))}
+                    className="w-full h-10 text-xs border rounded-xl px-3 py-2 bg-white border-slate-200 font-bold text-slate-700"
+                  >
+                    <option value={0}>Tất cả đối tượng</option>
+                    {allRanks.map((rank: any) => (
+                        <option key={rank.id} value={rank.id}>{rank.name}</option>
+                    ))}
+                  </select>
                 </div>
 
-                <div className="md:col-span-2 space-y-1.5">
-                  <label className="font-bold text-slate-700 text-xs block">Chỉ tiêu / Đơn vị</label>
-                  <div className="flex gap-1">
+                <div className="md:col-span-12 grid grid-cols-1 md:grid-cols-12 gap-4 mt-2">
+                  <div className="md:col-span-4 space-y-1.5">
+                    <label className="font-bold text-slate-700 text-xs block">
+                      {framework === 'BSC_KPI' ? 'Trọng số (%)' : framework === 'OKRS' ? 'Độ tự tin (1-10)' : 'Ưu tiên (1-10)'}
+                    </label>
                     <input
                       type="number"
-                      value={newTargetValue}
-                      onChange={e => setNewTargetValue(Number(e.target.value))}
-                      className="w-2/3 h-10 text-xs border rounded-xl px-2 py-2 font-mono font-bold text-right border-slate-200"
+                      min="1"
+                      value={newMetricFactor}
+                      onChange={e => setNewMetricFactor(Number(e.target.value))}
+                      className="w-full h-10 text-xs border rounded-xl px-3 py-2 font-mono font-bold text-center border-slate-200"
                       required
                     />
-                    <input
-                      type="text"
-                      value={newUnit}
-                      onChange={e => setNewUnit(e.target.value)}
-                      className="w-1/3 h-10 text-xs border rounded-xl px-1 py-2 text-center font-bold border-slate-200 bg-slate-50"
-                      required
-                    />
+                  </div>
+
+                  <div className="md:col-span-4 space-y-1.5">
+                    <label className="font-bold text-slate-700 text-xs block">Chỉ tiêu / Đơn vị</label>
+                    <div className="flex gap-1">
+                      <input
+                        type="number"
+                        value={newTargetValue}
+                        onChange={e => setNewTargetValue(Number(e.target.value))}
+                        className="w-2/3 h-10 text-xs border rounded-xl px-2 py-2 font-mono font-bold text-right border-slate-200"
+                        required
+                      />
+                      <input
+                        type="text"
+                        value={newUnit}
+                        onChange={e => setNewUnit(e.target.value)}
+                        className="w-1/3 h-10 text-xs border rounded-xl px-1 py-2 text-center font-bold border-slate-200 bg-slate-50"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -374,6 +410,7 @@ export function MasterPlanListClient() {
                   <tr className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200 uppercase tracking-wider text-[10px]">
                     <th className="py-3 px-4 w-[40%]">Nội dung & Căn cứ thực thi</th>
                     <th className="py-3 px-3">Khung quản trị</th>
+                    <th className="py-3 px-3">Đối tượng / Ngạch</th>
                     <th className="py-3 px-3">Cơ quan giám sát</th>
                     <th className="py-3 px-2 text-center">Định mức</th>
                     <th className="py-3 px-3 text-right">Mục tiêu</th>
@@ -393,6 +430,11 @@ export function MasterPlanListClient() {
                       <td className="py-3.5 px-3">
                         <span className="bg-slate-100 text-slate-800 text-[9px] font-black px-2 py-0.5 rounded border uppercase">
                           {item.framework}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="bg-indigo-50 text-indigo-700 text-[9px] font-bold px-2 py-0.5 rounded border border-indigo-100 uppercase">
+                          {(item as any).rankType || 'ALL'}
                         </span>
                       </td>
                       <td className="py-3.5 px-3 font-semibold text-slate-600">

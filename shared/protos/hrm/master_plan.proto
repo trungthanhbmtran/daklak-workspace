@@ -50,6 +50,17 @@ message CreateMasterPlanRequest {
   string startDate = 4;
   string endDate = 5;
   string documentId = 6;
+  repeated MasterPlanTaskPayload tasks = 7;
+}
+
+message MasterPlanTaskPayload {
+  string title = 1;
+  float weight = 2;
+  float targetValue = 3;
+  string unit = 4;
+  string supervisor = 5;
+  string rankCode = 6;
+  int32 rankId = 7;
 }
 
 message UpdateMasterPlanRequest {

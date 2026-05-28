@@ -1,5 +1,7 @@
-import { MasterPlanListClient } from '@/features/hrm/components/plans/MasterPlanListClient';
+"use client";
+
+import { MasterPlanDetail } from '@/features/hrm/components/plans/master-plans-layout/MasterPlanDetail';
 
 export default function PlansPage() {
-  return <MasterPlanListClient />;
+  return <MasterPlanDetail />;
 }

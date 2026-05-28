@@ -22,6 +22,17 @@ export class TaskTemplatesController {
     }
   }
 
+  @GrpcMethod('TaskTemplateService', 'BulkUpdate')
+  async bulkUpdate(data: { templates: any[] }) {
+    try {
+      console.log('BulkUpdate templates count:', data.templates?.length);
+      return await this.taskTemplatesService.bulkUpdate(data.templates || []);
+    } catch (error) {
+      console.error('Error bulk updating templates:', error);
+      throw error;
+    }
+  }
+
   @GrpcMethod('TaskTemplateService', 'Update')
   async update(data: any) {
     try {

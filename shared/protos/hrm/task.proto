@@ -14,6 +14,7 @@ service TaskTemplateService {
   rpc Create (CreateTemplateRequest) returns (TaskTemplateDataResponse) {}
   rpc Update (UpdateTemplateRequest) returns (TaskTemplateDataResponse) {}
   rpc Delete (DeleteTemplateRequest) returns (DeleteTemplateResponse) {}
+  rpc BulkUpdate (BulkUpdateTemplatesRequest) returns (BulkUpdateTemplatesResponse) {}
 }
 
 message TaskTemplateDataResponse {
@@ -119,6 +120,15 @@ message DeleteTemplateRequest {
 }
 
 message DeleteTemplateResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message BulkUpdateTemplatesRequest {
+  repeated CreateTemplateRequest templates = 1;
+}
+
+message BulkUpdateTemplatesResponse {
   bool success = 1;
   string message = 2;
 }
