@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { aiApi } from "../../api/ai.api";
+import { aiApi } from "../../../api/ai.api";
 import { Loader2, BrainCircuit, Activity, CheckCircle2, AlertTriangle, Users } from "lucide-react";
 
 interface AdvancedAIPlanDialogProps {
@@ -23,12 +23,12 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
     objective: '',
     durationDays: '30'
   });
-  
+
   const [aiResult, setAiResult] = useState<any[]>([]);
 
   const handleEvaluate = async () => {
     if (!formData.title || !formData.objective) return;
-    
+
     setLoading(true);
     setStep(2); // Loading / Evaluating state
     try {
@@ -40,7 +40,7 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
         orgContext: 'Văn phòng Sở, Thanh tra, Phòng Kế hoạch Tài chính, Quản lý Khoa học',
         rolesContext: 'Chuyên viên, Lãnh đạo Sở, Trưởng phòng'
       });
-      
+
       setAiResult(result);
       setStep(3); // Result state
     } catch (e) {
@@ -62,7 +62,7 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
       targetValue: t.targetValue,
       rankCode: t.assigneeRole
     }));
-    
+
     onSuccess({
       title: formData.title,
       description: formData.objective,
@@ -71,7 +71,7 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
       endDate: new Date(Date.now() + parseInt(formData.durationDays, 10) * 24 * 60 * 60 * 1000).toISOString(),
       tasks: tasks
     });
-    
+
     onClose();
   };
 
@@ -81,7 +81,7 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
   return (
     <Dialog open={isOpen} onOpenChange={(v) => !v && !loading && onClose()}>
       <DialogContent className="sm:max-w-[750px] bg-slate-50/90 backdrop-blur-xl border-white/50 shadow-2xl overflow-hidden rounded-3xl p-0">
-        
+
         <div className="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-md">
             <BrainCircuit className="w-7 h-7 text-white" />
@@ -99,28 +99,28 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
             <div className="space-y-5">
               <div className="space-y-2">
                 <Label className="text-slate-700 font-semibold">Tên công việc / Kế hoạch</Label>
-                <Input 
-                  placeholder="Ví dụ: Triển khai Số hóa dữ liệu Khoa học" 
-                  value={formData.title} 
-                  onChange={e => setFormData({...formData, title: e.target.value})}
+                <Input
+                  placeholder="Ví dụ: Triển khai Số hóa dữ liệu Khoa học"
+                  value={formData.title}
+                  onChange={e => setFormData({ ...formData, title: e.target.value })}
                   className="bg-white rounded-xl shadow-sm border-slate-200 focus-visible:ring-indigo-500"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-slate-700 font-semibold">Mục tiêu & Yêu cầu cụ thể</Label>
-                <Textarea 
-                  placeholder="Mô tả các kết quả kỳ vọng..." 
-                  value={formData.objective} 
-                  onChange={e => setFormData({...formData, objective: e.target.value})}
+                <Textarea
+                  placeholder="Mô tả các kết quả kỳ vọng..."
+                  value={formData.objective}
+                  onChange={e => setFormData({ ...formData, objective: e.target.value })}
                   className="bg-white rounded-xl shadow-sm border-slate-200 focus-visible:ring-indigo-500 min-h-[100px]"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-slate-700 font-semibold">Thời gian yêu cầu hoàn thành (Ngày)</Label>
-                <Input 
+                <Input
                   type="number"
-                  value={formData.durationDays} 
-                  onChange={e => setFormData({...formData, durationDays: e.target.value})}
+                  value={formData.durationDays}
+                  onChange={e => setFormData({ ...formData, durationDays: e.target.value })}
                   className="bg-white rounded-xl shadow-sm border-slate-200 focus-visible:ring-indigo-500 w-1/3"
                 />
               </div>
@@ -200,8 +200,8 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
             Hủy bỏ
           </Button>
           {step === 1 && (
-            <Button 
-              onClick={handleEvaluate} 
+            <Button
+              onClick={handleEvaluate}
               disabled={!formData.title || !formData.objective}
               className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md shadow-indigo-200"
             >
@@ -209,8 +209,8 @@ export function AdvancedAIPlanDialog({ isOpen, onClose, onSuccess }: AdvancedAIP
             </Button>
           )}
           {step === 3 && (
-            <Button 
-              onClick={handleCreate} 
+            <Button
+              onClick={handleCreate}
               className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-md shadow-emerald-200"
             >
               Duyệt & Tạo Kế hoạch này

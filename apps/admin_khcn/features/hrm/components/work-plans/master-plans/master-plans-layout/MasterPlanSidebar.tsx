@@ -1,19 +1,21 @@
 "use client";
 
-import { Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase } from "lucide-react";
+import { Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase, BrainCircuit } from "lucide-react";
 import { AdvancedAIPlanDialog } from "../AdvancedAIPlanDialog";
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
 import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 
 export function MasterPlanSidebar() {
   const { state, actions } = useMasterPlanContext();
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
+  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
 
-  const filteredPlans = state.masterPlans.filter(p => 
+  const filteredPlans = state.masterPlans.filter(p =>
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -25,22 +27,39 @@ export function MasterPlanSidebar() {
             <Briefcase className="w-4 h-4 text-indigo-600" />
             Kế hoạch & Phân bổ
           </h3>
-        <div className="flex items-center gap-2">
-          <AdvancedAIPlanDialog />
-          <Button 
-            size="sm" 
-            className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm"
-            onClick={() => {
-              actions.select(null);
-              actions.setMode("create");
-            }}
-          >
-            <Plus className="w-4 h-4 mr-1" />
-            Tạo mới
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 px-3 rounded-lg shadow-sm"
+              onClick={() => setIsAiDialogOpen(true)}
+            >
+              <BrainCircuit className="w-4 h-4 mr-1 text-indigo-600" />
+              Lập KH AI
+            </Button>
+            <AdvancedAIPlanDialog
+              isOpen={isAiDialogOpen}
+              onClose={() => setIsAiDialogOpen(false)}
+              onSuccess={(planData) => {
+                actions.select(null);
+                actions.setMode("create");
+                // In a real scenario we could pre-fill the form using planData here
+              }}
+            />
+            <Button
+              size="sm"
+              className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm"
+              onClick={() => {
+                actions.select(null);
+                actions.setMode("create");
+              }}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Tạo mới
+            </Button>
+          </div>
         </div>
-        </div>
-        
+
         <Search placeholder="Tìm kế hoạch..." className="w-full" />
       </div>
 
@@ -56,9 +75,8 @@ export function MasterPlanSidebar() {
               <button
                 key={plan.id}
                 onClick={() => actions.select(plan.id)}
-                className={`w-full text-left p-3 rounded-lg flex items-start gap-3 transition-colors ${
-                  isActive ? "bg-indigo-50 border border-indigo-100 shadow-sm" : "hover:bg-slate-50 border border-transparent"
-                }`}
+                className={`w-full text-left p-3 rounded-lg flex items-start gap-3 transition-colors ${isActive ? "bg-indigo-50 border border-indigo-100 shadow-sm" : "hover:bg-slate-50 border border-transparent"
+                  }`}
               >
                 <div className={`mt-0.5 p-1.5 rounded-md ${isActive ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-500"}`}>
                   <FileText className="w-4 h-4" />
