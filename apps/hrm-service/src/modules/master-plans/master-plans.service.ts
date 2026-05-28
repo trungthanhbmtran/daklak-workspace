@@ -91,7 +91,7 @@ export class MasterPlansService {
             title: task.title,
             description: task.description,
             assigneeCode: emp.employeeCode,
-            assignerCode: task.supervisor || emp.employeeCode,
+            assignerCode: emp.employeeCode,
             status: 'TODO',
             priority: 'MEDIUM',
             weight: task.weight,

@@ -149,7 +149,7 @@ export function MasterPlanForm() {
         type: framework,
         tasks: items.map(item => ({
           title: item.title,
-          description: `Góc độ: ${item.perspective}\nĐơn vị tính: ${item.unit}\nCăn cứ pháp lý: ${item.legalBasis || 'Không có'}`,
+          description: `Góc độ: ${item.perspective}\nĐơn vị tính: ${item.unit}\nCăn cứ pháp lý: ${item.legalBasis || 'Không có'}\nĐơn vị giám sát: ${item.supervisor || 'N/A'}`,
           weight: item.metricFactor,
           targetValue: item.targetValue,
           unit: item.unit,
