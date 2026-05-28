@@ -1,4 +1,4 @@
-import { CreateKpiClient } from '@/features/hrm/components/kpi/CreateKpiClient';
+import { CreateKpiClient } from '@/features/hrm/components/performance/evaluations/CreateKpiClient';
 
 export default function CreateKpiPageWrapper() {
   return <CreateKpiClient />;
