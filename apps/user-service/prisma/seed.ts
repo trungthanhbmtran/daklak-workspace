@@ -207,6 +207,50 @@ async function main() {
       nameEn: 'Workflow Service',
     },
 
+    // --- AI & TRANSLATION ---
+    {
+      group: 'AI_PROVIDER_TYPE',
+      code: 'OPENAI',
+      order: 1,
+      nameVi: 'OpenAI (GPT)',
+      nameEn: 'OpenAI (GPT)',
+    },
+    {
+      group: 'AI_PROVIDER_TYPE',
+      code: 'GEMINI',
+      order: 2,
+      nameVi: 'Google Gemini',
+      nameEn: 'Google Gemini',
+    },
+    {
+      group: 'AI_PROVIDER_TYPE',
+      code: 'CLAUDE',
+      order: 3,
+      nameVi: 'Anthropic Claude',
+      nameEn: 'Anthropic Claude',
+    },
+    {
+      group: 'TRANSLATION_SERVICE_TYPE',
+      code: 'GOOGLE',
+      order: 1,
+      nameVi: 'Google Translate API',
+      nameEn: 'Google Translate API',
+    },
+    {
+      group: 'TRANSLATION_SERVICE_TYPE',
+      code: 'DEEPL',
+      order: 2,
+      nameVi: 'DeepL Pro',
+      nameEn: 'DeepL Pro',
+    },
+    {
+      group: 'TRANSLATION_SERVICE_TYPE',
+      code: 'AI_ROUTER',
+      order: 3,
+      nameVi: 'Dùng chung hệ thống AI Smart Router',
+      nameEn: 'Use AI Smart Router',
+    },
+
     // --- GEOGRAPHIC DATA ---
     {
       group: 'PROVINCE',
