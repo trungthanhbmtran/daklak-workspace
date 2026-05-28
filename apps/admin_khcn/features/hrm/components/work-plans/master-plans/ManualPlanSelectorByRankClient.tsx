@@ -33,14 +33,14 @@ interface SelectedPlanItem {
 
 export function ManualPlanSelectorByRankClient() {
     const { data: congChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
-        queryFn: () => categoryApi.fetchByGroup('CIVIL_SERVANT_RANK'),
+        queryKey: ['categories', 'RANK_CONG_CHUC'],
+        queryFn: () => categoryApi.fetchByGroup('RANK_CONG_CHUC'),
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: vienChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
-        queryFn: () => categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK'),
+        queryKey: ['categories', 'RANK_VIEN_CHUC'],
+        queryFn: () => categoryApi.fetchByGroup('RANK_VIEN_CHUC'),
         staleTime: 5 * 60 * 1000,
     });
 
@@ -55,7 +55,7 @@ export function ManualPlanSelectorByRankClient() {
         defaultUnit: t.defaultUnit || 'Lượt'
     }));
 
-    const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
+    const [activeRankFilter, setActiveRankFilter] = useState<string>('CHUYEN_VIEN_CHINH');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [globalValue, setGlobalValue] = useState<number>(1);
 
@@ -119,7 +119,7 @@ export function ManualPlanSelectorByRankClient() {
                                             }`}
                                     >
                                         <div className="space-y-1">
-                                            <div className="text-xs font-bold tracking-wide">{rank.name}</div>
+                                            <div className="text-xs font-bold tracking-wide">{rank.nameVi || rank.name}</div>
                                             <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.code ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.description || 'Chưa có mô tả'}</div>
                                         </div>
                                         <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.code ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
@@ -140,7 +140,7 @@ export function ManualPlanSelectorByRankClient() {
                                             }`}
                                     >
                                         <div className="space-y-1">
-                                            <div className="text-xs font-bold tracking-wide">{rank.name}</div>
+                                            <div className="text-xs font-bold tracking-wide">{rank.nameVi || rank.name}</div>
                                             <div className={`text-[10px] leading-relaxed ${activeRankFilter === rank.code ? 'text-indigo-100' : 'text-slate-500'}`}>{rank.description || 'Chưa có mô tả'}</div>
                                         </div>
                                         <ChevronRight className={`w-4 h-4 shrink-0 transition-transform ${activeRankFilter === rank.code ? 'opacity-100 translate-x-1 text-white' : 'opacity-40 group-hover:opacity-100 group-hover:text-indigo-500'}`} />
