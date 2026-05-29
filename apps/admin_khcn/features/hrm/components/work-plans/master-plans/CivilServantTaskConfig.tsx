@@ -41,17 +41,9 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
                                 <SelectValue placeholder="Chọn ngạch" />
                             </SelectTrigger>
                             <SelectContent>
-                                {ranks.length > 0 ? ranks.map(r => (
+                                {ranks.map(r => (
                                     <SelectItem key={r.id} value={r.code} className="text-xs">{(r as any).nameVi || r.name}</SelectItem>
-                                )) : (
-                                    <>
-                                        <SelectItem value="SENIOR_SPECIALIST" className="text-xs">Chuyên viên Cao cấp</SelectItem>
-                                        <SelectItem value="PRINCIPAL_SPECIALIST" className="text-xs">Chuyên viên Chính</SelectItem>
-                                        <SelectItem value="SPECIALIST" className="text-xs">Chuyên viên</SelectItem>
-                                        <SelectItem value="OFFICER" className="text-xs">Cán sự</SelectItem>
-                                        <SelectItem value="STAFF" className="text-xs">Nhân viên</SelectItem>
-                                    </>
-                                )}
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>

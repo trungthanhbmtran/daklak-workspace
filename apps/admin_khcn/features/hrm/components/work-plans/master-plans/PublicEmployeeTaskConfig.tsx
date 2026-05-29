@@ -41,16 +41,9 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                                 <SelectValue placeholder="Chọn ngạch" />
                             </SelectTrigger>
                             <SelectContent>
-                                {ranks.length > 0 ? ranks.map(r => (
+                                {ranks.map(r => (
                                     <SelectItem key={r.id} value={r.code} className="text-xs">{(r as any).nameVi || r.name}</SelectItem>
-                                )) : (
-                                    <>
-                                        <SelectItem value="GRADE_1" className="text-xs">Viên chức Hạng I</SelectItem>
-                                        <SelectItem value="GRADE_2" className="text-xs">Viên chức Hạng II</SelectItem>
-                                        <SelectItem value="GRADE_3" className="text-xs">Viên chức Hạng III</SelectItem>
-                                        <SelectItem value="GRADE_4" className="text-xs">Viên chức Hạng IV</SelectItem>
-                                    </>
-                                )}
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
