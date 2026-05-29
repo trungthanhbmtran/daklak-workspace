@@ -133,6 +133,7 @@ export function IntegrationClient() {
       </div>
 
       <IntegrationModal 
+        key={isModalOpen ? (editingItem?.id || 'new') : 'closed'}
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
         initialData={editingItem} 

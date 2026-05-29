@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,33 +13,19 @@ interface Props {
 }
 
 export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
-  const [systemName, setSystemName] = useState('');
-  const [integrationCode, setIntegrationCode] = useState('');
-  const [configData, setConfigData] = useState('{}');
+  const [systemName, setSystemName] = useState(() => initialData?.systemName || '');
+  const [integrationCode, setIntegrationCode] = useState(() => initialData?.integrationCode || `SYS_${Math.floor(Math.random() * 100000)}`);
+  const [configData, setConfigData] = useState(() => initialData?.configData || '{\n  "webhookUrl": "",\n  "secret": ""\n}');
 
   const createMutation = useCreateIntegration();
   const updateMutation = useUpdateIntegration();
-
-  useEffect(() => {
-    if (isOpen) {
-      if (initialData) {
-        setSystemName(initialData.systemName);
-        setIntegrationCode(initialData.integrationCode);
-        setConfigData(initialData.configData || '{}');
-      } else {
-        setSystemName('');
-        setIntegrationCode(`SYS_${Math.floor(Math.random() * 100000)}`);
-        setConfigData('{\n  "webhookUrl": "",\n  "secret": ""\n}');
-      }
-    }
-  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       JSON.parse(configData); // Validate JSON
-    } catch (e) {
+    } catch {
       toast.error('Cấu hình JSON không hợp lệ');
       return;
     }
