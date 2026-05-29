@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight } from 'lucide-react';
+import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
 import { categoryApi } from "@/features/system-admin/categories/api";
@@ -54,7 +54,8 @@ export function ManualPlanSelectorByRankClient() {
         classification: t.classification,
         rank: t.rank,
         taskName: t.taskName,
-        defaultUnit: t.defaultUnit || 'Lượt'
+        defaultUnit: t.defaultUnit || 'Lượt',
+        defaultWeight: t.defaultWeight || 1
     }));
 
     const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
@@ -70,7 +71,7 @@ export function ManualPlanSelectorByRankClient() {
     const handleAssignTask = () => {
         const task = availableTasks.find(t => t.id === selectedTaskId);
         if (!task || addedPlans.some(p => p.title === task.taskName)) return;
-        
+
         setAddedPlans([...addedPlans, {
             id: crypto.randomUUID(),
             title: task.taskName,
@@ -78,7 +79,7 @@ export function ManualPlanSelectorByRankClient() {
             targetValue: targetValue,
             unit: task.defaultUnit
         }]);
-        
+
         setSelectedTaskId('');
         setTargetValue(1);
     };
@@ -199,14 +200,28 @@ export function ManualPlanSelectorByRankClient() {
                         {/* FORM CHỌN VIỆC VÀ ĐỊNH MỨC */}
                         <div className="mt-6 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl space-y-5">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">1</span>
-                                    Chọn công việc cần gán định mức
-                                </label>
-                                <select 
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">1</span>
+                                        Chọn công việc cần gán định mức
+                                    </label>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-6 px-2 text-[10px] font-bold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50"
+                                        onClick={() => router.push('/services/hrm/work-plans/rank-templates')}
+                                    >
+                                        + Cấu hình thêm
+                                    </Button>
+                                </div>
+                                <select
                                     className="w-full h-11 px-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-white transition-shadow"
                                     value={selectedTaskId}
-                                    onChange={e => setSelectedTaskId(e.target.value)}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setSelectedTaskId(val);
+                                        const task = availableTasks.find(t => t.id === val);
+                                        if (task) setTargetValue(task.defaultWeight);
+                                    }}
                                 >
                                     <option value="">-- Vui lòng chọn công việc --</option>
                                     {availableTasks.map(task => (
@@ -216,7 +231,9 @@ export function ManualPlanSelectorByRankClient() {
                                     ))}
                                 </select>
                                 {availableTasks.length === 0 && (
-                                    <p className="text-[11px] text-rose-500 font-medium ml-1">Chưa có công việc mẫu nào được cấu hình cho ngạch này.</p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <p className="text-[11px] text-rose-500 font-medium ml-1">Chưa có công việc mẫu nào được cấu hình cho ngạch này.</p>
+                                    </div>
                                 )}
                             </div>
 
@@ -226,7 +243,7 @@ export function ManualPlanSelectorByRankClient() {
                                         <span className="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">2</span>
                                         Nhập định mức
                                     </label>
-                                    <Input 
+                                    <Input
                                         type="number"
                                         value={targetValue}
                                         onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
@@ -243,7 +260,7 @@ export function ManualPlanSelectorByRankClient() {
                                 </div>
                             </div>
 
-                            <Button 
+                            <Button
                                 onClick={handleAssignTask}
                                 disabled={!selectedTaskId}
                                 className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm hover:shadow-md transition-all gap-2 mt-2"
