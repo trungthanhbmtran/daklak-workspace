@@ -53,6 +53,7 @@ export * from "./plans.api";
 export * from "./kpis.api";
 export * from "./tasks.api";
 export * from "./task-templates.api";
+export * from "./rank-quotas.api";
 
 export const hrmPayrollApi = {
   list(params: any = {}): Promise<{ data: any[]; meta: any }> {

@@ -147,3 +147,17 @@ model TaskRankTemplate {
 
   @@map("task_rank_templates")
 }
+
+model RankQuota {
+  id          Int      @id @default(autoincrement())
+  rankCode    String   @map("rank_code")
+  taskName    String   @map("task_name")
+  unit        String   @map("unit")
+  targetValue Float    @map("target_value")
+  weight      Float?   @map("weight")
+  
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("rank_quotas")
+}

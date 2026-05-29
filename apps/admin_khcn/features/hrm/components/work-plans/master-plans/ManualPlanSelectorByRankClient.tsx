@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
+import { hrmTaskTemplatesApi, hrmRankQuotasApi } from '@/features/hrm/api';
 import { categoryApi } from "@/features/system-admin/categories/api";
 import { useTaskTemplatesList, useCreateMasterPlan, useTasksList } from '@/features/hrm/hooks';
 import { useRouter } from 'next/navigation';
@@ -89,23 +89,21 @@ export function ManualPlanSelectorByRankClient() {
     };
 
     const handleSubmitPlan = async () => {
+        if (!activeRankFilter) {
+            toast.error('Vui lòng chọn ngạch trước khi lưu định biên.');
+            return;
+        }
+
         try {
-            await createPlan({
-                title: 'Kế hoạch Định biên Tổng hợp năm 2026',
-                description: 'Được lập từ tiện ích Phân bổ Chỉ tiêu Định biên theo Ngạch.',
-                startDate: new Date().toISOString(),
-                endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
-                status: 'DRAFT',
-                tasks: addedPlans.map(p => ({
-                    title: p.title,
-                    rankCode: p.rankType,
-                    unit: p.unit,
-                    targetValue: p.targetValue,
-                    weight: 5,
-                    status: 'TODO'
-                }))
-            });
-            toast.success('Khởi tạo Kế hoạch thành công!', {
+            const quotas = addedPlans.map(p => ({
+                taskName: p.title,
+                unit: p.unit,
+                targetValue: p.targetValue,
+                weight: 5
+            }));
+            
+            await hrmRankQuotasApi.save(activeRankFilter, quotas);
+            toast.success('Lưu định biên thành công!', {
                 description: `Đã đưa ${addedPlans.length} chỉ tiêu vào danh sách.`
             });
             setAddedPlans([]);

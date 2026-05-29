@@ -58,7 +58,8 @@ export const ModelName = {
   KpiCriteria: 'KpiCriteria',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
-  TaskRankTemplate: 'TaskRankTemplate'
+  TaskRankTemplate: 'TaskRankTemplate',
+  RankQuota: 'RankQuota'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -219,6 +220,20 @@ export const TaskRankTemplateScalarFieldEnum = {
 export type TaskRankTemplateScalarFieldEnum = (typeof TaskRankTemplateScalarFieldEnum)[keyof typeof TaskRankTemplateScalarFieldEnum]
 
 
+export const RankQuotaScalarFieldEnum = {
+  id: 'id',
+  rankCode: 'rankCode',
+  taskName: 'taskName',
+  unit: 'unit',
+  targetValue: 'targetValue',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RankQuotaScalarFieldEnum = (typeof RankQuotaScalarFieldEnum)[keyof typeof RankQuotaScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -343,4 +358,13 @@ export const TaskRankTemplateOrderByRelevanceFieldEnum = {
 } as const
 
 export type TaskRankTemplateOrderByRelevanceFieldEnum = (typeof TaskRankTemplateOrderByRelevanceFieldEnum)[keyof typeof TaskRankTemplateOrderByRelevanceFieldEnum]
+
+
+export const RankQuotaOrderByRelevanceFieldEnum = {
+  rankCode: 'rankCode',
+  taskName: 'taskName',
+  unit: 'unit'
+} as const
+
+export type RankQuotaOrderByRelevanceFieldEnum = (typeof RankQuotaOrderByRelevanceFieldEnum)[keyof typeof RankQuotaOrderByRelevanceFieldEnum]
 

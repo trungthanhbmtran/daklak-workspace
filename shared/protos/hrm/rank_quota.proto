@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package hrm;
+
+import "common/common.proto";
+
+service RankQuotaService {
+  rpc SaveRankQuotas (SaveRankQuotasRequest) returns (SaveRankQuotasResponse) {}
+  rpc GetRankQuotasByRank (GetRankQuotasByRankRequest) returns (RankQuotaList) {}
+}
+
+message RankQuota {
+  int32 id = 1;
+  string rankCode = 2;
+  string taskName = 3;
+  string unit = 4;
+  float targetValue = 5;
+  float weight = 6;
+  string createdAt = 7;
+  string updatedAt = 8;
+}
+
+message RankQuotaPayload {
+  string taskName = 1;
+  string unit = 2;
+  float targetValue = 3;
+  float weight = 4;
+}
+
+message SaveRankQuotasRequest {
+  string rankCode = 1;
+  repeated RankQuotaPayload quotas = 2;
+}
+
+message SaveRankQuotasResponse {
+  bool success = 1;
+  string message = 2;
+  repeated RankQuota data = 3;
+}
+
+message GetRankQuotasByRankRequest {
+  string rankCode = 1;
+}
+
+message RankQuotaList {
+  bool success = 1;
+  string message = 2;
+  repeated RankQuota data = 3;
+}

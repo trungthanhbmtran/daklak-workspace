@@ -108,6 +108,13 @@ export const MICROSERVICES = {
     URL: getHrmUrl(),
     SERVICE: 'MasterPlanService',
   },
+  RANK_QUOTA: {
+    PACKAGE: 'hrm',
+    SYMBOL: 'RANK_QUOTA_PACKAGE',
+    PROTO: 'hrm/rank_quota.proto',
+    URL: getHrmUrl(),
+    SERVICE: 'RankQuotaService',
+  },
   // Document
   DOCUMENT_CATEGORY: {
     PACKAGE: 'category',

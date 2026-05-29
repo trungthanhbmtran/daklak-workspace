@@ -11,6 +11,8 @@ import { KpisController } from './kpis.controller';
 import { MasterPlansController } from './master-plans.controller';
 import { TaskTemplatesController } from './task-templates.controller';
 
+import { RankQuotasController } from './rank-quotas.controller';
+
 @Module({
   imports: [
     registerGrpcService(MICROSERVICES.ORGANIZATION),
@@ -18,6 +20,7 @@ import { TaskTemplatesController } from './task-templates.controller';
     registerGrpcService(MICROSERVICES.TASK),
     registerGrpcService(MICROSERVICES.KPI),
     registerGrpcService(MICROSERVICES.MASTER_PLAN),
+    registerGrpcService(MICROSERVICES.RANK_QUOTA),
     registerGrpcService(MICROSERVICES.SYS_CATEGORY),
   ],
   controllers: [
@@ -30,6 +33,7 @@ import { TaskTemplatesController } from './task-templates.controller';
     KpisController,
     MasterPlansController,
     TaskTemplatesController,
+    RankQuotasController,
   ],
 })
 export class HrmModule {}

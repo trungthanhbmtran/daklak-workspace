@@ -391,7 +391,8 @@ export const ModelName = {
   KpiCriteria: 'KpiCriteria',
   KpiEvaluation: 'KpiEvaluation',
   KpiEvaluationDetail: 'KpiEvaluationDetail',
-  TaskRankTemplate: 'TaskRankTemplate'
+  TaskRankTemplate: 'TaskRankTemplate',
+  RankQuota: 'RankQuota'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "task" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate"
+    modelProps: "employee" | "task" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -939,6 +940,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RankQuota: {
+      payload: Prisma.$RankQuotaPayload<ExtArgs>
+      fields: Prisma.RankQuotaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RankQuotaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RankQuotaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>
+        }
+        findFirst: {
+          args: Prisma.RankQuotaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RankQuotaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>
+        }
+        findMany: {
+          args: Prisma.RankQuotaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>[]
+        }
+        create: {
+          args: Prisma.RankQuotaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>
+        }
+        createMany: {
+          args: Prisma.RankQuotaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.RankQuotaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>
+        }
+        update: {
+          args: Prisma.RankQuotaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>
+        }
+        deleteMany: {
+          args: Prisma.RankQuotaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RankQuotaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.RankQuotaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RankQuotaPayload>
+        }
+        aggregate: {
+          args: Prisma.RankQuotaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRankQuota>
+        }
+        groupBy: {
+          args: Prisma.RankQuotaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RankQuotaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RankQuotaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RankQuotaCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1120,6 +1187,20 @@ export const TaskRankTemplateScalarFieldEnum = {
 export type TaskRankTemplateScalarFieldEnum = (typeof TaskRankTemplateScalarFieldEnum)[keyof typeof TaskRankTemplateScalarFieldEnum]
 
 
+export const RankQuotaScalarFieldEnum = {
+  id: 'id',
+  rankCode: 'rankCode',
+  taskName: 'taskName',
+  unit: 'unit',
+  targetValue: 'targetValue',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RankQuotaScalarFieldEnum = (typeof RankQuotaScalarFieldEnum)[keyof typeof RankQuotaScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -1244,6 +1325,15 @@ export const TaskRankTemplateOrderByRelevanceFieldEnum = {
 } as const
 
 export type TaskRankTemplateOrderByRelevanceFieldEnum = (typeof TaskRankTemplateOrderByRelevanceFieldEnum)[keyof typeof TaskRankTemplateOrderByRelevanceFieldEnum]
+
+
+export const RankQuotaOrderByRelevanceFieldEnum = {
+  rankCode: 'rankCode',
+  taskName: 'taskName',
+  unit: 'unit'
+} as const
+
+export type RankQuotaOrderByRelevanceFieldEnum = (typeof RankQuotaOrderByRelevanceFieldEnum)[keyof typeof RankQuotaOrderByRelevanceFieldEnum]
 
 
 
@@ -1396,6 +1486,7 @@ export type GlobalOmitConfig = {
   kpiEvaluation?: Prisma.KpiEvaluationOmit
   kpiEvaluationDetail?: Prisma.KpiEvaluationDetailOmit
   taskRankTemplate?: Prisma.TaskRankTemplateOmit
+  rankQuota?: Prisma.RankQuotaOmit
 }
 
 /* Types for Logging */
