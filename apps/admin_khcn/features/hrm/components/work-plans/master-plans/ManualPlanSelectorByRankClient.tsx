@@ -5,7 +5,9 @@ import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight } from 
 import { useQuery } from '@tanstack/react-query';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
 import { categoryApi } from "@/features/system-admin/categories/api";
-import { useTaskTemplatesList } from '@/features/hrm/hooks';
+import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -58,6 +60,38 @@ export function ManualPlanSelectorByRankClient() {
     const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [globalValue, setGlobalValue] = useState<number>(1);
+
+    const router = useRouter();
+    const { mutateAsync: createPlan, isPending } = useCreateMasterPlan();
+
+    const handleSubmitPlan = async () => {
+        try {
+            await createPlan({
+                title: 'Kế hoạch Định biên Tổng hợp năm 2026',
+                description: 'Được lập từ tiện ích Phân bổ Chỉ tiêu Định biên theo Ngạch.',
+                startDate: new Date().toISOString(),
+                endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
+                status: 'DRAFT',
+                objectives: addedPlans.map(p => ({
+                    title: p.title,
+                    perspective: p.rankType,
+                    metric: p.unit,
+                    target: p.targetValue.toString(),
+                    weight: 5,
+                    status: 'TODO'
+                }))
+            });
+            toast.success('Khởi tạo Kế hoạch thành công!', {
+                description: `Đã đưa ${addedPlans.length} chỉ tiêu vào danh sách.`
+            });
+            setAddedPlans([]);
+            router.push('/services/hrm/work-plans/master-plans');
+        } catch (error) {
+            toast.error('Có lỗi xảy ra', {
+                description: 'Không thể lập cấu trúc kế hoạch vào lúc này.'
+            });
+        }
+    };
 
     const getRankName = (code: string) => {
         const r: any = [...congChucRanks, ...vienChucRanks].find((r: any) => r.code === code);
@@ -268,6 +302,21 @@ export function ManualPlanSelectorByRankClient() {
                             </TableBody>
                         </Table>
                     </CardContent>
+                    {addedPlans.length > 0 && (
+                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end items-center gap-3">
+                            <Button variant="outline" onClick={() => setAddedPlans([])} className="h-10 text-slate-500 hover:text-slate-700">
+                                Làm lại từ đầu
+                            </Button>
+                            <Button
+                                onClick={handleSubmitPlan}
+                                disabled={isPending}
+                                className="h-10 bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 rounded-xl shadow-sm hover:shadow-md transition-all gap-2"
+                            >
+                                {isPending ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Target className="w-4 h-4" />}
+                                Xác nhận lập kế hoạch
+                            </Button>
+                        </div>
+                    )}
                 </Card>
 
             </div>
