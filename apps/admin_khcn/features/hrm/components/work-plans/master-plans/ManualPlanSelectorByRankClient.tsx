@@ -5,7 +5,7 @@ import { Award, MousePointerClick, Target, Trash2, Network, ChevronRight, Plus }
 import { useQuery } from '@tanstack/react-query';
 import { hrmTaskTemplatesApi } from '@/features/hrm/api/task-templates.api';
 import { categoryApi } from "@/features/system-admin/categories/api";
-import { useTaskTemplatesList, useCreateMasterPlan } from '@/features/hrm/hooks';
+import { useTaskTemplatesList, useCreateMasterPlan, useTasksList } from '@/features/hrm/hooks';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
@@ -58,10 +58,18 @@ export function ManualPlanSelectorByRankClient() {
         defaultWeight: t.defaultWeight || 1
     }));
 
+    const { data: globalTasksData } = useTasksList({ limit: 1000 });
+    const globalTasks = globalTasksData?.data || [];
+
     const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [selectedTaskId, setSelectedTaskId] = useState<string>('');
     const [targetValue, setTargetValue] = useState<number>(1);
+
+    // Custom task states
+    const [selectedGlobalTaskId, setSelectedGlobalTaskId] = useState<string>('');
+    const [customTargetValue, setCustomTargetValue] = useState<number>(1);
+    const [customUnit, setCustomUnit] = useState<string>('Lượt');
 
     const router = useRouter();
     const { mutateAsync: createPlan, isPending } = useCreateMasterPlan();
@@ -70,7 +78,7 @@ export function ManualPlanSelectorByRankClient() {
 
     const handleAssignTask = () => {
         const task = availableTasks.find(t => t.id === selectedTaskId);
-        if (!task || addedPlans.some(p => p.title === task.taskName)) return;
+        if (!task || addedPlans.some(p => p.title === task.taskName && p.rankType === activeRankFilter)) return;
 
         setAddedPlans([...addedPlans, {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
@@ -82,6 +90,23 @@ export function ManualPlanSelectorByRankClient() {
 
         setSelectedTaskId('');
         setTargetValue(1);
+    };
+
+    const handleAssignGlobalTask = () => {
+        const task = globalTasks.find((t: any) => t.id === selectedGlobalTaskId);
+        if (!task || addedPlans.some(p => p.title === task.title && p.rankType === activeRankFilter)) return;
+
+        setAddedPlans([...addedPlans, {
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+            title: task.title,
+            rankType: activeRankFilter,
+            targetValue: customTargetValue,
+            unit: customUnit
+        }]);
+
+        setSelectedGlobalTaskId('');
+        setCustomTargetValue(1);
+        setCustomUnit('Lượt');
     };
 
     const handleSubmitPlan = async () => {

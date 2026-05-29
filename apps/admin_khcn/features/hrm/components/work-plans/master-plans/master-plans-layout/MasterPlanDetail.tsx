@@ -101,38 +101,46 @@ export function MasterPlanDetail() {
             <table className="w-full text-left text-sm">
               <thead className="bg-white border-b border-slate-100 text-slate-500 text-xs font-semibold uppercase">
                 <tr>
-                  <th className="p-4">Nội dung nhiệm vụ</th>
-                  <th className="p-4">Người phụ trách</th>
-                  <th className="p-4 text-center">Trạng thái</th>
-                  <th className="p-4 text-right">Trọng số</th>
+                  <th className="p-4">Nội dung chỉ tiêu (Công việc)</th>
+                  <th className="p-4">Ngạch áp dụng</th>
+                  <th className="p-4 text-center">Định mức</th>
+                  <th className="p-4 text-right">Trạng thái</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {selectedPlan.tasks && selectedPlan.tasks.length > 0 ? (
-                  selectedPlan.tasks.map((task: any) => (
-                    <tr key={task.id} className="hover:bg-slate-50/50">
-                      <td className="p-4">
-                        <div className="font-medium text-slate-800 mb-1">{task.title}</div>
-                        {task.description && (
-                          <div className="text-xs text-slate-500 whitespace-pre-wrap mt-2 bg-slate-50 p-2 rounded border border-slate-100">
-                            {task.description}
+                  selectedPlan.tasks.map((task: any) => {
+                    const rankInfo = state.ranks.find(r => r.code === task.perspective);
+                    return (
+                      <tr key={task.id} className="hover:bg-slate-50/50">
+                        <td className="p-4">
+                          <div className="font-medium text-slate-800 mb-1">{task.title}</div>
+                          {task.description && (
+                            <div className="text-xs text-slate-500 whitespace-pre-wrap mt-2 bg-slate-50 p-2 rounded border border-slate-100">
+                              {task.description}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-md text-xs font-bold">
+                            {rankInfo ? (rankInfo.nameVi || rankInfo.name) : (task.perspective || 'Tất cả')}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="inline-flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                            <span className="font-black text-slate-800">{task.target || 0}</span>
+                            <span className="text-[10px] uppercase font-bold text-slate-500">{task.metric || 'Lượt'}</span>
                           </div>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-md text-xs font-semibold">
-                          {task.assigneeName || task.assigneeCode || 'Chưa gán'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                          }`}>
-                          {task.status || 'TODO'}
-                        </span>
-                      </td>
-                      <td className="p-4 text-right font-mono font-bold text-slate-600">{task.weight}</td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="p-4 text-right">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                            }`}>
+                            {task.status || 'TODO'}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-slate-500">
