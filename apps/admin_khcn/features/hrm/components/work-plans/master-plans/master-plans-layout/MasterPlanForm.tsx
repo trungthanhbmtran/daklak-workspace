@@ -89,7 +89,7 @@ export function MasterPlanForm() {
             if (jobStatus.status === 'COMPLETED') {
               clearInterval(intervalId);
               let rawResult = jobStatus.result || jobStatus.data;
-              
+
               // Parse the raw JSON string returned by AI if necessary
               let parsedResult = rawResult;
               if (typeof rawResult === 'string') {
@@ -147,8 +147,8 @@ export function MasterPlanForm() {
               setAiStep(0);
             }
           } catch (pollErr) {
-             // Silently ignore poll errors, might be intermittent network issue
-             console.warn("Polling error", pollErr);
+            // Silently ignore poll errors, might be intermittent network issue
+            console.warn("Polling error", pollErr);
           }
         }, 3000); // Poll every 3 seconds
       } else {
@@ -289,41 +289,41 @@ export function MasterPlanForm() {
         </div>
 
         {aiStep === 1 && (
-            <div className="py-8 flex flex-col items-center justify-center space-y-4">
-              <div className="relative">
-                <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <BrainCircuit className="w-6 h-6 text-indigo-500 animate-pulse" />
-                </div>
-              </div>
-              <div className="text-center space-y-1">
-                <h3 className="text-md font-bold text-slate-800">AI đang đối chiếu dữ liệu...</h3>
-                <p className="text-slate-500 text-sm">Đang tính toán tỷ lệ khả thi và tối ưu nguồn lực nhân sự...</p>
+          <div className="py-8 flex flex-col items-center justify-center space-y-4">
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <BrainCircuit className="w-6 h-6 text-indigo-500 animate-pulse" />
               </div>
             </div>
+            <div className="text-center space-y-1">
+              <h3 className="text-md font-bold text-slate-800">AI đang đối chiếu dữ liệu...</h3>
+              <p className="text-slate-500 text-sm">Đang tính toán tỷ lệ khả thi và tối ưu nguồn lực nhân sự...</p>
+            </div>
+          </div>
         )}
 
         {aiStep === 2 && feasibilityInfo && (
-              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
-                <div className="flex-shrink-0 relative w-20 h-20">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                    <path className={`${feasibilityInfo.score >= 70 ? 'text-emerald-500' : feasibilityInfo.score >= 50 ? 'text-amber-500' : 'text-rose-500'}`} strokeDasharray={`${feasibilityInfo.score}, 100`} strokeWidth="3" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                  </svg>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-xl font-bold text-slate-700">{feasibilityInfo.score}%</span>
-                  </div>
-                </div>
-                <div className="flex-1 space-y-2">
-                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                    <Activity className="w-5 h-5 text-indigo-500" />
-                    Đánh giá Tỷ lệ Khả thi
-                  </h3>
-                  <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                    {feasibilityInfo.advice}
-                  </p>
-                </div>
+          <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+            <div className="flex-shrink-0 relative w-20 h-20">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path className={`${feasibilityInfo.score >= 70 ? 'text-emerald-500' : feasibilityInfo.score >= 50 ? 'text-amber-500' : 'text-rose-500'}`} strokeDasharray={`${feasibilityInfo.score}, 100`} strokeWidth="3" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xl font-bold text-slate-700">{feasibilityInfo.score}%</span>
               </div>
+            </div>
+            <div className="flex-1 space-y-2">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <Activity className="w-5 h-5 text-indigo-500" />
+                Đánh giá Tỷ lệ Khả thi
+              </h3>
+              <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                {feasibilityInfo.advice}
+              </p>
+            </div>
+          </div>
         )}
 
         <form onSubmit={handleAddItem} className="space-y-4 pt-4 border-t border-slate-100">
