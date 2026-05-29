@@ -56,12 +56,27 @@ export class AiController {
   async handleAiGenerateTask(data: { jobId: string; prompt: string }) {
     this.logger.log(`Worker received AI task: ${data.jobId}`);
     try {
-      const result = await this.aiService.generateText(data.prompt);
+      const resultStr = await this.aiService.generateText(data.prompt);
+      
+      let parsedResult = resultStr;
+      if (typeof resultStr === 'string') {
+        try {
+          let jsonStr = resultStr;
+          if (jsonStr.startsWith('```json')) {
+            jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+          } else if (jsonStr.startsWith('```')) {
+            jsonStr = jsonStr.replace(/```/g, '').trim();
+          }
+          parsedResult = JSON.parse(jsonStr);
+        } catch (e: any) {
+          this.logger.warn(`Worker could not parse JSON from AI result: ${e.message}`);
+        }
+      }
       
       // Update state to COMPLETED
       await this.redisService.set(`ai_job_${data.jobId}`, JSON.stringify({ 
         status: 'COMPLETED', 
-        result 
+        result: parsedResult 
       }), 3600);
       
       this.logger.log(`Worker completed AI task: ${data.jobId}`);

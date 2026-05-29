@@ -88,28 +88,15 @@ export function MasterPlanForm() {
             const jobStatus = await aiApi.getAiJobStatus(initRes.jobId);
             if (jobStatus.status === 'COMPLETED') {
               clearInterval(intervalId);
-              let rawResult = jobStatus.result || jobStatus.data;
-
-              // Parse the raw JSON string returned by AI if necessary
-              let parsedResult = rawResult;
-              if (typeof rawResult === 'string') {
-                try {
-                  let jsonStr = rawResult;
-                  if (jsonStr.startsWith('```json')) {
-                    jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
-                  } else if (jsonStr.startsWith('```')) {
-                    jsonStr = jsonStr.replace(/```/g, '').trim();
-                  }
-                  parsedResult = JSON.parse(jsonStr);
-                } catch (e) {
-                  console.error("Lỗi parse JSON từ AI:", e, rawResult);
-                  toast.error("Kết quả trả về từ AI không đúng định dạng JSON.");
+              let result = jobStatus.result || jobStatus.data;
+              
+              if (!Array.isArray(result)) {
+                  console.error("Kết quả trả về từ AI không phải Array:", result);
+                  toast.error("Kết quả trả về từ AI bị lỗi định dạng.");
                   setAiStep(0);
                   return;
-                }
               }
 
-              const result = parsedResult;
               const feasibility = result.find((r: any) => r.type === 'FEASIBILITY_ANALYSIS');
               setFeasibilityInfo(feasibility);
 
