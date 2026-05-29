@@ -70,6 +70,26 @@ export function ManualPlanSelectorByRankClient() {
     const router = useRouter();
     const { mutateAsync: createPlan, isPending } = useCreateMasterPlan();
 
+    const { data: existingQuotasData, isLoading: isFetchingQuotas } = useQuery({
+        queryKey: ['rank-quotas', activeRankFilter],
+        queryFn: () => hrmRankQuotasApi.getByRank(activeRankFilter),
+        staleTime: 0,
+    });
+
+    React.useEffect(() => {
+        if (existingQuotasData?.data) {
+            setAddedPlans(existingQuotasData.data.map((q: any) => ({
+                id: q.id.toString(),
+                title: q.taskName,
+                rankType: q.rankCode,
+                targetValue: q.targetValue,
+                unit: q.unit
+            })));
+        } else {
+            setAddedPlans([]);
+        }
+    }, [existingQuotasData, activeRankFilter]);
+
     const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter);
 
     const handleAssignTask = () => {
@@ -101,13 +121,11 @@ export function ManualPlanSelectorByRankClient() {
                 targetValue: p.targetValue,
                 weight: 5
             }));
-            
+
             await hrmRankQuotasApi.save(activeRankFilter, quotas);
             toast.success('Lưu định biên thành công!', {
                 description: `Đã đưa ${addedPlans.length} chỉ tiêu vào danh sách.`
             });
-            setAddedPlans([]);
-            router.push('/services/hrm/work-plans/master-plans');
         } catch (error) {
             toast.error('Có lỗi xảy ra', {
                 description: 'Không thể lập cấu trúc kế hoạch vào lúc này.'

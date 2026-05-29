@@ -3,11 +3,11 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class RankQuotasService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async SaveRankQuotas(data: any) {
     const { rankCode, quotas } = data;
-    
+
     // Xóa định biên cũ của ngạch này
     await this.prisma.rankQuota.deleteMany({
       where: { rankCode }
@@ -42,7 +42,7 @@ export class RankQuotasService {
     const quotas = await this.prisma.rankQuota.findMany({
       where: { rankCode }
     });
-    
+
     return {
       success: true,
       message: 'Lấy định biên thành công',
