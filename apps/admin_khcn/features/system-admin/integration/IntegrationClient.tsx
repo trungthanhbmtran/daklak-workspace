@@ -15,7 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useIntegrationList, useDeleteIntegration, useToggleActiveIntegration, IntegrationConfig } from './api';
+import { useIntegrationList, useDeleteIntegration, useToggleActiveIntegration } from './api';
+import type { IntegrationConfig } from './api';
 import { IntegrationModal } from './IntegrationModal';
 
 export function IntegrationClient() {

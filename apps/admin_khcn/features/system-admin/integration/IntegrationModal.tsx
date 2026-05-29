@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
-import { useCreateIntegration, useUpdateIntegration, IntegrationConfig } from './api';
+import { useCreateIntegration, useUpdateIntegration } from './api';
+import type { IntegrationConfig } from './api';
 
 interface Props {
   isOpen: boolean;
