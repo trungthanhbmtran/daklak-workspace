@@ -98,7 +98,14 @@ export class MasterPlansService {
       const taskData: any[] = [];
       for (const task of data.tasks) {
         let employees: any[] = [];
-        if (task.rankId && task.rankId > 0) {
+        if (task.rankCode) {
+          const ranks: any[] = await this.prisma.$queryRaw`SELECT id FROM admin_systems.job_titles WHERE code = ${task.rankCode}`;
+          if (ranks.length > 0) {
+            employees = await this.prisma.employee.findMany({
+              where: { civilServantRankId: ranks[0].id, status: 'active' }
+            });
+          }
+        } else if (task.rankId && task.rankId > 0) {
           employees = await this.prisma.employee.findMany({
             where: { civilServantRankId: task.rankId, status: 'active' }
           });

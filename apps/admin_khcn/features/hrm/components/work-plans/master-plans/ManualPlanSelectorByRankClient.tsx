@@ -96,11 +96,11 @@ export function ManualPlanSelectorByRankClient() {
                 startDate: new Date().toISOString(),
                 endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString(),
                 status: 'DRAFT',
-                objectives: addedPlans.map(p => ({
+                tasks: addedPlans.map(p => ({
                     title: p.title,
-                    perspective: p.rankType,
-                    metric: p.unit,
-                    target: p.targetValue.toString(),
+                    rankCode: p.rankType,
+                    unit: p.unit,
+                    targetValue: p.targetValue,
                     weight: 5,
                     status: 'TODO'
                 }))
