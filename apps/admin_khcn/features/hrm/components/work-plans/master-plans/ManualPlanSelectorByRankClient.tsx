@@ -293,6 +293,62 @@ export function ManualPlanSelectorByRankClient() {
                                 Gán vào cấu trúc
                             </Button>
                         </div>
+
+                        {/* FORM CHỌN CÔNG VIỆC TỪ DANH MỤC CHUNG */}
+                        <div className="mt-4 p-4 bg-white border border-dashed border-indigo-200 rounded-2xl space-y-4 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                                <Plus className="w-24 h-24 text-indigo-900" />
+                            </div>
+                            <h4 className="text-xs font-bold text-indigo-700 uppercase tracking-wider relative z-10">Hoặc chọn từ Danh mục chung</h4>
+
+                            <div className="space-y-2 relative z-10">
+                                <select
+                                    className="w-full h-11 px-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 transition-shadow"
+                                    value={selectedGlobalTaskId}
+                                    onChange={e => setSelectedGlobalTaskId(e.target.value)}
+                                >
+                                    <option value="">-- Vui lòng chọn công việc --</option>
+                                    {globalTasks.map((task: any) => (
+                                        <option key={task.id} value={task.id} disabled={addedPlans.some(p => p.title === task.title && p.rankType === activeRankFilter)}>
+                                            {task.title} {addedPlans.some(p => p.title === task.title && p.rankType === activeRankFilter) ? '(Đã thêm)' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="grid grid-cols-12 gap-3 relative z-10 items-end">
+                                <div className="col-span-5 space-y-1.5">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Định mức</label>
+                                    <Input
+                                        type="number"
+                                        value={customTargetValue}
+                                        onChange={e => setCustomTargetValue(Math.max(1, Number(e.target.value)))}
+                                        className="h-10 text-sm font-mono font-bold bg-white rounded-lg border-slate-300"
+                                    />
+                                </div>
+                                <div className="col-span-4 space-y-1.5">
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase">Đơn vị</label>
+                                    <Input
+                                        type="text"
+                                        value={customUnit}
+                                        onChange={e => setCustomUnit(e.target.value)}
+                                        className="h-10 text-sm bg-white rounded-lg border-slate-300"
+                                        placeholder="VD: Lượt..."
+                                    />
+                                </div>
+                                <div className="col-span-3">
+                                    <Button
+                                        variant="outline"
+                                        className="h-10 w-full border-indigo-200 text-indigo-700 hover:bg-indigo-50 font-bold rounded-lg px-2"
+                                        disabled={!selectedGlobalTaskId}
+                                        onClick={handleAssignGlobalTask}
+                                    >
+                                        <Plus className="w-4 h-4 mr-1" />
+                                        Thêm
+                                    </Button>
+                                </div>
+                            </div>
+                        </div>
                     </CardContent>
                 </Card>
 
