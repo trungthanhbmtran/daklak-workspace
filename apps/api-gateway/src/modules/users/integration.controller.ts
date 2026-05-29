@@ -24,7 +24,7 @@ export class AdminIntegrationController implements OnModuleInit {
   private integrationService: any;
 
   constructor(
-    @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.INTEGRATION.SYMBOL) private readonly client: any,
   ) {}
 
   onModuleInit() {
