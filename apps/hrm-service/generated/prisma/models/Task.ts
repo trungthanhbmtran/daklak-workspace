@@ -28,6 +28,7 @@ export type AggregateTask = {
 
 export type TaskAvgAggregateOutputType = {
   id: number | null
+  departmentId: number | null
   baseScore: number | null
   weight: number | null
   bonusPerDay: number | null
@@ -37,6 +38,7 @@ export type TaskAvgAggregateOutputType = {
 
 export type TaskSumAggregateOutputType = {
   id: number | null
+  departmentId: number | null
   baseScore: number | null
   weight: number | null
   bonusPerDay: number | null
@@ -50,6 +52,7 @@ export type TaskMinAggregateOutputType = {
   description: string | null
   assigneeCode: string | null
   assignerCode: string | null
+  departmentId: number | null
   status: string | null
   priority: string | null
   baseScore: number | null
@@ -72,6 +75,7 @@ export type TaskMaxAggregateOutputType = {
   description: string | null
   assigneeCode: string | null
   assignerCode: string | null
+  departmentId: number | null
   status: string | null
   priority: string | null
   baseScore: number | null
@@ -94,6 +98,7 @@ export type TaskCountAggregateOutputType = {
   description: number
   assigneeCode: number
   assignerCode: number
+  departmentId: number
   status: number
   priority: number
   baseScore: number
@@ -115,6 +120,7 @@ export type TaskCountAggregateOutputType = {
 
 export type TaskAvgAggregateInputType = {
   id?: true
+  departmentId?: true
   baseScore?: true
   weight?: true
   bonusPerDay?: true
@@ -124,6 +130,7 @@ export type TaskAvgAggregateInputType = {
 
 export type TaskSumAggregateInputType = {
   id?: true
+  departmentId?: true
   baseScore?: true
   weight?: true
   bonusPerDay?: true
@@ -137,6 +144,7 @@ export type TaskMinAggregateInputType = {
   description?: true
   assigneeCode?: true
   assignerCode?: true
+  departmentId?: true
   status?: true
   priority?: true
   baseScore?: true
@@ -159,6 +167,7 @@ export type TaskMaxAggregateInputType = {
   description?: true
   assigneeCode?: true
   assignerCode?: true
+  departmentId?: true
   status?: true
   priority?: true
   baseScore?: true
@@ -181,6 +190,7 @@ export type TaskCountAggregateInputType = {
   description?: true
   assigneeCode?: true
   assignerCode?: true
+  departmentId?: true
   status?: true
   priority?: true
   baseScore?: true
@@ -291,6 +301,7 @@ export type TaskGroupByOutputType = {
   description: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId: number | null
   status: string
   priority: string
   baseScore: number | null
@@ -337,6 +348,7 @@ export type TaskWhereInput = {
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   assigneeCode?: Prisma.StringFilter<"Task"> | string
   assignerCode?: Prisma.StringFilter<"Task"> | string
+  departmentId?: Prisma.IntNullableFilter<"Task"> | number | null
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
   baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
@@ -364,6 +376,7 @@ export type TaskOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
   assignerCode?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -395,6 +408,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   assigneeCode?: Prisma.StringFilter<"Task"> | string
   assignerCode?: Prisma.StringFilter<"Task"> | string
+  departmentId?: Prisma.IntNullableFilter<"Task"> | number | null
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
   baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
@@ -422,6 +436,7 @@ export type TaskOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
   assignerCode?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -453,6 +468,7 @@ export type TaskScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   assigneeCode?: Prisma.StringWithAggregatesFilter<"Task"> | string
   assignerCode?: Prisma.StringWithAggregatesFilter<"Task"> | string
+  departmentId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   status?: Prisma.StringWithAggregatesFilter<"Task"> | string
   priority?: Prisma.StringWithAggregatesFilter<"Task"> | string
   baseScore?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
@@ -473,6 +489,7 @@ export type TaskScalarWhereWithAggregatesInput = {
 export type TaskCreateInput = {
   title: string
   description?: string | null
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -498,6 +515,7 @@ export type TaskUncheckedCreateInput = {
   description?: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -518,6 +536,7 @@ export type TaskUncheckedCreateInput = {
 export type TaskUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -543,6 +562,7 @@ export type TaskUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -566,6 +586,7 @@ export type TaskCreateManyInput = {
   description?: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -586,6 +607,7 @@ export type TaskCreateManyInput = {
 export type TaskUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -607,6 +629,7 @@ export type TaskUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -646,6 +669,7 @@ export type TaskCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
   assignerCode?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
@@ -665,6 +689,7 @@ export type TaskCountOrderByAggregateInput = {
 
 export type TaskAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
@@ -678,6 +703,7 @@ export type TaskMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
   assignerCode?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
@@ -700,6 +726,7 @@ export type TaskMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   assigneeCode?: Prisma.SortOrder
   assignerCode?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
@@ -718,6 +745,7 @@ export type TaskMinOrderByAggregateInput = {
 
 export type TaskSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
@@ -904,6 +932,7 @@ export type TaskUncheckedUpdateManyWithoutPlanNestedInput = {
 export type TaskCreateWithoutAssignerInput = {
   title: string
   description?: string | null
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -927,6 +956,7 @@ export type TaskUncheckedCreateWithoutAssignerInput = {
   title: string
   description?: string | null
   assigneeCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -957,6 +987,7 @@ export type TaskCreateManyAssignerInputEnvelope = {
 export type TaskCreateWithoutAssigneeInput = {
   title: string
   description?: string | null
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -980,6 +1011,7 @@ export type TaskUncheckedCreateWithoutAssigneeInput = {
   title: string
   description?: string | null
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1010,6 +1042,7 @@ export type TaskCreateManyAssigneeInputEnvelope = {
 export type TaskCreateWithoutSupervisorInput = {
   title: string
   description?: string | null
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1034,6 +1067,7 @@ export type TaskUncheckedCreateWithoutSupervisorInput = {
   description?: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1085,6 +1119,7 @@ export type TaskScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   assigneeCode?: Prisma.StringFilter<"Task"> | string
   assignerCode?: Prisma.StringFilter<"Task"> | string
+  departmentId?: Prisma.IntNullableFilter<"Task"> | number | null
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
   baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
@@ -1137,6 +1172,7 @@ export type TaskUpdateManyWithWhereWithoutSupervisorInput = {
 export type TaskCreateWithoutPlanInput = {
   title: string
   description?: string | null
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1161,6 +1197,7 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   description?: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1208,6 +1245,7 @@ export type TaskCreateManyAssignerInput = {
   title: string
   description?: string | null
   assigneeCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1230,6 +1268,7 @@ export type TaskCreateManyAssigneeInput = {
   title: string
   description?: string | null
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1253,6 +1292,7 @@ export type TaskCreateManySupervisorInput = {
   description?: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1272,6 +1312,7 @@ export type TaskCreateManySupervisorInput = {
 export type TaskUpdateWithoutAssignerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1295,6 +1336,7 @@ export type TaskUncheckedUpdateWithoutAssignerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1317,6 +1359,7 @@ export type TaskUncheckedUpdateManyWithoutAssignerInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1337,6 +1380,7 @@ export type TaskUncheckedUpdateManyWithoutAssignerInput = {
 export type TaskUpdateWithoutAssigneeInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1360,6 +1404,7 @@ export type TaskUncheckedUpdateWithoutAssigneeInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1382,6 +1427,7 @@ export type TaskUncheckedUpdateManyWithoutAssigneeInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1402,6 +1448,7 @@ export type TaskUncheckedUpdateManyWithoutAssigneeInput = {
 export type TaskUpdateWithoutSupervisorInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1426,6 +1473,7 @@ export type TaskUncheckedUpdateWithoutSupervisorInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1448,6 +1496,7 @@ export type TaskUncheckedUpdateManyWithoutSupervisorInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1470,6 +1519,7 @@ export type TaskCreateManyPlanInput = {
   description?: string | null
   assigneeCode: string
   assignerCode: string
+  departmentId?: number | null
   status?: string
   priority?: string
   baseScore?: number | null
@@ -1489,6 +1539,7 @@ export type TaskCreateManyPlanInput = {
 export type TaskUpdateWithoutPlanInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1513,6 +1564,7 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1535,6 +1587,7 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   assigneeCode?: Prisma.StringFieldUpdateOperationsInput | string
   assignerCode?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
@@ -1559,6 +1612,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   description?: boolean
   assigneeCode?: boolean
   assignerCode?: boolean
+  departmentId?: boolean
   status?: boolean
   priority?: boolean
   baseScore?: boolean
@@ -1588,6 +1642,7 @@ export type TaskSelectScalar = {
   description?: boolean
   assigneeCode?: boolean
   assignerCode?: boolean
+  departmentId?: boolean
   status?: boolean
   priority?: boolean
   baseScore?: boolean
@@ -1605,7 +1660,7 @@ export type TaskSelectScalar = {
   planId?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "assigneeCode" | "assignerCode" | "status" | "priority" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "supervisorCode" | "documentIds" | "workflowInstId" | "dueDate" | "completionDate" | "createdAt" | "updatedAt" | "planId", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "assigneeCode" | "assignerCode" | "departmentId" | "status" | "priority" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "supervisorCode" | "documentIds" | "workflowInstId" | "dueDate" | "completionDate" | "createdAt" | "updatedAt" | "planId", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   assignee?: boolean | Prisma.Task$assigneeArgs<ExtArgs>
@@ -1627,6 +1682,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     description: string | null
     assigneeCode: string
     assignerCode: string
+    departmentId: number | null
     status: string
     priority: string
     baseScore: number | null
@@ -2020,6 +2076,7 @@ export interface TaskFieldRefs {
   readonly description: Prisma.FieldRef<"Task", 'String'>
   readonly assigneeCode: Prisma.FieldRef<"Task", 'String'>
   readonly assignerCode: Prisma.FieldRef<"Task", 'String'>
+  readonly departmentId: Prisma.FieldRef<"Task", 'Int'>
   readonly status: Prisma.FieldRef<"Task", 'String'>
   readonly priority: Prisma.FieldRef<"Task", 'String'>
   readonly baseScore: Prisma.FieldRef<"Task", 'Float'>

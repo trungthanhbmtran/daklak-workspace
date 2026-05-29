@@ -14,6 +14,7 @@ service TaskService {
 message AssignTaskRequest {
   int32 id = 1;
   string assigneeCode = 2;
+  int32 departmentId = 3;
 }
 
 message RecommendAssigneesRequest {
@@ -27,12 +28,26 @@ message AssigneeRecommendation {
   float currentLoad = 3;
   float performanceScore = 4;
   float matchScore = 5;
+  int32 departmentId = 6;
+}
+
+message DepartmentRecommendation {
+  int32 departmentId = 1;
+  float currentLoad = 2;
+  float performanceScore = 3;
+  float matchScore = 4;
+  int32 employeeCount = 5;
+}
+
+message RecommendAssigneesData {
+  repeated AssigneeRecommendation topEmployees = 1;
+  repeated DepartmentRecommendation topDepartments = 2;
 }
 
 message RecommendAssigneesResponse {
   bool success = 1;
   string message = 2;
-  repeated AssigneeRecommendation data = 3;
+  RecommendAssigneesData data = 3;
 }
 
 service TaskTemplateService {
@@ -68,6 +83,7 @@ message TaskResponse {
   string supervisorCode = 15;
   int32 planId = 16;
   string assigneeName = 17;
+  int32 departmentId = 18;
 }
 
 message CreateTaskRequest {
@@ -84,6 +100,7 @@ message CreateTaskRequest {
   float penaltyPerDay = 10;
   string supervisorCode = 11;
   int32 planId = 12;
+  int32 departmentId = 13;
 }
 
 message ListTasksRequest {

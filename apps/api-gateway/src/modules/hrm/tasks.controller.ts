@@ -57,10 +57,15 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id/assign')
-  async assignTask(@Param('id') id: string, @Body('assigneeCode') assigneeCode: string) {
+  async assignTask(
+    @Param('id') id: string, 
+    @Body('assigneeCode') assigneeCode: string,
+    @Body('departmentId') departmentId?: number
+  ) {
     return firstValueFrom(this.taskService.AssignTask({
       id: parseInt(id, 10),
       assigneeCode,
+      departmentId
     }));
   }
 }

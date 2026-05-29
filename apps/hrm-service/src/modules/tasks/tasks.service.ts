@@ -146,6 +146,7 @@ export class TasksService {
         description: data.description,
         assigneeCode: data.assigneeCode || '',
         assignerCode: data.assignerCode || '',
+        departmentId: data.departmentId || null,
         status: 'TODO',
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         baseScore: data.baseScore,
@@ -236,6 +237,7 @@ export class TasksService {
       return {
         employeeCode: emp.employeeCode,
         employeeName: `${emp.firstname} ${emp.lastname}`,
+        departmentId: emp.departmentId,
         currentLoad,
         performanceScore,
         matchScore
@@ -245,17 +247,52 @@ export class TasksService {
     // Sort by matchScore DESC
     recommendations.sort((a, b) => b.matchScore - a.matchScore);
 
+    // Group by department
+    const deptMap = new Map<number, any>();
+    recommendations.forEach(emp => {
+      if (!emp.departmentId) return;
+      if (!deptMap.has(emp.departmentId)) {
+        deptMap.set(emp.departmentId, {
+          departmentId: emp.departmentId,
+          totalLoad: 0,
+          totalPerf: 0,
+          totalMatch: 0,
+          count: 0
+        });
+      }
+      const d = deptMap.get(emp.departmentId);
+      d.totalLoad += emp.currentLoad;
+      d.totalPerf += emp.performanceScore;
+      d.totalMatch += emp.matchScore;
+      d.count += 1;
+    });
+
+    const topDepartments = Array.from(deptMap.values()).map(d => ({
+      departmentId: d.departmentId,
+      currentLoad: d.totalLoad / d.count,
+      performanceScore: d.totalPerf / d.count,
+      matchScore: d.totalMatch / d.count,
+      employeeCount: d.count
+    })).sort((a, b) => b.matchScore - a.matchScore);
+
     return {
       success: true,
-      message: 'Gợi ý nhân sự thành công',
-      data: recommendations.slice(0, 5) // Top 5
+      message: 'Gợi ý nhân sự và phòng ban thành công',
+      data: {
+        topEmployees: recommendations.slice(0, 5),
+        topDepartments: topDepartments.slice(0, 3)
+      }
     };
   }
 
-  async assignTask(id: number, assigneeCode: string) {
+  async assignTask(id: number, assigneeCode: string, departmentId?: number) {
+    const dataToUpdate: any = {};
+    if (assigneeCode) dataToUpdate.assigneeCode = assigneeCode;
+    if (departmentId !== undefined) dataToUpdate.departmentId = departmentId;
+
     const t = await this.prisma.task.update({
       where: { id },
-      data: { assigneeCode }
+      data: dataToUpdate
     });
 
     return {

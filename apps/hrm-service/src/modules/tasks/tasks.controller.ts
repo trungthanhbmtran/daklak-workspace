@@ -27,7 +27,7 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: { id: number; assigneeCode: string }) {
-    return this.tasksService.assignTask(data.id, data.assigneeCode);
+  assignTask(data: { id: number; assigneeCode: string; departmentId?: number }) {
+    return this.tasksService.assignTask(data.id, data.assigneeCode, data.departmentId);
   }
 }

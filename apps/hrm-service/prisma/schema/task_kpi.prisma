@@ -7,6 +7,8 @@ model Task {
   assigneeCode   String    @map("assignee_code") 
   assignerCode   String    @map("assigner_code")
   
+  departmentId   Int?      @map("department_id") // ID Phòng xử lý (Integration Key from user-service)
+  
   status         String    @default("TODO") // DRAFT, TODO, IN_PROGRESS, REVIEWING, DONE, OVERDUE, CANCELLED
   priority       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
   
