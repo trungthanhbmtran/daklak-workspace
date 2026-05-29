@@ -11,6 +11,7 @@ const protoPath = [
   join(hrmDir, 'task.proto'),
   join(hrmDir, 'kpi.proto'),
   join(hrmDir, 'master_plan.proto'),
+  join(hrmDir, 'rank_quota.proto'),
 ];
 
 async function bootstrap() {
