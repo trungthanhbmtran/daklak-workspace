@@ -27,7 +27,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
         templates,
         ranks,
         classification: 'VIEN_CHUC',
-        defaultRank: 'VIEN_CHUC_HANG_3'
+        defaultRank: 'GRADE_3'
     });
 
     return (
@@ -45,10 +45,10 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                                     <SelectItem key={r.id} value={r.code} className="text-xs">{(r as any).nameVi || r.name}</SelectItem>
                                 )) : (
                                     <>
-                                        <SelectItem value="VIEN_CHUC_HANG_1" className="text-xs">Viên chức Hạng I</SelectItem>
-                                        <SelectItem value="VIEN_CHUC_HANG_2" className="text-xs">Viên chức Hạng II</SelectItem>
-                                        <SelectItem value="VIEN_CHUC_HANG_3" className="text-xs">Viên chức Hạng III</SelectItem>
-                                        <SelectItem value="VIEN_CHUC_HANG_4" className="text-xs">Viên chức Hạng IV</SelectItem>
+                                        <SelectItem value="GRADE_1" className="text-xs">Viên chức Hạng I</SelectItem>
+                                        <SelectItem value="GRADE_2" className="text-xs">Viên chức Hạng II</SelectItem>
+                                        <SelectItem value="GRADE_3" className="text-xs">Viên chức Hạng III</SelectItem>
+                                        <SelectItem value="GRADE_4" className="text-xs">Viên chức Hạng IV</SelectItem>
                                     </>
                                 )}
                             </SelectContent>
@@ -119,7 +119,7 @@ export function PublicEmployeeTaskConfig({ templates, units, ranks }: { template
                                 )}
                                 <div className="flex items-center gap-2">
                                     <span className="text-[9px] font-black px-2 py-0.5 rounded border bg-purple-50 border-purple-200 text-purple-700">
-                                        {item.rank.replace(/_/g, ' ')}
+                                        {(ranks.find(r => r.code === item.rank) as any)?.nameVi || ranks.find(r => r.code === item.rank)?.name || item.rank.replace(/_/g, ' ')}
                                     </span>
                                 </div>
                             </div>

@@ -27,7 +27,7 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
         templates,
         ranks,
         classification: 'CONG_CHUC',
-        defaultRank: 'CHUYEN_VIEN'
+        defaultRank: 'SPECIALIST'
     });
 
     return (
@@ -45,11 +45,11 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
                                     <SelectItem key={r.id} value={r.code} className="text-xs">{(r as any).nameVi || r.name}</SelectItem>
                                 )) : (
                                     <>
-                                        <SelectItem value="CHUYEN_VIEN_CAO_CAP" className="text-xs">Chuyên viên Cao cấp</SelectItem>
-                                        <SelectItem value="CHUYEN_VIEN_CHINH" className="text-xs">Chuyên viên Chính</SelectItem>
-                                        <SelectItem value="CHUYEN_VIEN" className="text-xs">Chuyên viên</SelectItem>
-                                        <SelectItem value="CAN_SU" className="text-xs">Cán sự</SelectItem>
-                                        <SelectItem value="NHAN_VIEN" className="text-xs">Nhân viên</SelectItem>
+                                        <SelectItem value="SENIOR_SPECIALIST" className="text-xs">Chuyên viên Cao cấp</SelectItem>
+                                        <SelectItem value="PRINCIPAL_SPECIALIST" className="text-xs">Chuyên viên Chính</SelectItem>
+                                        <SelectItem value="SPECIALIST" className="text-xs">Chuyên viên</SelectItem>
+                                        <SelectItem value="OFFICER" className="text-xs">Cán sự</SelectItem>
+                                        <SelectItem value="STAFF" className="text-xs">Nhân viên</SelectItem>
                                     </>
                                 )}
                             </SelectContent>
@@ -119,12 +119,12 @@ export function CivilServantTaskConfig({ templates, units, ranks }: { templates:
                                     <div className="font-bold text-slate-900 leading-relaxed">{item.taskName}</div>
                                 )}
                                 <div className="flex items-center gap-2">
-                                    <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${item.rank === 'CHUYEN_VIEN_CAO_CAP' ? 'bg-red-50 border-red-200 text-red-700' :
-                                        item.rank === 'CHUYEN_VIEN_CHINH' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-                                            item.rank === 'CHUYEN_VIEN' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                                    <span className={`text-[9px] font-black px-2 py-0.5 rounded border ${item.rank === 'SENIOR_SPECIALIST' ? 'bg-red-50 border-red-200 text-red-700' :
+                                        item.rank === 'PRINCIPAL_SPECIALIST' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                                            item.rank === 'SPECIALIST' ? 'bg-blue-50 border-blue-200 text-blue-700' :
                                                 'bg-purple-50 border-purple-200 text-purple-700'
                                         }`}>
-                                        {item.rank.replace(/_/g, ' ')}
+                                        {(ranks.find(r => r.code === item.rank) as any)?.nameVi || ranks.find(r => r.code === item.rank)?.name || item.rank.replace(/_/g, ' ')}
                                     </span>
                                 </div>
                             </div>

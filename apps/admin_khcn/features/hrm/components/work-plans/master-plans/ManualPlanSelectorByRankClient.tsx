@@ -33,14 +33,14 @@ interface SelectedPlanItem {
 
 export function ManualPlanSelectorByRankClient() {
     const { data: congChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'RANK_CONG_CHUC'],
-        queryFn: () => categoryApi.fetchByGroup('RANK_CONG_CHUC'),
+        queryKey: ['categories', 'CIVIL_SERVANT_RANK'],
+        queryFn: () => categoryApi.fetchByGroup('CIVIL_SERVANT_RANK'),
         staleTime: 5 * 60 * 1000,
     });
 
     const { data: vienChucRanks = [] } = useQuery({
-        queryKey: ['categories', 'RANK_VIEN_CHUC'],
-        queryFn: () => categoryApi.fetchByGroup('RANK_VIEN_CHUC'),
+        queryKey: ['categories', 'PUBLIC_EMPLOYEE_RANK'],
+        queryFn: () => categoryApi.fetchByGroup('PUBLIC_EMPLOYEE_RANK'),
         staleTime: 5 * 60 * 1000,
     });
 
@@ -55,9 +55,14 @@ export function ManualPlanSelectorByRankClient() {
         defaultUnit: t.defaultUnit || 'Lượt'
     }));
 
-    const [activeRankFilter, setActiveRankFilter] = useState<string>('CHUYEN_VIEN_CHINH');
+    const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
     const [globalValue, setGlobalValue] = useState<number>(1);
+
+    const getRankName = (code: string) => {
+        const r: any = [...congChucRanks, ...vienChucRanks].find((r: any) => r.code === code);
+        return r ? (r.nameVi || r.name) : code.replace(/_/g, ' ');
+    };
 
     const handleQuickAdd = (taskName: string, unit: string) => {
         if (addedPlans.some(p => p.title === taskName)) return;
@@ -219,7 +224,7 @@ export function ManualPlanSelectorByRankClient() {
                                         </TableCell>
                                         <TableCell>
                                             <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 text-[10px] font-bold uppercase tracking-wider border border-indigo-100 shadow-sm px-2.5 py-1">
-                                                {plan.rankType.replace(/_/g, ' ')}
+                                                {getRankName(plan.rankType)}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">

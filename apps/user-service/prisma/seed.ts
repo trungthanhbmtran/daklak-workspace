@@ -1270,7 +1270,7 @@ async function main() {
     },
     {
       group: 'POSITION',
-      code: 'CHUYEN_VIEN',
+      code: 'SPECIALIST',
       order: 9,
       nameVi: 'Chuyên viên',
       nameEn: 'Expert',
@@ -1327,27 +1327,7 @@ async function main() {
       nameEn: 'Elementary',
     },
 
-    {
-      group: 'STATE_MANAGEMENT',
-      code: 'CHUYEN_VIEN_CAO_CAP',
-      order: 1,
-      nameVi: 'Chuyên viên cao cấp',
-      nameEn: 'Senior Management Expert',
-    },
-    {
-      group: 'STATE_MANAGEMENT',
-      code: 'CHUYEN_VIEN_CHINH',
-      order: 2,
-      nameVi: 'Chuyên viên chính',
-      nameEn: 'Principal Management Expert',
-    },
-    {
-      group: 'STATE_MANAGEMENT',
-      code: 'CHUYEN_VIEN',
-      order: 3,
-      nameVi: 'Chuyên viên',
-      nameEn: 'Management Expert',
-    },
+
 
     {
       group: 'IT_SKILL',
@@ -2371,7 +2351,7 @@ async function main() {
     { code: 'UNIT', name: 'Đơn vị tính' },
     { code: 'ACADEMIC_RANK', name: 'Học hàm/Học vị' },
     { code: 'POLITICAL_THEORY', name: 'Lý luận chính trị' },
-    { code: 'STATE_MANAGEMENT', name: 'Quản lý nhà nước' },
+
     { code: 'IT_SKILL', name: 'Trình độ tin học' },
     { code: 'LANGUAGE_SKILL', name: 'Trình độ ngoại ngữ' },
     { code: 'LANGUAGE', name: 'Ngôn ngữ hệ thống' },
@@ -3262,35 +3242,35 @@ async function main() {
       type: 'GOVERNMENT',
     },
     {
-      code: 'CHUYEN_VIEN',
+      code: 'SPECIALIST',
       name: 'Chuyên viên',
       category: 'STAFF',
       rank: 3,
       type: 'RANK',
     },
     {
-      code: 'CHUYEN_VIEN_CAO_CAP',
+      code: 'SENIOR_SPECIALIST',
       name: 'Chuyên viên cao cấp',
       category: 'STAFF',
       rank: 1,
       type: 'RANK',
     },
     {
-      code: 'CHUYEN_VIEN_CHINH',
+      code: 'PRINCIPAL_SPECIALIST',
       name: 'Chuyên viên chính',
       category: 'STAFF',
       rank: 2,
       type: 'RANK',
     },
     {
-      code: 'CAN_SU',
+      code: 'OFFICER',
       name: 'Cán sự',
       category: 'STAFF',
       rank: 4,
       type: 'RANK',
     },
     {
-      code: 'NHAN_VIEN',
+      code: 'STAFF',
       name: 'Nhân viên',
       category: 'SUPPORT',
       rank: 5,
@@ -3453,7 +3433,7 @@ async function main() {
     { jt: 'THANH_TRA_VIEN_CHINH', types: ['THANH_TRA'] },
     { jt: 'THANH_TRA_VIEN_CAO_CAP', types: ['THANH_TRA'] },
     {
-      jt: 'CHUYEN_VIEN',
+      jt: 'SPECIALIST',
       types: [
         'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
@@ -3464,15 +3444,15 @@ async function main() {
       ],
     },
     {
-      jt: 'CHUYEN_VIEN_CAO_CAP',
+      jt: 'SENIOR_SPECIALIST',
       types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
     },
     {
-      jt: 'CHUYEN_VIEN_CHINH',
+      jt: 'PRINCIPAL_SPECIALIST',
       types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
     },
     {
-      jt: 'CAN_SU',
+      jt: 'OFFICER',
       types: [
         'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
@@ -3482,7 +3462,7 @@ async function main() {
       ],
     },
     {
-      jt: 'NHAN_VIEN',
+      jt: 'STAFF',
       types: [
         'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
@@ -4418,7 +4398,7 @@ async function main() {
   // Các phòng ban thuộc Sở
   await setStaffing('SO_KHCN_VP', 'CHANH_VAN_PHONG', 1);
   await setStaffing('SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', 2);
-  await setStaffing('SO_KHCN_VP', 'CHUYEN_VIEN', 5);
+  await setStaffing('SO_KHCN_VP', 'SPECIALIST', 5);
 
   const phongBanCodes = [
     'SO_KHCN_KHTC',
@@ -4430,7 +4410,7 @@ async function main() {
   for (const code of phongBanCodes) {
     await setStaffing(code, 'TRUONG_PHONG', 1);
     await setStaffing(code, 'PHO_TRUONG_PHONG', 2);
-    await setStaffing(code, 'CHUYEN_VIEN', 4);
+    await setStaffing(code, 'SPECIALIST', 4);
   }
 
   // Các Trung tâm
@@ -4453,7 +4433,7 @@ async function main() {
   for (const code of phongTrungTamCodes) {
     await setStaffing(code, 'TRUONG_PHONG', 1);
     await setStaffing(code, 'PHO_TRUONG_PHONG', 1);
-    await setStaffing(code, 'CHUYEN_VIEN', 3);
+    await setStaffing(code, 'SPECIALIST', 3);
   }
 
   // ==========================================================
