@@ -25,7 +25,7 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       JSON.parse(configData); // Validate JSON
     } catch {
@@ -56,29 +56,29 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="space-y-2">
             <label className="text-sm font-semibold">Tên hệ thống đối tác</label>
-            <Input 
+            <Input
               required
-              value={systemName} 
-              onChange={e => setSystemName(e.target.value)} 
-              placeholder="Ví dụ: Trục liên thông quốc gia" 
+              value={systemName}
+              onChange={e => setSystemName(e.target.value)}
+              placeholder="Ví dụ: Trục liên thông quốc gia"
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold">Mã liên thông (Integration Code)</label>
-            <Input 
+            <Input
               required
-              value={integrationCode} 
-              onChange={e => setIntegrationCode(e.target.value)} 
-              placeholder="Mã định danh duy nhất" 
+              value={integrationCode}
+              onChange={e => setIntegrationCode(e.target.value)}
+              placeholder="Mã định danh duy nhất"
               className="font-mono bg-slate-50"
             />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold">Cấu hình JSON (Config)</label>
-            <Textarea 
+            <Textarea
               required
-              value={configData} 
-              onChange={e => setConfigData(e.target.value)} 
+              value={configData}
+              onChange={e => setConfigData(e.target.value)}
               className="font-mono text-sm h-32 bg-slate-900 text-green-400"
             />
           </div>

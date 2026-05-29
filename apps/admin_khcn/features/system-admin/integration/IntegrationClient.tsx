@@ -15,16 +15,15 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useIntegrationList, useDeleteIntegration, useToggleActiveIntegration } from './api';
-import type { IntegrationConfig } from './api';
-import { IntegrationModal } from './IntegrationModal';
+import { useIntegrationList, useDeleteIntegration, useToggleActiveIntegration, IntegrationConfig } from './api';
+import { IntegrationModal } from './';
 
 export function IntegrationClient() {
   const [search, setSearch] = useState('');
   const { data: integrations = [], isLoading } = useIntegrationList(search);
   const deleteMutation = useDeleteIntegration();
   const toggleMutation = useToggleActiveIntegration();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
 
@@ -108,7 +107,7 @@ export function IntegrationClient() {
                         {item.configData}
                       </TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge
                           variant={item.isActive ? "default" : "secondary"}
                           className="cursor-pointer"
                           onClick={() => handleToggle(item.id, item.isActive)}
@@ -133,11 +132,11 @@ export function IntegrationClient() {
         </Card>
       </div>
 
-      <IntegrationModal 
+      <IntegrationModal
         key={isModalOpen ? (editingItem?.id || 'new') : 'closed'}
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        initialData={editingItem} 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        initialData={editingItem}
       />
     </div>
   );
