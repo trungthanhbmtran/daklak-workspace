@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class MasterPlansService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(query: any) {
     const where: any = {};
@@ -56,10 +56,10 @@ export class MasterPlansService {
   async findById(id: number) {
     const mp = await this.prisma.masterPlan.findUnique({
       where: { id },
-      include: { 
+      include: {
         tasks: {
           include: { assignee: true }
-        } 
+        }
       }
     });
     if (!mp) return null;
@@ -156,14 +156,14 @@ export class MasterPlansService {
   async getHistoricalFeasibility(query: any) {
     // Tiêu chí: cùng một công việc (dựa vào title hoặc type), cùng thời gian yêu cầu (duration), thời gian gần nhất
     const { title, type, durationDays } = query;
-    
+
     let whereClause: any = {
       status: 'COMPLETED' // Chỉ tính các kế hoạch đã xong để lấy dữ liệu thực tế
     };
-    
+
     if (type) whereClause.type = type;
     if (title) whereClause.title = { contains: title };
-    
+
     // Tìm các kế hoạch thoả mãn
     const pastPlans = await this.prisma.masterPlan.findMany({
       where: whereClause,
