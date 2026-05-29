@@ -120,6 +120,7 @@ export const TaskScalarFieldEnum = {
   supervisorCode: 'supervisorCode',
   documentIds: 'documentIds',
   workflowInstId: 'workflowInstId',
+  startDate: 'startDate',
   dueDate: 'dueDate',
   completionDate: 'completionDate',
   createdAt: 'createdAt',
