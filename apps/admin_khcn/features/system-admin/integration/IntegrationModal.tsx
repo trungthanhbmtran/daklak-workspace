@@ -53,8 +53,8 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
         toast.success('Tạo mới thành công');
       }
       onClose();
-    } catch (e: any) {
-      toast.error(e.message || 'Lỗi khi lưu');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Lỗi khi lưu');
     }
   };
 

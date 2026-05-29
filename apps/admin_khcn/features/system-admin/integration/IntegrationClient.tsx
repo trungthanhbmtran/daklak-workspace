@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Plus, Search, Trash2, Edit, CheckCircle2, XCircle } from 'lucide-react';
+import { Plus, Search, Trash2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,8 +32,8 @@ export function IntegrationClient() {
       try {
         await deleteMutation.mutateAsync(id);
         toast.success('Xóa thành công');
-      } catch (e: any) {
-        toast.error(e.message || 'Lỗi khi xóa');
+      } catch (e: unknown) {
+        toast.error(e instanceof Error ? e.message : 'Lỗi khi xóa');
       }
     }
   };
@@ -42,8 +42,8 @@ export function IntegrationClient() {
     try {
       await toggleMutation.mutateAsync({ id, isActive: !currentStatus });
       toast.success('Cập nhật trạng thái thành công');
-    } catch (e: any) {
-      toast.error(e.message || 'Lỗi khi cập nhật trạng thái');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Lỗi khi cập nhật trạng thái');
     }
   };
 
