@@ -35,6 +35,7 @@ async function bootstrap() {
         longs: String,
         enums: String,
         defaults: true,
+        includeDirs: [protoRoot],
       },
     },
   });
