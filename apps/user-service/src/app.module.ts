@@ -7,6 +7,7 @@ import { CategoriesModule } from '@/modules/categories/categories.module';
 import { MenusModule } from '@/modules/menus/menus.module';
 import { OrganizationsModule } from '@/modules/organizations/organizations.module';
 import { ConfigsModule } from './configs/configs.module';
+import { IntegrationModule } from './modules/integration/integration.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConfigsModule } from './configs/configs.module';
     MenusModule,
     OrganizationsModule,
     ConfigsModule,
+    IntegrationModule,
   ],
 })
 export class AppModule {}

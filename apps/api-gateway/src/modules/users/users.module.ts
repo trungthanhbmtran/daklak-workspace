@@ -9,6 +9,7 @@ import { CategoriesController, PublicCategoriesController } from './categories.c
 import { MenusController } from './menus.controller';
 import { OrganizationsController, PublicOrganizationsController } from './organizations.controller';
 import { ConfigsController } from './configs.controller';
+import { AdminIntegrationController } from './integration.controller';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ConfigsController } from './configs.controller';
     registerGrpcService(MICROSERVICES.MENU),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
+    registerGrpcService(MICROSERVICES.INTEGRATION),
   ],
   controllers: [
     UserController,
@@ -30,6 +32,7 @@ import { ConfigsController } from './configs.controller';
     OrganizationsController,
     PublicOrganizationsController,
     ConfigsController,
+    AdminIntegrationController,
   ],
 })
 export class UsersModule {}

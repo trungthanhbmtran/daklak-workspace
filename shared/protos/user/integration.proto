@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package integration;
+
+import "common/common.proto";
+
+service IntegrationService {
+  rpc FindAll (FindAllIntegrationRequest) returns (FindAllIntegrationResponse) {}
+  rpc Create (CreateIntegrationRequest) returns (IntegrationDataResponse) {}
+  rpc Update (UpdateIntegrationRequest) returns (IntegrationDataResponse) {}
+  rpc Delete (DeleteIntegrationRequest) returns (DeleteIntegrationResponse) {}
+  rpc ToggleActive (ToggleActiveIntegrationRequest) returns (IntegrationDataResponse) {}
+}
+
+message IntegrationConfigResponse {
+  int32 id = 1;
+  string systemName = 2;
+  string integrationCode = 3;
+  string configData = 4; // JSON string
+  bool isActive = 5;
+  string createdAt = 6;
+  string updatedAt = 7;
+}
+
+message FindAllIntegrationRequest {
+  string search = 1;
+}
+
+message FindAllIntegrationResponse {
+  bool success = 1;
+  string message = 2;
+  repeated IntegrationConfigResponse data = 3;
+}
+
+message IntegrationDataResponse {
+  bool success = 1;
+  string message = 2;
+  IntegrationConfigResponse data = 3;
+}
+
+message CreateIntegrationRequest {
+  string systemName = 1;
+  string integrationCode = 2;
+  string configData = 3;
+}
+
+message UpdateIntegrationRequest {
+  int32 id = 1;
+  string systemName = 2;
+  string integrationCode = 3;
+  string configData = 4;
+}
+
+message DeleteIntegrationRequest {
+  int32 id = 1;
+}
+
+message DeleteIntegrationResponse {
+  bool success = 1;
+  string message = 2;
+}
+
+message ToggleActiveIntegrationRequest {
+  int32 id = 1;
+  bool isActive = 2;
+}
