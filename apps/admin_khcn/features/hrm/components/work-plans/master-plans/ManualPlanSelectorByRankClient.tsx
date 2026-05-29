@@ -73,7 +73,7 @@ export function ManualPlanSelectorByRankClient() {
         if (!task || addedPlans.some(p => p.title === task.taskName)) return;
 
         setAddedPlans([...addedPlans, {
-            id: crypto.randomUUID(),
+            id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             title: task.taskName,
             rankType: activeRankFilter,
             targetValue: targetValue,
