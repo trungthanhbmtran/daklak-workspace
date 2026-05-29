@@ -3,6 +3,18 @@
 import apiClient from "@/lib/axiosInstance";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+export interface LGSPConfigData {
+  type: 'LGSP' | 'WEBHOOK' | 'SYSTEM';
+  keys?: {
+    clientId: string;
+    clientSecret: string;
+    publicKey?: string;
+    privateKey?: string;
+  };
+  permissions?: string[];
+  [key: string]: any;
+}
+
 export interface IntegrationConfig {
   id: number;
   systemName: string;
