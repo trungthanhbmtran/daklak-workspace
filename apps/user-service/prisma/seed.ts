@@ -2668,6 +2668,14 @@ async function main() {
       order: 7,
       res: 'SYSTEM',
     },
+    {
+      code: 'ADMIN_INTEGRATION',
+      name: 'Trung tâm Liên thông',
+      route: 'integration',
+      icon: 'swap-horizontal-outline',
+      order: 8,
+      res: 'INTEGRATION',
+    },
   ];
 
   for (const { res, ...m } of adminMenus) {
