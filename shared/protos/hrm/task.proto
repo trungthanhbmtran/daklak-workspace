@@ -84,6 +84,7 @@ message TaskResponse {
   int32 planId = 16;
   string assigneeName = 17;
   int32 departmentId = 18;
+  string startDate = 19;
 }
 
 message CreateTaskRequest {
@@ -101,6 +102,7 @@ message CreateTaskRequest {
   string supervisorCode = 11;
   int32 planId = 12;
   int32 departmentId = 13;
+  string startDate = 14;
 }
 
 message ListTasksRequest {

@@ -1,19 +1,28 @@
 "use client";
 
 import React, { useState } from 'react';
+import { aiApi } from '../../../api/ai.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target } from 'lucide-react';
+import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target, Sparkles, BrainCircuit } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
 import { useTaskTemplatesList, useCreateTask } from '../../../hooks';
 
 export function TaskCreateClient() {
   const [assignee, setAssignee] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
   const [taskName, setTaskName] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [priority, setPriority] = useState('MEDIUM');
+  const [baseScore, setBaseScore] = useState(10);
+  
+  const [aiInstruction, setAiInstruction] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
@@ -41,13 +50,73 @@ export function TaskCreateClient() {
   const newLoad = selectedEmp ? selectedEmp.currentLoad + taskWeight : 0;
   const isOverload = selectedEmp ? newLoad > selectedEmp.rankLimit : false;
 
+  const handleAiAssign = async () => {
+    if (!aiInstruction.trim()) {
+      toast.error('Vui lòng nhập yêu cầu công việc để AI phân tích.');
+      return;
+    }
+    
+    setIsAiLoading(true);
+    try {
+      const employeesContext = employees.map(e => `${e.code} - ${e.name} (Ngạch: ${e.rank}, Load: ${e.currentLoad}/${e.rankLimit})`).join('\\n');
+      
+      const initRes = await aiApi.generateTaskAssignment({
+        instruction: aiInstruction,
+        employeesContext
+      });
+
+      if (initRes.jobId) {
+        const intervalId = setInterval(async () => {
+          try {
+            const jobStatus = await aiApi.getAiJobStatus(initRes.jobId);
+            if (jobStatus.status === 'COMPLETED') {
+              clearInterval(intervalId);
+              setIsAiLoading(false);
+              
+              const result = jobStatus.result || jobStatus.data;
+              if (result) {
+                if (result.taskName) setTaskName(result.taskName);
+                if (result.assigneeCode && employees.find(e => e.code === result.assigneeCode)) setAssignee(result.assigneeCode);
+                if (result.startDate) setStartDate(result.startDate);
+                if (result.dueDate) setDueDate(result.dueDate);
+                if (result.priority) setPriority(result.priority);
+                if (result.weight) setTaskWeight(result.weight);
+                if (result.baseScore) setBaseScore(result.baseScore);
+                
+                toast.success('AI đã phân tích và điền form thành công! Lý do: ' + (result.reasoning || ''));
+              }
+            } else if (jobStatus.status === 'FAILED') {
+              clearInterval(intervalId);
+              setIsAiLoading(false);
+              toast.error(jobStatus.error || 'Lỗi trong quá trình AI phân tích');
+            }
+          } catch (e) {
+            console.warn('Polling error', e);
+          }
+        }, 2000);
+      }
+    } catch (e: any) {
+      setIsAiLoading(false);
+      toast.error(e.message || 'Có lỗi xảy ra khi gọi AI');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isOverload) {
       toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức ngạch của nhân sự!');
     } else {
       try {
-        await createTask({ assignee, taskName, weight: taskWeight, templateId: selectedTemplateId });
+        await createTask({ 
+          assigneeCode: assignee, 
+          taskName, 
+          weight: taskWeight,
+          startDate,
+          dueDate,
+          priority,
+          baseScore,
+          templateId: selectedTemplateId 
+        });
         toast.success('Giao việc thành công!');
       } catch (err) {
         toast.error('Lỗi khi giao việc');
@@ -65,7 +134,43 @@ export function TaskCreateClient() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-        <div className="md:col-span-8">
+        <div className="md:col-span-8 space-y-6">
+          <Card className="shadow-sm border-indigo-100 bg-indigo-50/30">
+            <CardHeader className="pb-3 border-b border-indigo-100">
+              <CardTitle className="text-md flex items-center gap-2 text-indigo-800">
+                <Sparkles className="w-5 h-5 text-indigo-500" />
+                Phân công tự động bằng AI
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-4 space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-slate-700">Yêu cầu công việc (Nói bằng ngôn ngữ tự nhiên)</label>
+                <Textarea 
+                  placeholder="Ví dụ: Giao cho một bạn làm frontend thiết kế trang chủ mới trong 3 ngày tới, độ ưu tiên cao..."
+                  value={aiInstruction}
+                  onChange={e => setAiInstruction(e.target.value)}
+                  className="bg-white resize-none"
+                  rows={3}
+                />
+              </div>
+              <Button 
+                onClick={handleAiAssign} 
+                disabled={isAiLoading}
+                className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold"
+              >
+                {isAiLoading ? (
+                  <span className="flex items-center gap-2">
+                    <BrainCircuit className="w-4 h-4 animate-pulse" /> Đang phân tích và tìm kiếm nhân sự...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" /> Gợi ý Phân công ngay
+                  </span>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
           <Card className="shadow-sm">
             <CardHeader className="bg-slate-50 border-b">
               <CardTitle className="text-lg">Thông tin Công việc</CardTitle>
@@ -84,12 +189,19 @@ export function TaskCreateClient() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-slate-700">Hạn chót</label>
-                    <Input type="date" required />
+                    <label className="text-sm font-bold text-slate-700">Ngày bắt đầu</label>
+                    <Input type="date" required value={startDate} onChange={e => setStartDate(e.target.value)} />
                   </div>
                   <div className="space-y-2">
+                    <label className="text-sm font-bold text-slate-700">Hạn chót</label>
+                    <Input type="date" required value={dueDate} onChange={e => setDueDate(e.target.value)} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
                     <label className="text-sm font-bold text-slate-700">Mức độ ưu tiên</label>
-                    <Select defaultValue="MEDIUM">
+                    <Select value={priority} onValueChange={setPriority}>
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="HIGH">Cao</SelectItem>
@@ -97,6 +209,8 @@ export function TaskCreateClient() {
                         <SelectItem value="LOW">Thấp</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  <div className="space-y-2">
                   </div>
                 </div>
 
@@ -111,7 +225,7 @@ export function TaskCreateClient() {
                     </div>
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-slate-700">Điểm cơ bản (Base Score)</label>
-                      <Input type="number" defaultValue={10} required />
+                      <Input type="number" value={baseScore} onChange={e => setBaseScore(Number(e.target.value))} required />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">

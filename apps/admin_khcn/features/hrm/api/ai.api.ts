@@ -44,6 +44,47 @@ export const aiApi = {
   },
 
   /**
+   * Phân công công việc tự động bằng AI
+   */
+  async generateTaskAssignment(payload: {
+    instruction: string;
+    employeesContext: string;
+  }) {
+    const defaultPrompt = `Bạn là Trưởng phòng nhân sự, đang cần phân công một công việc dựa trên yêu cầu sau:
+Yêu cầu công việc: "{instruction}"
+
+Danh sách nhân viên (kèm Ngạch/Chức danh, khối lượng công việc hiện tại):
+{employeesContext}
+
+Hãy phân tích yêu cầu và gợi ý người phù hợp nhất (ưu tiên người đúng chuyên môn/ngạch và đang có khối lượng công việc thấp). Đồng thời bóc tách thời gian, mức độ ưu tiên.
+
+Trả về duy nhất 1 JSON object (không bọc trong mảng) theo cấu trúc sau:
+{
+  "taskName": "Tên công việc ngắn gọn",
+  "assigneeCode": "Mã nhân viên được đề xuất",
+  "startDate": "YYYY-MM-DD",
+  "dueDate": "YYYY-MM-DD",
+  "priority": "HIGH/MEDIUM/LOW",
+  "weight": 20,
+  "baseScore": 10,
+  "reasoning": "Giải thích ngắn gọn lý do chọn người này"
+}
+Lưu ý: Nếu không rõ ngày, hãy lấy mốc thời gian tương đối tính từ ngày hôm nay (${new Date().toISOString().split('T')[0]}).`;
+
+    let promptTemplate = await this.getPromptConfig('AI_PROMPT_TASK_ASSIGNMENT', defaultPrompt);
+    const prompt = promptTemplate
+      .replace(/{instruction}/g, payload.instruction)
+      .replace(/{employeesContext}/g, payload.employeesContext);
+
+    const res = await apiClient.post('/ai/generate', { prompt }, { timeout: AI_API_TIMEOUT_MS }) as any;
+    
+    if (typeof res.data === 'object') {
+      return res.data;
+    }
+    throw new Error("Không thể khởi tạo tiến trình AI (Task Assignment).");
+  },
+
+  /**
    * Sinh danh sách chỉ tiêu/hành động cho Kế hoạch (Master Plan)
    */
   async generateMasterPlanTasks(payload: {

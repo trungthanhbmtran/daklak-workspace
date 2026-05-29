@@ -24,6 +24,7 @@ model Task {
   documentIds    Json?     @map("document_ids") // Lưu array of strings/UUIDs
   workflowInstId String?   @map("workflow_instance_id")
 
+  startDate      DateTime? @map("start_date") @db.Date
   dueDate        DateTime? @map("due_date") @db.Date
   completionDate DateTime? @map("completion_date")
   createdAt      DateTime  @default(now()) @map("created_at")

@@ -148,6 +148,7 @@ export class TasksService {
         assignerCode: data.assignerCode || '',
         departmentId: data.departmentId || null,
         status: 'TODO',
+        startDate: data.startDate ? new Date(data.startDate) : null,
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         baseScore: data.baseScore,
         weight: data.weight,
@@ -161,6 +162,7 @@ export class TasksService {
 
     return {
       ...t,
+      startDate: t.startDate?.toISOString() || '',
       dueDate: t.dueDate?.toISOString() || '',
       createdAt: t.createdAt?.toISOString() || '',
       updatedAt: t.updatedAt?.toISOString() || '',
