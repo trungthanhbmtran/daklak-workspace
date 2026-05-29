@@ -72,7 +72,7 @@ export function MasterPlanForm() {
 
     setAiStep(1);
     try {
-      const result = await aiApi.evaluatePlanFeasibility({
+      const initRes = await aiApi.evaluatePlanFeasibility({
         title: planTitle,
         objective: planObjective,
         durationDays: 30, // Default duration
@@ -81,37 +81,61 @@ export function MasterPlanForm() {
         rolesContext: 'Chuyên viên, Lãnh đạo Sở, Trưởng phòng'
       });
 
-      const feasibility = result.find((r: any) => r.type === 'FEASIBILITY_ANALYSIS');
-      setFeasibilityInfo(feasibility);
+      if (initRes.jobId && initRes.status === 'PROCESSING') {
+        // Start polling
+        const intervalId = setInterval(async () => {
+          try {
+            const jobStatus = await aiApi.getAiJobStatus(initRes.jobId);
+            if (jobStatus.status === 'COMPLETED') {
+              clearInterval(intervalId);
+              const result = jobStatus.result || jobStatus.data;
+              
+              const feasibility = result.find((r: any) => r.type === 'FEASIBILITY_ANALYSIS');
+              setFeasibilityInfo(feasibility);
 
-      const aiTasks = result.filter((r: any) => r.type === 'TASK');
+              const aiTasks = result.filter((r: any) => r.type === 'TASK');
 
-      if (aiTasks.length > 0) {
-        const aiItems: TargetPlanItem[] = aiTasks.map((t: any, index: number) => {
-          const matchedRank = state.ranks.find((r: any) =>
-            r.name.toLowerCase().includes((t.assigneeRole || '').toLowerCase()) ||
-            (t.assigneeRole || '').toLowerCase().includes(r.name.toLowerCase())
-          );
+              if (aiTasks.length > 0) {
+                const aiItems: TargetPlanItem[] = aiTasks.map((t: any, index: number) => {
+                  const matchedRank = state.ranks.find((r: any) =>
+                    r.name.toLowerCase().includes((t.assigneeRole || '').toLowerCase()) ||
+                    (t.assigneeRole || '').toLowerCase().includes(r.name.toLowerCase())
+                  );
 
-          return {
-            id: `ai-${Date.now()}-${index}`,
-            title: t.title || '',
-            framework: framework,
-            perspective: 'DIGITAL_TRANSFORM',
-            legalBasis: t.reasoning || 'N/A',
-            metricFactor: t.weight || 10,
-            targetValue: t.targetValue || 100,
-            unit: '%',
-            supervisor: 'N/A',
-            rankType: matchedRank ? matchedRank.code : (t.assigneeRole || 'ALL'),
-            rankId: matchedRank ? matchedRank.id : 0,
-            aiStatus: 'RECOMMENDED'
-          };
-        });
-        setItems(aiItems);
-        toast.success("AI đã sinh thành công danh mục chỉ tiêu và đánh giá độ khả thi!");
+                  return {
+                    id: `ai-${Date.now()}-${index}`,
+                    title: t.title || '',
+                    framework: framework,
+                    perspective: 'DIGITAL_TRANSFORM',
+                    legalBasis: t.reasoning || 'N/A',
+                    metricFactor: t.weight || 10,
+                    targetValue: t.targetValue || 100,
+                    unit: '%',
+                    supervisor: 'N/A',
+                    rankType: matchedRank ? matchedRank.code : (t.assigneeRole || 'ALL'),
+                    rankId: matchedRank ? matchedRank.id : 0,
+                    aiStatus: 'RECOMMENDED'
+                  };
+                });
+                setItems(aiItems);
+                toast.success("AI đã sinh thành công danh mục chỉ tiêu và đánh giá độ khả thi!");
+              }
+              setAiStep(2);
+            } else if (jobStatus.status === 'FAILED') {
+              clearInterval(intervalId);
+              toast.error("Lỗi sinh tự động: " + (jobStatus.error || "Không xác định"));
+              setAiStep(0);
+            }
+          } catch (pollErr) {
+             // Silently ignore poll errors, might be intermittent network issue
+             console.warn("Polling error", pollErr);
+          }
+        }, 3000); // Poll every 3 seconds
+      } else {
+        // Fallback if not async
+        toast.error("Không thể khởi tạo tiến trình AI.");
+        setAiStep(0);
       }
-      setAiStep(2);
     } catch (error: any) {
       console.error(error);
       toast.error("Lỗi sinh tự động: " + (error.message || "Không xác định"));

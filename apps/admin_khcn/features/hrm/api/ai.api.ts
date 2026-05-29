@@ -1,14 +1,27 @@
 import apiClient from "@/lib/axiosInstance";
+import { AI_API_TIMEOUT_MS } from "@/config/constants";
+
+// Cache for system configs to avoid redundant API calls
+let configCache: any[] | null = null;
+let configCacheTime = 0;
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export const aiApi = {
   /**
-   * Helper function to get a system config by key
+   * Helper function to get a system config by key with caching
    */
   async getPromptConfig(key: string, defaultPrompt: string): Promise<string> {
     try {
-      const res = await apiClient.get('/system-configs') as any;
-      if (res.status === 'success' && res.data) {
-        const config = res.data.find((c: any) => c.key === key);
+      if (!configCache || Date.now() - configCacheTime > CACHE_TTL_MS) {
+        const res = await apiClient.get('/system-configs') as any;
+        if (res.status === 'success' && Array.isArray(res.data)) {
+          configCache = res.data;
+          configCacheTime = Date.now();
+        }
+      }
+
+      if (configCache) {
+        const config = configCache.find((c: any) => c.key === key);
         if (config && config.value) {
           return config.value;
         }
@@ -17,6 +30,17 @@ export const aiApi = {
       console.warn(`Could not fetch config ${key}, using fallback prompt.`);
     }
     return defaultPrompt;
+  },
+
+  /**
+   * Truy vấn trạng thái của một AI Job đang chạy trong Background
+   */
+  async getAiJobStatus(jobId: string) {
+    const res = await apiClient.get(`/ai/jobs/${jobId}`) as any;
+    if (res.status === 'success') {
+      return res.data;
+    }
+    throw new Error(res.message || "Lỗi khi truy vấn trạng thái AI Job");
   },
 
   /**
@@ -60,7 +84,7 @@ Trả về một mảng JSON thuần túy (KHÔNG CÓ markdown format \`\`\`json
       .replace(/{orgContext}/g, payload.orgContext)
       .replace(/{rolesContext}/g, payload.rolesContext);
 
-    const res = await apiClient.post('/ai/generate', { prompt }) as any;
+    const res = await apiClient.post('/ai/generate', { prompt }, { timeout: AI_API_TIMEOUT_MS }) as any;
     return this.parseJsonResponse(res);
   },
 
@@ -107,7 +131,7 @@ Trả về định dạng JSON thuần túy (không chứa markdown như \`\`\`j
       .replace(/{title}/g, payload.title)
       .replace(/{objective}/g, payload.objective);
 
-    const res = await apiClient.post('/ai/generate', { prompt }) as any;
+    const res = await apiClient.post('/ai/generate', { prompt }, { timeout: AI_API_TIMEOUT_MS }) as any;
     return this.parseJsonResponse(res);
   },
 
@@ -185,7 +209,7 @@ Trả về một mảng JSON thuần túy (chỉ bao gồm mảng [], không ch�
       .replace(/{rolesContext}/g, payload.rolesContext)
       .replace(/{historyStr}/g, historyStr);
 
-    const res = await apiClient.post('/ai/generate', { prompt }) as any;
+    const res = await apiClient.post('/ai/generate', { prompt }, { timeout: AI_API_TIMEOUT_MS }) as any;
     return this.parseJsonResponse(res);
   },
 
@@ -194,13 +218,20 @@ Trả về một mảng JSON thuần túy (chỉ bao gồm mảng [], không ch�
    */
   parseJsonResponse(res: any) {
     if (res.status === 'success' && res.data) {
-      let jsonStr = res.data;
-      if (jsonStr.startsWith('\`\`\`json')) {
-        jsonStr = jsonStr.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
-      } else if (jsonStr.startsWith('\`\`\`')) {
-        jsonStr = jsonStr.replace(/\`\`\`/g, '').trim();
+      // If backend returns an object directly (like { jobId, status })
+      if (typeof res.data === 'object') {
+        return res.data;
       }
-      return JSON.parse(jsonStr);
+
+      let jsonStr = res.data;
+      if (typeof jsonStr === 'string') {
+        if (jsonStr.startsWith('```json')) {
+          jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+        } else if (jsonStr.startsWith('```')) {
+          jsonStr = jsonStr.replace(/```/g, '').trim();
+        }
+        return JSON.parse(jsonStr);
+      }
     }
     
     // Nếu có lỗi, bóc message từ res.data (do NestJS TransformInterceptor bọc lại)

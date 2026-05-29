@@ -109,7 +109,47 @@ export const postsApi = {
     apiClient.post("/posts/tags", data).then((res: any) => res.data),
 
   // Translation
-  translate: (text: string, targetLang: string) =>
-    apiClient.post("/translate", { text, targetLang }).then((res: any) => res.data),
+  // Translation with built-in Polling
+  translate: async (text: string, targetLang: string) => {
+    // 1. Submit translation job
+    const initRes = await apiClient.post("/translate", { text, targetLang }) as any;
+    
+    // Check if backend returned the old format directly (fallback)
+    if (initRes.translated_text || initRes.data?.translated_text) {
+      return initRes.data || initRes;
+    }
+
+    // 2. Extract jobId from new async format
+    const jobId = initRes.data?.jobId || initRes.jobId;
+    if (!jobId) {
+      throw new Error("Không thể khởi tạo tiến trình dịch thuật.");
+    }
+
+    // 3. Start polling
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    const maxRetries = 30; // Max 1 minute (2s * 30)
+    let retries = 0;
+
+    while (retries < maxRetries) {
+      await delay(2000);
+      try {
+        const statusRes = await apiClient.get(`/translate/jobs/${jobId}`) as any;
+        const jobStatus = statusRes.data;
+
+        if (jobStatus.status === 'COMPLETED') {
+          return jobStatus.result || jobStatus.data;
+        } else if (jobStatus.status === 'FAILED') {
+          throw new Error(jobStatus.error || "Lỗi trong quá trình dịch thuật");
+        }
+        // If PROCESSING, continue polling
+        retries++;
+      } catch (err) {
+        console.warn("Polling translate error", err);
+        retries++; // Continue polling even if network blips
+      }
+    }
+
+    throw new Error("Quá thời gian chờ dịch thuật (Timeout).");
+  },
 
 };

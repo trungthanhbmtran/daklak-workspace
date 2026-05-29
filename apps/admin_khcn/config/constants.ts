@@ -8,6 +8,7 @@ export const API_BASE_URL = "/api/v1/admin";
 export const API_PREFIX = "/api/v1";
 
 export const API_TIMEOUT_MS = 15000;
+export const AI_API_TIMEOUT_MS = 90000;
 
 /** React Query keys */
 export const QUERY_KEY_PREFIX = {

@@ -55,6 +55,20 @@ async function bootstrap() {
   app.useGlobalFilters(new RpcExceptionFilter());
 
   const port = process.env.PORT || 8080;
+  
+  // Connect RabbitMQ Microservice for processing background jobs
+  app.connectMicroservice({
+    transport: 5, // Transport.RMQ
+    options: {
+      urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+      queue: 'ai_tasks_queue',
+      queueOptions: {
+        durable: true
+      },
+    },
+  });
+  
+  await app.startAllMicroservices();
   await app.listen(port, '0.0.0.0');
 
   logger.log(`🚀 Gateway đang chạy tại: http://localhost:${port}/api/v1`);

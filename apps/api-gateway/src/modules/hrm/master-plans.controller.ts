@@ -17,16 +17,16 @@ export class MasterPlansController implements OnModuleInit {
     return firstValueFrom(this.masterPlanService.FindAll({ type, status }));
   }
 
-  @Get(':id')
-  async findById(@Param('id') id: string) {
-    const data = (await firstValueFrom(this.masterPlanService.FindById({ id: parseInt(id, 10) }))) as any;
-    return { status: 'success', data };
-  }
-
   @Get('advanced/historical-feasibility')
   async getHistoricalFeasibility(@Query('type') type: string, @Query('title') title: string, @Query('durationDays') durationDays: string) {
     const data = (await firstValueFrom(this.masterPlanService.GetHistoricalFeasibility({ type, title, durationDays: parseInt(durationDays || '0', 10) }))) as any;
     return data;
+  }
+
+  @Get(':id')
+  async findById(@Param('id') id: string) {
+    const data = (await firstValueFrom(this.masterPlanService.FindById({ id: parseInt(id, 10) }))) as any;
+    return { status: 'success', data };
   }
 
   @Post('ai-generate')

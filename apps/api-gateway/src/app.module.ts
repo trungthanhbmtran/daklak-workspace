@@ -11,6 +11,7 @@ import { MediaModule } from './modules/media/media.module';
 import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
 import { AiModule } from './modules/ai/ai.module';
+import { RedisModule } from './core/redis/redis.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { AiModule } from './modules/ai/ai.module';
     MediaModule,
     WorkflowModule,
     TranslateModule,
-    AiModule
+    AiModule,
+    RedisModule
   ],
   controllers: [AppController],
   providers: [],
