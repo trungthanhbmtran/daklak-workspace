@@ -1,7 +1,6 @@
 "use client";
 
-import { Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase, BrainCircuit } from "lucide-react";
-import { AdvancedAIPlanDialog } from "../AdvancedAIPlanDialog";
+import { Plus, Calendar, FileText, CheckCircle2, ChevronRight, Briefcase } from "lucide-react";
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,6 @@ export function MasterPlanSidebar() {
   const { state, actions } = useMasterPlanContext();
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
-  const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
 
   const filteredPlans = state.masterPlans.filter(p =>
     p.title.toLowerCase().includes(searchTerm.toLowerCase())
@@ -30,32 +28,14 @@ export function MasterPlanSidebar() {
           <div className="flex items-center gap-2">
             <Button
               size="sm"
-              variant="outline"
-              className="h-8 px-3 rounded-lg shadow-sm"
-              onClick={() => setIsAiDialogOpen(true)}
-            >
-              <BrainCircuit className="w-4 h-4 mr-1 text-indigo-600" />
-              Lập KH AI
-            </Button>
-            <AdvancedAIPlanDialog
-              isOpen={isAiDialogOpen}
-              onClose={() => setIsAiDialogOpen(false)}
-              onSuccess={(planData) => {
-                actions.select(null);
-                actions.setMode("create");
-                // In a real scenario we could pre-fill the form using planData here
-              }}
-            />
-            <Button
-              size="sm"
-              className="h-8 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white h-8 px-3 rounded-lg shadow-sm"
               onClick={() => {
                 actions.select(null);
                 actions.setMode("create");
               }}
             >
               <Plus className="w-4 h-4 mr-1" />
-              Tạo mới
+              Lập Kế hoạch
             </Button>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import {
-  FolderPlus, Sparkles, GitMerge, Trash2, ClipboardCheck
+  FolderPlus, Sparkles, GitMerge, Trash2, ClipboardCheck, BrainCircuit, Activity
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useMasterPlanContext, type ManagementFramework, type GovPerspective } from './MasterPlanContext';
@@ -42,7 +42,8 @@ interface TargetPlanItem {
 export function MasterPlanForm() {
   const { state, actions } = useMasterPlanContext();
   const [framework, setFramework] = useState<ManagementFramework>('BSC_KPI');
-  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [aiStep, setAiStep] = useState(0); // 0: idle, 1: loading, 2: success
+  const [feasibilityInfo, setFeasibilityInfo] = useState<any>(null);
   const { mutateAsync: createMasterPlan } = useMutation({
     mutationFn: async (payload: any) => hrmPlansApi.create(payload)
   });
@@ -69,56 +70,52 @@ export function MasterPlanForm() {
       return;
     }
 
-    setIsAiProcessing(true);
+    setAiStep(1);
     try {
-      // Lấy dữ liệu tổ chức và chức danh
-      const orgTree = await organizationApi.getTree();
-      const { items: jobTitles } = await organizationApi.getJobTitles();
-
-      const orgContext = orgTree.map(o => o.name).join(', ');
-      const rolesContext = jobTitles.map(r => r.name).join(', ');
-
-      const parsed = await aiApi.generateMasterPlanTasks({
-        framework,
-        planTitle,
-        planObjective,
-        orgContext,
-        rolesContext
+      const result = await aiApi.evaluatePlanFeasibility({
+        title: planTitle,
+        objective: planObjective,
+        durationDays: 30, // Default duration
+        type: 'MASTER_PLAN',
+        orgContext: 'Văn phòng Sở, Thanh tra, Phòng Kế hoạch Tài chính, Quản lý Khoa học',
+        rolesContext: 'Chuyên viên, Lãnh đạo Sở, Trưởng phòng'
       });
 
-      if (Array.isArray(parsed)) {
-        const aiItems: TargetPlanItem[] = parsed.map((item: any, index: number) => {
-          // Tìm rankId tương ứng với rankType AI trả về, nếu không có thì lấy 0 (Tất cả)
+      const feasibility = result.find((r: any) => r.type === 'FEASIBILITY_ANALYSIS');
+      setFeasibilityInfo(feasibility);
+
+      const aiTasks = result.filter((r: any) => r.type === 'TASK');
+
+      if (aiTasks.length > 0) {
+        const aiItems: TargetPlanItem[] = aiTasks.map((t: any, index: number) => {
           const matchedRank = state.ranks.find((r: any) =>
-            r.name.toLowerCase().includes((item.rankType || '').toLowerCase()) ||
-            (item.rankType || '').toLowerCase().includes(r.name.toLowerCase())
+            r.name.toLowerCase().includes((t.assigneeRole || '').toLowerCase()) ||
+            (t.assigneeRole || '').toLowerCase().includes(r.name.toLowerCase())
           );
 
           return {
             id: `ai-${Date.now()}-${index}`,
-            title: item.title || '',
+            title: t.title || '',
             framework: framework,
-            perspective: item.perspective || 'DIGITAL_TRANSFORM',
-            legalBasis: item.legalBasis || 'N/A',
-            metricFactor: item.metricFactor || 10,
-            targetValue: item.targetValue || 100,
-            unit: item.unit || '%',
-            supervisor: item.supervisor || 'N/A',
-            rankType: matchedRank ? matchedRank.code : (item.rankType || 'ALL'),
+            perspective: 'DIGITAL_TRANSFORM',
+            legalBasis: t.reasoning || 'N/A',
+            metricFactor: t.weight || 10,
+            targetValue: t.targetValue || 100,
+            unit: '%',
+            supervisor: 'N/A',
+            rankType: matchedRank ? matchedRank.code : (t.assigneeRole || 'ALL'),
             rankId: matchedRank ? matchedRank.id : 0,
             aiStatus: 'RECOMMENDED'
           };
         });
         setItems(aiItems);
-        toast.success("AI đã sinh thành công danh mục chỉ tiêu!");
-      } else {
-        throw new Error("Dữ liệu trả về không phải là mảng JSON");
+        toast.success("AI đã sinh thành công danh mục chỉ tiêu và đánh giá độ khả thi!");
       }
+      setAiStep(2);
     } catch (error: any) {
       console.error(error);
       toast.error("Lỗi sinh tự động: " + (error.message || "Không xác định"));
-    } finally {
-      setIsAiProcessing(false);
+      setAiStep(0);
     }
   };
 
@@ -236,16 +233,54 @@ export function MasterPlanForm() {
         <div className="bg-indigo-50/50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
           <div>
             <h4 className="font-bold text-indigo-900 text-sm">AI Engine Phân rã Chỉ tiêu</h4>
-            <p className="text-xs text-indigo-700/70 mt-1">Hỗ trợ tự động tạo danh mục mục tiêu theo chuẩn {framework}</p>
+            <p className="text-xs text-indigo-700/70 mt-1">Phân tích khả năng thực thi và tự động tạo danh mục mục tiêu</p>
           </div>
           <Button
             onClick={handleAiGenerateFramework}
-            disabled={isAiProcessing}
+            disabled={aiStep === 1}
             className="bg-indigo-500 hover:bg-indigo-600 text-white"
           >
-            <Sparkles className="w-4 h-4 mr-2" /> {isAiProcessing ? "Đang xử lý..." : "Sinh tự động"}
+            {aiStep === 1 ? <><BrainCircuit className="w-4 h-4 mr-2 animate-pulse" /> Đang xử lý...</> : <><Sparkles className="w-4 h-4 mr-2" /> Phân tích & Sinh tự động</>}
           </Button>
         </div>
+
+        {aiStep === 1 && (
+            <div className="py-8 flex flex-col items-center justify-center space-y-4">
+              <div className="relative">
+                <div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <BrainCircuit className="w-6 h-6 text-indigo-500 animate-pulse" />
+                </div>
+              </div>
+              <div className="text-center space-y-1">
+                <h3 className="text-md font-bold text-slate-800">AI đang đối chiếu dữ liệu...</h3>
+                <p className="text-slate-500 text-sm">Đang tính toán tỷ lệ khả thi và tối ưu nguồn lực nhân sự...</p>
+              </div>
+            </div>
+        )}
+
+        {aiStep === 2 && feasibilityInfo && (
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex items-start gap-4">
+                <div className="flex-shrink-0 relative w-20 h-20">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <path className="text-slate-100" strokeWidth="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <path className={`${feasibilityInfo.score >= 70 ? 'text-emerald-500' : feasibilityInfo.score >= 50 ? 'text-amber-500' : 'text-rose-500'}`} strokeDasharray={`${feasibilityInfo.score}, 100`} strokeWidth="3" strokeLinecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-xl font-bold text-slate-700">{feasibilityInfo.score}%</span>
+                  </div>
+                </div>
+                <div className="flex-1 space-y-2">
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-indigo-500" />
+                    Đánh giá Tỷ lệ Khả thi
+                  </h3>
+                  <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    {feasibilityInfo.advice}
+                  </p>
+                </div>
+              </div>
+        )}
 
         <form onSubmit={handleAddItem} className="space-y-4 pt-4 border-t border-slate-100">
           <h3 className="text-sm font-bold text-slate-800 flex items-center gap-2 mb-4">
