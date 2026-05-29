@@ -59,10 +59,29 @@ export function ManualPlanSelectorByRankClient() {
 
     const [activeRankFilter, setActiveRankFilter] = useState<string>('PRINCIPAL_SPECIALIST');
     const [addedPlans, setAddedPlans] = useState<SelectedPlanItem[]>([]);
-    const [globalValue, setGlobalValue] = useState<number>(1);
+    const [selectedTaskId, setSelectedTaskId] = useState<string>('');
+    const [targetValue, setTargetValue] = useState<number>(1);
 
     const router = useRouter();
     const { mutateAsync: createPlan, isPending } = useCreateMasterPlan();
+
+    const availableTasks = rankTasksRepository.filter(item => item.rank === activeRankFilter);
+
+    const handleAssignTask = () => {
+        const task = availableTasks.find(t => t.id === selectedTaskId);
+        if (!task || addedPlans.some(p => p.title === task.taskName)) return;
+        
+        setAddedPlans([...addedPlans, {
+            id: crypto.randomUUID(),
+            title: task.taskName,
+            rankType: activeRankFilter,
+            targetValue: targetValue,
+            unit: task.defaultUnit
+        }]);
+        
+        setSelectedTaskId('');
+        setTargetValue(1);
+    };
 
     const handleSubmitPlan = async () => {
         try {
@@ -96,17 +115,6 @@ export function ManualPlanSelectorByRankClient() {
     const getRankName = (code: string) => {
         const r: any = [...congChucRanks, ...vienChucRanks].find((r: any) => r.code === code);
         return r ? (r.nameVi || r.name) : code.replace(/_/g, ' ');
-    };
-
-    const handleQuickAdd = (taskName: string, unit: string) => {
-        if (addedPlans.some(p => p.title === taskName)) return;
-        setAddedPlans([...addedPlans, {
-            id: crypto.randomUUID(),
-            title: taskName,
-            rankType: activeRankFilter,
-            targetValue: globalValue,
-            unit: unit
-        }]);
     };
 
     return (
@@ -188,48 +196,61 @@ export function ManualPlanSelectorByRankClient() {
                             </TabsContent>
                         </Tabs>
 
-                        <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
-                            <span className="text-xs font-semibold text-slate-600">Định mức số lượng gán nhanh:</span>
-                            <Input
-                                type="number"
-                                value={globalValue}
-                                onChange={e => setGlobalValue(Math.max(1, Number(e.target.value)))}
-                                className="w-20 h-8 text-center font-mono font-bold bg-white"
-                            />
-                        </div>
-
-                        {/* KHO VIỆC LỌC ĐỘNG THEO NGẠCH ĐÃ CHỌN */}
-                        <ScrollArea className="h-[250px] w-full rounded-md border border-slate-100 p-2">
+                        {/* FORM CHỌN VIỆC VÀ ĐỊNH MỨC */}
+                        <div className="mt-6 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl space-y-5">
                             <div className="space-y-2">
-                                {rankTasksRepository
-                                    .filter(item => item.rank === activeRankFilter)
-                                    .map(task => {
-                                        const added = addedPlans.some(p => p.title === task.taskName);
-                                        return (
-                                            <div
-                                                key={task.id}
-                                                onClick={() => !added && handleQuickAdd(task.taskName, task.defaultUnit)}
-                                                className={`p-3.5 border rounded-2xl flex items-center justify-between transition-all duration-300 text-xs font-semibold group
-                                                    ${added
-                                                        ? 'bg-slate-50/80 border-slate-100 opacity-50 cursor-not-allowed'
-                                                        : 'bg-white border-slate-200 hover:border-indigo-400 hover:shadow-md hover:bg-gradient-to-r hover:from-white hover:to-indigo-50 cursor-pointer'
-                                                    }`}
-                                            >
-                                                <div className="text-slate-800 leading-relaxed pr-3 group-hover:text-indigo-900 transition-colors">{task.taskName}</div>
-                                                <Badge variant="outline" className={`text-[10px] font-black font-mono px-2.5 py-1 rounded-lg shrink-0 transition-colors
-                                                    ${added ? 'text-slate-400 bg-slate-100 border-slate-200' : 'text-indigo-600 bg-indigo-50 border-indigo-200 group-hover:bg-indigo-600 group-hover:text-white'}`}>
-                                                    +{task.defaultUnit}
-                                                </Badge>
-                                            </div>
-                                        );
-                                    })}
-                                {rankTasksRepository.filter(item => item.rank === activeRankFilter).length === 0 && (
-                                    <div className="text-center text-xs text-slate-400 p-4">
-                                        Chưa có công việc mẫu nào được cấu hình cho ngạch này.
-                                    </div>
+                                <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                    <span className="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">1</span>
+                                    Chọn công việc cần gán định mức
+                                </label>
+                                <select 
+                                    className="w-full h-11 px-3 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-indigo-500 outline-none bg-white transition-shadow"
+                                    value={selectedTaskId}
+                                    onChange={e => setSelectedTaskId(e.target.value)}
+                                >
+                                    <option value="">-- Vui lòng chọn công việc --</option>
+                                    {availableTasks.map(task => (
+                                        <option key={task.id} value={task.id} disabled={addedPlans.some(p => p.title === task.taskName)}>
+                                            {task.taskName} {addedPlans.some(p => p.title === task.taskName) ? '(Đã thêm)' : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                {availableTasks.length === 0 && (
+                                    <p className="text-[11px] text-rose-500 font-medium ml-1">Chưa có công việc mẫu nào được cấu hình cho ngạch này.</p>
                                 )}
                             </div>
-                        </ScrollArea>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+                                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[10px]">2</span>
+                                        Nhập định mức
+                                    </label>
+                                    <Input 
+                                        type="number"
+                                        value={targetValue}
+                                        onChange={e => setTargetValue(Math.max(1, Number(e.target.value)))}
+                                        className="h-11 text-sm font-mono font-bold bg-white rounded-xl"
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                        Đơn vị tính
+                                    </label>
+                                    <div className="h-11 px-3 flex items-center bg-slate-100/50 text-slate-500 text-sm rounded-xl border border-slate-200 font-medium">
+                                        {selectedTaskId ? availableTasks.find(t => t.id === selectedTaskId)?.defaultUnit : '---'}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <Button 
+                                onClick={handleAssignTask}
+                                disabled={!selectedTaskId}
+                                className="w-full h-11 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-sm hover:shadow-md transition-all gap-2 mt-2"
+                            >
+                                Gán vào cấu trúc
+                            </Button>
+                        </div>
                     </CardContent>
                 </Card>
 
