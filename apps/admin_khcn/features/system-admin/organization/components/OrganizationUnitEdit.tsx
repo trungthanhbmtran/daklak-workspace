@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MultiSelectModal } from "./MultiSelectModal";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -290,25 +291,7 @@ export function OrganizationUnitEdit() {
               />
             </section>
 
-            {/* PHẠM VI QUẢN LÝ (Ghi chú thêm) */}
-            <section className="space-y-4">
-              <FormField
-                control={form.control}
-                name="scope"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-bold flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                      Phạm vi / Địa bàn quản lý (Ghi chú / Nhập liệu tự do)
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="VD: Toàn tỉnh, các Doanh nghiệp Nhà nước..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </section>
+
 
             {/* LĨNH VỰC & ĐỊA BÀN QUẢN LÝ */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -317,82 +300,21 @@ export function OrganizationUnitEdit() {
                 name="domainIds"
                 render={({ field }) => (
                   <FormItem className="flex flex-col space-y-1.5">
-                    <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs">
+                    <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs mb-1">
                       <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-slate-400" /> Lĩnh vực</span>
-                      <div className="flex items-center gap-1.5">
-                        {domainsToOffer.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const visibleIds = filteredDomains.map(d => d.id);
-                              const isAllSelected = visibleIds.length > 0 && visibleIds.every(id => field.value?.includes(id));
-                              if (isAllSelected) {
-                                field.onChange((field.value ?? []).filter(id => !visibleIds.includes(id)));
-                              } else {
-                                const current = field.value ?? [];
-                                const toAdd = visibleIds.filter(id => !current.includes(id));
-                                field.onChange([...current, ...toAdd]);
-                              }
-                            }}
-                            className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-normal normal-case"
-                          >
-                            Lọc nhanh tất cả
-                          </button>
-                        )}
-                        <Badge variant="secondary" className="px-1.5 py-0 text-[10px] bg-primary/10 text-primary">{field.value?.length ?? 0} chọn</Badge>
-                      </div>
                     </FormLabel>
-                    <div className="relative">
-                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                      <input
-                        type="text"
-                        placeholder="Tìm lĩnh vực..."
-                        value={searchDomain}
-                        onChange={e => setSearchDomain(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    <FormControl>
+                      <MultiSelectModal
+                        title="Chọn lĩnh vực chuyên môn"
+                        icon={<Briefcase className="h-5 w-5" />}
+                        items={domainsToOffer}
+                        selectedIds={field.value ?? []}
+                        onChange={field.onChange}
+                        placeholderSearch="Tìm lĩnh vực..."
+                        triggerLabel="Chọn lĩnh vực"
+                        isLoading={isLoadingDomains}
                       />
-                    </div>
-                    <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[180px] overflow-y-auto space-y-0.5 custom-scrollbar shadow-inner">
-                      {isLoadingDomains ? (
-                        <p className="text-xs animate-pulse italic p-1">Đang tải danh mục lĩnh vực...</p>
-                      ) : filteredDomains.length > 0 ? (
-                        filteredDomains.map((d) => {
-                          return (
-                            <FormField
-                              key={d.id}
-                              control={form.control}
-                              name="domainIds"
-                              render={({ field: innerField }) => {
-                                const isChecked = innerField.value?.includes(d.id);
-                                return (
-                                  <FormItem
-                                    className={cn("flex flex-row items-center gap-2 space-y-0 p-1.5 rounded-md cursor-pointer transition-colors", isChecked ? "bg-background shadow-sm" : "hover:bg-background/60")}
-                                  >
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={isChecked}
-                                        onCheckedChange={(checked) => {
-                                          const next = checked
-                                            ? [...(innerField.value ?? []), d.id]
-                                            : (innerField.value ?? []).filter(v => v !== d.id);
-                                          innerField.onChange(next);
-                                        }}
-                                        className="h-3.5 w-3.5"
-                                      />
-                                    </FormControl>
-                                    <FormLabel className={cn("font-normal text-xs truncate cursor-pointer flex-1 m-0", isChecked ? "text-primary font-medium" : "text-muted-foreground")}>
-                                      {d.name}
-                                    </FormLabel>
-                                  </FormItem>
-                                )
-                              }}
-                            />
-                          );
-                        })
-                      ) : (
-                        <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p>
-                      )}
-                    </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -403,82 +325,21 @@ export function OrganizationUnitEdit() {
                 name="geographicAreaIds"
                 render={({ field }) => (
                   <FormItem className="flex flex-col space-y-1.5">
-                    <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs">
+                    <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs mb-1">
                       <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-emerald-600" /> Phạm vi địa lý</span>
-                      <div className="flex items-center gap-1.5">
-                        {geoAreas?.length > 0 && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const visibleIds = filteredGeos.map(g => g.id);
-                              const isAllSelected = visibleIds.length > 0 && visibleIds.every(id => field.value?.includes(id));
-                              if (isAllSelected) {
-                                field.onChange((field.value ?? []).filter(id => !visibleIds.includes(id)));
-                              } else {
-                                const current = field.value ?? [];
-                                const toAdd = visibleIds.filter(id => !current.includes(id));
-                                field.onChange([...current, ...toAdd]);
-                              }
-                            }}
-                            className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-normal normal-case"
-                          >
-                            Lọc nhanh tất cả
-                          </button>
-                        )}
-                        <Badge variant="secondary" className="px-1.5 py-0 text-[10px] bg-primary/10 text-primary">{field.value?.length ?? 0} chọn</Badge>
-                      </div>
                     </FormLabel>
-                    <div className="relative">
-                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
-                      <input
-                        type="text"
-                        placeholder="Tìm tỉnh thành, khu vực..."
-                        value={searchGeo}
-                        onChange={e => setSearchGeo(e.target.value)}
-                        className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    <FormControl>
+                      <MultiSelectModal
+                        title="Chọn phạm vi địa lý"
+                        icon={<MapPin className="h-5 w-5" />}
+                        items={geoAreas}
+                        selectedIds={field.value ?? []}
+                        onChange={field.onChange}
+                        placeholderSearch="Tìm tỉnh thành, khu vực..."
+                        triggerLabel="Chọn khu vực địa lý"
+                        isLoading={isLoadingGeoAreas}
                       />
-                    </div>
-                    <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[180px] overflow-y-auto space-y-0.5 custom-scrollbar shadow-inner">
-                      {isLoadingGeoAreas ? (
-                        <p className="text-xs animate-pulse italic p-1">Đang tải danh mục khu vực...</p>
-                      ) : filteredGeos.length > 0 ? (
-                        filteredGeos.map((g) => {
-                          return (
-                            <FormField
-                              key={g.id}
-                              control={form.control}
-                              name="geographicAreaIds"
-                              render={({ field: innerField }) => {
-                                const isChecked = innerField.value?.includes(g.id);
-                                return (
-                                  <FormItem
-                                    className={cn("flex flex-row items-center gap-2 space-y-0 p-1.5 rounded-md cursor-pointer transition-colors", isChecked ? "bg-background shadow-sm" : "hover:bg-background/60")}
-                                  >
-                                    <FormControl>
-                                      <Checkbox
-                                        checked={isChecked}
-                                        onCheckedChange={(checked) => {
-                                          const next = checked
-                                            ? [...(innerField.value ?? []), g.id]
-                                            : (innerField.value ?? []).filter(v => v !== g.id);
-                                          innerField.onChange(next);
-                                        }}
-                                        className="h-3.5 w-3.5"
-                                      />
-                                    </FormControl>
-                                    <FormLabel className={cn("font-normal text-xs truncate cursor-pointer flex-1 m-0", isChecked ? "text-primary font-medium" : "text-muted-foreground")}>
-                                      {g.name}
-                                    </FormLabel>
-                                  </FormItem>
-                                )
-                              }}
-                            />
-                          );
-                        })
-                      ) : (
-                        <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p>
-                      )}
-                    </div>
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
