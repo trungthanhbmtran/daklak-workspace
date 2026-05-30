@@ -18,7 +18,7 @@ function toItem(c: any) {
 
 @Controller()
 export class CategoriesController {
-  constructor(private readonly catService: CategoriesService) {}
+  constructor(private readonly catService: CategoriesService) { }
 
   @GrpcMethod('CategoryService', 'GetAllCategories')
   async getAllCategories(data: { lang?: string }) {

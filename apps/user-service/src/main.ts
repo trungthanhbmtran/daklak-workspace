@@ -53,4 +53,4 @@ async function bootstrap() {
     process.env.GRPC_URL ?? '0.0.0.0:50051',
   );
 }
-bootstrap();
+void bootstrap();

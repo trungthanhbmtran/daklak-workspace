@@ -39,7 +39,9 @@ export class IntegrationService {
     let configData = {};
     try {
       configData = JSON.parse(data.configData);
-    } catch (e) {}
+    } catch {
+      // ignore parsing error
+    }
 
     const config = await this.prisma.integrationConfig.create({
       data: {
@@ -66,7 +68,9 @@ export class IntegrationService {
     let configData = {};
     try {
       if (data.configData) configData = JSON.parse(data.configData);
-    } catch (e) {}
+    } catch {
+      // ignore parsing error
+    }
 
     const config = await this.prisma.integrationConfig.update({
       where: { id: data.id },

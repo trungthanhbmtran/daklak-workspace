@@ -949,7 +949,12 @@ async function main() {
       parentCode: 'VAN_PHONG_UBND',
       nameVi: 'Chỉ đạo điều hành',
     },
-    { group: 'DOMAIN', code: 'MOT_CUA', parentCode: 'VAN_PHONG_UBND', nameVi: 'Một cửa' },
+    {
+      group: 'DOMAIN',
+      code: 'MOT_CUA',
+      parentCode: 'VAN_PHONG_UBND',
+      nameVi: 'Một cửa',
+    },
     {
       code: 'KIEM_SOAT_TTHC',
       parentCode: 'VAN_PHONG_UBND',
@@ -971,13 +976,23 @@ async function main() {
       parentCode: 'SO_NOI_VU',
       nameVi: 'Cán bộ công chức',
     },
-    { group: 'DOMAIN', code: 'VIEN_CHUC', parentCode: 'SO_NOI_VU', nameVi: 'Viên chức' },
+    {
+      group: 'DOMAIN',
+      code: 'VIEN_CHUC',
+      parentCode: 'SO_NOI_VU',
+      nameVi: 'Viên chức',
+    },
     {
       code: 'DIA_GIOI_HANH_CHINH',
       parentCode: 'SO_NOI_VU',
       nameVi: 'Địa giới hành chính',
     },
-    { group: 'DOMAIN', code: 'TON_GIAO', parentCode: 'SO_NOI_VU', nameVi: 'Tôn giáo' },
+    {
+      group: 'DOMAIN',
+      code: 'TON_GIAO',
+      parentCode: 'SO_NOI_VU',
+      nameVi: 'Tôn giáo',
+    },
     {
       code: 'THI_DUA_KHEN_THUONG',
       parentCode: 'SO_NOI_VU',
@@ -989,13 +1004,23 @@ async function main() {
     // =========================
 
     { group: 'DOMAIN', code: 'SO_TAI_CHINH', nameVi: 'Sở Tài chính' },
-    { group: 'DOMAIN', code: 'NGAN_SACH', parentCode: 'SO_TAI_CHINH', nameVi: 'Ngân sách' },
+    {
+      group: 'DOMAIN',
+      code: 'NGAN_SACH',
+      parentCode: 'SO_TAI_CHINH',
+      nameVi: 'Ngân sách',
+    },
     {
       code: 'TAI_SAN_CONG',
       parentCode: 'SO_TAI_CHINH',
       nameVi: 'Tài sản công',
     },
-    { group: 'DOMAIN', code: 'DAU_TU_CONG', parentCode: 'SO_TAI_CHINH', nameVi: 'Đầu tư công' },
+    {
+      group: 'DOMAIN',
+      code: 'DAU_TU_CONG',
+      parentCode: 'SO_TAI_CHINH',
+      nameVi: 'Đầu tư công',
+    },
     {
       code: 'DOANH_NGHIEP',
       parentCode: 'SO_TAI_CHINH',
@@ -1017,7 +1042,12 @@ async function main() {
       parentCode: 'SO_XAY_DUNG',
       nameVi: 'Quy hoạch xây dựng',
     },
-    { group: 'DOMAIN', code: 'NHA_O', parentCode: 'SO_XAY_DUNG', nameVi: 'Nhà ở' },
+    {
+      group: 'DOMAIN',
+      code: 'NHA_O',
+      parentCode: 'SO_XAY_DUNG',
+      nameVi: 'Nhà ở',
+    },
     {
       code: 'CAP_PHEP_XAY_DUNG',
       parentCode: 'SO_XAY_DUNG',
@@ -1028,7 +1058,12 @@ async function main() {
       parentCode: 'SO_XAY_DUNG',
       nameVi: 'Vật liệu xây dựng',
     },
-    { group: 'DOMAIN', code: 'GIAO_THONG', parentCode: 'SO_XAY_DUNG', nameVi: 'Giao thông' },
+    {
+      group: 'DOMAIN',
+      code: 'GIAO_THONG',
+      parentCode: 'SO_XAY_DUNG',
+      nameVi: 'Giao thông',
+    },
     {
       code: 'HA_TANG_DO_THI',
       parentCode: 'SO_XAY_DUNG',
@@ -1039,13 +1074,47 @@ async function main() {
     // SỞ NÔNG NGHIỆP & MÔI TRƯỜNG
     // =========================
 
-    { group: 'DOMAIN', code: 'SO_NN_MT', nameVi: 'Sở Nông nghiệp và Môi trường' },
-    { group: 'DOMAIN', code: 'TRONG_TROT', parentCode: 'SO_NN_MT', nameVi: 'Trồng trọt' },
-    { group: 'DOMAIN', code: 'CHAN_NUOI', parentCode: 'SO_NN_MT', nameVi: 'Chăn nuôi' },
-    { group: 'DOMAIN', code: 'THUY_LOI', parentCode: 'SO_NN_MT', nameVi: 'Thủy lợi' },
-    { group: 'DOMAIN', code: 'LAM_NGHIEP', parentCode: 'SO_NN_MT', nameVi: 'Lâm nghiệp' },
-    { group: 'DOMAIN', code: 'DAT_DAI', parentCode: 'SO_NN_MT', nameVi: 'Đất đai' },
-    { group: 'DOMAIN', code: 'MOI_TRUONG', parentCode: 'SO_NN_MT', nameVi: 'Môi trường' },
+    {
+      group: 'DOMAIN',
+      code: 'SO_NN_MT',
+      nameVi: 'Sở Nông nghiệp và Môi trường',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'TRONG_TROT',
+      parentCode: 'SO_NN_MT',
+      nameVi: 'Trồng trọt',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'CHAN_NUOI',
+      parentCode: 'SO_NN_MT',
+      nameVi: 'Chăn nuôi',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'THUY_LOI',
+      parentCode: 'SO_NN_MT',
+      nameVi: 'Thủy lợi',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'LAM_NGHIEP',
+      parentCode: 'SO_NN_MT',
+      nameVi: 'Lâm nghiệp',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'DAT_DAI',
+      parentCode: 'SO_NN_MT',
+      nameVi: 'Đất đai',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'MOI_TRUONG',
+      parentCode: 'SO_NN_MT',
+      nameVi: 'Môi trường',
+    },
     {
       code: 'KHI_TUONG_THUY_VAN',
       parentCode: 'SO_NN_MT',
@@ -1057,25 +1126,65 @@ async function main() {
     // =========================
 
     { group: 'DOMAIN', code: 'SO_KHCN', nameVi: 'Sở Khoa học và Công nghệ' },
-    { group: 'DOMAIN', code: 'CHUYEN_DOI_SO', parentCode: 'SO_KHCN', nameVi: 'Chuyển đổi số' },
-    { group: 'DOMAIN', code: 'DU_LIEU_SO', parentCode: 'SO_KHCN', nameVi: 'Dữ liệu số' },
+    {
+      group: 'DOMAIN',
+      code: 'CHUYEN_DOI_SO',
+      parentCode: 'SO_KHCN',
+      nameVi: 'Chuyển đổi số',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'DU_LIEU_SO',
+      parentCode: 'SO_KHCN',
+      nameVi: 'Dữ liệu số',
+    },
     {
       code: 'AN_TOAN_THONG_TIN',
       parentCode: 'SO_KHCN',
       nameVi: 'An toàn thông tin',
     },
-    { group: 'DOMAIN', code: 'VIEN_THONG', parentCode: 'SO_KHCN', nameVi: 'Viễn thông' },
-    { group: 'DOMAIN', code: 'KINH_TE_SO', parentCode: 'SO_KHCN', nameVi: 'Kinh tế số' },
+    {
+      group: 'DOMAIN',
+      code: 'VIEN_THONG',
+      parentCode: 'SO_KHCN',
+      nameVi: 'Viễn thông',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'KINH_TE_SO',
+      parentCode: 'SO_KHCN',
+      nameVi: 'Kinh tế số',
+    },
 
     // =========================
     // SỞ GIÁO DỤC
     // =========================
 
     { group: 'DOMAIN', code: 'SO_GIAO_DUC', nameVi: 'Sở Giáo dục và Đào tạo' },
-    { group: 'DOMAIN', code: 'MAM_NON', parentCode: 'SO_GIAO_DUC', nameVi: 'Mầm non' },
-    { group: 'DOMAIN', code: 'TIEU_HOC', parentCode: 'SO_GIAO_DUC', nameVi: 'Tiểu học' },
-    { group: 'DOMAIN', code: 'THCS', parentCode: 'SO_GIAO_DUC', nameVi: 'THCS' },
-    { group: 'DOMAIN', code: 'THPT', parentCode: 'SO_GIAO_DUC', nameVi: 'THPT' },
+    {
+      group: 'DOMAIN',
+      code: 'MAM_NON',
+      parentCode: 'SO_GIAO_DUC',
+      nameVi: 'Mầm non',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'TIEU_HOC',
+      parentCode: 'SO_GIAO_DUC',
+      nameVi: 'Tiểu học',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'THCS',
+      parentCode: 'SO_GIAO_DUC',
+      nameVi: 'THCS',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'THPT',
+      parentCode: 'SO_GIAO_DUC',
+      nameVi: 'THPT',
+    },
     {
       code: 'GIAO_DUC_NGHE',
       parentCode: 'SO_GIAO_DUC',
@@ -1087,8 +1196,18 @@ async function main() {
     // =========================
 
     { group: 'DOMAIN', code: 'SO_Y_TE', nameVi: 'Sở Y tế' },
-    { group: 'DOMAIN', code: 'KHAM_CHUA_BENH', parentCode: 'SO_Y_TE', nameVi: 'Khám chữa bệnh' },
-    { group: 'DOMAIN', code: 'Y_TE_DU_PHONG', parentCode: 'SO_Y_TE', nameVi: 'Y tế dự phòng' },
+    {
+      group: 'DOMAIN',
+      code: 'KHAM_CHUA_BENH',
+      parentCode: 'SO_Y_TE',
+      nameVi: 'Khám chữa bệnh',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'Y_TE_DU_PHONG',
+      parentCode: 'SO_Y_TE',
+      nameVi: 'Y tế dự phòng',
+    },
     { group: 'DOMAIN', code: 'DUOC', parentCode: 'SO_Y_TE', nameVi: 'Dược' },
     {
       code: 'AN_TOAN_THUC_PHAM',
@@ -1101,10 +1220,25 @@ async function main() {
     // =========================
 
     { group: 'DOMAIN', code: 'CONG_AN', nameVi: 'Công an' },
-    { group: 'DOMAIN', code: 'AN_NINH', parentCode: 'CONG_AN', nameVi: 'An ninh' },
-    { group: 'DOMAIN', code: 'TRAT_TU_XA_HOI', parentCode: 'CONG_AN', nameVi: 'Trật tự xã hội' },
+    {
+      group: 'DOMAIN',
+      code: 'AN_NINH',
+      parentCode: 'CONG_AN',
+      nameVi: 'An ninh',
+    },
+    {
+      group: 'DOMAIN',
+      code: 'TRAT_TU_XA_HOI',
+      parentCode: 'CONG_AN',
+      nameVi: 'Trật tự xã hội',
+    },
     { group: 'DOMAIN', code: 'PCCC', parentCode: 'CONG_AN', nameVi: 'PCCC' },
-    { group: 'DOMAIN', code: 'CU_TRU', parentCode: 'CONG_AN', nameVi: 'Cư trú' },
+    {
+      group: 'DOMAIN',
+      code: 'CU_TRU',
+      parentCode: 'CONG_AN',
+      nameVi: 'Cư trú',
+    },
 
     // =========================
     // QUÂN SỰ
@@ -1116,7 +1250,12 @@ async function main() {
       parentCode: 'QUAN_SU',
       nameVi: 'Quốc phòng địa phương',
     },
-    { group: 'DOMAIN', code: 'DAN_QUAN_TU_VE', parentCode: 'QUAN_SU', nameVi: 'Dân quân tự vệ' },
+    {
+      group: 'DOMAIN',
+      code: 'DAN_QUAN_TU_VE',
+      parentCode: 'QUAN_SU',
+      nameVi: 'Dân quân tự vệ',
+    },
     {
       code: 'NGHIA_VU_QUAN_SU',
       parentCode: 'QUAN_SU',
@@ -1336,8 +1475,6 @@ async function main() {
       nameVi: 'Sơ cấp',
       nameEn: 'Elementary',
     },
-
-
 
     {
       group: 'IT_SKILL',
@@ -2297,11 +2434,11 @@ async function main() {
     if (cat.group) currentGroup = cat.group;
     cat.group = currentGroup;
     const category = await prisma.category.upsert({
-      where: { group_code: { group: cat.group!, code: cat.code! } },
+      where: { group_code: { group: cat.group, code: cat.code } },
       update: { order: cat.order },
       create: {
-        group: cat.group!,
-        code: cat.code!,
+        group: cat.group,
+        code: cat.code,
         order: cat.order,
         isSystem: true,
       },
@@ -2312,11 +2449,11 @@ async function main() {
       where: {
         categoryId_langCode: { categoryId: category.id, langCode: 'vi' },
       },
-      update: { name: cat.nameVi! },
+      update: { name: cat.nameVi },
       create: {
         categoryId: category.id,
         langCode: 'vi',
-        name: cat.nameVi!,
+        name: cat.nameVi,
       },
     });
 
@@ -2325,11 +2462,11 @@ async function main() {
       where: {
         categoryId_langCode: { categoryId: category.id, langCode: 'en' },
       },
-      update: { name: cat.nameEn || cat.nameVi! },
+      update: { name: cat.nameEn || cat.nameVi },
       create: {
         categoryId: category.id,
         langCode: 'en',
-        name: cat.nameEn || cat.nameVi!,
+        name: cat.nameEn || cat.nameVi,
       },
     });
   }
@@ -4556,6 +4693,97 @@ async function main() {
     });
   }
   console.log('✅ Categories seeded successfully!');
+
+  // ==========================================================
+  // 11. CẬP NHẬT DỮ LIỆU THỬ NGHIỆM CHỨC DANH & ĐƠN VỊ
+  // ==========================================================
+  console.log('🔹 Seeding Job Titles and Organizations Test Data...');
+
+  // 1. Lấy các lĩnh vực thử nghiệm (Domain)
+  const domainCDS = await prisma.category.findFirst({
+    where: { code: 'CHUYEN_DOI_SO', group: 'DOMAIN' },
+  });
+  const domainDLS = await prisma.category.findFirst({
+    where: { code: 'DU_LIEU_SO', group: 'DOMAIN' },
+  });
+  const domainNS = await prisma.category.findFirst({
+    where: { code: 'NGAN_SACH', group: 'DOMAIN' },
+  });
+
+  // 2. Lấy các chức danh
+  const phogiamdoc = await prisma.jobTitle.findUnique({
+    where: { code: 'PHO_GIAM_DOC' },
+  });
+  const giamdoc = await prisma.jobTitle.findUnique({
+    where: { code: 'GIAM_DOC' },
+  });
+
+  // 3. Lấy các phòng ban
+  const phongKHTC = await prisma.organizationUnit.findUnique({
+    where: { code: 'SO_KHCN_KHTC' },
+  });
+  const phongQLCN = await prisma.organizationUnit.findUnique({
+    where: { code: 'SO_KHCN_QLCN' },
+  });
+
+  if (phogiamdoc && domainCDS && phongQLCN) {
+    // Cập nhật chức danh Phó Giám đốc: Quản lý lĩnh vực Chuyển đổi số, theo dõi phòng Quản lý công nghệ
+    await prisma.jobTitle.update({
+      where: { id: phogiamdoc.id },
+      data: {
+        domainId: domainCDS.id,
+      },
+    });
+
+    // Cập nhật phạm vi quản lý (Monitored Units)
+    await prisma.jobTitleMonitoredUnit.upsert({
+      where: {
+        jobTitleId_unitId: { jobTitleId: phogiamdoc.id, unitId: phongQLCN.id },
+      },
+      update: {},
+      create: { jobTitleId: phogiamdoc.id, unitId: phongQLCN.id },
+    });
+
+    // Gán lĩnh vực cho phòng ban
+    await prisma.unitDomain.upsert({
+      where: {
+        unitId_domainId: { unitId: phongQLCN.id, domainId: domainCDS.id },
+      },
+      update: {},
+      create: { unitId: phongQLCN.id, domainId: domainCDS.id },
+    });
+    console.log(
+      '✅ Đã cập nhật Phó Giám đốc: Lĩnh vực Chuyển đổi số, Theo dõi phòng QLCN',
+    );
+  }
+
+  if (giamdoc && domainNS && phongKHTC) {
+    await prisma.jobTitle.update({
+      where: { id: giamdoc.id },
+      data: {
+        domainId: domainNS.id,
+      },
+    });
+
+    await prisma.jobTitleMonitoredUnit.upsert({
+      where: {
+        jobTitleId_unitId: { jobTitleId: giamdoc.id, unitId: phongKHTC.id },
+      },
+      update: {},
+      create: { jobTitleId: giamdoc.id, unitId: phongKHTC.id },
+    });
+
+    await prisma.unitDomain.upsert({
+      where: {
+        unitId_domainId: { unitId: phongKHTC.id, domainId: domainNS.id },
+      },
+      update: {},
+      create: { unitId: phongKHTC.id, domainId: domainNS.id },
+    });
+    console.log(
+      '✅ Đã cập nhật Giám đốc: Lĩnh vực Ngân sách, Theo dõi phòng KHTC',
+    );
+  }
 }
 
 main()
