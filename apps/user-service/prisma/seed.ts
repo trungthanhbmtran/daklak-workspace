@@ -2934,7 +2934,23 @@ async function main() {
       name: 'Thông báo',
       route: 'notifications',
       icon: 'notifications-outline',
+      order: 7,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'HRM_MENU_RANK_TEMPLATES',
+      name: 'Cấu hình Ngạch',
+      route: 'work-plans/rank-templates',
+      icon: 'settings-outline',
       order: 5,
+      res: 'HRM_EMPLOYEE',
+    },
+    {
+      code: 'HRM_MENU_MANUAL_SELECTOR',
+      name: 'Gán việc theo Ngạch',
+      route: 'work-plans/manual-selector',
+      icon: 'list-outline',
+      order: 6,
       res: 'HRM_EMPLOYEE',
     },
   ];

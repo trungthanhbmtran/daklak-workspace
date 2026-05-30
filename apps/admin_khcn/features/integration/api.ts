@@ -34,27 +34,27 @@ export const integrationKeys = {
 
 export const integrationApi = {
   getList: async (search?: string) => {
-    const res = await apiClient.get('/admin/integrations', { params: { search } }) as any;
+    const res = await apiClient.get('/integrations', { params: { search } }) as any;
     if (res.status === 'success') return res.data as IntegrationConfig[];
     throw new Error(res.message);
   },
   create: async (data: any) => {
-    const res = await apiClient.post('/admin/integrations', data) as any;
+    const res = await apiClient.post('/integrations', data) as any;
     if (res.status === 'success') return res.data;
     throw new Error(res.message);
   },
   update: async (data: any) => {
-    const res = await apiClient.put(`/admin/integrations/${data.id}`, data) as any;
+    const res = await apiClient.put(`/integrations/${data.id}`, data) as any;
     if (res.status === 'success') return res.data;
     throw new Error(res.message);
   },
   delete: async (id: number) => {
-    const res = await apiClient.delete(`/admin/integrations/${id}`) as any;
+    const res = await apiClient.delete(`/integrations/${id}`) as any;
     if (res.status === 'success') return res.data;
     throw new Error(res.message);
   },
   toggleActive: async ({ id, isActive }: { id: number, isActive: boolean }) => {
-    const res = await apiClient.put(`/admin/integrations/${id}/active`, { isActive }) as any;
+    const res = await apiClient.put(`/integrations/${id}/active`, { isActive }) as any;
     if (res.status === 'success') return res.data;
     throw new Error(res.message);
   }
