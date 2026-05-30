@@ -10,6 +10,8 @@ export interface OrganizationUnitNode {
   domainIds?: number[];
   domainNames?: string[];
   scope?: string;
+  geographicAreaIds?: number[];
+  geographicAreaNames?: string[];
   children?: OrganizationUnitNode[];
 }
 
@@ -21,6 +23,7 @@ export interface CreateUnitPayload {
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
+  geographicAreaIds?: number[];
 }
 
 export interface CategoryOption {

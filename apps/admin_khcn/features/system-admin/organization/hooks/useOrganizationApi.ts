@@ -44,12 +44,20 @@ export function useOrganizationApi() {
     gcTime: GC_TIME,
   });
 
+  const { data: geoAreas = [], isLoading: isLoadingGeoAreas } = useQuery({
+    queryKey: categoryQueryKeys.geoAreas(),
+    queryFn: () => organizationApi.getGeoAreas(),
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+  });
+
   const createUnit = useMutation({
     mutationFn: (payload: CreateUnitPayload) =>
       organizationApi.createUnit({
         ...payload,
         parentId: payload.parentId ?? undefined,
         domainIds: payload.domainIds?.length ? payload.domainIds : undefined,
+        geographicAreaIds: payload.geographicAreaIds?.length ? payload.geographicAreaIds : undefined,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
@@ -102,9 +110,11 @@ export function useOrganizationApi() {
     flatUnits,
     unitTypes,
     domains,
+    geoAreas,
     isLoadingTree,
     isLoadingTypes,
     isLoadingDomains,
+    isLoadingGeoAreas,
     createUnit: createUnit.mutateAsync,
     updateUnit: (id: number, payload: UpdateUnitPayload) =>
       updateUnit.mutateAsync({ id, payload }),

@@ -15,7 +15,9 @@ import {
   Star,
   Info,
   ArrowLeftCircleIcon,
-  Briefcase
+  Briefcase,
+  MapPin,
+  Search
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -39,24 +41,19 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  FormDescription
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import { useOrganizationContext } from "../context/OrganizationContext";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 
 export function OrganizationUnitEdit() {
   const { state, actions, meta } = useOrganizationContext();
   const { selectedId, flatUnits } = state;
-  const { unitTypes, domains, isLoadingTypes, isLoadingDomains, isUpdating, isDeleting } = meta;
+  const { unitTypes, domains, geoAreas, isLoadingTypes, isLoadingDomains, isLoadingGeoAreas, isUpdating, isDeleting } = meta;
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [searchDomain, setSearchDomain] = useState("");
+  const [searchGeo, setSearchGeo] = useState("");
 
   const unit = selectedId != null ? flatUnits.find((u) => u.id === selectedId) : null;
   const hasChildren = unit != null && flatUnits.some((u) => u.parentId === unit.id);
@@ -106,6 +103,9 @@ export function OrganizationUnitEdit() {
     return domains;
   }, [parentUnit, domains]);
 
+  const filteredDomains = domainsToOffer.filter(d => d.name.toLowerCase().includes(searchDomain.toLowerCase()));
+  const filteredGeos = (geoAreas || []).filter(g => g.name.toLowerCase().includes(searchGeo.toLowerCase()));
+
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
     defaultValues: {
@@ -114,6 +114,7 @@ export function OrganizationUnitEdit() {
       shortName: "",
       typeId: 0,
       domainIds: [],
+      geographicAreaIds: [],
       scope: "",
     },
   });
@@ -126,6 +127,7 @@ export function OrganizationUnitEdit() {
         shortName: unit.shortName ?? "",
         typeId: unit.typeId ?? 0,
         domainIds: unit.domainIds ?? [],
+        geographicAreaIds: unit.geographicAreaIds ?? [],
         scope: unit.scope ?? "",
       });
     }
@@ -288,40 +290,70 @@ export function OrganizationUnitEdit() {
               />
             </section>
 
-            {/* LĨNH VỰC QUẢN LÝ (CHECKBOX GRID) */}
-            <section className="space-y-4">
+            {/* LĨNH VỰC & ĐỊA BÀN QUẢN LÝ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <FormField
                 control={form.control}
                 name="domainIds"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-bold flex items-center gap-2">
-                      <Briefcase className="h-4 w-4 text-slate-400" />
-                      Lĩnh vực chuyên môn phân cấp
+                  <FormItem className="flex flex-col space-y-1.5">
+                    <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-slate-400" /> Lĩnh vực</span>
+                      <div className="flex items-center gap-1.5">
+                        {domainsToOffer.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const visibleIds = filteredDomains.map(d => d.id);
+                              const isAllSelected = visibleIds.length > 0 && visibleIds.every(id => field.value?.includes(id));
+                              if (isAllSelected) {
+                                field.onChange((field.value ?? []).filter(id => !visibleIds.includes(id)));
+                              } else {
+                                field.onChange(Array.from(new Set([...(field.value ?? []), ...visibleIds])));
+                              }
+                            }}
+                            className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-normal normal-case"
+                          >
+                            Lọc nhanh tất cả
+                          </button>
+                        )}
+                        <Badge variant="secondary" className="px-1.5 py-0 text-[10px] bg-primary/10 text-primary">{field.value?.length ?? 0} chọn</Badge>
+                      </div>
                     </FormLabel>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border rounded-xl p-4 bg-slate-50/30 max-h-[180px] overflow-y-auto shadow-inner">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Tìm lĩnh vực..."
+                        value={searchDomain}
+                        onChange={e => setSearchDomain(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      />
+                    </div>
+                    <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[180px] overflow-y-auto space-y-0.5 custom-scrollbar shadow-inner">
                       {isLoadingDomains ? (
-                        <p className="text-xs animate-pulse italic">Đang tải danh mục lĩnh vực...</p>
-                      ) : domainsToOffer.length > 0 ? (
-                        domainsToOffer.map((d) => (
-                          <div key={d.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white border border-transparent hover:border-slate-100 transition-all cursor-pointer group">
-                            <Checkbox
-                              id={`domain-${d.id}`}
-                              checked={field.value?.includes(d.id)}
-                              onCheckedChange={(checked) => {
-                                const next = checked
-                                  ? [...(field.value ?? []), d.id]
-                                  : (field.value ?? []).filter(v => v !== d.id);
-                                field.onChange(next);
-                              }}
-                            />
-                            <label htmlFor={`domain-${d.id}`} className="text-sm font-medium leading-none cursor-pointer group-hover:text-primary transition-colors">
-                              {d.name}
+                        <p className="text-xs animate-pulse italic p-1">Đang tải danh mục lĩnh vực...</p>
+                      ) : filteredDomains.length > 0 ? (
+                        filteredDomains.map((d) => {
+                          const isChecked = field.value?.includes(d.id);
+                          return (
+                            <label key={d.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none", isChecked ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
+                              <Checkbox
+                                checked={isChecked}
+                                onCheckedChange={(checked) => {
+                                  const next = checked
+                                    ? [...(field.value ?? []), d.id]
+                                    : (field.value ?? []).filter(v => v !== d.id);
+                                  field.onChange(next);
+                                }}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className="truncate">{d.name}</span>
                             </label>
-                          </div>
-                        ))
+                          );
+                        })
                       ) : (
-                        <p className="text-xs text-muted-foreground italic col-span-2">Không có lĩnh vực phân cấp từ cơ quan chủ quản.</p>
+                        <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p>
                       )}
                     </div>
                     <FormMessage />
@@ -331,21 +363,73 @@ export function OrganizationUnitEdit() {
 
               <FormField
                 control={form.control}
-                name="scope"
+                name="geographicAreaIds"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="font-bold flex items-center gap-2">
-                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
-                      Phạm vi / Địa bàn quản lý
+                  <FormItem className="flex flex-col space-y-1.5">
+                    <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-emerald-600" /> Phạm vi địa lý</span>
+                      <div className="flex items-center gap-1.5">
+                        {geoAreas?.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const visibleIds = filteredGeos.map(g => g.id);
+                              const isAllSelected = visibleIds.length > 0 && visibleIds.every(id => field.value?.includes(id));
+                              if (isAllSelected) {
+                                field.onChange((field.value ?? []).filter(id => !visibleIds.includes(id)));
+                              } else {
+                                field.onChange(Array.from(new Set([...(field.value ?? []), ...visibleIds])));
+                              }
+                            }}
+                            className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-normal normal-case"
+                          >
+                            Lọc nhanh tất cả
+                          </button>
+                        )}
+                        <Badge variant="secondary" className="px-1.5 py-0 text-[10px] bg-primary/10 text-primary">{field.value?.length ?? 0} chọn</Badge>
+                      </div>
                     </FormLabel>
-                    <FormControl>
-                      <Input placeholder="VD: Toàn tỉnh, các Doanh nghiệp Nhà nước..." {...field} />
-                    </FormControl>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                      <input
+                        type="text"
+                        placeholder="Tìm tỉnh thành, khu vực..."
+                        value={searchGeo}
+                        onChange={e => setSearchGeo(e.target.value)}
+                        className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                      />
+                    </div>
+                    <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[180px] overflow-y-auto space-y-0.5 custom-scrollbar shadow-inner">
+                      {isLoadingGeoAreas ? (
+                        <p className="text-xs animate-pulse italic p-1">Đang tải danh mục khu vực...</p>
+                      ) : filteredGeos.length > 0 ? (
+                        filteredGeos.map((g) => {
+                          const isChecked = field.value?.includes(g.id);
+                          return (
+                            <label key={g.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none", isChecked ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
+                              <Checkbox
+                                checked={isChecked}
+                                onCheckedChange={(checked) => {
+                                  const next = checked
+                                    ? [...(field.value ?? []), g.id]
+                                    : (field.value ?? []).filter(v => v !== g.id);
+                                  field.onChange(next);
+                                }}
+                                className="h-3.5 w-3.5"
+                              />
+                              <span className="truncate">{g.name}</span>
+                            </label>
+                          );
+                        })
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p>
+                      )}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </section>
+            </div>
 
             {/* FOOTER ACTIONS */}
             <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100 mt-10">

@@ -27,8 +27,10 @@ export interface OrganizationActions {
 export interface OrganizationMeta {
   unitTypes: { id: number; code?: string; name: string }[];
   domains: { id: number; code?: string; name: string }[];
+  geoAreas: { id: number; name: string }[];
   isLoadingTypes: boolean;
   isLoadingDomains: boolean;
+  isLoadingGeoAreas: boolean;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;

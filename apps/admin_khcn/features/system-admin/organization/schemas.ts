@@ -13,6 +13,7 @@ export const organizationUnitSchema = z.object({
   shortName: z.string().max(50, "Tên viết tắt tối đa 50 ký tự").optional(),
   typeId: z.number({ error: "Vui lòng chọn loại đơn vị" }),
   domainIds: z.array(z.number()).optional(),
+  geographicAreaIds: z.array(z.number()).optional(),
   scope: z.string().max(500, "Phạm vi quản lý tối đa 500 ký tự").optional(),
 });
 

@@ -24,6 +24,8 @@ function normalizeUnitNode(n: any): OrganizationUnitNode {
     domainIds: n.domainIds ?? n.domain_ids ?? [],
     domainNames: n.domainNames ?? n.domain_names ?? [],
     scope: n.scope,
+    geographicAreaIds: n.geographicAreaIds ?? n.geographic_area_ids ?? [],
+    geographicAreaNames: n.geographicAreaNames ?? n.geographic_area_names ?? [],
     children: Array.isArray(n.children) ? n.children.map(normalizeUnitNode) : undefined,
   };
 }
@@ -36,6 +38,7 @@ export interface UpdateUnitPayload {
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
+  geographicAreaIds?: number[];
 }
 
 function unwrapData<T>(res: any): T {
