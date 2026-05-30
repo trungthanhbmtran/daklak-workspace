@@ -130,23 +130,23 @@ export function MultiSelectModal({
                           key={item.id}
                           onClick={() => toggleItem(item.id)}
                           className={cn(
-                            "flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all hover:border-primary/40",
+                            "flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all hover:border-primary/40",
                             isChecked ? "bg-primary/5 border-primary/40 shadow-sm" : "bg-white border-slate-200 hover:bg-slate-50"
                           )}
                         >
                           <Checkbox
                             checked={isChecked}
                             onCheckedChange={() => toggleItem(item.id)}
-                            className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground h-4 w-4"
+                            className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground h-4 w-4 shrink-0"
                             onClick={(e) => e.stopPropagation()}
                           />
                           <div className="flex flex-col flex-1 min-w-0">
-                            <span className={cn("text-sm truncate", isChecked ? "font-bold text-primary" : "font-medium text-slate-700")}>
+                            <span className={cn("text-sm leading-snug", isChecked ? "font-bold text-primary" : "font-medium text-slate-700")}>
                               {item.name}
                             </span>
                           </div>
                           {item.code && (
-                            <Badge variant="outline" className="font-mono text-[10px] shrink-0 text-muted-foreground bg-slate-50 border-slate-200">
+                            <Badge variant="outline" className="font-mono text-[10px] shrink-0 text-muted-foreground bg-slate-50 border-slate-200 mt-0.5">
                               {item.code}
                             </Badge>
                           )}
