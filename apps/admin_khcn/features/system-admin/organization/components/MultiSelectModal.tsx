@@ -74,7 +74,7 @@ export function MultiSelectModal({
           </Badge>
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden gap-0">
+      <DialogContent className="w-[95vw] max-w-5xl h-[90vh] sm:h-[85vh] flex flex-col p-0 overflow-hidden gap-0">
         <DialogHeader className="p-4 border-b bg-slate-50/80">
           <DialogTitle className="flex items-center gap-2 text-lg text-slate-800">
             {icon && <span className="text-primary">{icon}</span>}
@@ -118,7 +118,7 @@ export function MultiSelectModal({
                 Không tìm thấy kết quả phù hợp.
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 p-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-4">
                 {filteredItems.map((item) => {
                   const isChecked = selectedIds.includes(item.id);
                   return (
