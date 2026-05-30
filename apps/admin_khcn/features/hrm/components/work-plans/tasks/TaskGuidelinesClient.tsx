@@ -25,7 +25,7 @@ export function TaskGuidelinesClient() {
             </div>
           </div>
           <div>
-            <Link href="/services/hrm/tasks/create">
+            <Link href="/services/hrm/work-plans/tasks/create">
               <Button className="rounded-xl bg-blue-700 hover:bg-blue-800 font-bold px-6 shadow-md shadow-blue-200">
                 <FileText className="mr-2 h-4 w-4" /> Bắt đầu Giao việc
               </Button>

@@ -43,11 +43,11 @@ export const TaskListClient = () => {
       const res = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy });
       if (res.success) {
         if (Array.isArray(res.data)) {
-           setTopEmployees(res.data);
-           setTopDepartments([]);
+          setTopEmployees(res.data);
+          setTopDepartments([]);
         } else {
-           setTopEmployees(res.data?.topEmployees || []);
-           setTopDepartments(res.data?.topDepartments || []);
+          setTopEmployees(res.data?.topEmployees || []);
+          setTopDepartments(res.data?.topDepartments || []);
         }
       }
     } catch (e: any) {
@@ -119,7 +119,7 @@ export const TaskListClient = () => {
             Điều phối, theo dõi và quản lý tiến độ công việc toàn diện
           </p>
         </div>
-        <Link href="/services/hrm/tasks/create">
+        <Link href="/services/hrm/work-plans/tasks/create">
           <Button className="rounded-full h-12 px-8 text-base shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-300 hover:-translate-y-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 border-none group">
             <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> Giao việc mới
           </Button>

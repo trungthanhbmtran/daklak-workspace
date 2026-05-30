@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { aiApi } from '../../../api/ai.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useTaskTemplatesList, useCreateTask } from '../../../hooks';
 
 export function TaskCreateClient() {
+  const router = useRouter();
   const [assignee, setAssignee] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
   const [taskName, setTaskName] = useState('');
@@ -118,6 +120,7 @@ export function TaskCreateClient() {
           templateId: selectedTemplateId 
         });
         toast.success('Giao việc thành công!');
+        router.push('/services/hrm/work-plans/tasks');
       } catch (err) {
         toast.error('Lỗi khi giao việc');
       }
@@ -127,10 +130,15 @@ export function TaskCreateClient() {
   return (
     <div className="max-w-4xl mx-auto space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-black text-slate-900 flex items-center gap-2">
-          <PlusCircle className="w-8 h-8 text-indigo-600" />
-          Giao Việc Mới
-        </h1>
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => router.push('/services/hrm/work-plans/tasks')} className="text-slate-500 hover:text-slate-900">
+            &larr; Quay lại
+          </Button>
+          <h1 className="text-3xl font-black text-slate-900 flex items-center gap-2">
+            <PlusCircle className="w-8 h-8 text-indigo-600" />
+            Giao Việc Mới
+          </h1>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
