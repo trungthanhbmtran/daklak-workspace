@@ -121,6 +121,39 @@ export function TaskGuidelinesClient() {
           </Card>
 
         </div>
+
+        {/* Card 4: Quy định xử lý văn bản & Giao việc (Văn phòng Sở) */}
+        <Card className="rounded-2xl border-slate-200 shadow-sm border-t-4 border-t-orange-500 hover:shadow-md transition-shadow mt-6">
+          <CardHeader className="pb-3 border-b border-slate-100">
+            <CardTitle className="text-lg font-bold flex items-center gap-2">
+              <BookOpen className="h-5 w-5 text-orange-600" /> Quy định điều hành & Xử lý công việc (Văn phòng Sở)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 text-sm text-slate-700 space-y-4 leading-relaxed">
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-4 h-4" /></div>
+                <div><strong>Đầu mối xử lý:</strong> Chuyển văn bản đến một đầu mối chủ trì xử lý chính; đồng thời đưa Lãnh đạo Sở phụ trách lĩnh vực vào danh sách theo dõi, chỉ đạo nhằm hạn chế tình trạng luân chuyển văn bản qua nhiều đầu mối, gây chậm trễ.</div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-4 h-4" /></div>
+                <div><strong>Phân công nội bộ:</strong> Trưởng các phòng chuyên môn chịu trách nhiệm phân công nhiệm vụ cụ thể cho phó trưởng phòng và chuyên viên thuộc phạm vi quản lý; chủ động theo dõi, kiểm tra, đôn đốc tiến độ thực hiện nhiệm vụ của đơn vị mình.</div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-4 h-4" /></div>
+                <div><strong>Phản hồi điều chỉnh:</strong> Trường hợp văn bản được chuyển chưa đúng chức năng, nhiệm vụ của đơn vị thì phải kịp thời phản hồi để điều chỉnh; không để tồn đọng hoặc kéo dài thời gian xử lý.</div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-4 h-4" /></div>
+                <div><strong>Gia hạn tiến độ:</strong> Đối với các nhiệm vụ có thời hạn gấp hoặc khó bảo đảm tiến độ, đơn vị chủ trì phải chủ động báo cáo Lãnh đạo Sở; đồng thời tham mưu văn bản xin gia hạn theo quy định, không để xảy ra tình trạng quá hạn nhưng không báo cáo.</div>
+              </li>
+              <li className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle2 className="w-4 h-4" /></div>
+                <div><strong>Đánh giá thực chất:</strong> Giao Văn phòng Sở chủ trì tham mưu xây dựng cơ chế theo dõi, đánh giá kết quả thực hiện nhiệm vụ của các phòng, đơn vị; đồng thời nghiên cứu tham mưu điều chỉnh Quy chế thi đua, khen thưởng theo hướng nâng cao chất lượng, hiệu quả công việc, giảm hình thức.</div>
+              </li>
+            </ul>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

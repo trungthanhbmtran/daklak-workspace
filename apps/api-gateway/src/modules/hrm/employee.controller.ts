@@ -63,7 +63,12 @@ export class EmployeeController implements OnModuleInit {
 
       const jtMap: Record<string, any> = {};
       (jobTitlesRes?.items || []).forEach((jt: any) => {
-        jtMap[jt.id] = { name: jt.name, code: jt.code };
+        jtMap[jt.id] = { 
+          name: jt.name, 
+          code: jt.code, 
+          monitoredUnitIds: jt.monitoredUnitIds || [],
+          domainId: jt.domainId || null
+        };
       });
 
       const catMap: Record<string, any> = {};
@@ -74,7 +79,13 @@ export class EmployeeController implements OnModuleInit {
       const unitMap: Record<string, any> = {};
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
-          if (n.id) unitMap[n.id] = { name: n.name, code: n.code };
+          if (n.id) {
+            unitMap[n.id] = { 
+              name: n.name, 
+              code: n.code,
+              domainIds: n.domainIds || []
+            };
+          }
           if (n.children?.length) flattenNodes(n.children);
         }
       };

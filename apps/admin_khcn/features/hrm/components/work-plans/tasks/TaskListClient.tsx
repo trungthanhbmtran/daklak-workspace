@@ -414,6 +414,26 @@ export const TaskListClient = () => {
                         )}
                       </div>
                     </div>
+
+                    {selectedTask.supervisorCode && (
+                      <div>
+                        <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center mt-6">
+                          <span className="w-2 h-6 bg-orange-500 rounded-full mr-3"></span>
+                          Lãnh đạo theo dõi, chỉ đạo
+                        </h4>
+                        <div className="bg-orange-50/50 dark:bg-orange-900/10 p-5 rounded-3xl border border-orange-100 dark:border-orange-800/30 flex items-center">
+                          <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 text-orange-600 dark:text-orange-400 flex justify-center items-center font-bold text-lg shadow-sm border-2 border-orange-100 dark:border-orange-900/50 mr-4 shrink-0">
+                            {(selectedTask.supervisorName || selectedTask.supervisorCode)?.charAt(0) || '?'}
+                          </div>
+                          <div>
+                            <p className="font-bold text-md text-slate-800 dark:text-slate-100">
+                              {selectedTask.supervisorName || selectedTask.supervisorCode}
+                            </p>
+                            <p className="text-xs text-orange-600 dark:text-orange-400 font-medium">Lãnh đạo Sở</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

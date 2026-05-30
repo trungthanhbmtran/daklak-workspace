@@ -19,8 +19,8 @@ export interface HrmEmployee {
   partyTitleId?: number;
   startDate?: string;
   birthday?: string;
-  department?: { id: number; name: string; code: string };
-  jobTitle?: { id: number; name: string; code: string; type?: string };
+  department?: { id: number; name: string; code: string; domainIds?: number[] };
+  jobTitle?: { id: number; name: string; code: string; type?: string; monitoredUnitIds?: number[]; domainId?: number };
   civilServantRank?: { id: number; name: string; code: string; type?: string };
   partyTitle?: { id: number; name: string; code: string; type?: string };
   currentTaskCount?: number;

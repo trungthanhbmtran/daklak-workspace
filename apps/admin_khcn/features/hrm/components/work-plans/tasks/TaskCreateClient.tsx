@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { aiApi } from '../../../api/ai.api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../
 export function TaskCreateClient() {
   const router = useRouter();
   const [assignee, setAssignee] = useState('');
+  const [supervisor, setSupervisor] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
   const [taskName, setTaskName] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -36,9 +37,37 @@ export function TaskCreateClient() {
     rank: emp.civilServantRank?.code || 'CHUYEN_VIEN',
     rankLimit: 100, // Định mức mặc định
     currentLoad: emp.currentTaskCount || 0,
+    departmentId: emp.departmentId,
+    department: emp.department,
+    jobTitle: emp.jobTitle,
   })) || [];
 
   const selectedEmp = employees.find(e => e.code === assignee);
+
+  // Tự động tìm Lãnh đạo theo dõi mảng dựa trên lĩnh vực của phòng ban hoặc chức danh người được giao
+  useEffect(() => {
+    if (assignee && employeesData?.data && selectedEmp) {
+      // 1. Lấy lĩnh vực của người được giao việc
+      const unitDomainIds = selectedEmp.department?.domainIds || [];
+      const jtDomainId = selectedEmp.jobTitle?.domainId;
+      const domainsToMatch = new Set([...unitDomainIds, jtDomainId].filter(d => d != null && d > 0));
+
+      // 2. Tìm Lãnh đạo (GIAM_DOC hoặc PHO_GIAM_DOC) có lĩnh vực phụ trách trùng khớp
+      let leader = employeesData.data.find((e) => {
+        if (e.jobTitle?.code !== 'PHO_GIAM_DOC' && e.jobTitle?.code !== 'GIAM_DOC') return false;
+        return e.jobTitle.domainId && domainsToMatch.has(e.jobTitle.domainId);
+      });
+
+      // 3. Fallback: Nếu không tìm thấy, tìm Giám đốc Sở
+      if (!leader) {
+        leader = employeesData.data.find((e) => e.jobTitle?.code === 'GIAM_DOC');
+      }
+
+      if (leader) {
+        setSupervisor(leader.employeeCode);
+      }
+    }
+  }, [assignee, selectedEmp?.department?.domainIds, selectedEmp?.jobTitle?.domainId, employeesData?.data]);
 
   const { data } = useTaskTemplatesList(selectedEmp?.rank);
   const templates = data?.data || [];
@@ -115,6 +144,7 @@ export function TaskCreateClient() {
       try {
         await createTask({
           assigneeCode: assignee,
+          supervisorCode: supervisor,
           taskName,
           weight: taskWeight,
           startDate,
@@ -264,7 +294,7 @@ export function TaskCreateClient() {
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-slate-700">Chọn người thực hiện</label>
+                <label className="text-sm font-bold text-slate-700">Đầu mối chủ trì xử lý chính</label>
                 <Select value={assignee} onValueChange={setAssignee}>
                   <SelectTrigger className="bg-white">
                     <SelectValue placeholder="Chọn nhân sự..." />
@@ -272,6 +302,20 @@ export function TaskCreateClient() {
                   <SelectContent>
                     {employees.map(emp => (
                       <SelectItem key={emp.code} value={emp.code}>{emp.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-slate-700">Lãnh đạo Sở theo dõi, chỉ đạo</label>
+                <Select value={supervisor} onValueChange={setSupervisor}>
+                  <SelectTrigger className="bg-white border-orange-200">
+                    <SelectValue placeholder="Chọn Lãnh đạo Sở..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {employees.map(emp => (
+                      <SelectItem key={`sup-${emp.code}`} value={emp.code}>{emp.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
