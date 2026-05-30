@@ -1125,34 +1125,34 @@ async function main() {
     // SỞ KHOA HỌC & CÔNG NGHỆ
     // =========================
 
-    { group: 'DOMAIN', code: 'SO_KHCN', nameVi: 'Sở Khoa học và Công nghệ' },
+    { group: 'DOMAIN', code: 'H15.07', nameVi: 'Sở Khoa học và Công nghệ' },
     {
       group: 'DOMAIN',
       code: 'CHUYEN_DOI_SO',
-      parentCode: 'SO_KHCN',
+      parentCode: 'H15.07',
       nameVi: 'Chuyển đổi số',
     },
     {
       group: 'DOMAIN',
       code: 'DU_LIEU_SO',
-      parentCode: 'SO_KHCN',
+      parentCode: 'H15.07',
       nameVi: 'Dữ liệu số',
     },
     {
       code: 'AN_TOAN_THONG_TIN',
-      parentCode: 'SO_KHCN',
+      parentCode: 'H15.07',
       nameVi: 'An toàn thông tin',
     },
     {
       group: 'DOMAIN',
       code: 'VIEN_THONG',
-      parentCode: 'SO_KHCN',
+      parentCode: 'H15.07',
       nameVi: 'Viễn thông',
     },
     {
       group: 'DOMAIN',
       code: 'KINH_TE_SO',
-      parentCode: 'SO_KHCN',
+      parentCode: 'H15.07',
       nameVi: 'Kinh tế số',
     },
 
@@ -3840,10 +3840,10 @@ async function main() {
   const trungTamTypeId = unitTypeMap['TRUNG_TAM'].id;
 
   const province = await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_TINH_DAKLAK' },
+    where: { code: 'H15' },
     update: { name: 'UBND Tỉnh Đắk Lắk', typeId: ubndTinhTypeId },
     create: {
-      code: 'UBND_TINH_DAKLAK',
+      code: 'H15',
       name: 'UBND Tỉnh Đắk Lắk',
       typeId: ubndTinhTypeId,
       shortName: 'UBND Tỉnh',
@@ -3852,7 +3852,7 @@ async function main() {
 
   const depts = [
     {
-      code: 'SO_KHCN',
+      code: 'H15.07',
       name: 'Sở Khoa học và Công nghệ',
       shortName: 'Sở KH&CN',
     },
@@ -3952,35 +3952,45 @@ async function main() {
 
   // Thêm Đơn vị sự nghiệp tiêu biểu
   const soKhcn = await prisma.organizationUnit.findUnique({
-    where: { code: 'SO_KHCN' },
+    where: { code: 'H15.07' },
   });
   if (soKhcn) {
     await prisma.organizationUnit.upsert({
-      where: { code: 'TT_DMSM' },
+      where: { code: 'H15.07.01' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
       create: {
-        code: 'TT_DMSM',
+        code: 'H15.07.01',
         name: 'Trung tâm Đổi mới Sáng tạo',
         parentId: soKhcn.id,
         typeId: trungTamTypeId,
       },
     });
     await prisma.organizationUnit.upsert({
-      where: { code: 'TT_IOC' },
+      where: { code: 'H15.07.04' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
       create: {
-        code: 'TT_IOC',
+        code: 'H15.07.04',
         name: 'Trung tâm Giám sát, Điều hành Đô thị Thông minh (IOC)',
         parentId: soKhcn.id,
         typeId: trungTamTypeId,
       },
     });
     await prisma.organizationUnit.upsert({
-      where: { code: 'TT_KTTDC' },
+      where: { code: 'H15.07.02' },
       update: { parentId: soKhcn.id, typeId: trungTamTypeId },
       create: {
-        code: 'TT_KTTDC',
+        code: 'H15.07.02',
         name: 'Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng',
+        parentId: soKhcn.id,
+        typeId: trungTamTypeId,
+      },
+    });
+    await prisma.organizationUnit.upsert({
+      where: { code: 'H15.07.03' },
+      update: { parentId: soKhcn.id, typeId: trungTamTypeId },
+      create: {
+        code: 'H15.07.03',
+        name: 'Trung tâm Thông tin - Ứng dụng Khoa học và Công nghệ',
         parentId: soKhcn.id,
         typeId: trungTamTypeId,
       },
@@ -4019,80 +4029,112 @@ async function main() {
   // ==========================
   // 1. SỞ KHOA HỌC & CÔNG NGHỆ
   // ==========================
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_VP',
+  await createDept('H15.07', {
+    code: 'H15.07.VP',
     name: 'Văn phòng Sở',
     typeCode: 'VAN_PHONG',
   });
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_TT',
+  await createDept('H15.07', {
+    code: 'H15.07.TT',
     name: 'Thanh tra Sở',
     typeCode: 'THANH_TRA',
   });
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_KHTC',
+  await createDept('H15.07', {
+    code: 'H15.07.KHTC',
     name: 'Phòng Kế hoạch - Tài chính',
     typeCode: 'PHONG_BAN_SO',
   });
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_QLKH',
+  await createDept('H15.07', {
+    code: 'H15.07.QLKH',
     name: 'Phòng Quản lý Khoa học',
     typeCode: 'PHONG_BAN_SO',
   });
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_CDS',
+  await createDept('H15.07', {
+    code: 'H15.07.CDS',
     name: 'Phòng Chuyển đổi số',
     typeCode: 'PHONG_BAN_SO',
   });
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_QLCN',
+  await createDept('H15.07', {
+    code: 'H15.07.QLCN',
     name: 'Phòng Quản lý Công nghệ và Đổi mới sáng tạo',
     typeCode: 'PHONG_BAN_SO',
   });
-  await createDept('SO_KHCN', {
-    code: 'SO_KHCN_TDC',
+  await createDept('H15.07', {
+    code: 'H15.07.TDC',
     name: 'Phòng Quản lý Tiêu chuẩn - Đo lường - Chất lượng',
     typeCode: 'PHONG_BAN_SO',
   });
 
   // Các phòng thuộc Trung tâm Đổi mới Sáng tạo
-  await createDept('TT_DMSM', {
-    code: 'TT_DMSM_HC',
+  await createDept('H15.07.01', {
+    code: 'H15.07.01.HC',
     name: 'Phòng Hành chính - Tổng hợp',
     typeCode: 'VAN_PHONG',
   });
-  await createDept('TT_DMSM', {
-    code: 'TT_DMSM_UT',
+  await createDept('H15.07.01', {
+    code: 'H15.07.01.UT',
     name: 'Phòng Ươm tạo và Phát triển',
     typeCode: 'PHONG_BAN_SO',
   });
 
   // Các phòng thuộc Trung tâm IOC
-  await createDept('TT_IOC', {
-    code: 'TT_IOC_HC',
-    name: 'Phòng Hành chính - Quản trị',
+  await createDept('H15.07.04', {
+    code: 'H15.07.04.HC',
+    name: 'Phòng Hành chính - Tổng hợp',
     typeCode: 'VAN_PHONG',
   });
-  await createDept('TT_IOC', {
-    code: 'TT_IOC_CN',
-    name: 'Phòng Công nghệ và Hạ tầng',
+  await createDept('H15.07.04', {
+    code: 'H15.07.04.DL',
+    name: 'Phòng Khai thác và Quản lý dữ liệu',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('H15.07.04', {
+    code: 'H15.07.04.HT',
+    name: 'Phòng Hạ tầng - Đô thị thông minh',
     typeCode: 'PHONG_BAN_SO',
   });
 
   // Các phòng thuộc Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng
-  await createDept('TT_KTTDC', {
-    code: 'TT_KTTDC_HC',
+  await createDept('H15.07.02', {
+    code: 'H15.07.02.HC',
     name: 'Phòng Hành chính - Tổ chức',
     typeCode: 'VAN_PHONG',
   });
-  await createDept('TT_KTTDC', {
-    code: 'TT_KTTDC_DL',
+  await createDept('H15.07.02', {
+    code: 'H15.07.02.DL',
     name: 'Phòng Đo lường',
     typeCode: 'PHONG_BAN_SO',
   });
-  await createDept('TT_KTTDC', {
-    code: 'TT_KTTDC_TN',
+  await createDept('H15.07.02', {
+    code: 'H15.07.02.TN',
     name: 'Phòng Thử nghiệm',
+    typeCode: 'PHONG_BAN_SO',
+  });
+
+  // Các phòng thuộc Trung tâm Thông tin - Ứng dụng Khoa học và Công nghệ
+  await createDept('H15.07.03', {
+    code: 'H15.07.03.HC',
+    name: 'Phòng Hành chính - Tổng hợp',
+    typeCode: 'VAN_PHONG',
+  });
+  await createDept('H15.07.03', {
+    code: 'H15.07.03.TT',
+    name: 'Phòng Thông tin KH&CN',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('H15.07.03', {
+    code: 'H15.07.03.UD',
+    name: 'Phòng Ứng dụng KH&CN',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('H15.07.03', {
+    code: 'H15.07.03.DV',
+    name: 'Phòng Dịch vụ KH&CN',
+    typeCode: 'PHONG_BAN_SO',
+  });
+  await createDept('H15.07.03', {
+    code: 'H15.07.03.TN',
+    name: 'Trại Thực nghiệm KH&CN',
     typeCode: 'PHONG_BAN_SO',
   });
 
@@ -4245,7 +4287,7 @@ async function main() {
     'dohuuhuy@daklak.gov.vn',
     'dohuuhuy',
     'Đỗ Hữu Huy',
-    'UBND_TINH_DAKLAK',
+    'H15',
     'CHU_TICH',
     true,
   );
@@ -4263,7 +4305,7 @@ async function main() {
     'buithanhtoan@daklak.gov.vn',
     'buithanhtoan',
     'Bùi Thanh Toàn',
-    'SO_KHCN',
+    'H15.07',
     'GIAM_DOC',
     true,
   );
@@ -4271,7 +4313,7 @@ async function main() {
     'phamgiaviet@daklak.gov.vn',
     'phamgiaviet',
     'Phạm Gia Việt',
-    'SO_KHCN',
+    'H15.07',
     'PHO_GIAM_DOC',
     true,
   );
@@ -4279,7 +4321,7 @@ async function main() {
     'ralantruongthanhha@daklak.gov.vn',
     'ralantruongthanhha',
     'Ra Lan Trương Thanh Hà',
-    'SO_KHCN',
+    'H15.07',
     'PHO_GIAM_DOC',
     true,
   );
@@ -4287,7 +4329,7 @@ async function main() {
     'tranvanson@daklak.gov.vn',
     'tranvanson',
     'Trần Văn Sơn',
-    'SO_KHCN',
+    'H15.07',
     'PHO_GIAM_DOC',
     true,
   );
@@ -4295,7 +4337,7 @@ async function main() {
     'lamvumyhanh@daklak.gov.vn',
     'lamvumyhanh',
     'Lâm Vũ Mỹ Hạnh',
-    'SO_KHCN',
+    'H15.07',
     'PHO_GIAM_DOC',
     true,
   );
@@ -4304,7 +4346,7 @@ async function main() {
     'buithanhtoan@daklak.gov.vn',
     'buithanhtoan',
     'Bùi Thanh Toàn',
-    'SO_KHCN',
+    'H15.07',
     'BI_THU_DANG_BO',
     true,
   );
@@ -4312,7 +4354,7 @@ async function main() {
     'phamgiaviet@daklak.gov.vn',
     'phamgiaviet',
     'Phạm Gia Việt',
-    'SO_KHCN',
+    'H15.07',
     'PHO_BI_THU_DANG_BO',
     true,
   );
@@ -4322,7 +4364,7 @@ async function main() {
     'nguyenvana@daklak.gov.vn',
     'nguyenvana',
     'Nguyễn Văn A',
-    'SO_KHCN_VP',
+    'H15.07.VP',
     'CHANH_VAN_PHONG',
     true,
   );
@@ -4330,7 +4372,7 @@ async function main() {
     'lethib@daklak.gov.vn',
     'lethib',
     'Lê Thị B',
-    'SO_KHCN_KHTC',
+    'H15.07.KHTC',
     'TRUONG_PHONG',
     true,
   );
@@ -4338,7 +4380,7 @@ async function main() {
     'tranvanc@daklak.gov.vn',
     'tranvanc',
     'Trần Văn C',
-    'SO_KHCN_QLKH',
+    'H15.07.QLKH',
     'TRUONG_PHONG',
     true,
   );
@@ -4346,7 +4388,7 @@ async function main() {
     'phamthid@daklak.gov.vn',
     'phamthid',
     'Phạm Thị D',
-    'SO_KHCN_CDS',
+    'H15.07.CDS',
     'TRUONG_PHONG',
     true,
   );
@@ -4354,7 +4396,7 @@ async function main() {
     'hoangvane@daklak.gov.vn',
     'hoangvane',
     'Hoàng Văn E',
-    'SO_KHCN_QLCN',
+    'H15.07.QLCN',
     'TRUONG_PHONG',
     true,
   );
@@ -4362,7 +4404,7 @@ async function main() {
     'vuthif@daklak.gov.vn',
     'vuthif',
     'Vũ Thị F',
-    'SO_KHCN_TDC',
+    'H15.07.TDC',
     'TRUONG_PHONG',
     true,
   );
@@ -4372,7 +4414,7 @@ async function main() {
     'dovang@daklak.gov.vn',
     'dovang',
     'Đỗ Văn G',
-    'TT_DMSM',
+    'H15.07.01',
     'GIAM_DOC',
     true,
   );
@@ -4380,7 +4422,7 @@ async function main() {
     'ngothih@daklak.gov.vn',
     'ngothih',
     'Ngô Thị H',
-    'TT_IOC',
+    'H15.07.04',
     'GIAM_DOC',
     true,
   );
@@ -4388,7 +4430,7 @@ async function main() {
     'lyvani@daklak.gov.vn',
     'lyvani',
     'Lý Văn I',
-    'TT_KTTDC',
+    'H15.07.02',
     'GIAM_DOC',
     true,
   );
@@ -4398,7 +4440,7 @@ async function main() {
     'truongphonghc_dmsm@daklak.gov.vn',
     'truongphonghc_dmsm',
     'Hoàng Văn HC',
-    'TT_DMSM_HC',
+    'H15.07.01.HC',
     'TRUONG_PHONG',
     true,
   );
@@ -4406,7 +4448,7 @@ async function main() {
     'truongphongut_dmsm@daklak.gov.vn',
     'truongphongut_dmsm',
     'Lê Thị UT',
-    'TT_DMSM_UT',
+    'H15.07.01.UT',
     'TRUONG_PHONG',
     true,
   );
@@ -4414,7 +4456,7 @@ async function main() {
     'truongphonghc_ioc@daklak.gov.vn',
     'truongphonghc_ioc',
     'Trần Văn HC',
-    'TT_IOC_HC',
+    'H15.07.04.HC',
     'TRUONG_PHONG',
     true,
   );
@@ -4422,7 +4464,7 @@ async function main() {
     'truongphongcn_ioc@daklak.gov.vn',
     'truongphongcn_ioc',
     'Phạm Thị CN',
-    'TT_IOC_CN',
+    'H15.07.04.CN',
     'TRUONG_PHONG',
     true,
   );
@@ -4430,7 +4472,7 @@ async function main() {
     'truongphonghc_kttdc@daklak.gov.vn',
     'truongphonghc_kttdc',
     'Nguyễn Văn HC',
-    'TT_KTTDC_HC',
+    'H15.07.02.HC',
     'TRUONG_PHONG',
     true,
   );
@@ -4438,7 +4480,7 @@ async function main() {
     'truongphongdl_kttdc@daklak.gov.vn',
     'truongphongdl_kttdc',
     'Đinh Thị DL',
-    'TT_KTTDC_DL',
+    'H15.07.02.DL',
     'TRUONG_PHONG',
     true,
   );
@@ -4446,7 +4488,7 @@ async function main() {
     'truongphongtn_kttdc@daklak.gov.vn',
     'truongphongtn_kttdc',
     'Vũ Văn TN',
-    'TT_KTTDC_TN',
+    'H15.07.02.TN',
     'TRUONG_PHONG',
     true,
   );
@@ -4456,7 +4498,7 @@ async function main() {
     'phochvp_khcn@daklak.gov.vn',
     'phochvp_khcn',
     'Trương Văn Phó 1',
-    'SO_KHCN_VP',
+    'H15.07.VP',
     'PHO_CHANH_VAN_PHONG',
     false,
   );
@@ -4464,7 +4506,7 @@ async function main() {
     'photp_khtc_khcn@daklak.gov.vn',
     'photp_khtc_khcn',
     'Ngô Thị Phó 2',
-    'SO_KHCN_KHTC',
+    'H15.07.KHTC',
     'PHO_TRUONG_PHONG',
     false,
   );
@@ -4483,7 +4525,7 @@ async function main() {
     'trungthanh@daklak.gov.vn',
     'trungthanh',
     'Trần Trung Thành',
-    'SO_KHCN',
+    'H15.07',
     'CONG_CHUC_PHU_TRACH',
     false,
   );
@@ -4611,20 +4653,20 @@ async function main() {
   };
 
   // Sở KHCN
-  await setStaffing('SO_KHCN', 'GIAM_DOC', 1);
-  await setStaffing('SO_KHCN', 'PHO_GIAM_DOC', 4);
+  await setStaffing('H15.07', 'GIAM_DOC', 1);
+  await setStaffing('H15.07', 'PHO_GIAM_DOC', 4);
 
   // Các phòng ban thuộc Sở
-  await setStaffing('SO_KHCN_VP', 'CHANH_VAN_PHONG', 1);
-  await setStaffing('SO_KHCN_VP', 'PHO_CHANH_VAN_PHONG', 2);
-  await setStaffing('SO_KHCN_VP', 'SPECIALIST', 5);
+  await setStaffing('H15.07.VP', 'CHANH_VAN_PHONG', 1);
+  await setStaffing('H15.07.VP', 'PHO_CHANH_VAN_PHONG', 2);
+  await setStaffing('H15.07.VP', 'SPECIALIST', 5);
 
   const phongBanCodes = [
-    'SO_KHCN_KHTC',
-    'SO_KHCN_QLKH',
-    'SO_KHCN_CDS',
-    'SO_KHCN_QLCN',
-    'SO_KHCN_TDC',
+    'H15.07.KHTC',
+    'H15.07.QLKH',
+    'H15.07.CDS',
+    'H15.07.QLCN',
+    'H15.07.TDC',
   ];
   for (const code of phongBanCodes) {
     await setStaffing(code, 'TRUONG_PHONG', 1);
@@ -4633,7 +4675,7 @@ async function main() {
   }
 
   // Các Trung tâm
-  const trungTamCodes = ['TT_DMSM', 'TT_IOC', 'TT_KTTDC'];
+  const trungTamCodes = ['H15.07.01', 'H15.07.04', 'H15.07.02'];
   for (const code of trungTamCodes) {
     await setStaffing(code, 'GIAM_DOC', 1);
     await setStaffing(code, 'PHO_GIAM_DOC', 2);
@@ -4641,13 +4683,13 @@ async function main() {
 
   // Các phòng thuộc Trung tâm
   const phongTrungTamCodes = [
-    'TT_DMSM_HC',
-    'TT_DMSM_UT',
-    'TT_IOC_HC',
-    'TT_IOC_CN',
-    'TT_KTTDC_HC',
-    'TT_KTTDC_DL',
-    'TT_KTTDC_TN',
+    'H15.07.01.HC',
+    'H15.07.01.UT',
+    'H15.07.04.HC',
+    'H15.07.04.CN',
+    'H15.07.02.HC',
+    'H15.07.02.DL',
+    'H15.07.02.TN',
   ];
   for (const code of phongTrungTamCodes) {
     await setStaffing(code, 'TRUONG_PHONG', 1);
@@ -4692,97 +4734,155 @@ async function main() {
       create: { categoryId: cat.id, langCode: 'vi', name: fw.name },
     });
   }
+
+
+
   console.log('✅ Categories seeded successfully!');
 
-  // ==========================================================
-  // 11. CẬP NHẬT DỮ LIỆU THỬ NGHIỆM CHỨC DANH & ĐƠN VỊ
-  // ==========================================================
-  console.log('🔹 Seeding Job Titles and Organizations Test Data...');
 
-  // 1. Lấy các lĩnh vực thử nghiệm (Domain)
-  const domainCDS = await prisma.category.findFirst({
-    where: { code: 'CHUYEN_DOI_SO', group: 'DOMAIN' },
-  });
-  const domainDLS = await prisma.category.findFirst({
-    where: { code: 'DU_LIEU_SO', group: 'DOMAIN' },
-  });
-  const domainNS = await prisma.category.findFirst({
-    where: { code: 'NGAN_SACH', group: 'DOMAIN' },
+  // 4. Lấy tất cả các xã/phường (GEO_AREA) và toàn tỉnh Đắk Lắk (PROVINCE 47)
+  const allGeoAreas = await prisma.category.findMany({
+    where: {
+      OR: [
+        { group: 'GEO_AREA' },
+        { code: '47', group: 'PROVINCE' }
+      ]
+    },
   });
 
-  // 2. Lấy các chức danh
-  const phogiamdoc = await prisma.jobTitle.findUnique({
-    where: { code: 'PHO_GIAM_DOC' },
-  });
-  const giamdoc = await prisma.jobTitle.findUnique({
-    where: { code: 'GIAM_DOC' },
+  // 5. Lấy các lĩnh vực KHCN, TT&TT, CĐS và NGÂN SÁCH
+  const allDomainCodes = [
+    'H15.07', 'CHUYEN_DOI_SO', 'DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'VIEN_THONG', 'KINH_TE_SO',
+    'THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'HA_TANG_SO',
+    'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI', 'NGAN_SACH'
+  ];
+
+  const techDomains = await prisma.category.findMany({
+    where: {
+      group: 'DOMAIN',
+      code: {
+        in: allDomainCodes
+      }
+    }
   });
 
-  // 3. Lấy các phòng ban
-  const phongKHTC = await prisma.organizationUnit.findUnique({
-    where: { code: 'SO_KHCN_KHTC' },
-  });
-  const phongQLCN = await prisma.organizationUnit.findUnique({
-    where: { code: 'SO_KHCN_QLCN' },
+  const soKhcnUnits = await prisma.organizationUnit.findMany({
+    where: {
+      OR: [
+        { code: 'H15.07' },
+        { code: { startsWith: 'H15.07.' } }
+      ]
+    }
   });
 
-  if (phogiamdoc && domainCDS && phongQLCN) {
-    // Cập nhật chức danh Phó Giám đốc: Quản lý lĩnh vực Chuyển đổi số, theo dõi phòng Quản lý công nghệ
-    await prisma.jobTitle.update({
-      where: { id: phogiamdoc.id },
-      data: {
-        domainId: domainCDS.id,
-      },
+  if (soKhcnUnits.length > 0) {
+    const geoData: { unitId: number, geographicAreaId: number }[] = [];
+    const domainData: { unitId: number, domainId: number }[] = [];
+
+    const domainMapping: Record<string, string[]> = {
+      'H15.07': allDomainCodes,
+      'H15.07.CDS': ['CHUYEN_DOI_SO', 'DU_LIEU_SO', 'KINH_TE_SO', 'AN_TOAN_THONG_TIN', 'HA_TANG_SO'],
+      'H15.07.04': ['DU_LIEU_SO', 'HA_TANG_SO', 'THONG_TIN_TRUYEN_THONG', 'CHUYEN_DOI_SO'],
+      'H15.07.03': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
+      'H15.07.KHTC': ['NGAN_SACH', 'H15.07'],
+      'H15.07.VP': ['H15.07'],
+      'H15.07.QLCN': ['H15.07'],
+      'H15.07.QLKH': ['H15.07'],
+      'H15.07.TCDLCL': ['H15.07'],
+    };
+
+    for (const unit of soKhcnUnits) {
+      for (const geo of allGeoAreas) {
+        geoData.push({ unitId: unit.id, geographicAreaId: geo.id });
+      }
+
+      const assignedCodes = domainMapping[unit.code] || ['H15.07'];
+      const unitDomains = techDomains.filter(d => assignedCodes.includes(d.code));
+
+      for (const domain of unitDomains) {
+        domainData.push({ unitId: unit.id, domainId: domain.id });
+      }
+    }
+
+    await prisma.unitGeographicArea.createMany({
+      data: geoData,
+      skipDuplicates: true,
     });
 
-    // Cập nhật phạm vi quản lý (Monitored Units)
-    await prisma.jobTitleMonitoredUnit.upsert({
-      where: {
-        jobTitleId_unitId: { jobTitleId: phogiamdoc.id, unitId: phongQLCN.id },
-      },
-      update: {},
-      create: { jobTitleId: phogiamdoc.id, unitId: phongQLCN.id },
+    await prisma.unitDomain.createMany({
+      data: domainData,
+      skipDuplicates: true,
     });
 
-    // Gán lĩnh vực cho phòng ban
-    await prisma.unitDomain.upsert({
-      where: {
-        unitId_domainId: { unitId: phongQLCN.id, domainId: domainCDS.id },
-      },
-      update: {},
-      create: { unitId: phongQLCN.id, domainId: domainCDS.id },
-    });
-    console.log(
-      '✅ Đã cập nhật Phó Giám đốc: Lĩnh vực Chuyển đổi số, Theo dõi phòng QLCN',
-    );
-  }
+    console.log(`✅ Đã cập nhật ${allGeoAreas.length} Địa bàn (các xã, toàn tỉnh) cho ${soKhcnUnits.length} đơn vị KH&CN (Tổng: ${geoData.length} bản ghi)`);
+    console.log(`✅ Đã phân bổ Lĩnh vực chuyên môn theo chức năng cho các đơn vị KH&CN (Tổng: ${domainData.length} bản ghi)`);
 
-  if (giamdoc && domainNS && phongKHTC) {
-    await prisma.jobTitle.update({
-      where: { id: giamdoc.id },
-      data: {
-        domainId: domainNS.id,
-      },
+    // ----------------------------------------------------
+    // SEED STAFFING SLOTS (Định biên chi tiết cho từng Slot)
+    // ----------------------------------------------------
+    const allStaffing = await prisma.organizationStaffing.findMany({
+      where: { unitId: { in: soKhcnUnits.map(u => u.id) } },
+      include: { jobTitle: true, unit: true }
     });
 
-    await prisma.jobTitleMonitoredUnit.upsert({
-      where: {
-        jobTitleId_unitId: { jobTitleId: giamdoc.id, unitId: phongKHTC.id },
-      },
-      update: {},
-      create: { jobTitleId: giamdoc.id, unitId: phongKHTC.id },
-    });
+    const slotGeos: { slotId: number, geographicAreaId: number }[] = [];
+    const slotDomains: { slotId: number, domainId: number }[] = [];
+    const slotMonitored: { slotId: number, unitId: number }[] = [];
 
-    await prisma.unitDomain.upsert({
-      where: {
-        unitId_domainId: { unitId: phongKHTC.id, domainId: domainNS.id },
-      },
-      update: {},
-      create: { unitId: phongKHTC.id, domainId: domainNS.id },
-    });
-    console.log(
-      '✅ Đã cập nhật Giám đốc: Lĩnh vực Ngân sách, Theo dõi phòng KHTC',
-    );
+    const phongKHTC = soKhcnUnits.find(u => u.code === 'H15.07.KHTC');
+    const phongCDS = soKhcnUnits.find(u => u.code === 'H15.07.CDS');
+    const trungtamIOC = soKhcnUnits.find(u => u.code === 'H15.07.04');
+    const phongQLCN = soKhcnUnits.find(u => u.code === 'H15.07.QLCN');
+    const domainNS = techDomains.find(d => d.code === 'NGAN_SACH');
+    const domainCDS = techDomains.find(d => d.code === 'CHUYEN_DOI_SO');
+
+    const daklakGeo = allGeoAreas.find(g => g.code === '47');
+
+    for (const staffing of allStaffing) {
+      for (let i = 1; i <= staffing.quantity; i++) {
+        // Tạo Slot
+        const slot = await prisma.staffingSlot.upsert({
+          where: { staffingId_slotOrder: { staffingId: staffing.id, slotOrder: i } },
+          update: {},
+          create: { staffingId: staffing.id, slotOrder: i },
+        });
+
+        // 1. Địa bàn: Gán mặc định Tỉnh Đắk Lắk (mã 47) hoặc tất cả xã phường tuỳ chọn, ở đây gán Đắk Lắk
+        if (daklakGeo) {
+          slotGeos.push({ slotId: slot.id, geographicAreaId: daklakGeo.id });
+        }
+
+        // 2. Lĩnh vực và Phòng ban theo dõi
+        if (staffing.unit.code === 'H15.07') { // Lãnh đạo cấp Sở
+          if (staffing.jobTitle.code === 'GIAM_DOC' && i === 1) {
+            if (domainNS) slotDomains.push({ slotId: slot.id, domainId: domainNS.id });
+            if (phongKHTC) slotMonitored.push({ slotId: slot.id, unitId: phongKHTC.id });
+          } else if (staffing.jobTitle.code === 'PHO_GIAM_DOC') {
+            if (i === 1) { // PGD 1 phụ trách CĐS
+              if (domainCDS) slotDomains.push({ slotId: slot.id, domainId: domainCDS.id });
+              if (phongCDS) slotMonitored.push({ slotId: slot.id, unitId: phongCDS.id });
+              if (trungtamIOC) slotMonitored.push({ slotId: slot.id, unitId: trungtamIOC.id });
+            }
+            if (i === 2) { // PGD 2 phụ trách QLCN
+              if (phongQLCN) slotMonitored.push({ slotId: slot.id, unitId: phongQLCN.id });
+            }
+          }
+        } else {
+          // Trưởng phòng / Phó trưởng phòng: Kế thừa lĩnh vực của đơn vị cha
+          const assignedCodes = domainMapping[staffing.unit.code] || ['H15.07'];
+          const unitDomains = techDomains.filter(d => assignedCodes.includes(d.code));
+          for (const d of unitDomains) {
+            slotDomains.push({ slotId: slot.id, domainId: d.id });
+          }
+        }
+      }
+    }
+
+    await prisma.staffingSlotGeographicArea.createMany({ data: slotGeos, skipDuplicates: true });
+    await prisma.staffingSlotDomain.createMany({ data: slotDomains, skipDuplicates: true });
+    await prisma.staffingSlotMonitoredUnit.createMany({ data: slotMonitored, skipDuplicates: true });
+
+    console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Slot domains: ${slotDomains.length}, Geos: ${slotGeos.length}, Monitored Units: ${slotMonitored.length})`);
   }
 }
 

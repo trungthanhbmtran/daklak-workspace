@@ -250,11 +250,15 @@ export class OrganizationsController {
           jobTitleName: j?.name ?? '',
           quantity: s.quantity,
           currentCount: s.currentCount ?? 0,
-          jobTitleDomainName: this.getCatName(j?.domain),
-          jobTitleMonitoredUnitNames: (j?.monitoredUnits ?? [])
+          jobTitleDomainName:
+            this.getCatName(j?.domain) ||
+            [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.domains ?? []).map((d: any) => this.getCatName(d.domain))))].filter(Boolean).join(', '),
+          jobTitleMonitoredUnitNames: (j?.monitoredUnits?.length ? j.monitoredUnits : (s.slots ?? []).flatMap((slot: any) => slot.monitoredUnits ?? []))
             .map((mu: any) => mu.unit?.name ?? '')
-            .filter(Boolean),
-          jobTitleGeographicAreaName: this.getCatName(j?.geographicArea),
+            .filter((v: string, i: number, a: string[]) => v && a.indexOf(v) === i),
+          jobTitleGeographicAreaName:
+            this.getCatName(j?.geographicArea) ||
+            [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.geographicAreas ?? []).map((g: any) => this.getCatName(g.geographicArea))))].filter(Boolean).join(', '),
           slots: (s.slots ?? []).map((slot: any) => ({
             id: slot.id,
             staffingId: slot.staffingId,
