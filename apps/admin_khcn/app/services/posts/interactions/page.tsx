@@ -29,6 +29,14 @@ const interactionModules = [
     color: "text-green-600",
     bgColor: "bg-green-100",
   },
+  {
+    title: "Quản lý văn bản (LGSP)",
+    description: "Nhận và gửi văn bản thông qua trục liên thông quốc gia (LGSP).",
+    href: "/services/posts/interactions/lgsp",
+    icon: FileEdit, // Using FileEdit since we don't import a specific Document icon yet
+    color: "text-orange-600",
+    bgColor: "bg-orange-100",
+  },
 ];
 
 export default function InteractionsDashboard() {

@@ -8,6 +8,7 @@ import { MenusModule } from '@/modules/menus/menus.module';
 import { OrganizationsModule } from '@/modules/organizations/organizations.module';
 import { ConfigsModule } from './configs/configs.module';
 import { IntegrationModule } from './modules/integration/integration.module';
+import { LgspModule } from './modules/lgsp/lgsp.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { IntegrationModule } from './modules/integration/integration.module';
     OrganizationsModule,
     ConfigsModule,
     IntegrationModule,
+    LgspModule,
   ],
 })
 export class AppModule {}

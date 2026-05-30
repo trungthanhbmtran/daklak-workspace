@@ -10,6 +10,7 @@ import { MenusController } from './menus.controller';
 import { OrganizationsController, PublicOrganizationsController } from './organizations.controller';
 import { ConfigsController } from './configs.controller';
 import { AdminIntegrationController } from './integration.controller';
+import { LgspController } from './lgsp.controller';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AdminIntegrationController } from './integration.controller';
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
     registerGrpcService(MICROSERVICES.INTEGRATION),
+    registerGrpcService(MICROSERVICES.LGSP),
   ],
   controllers: [
     UserController,
@@ -33,6 +35,7 @@ import { AdminIntegrationController } from './integration.controller';
     PublicOrganizationsController,
     ConfigsController,
     AdminIntegrationController,
+    LgspController,
   ],
 })
 export class UsersModule {}

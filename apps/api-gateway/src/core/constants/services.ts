@@ -86,6 +86,13 @@ export const MICROSERVICES = {
     URL: getUserUrl(),
     SERVICE: 'IntegrationService',
   },
+  LGSP: {
+    PACKAGE: 'lgsp',
+    SYMBOL: 'LGSP_PACKAGE',
+    PROTO: 'users/lgsp.proto',
+    URL: getUserUrl(),
+    SERVICE: 'LgspService',
+  },
   // HRM: chỉ nhân viên (employee) qua project_stc/hrm-service; đơn vị/chức danh/định biên qua user-service (ORGANIZATION)
   EMPLOYEE: {
     PACKAGE: 'employee',
