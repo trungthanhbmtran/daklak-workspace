@@ -13,6 +13,7 @@ model OrganizationUnit {
   hierarchyPath String?   @map("hierarchy_path") 
   
   unitDomains   UnitDomain[]
+  unitGeographicAreas UnitGeographicArea[]
   scope         String?   @map("scope") 
 
   address       String?
@@ -42,6 +43,15 @@ model UnitDomain {
   domain   Category         @relation(fields: [domainId], references: [id], onDelete: Cascade)
   @@id([unitId, domainId])
   @@map("organization_unit_domains")
+}
+
+model UnitGeographicArea {
+  unitId           Int  @map("unit_id")
+  geographicAreaId Int  @map("geographic_area_id")
+  unit             OrganizationUnit @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  geographicArea   Category         @relation(fields: [geographicAreaId], references: [id], onDelete: Cascade)
+  @@id([unitId, geographicAreaId])
+  @@map("organization_unit_geographic_areas")
 }
 
 model JobTitle {

@@ -9,6 +9,7 @@ model Category {
   createdAt   DateTime @default(now()) @map("created_at")
 
   unitDomains             UnitDomain[]      
+  unitGeographicAreas     UnitGeographicArea[]
   jobTitlesDomain         JobTitle[]         @relation("JobTitleDomain") 
   jobTitlesGeographicArea JobTitle[]         @relation("JobTitleGeographicArea") 
   staffingSlotsGeographicArea StaffingSlot[]  @relation("StaffingSlotGeographicArea") 

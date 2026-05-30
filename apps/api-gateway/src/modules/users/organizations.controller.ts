@@ -32,7 +32,7 @@ export class OrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(
@@ -51,23 +51,27 @@ export class OrganizationsController implements OnModuleInit {
       shortName?: string;
       typeId: number;
       parentId?: number | null;
-      parent_id?: number | null;
       domainIds?: number[];
-      domain_id?: number;
+      geographicAreaIds?: number[];
       scope?: string;
     },
   ) {
     try {
-      const domainIds =
-        body.domainIds ?? (body.domain_id != null ? [body.domain_id] : []);
+      if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
+        throw new BadRequestException('domainIds phải là một mảng');
+      }
+      if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+        throw new BadRequestException('geographicAreaIds phải là một mảng');
+      }
       const result = await firstValueFrom(
         this.orgService.CreateUnit({
           code: body.code,
           name: body.name,
           shortName: body.shortName,
           typeId: body.typeId,
-          parentId: body.parentId ?? body.parent_id,
-          domainIds,
+          parentId: body.parentId,
+          domainIds: body.domainIds ?? [],
+          geographicAreaIds: body.geographicAreaIds ?? [],
           scope: body.scope,
         }),
       );
@@ -136,6 +140,9 @@ export class OrganizationsController implements OnModuleInit {
       monitoredUnitIds?: number[];
     },
   ) {
+    if (body.monitoredUnitIds !== undefined && !Array.isArray(body.monitoredUnitIds)) {
+      throw new BadRequestException('monitoredUnitIds phải là một mảng');
+    }
     const result = await firstValueFrom(
       this.orgService.UpdateJobTitle({
         id,
@@ -174,21 +181,26 @@ export class OrganizationsController implements OnModuleInit {
       shortName?: string;
       typeId?: number;
       parentId?: number | null;
-      parent_id?: number | null;
       domainIds?: number[];
-      domain_ids?: number[];
+      geographicAreaIds?: number[];
       scope?: string;
     },
   ) {
     try {
-      const domainIds = body.domainIds ?? body.domain_ids;
+      if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
+        throw new BadRequestException('domainIds phải là một mảng');
+      }
+      if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+        throw new BadRequestException('geographicAreaIds phải là một mảng');
+      }
       const payload: Record<string, unknown> = {
         id,
         code: body.code,
         name: body.name,
         shortName: body.shortName,
         typeId: body.typeId,
-        domainIds,
+        domainIds: body.domainIds,
+        geographicAreaIds: body.geographicAreaIds,
         scope: body.scope,
       };
       if (body.parentId !== undefined) payload.parentId = body.parentId;
@@ -309,7 +321,7 @@ export class PublicOrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(

@@ -25,8 +25,22 @@ export class OrganizationsController {
     };
   }
 
+  private geoAreaIdsAndNames(unit: any): {
+    geographicAreaIds: number[];
+    geographicAreaNames: string[];
+  } {
+    const uga = unit.unitGeographicAreas ?? [];
+    return {
+      geographicAreaIds: uga.map((d: any) => d.geographicAreaId ?? d.geographicArea?.id).filter(Boolean),
+      geographicAreaNames: uga
+        .map((d: any) => this.getCatName(d.geographicArea))
+        .filter(Boolean),
+    };
+  }
+
   private mapUnitNode(node: any): any {
     const { domainIds, domainNames } = this.domainIdsAndNames(node);
+    const { geographicAreaIds, geographicAreaNames } = this.geoAreaIdsAndNames(node);
     return {
       id: node.id,
       code: node.code,
@@ -38,6 +52,8 @@ export class OrganizationsController {
       typeName: node.type?.name ?? '',
       domainIds,
       domainNames,
+      geographicAreaIds,
+      geographicAreaNames,
       scope: node.scope ?? '',
       children:
         node.children && node.children.length
@@ -48,6 +64,7 @@ export class OrganizationsController {
 
   private toUnitResponse(unit: any): any {
     const { domainIds, domainNames } = this.domainIdsAndNames(unit);
+    const { geographicAreaIds, geographicAreaNames } = this.geoAreaIdsAndNames(unit);
     return {
       id: unit.id,
       code: unit.code,
@@ -59,6 +76,8 @@ export class OrganizationsController {
       typeName: unit.type?.name ?? '',
       domainIds,
       domainNames,
+      geographicAreaIds,
+      geographicAreaNames,
       scope: unit.scope ?? '',
     };
   }
@@ -71,18 +90,30 @@ export class OrganizationsController {
     typeId: number;
     parentId?: number;
     domainIds?: number[];
-    domainId?: number;
+    geographicAreaIds?: number[];
     scope?: string;
   }) {
-    const domainIds =
-      data.domainIds ?? (data.domainId != null ? [data.domainId] : []);
+    if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'domainIds phải là một mảng',
+      });
+    }
+    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'geographicAreaIds phải là một mảng',
+      });
+    }
+
     const unit = await this.orgService.createUnit({
       code: data.code,
       name: data.name,
       shortName: data.shortName,
       typeId: data.typeId,
       parentId: data.parentId,
-      domainIds,
+      domainIds: data.domainIds ?? [],
+      geographicAreaIds: data.geographicAreaIds ?? [],
       scope: data.scope,
     });
     return this.toUnitResponse(unit);
@@ -109,8 +140,22 @@ export class OrganizationsController {
     typeId?: number;
     parentId?: number;
     domainIds?: number[];
+    geographicAreaIds?: number[];
     scope?: string;
   }) {
+    if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'domainIds phải là một mảng',
+      });
+    }
+    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'geographicAreaIds phải là một mảng',
+      });
+    }
+
     try {
       const unit = await this.orgService.updateUnit(data.id, {
         code: data.code,
@@ -119,6 +164,7 @@ export class OrganizationsController {
         typeId: data.typeId,
         parentId: data.parentId,
         domainIds: data.domainIds,
+        geographicAreaIds: data.geographicAreaIds,
         scope: data.scope,
       });
       if (!unit) {
@@ -243,24 +289,36 @@ export class OrganizationsController {
     staffingId: number;
     slotOrder: number;
     description?: string;
-    geographicAreaId?: number;
     geographicAreaIds?: number[];
     domainIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const geographicAreaIds =
-      Array.isArray(data.geographicAreaIds) && data.geographicAreaIds.length > 0
-        ? data.geographicAreaIds
-        : data.geographicAreaId && data.geographicAreaId > 0
-          ? [data.geographicAreaId]
-          : [];
+    if (data.geographicAreaIds !== undefined && !Array.isArray(data.geographicAreaIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'geographicAreaIds phải là một mảng',
+      });
+    }
+    if (data.domainIds !== undefined && !Array.isArray(data.domainIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'domainIds phải là một mảng',
+      });
+    }
+    if (data.monitoredUnitIds !== undefined && !Array.isArray(data.monitoredUnitIds)) {
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: 'monitoredUnitIds phải là một mảng',
+      });
+    }
+
     const slot = await this.orgService.setStaffingSlot({
       staffingId: data.staffingId,
       slotOrder: data.slotOrder,
       description: data.description,
-      geographicAreaIds,
-      domainIds: data.domainIds,
-      monitoredUnitIds: data.monitoredUnitIds,
+      geographicAreaIds: data.geographicAreaIds ?? [],
+      domainIds: data.domainIds ?? [],
+      monitoredUnitIds: data.monitoredUnitIds ?? [],
     });
     return {
       id: slot.id,

@@ -17,6 +17,11 @@ export class OrganizationsService {
       : data.domainId != null
         ? [data.domainId]
         : [];
+    const geographicAreaIds = Array.isArray(data.geographicAreaIds)
+      ? data.geographicAreaIds
+      : data.geographicAreaId != null
+        ? [data.geographicAreaId]
+        : [];
     // Bước 1: Tạo đơn vị (Path tạm để trống)
     const unit = await this.prisma.organizationUnit.create({
       data: {
@@ -58,6 +63,14 @@ export class OrganizationsService {
         skipDuplicates: true,
       });
     }
+    if (geographicAreaIds.length > 0) {
+      await this.prisma.unitGeographicArea.createMany({
+        data: geographicAreaIds
+          .filter((id: number) => id > 0)
+          .map((geographicAreaId: number) => ({ unitId: unit.id, geographicAreaId })),
+        skipDuplicates: true,
+      });
+    }
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
       include: {
@@ -65,6 +78,17 @@ export class OrganizationsService {
         unitDomains: {
           include: {
             domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' },
+                },
+              },
+            },
+          },
+        },
+        unitGeographicAreas: {
+          include: {
+            geographicArea: {
               include: {
                 translations: {
                   where: { langCode: 'vi' },
@@ -93,6 +117,17 @@ export class OrganizationsService {
             },
           },
         },
+        unitGeographicAreas: {
+          include: {
+            geographicArea: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' },
+                },
+              },
+            },
+          },
+        },
       },
     });
     if (!unit) return null;
@@ -108,6 +143,7 @@ export class OrganizationsService {
       typeId?: number;
       parentId?: number | null;
       domainIds?: number[] | null;
+      geographicAreaIds?: number[] | null;
       scope?: string | null;
     },
   ) {
@@ -207,6 +243,18 @@ export class OrganizationsService {
         });
       }
     }
+    if (data.geographicAreaIds !== undefined) {
+      await this.prisma.unitGeographicArea.deleteMany({ where: { unitId: id } });
+      const geoIds = Array.isArray(data.geographicAreaIds)
+        ? data.geographicAreaIds.filter((d) => d > 0)
+        : [];
+      if (geoIds.length > 0) {
+        await this.prisma.unitGeographicArea.createMany({
+          data: geoIds.map((geographicAreaId) => ({ unitId: id, geographicAreaId })),
+          skipDuplicates: true,
+        });
+      }
+    }
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
       include: {
@@ -214,6 +262,17 @@ export class OrganizationsService {
         unitDomains: {
           include: {
             domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' },
+                },
+              },
+            },
+          },
+        },
+        unitGeographicAreas: {
+          include: {
+            geographicArea: {
               include: {
                 translations: {
                   where: { langCode: 'vi' },
@@ -260,6 +319,17 @@ export class OrganizationsService {
             },
           },
         },
+        unitGeographicAreas: {
+          include: {
+            geographicArea: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' },
+                },
+              },
+            },
+          },
+        },
       },
     });
     return { data: buildTree(units, null) };
@@ -287,6 +357,17 @@ export class OrganizationsService {
         unitDomains: {
           include: {
             domain: {
+              include: {
+                translations: {
+                  where: { langCode: 'vi' },
+                },
+              },
+            },
+          },
+        },
+        unitGeographicAreas: {
+          include: {
+            geographicArea: {
               include: {
                 translations: {
                   where: { langCode: 'vi' },
