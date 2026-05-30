@@ -309,16 +309,9 @@ export function TaskCreateClient() {
 
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Lãnh đạo Sở theo dõi, chỉ đạo</label>
-                <Select value={supervisor} onValueChange={setSupervisor}>
-                  <SelectTrigger className="bg-white border-orange-200">
-                    <SelectValue placeholder="Chọn Lãnh đạo Sở..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {employees.map(emp => (
-                      <SelectItem key={`sup-${emp.code}`} value={emp.code}>{emp.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <div className="p-2 border border-orange-200 bg-orange-50 rounded-md text-sm text-slate-700 font-medium h-9 flex items-center">
+                  {supervisor ? employees.find(e => e.code === supervisor)?.name : "Hệ thống sẽ tự động chỉ định..."}
+                </div>
               </div>
 
               {selectedEmp && (
