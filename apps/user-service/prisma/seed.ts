@@ -2579,6 +2579,15 @@ async function main() {
       order: 5,
       res: 'WORKFLOW',
     },
+    {
+      code: 'INTEGRATION_SERVICE_ROOT',
+      name: 'Trung tâm Liên thông',
+      icon: 'swap-horizontal-outline',
+      service: 'INTEGRATION_SERVICE',
+      color: '#0ea5e9',
+      order: 6,
+      res: 'INTEGRATION',
+    },
   ];
 
   const serviceNodes: Record<string, any> = {};
@@ -2667,14 +2676,6 @@ async function main() {
       icon: 'settings-outline',
       order: 7,
       res: 'SYSTEM',
-    },
-    {
-      code: 'ADMIN_INTEGRATION',
-      name: 'Trung tâm Liên thông',
-      route: 'integration',
-      icon: 'swap-horizontal-outline',
-      order: 8,
-      res: 'INTEGRATION',
     },
   ];
 
@@ -3048,6 +3049,14 @@ async function main() {
         order: 3,
         res: 'CITIZEN_INTERACTION',
       },
+      {
+        code: 'CONTENT_MENU_LGSP',
+        name: 'Quản lý văn bản (LGSP)',
+        route: 'interactions/lgsp',
+        icon: 'document-text-outline',
+        order: 4,
+        res: 'CITIZEN_INTERACTION',
+      },
     ];
 
     for (const { res, ...m } of interactionSubMenus) {
@@ -3068,6 +3077,45 @@ async function main() {
       });
       await linkMenuPBAC(node.id, res, 'READ');
     }
+  }
+
+  // 5. Integration Module
+  const integrationMenus = [
+    {
+      code: 'INTEGRATION_MENU_CONFIG',
+      name: 'Cấu hình kết nối',
+      route: '',
+      icon: 'options-outline',
+      order: 1,
+      res: 'INTEGRATION',
+    },
+    {
+      code: 'INTEGRATION_MENU_LOGS',
+      name: 'Nhật ký đồng bộ',
+      route: 'logs',
+      icon: 'list-outline',
+      order: 2,
+      res: 'INTEGRATION',
+    },
+  ];
+
+  for (const { res, ...m } of integrationMenus) {
+    const node = await prisma.menu.upsert({
+      where: { code: m.code },
+      update: {
+        parentId: serviceNodes['INTEGRATION_SERVICE'].id,
+        order: m.order,
+        route: m.route,
+        icon: m.icon,
+      },
+      create: {
+        ...m,
+        parentId: serviceNodes['INTEGRATION_SERVICE'].id,
+        application: 'ADMIN_PORTAL',
+        service: 'INTEGRATION_SERVICE',
+      },
+    });
+    await linkMenuPBAC(node.id, res, 'READ');
   }
 
   // ==========================================================
