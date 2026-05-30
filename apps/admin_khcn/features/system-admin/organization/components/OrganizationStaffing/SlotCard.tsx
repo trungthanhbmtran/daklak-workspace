@@ -5,6 +5,7 @@ import { Briefcase, MapPin, Network, Users, Save, Loader2, Search, CheckSquare, 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input"; // Giả định bạn có Input của shadcn
 import type { StaffingSlotItem } from "../../types";
@@ -121,12 +122,16 @@ export function SlotCard({
               <input type="text" placeholder="Tìm lĩnh vực..." value={searchDomain} onChange={e => setSearchDomain(e.target.value)} className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
             </div>
             <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[110px] overflow-y-auto space-y-0.5 custom-scrollbar">
-              {filteredDomains.length === 0 ? <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p> : filteredDomains.map(d => (
-                <label key={d.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none", domainIds.includes(d.id) ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
-                  <Checkbox checked={domainIds.includes(d.id)} onCheckedChange={() => toggleDomain(d.id)} className="h-3.5 w-3.5" />
-                  <span className="truncate">{d.name}</span>
-                </label>
-              ))}
+              {filteredDomains.length === 0 ? <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p> : filteredDomains.map(d => {
+                const isChecked = domainIds.includes(d.id);
+                const fieldId = `slot-${staffingId}-${slotOrder}-domain-${d.id}`;
+                return (
+                  <Label key={d.id} htmlFor={fieldId} className={cn("flex flex-row items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none font-normal", isChecked ? "bg-background text-primary shadow-sm font-medium" : "hover:bg-background/60 text-muted-foreground")}>
+                    <Checkbox id={fieldId} checked={isChecked} onCheckedChange={() => toggleDomain(d.id)} className="h-3.5 w-3.5" />
+                    <span className="truncate flex-1">{d.name}</span>
+                  </Label>
+                );
+              })}
             </div>
           </div>
 
@@ -148,12 +153,16 @@ export function SlotCard({
               <input type="text" placeholder="Tìm tỉnh thành, khu vực..." value={searchGeo} onChange={e => setSearchGeo(e.target.value)} className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
             </div>
             <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[110px] overflow-y-auto space-y-0.5 custom-scrollbar">
-              {filteredGeos.length === 0 ? <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p> : filteredGeos.map(g => (
-                <label key={g.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none", geographicAreaIds.includes(g.id) ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
-                  <Checkbox checked={geographicAreaIds.includes(g.id)} onCheckedChange={() => toggleGeoArea(g.id)} className="h-3.5 w-3.5" />
-                  <span className="truncate">{g.name}</span>
-                </label>
-              ))}
+              {filteredGeos.length === 0 ? <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p> : filteredGeos.map(g => {
+                const isChecked = geographicAreaIds.includes(g.id);
+                const fieldId = `slot-${staffingId}-${slotOrder}-geo-${g.id}`;
+                return (
+                  <Label key={g.id} htmlFor={fieldId} className={cn("flex flex-row items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none font-normal", isChecked ? "bg-background text-primary shadow-sm font-medium" : "hover:bg-background/60 text-muted-foreground")}>
+                    <Checkbox id={fieldId} checked={isChecked} onCheckedChange={() => toggleGeoArea(g.id)} className="h-3.5 w-3.5" />
+                    <span className="truncate flex-1">{g.name}</span>
+                  </Label>
+                );
+              })}
             </div>
           </div>
 
@@ -168,15 +177,19 @@ export function SlotCard({
               <input type="text" placeholder="Tìm tên hoặc mã phòng ban..." value={searchUnit} onChange={e => setSearchUnit(e.target.value)} className="w-full pl-8 pr-3 py-1 h-8 rounded-t-lg border border-b-0 border-input bg-background text-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring" />
             </div>
             <div className="border rounded-b-lg bg-muted/20 p-1.5 h-[110px] overflow-y-auto space-y-0.5 custom-scrollbar">
-              {filteredUnits.length === 0 ? <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p> : filteredUnits.map(u => (
-                <label key={u.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none justify-between", monitoredUnitIds.includes(u.id) ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
-                  <div className="flex items-center gap-2 truncate min-w-0">
-                    <Checkbox checked={monitoredUnitIds.includes(u.id)} onCheckedChange={() => toggleUnit(u.id)} className="h-3.5 w-3.5" />
-                    <span className="truncate">{u.name}</span>
-                  </div>
-                  {u.code && <span className={cn("text-[10px] px-1 ml-2 rounded uppercase font-mono font-bold shrink-0", monitoredUnitIds.includes(u.id) ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>{u.code}</span>}
-                </label>
-              ))}
+              {filteredUnits.length === 0 ? <p className="text-xs text-muted-foreground italic p-1">Không tìm thấy.</p> : filteredUnits.map(u => {
+                const isChecked = monitoredUnitIds.includes(u.id);
+                const fieldId = `slot-${staffingId}-${slotOrder}-unit-${u.id}`;
+                return (
+                  <Label key={u.id} htmlFor={fieldId} className={cn("flex flex-row items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none justify-between font-normal", isChecked ? "bg-background text-primary shadow-sm font-medium" : "hover:bg-background/60 text-muted-foreground")}>
+                    <div className="flex items-center gap-2 truncate min-w-0 flex-1">
+                      <Checkbox id={fieldId} checked={isChecked} onCheckedChange={() => toggleUnit(u.id)} className="h-3.5 w-3.5" />
+                      <span className="truncate flex-1">{u.name}</span>
+                    </div>
+                    {u.code && <span className={cn("text-[10px] px-1 ml-2 rounded uppercase font-mono font-bold shrink-0", isChecked ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>{u.code}</span>}
+                  </Label>
+                );
+              })}
             </div>
           </div>
 

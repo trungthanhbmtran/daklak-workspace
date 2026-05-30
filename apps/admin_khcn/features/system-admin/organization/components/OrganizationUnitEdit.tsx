@@ -329,7 +329,9 @@ export function OrganizationUnitEdit() {
                               if (isAllSelected) {
                                 field.onChange((field.value ?? []).filter(id => !visibleIds.includes(id)));
                               } else {
-                                field.onChange(Array.from(new Set([...(field.value ?? []), ...visibleIds])));
+                                const current = field.value ?? [];
+                                const toAdd = visibleIds.filter(id => !current.includes(id));
+                                field.onChange([...current, ...toAdd]);
                               }
                             }}
                             className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-normal normal-case"
@@ -355,21 +357,36 @@ export function OrganizationUnitEdit() {
                         <p className="text-xs animate-pulse italic p-1">Đang tải danh mục lĩnh vực...</p>
                       ) : filteredDomains.length > 0 ? (
                         filteredDomains.map((d) => {
-                          const isChecked = field.value?.includes(d.id);
                           return (
-                            <label key={d.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none", isChecked ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
-                              <Checkbox
-                                checked={isChecked}
-                                onCheckedChange={(checked) => {
-                                  const next = checked
-                                    ? [...(field.value ?? []), d.id]
-                                    : (field.value ?? []).filter(v => v !== d.id);
-                                  field.onChange(next);
-                                }}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className="truncate">{d.name}</span>
-                            </label>
+                            <FormField
+                              key={d.id}
+                              control={form.control}
+                              name="domainIds"
+                              render={({ field: innerField }) => {
+                                const isChecked = innerField.value?.includes(d.id);
+                                return (
+                                  <FormItem
+                                    className={cn("flex flex-row items-center gap-2 space-y-0 p-1.5 rounded-md cursor-pointer transition-colors", isChecked ? "bg-background shadow-sm" : "hover:bg-background/60")}
+                                  >
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={isChecked}
+                                        onCheckedChange={(checked) => {
+                                          const next = checked
+                                            ? [...(innerField.value ?? []), d.id]
+                                            : (innerField.value ?? []).filter(v => v !== d.id);
+                                          innerField.onChange(next);
+                                        }}
+                                        className="h-3.5 w-3.5"
+                                      />
+                                    </FormControl>
+                                    <FormLabel className={cn("font-normal text-xs truncate cursor-pointer flex-1 m-0", isChecked ? "text-primary font-medium" : "text-muted-foreground")}>
+                                      {d.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                )
+                              }}
+                            />
                           );
                         })
                       ) : (
@@ -398,7 +415,9 @@ export function OrganizationUnitEdit() {
                               if (isAllSelected) {
                                 field.onChange((field.value ?? []).filter(id => !visibleIds.includes(id)));
                               } else {
-                                field.onChange(Array.from(new Set([...(field.value ?? []), ...visibleIds])));
+                                const current = field.value ?? [];
+                                const toAdd = visibleIds.filter(id => !current.includes(id));
+                                field.onChange([...current, ...toAdd]);
                               }
                             }}
                             className="text-[10px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-normal normal-case"
@@ -424,21 +443,36 @@ export function OrganizationUnitEdit() {
                         <p className="text-xs animate-pulse italic p-1">Đang tải danh mục khu vực...</p>
                       ) : filteredGeos.length > 0 ? (
                         filteredGeos.map((g) => {
-                          const isChecked = field.value?.includes(g.id);
                           return (
-                            <label key={g.id} className={cn("flex items-center gap-2 cursor-pointer p-1.5 rounded-md text-xs transition-colors select-none", isChecked ? "bg-background font-medium text-primary shadow-sm" : "hover:bg-background/60 text-muted-foreground")}>
-                              <Checkbox
-                                checked={isChecked}
-                                onCheckedChange={(checked) => {
-                                  const next = checked
-                                    ? [...(field.value ?? []), g.id]
-                                    : (field.value ?? []).filter(v => v !== g.id);
-                                  field.onChange(next);
-                                }}
-                                className="h-3.5 w-3.5"
-                              />
-                              <span className="truncate">{g.name}</span>
-                            </label>
+                            <FormField
+                              key={g.id}
+                              control={form.control}
+                              name="geographicAreaIds"
+                              render={({ field: innerField }) => {
+                                const isChecked = innerField.value?.includes(g.id);
+                                return (
+                                  <FormItem
+                                    className={cn("flex flex-row items-center gap-2 space-y-0 p-1.5 rounded-md cursor-pointer transition-colors", isChecked ? "bg-background shadow-sm" : "hover:bg-background/60")}
+                                  >
+                                    <FormControl>
+                                      <Checkbox
+                                        checked={isChecked}
+                                        onCheckedChange={(checked) => {
+                                          const next = checked
+                                            ? [...(innerField.value ?? []), g.id]
+                                            : (innerField.value ?? []).filter(v => v !== g.id);
+                                          innerField.onChange(next);
+                                        }}
+                                        className="h-3.5 w-3.5"
+                                      />
+                                    </FormControl>
+                                    <FormLabel className={cn("font-normal text-xs truncate cursor-pointer flex-1 m-0", isChecked ? "text-primary font-medium" : "text-muted-foreground")}>
+                                      {g.name}
+                                    </FormLabel>
+                                  </FormItem>
+                                )
+                              }}
+                            />
                           );
                         })
                       ) : (
