@@ -16,6 +16,7 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   initialData?: IntegrationConfig | null;
+  prefillData?: any;
 }
 
 const DEFAULT_LGSP_CONFIG: LGSPConfigData = {
@@ -31,7 +32,7 @@ const DEFAULT_LGSP_CONFIG: LGSPConfigData = {
   permissions: []
 };
 
-export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
+export function IntegrationModal({ isOpen, onClose, initialData, prefillData }: Props) {
   const [systemName, setSystemName] = useState('');
   const [integrationCode, setIntegrationCode] = useState('');
   const [lgspConfig, setLgspConfig] = useState<any>(DEFAULT_LGSP_CONFIG);
@@ -46,21 +47,30 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
 
   useEffect(() => {
     if (isOpen) {
-      setSystemName(initialData?.systemName || '');
-      setIntegrationCode(initialData?.integrationCode || `LGSP_${Math.floor(Math.random() * 100000)}`);
+      if (prefillData) {
+        setSystemName(prefillData.info?.name || 'Imported Postman API');
+        setIntegrationCode(`POSTMAN_${Math.floor(Math.random() * 100000)}`);
+        setLgspConfig({
+          type: 'POSTMAN',
+          ...prefillData
+        });
+      } else {
+        setSystemName(initialData?.systemName || '');
+        setIntegrationCode(initialData?.integrationCode || `LGSP_${Math.floor(Math.random() * 100000)}`);
 
-      if (initialData?.configData) {
-        try {
-          const parsed = JSON.parse(initialData.configData);
-          setLgspConfig({ ...DEFAULT_LGSP_CONFIG, ...parsed });
-        } catch {
+        if (initialData?.configData) {
+          try {
+            const parsed = JSON.parse(initialData.configData);
+            setLgspConfig({ ...DEFAULT_LGSP_CONFIG, ...parsed });
+          } catch {
+            setLgspConfig(DEFAULT_LGSP_CONFIG);
+          }
+        } else {
           setLgspConfig(DEFAULT_LGSP_CONFIG);
         }
-      } else {
-        setLgspConfig(DEFAULT_LGSP_CONFIG);
       }
     }
-  }, [isOpen, initialData]);
+  }, [isOpen, initialData, prefillData]);
 
   const createMutation = useCreateIntegration();
   const updateMutation = useUpdateIntegration();

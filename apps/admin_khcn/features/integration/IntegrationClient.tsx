@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Plus, Search, Trash2, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,33 @@ export function IntegrationClient() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
+  const [prefillData, setPrefillData] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (json.info && json.item) {
+          setPrefillData(json);
+          setEditingItem(null);
+          setIsModalOpen(true);
+        } else {
+          toast.error("File JSON không đúng định dạng Postman Collection");
+        }
+      } catch (err) {
+        toast.error("Lỗi khi đọc file JSON");
+      }
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (confirm('Bạn có chắc chắn muốn xóa mã liên thông này?')) {
@@ -48,11 +75,13 @@ export function IntegrationClient() {
   };
 
   const openEdit = (item: IntegrationConfig) => {
+    setPrefillData(null);
     setEditingItem(item);
     setIsModalOpen(true);
   };
 
   const openCreate = () => {
+    setPrefillData(null);
     setEditingItem(null);
     setIsModalOpen(true);
   };
@@ -70,9 +99,15 @@ export function IntegrationClient() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <Button className="shrink-0 w-full sm:w-auto" onClick={openCreate}>
-            <Plus className="mr-2 h-4 w-4" /> Thêm Mã liên thông
-          </Button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
+            <Button variant="outline" className="shrink-0 w-full sm:w-auto" onClick={() => fileInputRef.current?.click()}>
+              Nhập từ Postman
+            </Button>
+            <Button className="shrink-0 w-full sm:w-auto" onClick={openCreate}>
+              <Plus className="mr-2 h-4 w-4" /> Thêm Mã liên thông
+            </Button>
+          </div>
         </div>
 
         <Card className="shadow-sm border-0">
@@ -135,8 +170,9 @@ export function IntegrationClient() {
       <IntegrationModal
         key={isModalOpen ? (editingItem?.id || 'new') : 'closed'}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setPrefillData(null); }}
         initialData={editingItem}
+        prefillData={prefillData}
       />
     </div>
   );
