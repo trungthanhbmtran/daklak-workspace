@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target, Sparkles, BrainCircuit } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { useTaskTemplatesList, useCreateTask } from '../../../hooks';
+import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
 
 export function TaskCreateClient() {
   const router = useRouter();
@@ -22,17 +22,21 @@ export function TaskCreateClient() {
   const [dueDate, setDueDate] = useState('');
   const [priority, setPriority] = useState('MEDIUM');
   const [baseScore, setBaseScore] = useState(10);
-  
+
   const [aiInstruction, setAiInstruction] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
-  // Mock nhân sự để minh họa logic Ngạch
-  const employees = [
-    { code: 'NV01', name: 'Nguyễn Văn A', rank: 'CHUYEN_VIEN_CAO_CAP', rankLimit: 100, currentLoad: 50 },
-    { code: 'NV02', name: 'Trần Thị B', rank: 'CHUYEN_VIEN', rankLimit: 60, currentLoad: 55 },
-  ];
+  // Lấy nhân sự từ thực tế
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 100 });
+  const employees = employeesData?.data?.map(emp => ({
+    code: emp.employeeCode,
+    name: `${emp.lastname} ${emp.firstname}`,
+    rank: emp.civilServantRank?.code || 'CHUYEN_VIEN',
+    rankLimit: 100, // Định mức mặc định
+    currentLoad: emp.currentTaskCount || 0,
+  })) || [];
 
   const selectedEmp = employees.find(e => e.code === assignee);
 
@@ -57,11 +61,11 @@ export function TaskCreateClient() {
       toast.error('Vui lòng nhập yêu cầu công việc để AI phân tích.');
       return;
     }
-    
+
     setIsAiLoading(true);
     try {
       const employeesContext = employees.map(e => `${e.code} - ${e.name} (Ngạch: ${e.rank}, Load: ${e.currentLoad}/${e.rankLimit})`).join('\\n');
-      
+
       const initRes = await aiApi.generateTaskAssignment({
         instruction: aiInstruction,
         employeesContext
@@ -74,7 +78,7 @@ export function TaskCreateClient() {
             if (jobStatus.status === 'COMPLETED') {
               clearInterval(intervalId);
               setIsAiLoading(false);
-              
+
               const result = jobStatus.result || jobStatus.data;
               if (result) {
                 if (result.taskName) setTaskName(result.taskName);
@@ -84,7 +88,7 @@ export function TaskCreateClient() {
                 if (result.priority) setPriority(result.priority);
                 if (result.weight) setTaskWeight(result.weight);
                 if (result.baseScore) setBaseScore(result.baseScore);
-                
+
                 toast.success('AI đã phân tích và điền form thành công! Lý do: ' + (result.reasoning || ''));
               }
             } else if (jobStatus.status === 'FAILED') {
@@ -109,15 +113,15 @@ export function TaskCreateClient() {
       toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức ngạch của nhân sự!');
     } else {
       try {
-        await createTask({ 
-          assigneeCode: assignee, 
-          taskName, 
+        await createTask({
+          assigneeCode: assignee,
+          taskName,
           weight: taskWeight,
           startDate,
           dueDate,
           priority,
           baseScore,
-          templateId: selectedTemplateId 
+          templateId: selectedTemplateId
         });
         toast.success('Giao việc thành công!');
         router.push('/services/hrm/work-plans/tasks');
@@ -153,7 +157,7 @@ export function TaskCreateClient() {
             <CardContent className="pt-4 space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-slate-700">Yêu cầu công việc (Nói bằng ngôn ngữ tự nhiên)</label>
-                <Textarea 
+                <Textarea
                   placeholder="Ví dụ: Giao cho một bạn làm frontend thiết kế trang chủ mới trong 3 ngày tới, độ ưu tiên cao..."
                   value={aiInstruction}
                   onChange={e => setAiInstruction(e.target.value)}
@@ -161,8 +165,8 @@ export function TaskCreateClient() {
                   rows={3}
                 />
               </div>
-              <Button 
-                onClick={handleAiAssign} 
+              <Button
+                onClick={handleAiAssign}
                 disabled={isAiLoading}
                 className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold"
               >
