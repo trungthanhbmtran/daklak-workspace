@@ -11,7 +11,12 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import type { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -26,7 +31,7 @@ export class AuthController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
@@ -35,12 +40,23 @@ export class AuthController implements OnModuleInit {
 
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập bằng username hoặc email + mật khẩu' })
-  @ApiResponse({ status: 200, description: 'accessToken, refreshToken, userId, email, username, fullName, unitName (camelCase)' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'accessToken, refreshToken, userId, email, username, fullName, unitName (camelCase)',
+  })
   async login(
-    @Body() body: { username?: string; email?: string; password?: string;[key: string]: any },
+    @Body()
+    body: {
+      username?: string;
+      email?: string;
+      password?: string;
+      [key: string]: any;
+    },
     @Res({ passthrough: true }) res: Response,
   ) {
-    const hasPassword = body.password && String(body.password).trim().length > 0;
+    const hasPassword =
+      body.password && String(body.password).trim().length > 0;
     const loginKey = body.username?.trim() || body.email?.trim();
     if (!loginKey || !hasPassword) {
       throw new BadRequestException(
@@ -48,12 +64,12 @@ export class AuthController implements OnModuleInit {
       );
     }
     try {
-      const result = await firstValueFrom(
+      const result = (await firstValueFrom(
         this.userService.Login({
           usernameOrEmail: loginKey,
           password: body.password,
         }),
-      ) as any;
+      )) as any;
 
       // Set cookies
       const cookieConfig = {
@@ -76,8 +92,14 @@ export class AuthController implements OnModuleInit {
   }
 
   @Post('refresh')
-  @ApiOperation({ summary: 'Làm mới access_token bằng refresh_token (session)' })
-  @ApiResponse({ status: 200, description: 'accessToken, refreshToken (rotation), userId, email, username, fullName, unitName' })
+  @ApiOperation({
+    summary: 'Làm mới access_token bằng refresh_token (session)',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'accessToken, refreshToken (rotation), userId, email, username, fullName, unitName',
+  })
   async refresh(
     @Body() body: { refreshToken?: string },
     @Req() req: any,
@@ -90,9 +112,9 @@ export class AuthController implements OnModuleInit {
       throw new UnauthorizedException('Thiếu refresh_token');
     }
     try {
-      const result = await firstValueFrom(
+      const result = (await firstValueFrom(
         this.userService.Refresh({ refreshToken: token }),
-      ) as any;
+      )) as any;
 
       // Set cookies
       const cookieConfig = {
@@ -107,7 +129,8 @@ export class AuthController implements OnModuleInit {
 
       return result;
     } catch (err: any) {
-      const message = err?.details || err?.message || 'Refresh token không hợp lệ';
+      const message =
+        err?.details || err?.message || 'Refresh token không hợp lệ';
       throw new UnauthorizedException(message);
     }
   }

@@ -3,24 +3,21 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
   async getAll(lang?: string) {
     const targetLang = lang || 'vi';
     const items = await this.prisma.category.findMany({
-      orderBy: [
-        { group: 'asc' },
-        { order: 'asc' },
-      ],
+      orderBy: [{ group: 'asc' }, { order: 'asc' }],
       include: {
         translations: {
-          where: { langCode: targetLang }
-        }
-      }
+          where: { langCode: targetLang },
+        },
+      },
     });
 
-    return items.map(item => {
+    return items.map((item) => {
       const trans = item.translations?.[0];
       return {
         id: item.id,
@@ -44,12 +41,12 @@ export class CategoriesService {
       orderBy: { order: 'asc' },
       include: {
         translations: {
-          where: { langCode: targetLang }
-        }
-      }
+          where: { langCode: targetLang },
+        },
+      },
     });
 
-    return items.map(item => {
+    return items.map((item) => {
       const trans = item.translations?.[0];
       return {
         id: item.id,
@@ -78,14 +75,16 @@ export class CategoriesService {
     });
 
     // 3. Hợp nhất mã nhóm từ cả 2 nguồn để không bỏ sót bất kỳ nhóm nào
-    const allCodes = Array.from(new Set([
-      ...definedGroups.map(g => g.code),
-      ...actualGroups.map(g => g.group)
-    ]));
+    const allCodes = Array.from(
+      new Set([
+        ...definedGroups.map((g) => g.code),
+        ...actualGroups.map((g) => g.group),
+      ]),
+    );
 
     // 4. Map lại thành đối tượng { code, name } và kèm theo thứ tự sắp xếp
-    const result = allCodes.map(code => {
-      const defined = definedGroups.find(dg => dg.code === code);
+    const result = allCodes.map((code) => {
+      const defined = definedGroups.find((dg) => dg.code === code);
       return {
         code,
         name: defined?.name || code, // Nếu chưa có tên hiển thị thì dùng mã code
@@ -98,7 +97,13 @@ export class CategoriesService {
   }
 
   // Tạo mới (Tạo danh mục + Bản dịch mặc định Tiếng Việt 'vi')
-  async create(data: { group: string; code: string; name: string; description?: string; order?: number }) {
+  async create(data: {
+    group: string;
+    code: string;
+    name: string;
+    description?: string;
+    order?: number;
+  }) {
     const created = await this.prisma.category.create({
       data: {
         group: data.group,
@@ -109,14 +114,14 @@ export class CategoriesService {
             langCode: 'vi',
             name: data.name,
             description: data.description ?? null,
-          }
-        }
+          },
+        },
       },
       include: {
         translations: {
-          where: { langCode: 'vi' }
-        }
-      }
+          where: { langCode: 'vi' },
+        },
+      },
     });
 
     const trans = created.translations?.[0];
@@ -136,7 +141,13 @@ export class CategoriesService {
   // Cập nhật (Cập nhật danh mục + Cập nhật hoặc Upsert bản dịch Tiếng Việt 'vi')
   async update(
     id: number,
-    data: { code?: string; name?: string; description?: string; order?: number; isActive?: boolean },
+    data: {
+      code?: string;
+      name?: string;
+      description?: string;
+      order?: number;
+      isActive?: boolean;
+    },
   ) {
     const category = await this.prisma.category.findUnique({ where: { id } });
     if (!category) return null;
@@ -157,14 +168,16 @@ export class CategoriesService {
         where: { categoryId_langCode: { categoryId: id, langCode: 'vi' } },
         update: {
           ...(data.name !== undefined && { name: data.name }),
-          ...(data.description !== undefined && { description: data.description }),
+          ...(data.description !== undefined && {
+            description: data.description,
+          }),
         },
         create: {
           categoryId: id,
           langCode: 'vi',
           name: data.name ?? '',
           description: data.description ?? null,
-        }
+        },
       });
     }
 
@@ -173,9 +186,9 @@ export class CategoriesService {
       where: { id },
       include: {
         translations: {
-          where: { langCode: 'vi' }
-        }
-      }
+          where: { langCode: 'vi' },
+        },
+      },
     });
 
     if (!updatedCategory) return null;

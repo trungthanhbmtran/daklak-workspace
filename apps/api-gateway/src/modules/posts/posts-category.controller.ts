@@ -23,10 +23,14 @@ import { UseGuards } from '@nestjs/common';
 export class PostsCategoryController {
   private categoryService: any;
 
-  constructor(@Inject(MICROSERVICES.POSTS_CATEGORY.SYMBOL) private client: ClientGrpc) { }
+  constructor(
+    @Inject(MICROSERVICES.POSTS_CATEGORY.SYMBOL) private client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.categoryService = this.client.getService<any>(MICROSERVICES.POSTS_CATEGORY.SERVICE);
+    this.categoryService = this.client.getService<any>(
+      MICROSERVICES.POSTS_CATEGORY.SERVICE,
+    );
   }
 
   @Post()
@@ -37,7 +41,9 @@ export class PostsCategoryController {
   @Get()
   async findAll(@Query() query: any) {
     console.log('Gateway: Calling ListCategories with query:', query);
-    const result = await firstValueFrom(this.categoryService.listCategories(query));
+    const result = await firstValueFrom(
+      this.categoryService.listCategories(query),
+    );
     console.log('Gateway: ListCategories response received');
     return result;
   }
@@ -49,7 +55,9 @@ export class PostsCategoryController {
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateDto: any) {
-    return firstValueFrom(this.categoryService.updateCategory({ id, ...updateDto }));
+    return firstValueFrom(
+      this.categoryService.updateCategory({ id, ...updateDto }),
+    );
   }
 
   @Delete(':id')

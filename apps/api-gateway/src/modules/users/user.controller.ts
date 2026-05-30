@@ -1,5 +1,26 @@
-import { Controller, Get, Post, Put, Patch, Delete, Body, Param, Req, Inject, UseGuards, OnModuleInit, BadRequestException, NotAcceptableException, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Req,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  BadRequestException,
+  NotAcceptableException,
+  ParseIntPipe,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -15,7 +36,7 @@ export class UserController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
     private readonly notificationsService: NotificationsService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.userService = this.client.getService(MICROSERVICES.USER.SERVICE);
@@ -23,9 +44,15 @@ export class UserController implements OnModuleInit {
 
   @Get()
   @ApiOperation({ summary: 'Danh sách user' })
-  @ApiResponse({ status: 200, description: 'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
+  })
   async list() {
-    const response = (await firstValueFrom(this.userService.ListUsers({}))) as any;
+    const response = (await firstValueFrom(
+      this.userService.ListUsers({}),
+    )) as any;
     return {
       success: true,
       data: response.data || [],
@@ -35,7 +62,11 @@ export class UserController implements OnModuleInit {
 
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết user theo ID' })
-  @ApiResponse({ status: 200, description: 'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)' })
+  @ApiResponse({
+    status: 200,
+    description:
+      'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
+  })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
     const data = await firstValueFrom(this.userService.FindOne({ id }));
     return {
@@ -45,11 +76,19 @@ export class UserController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode từ HRM)' })
-  @ApiResponse({ status: 201, description: 'id, email, username, fullName, phoneNumber, cccd, employeeCode, ...' })
+  @ApiOperation({
+    summary:
+      'Tạo user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode từ HRM)',
+  })
+  @ApiResponse({
+    status: 201,
+    description:
+      'id, email, username, fullName, phoneNumber, cccd, employeeCode, ...',
+  })
   async create(
     @Req() req: { user?: { id?: string | number; email?: string } },
-    @Body() body: {
+    @Body()
+    body: {
       email: string;
       username?: string;
       password?: string;
@@ -80,11 +119,14 @@ export class UserController implements OnModuleInit {
       );
     } catch (err: any) {
       const message = err?.details ?? err?.message ?? 'Lỗi tạo tài khoản';
-      throw new BadRequestException(typeof message === 'string' ? message : String(message));
+      throw new BadRequestException(
+        typeof message === 'string' ? message : String(message),
+      );
     }
     if (createdByUserId && created) {
       const email = (created as { email?: string }).email ?? body.email;
-      const fullName = (created as { fullName?: string }).fullName ?? body.fullName ?? '';
+      const fullName =
+        (created as { fullName?: string }).fullName ?? body.fullName ?? '';
       this.notificationsService.push(
         String(createdByUserId),
         'Đã tạo tài khoản mới',
@@ -119,7 +161,10 @@ export class UserController implements OnModuleInit {
     @Body() body: { isActive: boolean },
   ) {
     return firstValueFrom(
-      this.userService.SetUserActive({ userId: id, isActive: body.isActive ?? false }),
+      this.userService.SetUserActive({
+        userId: id,
+        isActive: body.isActive ?? false,
+      }),
     );
   }
 

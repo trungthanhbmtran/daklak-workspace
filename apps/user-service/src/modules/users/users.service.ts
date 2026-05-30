@@ -10,7 +10,11 @@ import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 
-const GRPC = { INVALID_ARGUMENT: 3, NOT_FOUND: 5, UNAUTHENTICATED: 16 } as const;
+const GRPC = {
+  INVALID_ARGUMENT: 3,
+  NOT_FOUND: 5,
+  UNAUTHENTICATED: 16,
+} as const;
 
 const REFRESH_TOKEN_PREFIX = 'refresh:';
 const REFRESH_TTL_SECONDS = 7 * 24 * 60 * 60; // 7 ngày
@@ -27,24 +31,34 @@ export class UsersService implements OnModuleInit {
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
     @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.workflowEngine = this.workflowClient.getService<any>('WorkflowService');
+    this.workflowEngine =
+      this.workflowClient.getService<any>('WorkflowService');
   }
 
   private async triggerWorkflow(trigger: string, context: any) {
     if (!this.workflowEngine) return;
     try {
-      await firstValueFrom(this.workflowEngine.TriggerWorkflow({ trigger, initialContext: context }));
+      await firstValueFrom(
+        this.workflowEngine.TriggerWorkflow({
+          trigger,
+          initialContext: context,
+        }),
+      );
     } catch (e) {
       this.logger.error(`Failed to trigger workflow ${trigger}: ${e.message}`);
     }
   }
 
   // Bổ nhiệm nhân sự (Assign Job Position)
-  async assignPosition(dto: { userId: number; unitId: number; jobTitleId: number; isPrimary: boolean }) {
-
+  async assignPosition(dto: {
+    userId: number;
+    unitId: number;
+    jobTitleId: number;
+    isPrimary: boolean;
+  }) {
     // 1. Kiểm tra Định biên (Staffing Check)
     const staffing = await this.prisma.organizationStaffing.findUnique({
       where: {
@@ -53,7 +67,10 @@ export class UsersService implements OnModuleInit {
     });
 
     if (!staffing) {
-      throw new RpcException({ message: 'Đơn vị này chưa có chỉ tiêu (Định biên) cho chức danh này.', code: GRPC.INVALID_ARGUMENT });
+      throw new RpcException({
+        message: 'Đơn vị này chưa có chỉ tiêu (Định biên) cho chức danh này.',
+        code: GRPC.INVALID_ARGUMENT,
+      });
     }
 
     // 2. Logic so sánh: Nếu Đã dùng >= Chỉ tiêu -> Chặn
@@ -78,7 +95,7 @@ export class UsersService implements OnModuleInit {
         unit: true,
         jobTitle: true,
         user: true,
-      }
+      },
     });
 
     // 3. 🚀 BẮN SỰ KIỆN RABBITMQ (FIRE & FORGET)
@@ -109,8 +126,14 @@ export class UsersService implements OnModuleInit {
     createdByEmail?: string;
   }) {
     if (data.username) {
-      const existing = await this.prisma.user.findUnique({ where: { username: data.username } });
-      if (existing) throw new RpcException({ message: 'Username đã tồn tại', code: GRPC.INVALID_ARGUMENT });
+      const existing = await this.prisma.user.findUnique({
+        where: { username: data.username },
+      });
+      if (existing)
+        throw new RpcException({
+          message: 'Username đã tồn tại',
+          code: GRPC.INVALID_ARGUMENT,
+        });
     }
     const roleIds = (data.roleIds ?? []).filter((id) => id > 0);
     let user;
@@ -123,14 +146,23 @@ export class UsersService implements OnModuleInit {
           phoneNumber: data.phoneNumber?.trim() || null,
           cccd: data.cccd?.trim() || null,
           employeeCode: data.employeeCode?.trim() || null,
-          ...(roleIds.length > 0 && { roles: { connect: roleIds.map((id) => ({ id })) } }),
+          ...(roleIds.length > 0 && {
+            roles: { connect: roleIds.map((id) => ({ id })) },
+          }),
         },
       });
     } catch (e: any) {
       if (e?.code === 'P2002') {
-        const target = Array.isArray(e?.meta?.target) ? e.meta.target[0] : 'email';
+        const target = Array.isArray(e?.meta?.target)
+          ? e.meta.target[0]
+          : 'email';
         throw new RpcException({
-          message: target === 'email' ? 'Email đã tồn tại' : target === 'username' ? 'Username đã tồn tại' : 'Dữ liệu trùng lặp',
+          message:
+            target === 'email'
+              ? 'Email đã tồn tại'
+              : target === 'username'
+                ? 'Username đã tồn tại'
+                : 'Dữ liệu trùng lặp',
           code: GRPC.INVALID_ARGUMENT,
         });
       }
@@ -153,7 +185,11 @@ export class UsersService implements OnModuleInit {
           recipient: data.createdByEmail.trim(),
           subject: 'Đã tạo tài khoản mới trên hệ thống',
           body: `Bạn đã tạo tài khoản thành công.\n\nNgười dùng: ${newUserDisplay}\nEmail: ${user.email}\nTên đăng nhập: ${user.username ?? user.email}\n\nThông báo đăng nhập đã được gửi tới email người dùng.`,
-          metadata: { type: 'user_created', createdByUserId: data.createdByUserId, newUserId: user.id },
+          metadata: {
+            type: 'user_created',
+            createdByUserId: data.createdByUserId,
+            newUserId: user.id,
+          },
         });
       }
       this.notiClient.emit('notification', {
@@ -163,9 +199,14 @@ export class UsersService implements OnModuleInit {
         body: `Chào bạn,\n\nTài khoản đăng nhập hệ thống đã được tạo cho bạn.\n\nTên đăng nhập: ${user.username ?? user.email}\n${tempPassword ? `Mật khẩu tạm: ${tempPassword}\n\nVui lòng đổi mật khẩu sau lần đăng nhập đầu tiên.` : 'Vui lòng sử dụng chức năng "Quên mật khẩu" hoặc liên hệ quản trị để được cấp mật khẩu.'}\n\nTrân trọng.`,
         metadata: { type: 'user_created', newUserId: user.id },
       });
-      console.log(`📡 Đã gửi thông báo tới phụ trách và email đăng nhập cho ${user.email}.`);
+      console.log(
+        `📡 Đã gửi thông báo tới phụ trách và email đăng nhập cho ${user.email}.`,
+      );
     } catch (err) {
-      console.warn('Gửi thông báo email thất bại (RabbitMQ/notification service có thể chưa chạy):', (err as Error)?.message ?? err);
+      console.warn(
+        'Gửi thông báo email thất bại (RabbitMQ/notification service có thể chưa chạy):',
+        (err as Error)?.message ?? err,
+      );
     }
 
     // Kích hoạt quy trình động
@@ -205,7 +246,10 @@ export class UsersService implements OnModuleInit {
     const key = String(data.usernameOrEmail ?? '').trim();
     const pwd = String(data.password ?? '').trim();
     if (!key || !pwd) {
-      throw new RpcException({ message: 'Thiếu username/email hoặc mật khẩu', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message: 'Thiếu username/email hoặc mật khẩu',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     const user = await this.prisma.user.findFirst({
       where: {
@@ -214,18 +258,31 @@ export class UsersService implements OnModuleInit {
       },
       include: {
         credential: true,
-        jobPositions: { include: { unit: true }, orderBy: [{ isPrimary: 'desc' }] },
+        jobPositions: {
+          include: { unit: true },
+          orderBy: [{ isPrimary: 'desc' }],
+        },
       },
     });
     if (!user) {
-      throw new RpcException({ message: 'Tài khoản không tồn tại', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message: 'Tài khoản không tồn tại',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     if (!user.credential) {
-      throw new RpcException({ message: 'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message:
+          'Tài khoản chưa đặt mật khẩu. Dùng SSO hoặc đặt mật khẩu trước.',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     const ok = await bcrypt.compare(pwd, user.credential.passwordHash);
     if (!ok) {
-      throw new RpcException({ message: 'Mật khẩu sai', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message: 'Mật khẩu sai',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     const refreshToken = randomBytes(40).toString('hex');
     await this.cache.set(
@@ -269,12 +326,18 @@ export class UsersService implements OnModuleInit {
   }) {
     const token = String(data.refreshToken ?? '').trim();
     if (!token) {
-      throw new RpcException({ message: 'Thiếu refresh_token', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message: 'Thiếu refresh_token',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     const redisKey = REFRESH_TOKEN_PREFIX + token;
     const userIdStr = await this.cache.get<string>(redisKey);
     if (!userIdStr) {
-      throw new RpcException({ message: 'Refresh token không hợp lệ hoặc đã hết hạn', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message: 'Refresh token không hợp lệ hoặc đã hết hạn',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     const userId = parseInt(userIdStr, 10);
     await this.cache.del(redisKey);
@@ -282,11 +345,17 @@ export class UsersService implements OnModuleInit {
       where: { id: userId, isActive: true },
       include: {
         roles: true,
-        jobPositions: { include: { unit: true }, orderBy: [{ isPrimary: 'desc' }] }
+        jobPositions: {
+          include: { unit: true },
+          orderBy: [{ isPrimary: 'desc' }],
+        },
       },
     });
     if (!user) {
-      throw new RpcException({ message: 'User không tồn tại', code: GRPC.UNAUTHENTICATED });
+      throw new RpcException({
+        message: 'User không tồn tại',
+        code: GRPC.UNAUTHENTICATED,
+      });
     }
     const newRefreshToken = randomBytes(40).toString('hex');
     await this.cache.set(
@@ -327,8 +396,15 @@ export class UsersService implements OnModuleInit {
   }
 
   async setPassword(data: { userId: number; newPassword: string }) {
-    const user = await this.prisma.user.findUnique({ where: { id: data.userId }, include: { credential: true } });
-    if (!user) throw new RpcException({ message: 'User not found', code: GRPC.NOT_FOUND });
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.userId },
+      include: { credential: true },
+    });
+    if (!user)
+      throw new RpcException({
+        message: 'User not found',
+        code: GRPC.NOT_FOUND,
+      });
     const hash = await bcrypt.hash(data.newPassword, 10);
     if (user.credential) {
       await this.prisma.credential.update({
@@ -349,11 +425,21 @@ export class UsersService implements OnModuleInit {
       include: { roles: true },
     });
     if (!user) {
-      throw new RpcException({ message: `User with id ${data.id} not found`, code: GRPC.NOT_FOUND });
+      throw new RpcException({
+        message: `User with id ${data.id} not found`,
+        code: GRPC.NOT_FOUND,
+      });
     }
     const base = this.toUserResponse(user);
-    const roles = (user as { roles?: Array<{ id: number; name?: string | null; code?: string }> }).roles ?? [];
-    const roleNames = roles.map((r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '');
+    const roles =
+      (
+        user as {
+          roles?: Array<{ id: number; name?: string | null; code?: string }>;
+        }
+      ).roles ?? [];
+    const roleNames = roles.map(
+      (r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
+    );
 
     const roleIds = roles.map((r) => r.id);
     const policies: Array<{ description: string; resource: string }> = [];
@@ -401,29 +487,51 @@ export class UsersService implements OnModuleInit {
 
   /** Khóa/mở tài khoản (isActive = false/true) */
   async setUserActive(data: { userId: number; isActive: boolean }) {
-    const user = await this.prisma.user.findUnique({ where: { id: data.userId } });
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.userId },
+    });
     if (!user) {
-      throw new RpcException({ message: `User with id ${data.userId} not found`, code: GRPC.NOT_FOUND });
+      throw new RpcException({
+        message: `User with id ${data.userId} not found`,
+        code: GRPC.NOT_FOUND,
+      });
     }
     await this.prisma.user.update({
       where: { id: data.userId },
       data: { isActive: data.isActive },
     });
-    return { success: true, message: data.isActive ? 'Đã mở khóa tài khoản.' : 'Đã khóa tài khoản.' };
+    return {
+      success: true,
+      message: data.isActive ? 'Đã mở khóa tài khoản.' : 'Đã khóa tài khoản.',
+    };
   }
 
   /** Gán lại vai trò cho user (thay thế toàn bộ role hiện tại). Lưu vào bảng _RoleToUser (quan hệ User-Role). */
-  async assignRoles(data: { userId: number; roleIds?: number[]; role_ids?: number[] }) {
-    const user = await this.prisma.user.findUnique({ where: { id: data.userId } });
+  async assignRoles(data: {
+    userId: number;
+    roleIds?: number[];
+    role_ids?: number[];
+  }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.userId },
+    });
     if (!user) {
-      throw new RpcException({ message: `User with id ${data.userId} not found`, code: GRPC.NOT_FOUND });
+      throw new RpcException({
+        message: `User with id ${data.userId} not found`,
+        code: GRPC.NOT_FOUND,
+      });
     }
     const rawIds = data.roleIds ?? data.role_ids ?? [];
-    const roleIds = Array.isArray(rawIds) ? rawIds.filter((id: number) => Number(id) > 0).map(Number) : [];
+    const roleIds = Array.isArray(rawIds)
+      ? rawIds.filter((id: number) => Number(id) > 0).map(Number)
+      : [];
     await this.prisma.user.update({
       where: { id: data.userId },
       data: {
-        roles: roleIds.length > 0 ? { set: roleIds.map((id) => ({ id })) } : { set: [] },
+        roles:
+          roleIds.length > 0
+            ? { set: roleIds.map((id) => ({ id })) }
+            : { set: [] },
       },
     });
     return { success: true, message: 'Đã cập nhật vai trò.' };

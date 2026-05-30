@@ -7,10 +7,14 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class PublicPortalConfigController {
   private configService: any;
 
-  constructor(@Inject(MICROSERVICES.PORTAL_CONFIG.SYMBOL) private client: ClientGrpc) { }
+  constructor(
+    @Inject(MICROSERVICES.PORTAL_CONFIG.SYMBOL) private client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.configService = this.client.getService<any>(MICROSERVICES.PORTAL_CONFIG.SERVICE);
+    this.configService = this.client.getService<any>(
+      MICROSERVICES.PORTAL_CONFIG.SERVICE,
+    );
   }
 
   @Get()

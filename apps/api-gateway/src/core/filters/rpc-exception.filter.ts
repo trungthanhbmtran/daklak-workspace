@@ -18,15 +18,21 @@ export class RpcExceptionFilter implements ExceptionFilter {
 
     // Nếu đã là HttpException thì giữ nguyên
     if (exception instanceof HttpException) {
-      return response.status(exception.getStatus()).json(exception.getResponse());
+      return response
+        .status(exception.getStatus())
+        .json(exception.getResponse());
     }
 
     // Map gRPC code sang HTTP status
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = exception.details || exception.message || 'Internal server error';
+    const message =
+      exception.details || exception.message || 'Internal server error';
 
     // Log the full exception for debugging
-    this.logger.error(`gRPC Error caught: [${exception.code}] ${message}`, exception.stack);
+    this.logger.error(
+      `gRPC Error caught: [${exception.code}] ${message}`,
+      exception.stack,
+    );
 
     switch (exception.code) {
       case GrpcStatus.INVALID_ARGUMENT:

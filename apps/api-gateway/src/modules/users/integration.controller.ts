@@ -63,9 +63,37 @@ export class AdminIntegrationController implements OnModuleInit {
 
   @Put(':id/active')
   @ApiOperation({ summary: 'Bật/tắt mã liên thông' })
-  async toggleActive(@Param('id') id: string, @Body('isActive') isActive: boolean) {
+  async toggleActive(
+    @Param('id') id: string,
+    @Body('isActive') isActive: boolean,
+  ) {
     return firstValueFrom(
       this.integrationService.ToggleActive({ id: parseInt(id, 10), isActive }),
+    );
+  }
+
+  // --- LGSP Endpoints ---
+  @Get('documents/sync')
+  @ApiOperation({ summary: 'Đồng bộ văn bản từ trục LGSP' })
+  async syncDocuments(@Query('serviceCode') serviceCode: string) {
+    return firstValueFrom(
+      this.integrationService.SyncDocuments({
+        configId: serviceCode || 'LGSP_QUAN_LY_VAN_BAN',
+      }),
+    );
+  }
+
+  @Post('documents/send')
+  @ApiOperation({ summary: 'Gửi văn bản lên trục LGSP' })
+  async sendDocument(
+    @Body() body: any,
+    @Query('serviceCode') serviceCode: string,
+  ) {
+    return firstValueFrom(
+      this.integrationService.SendDocument({
+        ...body,
+        serviceCode: serviceCode || 'LGSP_QUAN_LY_VAN_BAN',
+      }),
     );
   }
 }

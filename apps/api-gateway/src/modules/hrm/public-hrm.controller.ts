@@ -13,7 +13,9 @@ export class PublicHrmController implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.employeeService = this.client.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.employeeService = this.client.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   @Get()
@@ -24,7 +26,9 @@ export class PublicHrmController implements OnModuleInit {
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
 
-    const response = await firstValueFrom(this.employeeService.ListEmployees(req));
+    const response = await firstValueFrom(
+      this.employeeService.ListEmployees(req),
+    );
     return response;
   }
 }

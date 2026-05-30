@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -28,7 +41,9 @@ export class DepartmentController implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
   }
 
   @Get('tree')
@@ -46,11 +61,19 @@ export class DepartmentController implements OnModuleInit {
   }
 
   @Post('move')
-  @ApiOperation({ summary: 'Chuyển đơn vị sang đơn vị cha mới (user-service UpdateUnit parentId)' })
+  @ApiOperation({
+    summary:
+      'Chuyển đơn vị sang đơn vị cha mới (user-service UpdateUnit parentId)',
+  })
   async move(@Body() body: { id: number; newParentId?: number }) {
     const id = body.id;
     const newParentId = body.newParentId ?? null;
-    return firstValueFrom(this.orgService.UpdateUnit({ id, parentId: newParentId === 0 ? null : newParentId }));
+    return firstValueFrom(
+      this.orgService.UpdateUnit({
+        id,
+        parentId: newParentId === 0 ? null : newParentId,
+      }),
+    );
   }
 
   @Get()
@@ -59,19 +82,24 @@ export class DepartmentController implements OnModuleInit {
     const res = (await firstValueFrom(this.orgService.GetFullTree({}))) as any;
     const all = flattenUnits(res.nodes ?? []);
     let list = all;
-    const parentId = query.parentId != null ? parseInt(query.parentId, 10) : undefined;
+    const parentId =
+      query.parentId != null ? parseInt(query.parentId, 10) : undefined;
     if (parentId !== undefined && !Number.isNaN(parentId)) {
       list = list.filter((u: any) => (u.parentId ?? 0) === parentId);
     }
     const keyword = (query.keyword || '').trim().toLowerCase();
     if (keyword) {
-      list = list.filter((u: any) =>
-        (u.name && u.name.toLowerCase().includes(keyword)) ||
-        (u.code && u.code.toLowerCase().includes(keyword)),
+      list = list.filter(
+        (u: any) =>
+          (u.name && u.name.toLowerCase().includes(keyword)) ||
+          (u.code && u.code.toLowerCase().includes(keyword)),
       );
     }
     const page = Math.max(1, parseInt(query.page, 10) || 1);
-    const pageSize = Math.min(100, Math.max(1, parseInt(query.pageSize, 10) || 10));
+    const pageSize = Math.min(
+      100,
+      Math.max(1, parseInt(query.pageSize, 10) || 10),
+    );
     const start = (page - 1) * pageSize;
     const slice = list.slice(start, start + pageSize);
     return {
@@ -92,7 +120,9 @@ export class DepartmentController implements OnModuleInit {
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết đơn vị (user-service)' })
   async getDetail(@Param('id') id: string) {
-    const res = await firstValueFrom(this.orgService.GetOne({ id: parseInt(id, 10) }));
+    const res = await firstValueFrom(
+      this.orgService.GetOne({ id: parseInt(id, 10) }),
+    );
     return res;
   }
 
@@ -136,7 +166,9 @@ export class DepartmentController implements OnModuleInit {
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa đơn vị (user-service)' })
   async delete(@Param('id') id: string) {
-    const res = await firstValueFrom(this.orgService.DeleteUnit({ id: parseInt(id, 10) })) as { success?: boolean; message?: string };
+    const res = await firstValueFrom(
+      this.orgService.DeleteUnit({ id: parseInt(id, 10) }),
+    );
     return res ?? { success: true, message: 'Đã xóa đơn vị' };
   }
 }

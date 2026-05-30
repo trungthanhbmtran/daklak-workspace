@@ -5,18 +5,23 @@ import { OrganizationsService } from './organizations.service';
 
 @Controller()
 export class OrganizationsController {
-  constructor(private readonly orgService: OrganizationsService) { }
+  constructor(private readonly orgService: OrganizationsService) {}
 
   private getCatName(cat: any): string {
     if (!cat) return '';
     return cat.translations?.[0]?.name ?? '';
   }
 
-  private domainIdsAndNames(unit: any): { domainIds: number[]; domainNames: string[] } {
+  private domainIdsAndNames(unit: any): {
+    domainIds: number[];
+    domainNames: string[];
+  } {
     const ud = unit.unitDomains ?? [];
     return {
       domainIds: ud.map((d: any) => d.domainId ?? d.domain?.id).filter(Boolean),
-      domainNames: ud.map((d: any) => this.getCatName(d.domain)).filter(Boolean),
+      domainNames: ud
+        .map((d: any) => this.getCatName(d.domain))
+        .filter(Boolean),
     };
   }
 
@@ -34,9 +39,10 @@ export class OrganizationsController {
       domainIds,
       domainNames,
       scope: node.scope ?? '',
-      children: (node.children && node.children.length)
-        ? node.children.map((c: any) => this.mapUnitNode(c))
-        : [],
+      children:
+        node.children && node.children.length
+          ? node.children.map((c: any) => this.mapUnitNode(c))
+          : [],
     };
   }
 
@@ -68,7 +74,8 @@ export class OrganizationsController {
     domainId?: number;
     scope?: string;
   }) {
-    const domainIds = data.domainIds ?? (data.domainId != null ? [data.domainId] : []);
+    const domainIds =
+      data.domainIds ?? (data.domainId != null ? [data.domainId] : []);
     const unit = await this.orgService.createUnit({
       code: data.code,
       name: data.name,
@@ -85,13 +92,25 @@ export class OrganizationsController {
   async getOne(data: { id: number }) {
     const unit = await this.orgService.getById(data.id);
     if (!unit) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Đơn vị không tồn tại' });
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Đơn vị không tồn tại',
+      });
     }
     return this.toUnitResponse(unit);
   }
 
   @GrpcMethod('OrganizationService', 'UpdateUnit')
-  async updateUnit(data: { id: number; code?: string; name?: string; shortName?: string; typeId?: number; parentId?: number; domainIds?: number[]; scope?: string }) {
+  async updateUnit(data: {
+    id: number;
+    code?: string;
+    name?: string;
+    shortName?: string;
+    typeId?: number;
+    parentId?: number;
+    domainIds?: number[];
+    scope?: string;
+  }) {
     try {
       const unit = await this.orgService.updateUnit(data.id, {
         code: data.code,
@@ -103,12 +122,18 @@ export class OrganizationsController {
         scope: data.scope,
       });
       if (!unit) {
-        throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Đơn vị không tồn tại' });
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Đơn vị không tồn tại',
+        });
       }
       return this.toUnitResponse(unit);
     } catch (e: any) {
       if (e instanceof RpcException) throw e;
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e?.message ?? 'Lỗi cập nhật đơn vị' });
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: e?.message ?? 'Lỗi cập nhật đơn vị',
+      });
     }
   }
 
@@ -119,7 +144,10 @@ export class OrganizationsController {
       return { success: ok, message: 'Đã xóa đơn vị' };
     } catch (e: any) {
       if (e instanceof RpcException) throw e;
-      throw new RpcException({ code: GrpcStatus.FAILED_PRECONDITION, message: e?.message ?? 'Lỗi xóa đơn vị' });
+      throw new RpcException({
+        code: GrpcStatus.FAILED_PRECONDITION,
+        message: e?.message ?? 'Lỗi xóa đơn vị',
+      });
     }
   }
 
@@ -137,12 +165,18 @@ export class OrganizationsController {
     const res = await this.orgService.getSubTree(data.id);
     const tree = res?.data ?? [];
     return {
-      nodes: Array.isArray(tree) ? tree.map((node: any) => this.mapUnitNode(node)) : [],
+      nodes: Array.isArray(tree)
+        ? tree.map((node: any) => this.mapUnitNode(node))
+        : [],
     };
   }
 
   @GrpcMethod('OrganizationService', 'SetStaffing')
-  async setStaffing(data: { unitId: number; jobTitleId: number; quantity: number }) {
+  async setStaffing(data: {
+    unitId: number;
+    jobTitleId: number;
+    quantity: number;
+  }) {
     const staffing = await this.orgService.setStaffing({
       unitId: data.unitId,
       jobTitleId: data.jobTitleId,
@@ -171,7 +205,9 @@ export class OrganizationsController {
           quantity: s.quantity,
           currentCount: s.currentCount ?? 0,
           jobTitleDomainName: this.getCatName(j?.domain),
-          jobTitleMonitoredUnitNames: (j?.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? '').filter(Boolean),
+          jobTitleMonitoredUnitNames: (j?.monitoredUnits ?? [])
+            .map((mu: any) => mu.unit?.name ?? '')
+            .filter(Boolean),
           jobTitleGeographicAreaName: this.getCatName(j?.geographicArea),
           slots: (s.slots ?? []).map((slot: any) => ({
             id: slot.id,
@@ -181,11 +217,21 @@ export class OrganizationsController {
             geographicAreaId: slot.geographicAreaId ?? 0,
             geographicAreaName: this.getCatName(slot.geographicArea),
             domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-            domainNames: (slot.domains ?? []).map((d: any) => this.getCatName(d.domain)),
-            monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-            monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
-            geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
-            geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) => this.getCatName(ga.geographicArea)),
+            domainNames: (slot.domains ?? []).map((d: any) =>
+              this.getCatName(d.domain),
+            ),
+            monitoredUnitIds: (slot.monitoredUnits ?? []).map(
+              (mu: any) => mu.unitId,
+            ),
+            monitoredUnitNames: (slot.monitoredUnits ?? []).map(
+              (mu: any) => mu.unit?.name ?? '',
+            ),
+            geographicAreaIds: (slot.geographicAreas ?? []).map(
+              (ga: any) => ga.geographicAreaId,
+            ),
+            geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) =>
+              this.getCatName(ga.geographicArea),
+            ),
           })),
         };
       }),
@@ -202,9 +248,12 @@ export class OrganizationsController {
     domainIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const geographicAreaIds = Array.isArray(data.geographicAreaIds) && data.geographicAreaIds.length > 0
-      ? data.geographicAreaIds
-      : (data.geographicAreaId && data.geographicAreaId > 0 ? [data.geographicAreaId] : []);
+    const geographicAreaIds =
+      Array.isArray(data.geographicAreaIds) && data.geographicAreaIds.length > 0
+        ? data.geographicAreaIds
+        : data.geographicAreaId && data.geographicAreaId > 0
+          ? [data.geographicAreaId]
+          : [];
     const slot = await this.orgService.setStaffingSlot({
       staffingId: data.staffingId,
       slotOrder: data.slotOrder,
@@ -221,11 +270,19 @@ export class OrganizationsController {
       geographicAreaId: slot.geographicAreaId ?? 0,
       geographicAreaName: this.getCatName(slot.geographicArea),
       domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-      domainNames: (slot.domains ?? []).map((d: any) => this.getCatName(d.domain)),
+      domainNames: (slot.domains ?? []).map((d: any) =>
+        this.getCatName(d.domain),
+      ),
       monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-      monitoredUnitNames: (slot.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
-      geographicAreaIds: (slot.geographicAreas ?? []).map((ga: any) => ga.geographicAreaId),
-      geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) => this.getCatName(ga.geographicArea)),
+      monitoredUnitNames: (slot.monitoredUnits ?? []).map(
+        (mu: any) => mu.unit?.name ?? '',
+      ),
+      geographicAreaIds: (slot.geographicAreas ?? []).map(
+        (ga: any) => ga.geographicAreaId,
+      ),
+      geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) =>
+        this.getCatName(ga.geographicArea),
+      ),
     };
   }
 
@@ -276,7 +333,9 @@ export class OrganizationsController {
       domainId: j.domainId ?? 0,
       domainName: this.getCatName(j.domain),
       monitoredUnitIds: (j.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-      monitoredUnitNames: (j.monitoredUnits ?? []).map((mu: any) => mu.unit?.name ?? ''),
+      monitoredUnitNames: (j.monitoredUnits ?? []).map(
+        (mu: any) => mu.unit?.name ?? '',
+      ),
       geographicAreaId: j.geographicAreaId ?? 0,
       geographicAreaName: this.getCatName(j.geographicArea),
       category: j.category ?? '',

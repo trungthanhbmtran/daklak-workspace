@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Inject,
-  OnModuleInit,
-  Query,
-} from '@nestjs/common';
+import { Controller, Get, Inject, OnModuleInit, Query } from '@nestjs/common';
 import { type ClientGrpc } from '@nestjs/microservices';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -15,10 +9,14 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class PublicBannersController implements OnModuleInit {
   private bannerService: any;
 
-  constructor(@Inject(MICROSERVICES.BANNER.SYMBOL) private client: ClientGrpc) { }
+  constructor(
+    @Inject(MICROSERVICES.BANNER.SYMBOL) private client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.bannerService = this.client.getService<any>(MICROSERVICES.BANNER.SERVICE);
+    this.bannerService = this.client.getService<any>(
+      MICROSERVICES.BANNER.SERVICE,
+    );
   }
 
   @Get()

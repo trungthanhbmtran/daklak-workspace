@@ -20,8 +20,10 @@ export default function LgspDocumentsPage() {
     setLoading(true);
     try {
       // Call API Gateway to sync documents via specific service code
-      const response = await axios.get('/api/admin/lgsp/documents/sync?serviceCode=LGSP_QUAN_LY_VAN_BAN');
-      if (response.data?.success) {
+      const response = await axios.get("/api/admin/integrations/documents/sync", {
+        params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" }
+      });
+      if (response.data.success) {
         setDocuments(response.data.data || []);
         toast.success("Đồng bộ thành công: Đã lấy các văn bản mới nhất từ trục liên thông LGSP.");
       } else {
@@ -42,7 +44,9 @@ export default function LgspDocumentsPage() {
         content: "Nội dung văn bản thử nghiệm",
         source: "Hệ thống Admin"
       };
-      const response = await axios.post('/api/admin/lgsp/documents/send?serviceCode=LGSP_QUAN_LY_VAN_BAN', payload);
+      const response = await axios.post("/api/admin/integrations/documents/send", payload, {
+        params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" }
+      });
 
       if (response.data?.success) {
         toast.success("Gửi thành công: Văn bản đã được đẩy lên trục LGSP.");

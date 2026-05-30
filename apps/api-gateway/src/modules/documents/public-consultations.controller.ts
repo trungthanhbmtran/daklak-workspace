@@ -1,4 +1,11 @@
-import { Controller, Post, Body, Param, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  Inject,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -17,8 +24,13 @@ export class PublicConsultationsController implements OnModuleInit {
   }
 
   @Post(':id/comments')
-  async submitPublicComment(@Param('id') consultationId: string, @Body() body: any) {
+  async submitPublicComment(
+    @Param('id') consultationId: string,
+    @Body() body: any,
+  ) {
     const payload = { consultationId, ...body };
-    return firstValueFrom(this.consultationService.SubmitPublicComment(payload));
+    return firstValueFrom(
+      this.consultationService.SubmitPublicComment(payload),
+    );
   }
 }

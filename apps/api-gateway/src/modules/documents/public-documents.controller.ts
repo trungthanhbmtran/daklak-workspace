@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Query, Inject, OnModuleInit } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Inject,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -13,7 +20,9 @@ export class PublicDocumentsController implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.documentService = this.client.getService(MICROSERVICES.DOCUMENT.SERVICE);
+    this.documentService = this.client.getService(
+      MICROSERVICES.DOCUMENT.SERVICE,
+    );
   }
 
   @Get('procedures')
@@ -21,8 +30,8 @@ export class PublicDocumentsController implements OnModuleInit {
     const req = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
-      search: query.search || "",
-      category: query.category || "ALL",
+      search: query.search || '',
+      category: query.category || 'ALL',
     };
     return firstValueFrom(this.documentService.ListProcedures(req));
   }
@@ -42,14 +51,16 @@ export class PublicDocumentsController implements OnModuleInit {
     const req: any = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
-      search: query.search || "",
+      search: query.search || '',
     };
     req.isPublic = true;
     if (query.typeId) req.typeId = query.typeId;
     if (query.fieldId) req.fieldId = query.fieldId;
     if (query.status) req.status = query.status;
-    if (query.fiscalYear) req.fiscalYear = parseInt(query.fiscalYear.toString());
-    if (query.transparencyCategory) req.transparencyCategory = query.transparencyCategory;
+    if (query.fiscalYear)
+      req.fiscalYear = parseInt(query.fiscalYear.toString());
+    if (query.transparencyCategory)
+      req.transparencyCategory = query.transparencyCategory;
     return firstValueFrom(this.documentService.ListDocuments(req));
   }
 
@@ -58,4 +69,3 @@ export class PublicDocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.GetDocument({ id }));
   }
 }
-

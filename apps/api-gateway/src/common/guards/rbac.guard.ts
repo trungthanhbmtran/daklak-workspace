@@ -4,7 +4,7 @@ import { Role, ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
 export class RbacGuard implements CanActivate {
-  constructor(private reflector: Reflector) { }
+  constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -18,8 +18,9 @@ export class RbacGuard implements CanActivate {
     const userRoles = Array.isArray(user.roles) ? user.roles : [];
 
     // ADMIN and SUPER_ADMIN have all permissions
-    if (userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN)) return true;
+    if (userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN))
+      return true;
 
-    return requiredRoles.some(role => userRoles.includes(role));
+    return requiredRoles.some((role) => userRoles.includes(role));
   }
 }

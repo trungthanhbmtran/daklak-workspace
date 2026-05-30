@@ -30,4 +30,14 @@ export class IntegrationController {
   async toggleActive(data: { id: number; isActive: boolean }) {
     return this.integrationService.toggleActive(data.id, data.isActive);
   }
+
+  @GrpcMethod('IntegrationService', 'SyncDocuments')
+  async syncDocuments(data: any) {
+    return this.integrationService.syncDocuments(data);
+  }
+
+  @GrpcMethod('IntegrationService', 'SendDocument')
+  async sendDocument(data: any) {
+    return this.integrationService.sendDocument(data);
+  }
 }

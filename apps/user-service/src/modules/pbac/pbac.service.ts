@@ -10,13 +10,23 @@ const GRPC = { ALREADY_EXISTS: 6, FAILED_PRECONDITION: 9 } as const;
 export class PbacService {
   constructor(
     private prisma: PrismaService,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache
-  ) { }
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
-  async createRole(data: { code: string; name: string; description?: string; permissionIds?: number[] }) {
-    const existing = await this.prisma.role.findUnique({ where: { code: data.code } });
+  async createRole(data: {
+    code: string;
+    name: string;
+    description?: string;
+    permissionIds?: number[];
+  }) {
+    const existing = await this.prisma.role.findUnique({
+      where: { code: data.code },
+    });
     if (existing) {
-      throw new RpcException({ message: 'Mã vai trò đã tồn tại', code: GRPC.ALREADY_EXISTS });
+      throw new RpcException({
+        message: 'Mã vai trò đã tồn tại',
+        code: GRPC.ALREADY_EXISTS,
+      });
     }
 
     return this.prisma.role.create({
@@ -47,15 +57,20 @@ export class PbacService {
     });
   }
 
-  async updateRole(id: number, data: { name?: string; description?: string; permissionIds?: number[] }) {
+  async updateRole(
+    id: number,
+    data: { name?: string; description?: string; permissionIds?: number[] },
+  ) {
     return this.prisma.role.update({
       where: { id },
       data: {
         name: data.name,
         description: data.description,
-        permissions: data.permissionIds ? {
-          set: data.permissionIds.map((pid) => ({ id: pid })),
-        } : undefined,
+        permissions: data.permissionIds
+          ? {
+              set: data.permissionIds.map((pid) => ({ id: pid })),
+            }
+          : undefined,
       },
     });
   }
@@ -66,7 +81,8 @@ export class PbacService {
     });
     if (countUsers > 0) {
       throw new RpcException({
-        message: 'Không thể xóa vai trò đang có người sử dụng. Hãy gỡ user ra trước.',
+        message:
+          'Không thể xóa vai trò đang có người sử dụng. Hãy gỡ user ra trước.',
         code: GRPC.FAILED_PRECONDITION,
       });
     }
@@ -83,9 +99,14 @@ export class PbacService {
   }
 
   async createResource(data: { code: string; name: string }) {
-    const existing = await this.prisma.resource.findUnique({ where: { code: data.code } });
+    const existing = await this.prisma.resource.findUnique({
+      where: { code: data.code },
+    });
     if (existing) {
-      throw new RpcException({ message: 'Mã tài nguyên đã tồn tại', code: GRPC.ALREADY_EXISTS });
+      throw new RpcException({
+        message: 'Mã tài nguyên đã tồn tại',
+        code: GRPC.ALREADY_EXISTS,
+      });
     }
     return this.prisma.resource.create({
       data: { code: data.code, name: data.name },
@@ -96,9 +117,14 @@ export class PbacService {
     const resource = await this.prisma.resource.findUnique({ where: { id } });
     if (!resource) return null;
     if (data.code !== undefined) {
-      const existing = await this.prisma.resource.findUnique({ where: { code: data.code } });
+      const existing = await this.prisma.resource.findUnique({
+        where: { code: data.code },
+      });
       if (existing && existing.id !== id) {
-        throw new RpcException({ message: 'Mã tài nguyên đã tồn tại', code: GRPC.ALREADY_EXISTS });
+        throw new RpcException({
+          message: 'Mã tài nguyên đã tồn tại',
+          code: GRPC.ALREADY_EXISTS,
+        });
       }
     }
     return this.prisma.resource.update({
@@ -118,7 +144,8 @@ export class PbacService {
     if (!resource) return false;
     if (resource.permissions.length > 0) {
       throw new RpcException({
-        message: 'Không thể xóa tài nguyên đang có quyền. Hãy xóa các quyền trước.',
+        message:
+          'Không thể xóa tài nguyên đang có quyền. Hãy xóa các quyền trước.',
         code: GRPC.FAILED_PRECONDITION,
       });
     }
@@ -127,19 +154,30 @@ export class PbacService {
   }
 
   async createPermission(data: { resourceId: number; action: string }) {
-    const resource = await this.prisma.resource.findUnique({ where: { id: data.resourceId } });
+    const resource = await this.prisma.resource.findUnique({
+      where: { id: data.resourceId },
+    });
     if (!resource) {
-      throw new RpcException({ message: 'Tài nguyên không tồn tại', code: GRPC.FAILED_PRECONDITION });
+      throw new RpcException({
+        message: 'Tài nguyên không tồn tại',
+        code: GRPC.FAILED_PRECONDITION,
+      });
     }
     const action = (data.action || '').trim().toUpperCase();
     if (!action) {
-      throw new RpcException({ message: 'Action không được để trống', code: GRPC.FAILED_PRECONDITION });
+      throw new RpcException({
+        message: 'Action không được để trống',
+        code: GRPC.FAILED_PRECONDITION,
+      });
     }
     const existing = await this.prisma.permission.findUnique({
       where: { action_resourceId: { action, resourceId: data.resourceId } },
     });
     if (existing) {
-      throw new RpcException({ message: 'Quyền này đã tồn tại', code: GRPC.ALREADY_EXISTS });
+      throw new RpcException({
+        message: 'Quyền này đã tồn tại',
+        code: GRPC.ALREADY_EXISTS,
+      });
     }
     return this.prisma.permission.create({
       data: { action, resourceId: data.resourceId },
@@ -147,7 +185,9 @@ export class PbacService {
   }
 
   async deletePermission(id: number) {
-    const permission = await this.prisma.permission.findUnique({ where: { id } });
+    const permission = await this.prisma.permission.findUnique({
+      where: { id },
+    });
     if (!permission) return false;
     await this.prisma.permission.delete({ where: { id } });
     return true;

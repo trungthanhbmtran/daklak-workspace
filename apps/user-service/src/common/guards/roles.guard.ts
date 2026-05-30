@@ -21,13 +21,16 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const rpcContext = context.switchToRpc().getContext<Record<string, unknown>>();
+    const rpcContext = context
+      .switchToRpc()
+      .getContext<Record<string, unknown>>();
     const user = rpcContext?.[GRPC_USER_KEY] as UserWithPbac | undefined;
 
     if (!user) {
       throw new RpcException({
         code: GrpcStatus.PERMISSION_DENIED,
-        message: 'User context missing. Use GrpcAuthGuard before RolesGuard (PBAC).',
+        message:
+          'User context missing. Use GrpcAuthGuard before RolesGuard (PBAC).',
       });
     }
 

@@ -14,7 +14,14 @@ import {
   ParseIntPipe,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiQuery, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiQuery,
+  ApiBody,
+} from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -25,7 +32,8 @@ function toFrontendItem(m: any): any {
   const rawIds = m.requiredPermissionIds ?? m.required_permission_ids;
   const requiredPermissionIds = Array.isArray(rawIds)
     ? rawIds.map(Number).filter((id: number) => id > 0)
-    : (m.requiredPermissionId ?? m.required_permission_id) != null && (m.requiredPermissionId ?? m.required_permission_id) !== 0
+    : (m.requiredPermissionId ?? m.required_permission_id) != null &&
+        (m.requiredPermissionId ?? m.required_permission_id) !== 0
       ? [Number(m.requiredPermissionId ?? m.required_permission_id)]
       : [];
   const order = m.order ?? m.sort ?? 0;
@@ -36,7 +44,8 @@ function toFrontendItem(m: any): any {
     name: m.name ?? '',
     path: m.route ?? m.path ?? '',
     icon: m.icon ?? '',
-    parentId: parentId === 0 || parentId === undefined ? null : Number(parentId),
+    parentId:
+      parentId === 0 || parentId === undefined ? null : Number(parentId),
     service: m.service ?? '',
     portal: application,
     target: m.target ?? 'SELF',
@@ -76,11 +85,21 @@ export class MenusController implements OnModuleInit {
 
   @Get('me')
   @ApiOperation({ summary: 'Menu sidebar theo user đăng nhập và ứng dụng' })
-  @ApiQuery({ name: 'app', required: false, description: 'ADMIN_PORTAL | CITIZEN_PORTAL', example: 'ADMIN_PORTAL' })
+  @ApiQuery({
+    name: 'app',
+    required: false,
+    description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
+    example: 'ADMIN_PORTAL',
+  })
   @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
-    const userId = rawId != null && rawId !== '' ? (typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)) : 0;
+    const userId =
+      rawId != null && rawId !== ''
+        ? typeof rawId === 'number'
+          ? rawId
+          : parseInt(String(rawId), 10)
+        : 0;
     return firstValueFrom(
       this.menuService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
@@ -103,12 +122,16 @@ export class MenusController implements OnModuleInit {
     const rawIds = body.requiredPermissionIds ?? body.required_permission_ids;
     const requiredPermissionIds = Array.isArray(rawIds)
       ? rawIds.map(Number).filter((id: number) => id > 0)
-      : (body.requiredPermissionId ?? body.required_permission_id) != null && (body.requiredPermissionId ?? body.required_permission_id) !== 0
+      : (body.requiredPermissionId ?? body.required_permission_id) != null &&
+          (body.requiredPermissionId ?? body.required_permission_id) !== 0
         ? [Number(body.requiredPermissionId ?? body.required_permission_id)]
         : [];
     const isActive =
-      body.active !== undefined ? Boolean(Number(body.active)) :
-      body.is_active !== undefined ? !!body.is_active : true;
+      body.active !== undefined
+        ? Boolean(Number(body.active))
+        : body.is_active !== undefined
+          ? !!body.is_active
+          : true;
     return {
       code,
       name,
@@ -120,7 +143,8 @@ export class MenusController implements OnModuleInit {
       service,
       application,
       target,
-      parentId: parentId === null || parentId === undefined ? 0 : Number(parentId),
+      parentId:
+        parentId === null || parentId === undefined ? 0 : Number(parentId),
       requiredPermissionIds,
       isActive,
     };
@@ -133,11 +157,15 @@ export class MenusController implements OnModuleInit {
   async create(@Body() body: any) {
     try {
       const payload = this.toCreatePayload(body);
-      const res = (await firstValueFrom(this.menuService.Create(payload))) as any;
+      const res = (await firstValueFrom(
+        this.menuService.Create(payload),
+      )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi tạo menu';
-      throw new BadRequestException(typeof message === 'string' ? message : message);
+      throw new BadRequestException(
+        typeof message === 'string' ? message : message,
+      );
     }
   }
 
@@ -145,26 +173,37 @@ export class MenusController implements OnModuleInit {
   private toUpdatePayload(id: number, body: any) {
     const parentId = body.parentId ?? body.parent_id;
     const rawIds = body.requiredPermissionIds ?? body.required_permission_ids;
-    const requiredPermissionIds = rawIds !== undefined
-      ? (Array.isArray(rawIds) ? rawIds.map(Number).filter((id: number) => id > 0) : [])
-      : undefined;
+    const requiredPermissionIds =
+      rawIds !== undefined
+        ? Array.isArray(rawIds)
+          ? rawIds.map(Number).filter((id: number) => id > 0)
+          : []
+        : undefined;
     const payload: any = {
       id,
       code: body.code != null ? String(body.code).trim() : undefined,
       name: body.name != null ? String(body.name).trim() : undefined,
       route: body.path ?? body.route,
       icon: body.icon,
-      order: body.sort !== undefined || body.order !== undefined ? Number(body.sort ?? body.order ?? 0) : undefined,
+      order:
+        body.sort !== undefined || body.order !== undefined
+          ? Number(body.sort ?? body.order ?? 0)
+          : undefined,
       description: body.description,
       iconColor: body.iconColor ?? body.icon_color,
       service: body.service,
       application: body.portal ?? body.application,
       target: body.target,
     };
-    if (parentId !== undefined) payload.parentId = parentId === null ? 0 : Number(parentId);
-    if (requiredPermissionIds !== undefined) payload.requiredPermissionIds = requiredPermissionIds;
+    if (parentId !== undefined)
+      payload.parentId = parentId === null ? 0 : Number(parentId);
+    if (requiredPermissionIds !== undefined)
+      payload.requiredPermissionIds = requiredPermissionIds;
     if (body.active !== undefined || body.is_active !== undefined) {
-      payload.isActive = body.active !== undefined ? Boolean(Number(body.active)) : !!body.is_active;
+      payload.isActive =
+        body.active !== undefined
+          ? Boolean(Number(body.active))
+          : !!body.is_active;
     }
     return payload;
   }
@@ -172,17 +211,18 @@ export class MenusController implements OnModuleInit {
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật menu (PBAC: quyền gắn với Permission)' })
   @ApiResponse({ status: 200, description: 'Menu đã cập nhật' })
-  async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: any,
-  ) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     try {
       const payload = this.toUpdatePayload(id, body);
-      const res = (await firstValueFrom(this.menuService.Update(payload))) as any;
+      const res = (await firstValueFrom(
+        this.menuService.Update(payload),
+      )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi cập nhật menu';
-      throw new BadRequestException(typeof message === 'string' ? message : message);
+      throw new BadRequestException(
+        typeof message === 'string' ? message : message,
+      );
     }
   }
 
@@ -191,6 +231,9 @@ export class MenusController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Đã xóa' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
-    return { success: res?.success ?? true, message: res?.message ?? 'Đã xóa menu' };
+    return {
+      success: res?.success ?? true,
+      message: res?.message ?? 'Đã xóa menu',
+    };
   }
 }

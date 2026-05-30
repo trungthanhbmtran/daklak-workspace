@@ -19,13 +19,17 @@ export class RankQuotasController {
 
   @Post()
   async saveRankQuotas(@Body() body: any) {
-    const data = await firstValueFrom(this.rankQuotaService.SaveRankQuotas(body));
+    const data = await firstValueFrom(
+      this.rankQuotaService.SaveRankQuotas(body),
+    );
     return data;
   }
 
   @Get(':rankCode')
   async getRankQuotasByRank(@Param('rankCode') rankCode: string) {
-    const data = await firstValueFrom(this.rankQuotaService.GetRankQuotasByRank({ rankCode }));
+    const data = await firstValueFrom(
+      this.rankQuotaService.GetRankQuotasByRank({ rankCode }),
+    );
     return data;
   }
 }

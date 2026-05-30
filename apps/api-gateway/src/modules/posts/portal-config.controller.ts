@@ -21,15 +21,21 @@ import { Roles, Role } from '../../common/decorators/roles.decorator';
 export class PortalConfigController {
   private configService: any;
 
-  constructor(@Inject(MICROSERVICES.PORTAL_CONFIG.SYMBOL) private client: ClientGrpc) { }
+  constructor(
+    @Inject(MICROSERVICES.PORTAL_CONFIG.SYMBOL) private client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.configService = this.client.getService<any>(MICROSERVICES.PORTAL_CONFIG.SERVICE);
+    this.configService = this.client.getService<any>(
+      MICROSERVICES.PORTAL_CONFIG.SERVICE,
+    );
   }
 
   @Post()
   @Roles(Role.ADMIN)
-  async create(@Body() dto: { code: string; name: string; description?: string }) {
+  async create(
+    @Body() dto: { code: string; name: string; description?: string },
+  ) {
     const res: any = await firstValueFrom(this.configService.create(dto));
     return { success: true, data: res.data };
   }
@@ -46,14 +52,24 @@ export class PortalConfigController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: { code?: string; name?: string; description?: string },
   ) {
-    const res: any = await firstValueFrom(this.configService.update({ id, ...dto }));
+    const res: any = await firstValueFrom(
+      this.configService.update({ id, ...dto }),
+    );
     return { success: true, data: res.data };
   }
 
   @Post('upsert')
   @Roles(Role.ADMIN)
-  async upsert(@Body() dto: { code: string; name: string; description?: string }) {
-    const res: any = await firstValueFrom(this.configService.upsertByCode({ code: dto.code, name: dto.name, description: dto.description }));
+  async upsert(
+    @Body() dto: { code: string; name: string; description?: string },
+  ) {
+    const res: any = await firstValueFrom(
+      this.configService.upsertByCode({
+        code: dto.code,
+        name: dto.name,
+        description: dto.description,
+      }),
+    );
     return { success: true, data: res.data };
   }
 }

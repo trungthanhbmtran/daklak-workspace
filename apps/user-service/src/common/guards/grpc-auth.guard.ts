@@ -9,9 +9,7 @@ import type { UserWithPbac } from '@/common/types/grpc-user.type';
 /** Key lưu user trên gRPC context để guard khác dùng */
 export const GRPC_USER_KEY = 'user';
 
-function flattenPermissions(
-  roles: UserWithPbac['roles'],
-): string[] {
+function flattenPermissions(roles: UserWithPbac['roles']): string[] {
   const set = new Set<string>();
   for (const role of roles) {
     for (const p of role.permissions ?? []) {
@@ -30,7 +28,9 @@ export class GrpcAuthGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const rpcContext = context.switchToRpc().getContext<{ metadata?: import('@grpc/grpc-js').Metadata }>();
+    const rpcContext = context
+      .switchToRpc()
+      .getContext<{ metadata?: import('@grpc/grpc-js').Metadata }>();
     const metadata = rpcContext?.metadata;
     if (!metadata) {
       throw new RpcException({

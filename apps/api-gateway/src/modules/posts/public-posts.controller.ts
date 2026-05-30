@@ -17,7 +17,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class PublicPostsController implements OnModuleInit {
   private postService: any;
 
-  constructor(@Inject(MICROSERVICES.POST.SYMBOL) private client: ClientGrpc) { }
+  constructor(@Inject(MICROSERVICES.POST.SYMBOL) private client: ClientGrpc) {}
 
   onModuleInit() {
     this.postService = this.client.getService<any>(MICROSERVICES.POST.SERVICE);
@@ -26,7 +26,9 @@ export class PublicPostsController implements OnModuleInit {
   @Get()
   async findAll(@Query() query: any) {
     // Chỉ trả về các bài viết công khai (PUBLISHED)
-    return firstValueFrom(this.postService.listPosts({ ...query, status: 'PUBLISHED' }));
+    return firstValueFrom(
+      this.postService.listPosts({ ...query, status: 'PUBLISHED' }),
+    );
   }
 
   @Get('slug/:slug')

@@ -1,4 +1,16 @@
-import { Controller, Get, Put, Body, Param, Query, Inject, UseGuards, OnModuleInit, ParseIntPipe, NotFoundException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Put,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  ParseIntPipe,
+  NotFoundException,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -16,20 +28,33 @@ export class JobTitleController implements OnModuleInit {
   ) {}
 
   onModuleInit() {
-    this.orgService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.client.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách chức danh (user-service, unitId tùy chọn)' })
+  @ApiOperation({
+    summary: 'Danh sách chức danh (user-service, unitId tùy chọn)',
+  })
   async list(@Query() query: any) {
-    const unitId = query.unitId != null && query.unitId !== '' ? parseInt(query.unitId, 10) : undefined;
-    const res = await firstValueFrom(this.orgService.ListJobTitles({ unitId: Number.isNaN(unitId as number) ? undefined : unitId }));
+    const unitId =
+      query.unitId != null && query.unitId !== ''
+        ? parseInt(query.unitId, 10)
+        : undefined;
+    const res = await firstValueFrom(
+      this.orgService.ListJobTitles({
+        unitId: Number.isNaN(unitId as number) ? undefined : unitId,
+      }),
+    );
     const items = (res as any).items ?? [];
     return { data: items, items };
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Chi tiết chức danh (lấy từ danh sách user-service)' })
+  @ApiOperation({
+    summary: 'Chi tiết chức danh (lấy từ danh sách user-service)',
+  })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
     const res = await firstValueFrom(this.orgService.ListJobTitles({}));
     const items = (res as any).items ?? [];
@@ -39,7 +64,10 @@ export class JobTitleController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật chức danh (lĩnh vực, theo dõi đơn vị, khu vực - user-service)' })
+  @ApiOperation({
+    summary:
+      'Cập nhật chức danh (lĩnh vực, theo dõi đơn vị, khu vực - user-service)',
+  })
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
     const payload = {
       id,

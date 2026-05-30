@@ -206,6 +206,13 @@ async function main() {
       nameVi: 'Dịch vụ Quy trình',
       nameEn: 'Workflow Service',
     },
+    {
+      group: 'MICROSERVICE',
+      code: 'INTEGRATION_SERVICE',
+      order: 6,
+      nameVi: 'Dịch vụ Liên thông',
+      nameEn: 'Integration Service',
+    },
 
     // --- AI & TRANSLATION ---
     {
@@ -3047,14 +3054,6 @@ async function main() {
         route: 'interactions/feedbacks',
         icon: 'create-outline',
         order: 3,
-        res: 'CITIZEN_INTERACTION',
-      },
-      {
-        code: 'CONTENT_MENU_LGSP',
-        name: 'Quản lý văn bản (LGSP)',
-        route: 'interactions/lgsp',
-        icon: 'document-text-outline',
-        order: 4,
         res: 'CITIZEN_INTERACTION',
       },
     ];

@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface LGSPConfigData {
   type: 'LGSP' | 'WEBHOOK' | 'SYSTEM';
+  apiUrl?: string;
+  apiToken?: string;
   keys?: {
     clientId: string;
     clientSecret: string;

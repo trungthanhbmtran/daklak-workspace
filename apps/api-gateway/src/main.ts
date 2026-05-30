@@ -15,13 +15,27 @@ async function bootstrap() {
   // Swagger
   const config = new DocumentBuilder()
     .setTitle('API Gateway')
-    .setDescription('API Gateway – Tiếp nhận request, validate, chuyển microservice, response')
+    .setDescription(
+      'API Gateway – Tiếp nhận request, validate, chuyển microservice, response',
+    )
     .setVersion('1.0')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'JWT-auth')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'JWT-auth',
+    )
     .addTag('Auth', 'Đăng nhập, đăng xuất, thông tin user')
-    .addTag('Users', 'Người dùng (user-service: CreateUser, FindOne, AssignPosition)')
-    .addTag('PBAC', 'Chính sách phân quyền – Vai trò và ma trận quyền (user-service)')
-    .addTag('Danh mục hệ thống', 'Danh mục dùng chung: UNIT_TYPE, GENDER... (user-service)')
+    .addTag(
+      'Users',
+      'Người dùng (user-service: CreateUser, FindOne, AssignPosition)',
+    )
+    .addTag(
+      'PBAC',
+      'Chính sách phân quyền – Vai trò và ma trận quyền (user-service)',
+    )
+    .addTag(
+      'Danh mục hệ thống',
+      'Danh mục dùng chung: UNIT_TYPE, GENDER... (user-service)',
+    )
     .addTag('Menu', 'Menu sidebar theo user (user-service)')
     .addTag('Đơn vị tổ chức', 'Đơn vị, cây tổ chức, định biên (user-service)')
     .addTag('HRM', 'Đơn vị, nhân viên, định biên, chức danh')
@@ -44,30 +58,34 @@ async function bootstrap() {
   });
 
   // 3. Cấu hình Validation (Tự động kiểm tra dữ liệu đầu vào)
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: false, // Cho phép field thừa khi proxy
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: false, // Cho phép field thừa khi proxy
+      transform: true,
+    }),
+  );
 
   // 4. Áp dụng Interceptor và Filter toàn cục
   app.useGlobalInterceptors(new TransformInterceptor());
   app.useGlobalFilters(new RpcExceptionFilter());
 
   const port = process.env.PORT || 8080;
-  
+
   // Connect RabbitMQ Microservice for processing background jobs
   app.connectMicroservice({
     transport: 5, // Transport.RMQ
     options: {
-      urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+      urls: [
+        process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672',
+      ],
       queue: 'ai_tasks_queue',
       queueOptions: {
-        durable: true
+        durable: true,
       },
     },
   });
-  
+
   await app.startAllMicroservices();
   await app.listen(port, '0.0.0.0');
 

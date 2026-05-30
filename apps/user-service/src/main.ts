@@ -3,7 +3,8 @@ import { AppModule } from './app.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 
-const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
+const protoRoot =
+  process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
 
 const userDir = join(protoRoot, 'users');
 const protoPath = [
@@ -23,7 +24,15 @@ async function bootstrap() {
     {
       transport: Transport.GRPC,
       options: {
-        package: ['user', 'pbac', 'category', 'menu', 'organization', 'users', 'integration'],
+        package: [
+          'user',
+          'pbac',
+          'category',
+          'menu',
+          'organization',
+          'users',
+          'integration',
+        ],
         protoPath,
         url: process.env.GRPC_URL ?? '0.0.0.0:50051',
         loader: {
@@ -39,6 +48,9 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen();
-  console.log('User Service (gRPC) listening on', process.env.GRPC_URL ?? '0.0.0.0:50051');
+  console.log(
+    'User Service (gRPC) listening on',
+    process.env.GRPC_URL ?? '0.0.0.0:50051',
+  );
 }
 bootstrap();

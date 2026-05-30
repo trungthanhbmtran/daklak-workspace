@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -17,12 +29,18 @@ export class DocumentsController implements OnModuleInit {
     @Inject(MICROSERVICES.DOCUMENT.SYMBOL) private readonly documentClient: any,
     @Inject(MICROSERVICES.CABINET.SYMBOL) private readonly cabinetClient: any,
     @Inject(MICROSERVICES.DOSSIER.SYMBOL) private readonly dossierClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.documentService = this.documentClient.getService(MICROSERVICES.DOCUMENT.SERVICE);
-    this.cabinetService = this.cabinetClient.getService(MICROSERVICES.CABINET.SERVICE);
-    this.dossierService = this.dossierClient.getService(MICROSERVICES.DOSSIER.SERVICE);
+    this.documentService = this.documentClient.getService(
+      MICROSERVICES.DOCUMENT.SERVICE,
+    );
+    this.cabinetService = this.cabinetClient.getService(
+      MICROSERVICES.CABINET.SERVICE,
+    );
+    this.dossierService = this.dossierClient.getService(
+      MICROSERVICES.DOSSIER.SERVICE,
+    );
   }
 
   @Get('stats')
@@ -45,8 +63,10 @@ export class DocumentsController implements OnModuleInit {
     };
     if (query.isPublic !== undefined) req.isPublic = query.isPublic === 'true';
     if (query.fiscalYear) req.fiscalYear = parseInt(query.fiscalYear);
-    if (query.transparencyCategory) req.transparencyCategory = query.transparencyCategory;
-    if (query.isIncoming !== undefined) req.isIncoming = query.isIncoming === 'true';
+    if (query.transparencyCategory)
+      req.transparencyCategory = query.transparencyCategory;
+    if (query.isIncoming !== undefined)
+      req.isIncoming = query.isIncoming === 'true';
     return firstValueFrom(this.documentService.ListDocuments(req));
   }
 
@@ -56,8 +76,8 @@ export class DocumentsController implements OnModuleInit {
     const req = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
-      search: query.search || "",
-      category: query.category || "ALL",
+      search: query.search || '',
+      category: query.category || 'ALL',
     };
     return firstValueFrom(this.documentService.ListProcedures(req));
   }
@@ -74,7 +94,9 @@ export class DocumentsController implements OnModuleInit {
 
   @Put('procedures/:id')
   async updateAdminProcedure(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(this.documentService.UpdateProcedure({ id, ...body }));
+    return firstValueFrom(
+      this.documentService.UpdateProcedure({ id, ...body }),
+    );
   }
 
   @Delete('procedures/:id')
@@ -88,8 +110,8 @@ export class DocumentsController implements OnModuleInit {
     const req = {
       page: parseInt(query.page) || 1,
       limit: parseInt(query.limit) || 10,
-      search: query.search || "",
-      status: query.status || "",
+      search: query.search || '',
+      status: query.status || '',
     };
     return firstValueFrom(this.documentService.ListDossiers(req));
   }
@@ -116,8 +138,16 @@ export class DocumentsController implements OnModuleInit {
 
   // --- Cabinet ---
   @Get('cabinet')
-  async listCabinetFiles(@Query('userId') userId: string, @Query('orgId') orgId: string) {
-    return firstValueFrom(this.cabinetService.ListFiles({ userId: userId || "", orgId: orgId || "" }));
+  async listCabinetFiles(
+    @Query('userId') userId: string,
+    @Query('orgId') orgId: string,
+  ) {
+    return firstValueFrom(
+      this.cabinetService.ListFiles({
+        userId: userId || '',
+        orgId: orgId || '',
+      }),
+    );
   }
 
   @Post('cabinet')
@@ -142,18 +172,27 @@ export class DocumentsController implements OnModuleInit {
   }
 
   @Post('dossiers/from-template')
-  async createDossierFromTemplate(@Body() body: { procedureId: string, senderName: string }) {
+  async createDossierFromTemplate(
+    @Body() body: { procedureId: string; senderName: string },
+  ) {
     return firstValueFrom(this.dossierService.CreateDossierFromTemplate(body));
   }
 
   @Post('dossiers/create-blank')
-  async createBlankDossier(@Body() body: { procedureName: string, senderName: string }) {
+  async createBlankDossier(
+    @Body() body: { procedureName: string; senderName: string },
+  ) {
     return firstValueFrom(this.dossierService.CreateBlankDossier(body));
   }
 
   @Post('dossiers/:id/components')
-  async addComponentFromCabinet(@Param('id') dossierId: string, @Body() body: { name: string, fileUrl: string }) {
-    return firstValueFrom(this.dossierService.AddComponentFromCabinet({ dossierId, ...body }));
+  async addComponentFromCabinet(
+    @Param('id') dossierId: string,
+    @Body() body: { name: string; fileUrl: string },
+  ) {
+    return firstValueFrom(
+      this.dossierService.AddComponentFromCabinet({ dossierId, ...body }),
+    );
   }
 
   @Get(':id')
@@ -163,7 +202,7 @@ export class DocumentsController implements OnModuleInit {
 
   @Post()
   async createDocument(@Body() body: any) {
-    console.log("body", body);
+    console.log('body', body);
     return firstValueFrom(this.documentService.CreateDocument(body));
   }
 
@@ -193,4 +232,3 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.DeleteDocument({ id }));
   }
 }
-

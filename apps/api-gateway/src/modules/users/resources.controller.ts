@@ -1,5 +1,22 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Inject, UseGuards, OnModuleInit, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  ParseIntPipe,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -23,7 +40,9 @@ export class ResourcesController implements OnModuleInit {
   @ApiOperation({ summary: 'Tạo tài nguyên mới' })
   @ApiResponse({ status: 201, description: 'Tài nguyên vừa tạo' })
   async createResource(@Body() body: { code: string; name: string }) {
-    return firstValueFrom(this.pbacService.CreateResource({ code: body.code, name: body.name }));
+    return firstValueFrom(
+      this.pbacService.CreateResource({ code: body.code, name: body.name }),
+    );
   }
 
   @Put(':id')
@@ -33,7 +52,9 @@ export class ResourcesController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { code?: string; name?: string },
   ) {
-    return firstValueFrom(this.pbacService.UpdateResource({ id, code: body.code, name: body.name }));
+    return firstValueFrom(
+      this.pbacService.UpdateResource({ id, code: body.code, name: body.name }),
+    );
   }
 
   @Delete('permissions/:id')
@@ -44,7 +65,9 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa tài nguyên (chỉ khi không còn permission nào)' })
+  @ApiOperation({
+    summary: 'Xóa tài nguyên (chỉ khi không còn permission nào)',
+  })
   @ApiResponse({ status: 200, description: 'Kết quả xóa' })
   async deleteResource(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.DeleteResource({ id }));
@@ -57,6 +80,11 @@ export class ResourcesController implements OnModuleInit {
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { action: string },
   ) {
-    return firstValueFrom(this.pbacService.CreatePermission({ resourceId: id, action: body.action }));
+    return firstValueFrom(
+      this.pbacService.CreatePermission({
+        resourceId: id,
+        action: body.action,
+      }),
+    );
   }
 }

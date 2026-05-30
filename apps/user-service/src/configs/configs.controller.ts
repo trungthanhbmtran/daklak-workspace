@@ -13,8 +13,16 @@ export class ConfigsController {
   }
 
   @GrpcMethod('SystemConfigService', 'UpdateConfig')
-  async updateConfig(data: { key: string; value: string; description?: string }) {
-    const config = await this.configsService.updateConfig(data.key, data.value, data.description);
+  async updateConfig(data: {
+    key: string;
+    value: string;
+    description?: string;
+  }) {
+    const config = await this.configsService.updateConfig(
+      data.key,
+      data.value,
+      data.description,
+    );
     return config;
   }
 }

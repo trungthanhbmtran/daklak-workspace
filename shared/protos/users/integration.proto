@@ -10,6 +10,41 @@ service IntegrationService {
   rpc Update (UpdateIntegrationRequest) returns (IntegrationDataResponse) {}
   rpc Delete (DeleteIntegrationRequest) returns (DeleteIntegrationResponse) {}
   rpc ToggleActive (ToggleActiveIntegrationRequest) returns (IntegrationDataResponse) {}
+
+  // Added from LGSP
+  rpc SyncDocuments (SyncDocumentsRequest) returns (SyncDocumentsResponse) {}
+  rpc SendDocument (SendDocumentRequest) returns (SendDocumentResponse) {}
+}
+
+message SyncDocumentsRequest {
+  string configId = 1;
+}
+
+message SyncDocumentsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated IntegrationDocument data = 3;
+}
+
+message SendDocumentRequest {
+  string title = 1;
+  string content = 2;
+  string source = 3;
+  string serviceCode = 4;
+}
+
+message SendDocumentResponse {
+  bool success = 1;
+  string message = 2;
+  IntegrationDocument data = 3;
+}
+
+message IntegrationDocument {
+  string id = 1;
+  string title = 2;
+  string date = 3;
+  string status = 4;
+  string source = 5;
 }
 
 message IntegrationConfigResponse {

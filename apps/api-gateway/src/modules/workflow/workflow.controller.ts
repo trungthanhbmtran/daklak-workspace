@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -15,24 +28,34 @@ export class WorkflowController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.WORKFLOW.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.workflowService = this.client.getService(MICROSERVICES.WORKFLOW.SERVICE);
-    this.categoryService = this.catClient.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
+    this.workflowService = this.client.getService(
+      MICROSERVICES.WORKFLOW.SERVICE,
+    );
+    this.categoryService = this.catClient.getService(
+      MICROSERVICES.SYS_CATEGORY.SERVICE,
+    );
   }
- 
+
   @Get('services')
-  @ApiOperation({ summary: 'Lấy danh sách các microservice khả dụng cho workflow' })
+  @ApiOperation({
+    summary: 'Lấy danh sách các microservice khả dụng cho workflow',
+  })
   async getMicroservices() {
-    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: 'MICROSERVICE' })) as any;
+    const result = (await firstValueFrom(
+      this.categoryService.GetByGroup({ group: 'MICROSERVICE' }),
+    )) as any;
     return { data: result.data || [] };
   }
- 
+
   @Get('triggers')
   @ApiOperation({ summary: 'Lấy danh sách các trigger khả dụng' })
   async getTriggers() {
-    const result = await firstValueFrom(this.categoryService.GetByGroup({ group: 'WORKFLOW_TRIGGER' })) as any;
+    const result = (await firstValueFrom(
+      this.categoryService.GetByGroup({ group: 'WORKFLOW_TRIGGER' }),
+    )) as any;
     return { data: result.data || [] };
   }
 
@@ -47,9 +70,13 @@ export class WorkflowController implements OnModuleInit {
       definition: JSON.stringify(body.definition || { nodes: [], edges: [] }),
       trigger: body.trigger,
     };
-    const result = await firstValueFrom(this.workflowService.CreateWorkflow(payload)) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.CreateWorkflow(payload),
+    )) as any;
     if (result && typeof result.definition === 'string') {
-      try { result.definition = JSON.parse(result.definition); } catch (e) { }
+      try {
+        result.definition = JSON.parse(result.definition);
+      } catch (e) {}
     }
     return { data: result };
   }
@@ -64,9 +91,13 @@ export class WorkflowController implements OnModuleInit {
       definition: JSON.stringify(body.definition),
       trigger: body.trigger,
     };
-    const result = await firstValueFrom(this.workflowService.UpdateWorkflow(payload)) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.UpdateWorkflow(payload),
+    )) as any;
     if (result && typeof result.definition === 'string') {
-      try { result.definition = JSON.parse(result.definition); } catch (e) { }
+      try {
+        result.definition = JSON.parse(result.definition);
+      } catch (e) {}
     }
     return { data: result };
   }
@@ -76,25 +107,33 @@ export class WorkflowController implements OnModuleInit {
   async list(@Query() query: any) {
     const skip = parseInt(query.skip) || 0;
     const take = parseInt(query.take) || 20;
-    const result = await firstValueFrom(this.workflowService.ListWorkflows({ skip, take })) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.ListWorkflows({ skip, take }),
+    )) as any;
     const items = (result.items || []).map((item: any) => {
       if (typeof item.definition === 'string') {
-        try { item.definition = JSON.parse(item.definition); } catch (e) { }
+        try {
+          item.definition = JSON.parse(item.definition);
+        } catch (e) {}
       }
       return item;
     });
     return {
       data: items,
-      meta: { total: result.total || 0 }
+      meta: { total: result.total || 0 },
     };
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Chi tiết quy trình' })
   async findOne(@Param('id') id: string) {
-    const result = await firstValueFrom(this.workflowService.FindOneWorkflow({ id })) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.FindOneWorkflow({ id }),
+    )) as any;
     if (result && typeof result.definition === 'string') {
-      try { result.definition = JSON.parse(result.definition); } catch (e) { }
+      try {
+        result.definition = JSON.parse(result.definition);
+      } catch (e) {}
     }
     return { data: result };
   }
@@ -102,7 +141,9 @@ export class WorkflowController implements OnModuleInit {
   @Delete(':id')
   @ApiOperation({ summary: 'Xóa quy trình' })
   async delete(@Param('id') id: string) {
-    const result = await firstValueFrom(this.workflowService.DeleteWorkflow({ id })) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.DeleteWorkflow({ id }),
+    )) as any;
     return { success: result.success || true };
   }
 
@@ -112,11 +153,13 @@ export class WorkflowController implements OnModuleInit {
   @ApiOperation({ summary: 'Kích hoạt chạy một quy trình' })
   async start(@Param('id') id: string, @Body() body: any, @Req() req: any) {
     const initiatorId = req.user?.id?.toString() || 'system';
-    const result = await firstValueFrom(this.workflowService.StartWorkflow({
-      workflowId: id,
-      initialContext: body.initialContext || body,
-      initiatorId,
-    })) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.StartWorkflow({
+        workflowId: id,
+        initialContext: body.initialContext || body,
+        initiatorId,
+      }),
+    )) as any;
     return { data: result };
   }
 
@@ -126,31 +169,37 @@ export class WorkflowController implements OnModuleInit {
     @Param('instanceId') instanceId: string,
     @Param('nodeId') nodeId: string,
     @Body() body: any,
-    @Req() req: any
+    @Req() req: any,
   ) {
     const userRoles = req.user?.roles || [];
-    const result = await firstValueFrom(this.workflowService.ResumeWorkflow({
-      instanceId,
-      nodeId,
-      actionData: body.actionData || body,
-      userRoles,
-    })) as any;
+    const result = (await firstValueFrom(
+      this.workflowService.ResumeWorkflow({
+        instanceId,
+        nodeId,
+        actionData: body.actionData || body,
+        userRoles,
+      }),
+    )) as any;
     return { data: result };
   }
 
   @Get('instances/:id')
   @ApiOperation({ summary: 'Trạng thái hiện tại của workflow instance' })
   async getInstance(@Param('id') id: string) {
-    const result = await firstValueFrom(this.workflowService.GetInstance({ id }));
+    const result = await firstValueFrom(
+      this.workflowService.GetInstance({ id }),
+    );
     return { data: result };
   }
 
   @Get('instances/:instanceId/logs')
   @ApiOperation({ summary: 'Lịch sử thực thi của workflow instance' })
   async getLogs(@Param('instanceId') instanceId: string) {
-    const response = await firstValueFrom(this.workflowService.GetLogs({ instanceId })) as any;
+    const response = (await firstValueFrom(
+      this.workflowService.GetLogs({ instanceId }),
+    )) as any;
     return {
-      data: response.logs || []
+      data: response.logs || [],
     };
   }
 }

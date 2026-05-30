@@ -13,7 +13,12 @@ import {
   ParseIntPipe,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -27,20 +32,34 @@ export class OrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.orgService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.client.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
   }
 
   @Post()
   @ApiOperation({ summary: 'Tạo đơn vị tổ chức' })
   @ApiResponse({ status: 201, description: 'Đơn vị vừa tạo (camelCase)' })
   async create(
-    @Body() body: { code: string; name: string; shortName?: string; typeId: number; parentId?: number | null; parent_id?: number | null; domainIds?: number[]; domain_id?: number; scope?: string },
+    @Body()
+    body: {
+      code: string;
+      name: string;
+      shortName?: string;
+      typeId: number;
+      parentId?: number | null;
+      parent_id?: number | null;
+      domainIds?: number[];
+      domain_id?: number;
+      scope?: string;
+    },
   ) {
     try {
-      const domainIds = body.domainIds ?? (body.domain_id != null ? [body.domain_id] : []);
+      const domainIds =
+        body.domainIds ?? (body.domain_id != null ? [body.domain_id] : []);
       const result = await firstValueFrom(
         this.orgService.CreateUnit({
           code: body.code,
@@ -55,7 +74,9 @@ export class OrganizationsController implements OnModuleInit {
       return { success: true, data: result };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi tạo đơn vị';
-      throw new BadRequestException(typeof message === 'string' ? message : message);
+      throw new BadRequestException(
+        typeof message === 'string' ? message : message,
+      );
     }
   }
 
@@ -63,33 +84,57 @@ export class OrganizationsController implements OnModuleInit {
   @ApiOperation({ summary: 'Lấy danh sách loại đơn vị (UBND, Sở, Phòng...)' })
   @ApiResponse({ status: 200, description: 'Danh sách loại đơn vị' })
   async getUnitTypes() {
-    const res = await firstValueFrom(this.orgService.ListUnitTypes({})) as any;
+    const res = (await firstValueFrom(
+      this.orgService.ListUnitTypes({}),
+    )) as any;
     return { success: true, data: res.items || [] };
   }
 
   @Get('tree')
   @ApiOperation({ summary: 'Cây tổ chức toàn bộ' })
-  @ApiResponse({ status: 200, description: 'Cây đơn vị (root nodes có children)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Cây đơn vị (root nodes có children)',
+  })
   async getFullTree() {
-    const res = await firstValueFrom(this.orgService.GetFullTree({})) as any;
+    const res = (await firstValueFrom(this.orgService.GetFullTree({}))) as any;
     return { success: true, data: res.nodes || [] };
   }
 
   @Get('job-titles')
-  @ApiOperation({ summary: 'Danh sách chức danh (theo đơn vị: chỉ chức danh áp dụng cho loại đơn vị đó)' })
+  @ApiOperation({
+    summary:
+      'Danh sách chức danh (theo đơn vị: chỉ chức danh áp dụng cho loại đơn vị đó)',
+  })
   @ApiResponse({ status: 200, description: 'Danh sách chức danh (camelCase)' })
   async getJobTitles(@Query('unitId') unitId?: string) {
-    const unitIdNum = unitId != null && unitId !== '' ? parseInt(unitId, 10) : undefined;
-    const res = await firstValueFrom(this.orgService.ListJobTitles({ unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum })) as any;
+    const unitIdNum =
+      unitId != null && unitId !== '' ? parseInt(unitId, 10) : undefined;
+    const res = (await firstValueFrom(
+      this.orgService.ListJobTitles({
+        unitId: Number.isNaN(unitIdNum) ? undefined : unitIdNum,
+      }),
+    )) as any;
     return { success: true, data: res.items || [] };
   }
 
   @Put('job-titles/:id')
-  @ApiOperation({ summary: 'Cập nhật chức danh (lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý)' })
-  @ApiResponse({ status: 200, description: 'Chức danh đã cập nhật (camelCase)' })
+  @ApiOperation({
+    summary:
+      'Cập nhật chức danh (lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Chức danh đã cập nhật (camelCase)',
+  })
   async updateJobTitle(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { domainId?: number; geographicAreaId?: number; monitoredUnitIds?: number[] },
+    @Body()
+    body: {
+      domainId?: number;
+      geographicAreaId?: number;
+      monitoredUnitIds?: number[];
+    },
   ) {
     const result = await firstValueFrom(
       this.orgService.UpdateJobTitle({
@@ -111,7 +156,9 @@ export class OrganizationsController implements OnModuleInit {
       return { success: true, data: result };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Đơn vị không tồn tại';
-      throw new BadRequestException(typeof message === 'string' ? message : message);
+      throw new BadRequestException(
+        typeof message === 'string' ? message : message,
+      );
     }
   }
 
@@ -120,7 +167,18 @@ export class OrganizationsController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Đơn vị đã cập nhật (camelCase)' })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { code?: string; name?: string; shortName?: string; typeId?: number; parentId?: number | null; parent_id?: number | null; domainIds?: number[]; domain_ids?: number[]; scope?: string },
+    @Body()
+    body: {
+      code?: string;
+      name?: string;
+      shortName?: string;
+      typeId?: number;
+      parentId?: number | null;
+      parent_id?: number | null;
+      domainIds?: number[];
+      domain_ids?: number[];
+      scope?: string;
+    },
   ) {
     try {
       const domainIds = body.domainIds ?? body.domain_ids;
@@ -134,11 +192,15 @@ export class OrganizationsController implements OnModuleInit {
         scope: body.scope,
       };
       if (body.parentId !== undefined) payload.parentId = body.parentId;
-      const result = await firstValueFrom(this.orgService.UpdateUnit(payload as any));
+      const result = await firstValueFrom(
+        this.orgService.UpdateUnit(payload as any),
+      );
       return { success: true, data: result };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi cập nhật đơn vị';
-      throw new BadRequestException(typeof message === 'string' ? message : message);
+      throw new BadRequestException(
+        typeof message === 'string' ? message : message,
+      );
     }
   }
 
@@ -147,11 +209,18 @@ export class OrganizationsController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'success, message' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     try {
-      const res = (await firstValueFrom(this.orgService.DeleteUnit({ id }))) as any;
-      return { success: res?.success ?? true, message: res?.message ?? 'Đã xóa đơn vị' };
+      const res = (await firstValueFrom(
+        this.orgService.DeleteUnit({ id }),
+      )) as any;
+      return {
+        success: res?.success ?? true,
+        message: res?.message ?? 'Đã xóa đơn vị',
+      };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi xóa đơn vị';
-      throw new BadRequestException(typeof message === 'string' ? message : message);
+      throw new BadRequestException(
+        typeof message === 'string' ? message : message,
+      );
     }
   }
 
@@ -159,35 +228,56 @@ export class OrganizationsController implements OnModuleInit {
   @ApiOperation({ summary: 'Cây con của một đơn vị' })
   @ApiResponse({ status: 200, description: 'Cây con từ đơn vị id' })
   async getSubTree(@Param('id', ParseIntPipe) id: number) {
-    const res = await firstValueFrom(this.orgService.GetSubTree({ id })) as any;
+    const res = (await firstValueFrom(
+      this.orgService.GetSubTree({ id }),
+    )) as any;
     return { success: true, data: res.nodes || [] };
   }
 
   @Post('staffing')
-  @ApiOperation({ summary: 'Thiết lập định biên (số lượng chức danh cho đơn vị)' })
+  @ApiOperation({
+    summary: 'Thiết lập định biên (số lượng chức danh cho đơn vị)',
+  })
   @ApiResponse({ status: 200, description: 'Định biên đã lưu (camelCase)' })
-  async setStaffing(@Body() body: { unitId: number; jobTitleId: number; quantity: number }) {
-    const result = await firstValueFrom(this.orgService.SetStaffing({
-      unitId: body.unitId,
-      jobTitleId: body.jobTitleId,
-      quantity: body.quantity,
-    }));
+  async setStaffing(
+    @Body() body: { unitId: number; jobTitleId: number; quantity: number },
+  ) {
+    const result = await firstValueFrom(
+      this.orgService.SetStaffing({
+        unitId: body.unitId,
+        jobTitleId: body.jobTitleId,
+        quantity: body.quantity,
+      }),
+    );
     return { success: true, data: result };
   }
 
   @Get(':id/staffing-report')
-  @ApiOperation({ summary: 'Báo cáo định biên của đơn vị (thừa/thiếu nhân sự, kèm phân công từng vị trí)' })
-  @ApiResponse({ status: 200, description: 'Danh sách chức danh và số lượng, mỗi item có slots (camelCase)' })
+  @ApiOperation({
+    summary:
+      'Báo cáo định biên của đơn vị (thừa/thiếu nhân sự, kèm phân công từng vị trí)',
+  })
+  @ApiResponse({
+    status: 200,
+    description:
+      'Danh sách chức danh và số lượng, mỗi item có slots (camelCase)',
+  })
   async getStaffingReport(@Param('id', ParseIntPipe) id: number) {
-    const res = await firstValueFrom(this.orgService.GetStaffingReport({ unitId: id })) as any;
+    const res = (await firstValueFrom(
+      this.orgService.GetStaffingReport({ unitId: id }),
+    )) as any;
     return { success: true, data: res.items || [] };
   }
 
   @Post('staffing-slots')
-  @ApiOperation({ summary: 'Phân công từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực riêng cho slot' })
+  @ApiOperation({
+    summary:
+      'Phân công từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực riêng cho slot',
+  })
   @ApiResponse({ status: 200, description: 'Slot đã lưu (camelCase)' })
   async setStaffingSlot(
-    @Body() body: {
+    @Body()
+    body: {
       staffingId: number;
       slotOrder: number;
       description?: string;
@@ -219,18 +309,27 @@ export class PublicOrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.orgService = this.client.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.client.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
   }
 
   @Get()
-  @ApiOperation({ summary: 'Lấy danh sách phẳng tất cả đơn vị tổ chức công khai' })
-  @ApiResponse({ status: 200, description: 'Danh sách phẳng tất cả đơn vị tổ chức' })
+  @ApiOperation({
+    summary: 'Lấy danh sách phẳng tất cả đơn vị tổ chức công khai',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách phẳng tất cả đơn vị tổ chức',
+  })
   async getPublicOrgUnits() {
     try {
-      const res = await firstValueFrom(this.orgService.GetFullTree({})) as any;
+      const res = (await firstValueFrom(
+        this.orgService.GetFullTree({}),
+      )) as any;
       const nodes = res.nodes || [];
       const flatList = this.flattenTree(nodes);
       return { success: true, data: flatList };
@@ -257,4 +356,3 @@ export class PublicOrganizationsController implements OnModuleInit {
     return result;
   }
 }
-

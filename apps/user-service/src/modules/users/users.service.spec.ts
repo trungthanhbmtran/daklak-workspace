@@ -30,7 +30,14 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: prisma },
         { provide: 'NOTIFICATION_SERVICE', useValue: { emit: jest.fn() } },
-        { provide: ConfigService, useValue: { get: jest.fn((k: string) => (k === 'JWT_EXPIRES_IN' ? '1h' : 'secret')) } },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((k: string) =>
+              k === 'JWT_EXPIRES_IN' ? '1h' : 'secret',
+            ),
+          },
+        },
         { provide: JwtService, useValue: { sign: jest.fn(() => 'mock-jwt') } },
       ],
     }).compile();
@@ -56,7 +63,9 @@ describe('UsersService', () => {
       const result = await service.createUser({ email: 'a@b.com' });
       expect(result).toMatchObject({ id: 1, email: 'a@b.com' });
       expect(result).toHaveProperty('username', '');
-      expect(prisma.user.create).toHaveBeenCalledWith({ data: { email: 'a@b.com', username: null } });
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: { email: 'a@b.com', username: null },
+      });
     });
   });
 

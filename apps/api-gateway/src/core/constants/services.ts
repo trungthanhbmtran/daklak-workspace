@@ -3,14 +3,24 @@
  * URL: user_service, project_stc/hrm-service, document_service...
  */
 // Dùng 127.0.0.1 thay vì localhost để tránh resolve sang ::1 (IPv6) gây ECONNREFUSED
-const getUserUrl = () => process.env.USER_SERVICE_ADDR || process.env.AUTH_SERVICE_URL || 'user-service:50051';
+const getUserUrl = () =>
+  process.env.USER_SERVICE_ADDR ||
+  process.env.AUTH_SERVICE_URL ||
+  'user-service:50051';
 /** project_stc/hrm-service (gRPC, mặc định 127.0.0.1:50052) */
-const getHrmUrl = () => process.env.HRM_SERVICE_ADDR || process.env.DEPARTMENT_SERVICE_URL || 'hrm-service:50052';
-const getDocumentUrl = () => process.env.DOCUMENT_SERVICE_URL || 'document-service:50056';
+const getHrmUrl = () =>
+  process.env.HRM_SERVICE_ADDR ||
+  process.env.DEPARTMENT_SERVICE_URL ||
+  'hrm-service:50052';
+const getDocumentUrl = () =>
+  process.env.DOCUMENT_SERVICE_URL || 'document-service:50056';
 const getPostUrl = () => process.env.POST_SERVICE_URL || 'posts-service:50055';
-const getMediaUrl = () => process.env.MEDIA_SERVICE_URL || 'media-service:50059';
-const getTranslateUrl = () => process.env.TRANSLATE_SERVICE_URL || 'translate-service:50053';
-const getWorkflowUrl = () => process.env.WORKFLOW_SERVICE_URL || 'workflow-service:50060';
+const getMediaUrl = () =>
+  process.env.MEDIA_SERVICE_URL || 'media-service:50059';
+const getTranslateUrl = () =>
+  process.env.TRANSLATE_SERVICE_URL || 'translate-service:50053';
+const getWorkflowUrl = () =>
+  process.env.WORKFLOW_SERVICE_URL || 'workflow-service:50060';
 
 export const MICROSERVICES = {
   // Workflow (workflow-service)
@@ -85,13 +95,6 @@ export const MICROSERVICES = {
     PROTO: 'users/integration.proto',
     URL: getUserUrl(),
     SERVICE: 'IntegrationService',
-  },
-  LGSP: {
-    PACKAGE: 'lgsp',
-    SYMBOL: 'LGSP_PACKAGE',
-    PROTO: 'users/lgsp.proto',
-    URL: getUserUrl(),
-    SERVICE: 'LgspService',
   },
   // HRM: chỉ nhân viên (employee) qua project_stc/hrm-service; đơn vị/chức danh/định biên qua user-service (ORGANIZATION)
   EMPLOYEE: {

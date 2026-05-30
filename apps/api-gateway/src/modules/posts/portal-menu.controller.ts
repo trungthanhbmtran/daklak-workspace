@@ -22,10 +22,14 @@ import { Roles, Role } from '../../common/decorators/roles.decorator';
 export class PortalMenuController {
   private portalMenuService: any;
 
-  constructor(@Inject(MICROSERVICES.PORTAL_MENU.SYMBOL) private client: ClientGrpc) { }
+  constructor(
+    @Inject(MICROSERVICES.PORTAL_MENU.SYMBOL) private client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.portalMenuService = this.client.getService<any>(MICROSERVICES.PORTAL_MENU.SERVICE);
+    this.portalMenuService = this.client.getService<any>(
+      MICROSERVICES.PORTAL_MENU.SERVICE,
+    );
   }
 
   @Post()
@@ -37,7 +41,9 @@ export class PortalMenuController {
   @Get()
   async findAll(@Query() query: any) {
     console.log('Gateway: Calling ListPortalMenus with query:', query);
-    const result = await firstValueFrom(this.portalMenuService.listPortalMenus(query));
+    const result = await firstValueFrom(
+      this.portalMenuService.listPortalMenus(query),
+    );
     console.log('Gateway: ListPortalMenus response received');
     return result;
   }
@@ -45,7 +51,9 @@ export class PortalMenuController {
   @Get('quick-setup')
   async getQuickSetupData() {
     console.log('Gateway: Calling GetQuickSetupData');
-    const result = await firstValueFrom(this.portalMenuService.getQuickSetupData({}));
+    const result = await firstValueFrom(
+      this.portalMenuService.getQuickSetupData({}),
+    );
     console.log('Gateway: GetQuickSetupData response received');
     return result;
   }
@@ -58,7 +66,9 @@ export class PortalMenuController {
   @Put(':id')
   @Roles(Role.ADMIN)
   async update(@Param('id') id: string, @Body() dto: any) {
-    return firstValueFrom(this.portalMenuService.updatePortalMenu({ id, ...dto }));
+    return firstValueFrom(
+      this.portalMenuService.updatePortalMenu({ id, ...dto }),
+    );
   }
 
   @Delete(':id')

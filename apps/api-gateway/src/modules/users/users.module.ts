@@ -5,12 +5,17 @@ import { NotificationsModule } from '../notifications/notifications.module';
 import { UserController } from './user.controller';
 import { PbacController } from './pbac.controller';
 import { ResourcesController } from './resources.controller';
-import { CategoriesController, PublicCategoriesController } from './categories.controller';
+import {
+  CategoriesController,
+  PublicCategoriesController,
+} from './categories.controller';
 import { MenusController } from './menus.controller';
-import { OrganizationsController, PublicOrganizationsController } from './organizations.controller';
+import {
+  OrganizationsController,
+  PublicOrganizationsController,
+} from './organizations.controller';
 import { ConfigsController } from './configs.controller';
 import { AdminIntegrationController } from './integration.controller';
-import { LgspController } from './lgsp.controller';
 
 @Module({
   imports: [
@@ -22,7 +27,6 @@ import { LgspController } from './lgsp.controller';
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
     registerGrpcService(MICROSERVICES.INTEGRATION),
-    registerGrpcService(MICROSERVICES.LGSP),
   ],
   controllers: [
     UserController,
@@ -35,7 +39,6 @@ import { LgspController } from './lgsp.controller';
     PublicOrganizationsController,
     ConfigsController,
     AdminIntegrationController,
-    LgspController,
   ],
 })
 export class UsersModule {}

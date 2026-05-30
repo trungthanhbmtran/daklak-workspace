@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Query, Inject, UseGuards, OnModuleInit, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  Param,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -11,9 +23,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 export class KpisController implements OnModuleInit {
   private kpiService: any;
 
-  constructor(
-    @Inject(MICROSERVICES.KPI.SYMBOL) private readonly client: any,
-  ) {}
+  constructor(@Inject(MICROSERVICES.KPI.SYMBOL) private readonly client: any) {}
 
   onModuleInit() {
     this.kpiService = this.client.getService(MICROSERVICES.KPI.SERVICE);
@@ -41,7 +51,9 @@ export class KpisController implements OnModuleInit {
 
   @Put('criteria/:id')
   async updateCriterion(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(this.kpiService.UpdateCriterion({ id: Number(id), ...body }));
+    return firstValueFrom(
+      this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
+    );
   }
 
   @Delete('criteria/:id')
@@ -56,8 +68,10 @@ export class KpisController implements OnModuleInit {
 
   @Get('evaluations')
   async findEvaluations(@Query('employeeCode') employeeCode: string) {
-    return firstValueFrom(this.kpiService.FindEvaluations({
-      employeeCode,
-    }));
+    return firstValueFrom(
+      this.kpiService.FindEvaluations({
+        employeeCode,
+      }),
+    );
   }
 }

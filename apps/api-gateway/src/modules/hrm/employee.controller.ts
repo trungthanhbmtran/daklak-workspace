@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -17,12 +29,18 @@ export class EmployeeController implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.employeeService = this.client.getService(MICROSERVICES.EMPLOYEE.SERVICE);
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
-    this.catService = this.catClient.getService(MICROSERVICES.SYS_CATEGORY.SERVICE);
+    this.employeeService = this.client.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
+    this.catService = this.catClient.getService(
+      MICROSERVICES.SYS_CATEGORY.SERVICE,
+    );
   }
 
   /**
@@ -36,16 +54,23 @@ export class EmployeeController implements OnModuleInit {
         firstValueFrom(this.catService.GetAllCategories({})),
       ]);
 
-      const jobTitlesRes: any = results[0].status === 'fulfilled' ? results[0].value : { items: [] };
-      const treeRes: any = results[1].status === 'fulfilled' ? results[1].value : { nodes: [] };
-      const catRes: any = results[2].status === 'fulfilled' ? results[2].value : { data: [] };
+      const jobTitlesRes: any =
+        results[0].status === 'fulfilled' ? results[0].value : { items: [] };
+      const treeRes: any =
+        results[1].status === 'fulfilled' ? results[1].value : { nodes: [] };
+      const catRes: any =
+        results[2].status === 'fulfilled' ? results[2].value : { data: [] };
 
       const jtMap: Record<string, any> = {};
-      (jobTitlesRes?.items || []).forEach((jt: any) => { jtMap[jt.id] = { name: jt.name, code: jt.code }; });
-      
+      (jobTitlesRes?.items || []).forEach((jt: any) => {
+        jtMap[jt.id] = { name: jt.name, code: jt.code };
+      });
+
       const catMap: Record<string, any> = {};
-      (catRes?.data || []).forEach((c: any) => { catMap[c.id] = { name: c.name, code: c.code }; });
-      
+      (catRes?.data || []).forEach((c: any) => {
+        catMap[c.id] = { name: c.name, code: c.code };
+      });
+
       const unitMap: Record<string, any> = {};
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
@@ -64,15 +89,29 @@ export class EmployeeController implements OnModuleInit {
   /**
    * Ánh xạ thông tin chức danh, phòng ban vào nhân viên
    */
-  private enrichEmployee(emp: any, jtMap: Record<string, any>, unitMap: Record<string, any>, catMap: Record<string, any>) {
+  private enrichEmployee(
+    emp: any,
+    jtMap: Record<string, any>,
+    unitMap: Record<string, any>,
+    catMap: Record<string, any>,
+  ) {
     if (!emp) return emp;
-    const lookup = (map: Record<string, any>, id?: number) => id && id > 0 ? map[id as any] || { name: '', code: '' } : { name: '', code: '' };
+    const lookup = (map: Record<string, any>, id?: number) =>
+      id && id > 0
+        ? map[id as any] || { name: '', code: '' }
+        : { name: '', code: '' };
 
     return {
       ...emp,
-      department: { id: emp.departmentId, ...lookup(unitMap, emp.departmentId) },
+      department: {
+        id: emp.departmentId,
+        ...lookup(unitMap, emp.departmentId),
+      },
       jobTitle: { id: emp.jobTitleId, ...lookup(jtMap, emp.jobTitleId) },
-      civilServantRank: { id: emp.civilServantRankId, ...lookup(catMap, emp.civilServantRankId) },
+      civilServantRank: {
+        id: emp.civilServantRankId,
+        ...lookup(catMap, emp.civilServantRankId),
+      },
       partyTitle: { id: emp.partyTitleId, ...lookup(jtMap, emp.partyTitleId) },
     };
   }
@@ -84,16 +123,19 @@ export class EmployeeController implements OnModuleInit {
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
     // Nhận thêm params từ client
-    if (req.civilServantRankId) req.civilServantRankId = parseInt(req.civilServantRankId);
+    if (req.civilServantRankId)
+      req.civilServantRankId = parseInt(req.civilServantRankId);
     if (req.partyTitleId) req.partyTitleId = parseInt(req.partyTitleId);
 
     const [res, dicts] = await Promise.all([
-      firstValueFrom(this.employeeService.ListEmployees(req)) as Promise<any>,
-      this.fetchDictionaries()
+      firstValueFrom(this.employeeService.ListEmployees(req)),
+      this.fetchDictionaries(),
     ]);
 
     if (res && res.data) {
-      res.data = res.data.map((e: any) => this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap));
+      res.data = res.data.map((e: any) =>
+        this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
+      );
     }
     return res;
   }
@@ -101,12 +143,17 @@ export class EmployeeController implements OnModuleInit {
   @Get(':id')
   async getDetail(@Param('id') id: string) {
     const [res, dicts] = await Promise.all([
-      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })) as Promise<any>,
-      this.fetchDictionaries()
+      firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })),
+      this.fetchDictionaries(),
     ]);
 
     if (res && res.data) {
-      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap, dicts.catMap);
+      res.data = this.enrichEmployee(
+        res.data,
+        dicts.jtMap,
+        dicts.unitMap,
+        dicts.catMap,
+      );
     }
     return res;
   }
@@ -114,12 +161,17 @@ export class EmployeeController implements OnModuleInit {
   @Post()
   async create(@Body() body: any) {
     const [res, dicts] = await Promise.all([
-      firstValueFrom(this.employeeService.CreateEmployee(body)) as Promise<any>,
-      this.fetchDictionaries()
+      firstValueFrom(this.employeeService.CreateEmployee(body)),
+      this.fetchDictionaries(),
     ]);
 
     if (res && res.data) {
-      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap, dicts.catMap);
+      res.data = this.enrichEmployee(
+        res.data,
+        dicts.jtMap,
+        dicts.unitMap,
+        dicts.catMap,
+      );
     }
     return res;
   }
@@ -128,18 +180,25 @@ export class EmployeeController implements OnModuleInit {
   async update(@Param('id') id: string, @Body() body: any) {
     const payload = { ...body, id: parseInt(id) };
     const [res, dicts] = await Promise.all([
-      firstValueFrom(this.employeeService.UpdateEmployee(payload)) as Promise<any>,
-      this.fetchDictionaries()
+      firstValueFrom(this.employeeService.UpdateEmployee(payload)),
+      this.fetchDictionaries(),
     ]);
 
     if (res && res.data) {
-      res.data = this.enrichEmployee(res.data, dicts.jtMap, dicts.unitMap, dicts.catMap);
+      res.data = this.enrichEmployee(
+        res.data,
+        dicts.jtMap,
+        dicts.unitMap,
+        dicts.catMap,
+      );
     }
     return res;
   }
 
   @Delete(':id')
   async delete(@Param('id') id: string) {
-    return firstValueFrom(this.employeeService.DeleteEmployee({ id: parseInt(id) }));
+    return firstValueFrom(
+      this.employeeService.DeleteEmployee({ id: parseInt(id) }),
+    );
   }
 }

@@ -4,9 +4,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { MediaGatewayController } from './media.controller';
 
 @Module({
-  imports: [
-    registerGrpcService(MICROSERVICES.MEDIA),
-  ],
+  imports: [registerGrpcService(MICROSERVICES.MEDIA)],
   controllers: [MediaGatewayController],
 })
-export class MediaModule { }
+export class MediaModule {}

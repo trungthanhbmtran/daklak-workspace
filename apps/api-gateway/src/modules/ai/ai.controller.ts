@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Get, Inject, Param, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  Inject,
+  Param,
+  Logger,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AiService } from './ai.service';
 import { ClientProxy, EventPattern } from '@nestjs/microservices';
@@ -24,13 +32,17 @@ export class AiController {
 
     try {
       const jobId = uuidv4();
-      
+
       // Save initial state to Redis (TTL 1 hour)
-      await this.redisService.set(`ai_job_${jobId}`, JSON.stringify({ status: 'PROCESSING' }), 3600);
-      
+      await this.redisService.set(
+        `ai_job_${jobId}`,
+        JSON.stringify({ status: 'PROCESSING' }),
+        3600,
+      );
+
       // Emit event to RabbitMQ
       this.rmqClient.emit('ai_generate_task', { jobId, prompt: body.prompt });
-      
+
       // Return 202 immediately
       return { status: 'success', data: { jobId, status: 'PROCESSING' } };
     } catch (err: any) {
@@ -44,7 +56,10 @@ export class AiController {
     try {
       const jobData = await this.redisService.get(`ai_job_${jobId}`);
       if (!jobData) {
-        return { status: 'error', message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)' };
+        return {
+          status: 'error',
+          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
+        };
       }
       return { status: 'success', data: JSON.parse(jobData) };
     } catch (err: any) {
@@ -57,36 +72,49 @@ export class AiController {
     this.logger.log(`Worker received AI task: ${data.jobId}`);
     try {
       const resultStr = await this.aiService.generateText(data.prompt);
-      
+
       let parsedResult = resultStr;
       if (typeof resultStr === 'string') {
         try {
           let jsonStr = resultStr;
           if (jsonStr.startsWith('```json')) {
-            jsonStr = jsonStr.replace(/```json/g, '').replace(/```/g, '').trim();
+            jsonStr = jsonStr
+              .replace(/```json/g, '')
+              .replace(/```/g, '')
+              .trim();
           } else if (jsonStr.startsWith('```')) {
             jsonStr = jsonStr.replace(/```/g, '').trim();
           }
           parsedResult = JSON.parse(jsonStr);
         } catch (e: any) {
-          this.logger.warn(`Worker could not parse JSON from AI result: ${e.message}`);
+          this.logger.warn(
+            `Worker could not parse JSON from AI result: ${e.message}`,
+          );
         }
       }
-      
+
       // Update state to COMPLETED
-      await this.redisService.set(`ai_job_${data.jobId}`, JSON.stringify({ 
-        status: 'COMPLETED', 
-        result: parsedResult 
-      }), 3600);
-      
+      await this.redisService.set(
+        `ai_job_${data.jobId}`,
+        JSON.stringify({
+          status: 'COMPLETED',
+          result: parsedResult,
+        }),
+        3600,
+      );
+
       this.logger.log(`Worker completed AI task: ${data.jobId}`);
     } catch (err: any) {
       this.logger.error(`Worker failed AI task: ${data.jobId}`, err);
       // Update state to FAILED
-      await this.redisService.set(`ai_job_${data.jobId}`, JSON.stringify({ 
-        status: 'FAILED', 
-        error: err.message 
-      }), 3600);
+      await this.redisService.set(
+        `ai_job_${data.jobId}`,
+        JSON.stringify({
+          status: 'FAILED',
+          error: err.message,
+        }),
+        3600,
+      );
     }
   }
 
@@ -97,7 +125,10 @@ export class AiController {
     }
 
     try {
-      const models = await this.aiService.listModels(body.provider, body.apiKey);
+      const models = await this.aiService.listModels(
+        body.provider,
+        body.apiKey,
+      );
       return { status: 'success', data: models };
     } catch (err: any) {
       return { status: 'error', message: err.message };

@@ -11,8 +11,6 @@ import {
   ShieldCheck,
   FileText,
   Newspaper,
-  Layers,
-  Palette,
   type LucideIcon,
 } from "lucide-react";
 import { menuApi, type MenuNode } from "@/features/system-admin/menus/api";
@@ -26,6 +24,7 @@ const SERVICE_CONFIG: Record<string, { serviceCode: string; basePath: string }> 
   hrm: { serviceCode: "HRM_SERVICE", basePath: "/services/hrm" },
   documents: { serviceCode: "DOCUMENT_SERVICE", basePath: "/services/documents" },
   posts: { serviceCode: "CONTENT_SERVICE", basePath: "/services/posts" },
+  integration: { serviceCode: "INTEGRATION_SERVICE", basePath: "/services/integration" },
 };
 
 // Map ngược lại để dùng cho Hub
@@ -152,79 +151,6 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
       (a, b) => a.order - b.order
     );
 
-    if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/portal-config"))) {
-      menuItems.push({
-        name: "Cấu hình đơn vị",
-        href: `${config.basePath}/portal-config`,
-        icon: ICON_MAP["settings-outline"] || Settings2,
-        order: 6,
-      });
-    }
-    if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/portal-page-builder"))) {
-      menuItems.push({
-        name: "Trình tạo trang trực quan",
-        href: `${config.basePath}/portal-page-builder`,
-        icon: Layers,
-        order: 7,
-      });
-    }
-    if (serviceKey === "posts" && !menuItems.some((item) => item.href.endsWith("/appearance"))) {
-      menuItems.push({
-        name: "Quản trị Giao diện",
-        href: `${config.basePath}/appearance`,
-        icon: Palette,
-        order: 8,
-      });
-    }
-
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/master-plans"))) {
-      menuItems.push({
-        name: "Kế hoạch công tác",
-        href: `${config.basePath}/work-plans/master-plans`,
-        icon: ListTree,
-        order: 8,
-      });
-    }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/rank-templates"))) {
-      menuItems.push({
-        name: "Cấu hình Ngạch",
-        href: `${config.basePath}/work-plans/rank-templates`,
-        icon: Settings2,
-        order: 9,
-      });
-    }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/manual-selector"))) {
-      menuItems.push({
-        name: "Gán việc theo Ngạch",
-        href: `${config.basePath}/work-plans/manual-selector`,
-        icon: ListTree,
-        order: 10,
-      });
-    }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/work-plans/tasks"))) {
-      menuItems.push({
-        name: "Giao việc",
-        href: `${config.basePath}/work-plans/tasks`,
-        icon: ListTree,
-        order: 11,
-      });
-    }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/performance/evaluations"))) {
-      menuItems.push({
-        name: "Đánh giá KPI",
-        href: `${config.basePath}/performance/evaluations`,
-        icon: Settings2,
-        order: 12,
-      });
-    }
-    if (serviceKey === "hrm" && !menuItems.some((item) => item.href.endsWith("/performance/criteria"))) {
-      menuItems.push({
-        name: "Khung tiêu chí đánh giá",
-        href: `${config.basePath}/performance/criteria`,
-        icon: Settings2,
-        order: 13,
-      });
-    }
   }
 
   return {

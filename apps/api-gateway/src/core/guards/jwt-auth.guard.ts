@@ -18,18 +18,22 @@ export class JwtAuthGuard implements CanActivate {
     // Chú ý: Tên cookie phải khớp với tên bạn đã set lúc Login (ví dụ: 'accessToken')
     if (request.cookies && request.cookies.accessToken) {
       token = request.cookies.accessToken;
-    } 
+    }
     // 2. NẾU KHÔNG CÓ COOKIE, MỚI TÌM TRONG HEADER (Dùng cho Postman / Mobile App)
-    else if (request.headers.authorization && request.headers.authorization.startsWith('Bearer ')) {
+    else if (
+      request.headers.authorization &&
+      request.headers.authorization.startsWith('Bearer ')
+    ) {
       token = request.headers.authorization.split(' ')[1];
     }
 
     // console.log(token);
 
-
     // Nếu tìm cả 2 nơi đều không thấy token
     if (!token) {
-      throw new UnauthorizedException('Không tìm thấy token xác thực trong Cookie hoặc Header');
+      throw new UnauthorizedException(
+        'Không tìm thấy token xác thực trong Cookie hoặc Header',
+      );
     }
 
     try {
@@ -38,9 +42,9 @@ export class JwtAuthGuard implements CanActivate {
         process.env.JWT_SECRET ||
         process.env.ACCESS_TOKEN_SECRET ||
         'super-secret';
-        
+
       const decoded = jwt.verify(token, secret) as any;
-      
+
       // Gắn thông tin user vào request để các Controller có thể lấy dùng (@Req() req)
       (request as any).user = {
         id: decoded.sub,
@@ -48,11 +52,11 @@ export class JwtAuthGuard implements CanActivate {
         identitycard: decoded.identitycard,
         roles: decoded.roles || [],
       };
-      
+
       return true;
     } catch (error) {
       // Bắt lỗi cụ thể để dễ debug hơn
-      console.error("JWT Verification Error:", error.message);
+      console.error('JWT Verification Error:', error.message);
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
     }
   }

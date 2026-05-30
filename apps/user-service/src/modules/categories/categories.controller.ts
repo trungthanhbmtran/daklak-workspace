@@ -18,7 +18,7 @@ function toItem(c: any) {
 
 @Controller()
 export class CategoriesController {
-  constructor(private readonly catService: CategoriesService) { }
+  constructor(private readonly catService: CategoriesService) {}
 
   @GrpcMethod('CategoryService', 'GetAllCategories')
   async getAllCategories(data: { lang?: string }) {
@@ -39,7 +39,13 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'Create')
-  async create(data: { group: string; code: string; name: string; description?: string; order?: number }) {
+  async create(data: {
+    group: string;
+    code: string;
+    name: string;
+    description?: string;
+    order?: number;
+  }) {
     const category = await this.catService.create({
       group: data.group,
       code: data.code,
@@ -59,7 +65,14 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'Update')
-  async update(data: { id: number; code?: string; name?: string; description?: string; order?: number; isActive?: boolean }) {
+  async update(data: {
+    id: number;
+    code?: string;
+    name?: string;
+    description?: string;
+    order?: number;
+    isActive?: boolean;
+  }) {
     const category = await this.catService.update(data.id, {
       code: data.code,
       name: data.name,
@@ -68,7 +81,10 @@ export class CategoriesController {
       isActive: data.isActive,
     });
     if (!category) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Category not found' });
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Category not found',
+      });
     }
     return {
       id: category.id,
@@ -88,7 +104,10 @@ export class CategoriesController {
       return { success: ok, message: 'Đã xóa danh mục' };
     } catch (e: any) {
       if (e.message?.includes('hệ thống')) {
-        throw new RpcException({ code: GrpcStatus.FAILED_PRECONDITION, message: e.message });
+        throw new RpcException({
+          code: GrpcStatus.FAILED_PRECONDITION,
+          message: e.message,
+        });
       }
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }

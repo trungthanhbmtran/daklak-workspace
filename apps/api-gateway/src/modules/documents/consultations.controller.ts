@@ -1,4 +1,17 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+  Req,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -32,7 +45,9 @@ export class ConsultationsController implements OnModuleInit {
 
   @Get('public-comments')
   async listAllPublicComments(@Query('status') status: string) {
-    return firstValueFrom(this.consultationService.ListPublicComments({ status }));
+    return firstValueFrom(
+      this.consultationService.ListPublicComments({ status }),
+    );
   }
 
   @Get(':id')
@@ -53,16 +68,27 @@ export class ConsultationsController implements OnModuleInit {
 
   @Get(':id/responses')
   async listResponses(@Param('id') consultationId: string) {
-    return firstValueFrom(this.consultationService.ListResponses({ consultationId }));
+    return firstValueFrom(
+      this.consultationService.ListResponses({ consultationId }),
+    );
   }
 
   @Get(':id/public-comments')
-  async listPublicComments(@Param('id') consultationId: string, @Query('status') status: string) {
-    return firstValueFrom(this.consultationService.ListPublicComments({ consultationId, status }));
+  async listPublicComments(
+    @Param('id') consultationId: string,
+    @Query('status') status: string,
+  ) {
+    return firstValueFrom(
+      this.consultationService.ListPublicComments({ consultationId, status }),
+    );
   }
 
   @Put('public-comments/:id/moderate')
-  async moderateComment(@Param('id') id: string, @Body() body: any, @Req() req: any) {
+  async moderateComment(
+    @Param('id') id: string,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
     const payload = { id, status: body.status, userId: req.user.id };
     return firstValueFrom(this.consultationService.ModerateComment(payload));
   }

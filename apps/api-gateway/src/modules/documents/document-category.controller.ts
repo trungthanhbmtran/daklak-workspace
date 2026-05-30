@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -12,11 +24,14 @@ export class DocumentCategoryController implements OnModuleInit {
   private categoryService: any;
 
   constructor(
-    @Inject(MICROSERVICES.DOCUMENT_CATEGORY.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.DOCUMENT_CATEGORY.SYMBOL)
+    private readonly client: any,
   ) {}
 
   onModuleInit() {
-    this.categoryService = this.client.getService(MICROSERVICES.DOCUMENT_CATEGORY.SERVICE);
+    this.categoryService = this.client.getService(
+      MICROSERVICES.DOCUMENT_CATEGORY.SERVICE,
+    );
   }
 
   @Get()

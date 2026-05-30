@@ -20,7 +20,9 @@ export class PbacGuard implements CanActivate {
       return true;
     }
 
-    const rpcContext = context.switchToRpc().getContext<Record<string, unknown>>();
+    const rpcContext = context
+      .switchToRpc()
+      .getContext<Record<string, unknown>>();
     const user = rpcContext?.[GRPC_USER_KEY] as UserWithPbac | undefined;
 
     if (!user) {

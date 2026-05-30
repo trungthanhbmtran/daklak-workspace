@@ -22,7 +22,7 @@ export type UpdateMenuDto = Partial<CreateMenuDto>;
 
 @Injectable()
 export class MenusService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async getAll(application = 'ADMIN_PORTAL') {
     const list = await this.prisma.menu.findMany({
@@ -48,13 +48,19 @@ export class MenusService {
     const existing = await this.prisma.menu.findUnique({ where: { code } });
     if (existing) throw new Error(`Mã menu "${code}" đã tồn tại.`);
 
-    const permIds = (dto.requiredPermissionIds ?? []).filter((id) => id != null && id !== 0);
+    const permIds = (dto.requiredPermissionIds ?? []).filter(
+      (id) => id != null && id !== 0,
+    );
     if (permIds.length > 0) {
-      const found = await this.prisma.permission.findMany({ where: { id: { in: permIds } } });
+      const found = await this.prisma.permission.findMany({
+        where: { id: { in: permIds } },
+      });
       const foundIds = new Set(found.map((p) => p.id));
       const missing = permIds.filter((id) => !foundIds.has(id));
       if (missing.length > 0) {
-        throw new Error(`Quyền (Permission) id=${missing.join(', ')} không tồn tại trong hệ thống PBAC.`);
+        throw new Error(
+          `Quyền (Permission) id=${missing.join(', ')} không tồn tại trong hệ thống PBAC.`,
+        );
       }
     }
 
@@ -72,7 +78,10 @@ export class MenusService {
         target: dto.target ?? 'SELF',
         parentId: dto.parentId ?? null,
         isActive: dto.isActive ?? true,
-        requiredPermissions: permIds.length > 0 ? { create: permIds.map((permissionId) => ({ permissionId })) } : undefined,
+        requiredPermissions:
+          permIds.length > 0
+            ? { create: permIds.map((permissionId) => ({ permissionId })) }
+            : undefined,
       },
     });
     const withPerms = await this.prisma.menu.findUnique({
@@ -90,23 +99,35 @@ export class MenusService {
       const code = String(dto.code).trim();
       if (!code) throw new Error('Mã menu (code) không được để trống.');
       const existing = await this.prisma.menu.findUnique({ where: { code } });
-      if (existing && existing.id !== id) throw new Error(`Mã menu "${code}" đã được sử dụng bởi menu khác.`);
+      if (existing && existing.id !== id)
+        throw new Error(`Mã menu "${code}" đã được sử dụng bởi menu khác.`);
     }
 
     if (dto.requiredPermissionIds !== undefined) {
-      const permIds = (dto.requiredPermissionIds ?? []).filter((id) => id != null && id !== 0);
+      const permIds = (dto.requiredPermissionIds ?? []).filter(
+        (id) => id != null && id !== 0,
+      );
       if (permIds.length > 0) {
-        const found = await this.prisma.permission.findMany({ where: { id: { in: permIds } } });
+        const found = await this.prisma.permission.findMany({
+          where: { id: { in: permIds } },
+        });
         const foundIds = new Set(found.map((p) => p.id));
         const missing = permIds.filter((id) => !foundIds.has(id));
         if (missing.length > 0) {
-          throw new Error(`Quyền (Permission) id=${missing.join(', ')} không tồn tại trong hệ thống PBAC.`);
+          throw new Error(
+            `Quyền (Permission) id=${missing.join(', ')} không tồn tại trong hệ thống PBAC.`,
+          );
         }
       }
-      await (this.prisma as any).menuRequiredPermission.deleteMany({ where: { menuId: id } });
+      await (this.prisma as any).menuRequiredPermission.deleteMany({
+        where: { menuId: id },
+      });
       if (permIds.length > 0) {
         await (this.prisma as any).menuRequiredPermission.createMany({
-          data: permIds.map((permissionId: number) => ({ menuId: id, permissionId })),
+          data: permIds.map((permissionId: number) => ({
+            menuId: id,
+            permissionId,
+          })),
         });
       }
     }
@@ -124,7 +145,10 @@ export class MenusService {
         ...(dto.service !== undefined && { service: dto.service }),
         ...(dto.application !== undefined && { application: dto.application }),
         ...(dto.target !== undefined && { target: dto.target }),
-        ...(dto.parentId !== undefined && { parentId: dto.parentId === null || dto.parentId === 0 ? null : dto.parentId }),
+        ...(dto.parentId !== undefined && {
+          parentId:
+            dto.parentId === null || dto.parentId === 0 ? null : dto.parentId,
+        }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
       },
     });
@@ -136,10 +160,15 @@ export class MenusService {
   }
 
   async delete(id: number) {
-    const menu = await this.prisma.menu.findUnique({ where: { id }, include: { children: true } });
+    const menu = await this.prisma.menu.findUnique({
+      where: { id },
+      include: { children: true },
+    });
     if (!menu) return false;
     if (menu.children.length > 0) {
-      throw new Error('Không thể xóa menu có menu con. Hãy xóa menu con trước.');
+      throw new Error(
+        'Không thể xóa menu có menu con. Hãy xóa menu con trước.',
+      );
     }
     await this.prisma.menu.delete({ where: { id } });
     return true;
@@ -161,7 +190,8 @@ export class MenusService {
     isActive: boolean;
     requiredPermissions?: { permissionId: number }[];
   }) {
-    const requiredPermissionIds = m.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
+    const requiredPermissionIds =
+      m.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
     return {
       id: m.id,
       code: m.code,
@@ -201,7 +231,8 @@ export class MenusService {
     });
     const userPermSet = new Set(permissionIds ?? []);
     const visibleMenus = rawMenus.filter((menu) => {
-      const requiredIds = menu.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
+      const requiredIds =
+        menu.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
       if (requiredIds.length === 0) return true; // công khai
       return requiredIds.some((pid) => userPermSet.has(pid));
     });

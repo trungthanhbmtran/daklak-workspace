@@ -11,7 +11,12 @@ import {
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+} from '@nestjs/swagger';
 import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -40,19 +45,27 @@ export class MediaGatewayController implements OnModuleInit {
   private mediaService: MediaGrpcService;
 
   constructor(
-    @Inject(MICROSERVICES.MEDIA.SYMBOL) private readonly client: microservices.ClientGrpc,
-  ) { }
+    @Inject(MICROSERVICES.MEDIA.SYMBOL)
+    private readonly client: microservices.ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.mediaService = this.client.getService<MediaGrpcService>(MICROSERVICES.MEDIA.SERVICE);
+    this.mediaService = this.client.getService<MediaGrpcService>(
+      MICROSERVICES.MEDIA.SERVICE,
+    );
   }
 
   @Get('download/:id')
   @ApiOperation({ summary: 'Download media file by ID (Redirect)' })
-  @ApiResponse({ status: 302, description: 'Redirects to the signed download URL' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to the signed download URL',
+  })
   async downloadMedia(@Param('id') id: string, @Res() res: Response) {
     try {
-      const data = await firstValueFrom<any>(this.mediaService.GetMedia({ fileId: id }));
+      const data = await firstValueFrom<any>(
+        this.mediaService.GetMedia({ fileId: id }),
+      );
       if (data?.downloadUrl) {
         return res.redirect(data.downloadUrl);
       }
@@ -64,7 +77,9 @@ export class MediaGatewayController implements OnModuleInit {
 
   @Post('request-upload')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Request a presigned URL for direct upload to storage' })
+  @ApiOperation({
+    summary: 'Request a presigned URL for direct upload to storage',
+  })
   @ApiResponse({ status: 201, description: 'Returns uploadUrl and fileId' })
   async requestUpload(@Req() req: any, @Body() body: RequestUploadDto) {
     const ownerId = req.user?.id || req.user?.sub || 'anonymous';
@@ -75,7 +90,10 @@ export class MediaGatewayController implements OnModuleInit {
   @Post('confirm-upload')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Confirm file upload completion' })
-  @ApiResponse({ status: 200, description: 'Returns media info and download URL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns media info and download URL',
+  })
   async confirmUpload(@Body() body: ConfirmUploadDto) {
     return await firstValueFrom(this.mediaService.ConfirmUpload(body));
   }
@@ -83,7 +101,10 @@ export class MediaGatewayController implements OnModuleInit {
   @Post('init-multipart-upload')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Initialize multipart upload for large files' })
-  async initMultipartUpload(@Req() req: any, @Body() body: InitMultipartUploadDto) {
+  async initMultipartUpload(
+    @Req() req: any,
+    @Body() body: InitMultipartUploadDto,
+  ) {
     const ownerId = req.user?.id || req.user?.sub || 'anonymous';
     const payload = { ...body, ownerId: String(ownerId) };
     return await firstValueFrom(this.mediaService.InitMultipartUpload(payload));
@@ -93,14 +114,20 @@ export class MediaGatewayController implements OnModuleInit {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
   async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
-    return await firstValueFrom(this.mediaService.GetMultipartPreSignedUrls(body));
+    return await firstValueFrom(
+      this.mediaService.GetMultipartPreSignedUrls(body),
+    );
   }
 
   @Post('complete-multipart-upload')
   @UseGuards(JwtAuthGuard)
-  @ApiOperation({ summary: 'Complete multipart upload after all parts are uploaded' })
+  @ApiOperation({
+    summary: 'Complete multipart upload after all parts are uploaded',
+  })
   async completeMultipartUpload(@Body() body: CompleteMultipartUploadDto) {
-    return await firstValueFrom(this.mediaService.CompleteMultipartUpload(body));
+    return await firstValueFrom(
+      this.mediaService.CompleteMultipartUpload(body),
+    );
   }
 
   @Get(':id')

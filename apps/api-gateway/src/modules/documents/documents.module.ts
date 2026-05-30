@@ -23,7 +23,7 @@ import { PublicDocumentsController } from './public-documents.controller';
     ConsultationsController,
     PublicConsultationsController,
     PublicDocumentsController,
-    DocumentsController
+    DocumentsController,
   ],
 })
-export class DocumentsModule { }
+export class DocumentsModule {}

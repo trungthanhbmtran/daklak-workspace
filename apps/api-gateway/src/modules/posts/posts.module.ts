@@ -39,4 +39,4 @@ import { PublicPortalConfigController } from './public-portal-config.controller'
     PublicPortalConfigController,
   ],
 })
-export class PostsModule { }
+export class PostsModule {}

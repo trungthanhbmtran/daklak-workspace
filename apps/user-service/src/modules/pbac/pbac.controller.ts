@@ -6,7 +6,12 @@ import { PbacService } from './pbac.service';
 export class PbacController {
   constructor(private readonly pbacService: PbacService) {}
 
-  private toRoleResponse(role: { id: number; code: string; name: string | null; description: string | null }) {
+  private toRoleResponse(role: {
+    id: number;
+    code: string;
+    name: string | null;
+    description: string | null;
+  }) {
     return {
       id: role.id,
       code: role.code,
@@ -16,7 +21,12 @@ export class PbacController {
   }
 
   @GrpcMethod('PbacService', 'CreateRole')
-  async createRole(data: { code: string; name: string; description?: string; permissionIds?: number[] }) {
+  async createRole(data: {
+    code: string;
+    name: string;
+    description?: string;
+    permissionIds?: number[];
+  }) {
     const role = await this.pbacService.createRole({
       code: data.code,
       name: data.name,
@@ -44,7 +54,8 @@ export class PbacController {
   @GrpcMethod('PbacService', 'FindOneRole')
   async findOneRole(data: { id: number }) {
     const role = await this.pbacService.findOneRole(data.id);
-    if (!role) return { id: 0, code: '', name: '', description: '', permissions: [] };
+    if (!role)
+      return { id: 0, code: '', name: '', description: '', permissions: [] };
     return {
       id: role.id,
       code: role.code,
@@ -59,7 +70,12 @@ export class PbacController {
   }
 
   @GrpcMethod('PbacService', 'UpdateRole')
-  async updateRole(data: { id: number; name?: string; description?: string; permissionIds?: number[] }) {
+  async updateRole(data: {
+    id: number;
+    name?: string;
+    description?: string;
+    permissionIds?: number[];
+  }) {
     const role = await this.pbacService.updateRole(data.id, {
       name: data.name,
       description: data.description,
@@ -99,23 +115,42 @@ export class PbacController {
 
   @GrpcMethod('PbacService', 'UpdateResource')
   async updateResource(data: { id: number; code?: string; name?: string }) {
-    const resource = await this.pbacService.updateResource(data.id, { code: data.code, name: data.name });
-    if (!resource) throw new RpcException({ message: 'Resource not found', code: 5 });
+    const resource = await this.pbacService.updateResource(data.id, {
+      code: data.code,
+      name: data.name,
+    });
+    if (!resource)
+      throw new RpcException({ message: 'Resource not found', code: 5 });
     return { id: resource.id, code: resource.code, name: resource.name };
   }
 
   @GrpcMethod('PbacService', 'DeleteResource')
   async deleteResource(data: { id: number }) {
     const ok = await this.pbacService.deleteResource(data.id);
-    return { success: ok, message: ok ? 'Đã xóa tài nguyên' : 'Không tìm thấy' };
+    return {
+      success: ok,
+      message: ok ? 'Đã xóa tài nguyên' : 'Không tìm thấy',
+    };
   }
 
   @GrpcMethod('PbacService', 'CreatePermission')
-  async createPermission(data: { resourceId?: number; resource_id?: number; action: string }) {
+  async createPermission(data: {
+    resourceId?: number;
+    resource_id?: number;
+    action: string;
+  }) {
     const resourceId = data.resourceId ?? data.resource_id;
-    if (!resourceId) throw new RpcException({ message: 'resource_id required', code: 3 });
-    const permission = await this.pbacService.createPermission({ resourceId, action: data.action });
-    return { id: permission.id, action: permission.action, resource_id: permission.resourceId };
+    if (!resourceId)
+      throw new RpcException({ message: 'resource_id required', code: 3 });
+    const permission = await this.pbacService.createPermission({
+      resourceId,
+      action: data.action,
+    });
+    return {
+      id: permission.id,
+      action: permission.action,
+      resource_id: permission.resourceId,
+    };
   }
 
   @GrpcMethod('PbacService', 'DeletePermission')

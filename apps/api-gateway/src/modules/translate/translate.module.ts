@@ -12,14 +12,16 @@ import { TranslateController } from './translate.controller';
         name: 'TRANSLATE_QUEUE_SERVICE',
         transport: Transport.RMQ,
         options: {
-          urls: [process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672'],
+          urls: [
+            process.env.RABBITMQ_URL || 'amqp://admin:admin123@localhost:5672',
+          ],
           queue: 'translate_tasks_queue',
           queueOptions: {
-            durable: true
+            durable: true,
           },
         },
       },
-    ])
+    ]),
   ],
   controllers: [TranslateController],
 })

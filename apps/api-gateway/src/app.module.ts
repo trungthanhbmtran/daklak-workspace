@@ -29,7 +29,7 @@ import { RedisModule } from './core/redis/redis.module';
     WorkflowModule,
     TranslateModule,
     AiModule,
-    RedisModule
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [],
@@ -39,7 +39,12 @@ export class AppModule implements NestModule {
     consumer
       .apply((req: any, res: any, next: () => void) => {
         // 1. Extract lang from query, cookies, x-lang header, or Accept-Language header
-        let lang = req.query?.lang || req.cookies?.lang || req.headers['x-lang'] || req.headers['accept-language'] || 'vi';
+        let lang =
+          req.query?.lang ||
+          req.cookies?.lang ||
+          req.headers['x-lang'] ||
+          req.headers['accept-language'] ||
+          'vi';
 
         if (typeof lang === 'string') {
           lang = lang.trim().toLowerCase();

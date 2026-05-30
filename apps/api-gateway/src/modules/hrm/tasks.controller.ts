@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Body, Param, Query, Inject, UseGuards, OnModuleInit } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Body,
+  Param,
+  Query,
+  Inject,
+  UseGuards,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
@@ -28,44 +39,52 @@ export class TasksController implements OnModuleInit {
   async list(
     @Query('assigneeCode') assigneeCode: string,
     @Query('filter') filter: string,
-    @Query('search') search: string
+    @Query('search') search: string,
   ) {
-    return firstValueFrom(this.taskService.ListTasks({
-      assigneeCode,
-      filter,
-      search,
-    }));
+    return firstValueFrom(
+      this.taskService.ListTasks({
+        assigneeCode,
+        filter,
+        search,
+      }),
+    );
   }
 
   @Put(':id/status')
   async updateStatus(@Param('id') id: string, @Body('status') status: string) {
-    return firstValueFrom(this.taskService.UpdateTaskStatus({
-      id: parseInt(id, 10),
-      status,
-    }));
+    return firstValueFrom(
+      this.taskService.UpdateTaskStatus({
+        id: parseInt(id, 10),
+        status,
+      }),
+    );
   }
 
   @Get('recommend-assignees')
   async recommendAssignees(
     @Query('rankCode') rankCode: string,
-    @Query('strategy') strategy: string
+    @Query('strategy') strategy: string,
   ) {
-    return firstValueFrom(this.taskService.RecommendAssignees({
-      rankCode: rankCode || 'ALL',
-      strategy: strategy || 'LOW_PERFORMANCE',
-    }));
+    return firstValueFrom(
+      this.taskService.RecommendAssignees({
+        rankCode: rankCode || 'ALL',
+        strategy: strategy || 'LOW_PERFORMANCE',
+      }),
+    );
   }
 
   @Put(':id/assign')
   async assignTask(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body('assigneeCode') assigneeCode: string,
-    @Body('departmentId') departmentId?: number
+    @Body('departmentId') departmentId?: number,
   ) {
-    return firstValueFrom(this.taskService.AssignTask({
-      id: parseInt(id, 10),
-      assigneeCode,
-      departmentId
-    }));
+    return firstValueFrom(
+      this.taskService.AssignTask({
+        id: parseInt(id, 10),
+        assigneeCode,
+        departmentId,
+      }),
+    );
   }
 }

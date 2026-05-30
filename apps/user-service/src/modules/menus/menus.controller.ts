@@ -5,7 +5,7 @@ import { MenusService } from './menus.service';
 
 @Controller()
 export class MenusController {
-  constructor(private readonly menusService: MenusService) { }
+  constructor(private readonly menusService: MenusService) {}
 
   private normalizePermissionIds(raw: number[] | number | undefined): number[] {
     if (raw == null) return [];
@@ -29,9 +29,10 @@ export class MenusController {
       target: node.target ?? 'SELF',
       parentId,
       isActive: node.isActive ?? node.is_active ?? true,
-      children: (node.children && node.children.length)
-        ? node.children.map((c: any) => this.mapMenuNode(c))
-        : [],
+      children:
+        node.children && node.children.length
+          ? node.children.map((c: any) => this.mapMenuNode(c))
+          : [],
     };
   }
 
@@ -59,7 +60,10 @@ export class MenusController {
   async getOne(data: { id: number }) {
     const menu = await this.menusService.getById(data.id);
     if (!menu) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Menu not found' });
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Menu not found',
+      });
     }
     return { menu };
   }
@@ -68,8 +72,13 @@ export class MenusController {
   async create(data: any) {
     try {
       const rawParentId = data.parentId ?? data.parent_id;
-      const parentId = rawParentId === undefined || rawParentId === 0 ? null : Number(rawParentId);
-      const requiredPermissionIds = this.normalizePermissionIds(data.requiredPermissionIds ?? data.required_permission_ids);
+      const parentId =
+        rawParentId === undefined || rawParentId === 0
+          ? null
+          : Number(rawParentId);
+      const requiredPermissionIds = this.normalizePermissionIds(
+        data.requiredPermissionIds ?? data.required_permission_ids,
+      );
       const isActive = data.isActive ?? data.is_active;
       const menu = await this.menusService.create({
         code: String(data.code ?? '').trim() || `MENU_${Date.now()}`,
@@ -89,19 +98,31 @@ export class MenusController {
       return { menu };
     } catch (e: any) {
       if (e instanceof RpcException) throw e;
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e?.message ?? 'Lỗi tạo menu' });
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: e?.message ?? 'Lỗi tạo menu',
+      });
     }
   }
 
   @GrpcMethod('MenuService', 'Update')
-  async update(data: { id: number;[k: string]: any }) {
+  async update(data: { id: number; [k: string]: any }) {
     try {
       const { id, ...rest } = data;
       const rawParentId = rest.parentId ?? rest.parent_id;
-      const parentId = rawParentId === undefined ? undefined : (rawParentId === 0 ? null : Number(rawParentId));
-      const requiredPermissionIds = rest.requiredPermissionIds !== undefined || rest.required_permission_ids !== undefined
-        ? this.normalizePermissionIds(rest.requiredPermissionIds ?? rest.required_permission_ids ?? [])
-        : undefined;
+      const parentId =
+        rawParentId === undefined
+          ? undefined
+          : rawParentId === 0
+            ? null
+            : Number(rawParentId);
+      const requiredPermissionIds =
+        rest.requiredPermissionIds !== undefined ||
+        rest.required_permission_ids !== undefined
+          ? this.normalizePermissionIds(
+              rest.requiredPermissionIds ?? rest.required_permission_ids ?? [],
+            )
+          : undefined;
       const isActiveRaw = rest.isActive ?? rest.is_active;
       const order = rest.order !== undefined ? Number(rest.order) : undefined;
       const menu = await this.menusService.update(id, {
@@ -110,7 +131,8 @@ export class MenusController {
         route: rest.route,
         icon: rest.icon,
         order,
-        description: rest.description !== undefined ? rest.description : undefined,
+        description:
+          rest.description !== undefined ? rest.description : undefined,
         iconColor: rest.iconColor ?? rest.icon_color,
         service: rest.service,
         application: rest.application,
@@ -120,12 +142,18 @@ export class MenusController {
         isActive: isActiveRaw === undefined ? undefined : Boolean(isActiveRaw),
       });
       if (!menu) {
-        throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Menu not found' });
+        throw new RpcException({
+          code: GrpcStatus.NOT_FOUND,
+          message: 'Menu not found',
+        });
       }
       return { menu };
     } catch (e: any) {
       if (e instanceof RpcException) throw e;
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: e?.message ?? 'Lỗi cập nhật menu' });
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: e?.message ?? 'Lỗi cập nhật menu',
+      });
     }
   }
 
@@ -136,7 +164,10 @@ export class MenusController {
       return { success: ok, message: 'Đã xóa menu' };
     } catch (e: any) {
       if (e.message?.includes('menu con')) {
-        throw new RpcException({ code: GrpcStatus.FAILED_PRECONDITION, message: e.message });
+        throw new RpcException({
+          code: GrpcStatus.FAILED_PRECONDITION,
+          message: e.message,
+        });
       }
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }

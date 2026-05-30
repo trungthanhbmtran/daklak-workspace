@@ -17,10 +17,14 @@ import { MICROSERVICES } from '../../core/constants/services';
 export class PostsBannerController {
   private bannerService: any;
 
-  constructor(@Inject(MICROSERVICES.BANNER.SYMBOL) private client: ClientGrpc) { }
+  constructor(
+    @Inject(MICROSERVICES.BANNER.SYMBOL) private client: ClientGrpc,
+  ) {}
 
   onModuleInit() {
-    this.bannerService = this.client.getService<any>(MICROSERVICES.BANNER.SERVICE);
+    this.bannerService = this.client.getService<any>(
+      MICROSERVICES.BANNER.SERVICE,
+    );
   }
 
   @Post()
@@ -40,7 +44,9 @@ export class PostsBannerController {
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() updateDto: any) {
-    return firstValueFrom(this.bannerService.updateBanner({ id, ...updateDto }));
+    return firstValueFrom(
+      this.bannerService.updateBanner({ id, ...updateDto }),
+    );
   }
 
   @Delete(':id')

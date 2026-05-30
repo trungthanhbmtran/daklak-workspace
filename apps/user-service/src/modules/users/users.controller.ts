@@ -36,13 +36,18 @@ export class UsersController {
         roleIds: data.roleIds ?? data.role_ids ?? [],
         cccd: data.cccd ?? null,
         employeeCode: data.employeeCode ?? data.employee_code ?? null,
-        createdByUserId: data.createdByUserId ?? data.created_by_user_id ?? undefined,
-        createdByEmail: data.createdByEmail ?? data.created_by_email ?? undefined,
+        createdByUserId:
+          data.createdByUserId ?? data.created_by_user_id ?? undefined,
+        createdByEmail:
+          data.createdByEmail ?? data.created_by_email ?? undefined,
       });
     } catch (e: any) {
       if (e instanceof RpcException) throw e;
       const message = e?.message ?? e?.meta?.cause ?? 'Lỗi tạo tài khoản';
-      throw new RpcException({ code: GrpcStatus.INVALID_ARGUMENT, message: String(message) });
+      throw new RpcException({
+        code: GrpcStatus.INVALID_ARGUMENT,
+        message: String(message),
+      });
     }
   }
 
@@ -104,21 +109,36 @@ export class UsersController {
   }
 
   @GrpcMethod('UserService', 'SetUserActive')
-  async setUserActive(data: { userId?: number; user_id?: number; isActive?: boolean; is_active?: boolean }) {
+  async setUserActive(data: {
+    userId?: number;
+    user_id?: number;
+    isActive?: boolean;
+    is_active?: boolean;
+  }) {
     const userId = data.userId ?? data.user_id ?? 0;
     const isActive = data.isActive ?? data.is_active ?? true;
     return this.usersService.setUserActive({ userId, isActive });
   }
 
   @GrpcMethod('UserService', 'AssignRoles')
-  async assignRoles(data: { userId?: number; user_id?: number; roleIds?: number[]; role_ids?: number[] }) {
+  async assignRoles(data: {
+    userId?: number;
+    user_id?: number;
+    roleIds?: number[];
+    role_ids?: number[];
+  }) {
     const userId = data.userId ?? data.user_id ?? 0;
     const roleIds = data.roleIds ?? data.role_ids ?? [];
     return this.usersService.assignRoles({ userId, roleIds });
   }
 
   @GrpcMethod('UserService', 'AssignPosition')
-  async assignPosition(data: { userId: number; unitId: number; jobTitleId: number; isPrimary: boolean }) {
+  async assignPosition(data: {
+    userId: number;
+    unitId: number;
+    jobTitleId: number;
+    isPrimary: boolean;
+  }) {
     const result = await this.usersService.assignPosition({
       userId: data.userId,
       unitId: data.unitId,

@@ -19,6 +19,8 @@ interface Props {
 
 const DEFAULT_LGSP_CONFIG: LGSPConfigData = {
   type: 'LGSP',
+  apiUrl: '',
+  apiToken: '',
   keys: {
     clientId: '',
     clientSecret: '',
@@ -32,7 +34,7 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
   const [systemName, setSystemName] = useState('');
   const [integrationCode, setIntegrationCode] = useState('');
   const [lgspConfig, setLgspConfig] = useState<LGSPConfigData>(DEFAULT_LGSP_CONFIG);
-  
+
   const availablePermissions = [
     { id: 'READ_USERS', label: 'Đọc dữ liệu Người dùng' },
     { id: 'SYNC_HRM', label: 'Đồng bộ Nhân sự' },
@@ -45,7 +47,7 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
     if (isOpen) {
       setSystemName(initialData?.systemName || '');
       setIntegrationCode(initialData?.integrationCode || `LGSP_${Math.floor(Math.random() * 100000)}`);
-      
+
       if (initialData?.configData) {
         try {
           const parsed = JSON.parse(initialData.configData);
@@ -82,7 +84,7 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
   };
 
   const generateKeys = () => {
-    const generateHex = (len: number) => Array.from({length: len}, () => Math.floor(Math.random()*16).toString(16)).join('');
+    const generateHex = (len: number) => Array.from({ length: len }, () => Math.floor(Math.random() * 16).toString(16)).join('');
     setLgspConfig(prev => ({
       ...prev,
       keys: {
@@ -115,16 +117,16 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
         <DialogHeader>
           <DialogTitle>{initialData ? 'Sửa cấu hình liên thông LGSP' : 'Tạo mới mã liên thông LGSP'}</DialogTitle>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <Tabs defaultValue="general" className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="general">Thông tin</TabsTrigger>
-              <TabsTrigger value="keys">Cặp khóa</TabsTrigger>
+              <TabsTrigger value="outbound">Cấu hình gọi ra</TabsTrigger>
+              <TabsTrigger value="inbound">Cấu hình gọi vào</TabsTrigger>
               <TabsTrigger value="permissions">Phân quyền</TabsTrigger>
-              <TabsTrigger value="endpoints">Endpoints</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="general" className="space-y-4 mt-4">
               <div className="space-y-2">
                 <label className="text-sm font-semibold">Tên hệ thống đối tác</label>
@@ -163,14 +165,41 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
               </div>
             </TabsContent>
 
-            <TabsContent value="keys" className="space-y-4 mt-4">
+            <TabsContent value="outbound" className="space-y-4 mt-4">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm text-muted-foreground">Cấu hình để hệ thống của chúng ta gọi ra dịch vụ của đối tác (Outbound).</p>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Endpoint (API URL)</label>
+                  <Input
+                    value={lgspConfig.apiUrl || ''}
+                    onChange={e => setLgspConfig({ ...lgspConfig, apiUrl: e.target.value })}
+                    placeholder="VD: https://api.doitac.com/v1"
+                    className="font-mono text-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold">Token / Cặp Key xác thực (API Token)</label>
+                  <Input
+                    value={lgspConfig.apiToken || ''}
+                    onChange={e => setLgspConfig({ ...lgspConfig, apiToken: e.target.value })}
+                    placeholder="Bearer token hoặc mã bí mật"
+                    className="font-mono text-sm"
+                    type="password"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="inbound" className="space-y-4 mt-4">
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">Cặp khóa dùng để xác thực hệ thống bên ngoài gọi vào API Gateway.</p>
                 <Button type="button" variant="outline" size="sm" onClick={generateKeys}>
                   <RefreshCw className="w-4 h-4 mr-2" /> Sinh khóa mới
                 </Button>
               </div>
-              
+
               <div className="space-y-3">
                 <div className="space-y-1">
                   <label className="text-xs font-semibold">Client ID</label>
@@ -208,8 +237,8 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border p-4 rounded-md">
                 {availablePermissions.map(perm => (
                   <label key={perm.id} className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       className="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                       checked={(lgspConfig.permissions || []).includes(perm.id)}
                       onChange={() => togglePermission(perm.id)}
@@ -217,33 +246,6 @@ export function IntegrationModal({ isOpen, onClose, initialData }: Props) {
                     <span className="text-sm">{perm.label}</span>
                   </label>
                 ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="endpoints" className="space-y-4 mt-4">
-              <p className="text-sm text-muted-foreground">Danh sách các Endpoint hỗ trợ truy cập thông qua LGSP Client ID.</p>
-              <div className="space-y-3">
-                <div className="border rounded p-3 bg-slate-50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">GET</span>
-                    <span className="font-mono text-sm font-semibold">/api/v1/public/lgsp/users</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Đồng bộ danh sách Cán bộ, Công chức. Yêu cầu quyền: READ_USERS</p>
-                </div>
-                <div className="border rounded p-3 bg-slate-50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded">GET</span>
-                    <span className="font-mono text-sm font-semibold">/api/v1/public/lgsp/documents</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Lấy danh sách văn bản đi/đến công khai. Yêu cầu quyền: READ_DOCUMENTS</p>
-                </div>
-                <div className="border rounded p-3 bg-slate-50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-bold rounded">POST</span>
-                    <span className="font-mono text-sm font-semibold">/api/v1/public/lgsp/documents</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">Đẩy văn bản từ Trục liên thông quốc gia về. Yêu cầu quyền: WRITE_DOCUMENTS</p>
-                </div>
               </div>
             </TabsContent>
           </Tabs>

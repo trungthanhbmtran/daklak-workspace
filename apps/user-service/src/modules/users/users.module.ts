@@ -5,11 +5,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
+
 import * as redisStore from 'cache-manager-redis-store';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
-const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
+const protoRoot =
+  process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'shared', 'protos');
 
 @Module({
   imports: [
@@ -64,4 +65,4 @@ const protoRoot = process.env.PROTO_PATH ?? join(process.cwd(), '..', '..', 'sha
   providers: [UsersService],
   exports: [UsersService],
 })
-export class UsersModule { }
+export class UsersModule {}
