@@ -15,8 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIntegrationList, useDeleteIntegration, useToggleActiveIntegration, IntegrationConfig } from './api';
 import { IntegrationModal } from './';
+import { ApiMonitorDashboard } from './components/ApiMonitorDashboard';
 
 export function IntegrationClient() {
   const [search, setSearch] = useState('');
@@ -87,8 +89,13 @@ export function IntegrationClient() {
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex-1 space-y-4">
+    <Tabs defaultValue="manage" className="flex flex-col gap-6">
+      <TabsList className="w-fit">
+        <TabsTrigger value="manage">Quản lý cấu hình</TabsTrigger>
+        <TabsTrigger value="monitor">Giám sát Dữ liệu</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="manage" className="flex-1 space-y-4 m-0">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-4 rounded-lg border shadow-sm">
           <div className="relative w-full sm:w-96">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -165,7 +172,11 @@ export function IntegrationClient() {
             </Table>
           </CardContent>
         </Card>
-      </div>
+      </TabsContent>
+
+      <TabsContent value="monitor" className="m-0">
+        <ApiMonitorDashboard integrations={integrations} />
+      </TabsContent>
 
       <IntegrationModal
         key={isModalOpen ? (editingItem?.id || 'new') : 'closed'}
@@ -174,6 +185,6 @@ export function IntegrationClient() {
         initialData={editingItem}
         prefillData={prefillData}
       />
-    </div>
+    </Tabs>
   );
 }
