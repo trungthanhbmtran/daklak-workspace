@@ -9,9 +9,10 @@ import {
   CheckCircle2, Clock, PlayCircle,
   AlertCircle, Filter,
   LayoutGrid, List as ListIcon,
-  Calendar, User
+  Calendar, User, MessageSquare, Send, Reply, X, ArrowLeftCircle, Split
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useTasksList } from '../../../hooks';
 import { hrmTasksApi } from '../../../api';
@@ -28,6 +29,17 @@ export const TaskListClient = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  
+  // New features state
+  const [activeTab, setActiveTab] = useState<'ALL' | 'MY_TASKS' | 'DEPT_TASKS'>('ALL');
+  const [rejectReason, setRejectReason] = useState('');
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [taskComments, setTaskComments] = useState<any[]>([]);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+
+  // Mock currentUser for testing UI
+  const currentUser = { code: 'truongngoctuan', departmentId: 1, isManager: true };
 
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
@@ -68,6 +80,8 @@ export const TaskListClient = () => {
   const { data, isLoading, refetch } = useTasksList({
     filter: activeFilter,
     search: searchQuery,
+    ...(activeTab === 'MY_TASKS' ? { assigneeCode: currentUser.code } : {}),
+    ...(activeTab === 'DEPT_TASKS' ? { departmentId: currentUser.departmentId } : {}),
   });
   const tasks = data?.data || [];
   const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
@@ -97,6 +111,55 @@ export const TaskListClient = () => {
       case 'MEDIUM': return 'text-amber-500';
       case 'LOW': return 'text-emerald-500';
       default: return 'text-slate-500';
+    }
+  };
+
+  const fetchComments = async (taskId: number) => {
+    setIsLoadingComments(true);
+    try {
+      const res = await hrmTasksApi.getComments(taskId.toString());
+      setTaskComments(res.data || []);
+    } catch (e: any) {
+      toast.error('Lỗi tải tin nhắn công việc');
+    } finally {
+      setIsLoadingComments(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedTask?.id) {
+      fetchComments(selectedTask.id);
+    }
+  }, [selectedTask?.id]);
+
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim() || !selectedTask) return;
+    try {
+      await hrmTasksApi.addComment(selectedTask.id.toString(), {
+        authorCode: currentUser.code,
+        content: chatMessage,
+      });
+      setChatMessage('');
+      fetchComments(selectedTask.id);
+    } catch (e: any) {
+      toast.error('Gửi tin nhắn thất bại');
+    }
+  };
+
+  const handleRejectTask = async () => {
+    if (!rejectReason.trim() || !selectedTask) return;
+    try {
+      await hrmTasksApi.updateStatus(selectedTask.id.toString(), {
+        status: 'RETURNED',
+        rejectReason: rejectReason,
+      });
+      toast.success('Đã trả lại công việc');
+      setIsRejectOpen(false);
+      setRejectReason('');
+      setSelectedTask(null);
+      refetch();
+    } catch (e: any) {
+      toast.error('Lỗi khi trả lại công việc');
     }
   };
 
@@ -152,8 +215,17 @@ export const TaskListClient = () => {
 
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-3xl shadow-sm border border-slate-200/50 dark:border-slate-800/50 relative z-10">
-        <Search placeholder="Tìm kiếm công việc..." className="w-full sm:w-96 rounded-2xl" />
-        <div className="flex items-center gap-3 w-full sm:w-auto">
+        <div className="flex-1 flex gap-4 items-center w-full">
+          <Search placeholder="Tìm kiếm công việc..." className="w-full sm:max-w-[300px] rounded-2xl" />
+          <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-[400px]">
+            <TabsList className="grid w-full grid-cols-3 rounded-full bg-slate-100 dark:bg-slate-800 p-1">
+              <TabsTrigger value="ALL" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Tất cả</TabsTrigger>
+              <TabsTrigger value="MY_TASKS" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Việc của tôi</TabsTrigger>
+              <TabsTrigger value="DEPT_TASKS" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Việc của phòng</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
           <Button variant="outline" className="rounded-full border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800">
             <Filter className="mr-2 h-4 w-4 text-slate-500" /> Bộ lọc
           </Button>
@@ -384,6 +456,63 @@ export const TaskListClient = () => {
                         {selectedTask.description || 'Chưa có mô tả chi tiết cho công việc này.'}
                       </div>
                     </div>
+                    
+                    {/* Chat Box / Trao đổi công việc */}
+                    <div className="mt-8">
+                      <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
+                        <span className="w-2 h-6 bg-cyan-500 rounded-full mr-3"></span>
+                        Trao đổi công việc
+                      </h4>
+                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col h-[300px]">
+                        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                          {isLoadingComments ? (
+                            <div className="flex justify-center items-center h-full">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                            </div>
+                          ) : taskComments.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                              <MessageSquare className="w-10 h-10 mb-2 opacity-20" />
+                              <p className="text-sm">Chưa có trao đổi nào</p>
+                            </div>
+                          ) : (
+                            taskComments.map((msg, idx) => (
+                              <div key={idx} className={`flex gap-3 ${msg.authorCode === currentUser.code ? 'flex-row-reverse' : ''}`}>
+                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold shrink-0">
+                                  {msg.authorName?.charAt(0) || msg.authorCode?.charAt(0) || '?'}
+                                </div>
+                                <div className={`max-w-[75%] rounded-2xl p-3 ${msg.isSystemMessage ? 'bg-rose-50 text-rose-600 border border-rose-100' : msg.authorCode === currentUser.code ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-tl-none'}`}>
+                                  {!msg.isSystemMessage && msg.authorCode !== currentUser.code && (
+                                    <p className="text-xs font-bold mb-1 opacity-70">{msg.authorName || msg.authorCode}</p>
+                                  )}
+                                  <p className="text-sm">{msg.content}</p>
+                                  <p className="text-[10px] opacity-50 mt-1 text-right">
+                                    {new Date(msg.createdAt).toLocaleString('vi-VN')}
+                                  </p>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                        <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-3xl flex items-center gap-2">
+                          <input 
+                            type="text" 
+                            disabled={selectedTask.status === 'DONE'}
+                            value={chatMessage}
+                            onChange={(e) => setChatMessage(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                            placeholder={selectedTask.status === 'DONE' ? "Công việc đã hoàn thành, không thể chat" : "Nhập tin nhắn trao đổi..."}
+                            className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                          />
+                          <Button 
+                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim()} 
+                            onClick={handleSendMessage}
+                            className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0"
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div className="space-y-6">
@@ -434,6 +563,31 @@ export const TaskListClient = () => {
                         </div>
                       </div>
                     )}
+                    
+                    {/* Hành động */}
+                    {selectedTask.status !== 'DONE' && (
+                      <div className="pt-6">
+                        <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
+                          <span className="w-2 h-6 bg-slate-500 rounded-full mr-3"></span>
+                          Hành động
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3">
+                          <Button 
+                            variant="outline" 
+                            className="rounded-xl border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 bg-white"
+                            onClick={() => setIsRejectOpen(true)}
+                          >
+                            <Reply className="w-4 h-4 mr-2" /> Trả lại
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            className="rounded-xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 bg-white"
+                          >
+                            <Split className="w-4 h-4 mr-2" /> Chia việc
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -441,6 +595,30 @@ export const TaskListClient = () => {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Reject Task Dialog */}
+      <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
+        <DialogContent className="max-w-md font-sans p-6 rounded-[2rem]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold">Trả lại công việc</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-slate-500">Vui lòng nhập lý do trả lại công việc (sai chức năng, không đủ thẩm quyền...)</p>
+            <textarea
+              className="w-full border border-slate-200 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-rose-500 outline-none resize-none"
+              rows={4}
+              placeholder="Nhập lý do chi tiết..."
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-3">
+            <Button variant="ghost" onClick={() => setIsRejectOpen(false)} className="rounded-full">Hủy</Button>
+            <Button onClick={handleRejectTask} disabled={!rejectReason.trim()} className="rounded-full bg-rose-600 hover:bg-rose-700 text-white">Xác nhận trả lại</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
       {/* Smart Assign Dialog */}
       <Dialog
         open={!!taskToAssign}

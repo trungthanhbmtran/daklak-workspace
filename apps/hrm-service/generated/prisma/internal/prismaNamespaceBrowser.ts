@@ -53,6 +53,7 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  TaskComment: 'TaskComment',
   MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
@@ -125,10 +126,25 @@ export const TaskScalarFieldEnum = {
   completionDate: 'completionDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  planId: 'planId'
+  planId: 'planId',
+  parentId: 'parentId',
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskCommentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  authorCode: 'authorCode',
+  content: 'content',
+  isSystemMessage: 'isSystemMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
 
 
 export const MasterPlanScalarFieldEnum = {
@@ -301,10 +317,19 @@ export const TaskOrderByRelevanceFieldEnum = {
   priority: 'priority',
   scoringMethod: 'scoringMethod',
   supervisorCode: 'supervisorCode',
-  workflowInstId: 'workflowInstId'
+  workflowInstId: 'workflowInstId',
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskCommentOrderByRelevanceFieldEnum = {
+  authorCode: 'authorCode',
+  content: 'content'
+} as const
+
+export type TaskCommentOrderByRelevanceFieldEnum = (typeof TaskCommentOrderByRelevanceFieldEnum)[keyof typeof TaskCommentOrderByRelevanceFieldEnum]
 
 
 export const MasterPlanOrderByRelevanceFieldEnum = {

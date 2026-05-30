@@ -33,12 +33,38 @@ model Task {
   planId         Int?      @map("plan_id")
   plan           MasterPlan? @relation(fields: [planId], references: [id])
 
+  // Tính năng quản lý theo nhóm (Sub-task)
+  parentId       Int?      @map("parent_id")
+  parent         Task?     @relation("SubTasks", fields: [parentId], references: [id])
+  subTasks       Task[]    @relation("SubTasks")
+
+  // Tính năng Trả lại việc
+  rejectReason   String?   @db.Text @map("reject_reason")
+
   // Quan hệ tới bảng Employee được thực hiện lỏng lẻo qua employeeCode
   assignee       Employee? @relation("TaskAssignee", fields: [assigneeCode], references: [employeeCode])
   assigner       Employee? @relation("TaskAssigner", fields: [assignerCode], references: [employeeCode])
   supervisor     Employee? @relation("TaskSupervisor", fields: [supervisorCode], references: [employeeCode])
 
+  comments       TaskComment[]
+
   @@map("tasks")
+}
+
+model TaskComment {
+  id              Int       @id @default(autoincrement())
+  taskId          Int       @map("task_id")
+  authorCode      String?   @map("author_code")
+  content         String    @db.Text
+  isSystemMessage Boolean   @default(false) @map("is_system_message")
+  
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author          Employee? @relation("CommentAuthor", fields: [authorCode], references: [employeeCode])
+
+  @@map("task_comments")
 }
 
 model MasterPlan {

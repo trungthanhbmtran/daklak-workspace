@@ -20,5 +20,13 @@ export const hrmTasksApi = {
   },
   assignTask(id: string, payload: { assigneeCode?: string; departmentId?: number }): Promise<any> {
     return apiClient.put(`/hrm/tasks/${id}/assign`, payload).then((res: any) => res);
+  },
+  getComments(id: string): Promise<{ data: any[] }> {
+    return apiClient.get(`/hrm/tasks/${id}/comments`).then((res: any) => ({
+      data: res.data || []
+    }));
+  },
+  addComment(id: string, payload: { authorCode: string; content: string; isSystemMessage?: boolean }): Promise<any> {
+    return apiClient.post(`/hrm/tasks/${id}/comments`, payload).then((res: any) => res.data || res);
   }
 };

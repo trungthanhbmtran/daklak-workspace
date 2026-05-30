@@ -40,22 +40,31 @@ export class TasksController implements OnModuleInit {
     @Query('assigneeCode') assigneeCode: string,
     @Query('filter') filter: string,
     @Query('search') search: string,
+    @Query('departmentId') departmentId: string,
+    @Query('isSupervisor') isSupervisor: string,
   ) {
     return firstValueFrom(
       this.taskService.ListTasks({
         assigneeCode,
         filter,
         search,
+        departmentId: departmentId ? parseInt(departmentId, 10) : undefined,
+        isSupervisor: isSupervisor === 'true',
       }),
     );
   }
 
   @Put(':id/status')
-  async updateStatus(@Param('id') id: string, @Body('status') status: string) {
+  async updateStatus(
+    @Param('id') id: string, 
+    @Body('status') status: string,
+    @Body('rejectReason') rejectReason?: string
+  ) {
     return firstValueFrom(
       this.taskService.UpdateTaskStatus({
         id: parseInt(id, 10),
         status,
+        rejectReason,
       }),
     );
   }
@@ -84,6 +93,30 @@ export class TasksController implements OnModuleInit {
         id: parseInt(id, 10),
         assigneeCode,
         departmentId,
+      }),
+    );
+  }
+
+  @Get(':id/comments')
+  async getComments(@Param('id') id: string) {
+    return firstValueFrom(
+      this.taskService.GetComments({
+        taskId: parseInt(id, 10),
+      }),
+    );
+  }
+
+  @Post(':id/comments')
+  async addComment(
+    @Param('id') id: string,
+    @Body() body: { authorCode: string; content: string; isSystemMessage?: boolean }
+  ) {
+    return firstValueFrom(
+      this.taskService.AddComment({
+        taskId: parseInt(id, 10),
+        authorCode: body.authorCode,
+        content: body.content,
+        isSystemMessage: body.isSystemMessage || false,
       }),
     );
   }

@@ -9,6 +9,8 @@ service TaskService {
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
   rpc RecommendAssignees (RecommendAssigneesRequest) returns (RecommendAssigneesResponse) {}
   rpc AssignTask (AssignTaskRequest) returns (TaskResponse) {}
+  rpc AddComment (AddCommentRequest) returns (TaskCommentResponse) {}
+  rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse) {}
 }
 
 message AssignTaskRequest {
@@ -85,6 +87,8 @@ message TaskResponse {
   string assigneeName = 17;
   int32 departmentId = 18;
   string startDate = 19;
+  int32 parentId = 20;
+  string rejectReason = 21;
 }
 
 message CreateTaskRequest {
@@ -103,12 +107,15 @@ message CreateTaskRequest {
   int32 planId = 12;
   int32 departmentId = 13;
   string startDate = 14;
+  int32 parentId = 15;
 }
 
 message ListTasksRequest {
   string assigneeCode = 1; // optional
   string filter = 2; // optional (overdue, dueIn3Days, dueIn7Days, dueOver7Days)
   string search = 3; // optional
+  int32 departmentId = 4; // optional
+  bool isSupervisor = 5; // optional
 }
 
 message TaskStats {
@@ -129,6 +136,7 @@ message ListTasksResponse {
 message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
+  string rejectReason = 3; // optional
 }
 
 message TaskTemplateResponse {
@@ -187,4 +195,32 @@ message BulkUpdateTemplatesRequest {
 message BulkUpdateTemplatesResponse {
   bool success = 1;
   string message = 2;
+}
+
+message TaskCommentResponse {
+  int32 id = 1;
+  int32 taskId = 2;
+  string authorCode = 3;
+  string authorName = 4;
+  string authorAvatar = 5;
+  string content = 6;
+  bool isSystemMessage = 7;
+  string createdAt = 8;
+}
+
+message AddCommentRequest {
+  int32 taskId = 1;
+  string authorCode = 2;
+  string content = 3;
+  bool isSystemMessage = 4;
+}
+
+message GetCommentsRequest {
+  int32 taskId = 1;
+}
+
+message GetCommentsResponse {
+  bool success = 1;
+  string message = 2;
+  repeated TaskCommentResponse data = 3;
 }

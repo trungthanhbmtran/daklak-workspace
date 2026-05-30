@@ -386,6 +386,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  TaskComment: 'TaskComment',
   MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
   KpiCriteria: 'KpiCriteria',
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "task" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "task" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -541,6 +542,72 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TaskCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TaskCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskComment: {
+      payload: Prisma.$TaskCommentPayload<ExtArgs>
+      fields: Prisma.TaskCommentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskCommentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskCommentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskCommentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskCommentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        findMany: {
+          args: Prisma.TaskCommentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>[]
+        }
+        create: {
+          args: Prisma.TaskCommentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        createMany: {
+          args: Prisma.TaskCommentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.TaskCommentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        update: {
+          args: Prisma.TaskCommentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskCommentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskCommentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.TaskCommentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskCommentPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskCommentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskComment>
+        }
+        groupBy: {
+          args: Prisma.TaskCommentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskCommentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskCommentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskCommentCountAggregateOutputType> | number
         }
       }
     }
@@ -1092,10 +1159,25 @@ export const TaskScalarFieldEnum = {
   completionDate: 'completionDate',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  planId: 'planId'
+  planId: 'planId',
+  parentId: 'parentId',
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const TaskCommentScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  authorCode: 'authorCode',
+  content: 'content',
+  isSystemMessage: 'isSystemMessage',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TaskCommentScalarFieldEnum = (typeof TaskCommentScalarFieldEnum)[keyof typeof TaskCommentScalarFieldEnum]
 
 
 export const MasterPlanScalarFieldEnum = {
@@ -1268,10 +1350,19 @@ export const TaskOrderByRelevanceFieldEnum = {
   priority: 'priority',
   scoringMethod: 'scoringMethod',
   supervisorCode: 'supervisorCode',
-  workflowInstId: 'workflowInstId'
+  workflowInstId: 'workflowInstId',
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
+
+
+export const TaskCommentOrderByRelevanceFieldEnum = {
+  authorCode: 'authorCode',
+  content: 'content'
+} as const
+
+export type TaskCommentOrderByRelevanceFieldEnum = (typeof TaskCommentOrderByRelevanceFieldEnum)[keyof typeof TaskCommentOrderByRelevanceFieldEnum]
 
 
 export const MasterPlanOrderByRelevanceFieldEnum = {
@@ -1384,6 +1475,13 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
+
+/**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
 /**
  * Batch Payload for updateMany & deleteMany & createMany
  */
@@ -1481,6 +1579,7 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   employee?: Prisma.EmployeeOmit
   task?: Prisma.TaskOmit
+  taskComment?: Prisma.TaskCommentOmit
   masterPlan?: Prisma.MasterPlanOmit
   kpiPeriod?: Prisma.KpiPeriodOmit
   kpiCriteria?: Prisma.KpiCriteriaOmit

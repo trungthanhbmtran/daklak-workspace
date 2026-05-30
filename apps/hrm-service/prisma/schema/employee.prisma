@@ -26,6 +26,7 @@ model Employee {
   tasksSupervised   Task[] @relation("TaskSupervisor")
   kpiEvaluations    KpiEvaluation[] @relation("KpiEmployee")
   kpiReviews        KpiEvaluation[] @relation("KpiReviewer")
+  taskComments      TaskComment[]   @relation("CommentAuthor")
 
   @@map("employees")
 }

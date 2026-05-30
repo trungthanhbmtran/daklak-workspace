@@ -50,6 +50,11 @@ export type Employee = Prisma.EmployeeModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model TaskComment
+ * 
+ */
+export type TaskComment = Prisma.TaskCommentModel
+/**
  * Model MasterPlan
  * 
  */
