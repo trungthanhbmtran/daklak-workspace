@@ -49,14 +49,14 @@ export function IntegrationModal({ isOpen, onClose, initialData, prefillData }: 
     if (isOpen) {
       if (prefillData) {
         setSystemName(prefillData.info?.name || 'Imported Postman API');
-        setIntegrationCode(`POSTMAN_${Math.floor(Math.random() * 100000)}`);
+        setIntegrationCode(`POSTMAN_${Date.now()}`);
         setLgspConfig({
           type: 'POSTMAN',
           ...prefillData
         });
       } else {
         setSystemName(initialData?.systemName || '');
-        setIntegrationCode(initialData?.integrationCode || `LGSP_${Math.floor(Math.random() * 100000)}`);
+        setIntegrationCode(initialData?.integrationCode || `LGSP_${Date.now()}`);
 
         if (initialData?.configData) {
           try {
