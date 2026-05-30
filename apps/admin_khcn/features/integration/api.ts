@@ -4,7 +4,7 @@ import apiClient from "@/lib/axiosInstance";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export interface LGSPConfigData {
-  type: 'LGSP' | 'WEBHOOK' | 'SYSTEM';
+  type: 'LGSP' | 'WEBHOOK' | 'SYSTEM' | 'POSTMAN';
   apiUrl?: string;
   apiToken?: string;
   keys?: {
@@ -15,6 +15,40 @@ export interface LGSPConfigData {
   };
   permissions?: string[];
   [key: string]: any;
+}
+
+export interface PostmanHeader {
+  key: string;
+  value: string;
+  type: string;
+}
+
+export interface PostmanRequest {
+  auth?: { type: string };
+  method: string;
+  header: PostmanHeader[];
+  url: {
+    raw: string;
+    protocol?: string;
+    host?: string[];
+    port?: string;
+    path?: string[];
+  };
+}
+
+export interface PostmanItem {
+  name: string;
+  request: PostmanRequest;
+}
+
+export interface PostmanConfigData extends LGSPConfigData {
+  info: {
+    name: string;
+    _postman_id?: string;
+    schema?: string;
+    _exporter_id?: string;
+  };
+  item: PostmanItem[];
 }
 
 export interface IntegrationConfig {

@@ -1,4 +1,4 @@
-name: CD - Deploy to VPS (Self-hosted)
+name: CD - Deploy to VPS (SSH)
 
 on:
   push:
@@ -97,7 +97,7 @@ jobs:
 
 
 # ==========================================
-# 3. Deploy on VPS (Self-hosted runner)
+# 3. Deploy on VPS via SSH
 # ==========================================
   deploy:
     needs: [filter, build-push]
@@ -105,30 +105,38 @@ jobs:
       always() &&
       (needs.build-push.result == 'success' || needs.build-push.result == 'skipped')
 
-    runs-on: [self-hosted, daklak]
+    runs-on: ubuntu-latest # Chuyển từ self-hosted sang ubuntu-latest
 
     steps:
-      - name: Login Docker Hub
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }} # Thêm dòng này
+          # key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT || '22' }} # Mặc định port 22 nếu không cấu hình secret
+          script_stop: true # Dừng script nếu có lỗi xảy ra
+          script: |
+            echo "🔐 Login Docker Hub..."
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Deploy
-        run: |
-          cd ${{ secrets.DEPLOY_PATH }}
+            echo "📂 Go to deploy directory..."
+            cd ${{ secrets.DEPLOY_PATH }}
 
-          echo "📦 Pull images..."
-          docker compose -f docker-compose.prod.yml pull
+            echo "📦 Pull images..."
+            docker compose -f docker-compose.prod.yml pull
 
-          echo "🗄 Run migrations..."
-          docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate || true
-          docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate || true
-          docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate || true
-          docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate || true
-          docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate || true
-          docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate || true
+            echo "🗄 Run migrations..."
+            docker compose -f docker-compose.prod.yml --profile migrate run --rm user-service-migrate || true
+            docker compose -f docker-compose.prod.yml --profile migrate run --rm hrm-service-migrate || true
+            docker compose -f docker-compose.prod.yml --profile migrate run --rm media-service-migrate || true
+            docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-service-migrate || true
+            docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate || true
+            docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate || true
 
-          echo "🚀 Start services..."
-          docker compose -f docker-compose.prod.yml up -d
+            echo "🚀 Start services..."
+            docker compose -f docker-compose.prod.yml up -d
 
-          echo "🧹 Cleanup..."
-          docker system prune -f
+            echo "🧹 Cleanup..."
+            docker system prune -f
