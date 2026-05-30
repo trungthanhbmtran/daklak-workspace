@@ -58,6 +58,9 @@ async function main() {
 
     // Workflow
     { code: 'WORKFLOW', name: 'Quy trình nghiệp vụ' },
+
+    // Integration
+    { code: 'INTEGRATION', name: 'Liên thông hệ thống' },
   ];
 
   const resources: Record<string, { id: number; code: string; name: string }> =
@@ -2887,6 +2890,11 @@ async function main() {
           'HRM_MENU_CONTRACTS',
           'HRM_MENU_LEAVE',
           'HRM_MENU_PAYROLL',
+          'HRM_MENU_PLANS',
+          'HRM_MENU_TASKS',
+          'HRM_MENU_KPI',
+          'HRM_MENU_NOTIFICATIONS',
+          'CONTENT_MENU_PORTAL_CONFIG',
         ],
       },
     },
@@ -2900,38 +2908,6 @@ async function main() {
       route: 'employees',
       icon: 'people-outline',
       order: 1,
-      res: 'HRM_EMPLOYEE',
-    },
-    {
-      code: 'HRM_MENU_PLANS',
-      name: 'Chủ trương & Kế hoạch',
-      route: 'work-plans/master-plans',
-      icon: 'layers-outline',
-      order: 2,
-      res: 'HRM_EMPLOYEE',
-    },
-    {
-      code: 'HRM_MENU_TASKS',
-      name: 'Phân công & Giao việc',
-      route: 'work-plans/tasks',
-      icon: 'list-outline',
-      order: 3,
-      res: 'HRM_EMPLOYEE',
-    },
-    {
-      code: 'HRM_MENU_KPI',
-      name: 'Đánh giá Năng lực (KPI)',
-      route: 'performance/evaluations',
-      icon: 'settings-outline',
-      order: 4,
-      res: 'HRM_EMPLOYEE',
-    },
-    {
-      code: 'HRM_MENU_NOTIFICATIONS',
-      name: 'Thông báo',
-      route: 'notifications',
-      icon: 'notifications-outline',
-      order: 5,
       res: 'HRM_EMPLOYEE',
     },
   ];
@@ -2996,14 +2972,6 @@ async function main() {
       icon: 'layers-outline',
       order: 5,
       res: 'BANNER',
-    },
-    {
-      code: 'CONTENT_MENU_PORTAL_CONFIG',
-      name: 'Cấu hình chung đơn vị',
-      route: 'portal-config',
-      icon: 'settings-outline',
-      order: 6,
-      res: 'PORTAL_MENU',
     },
   ];
 
