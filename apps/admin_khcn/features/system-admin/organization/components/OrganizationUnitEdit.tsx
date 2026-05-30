@@ -290,6 +290,26 @@ export function OrganizationUnitEdit() {
               />
             </section>
 
+            {/* PHẠM VI QUẢN LÝ (Ghi chú thêm) */}
+            <section className="space-y-4">
+              <FormField
+                control={form.control}
+                name="scope"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-bold flex items-center gap-2">
+                      <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                      Phạm vi / Địa bàn quản lý (Ghi chú / Nhập liệu tự do)
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="VD: Toàn tỉnh, các Doanh nghiệp Nhà nước..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </section>
+
             {/* LĨNH VỰC & ĐỊA BÀN QUẢN LÝ */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <FormField
