@@ -29,7 +29,7 @@ export class EmployeeController implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.employeeService = this.client.getService(
@@ -127,7 +127,7 @@ export class EmployeeController implements OnModuleInit {
       req.civilServantRankId = parseInt(req.civilServantRankId);
     if (req.partyTitleId) req.partyTitleId = parseInt(req.partyTitleId);
 
-    const [res, dicts] = await Promise.all([
+    const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.ListEmployees(req)),
       this.fetchDictionaries(),
     ]);
@@ -142,7 +142,7 @@ export class EmployeeController implements OnModuleInit {
 
   @Get(':id')
   async getDetail(@Param('id') id: string) {
-    const [res, dicts] = await Promise.all([
+    const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.GetEmployee({ id: parseInt(id) })),
       this.fetchDictionaries(),
     ]);
@@ -160,7 +160,7 @@ export class EmployeeController implements OnModuleInit {
 
   @Post()
   async create(@Body() body: any) {
-    const [res, dicts] = await Promise.all([
+    const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.CreateEmployee(body)),
       this.fetchDictionaries(),
     ]);
@@ -179,7 +179,7 @@ export class EmployeeController implements OnModuleInit {
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
     const payload = { ...body, id: parseInt(id) };
-    const [res, dicts] = await Promise.all([
+    const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.UpdateEmployee(payload)),
       this.fetchDictionaries(),
     ]);
