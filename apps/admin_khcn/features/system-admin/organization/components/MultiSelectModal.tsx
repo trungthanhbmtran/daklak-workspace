@@ -140,16 +140,16 @@ export function MultiSelectModal({
                             className="mt-0.5 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground h-4 w-4 shrink-0"
                             onClick={(e) => e.stopPropagation()}
                           />
-                          <div className="flex flex-col flex-1 min-w-0">
+                          <div className="flex flex-col flex-1 min-w-0 gap-1.5">
                             <span className={cn("text-sm leading-snug", isChecked ? "font-bold text-primary" : "font-medium text-slate-700")}>
                               {item.name}
                             </span>
+                            {item.code && (
+                              <Badge variant="outline" className="w-fit font-mono text-[10px] text-muted-foreground bg-slate-50 border-slate-200">
+                                {item.code}
+                              </Badge>
+                            )}
                           </div>
-                          {item.code && (
-                            <Badge variant="outline" className="font-mono text-[10px] shrink-0 text-muted-foreground bg-slate-50 border-slate-200 mt-0.5">
-                              {item.code}
-                            </Badge>
-                          )}
                         </div>
                       );
                     })}
