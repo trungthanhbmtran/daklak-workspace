@@ -230,6 +230,8 @@ export const TaskRankTemplateScalarFieldEnum = {
   taskName: 'taskName',
   defaultUnit: 'defaultUnit',
   defaultWeight: 'defaultWeight',
+  rankNameVN: 'rankNameVN',
+  legalBasis: 'legalBasis',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -380,7 +382,9 @@ export const TaskRankTemplateOrderByRelevanceFieldEnum = {
   classification: 'classification',
   rank: 'rank',
   taskName: 'taskName',
-  defaultUnit: 'defaultUnit'
+  defaultUnit: 'defaultUnit',
+  rankNameVN: 'rankNameVN',
+  legalBasis: 'legalBasis'
 } as const
 
 export type TaskRankTemplateOrderByRelevanceFieldEnum = (typeof TaskRankTemplateOrderByRelevanceFieldEnum)[keyof typeof TaskRankTemplateOrderByRelevanceFieldEnum]

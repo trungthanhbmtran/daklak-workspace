@@ -168,6 +168,8 @@ model TaskRankTemplate {
   taskName        String   @map("task_name")
   defaultUnit     String   @map("default_unit")
   defaultWeight   Float?   @map("default_weight")
+  rankNameVN      String?  @map("rank_name_vn")
+  legalBasis      String?  @map("legal_basis")
   
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
