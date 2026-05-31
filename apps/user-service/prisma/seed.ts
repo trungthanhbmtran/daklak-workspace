@@ -3064,6 +3064,7 @@ async function main() {
       icon: 'people-outline',
       order: 1,
       res: 'HRM_EMPLOYEE',
+      action: 'VIEW',
     },
     {
       code: 'HRM_MENU_PLANS',
@@ -3072,6 +3073,7 @@ async function main() {
       icon: 'layers-outline',
       order: 2,
       res: 'PLAN',
+      action: 'VIEW',
     },
     {
       code: 'HRM_MENU_TASKS',
@@ -3080,6 +3082,7 @@ async function main() {
       icon: 'list-outline',
       order: 3,
       res: 'TASK',
+      action: 'VIEW',
     },
     {
       code: 'HRM_MENU_CRITERIA',
@@ -3088,6 +3091,7 @@ async function main() {
       icon: 'document-text-outline',
       order: 4,
       res: 'KPI',
+      action: 'VIEW',
     },
     {
       code: 'HRM_MENU_KPI',
@@ -3096,6 +3100,7 @@ async function main() {
       icon: 'settings-outline',
       order: 5,
       res: 'KPI',
+      action: 'VIEW',
     },
     {
       code: 'HRM_MENU_RANK_TEMPLATES',
@@ -3104,6 +3109,7 @@ async function main() {
       icon: 'settings-outline',
       order: 6,
       res: 'HRM_EMPLOYEE',
+      action: 'MANAGE',
     },
     {
       code: 'HRM_MENU_MANUAL_SELECTOR',
@@ -3112,6 +3118,7 @@ async function main() {
       icon: 'list-outline',
       order: 7,
       res: 'HRM_EMPLOYEE',
+      action: 'MANAGE',
     },
     {
       code: 'HRM_MENU_NOTIFICATIONS',
@@ -3120,10 +3127,11 @@ async function main() {
       icon: 'notifications-outline',
       order: 8,
       res: 'HRM_EMPLOYEE',
+      action: 'VIEW',
     },
   ];
 
-  for (const { res, ...m } of hrmMenus) {
+  for (const { res, action, ...m } of hrmMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: {
@@ -3139,9 +3147,7 @@ async function main() {
         service: 'HRM_SERVICE',
       },
     });
-    // For PBAC scopes (PLAN, TASK, KPI), use VIEW instead of READ
-    const action = ['PLAN', 'TASK', 'KPI'].includes(res) ? 'VIEW' : 'READ';
-    await linkMenuPBAC(node.id, res, action);
+    await linkMenuPBAC(node.id, res, action || 'READ');
   }
 
   // 4. Content Module
@@ -5081,10 +5087,10 @@ async function main() {
 
   const roleDefinitions = [
     { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
-    { code: 'LEADER', name: 'Lãnh đạo đơn vị', scope: 'ORGANIZATION', perms: ['DOCUMENT.*', 'PLAN.*', 'OBJECTIVE.*', 'TASK.*', 'KPI.*', 'REPORT.*'] },
-    { code: 'MANAGER', name: 'Quản lý', scope: 'DEPARTMENT', perms: ['DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'DOCUMENT.ASSIGN', 'PLAN.VIEW', 'PLAN.UPDATE', 'OBJECTIVE.VIEW', 'OBJECTIVE.UPDATE', 'TASK.VIEW', 'TASK.CREATE', 'TASK.UPDATE', 'TASK.ASSIGN', 'TASK.COMPLETE', 'KPI.VIEW', 'REPORT.VIEW'] },
-    { code: 'STAFF', name: 'Nhân viên', scope: 'SELF', perms: ['DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'TASK.UPDATE', 'TASK.COMMENT', 'TASK.COMPLETE', 'KPI.VIEW'] },
-    { code: 'SUPERVISOR', name: 'Giám sát', scope: 'DEPARTMENT', perms: ['DOCUMENT.VIEW', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'KPI.VIEW', 'REPORT.VIEW'] }
+    { code: 'LEADER', name: 'Lãnh đạo đơn vị', scope: 'ORGANIZATION', perms: ['HRM_EMPLOYEE.*', 'DOCUMENT.*', 'PLAN.*', 'OBJECTIVE.*', 'TASK.*', 'KPI.*', 'REPORT.*'] },
+    { code: 'MANAGER', name: 'Quản lý', scope: 'DEPARTMENT', perms: ['HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.MANAGE', 'DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'DOCUMENT.ASSIGN', 'PLAN.VIEW', 'PLAN.UPDATE', 'OBJECTIVE.VIEW', 'OBJECTIVE.UPDATE', 'TASK.VIEW', 'TASK.CREATE', 'TASK.UPDATE', 'TASK.ASSIGN', 'TASK.COMPLETE', 'KPI.VIEW', 'REPORT.VIEW'] },
+    { code: 'STAFF', name: 'Nhân viên', scope: 'SELF', perms: ['HRM_EMPLOYEE.VIEW', 'DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'TASK.UPDATE', 'TASK.COMMENT', 'TASK.COMPLETE', 'KPI.VIEW'] },
+    { code: 'SUPERVISOR', name: 'Giám sát', scope: 'DEPARTMENT', perms: ['HRM_EMPLOYEE.VIEW', 'DOCUMENT.VIEW', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'KPI.VIEW', 'REPORT.VIEW'] }
   ];
 
   for (const rd of roleDefinitions) {

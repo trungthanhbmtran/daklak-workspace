@@ -29,6 +29,7 @@ export class MenusController {
       target: node.target ?? 'SELF',
       parentId,
       isActive: node.isActive ?? node.is_active ?? true,
+      requiredPermissionIds: node.requiredPermissionIds ?? [],
       children:
         node.children && node.children.length
           ? node.children.map((c: any) => this.mapMenuNode(c))
