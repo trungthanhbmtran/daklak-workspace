@@ -137,30 +137,66 @@ export function TaskCreateClient() {
                   <ComboboxContent className="w-[var(--radix-select-trigger-width)] sm:w-[350px]">
                     <ComboboxList>
                       <ComboboxEmpty>Không tìm thấy nhân sự phù hợp</ComboboxEmpty>
-                      {assignableEmployees.map((emp) => (
-                        <ComboboxItem key={emp.code} value={emp.code}>
-                          <div className="flex flex-col py-1">
-                            <span className="font-bold text-sm text-foreground">{emp.name}</span>
-                            <span className="text-[11px] text-muted-foreground mt-0.5">
-                              {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
-                              {emp.department?.name ? ` • ${emp.department.name}` : ''}
-                            </span>
-                          </div>
-                        </ComboboxItem>
-                      ))}
+                      {assignableEmployees.map((emp) => {
+                        return (
+                          // @ts-ignore - Base UI ComboboxItem textValue prop is not in the type definition but works
+                          <ComboboxItem key={emp.code} value={emp.code} textValue={emp.name}>
+                            <div className="flex flex-col py-1">
+                              <span className="font-bold text-sm text-foreground">{emp.name}</span>
+                              <span className="text-[11px] text-muted-foreground mt-0.5">
+                                {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
+                                {emp.department?.name ? ` • ${emp.department.name}` : ''}
+                              </span>
+                            </div>
+                          </ComboboxItem>
+                        );
+                      })}
                     </ComboboxList>
                   </ComboboxContent>
                 </Combobox>
               </div>
 
               {selectedEmp && (
-                <div className="space-y-3 p-3 bg-slate-50 rounded-lg border">
-                  <div className="text-xs font-bold flex justify-between">
-                    <span>Workload</span>
-                    <span className={isOverload ? 'text-red-600' : 'text-indigo-600'}>{newLoad}/{selectedEmp.rankLimit}</span>
+                <div className={`space-y-4 p-4 rounded-xl border-2 transition-colors duration-300 ${isOverload ? 'bg-red-50/50 border-red-200' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-50/50 border-amber-200' : 'bg-indigo-50/50 border-indigo-100'}`}>
+                  {/* Thông tin nhân sự */}
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${isOverload ? 'bg-red-100 text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                      {selectedEmp.name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm text-slate-900 leading-tight">{selectedEmp.name}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{selectedEmp.jobTitle?.name || 'Nhân viên'} {selectedEmp.department?.name ? `• ${selectedEmp.department.name}` : ''}</p>
+                    </div>
                   </div>
-                  <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div className={`h-full ${isOverload ? 'bg-red-500' : 'bg-indigo-500'}`} style={{ width: `${Math.min((newLoad / selectedEmp.rankLimit) * 100, 100)}%` }} />
+
+                  {/* Thanh tiến độ Workload */}
+                  <div className="space-y-2 pt-2 border-t border-slate-200/60">
+                    <div className="flex justify-between items-center text-xs font-bold">
+                      <span className="text-slate-600 flex items-center gap-1">
+                        <Activity className="w-3 h-3" /> Tải công việc
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {isOverload && (
+                          <span className="flex items-center gap-1 text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                            <AlertTriangle className="w-3 h-3" /> Quá tải
+                          </span>
+                        )}
+                        <span className={isOverload ? 'text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'text-amber-600' : 'text-indigo-600'}>
+                          {newLoad} / {selectedEmp.rankLimit} đ
+                        </span>
+                      </div>
+                    </div>
+                    <div className="h-2.5 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
+                      <div
+                        className={`h-full transition-all duration-500 rounded-full ${isOverload ? 'bg-red-500' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-500' : 'bg-indigo-500'}`}
+                        style={{ width: `${Math.min((newLoad / selectedEmp.rankLimit) * 100, 100)}%` }}
+                      />
+                    </div>
+                    {isOverload && (
+                      <p className="text-[10px] text-red-500 font-medium">
+                        * Nhân sự này đã vượt quá định mức công việc quy định. Hãy cân nhắc chọn người khác.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}
