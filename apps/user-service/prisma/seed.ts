@@ -2670,6 +2670,49 @@ async function main() {
     roleMap[r.code] = createdRole;
   }
 
+  // --- TASK ROLES ---
+  const taskRoles = [
+    {
+      code: 'LEADER',
+      name: 'Lãnh đạo đơn vị (Giao việc)',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'ASSIGN', 'COMPLETE', 'COMMENT', 'EVALUATE', 'APPROVE'],
+    },
+    {
+      code: 'MANAGER',
+      name: 'Quản lý cấp phòng (Giao việc)',
+      permissions: ['CREATE', 'READ', 'UPDATE', 'VIEW', 'ASSIGN', 'COMPLETE'],
+    },
+    {
+      code: 'STAFF',
+      name: 'Chuyên viên / Nhân viên (Giao việc)',
+      permissions: ['READ', 'VIEW', 'UPDATE', 'COMMENT', 'COMPLETE'],
+    },
+  ];
+
+  for (const r of taskRoles) {
+    const rolePerms: { id: number }[] = [];
+    const resId = resources['TASK']?.id;
+    if (resId) {
+      for (const action of r.permissions) {
+        const perm = await prisma.permission.findUnique({
+          where: { action_resourceId: { action, resourceId: resId } },
+        });
+        if (perm) rolePerms.push({ id: perm.id });
+      }
+    }
+
+    const createdRole = await prisma.role.upsert({
+      where: { code: r.code },
+      update: { name: r.name, permissions: { set: rolePerms } },
+      create: {
+        code: r.code,
+        name: r.name,
+        permissions: { connect: rolePerms },
+      },
+    });
+    roleMap[r.code] = createdRole;
+  }
+
   // ==========================================================
   // 5. MENUS (ADMIN_PORTAL) - PBAC Implementation
   // ==========================================================
