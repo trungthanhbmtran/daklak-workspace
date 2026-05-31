@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@/components/ui/combobox';
 import { toast } from 'sonner';
 import { Save, AlertTriangle, Sparkles, PlusCircle, Target, Briefcase, Activity, MapPin } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
@@ -107,9 +108,15 @@ export function TaskCreateClient() {
                   <label className="text-sm font-bold">Tên công việc</label>
                   <Input value={taskName} onChange={e => setTaskName(e.target.value)} required />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
-                  <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Ngày bắt đầu</label>
+                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold">Hạn chót</label>
+                    <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required />
+                  </div>
                 </div>
               </form>
             </CardContent>
@@ -122,19 +129,28 @@ export function TaskCreateClient() {
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold">Người thực hiện</label>
-                <Select value={assignee} onValueChange={setAssignee}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Chọn nhân sự..." /></SelectTrigger>
-                  <SelectContent className="w-[var(--radix-select-trigger-width)]">
-                    {assignableEmployees.map(emp => (
-                      <SelectItem key={emp.code} value={emp.code}>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-sm">{emp.name}</span>
-                          <span className="text-[10px] text-slate-500">{emp.jobTitle?.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Combobox
+                  value={assignee}
+                  onValueChange={(val) => setAssignee(val as string)}
+                >
+                  <ComboboxInput placeholder="Tìm kiếm tên, chức danh..." className="w-full h-10" />
+                  <ComboboxContent className="w-[var(--radix-select-trigger-width)] sm:w-[350px]">
+                    <ComboboxList>
+                      <ComboboxEmpty>Không tìm thấy nhân sự phù hợp</ComboboxEmpty>
+                      {assignableEmployees.map((emp) => (
+                        <ComboboxItem key={emp.code} value={emp.code}>
+                          <div className="flex flex-col py-1">
+                            <span className="font-bold text-sm text-foreground">{emp.name}</span>
+                            <span className="text-[11px] text-muted-foreground mt-0.5">
+                              {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
+                              {emp.department?.name ? ` • ${emp.department.name}` : ''}
+                            </span>
+                          </div>
+                        </ComboboxItem>
+                      ))}
+                    </ComboboxList>
+                  </ComboboxContent>
+                </Combobox>
               </div>
 
               {selectedEmp && (
