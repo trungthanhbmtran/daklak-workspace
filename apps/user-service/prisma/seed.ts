@@ -2639,20 +2639,23 @@ async function main() {
     ADMIN: adminRole,
   };
 
+  const cmsResources = ['POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION'];
   for (const r of cmsRoles) {
     const rolePerms: { id: number }[] = [];
-    const postResId = resources['POST'].id;
-
-    for (const action of r.permissions) {
-      const perm = await prisma.permission.findUnique({
-        where: {
-          action_resourceId: {
-            action: action === 'REJECT' ? 'UPDATE' : action,
-            resourceId: postResId,
+    for (const resCode of cmsResources) {
+      const resId = resources[resCode]?.id;
+      if (!resId) continue;
+      for (const action of r.permissions) {
+        const perm = await prisma.permission.findUnique({
+          where: {
+            action_resourceId: {
+              action: action === 'REJECT' ? 'UPDATE' : action,
+              resourceId: resId,
+            },
           },
-        },
-      });
-      if (perm) rolePerms.push({ id: perm.id });
+        });
+        if (perm) rolePerms.push({ id: perm.id });
+      }
     }
 
     const createdRole = await prisma.role.upsert({
@@ -5087,10 +5090,166 @@ async function main() {
 
   const roleDefinitions = [
     { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
-    { code: 'LEADER', name: 'Lãnh đạo đơn vị', scope: 'ORGANIZATION', perms: ['HRM_EMPLOYEE.*', 'DOCUMENT.*', 'PLAN.*', 'OBJECTIVE.*', 'TASK.*', 'KPI.*', 'REPORT.*'] },
-    { code: 'MANAGER', name: 'Quản lý', scope: 'DEPARTMENT', perms: ['HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.MANAGE', 'DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'DOCUMENT.ASSIGN', 'PLAN.VIEW', 'PLAN.UPDATE', 'OBJECTIVE.VIEW', 'OBJECTIVE.UPDATE', 'TASK.VIEW', 'TASK.CREATE', 'TASK.UPDATE', 'TASK.ASSIGN', 'TASK.COMPLETE', 'KPI.VIEW', 'REPORT.VIEW'] },
-    { code: 'STAFF', name: 'Nhân viên', scope: 'SELF', perms: ['HRM_EMPLOYEE.VIEW', 'DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'TASK.UPDATE', 'TASK.COMMENT', 'TASK.COMPLETE', 'KPI.VIEW'] },
-    { code: 'SUPERVISOR', name: 'Giám sát', scope: 'DEPARTMENT', perms: ['HRM_EMPLOYEE.VIEW', 'DOCUMENT.VIEW', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'KPI.VIEW', 'REPORT.VIEW'] }
+    {
+      code: 'LEADER',
+      name: 'Lãnh đạo đơn vị',
+      scope: 'ORGANIZATION',
+      perms: [
+        'HRM_EMPLOYEE.*',
+        'DOCUMENT.*',
+        'DOC_INCOMING.*',
+        'DOC_OUTGOING.*',
+        'DOC_PROCESSING.*',
+        'DOC_PUBLISH.*',
+        'DOC_TRANSPARENCY.*',
+        'DOC_CONSULTATION.*',
+        'DOC_MINUTES.*',
+        'DOC_CATEGORIES.*',
+        'PLAN.*',
+        'OBJECTIVE.*',
+        'TASK.*',
+        'KPI.*',
+        'REPORT.*',
+        'WORKFLOW.*'
+      ]
+    },
+    {
+      code: 'MANAGER',
+      name: 'Quản lý',
+      scope: 'DEPARTMENT',
+      perms: [
+        'HRM_EMPLOYEE.VIEW',
+        'HRM_EMPLOYEE.READ',
+        'HRM_EMPLOYEE.MANAGE',
+        'DOCUMENT.VIEW',
+        'DOCUMENT.READ',
+        'DOCUMENT.PROCESS',
+        'DOCUMENT.ASSIGN',
+        'DOC_INCOMING.VIEW',
+        'DOC_INCOMING.READ',
+        'DOC_INCOMING.PROCESS',
+        'DOC_INCOMING.ASSIGN',
+        'DOC_OUTGOING.VIEW',
+        'DOC_OUTGOING.READ',
+        'DOC_OUTGOING.PROCESS',
+        'DOC_PROCESSING.VIEW',
+        'DOC_PROCESSING.READ',
+        'DOC_PROCESSING.PROCESS',
+        'DOC_PUBLISH.VIEW',
+        'DOC_PUBLISH.READ',
+        'DOC_PUBLISH.PROCESS',
+        'DOC_TRANSPARENCY.VIEW',
+        'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW',
+        'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW',
+        'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW',
+        'DOC_CATEGORIES.READ',
+        'PLAN.VIEW',
+        'PLAN.READ',
+        'PLAN.UPDATE',
+        'OBJECTIVE.VIEW',
+        'OBJECTIVE.READ',
+        'OBJECTIVE.UPDATE',
+        'TASK.VIEW',
+        'TASK.READ',
+        'TASK.CREATE',
+        'TASK.UPDATE',
+        'TASK.ASSIGN',
+        'TASK.COMPLETE',
+        'KPI.VIEW',
+        'KPI.READ',
+        'REPORT.VIEW',
+        'REPORT.READ',
+        'WORKFLOW.VIEW',
+        'WORKFLOW.READ'
+      ]
+    },
+    {
+      code: 'STAFF',
+      name: 'Nhân viên',
+      scope: 'SELF',
+      perms: [
+        'HRM_EMPLOYEE.VIEW',
+        'HRM_EMPLOYEE.READ',
+        'DOCUMENT.VIEW',
+        'DOCUMENT.READ',
+        'DOCUMENT.PROCESS',
+        'DOC_INCOMING.VIEW',
+        'DOC_INCOMING.READ',
+        'DOC_INCOMING.PROCESS',
+        'DOC_OUTGOING.VIEW',
+        'DOC_OUTGOING.READ',
+        'DOC_OUTGOING.PROCESS',
+        'DOC_PROCESSING.VIEW',
+        'DOC_PROCESSING.READ',
+        'DOC_PROCESSING.PROCESS',
+        'DOC_PUBLISH.VIEW',
+        'DOC_PUBLISH.READ',
+        'DOC_PUBLISH.PROCESS',
+        'DOC_TRANSPARENCY.VIEW',
+        'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW',
+        'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW',
+        'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW',
+        'DOC_CATEGORIES.READ',
+        'PLAN.VIEW',
+        'PLAN.READ',
+        'OBJECTIVE.VIEW',
+        'OBJECTIVE.READ',
+        'TASK.VIEW',
+        'TASK.READ',
+        'TASK.UPDATE',
+        'TASK.COMMENT',
+        'TASK.COMPLETE',
+        'KPI.VIEW',
+        'KPI.READ',
+        'WORKFLOW.VIEW',
+        'WORKFLOW.READ'
+      ]
+    },
+    {
+      code: 'SUPERVISOR',
+      name: 'Giám sát',
+      scope: 'DEPARTMENT',
+      perms: [
+        'HRM_EMPLOYEE.VIEW',
+        'HRM_EMPLOYEE.READ',
+        'DOCUMENT.VIEW',
+        'DOCUMENT.READ',
+        'DOC_INCOMING.VIEW',
+        'DOC_INCOMING.READ',
+        'DOC_OUTGOING.VIEW',
+        'DOC_OUTGOING.READ',
+        'DOC_PROCESSING.VIEW',
+        'DOC_PROCESSING.READ',
+        'DOC_PUBLISH.VIEW',
+        'DOC_PUBLISH.READ',
+        'DOC_TRANSPARENCY.VIEW',
+        'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW',
+        'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW',
+        'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW',
+        'DOC_CATEGORIES.READ',
+        'PLAN.VIEW',
+        'PLAN.READ',
+        'OBJECTIVE.VIEW',
+        'OBJECTIVE.READ',
+        'TASK.VIEW',
+        'TASK.READ',
+        'KPI.VIEW',
+        'KPI.READ',
+        'REPORT.VIEW',
+        'REPORT.READ',
+        'WORKFLOW.VIEW',
+        'WORKFLOW.READ'
+      ]
+    }
   ];
 
   for (const rd of roleDefinitions) {
