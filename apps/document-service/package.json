@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "prisma generate --schema=./prisma/schema && nest build && tsc",
+    "build": "prisma generate --schema=./prisma/schema && nest build && tsc && tsc-alias",
     "prisma:generate": "prisma generate --schema=./prisma/schema",
     "prisma:migrate": "prisma migrate dev --schema=./prisma/schema",
     "prisma:migrate:dev": "prisma migrate dev --schema=./prisma/schema",

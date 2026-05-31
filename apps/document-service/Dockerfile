@@ -47,7 +47,7 @@ RUN npm ci --omit=dev
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/shared/protos ./protos
-COPY --from=builder /app/generated ./generated
+COPY --from=builder /app/generated ./dist/generated
 
 # 🔥 BẮT BUỘC với Prisma 7
 COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
