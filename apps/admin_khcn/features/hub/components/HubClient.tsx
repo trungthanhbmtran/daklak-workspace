@@ -4,38 +4,25 @@ import Link from "next/link";
 import {
   ShieldCheck,
   ArrowRight,
-  LogOut,
-  User,
   Loader2,
   Layers,
-  type LucideIcon,
+  LucideIcon,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useLogout } from "@/hooks/useLogout";
 import { useHubServices } from "@/hooks/useServiceMenus";
 import { useUser } from "@/hooks/useUser";
+import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
 
 // 2. TÁCH HEADER COMPONENT: Cho code gọn gàng
 function PortalHeader() {
-  const { handleLogout, isPending } = useLogout();
-  const { user } = useUser();
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 shadow-sm">
       <div className="flex h-16 w-full items-center justify-between px-4 lg:px-8">
-        
+
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
             <ShieldCheck className="h-5 w-5" />
@@ -46,41 +33,7 @@ function PortalHeader() {
           </div>
         </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-11 flex items-center gap-3 rounded-full pl-2 pr-4 hover:bg-muted/60 transition-colors">
-              <Avatar className="h-8 w-8 border border-border">
-                <AvatarImage src="" alt="Avatar" />
-                <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
-                   {user?.fullName?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="hidden md:flex flex-col items-start">
-                <span className="text-sm font-semibold leading-none">{user?.fullName || 'Người dùng'}</span>
-                <span className="text-[10px] text-muted-foreground mt-1 font-normal">{user?.email || 'user@daklak.gov.vn'}</span>
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.fullName}</p>
-                <p className="text-xs text-muted-foreground">{user?.email}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="cursor-pointer"><User className="mr-2 h-4 w-4" /> Hồ sơ cá nhân</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
-              onClick={() => handleLogout()}
-              disabled={isPending}
-            >
-              <LogOut className="mr-2 h-4 w-4" />
-              {isPending ? "Đang đăng xuất…" : "Đăng xuất"}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <HeaderUserProfile showName />
 
       </div>
     </header>
@@ -142,7 +95,7 @@ export function HubClient() {
       <PortalHeader />
       <main className="container mx-auto py-12 px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {user?.fullName?.split(' ').pop()}!</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {[user?.lastname, user?.firstname].filter(Boolean).join(' ') || 'Bạn'}!</h1>
           <p className="text-muted-foreground mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
         </div>
         {isLoading ? (
@@ -157,7 +110,7 @@ export function HubClient() {
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {/* Workflow Builder Card */}
-            <AppCard 
+            <AppCard
               app={{
                 id: "workflow-builder",
                 title: "Trình kéo thả Quy trình",
@@ -166,7 +119,7 @@ export function HubClient() {
                 icon: Layers,
                 iconColor: "#8b5cf6",
                 disabled: false,
-              }} 
+              }}
             />
             {apps.map((app) => (
               <AppCard key={app.id} app={app} />
