@@ -103,9 +103,16 @@ export function StaffingTable({
                           )}
                         </div>
                       )}
-                      <span className={cn(hasSlots && "group-hover:underline decoration-muted-foreground")}>
-                        {row.jobTitleName}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className={cn(hasSlots && "group-hover:underline decoration-muted-foreground")}>
+                          {row.jobTitleName}
+                        </span>
+                        {row.currentEmployeeNames && row.currentEmployeeNames.length > 0 && (
+                          <span className="text-xs text-muted-foreground font-normal mt-0.5">
+                            (Đang gán: {row.currentEmployeeNames.join(", ")})
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">

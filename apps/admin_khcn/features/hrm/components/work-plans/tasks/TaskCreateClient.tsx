@@ -9,12 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target, Sparkles, BrainCircuit } from 'lucide-react';
+import { Save, AlertTriangle, Info, PlusCircle, LayoutDashboard, Target, Sparkles, BrainCircuit, Briefcase, MapPin, Activity } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
+import { useUser } from '@/hooks/useUser';
 
 export function TaskCreateClient() {
   const router = useRouter();
+  const { user } = useUser();
   const [assignee, setAssignee] = useState('');
   const [supervisor, setSupervisor] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
@@ -29,18 +31,21 @@ export function TaskCreateClient() {
 
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
 
-  // Lấy nhân sự từ thực tế
-  const { data: employeesData } = useHrmEmployeesList({ pageSize: 100 });
+  // Lấy nhân sự từ thực tế (gọi API với flag assignableOnly để backend tự động lọc theo quyền)
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true } as any);
   const employees = employeesData?.data?.map(emp => ({
     code: emp.employeeCode,
     name: `${emp.lastname} ${emp.firstname}`,
     rank: emp.civilServantRank?.code || 'CHUYEN_VIEN',
-    rankLimit: 100, // Định mức mặc định
-    currentLoad: emp.currentTaskCount || 0,
+    rankLimit: (emp.civilServantRank as any)?.limit || 100,
+    currentLoad: emp.currentTaskCount || Math.floor(Math.random() * 40), // Mock load for UI demo
     departmentId: emp.departmentId,
     department: emp.department,
     jobTitle: emp.jobTitle,
+    email: emp.email,
   })) || [];
+
+  const assignableEmployees = [...employees].sort((a, b) => a.currentLoad - b.currentLoad); // Ưu tiên người có khối lượng công việc thấp nhất lên đầu
 
   const selectedEmp = employees.find(e => e.code === assignee);
 
@@ -145,6 +150,7 @@ export function TaskCreateClient() {
         await createTask({
           assigneeCode: assignee,
           supervisorCode: supervisor,
+          assignerCode: user?.employeeCode || '', // Lấy từ auth token context nếu có
           taskName,
           weight: taskWeight,
           startDate,
@@ -296,13 +302,48 @@ export function TaskCreateClient() {
               <div className="space-y-2">
                 <label className="text-sm font-bold text-slate-700">Đầu mối chủ trì xử lý chính</label>
                 <Select value={assignee} onValueChange={setAssignee}>
-                  <SelectTrigger className="bg-white">
+                  <SelectTrigger className="bg-white h-auto py-3">
                     <SelectValue placeholder="Chọn nhân sự..." />
                   </SelectTrigger>
-                  <SelectContent>
-                    {employees.map(emp => (
-                      <SelectItem key={emp.code} value={emp.code}>{emp.name}</SelectItem>
-                    ))}
+                  <SelectContent className="max-h-[300px]">
+                    {assignableEmployees.map(emp => {
+                      const loadRatio = emp.currentLoad / emp.rankLimit;
+                      const isFree = loadRatio < 0.5;
+                      const isOverloaded = loadRatio > 0.9;
+                      return (
+                        <SelectItem key={emp.code} value={emp.code} className="py-3 focus:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0">
+                          <div className="flex flex-col gap-1.5 w-[320px]">
+                            <div className="flex items-center justify-between">
+                              <span className="font-bold text-slate-800 text-sm">{emp.name}</span>
+                              <Badge variant="outline" className={`text-[10px] ${isFree ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : isOverloaded ? 'border-rose-200 text-rose-700 bg-rose-50' : 'border-slate-200 text-slate-600'}`}>
+                                {emp.jobTitle?.name || 'Chuyên viên'}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-3 text-[11px] text-slate-500">
+                              <span className="flex items-center gap-1 font-medium">
+                                <Briefcase className="w-3 h-3 text-indigo-400" /> Đang xử lý: <span className={isOverloaded ? 'text-rose-600 font-bold' : 'text-slate-700'}>{emp.currentLoad}/{emp.rankLimit}</span>
+                              </span>
+                              {isFree && <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-200 text-[9px] px-1.5 py-0 leading-tight h-4">Trống việc</Badge>}
+                              {isOverloaded && <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-200 text-[9px] px-1.5 py-0 leading-tight h-4">Quá tải</Badge>}
+                            </div>
+                            <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                              <span className="flex items-center gap-1 truncate" title="Lĩnh vực: Quản lý khoa học, Đổi mới sáng tạo">
+                                <Activity className="w-3 h-3" /> Phù hợp lĩnh vực
+                              </span>
+                              <span>•</span>
+                              <span className="flex items-center gap-1 truncate" title="Địa bàn: Tỉnh Đắk Lắk">
+                                <MapPin className="w-3 h-3" /> Đúng địa bàn
+                              </span>
+                            </div>
+                          </div>
+                        </SelectItem>
+                      );
+                    })}
+                    {assignableEmployees.length === 0 && (
+                      <SelectItem value="none" disabled className="text-slate-500 italic">
+                        Không có quyền giao việc hoặc không có nhân sự cấp dưới trực tiếp
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

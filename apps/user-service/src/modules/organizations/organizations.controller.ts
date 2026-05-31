@@ -250,6 +250,7 @@ export class OrganizationsController {
           jobTitleName: j?.name ?? '',
           quantity: s.quantity,
           currentCount: s.currentCount ?? 0,
+          currentEmployeeNames: s.current_employee_names ?? [],
           jobTitleDomainName:
             this.getCatName(j?.domain) ||
             [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.domains ?? []).map((d: any) => this.getCatName(d.domain))))].filter(Boolean).join(', '),

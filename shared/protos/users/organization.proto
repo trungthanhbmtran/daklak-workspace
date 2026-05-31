@@ -133,6 +133,7 @@ message StaffingReportItem {
   string job_title_geographic_area_name = 9;
   // Phân công từng vị trí (từng phó): mỗi slot có lĩnh vực, nhiệm vụ, khu vực riêng
   repeated StaffingSlotItem slots = 10;
+  repeated string current_employee_names = 11;
 }
 
 message StaffingSlotItem {

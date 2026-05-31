@@ -43,11 +43,6 @@ export function SlotCard({
   );
   const [monitoredUnitIds, setMonitoredUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
 
-  // --- STATE TÌM KIẾM ---
-  const [searchDomain, setSearchDomain] = useState("");
-  const [searchGeo, setSearchGeo] = useState("");
-  const [searchUnit, setSearchUnit] = useState("");
-
   useEffect(() => {
     setDescription(existingSlot?.description ?? "");
     setDomainIds(existingSlot?.domainIds ?? []);
@@ -57,32 +52,6 @@ export function SlotCard({
     );
     setMonitoredUnitIds(existingSlot?.monitoredUnitIds ?? []);
   }, [existingSlot]);
-
-  // --- LỌC DANH SÁCH THEO TỪ KHÓA ---
-  const filteredDomains = domainsForUnit.filter(d => d.name.toLowerCase().includes(searchDomain.toLowerCase()));
-  const filteredGeos = geoAreas.filter(g => g.name.toLowerCase().includes(searchGeo.toLowerCase()));
-  const filteredUnits = subordinateUnits.filter(u =>
-    u.name.toLowerCase().includes(searchUnit.toLowerCase()) ||
-    u.code?.toLowerCase().includes(searchUnit.toLowerCase())
-  );
-
-  // --- HÀM TOGGLE KHÔNG ĐỔI ---
-  const toggleDomain = (id: number) => setDomainIds(p => p.includes(id) ? p.filter(d => d !== id) : [...p, id]);
-  const toggleGeoArea = (id: number) => setGeographicAreaIds(p => p.includes(id) ? p.filter(g => g !== id) : [...p, id]);
-  const toggleUnit = (id: number) => setMonitoredUnitIds(p => p.includes(id) ? p.filter(u => u !== id) : [...p, id]);
-
-  // --- HÀM CHỌN NHANH / BỎ CHỌN NHANH ---
-  const toggleSelectAllGeo = () => {
-    // Nếu đã chọn hết các mục đang hiển thị sau lọc -> Bỏ chọn những mục đó
-    const visibleIds = filteredGeos.map(g => g.id);
-    const isAllVisibleSelected = visibleIds.every(id => geographicAreaIds.includes(id));
-
-    if (isAllVisibleSelected) {
-      setGeographicAreaIds(p => p.filter(id => !visibleIds.includes(id)));
-    } else {
-      setGeographicAreaIds(p => Array.from(new Set([...p, ...visibleIds])));
-    }
-  };
 
   return (
     <Card className="rounded-xl border border-border bg-card shadow-sm flex flex-col h-full">

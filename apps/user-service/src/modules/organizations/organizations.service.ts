@@ -444,7 +444,26 @@ export class OrganizationsService {
         },
       },
     });
-    return { data: items };
+    
+    // Fetch all current employees holding these job positions in this unit
+    const jobPositions = await this.prisma.jobPosition.findMany({
+      where: { unitId },
+      include: { user: true }
+    });
+
+    const data = items.map(item => {
+      const assignedUsers = jobPositions
+        .filter(jp => jp.jobTitleId === item.jobTitleId)
+        .map(jp => jp.user?.fullName)
+        .filter(Boolean) as string[];
+      
+      return {
+        ...item,
+        current_employee_names: assignedUsers
+      };
+    });
+
+    return { data };
   }
 
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó

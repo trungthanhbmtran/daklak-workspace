@@ -152,6 +152,7 @@ function normalizeStaffingReportItem(r: any): StaffingReportItem {
     jobTitleName: r.jobTitleName ?? r.job_title_name ?? "",
     quantity: r.quantity ?? 0,
     currentCount: r.currentCount ?? r.current_count ?? 0,
+    currentEmployeeNames: r.currentEmployeeNames ?? r.current_employee_names ?? [],
     jobTitleDomainName: r.jobTitleDomainName ?? r.job_title_domain_name,
     jobTitleMonitoredUnitNames:
       r.jobTitleMonitoredUnitNames ?? r.job_title_monitored_unit_names ?? [],

@@ -33,6 +33,41 @@ export interface CategoryOption {
   name: string;
   order?: number;
 }
+export interface OrganizationUnitNode {
+  id: number;
+  code: string;
+  name: string;
+  shortName?: string;
+  typeId: number;
+  parentId: number | null;
+  hierarchyPath?: string;
+  typeName?: string;
+  domainIds?: number[];
+  domainNames?: string[];
+  scope?: string;
+  geographicAreaIds?: number[];
+  geographicAreaNames?: string[];
+  children?: OrganizationUnitNode[];
+}
+
+export interface CreateUnitPayload {
+  code: string;
+  name: string;
+  shortName?: string;
+  typeId: number;
+  parentId?: number | null;
+  domainIds?: number[];
+  scope?: string;
+  geographicAreaIds?: number[];
+}
+
+export interface CategoryOption {
+  id: number;
+  group_code: string;
+  code: string;
+  name: string;
+  order?: number;
+}
 
 /** Chức danh (dùng cho dropdown định biên), kèm lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý */
 export interface JobTitleItem {
@@ -74,11 +109,12 @@ export interface StaffingReportItem {
   jobTitleName: string;
   quantity: number;
   currentCount: number;
+  /** Danh sách tên người đang giữ vị trí */
+  currentEmployeeNames?: string[];
   /** Lĩnh vực phụ trách (chức danh - mặc định chung) */
   jobTitleDomainName?: string;
-  /** Theo dõi phòng ban (tên đơn vị) */
-  jobTitleMonitoredUnitNames?: string[];
   /** Khu vực địa lý phụ trách */
+  jobTitleMonitoredUnitNames?: string[];
   jobTitleGeographicAreaName?: string;
   /** Phân công từng vị trí (từng phó): mỗi slot có lĩnh vực, nhiệm vụ, khu vực riêng */
   slots?: StaffingSlotItem[];

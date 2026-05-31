@@ -259,7 +259,7 @@ export class UsersService implements OnModuleInit {
       include: {
         credential: true,
         jobPositions: {
-          include: { unit: true },
+          include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
         },
       },
@@ -297,11 +297,14 @@ export class UsersService implements OnModuleInit {
     const roles = userWithRoles?.roles?.map((r) => r.code) ?? [];
 
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
+    const firstPosition = user.jobPositions?.[0];
+    const unitId = firstPosition?.unit?.id ?? null;
+    const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
+    
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email, roles },
+      { sub: user.id, email: user.email, roles, unitId, jobTitleCode },
       { expiresIn: jwtExpiresIn },
     );
-    const firstPosition = user.jobPositions?.[0];
     const unitName = firstPosition?.unit?.name ?? null;
     const expiresIn = this.getAccessTokenExpiresInSeconds();
 
@@ -346,7 +349,7 @@ export class UsersService implements OnModuleInit {
       include: {
         roles: true,
         jobPositions: {
-          include: { unit: true },
+          include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
         },
       },
@@ -366,11 +369,14 @@ export class UsersService implements OnModuleInit {
     const roles = user.roles?.map((r) => r.code) ?? [];
 
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
+    const firstPosition = user.jobPositions?.[0];
+    const unitId = firstPosition?.unit?.id ?? null;
+    const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
+
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email, roles },
+      { sub: user.id, email: user.email, roles, unitId, jobTitleCode },
       { expiresIn: jwtExpiresIn },
     );
-    const firstPosition = user.jobPositions?.[0];
     const unitName = firstPosition?.unit?.name ?? null;
     const expiresIn = this.getAccessTokenExpiresInSeconds();
 

@@ -100,6 +100,12 @@ message ListEmployeesRequest {
 
   int32 civilServantRankId = 8;
   int32 partyTitleId = 9;
+
+  // PBAC Caller Context
+  bool assignableOnly = 10;
+  string callerEmail = 11;
+  int32 callerUnitId = 12;
+  string callerJobCode = 13;
 }
 
 // ---------------- RESPONSES ----------------

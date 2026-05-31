@@ -12,6 +12,10 @@ import {
   OnModuleInit,
   ParseIntPipe,
   BadRequestException,
+  NotFoundException,
+  ConflictException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -78,9 +82,9 @@ export class OrganizationsController implements OnModuleInit {
       return { success: true, data: result };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi tạo đơn vị';
-      throw new BadRequestException(
-        typeof message === 'string' ? message : message,
-      );
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 6) throw new ConflictException(message);
+      throw new BadRequestException(message);
     }
   }
 
@@ -163,9 +167,8 @@ export class OrganizationsController implements OnModuleInit {
       return { success: true, data: result };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Đơn vị không tồn tại';
-      throw new BadRequestException(
-        typeof message === 'string' ? message : message,
-      );
+      if (err?.code === 5) throw new NotFoundException(message);
+      throw new BadRequestException(message);
     }
   }
 
@@ -210,9 +213,9 @@ export class OrganizationsController implements OnModuleInit {
       return { success: true, data: result };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi cập nhật đơn vị';
-      throw new BadRequestException(
-        typeof message === 'string' ? message : message,
-      );
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 6) throw new ConflictException(message);
+      throw new BadRequestException(message);
     }
   }
 
@@ -230,9 +233,9 @@ export class OrganizationsController implements OnModuleInit {
       };
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi xóa đơn vị';
-      throw new BadRequestException(
-        typeof message === 'string' ? message : message,
-      );
+      if (err?.code === 5) throw new NotFoundException(message);
+      if (err?.code === 9) throw new ConflictException(message); // FAILED_PRECONDITION
+      throw new BadRequestException(message);
     }
   }
 
@@ -299,6 +302,9 @@ export class OrganizationsController implements OnModuleInit {
       monitoredUnitIds?: number[];
     },
   ) {
+    if (body.monitoredUnitIds !== undefined && !Array.isArray(body.monitoredUnitIds)) {
+      throw new BadRequestException('monitoredUnitIds phải là một mảng');
+    }
     const result = await firstValueFrom(
       this.orgService.SetStaffingSlot({
         staffingId: body.staffingId,
