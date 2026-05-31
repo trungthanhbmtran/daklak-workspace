@@ -3071,7 +3071,7 @@ async function main() {
       route: 'work-plans/master-plans',
       icon: 'layers-outline',
       order: 2,
-      res: 'HRM_EMPLOYEE',
+      res: 'PLAN',
     },
     {
       code: 'HRM_MENU_TASKS',
@@ -3079,7 +3079,7 @@ async function main() {
       route: 'work-plans/tasks',
       icon: 'list-outline',
       order: 3,
-      res: 'HRM_EMPLOYEE',
+      res: 'TASK',
     },
     {
       code: 'HRM_MENU_CRITERIA',
@@ -3087,7 +3087,7 @@ async function main() {
       route: 'performance/criteria',
       icon: 'document-text-outline',
       order: 4,
-      res: 'HRM_EMPLOYEE',
+      res: 'KPI',
     },
     {
       code: 'HRM_MENU_KPI',
@@ -3095,7 +3095,7 @@ async function main() {
       route: 'performance/evaluations',
       icon: 'settings-outline',
       order: 5,
-      res: 'HRM_EMPLOYEE',
+      res: 'KPI',
     },
     {
       code: 'HRM_MENU_RANK_TEMPLATES',
@@ -3139,7 +3139,9 @@ async function main() {
         service: 'HRM_SERVICE',
       },
     });
-    await linkMenuPBAC(node.id, res, 'READ');
+    // For PBAC scopes (PLAN, TASK, KPI), use VIEW instead of READ
+    const action = ['PLAN', 'TASK', 'KPI'].includes(res) ? 'VIEW' : 'READ';
+    await linkMenuPBAC(node.id, res, action);
   }
 
   // 4. Content Module
@@ -3855,6 +3857,7 @@ async function main() {
     { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
   ];
 
+  const templatesToCreate: { unitTypeId: number; jobTitleId: number }[] = [];
   for (const link of links) {
     const jobTitle = await prisma.jobTitle.findUnique({
       where: { code: link.jt },
@@ -3863,19 +3866,17 @@ async function main() {
       for (const typeCode of link.types) {
         const typeId = unitTypeMap[typeCode]?.id;
         if (typeId) {
-          await prisma.unitTypeJobTemplate.upsert({
-            where: {
-              unitTypeId_jobTitleId: {
-                unitTypeId: typeId,
-                jobTitleId: jobTitle.id,
-              },
-            },
-            update: {},
-            create: { unitTypeId: typeId, jobTitleId: jobTitle.id },
-          });
+          templatesToCreate.push({ unitTypeId: typeId, jobTitleId: jobTitle.id });
         }
       }
     }
+  }
+
+  if (templatesToCreate.length > 0) {
+    await prisma.unitTypeJobTemplate.createMany({
+      data: templatesToCreate,
+      skipDuplicates: true,
+    });
   }
 
   // ==========================================================
