@@ -29,6 +29,7 @@ Nếu muốn deploy thủ công trên server:
 
 # Pull images mới nhất
 
+
 docker compose -f docker-compose.prod.yml pull
 
 # Chạy migrations (quan trọng)
