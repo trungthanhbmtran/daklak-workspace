@@ -14,6 +14,8 @@ import { Save, AlertTriangle, Sparkles, PlusCircle, Target, Briefcase, Activity,
 import { Textarea } from '@/components/ui/textarea';
 import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
 import { useUser } from '@/hooks/useUser';
+import { hrmPlansApi } from "@/features/hrm/api";
+import { useQuery } from "@tanstack/react-query";
 
 export function TaskCreateClient() {
   const router = useRouter();
@@ -29,6 +31,13 @@ export function TaskCreateClient() {
   const [aiInstruction, setAiInstruction] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
+  const [planId, setPlanId] = useState('');
+
+  const { data: plansRes } = useQuery({
+    queryKey: ["hrm-master-plans"],
+    queryFn: () => hrmPlansApi.list(),
+  });
+  const masterPlans = plansRes?.data || [];
 
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true } as any);
   const employees = employeesData?.data?.map(emp => {
@@ -82,7 +91,8 @@ export function TaskCreateClient() {
     e.preventDefault();
     if (isOverload) return toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức!');
     try {
-      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, assignerCode: user?.employeeCode || '', taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId });
+      const finalPlanId = planId === 'none' || planId === '' ? undefined : Number(planId);
+      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, assignerCode: user?.employeeCode || '', taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
       toast.success('Giao việc thành công!');
       router.push('/services/hrm/work-plans/tasks');
     } catch { toast.error('Lỗi khi giao việc'); }
@@ -160,6 +170,25 @@ export function TaskCreateClient() {
                     </label>
                     <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required className="h-11" />
                   </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    Kế hoạch / Mục tiêu liên kết
+                  </label>
+                  <Select value={planId} onValueChange={setPlanId}>
+                    <SelectTrigger className="h-11 bg-slate-50 focus-visible:bg-white border-slate-200">
+                      <SelectValue placeholder="Chọn kế hoạch (Không bắt buộc)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none"><span className="text-slate-500 italic">Không liên kết kế hoạch</span></SelectItem>
+                      {masterPlans.map((plan: any) => (
+                        <SelectItem key={plan.id} value={plan.id.toString()}>
+                          <span className="font-medium text-slate-800">{plan.title}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </form>
             </CardContent>

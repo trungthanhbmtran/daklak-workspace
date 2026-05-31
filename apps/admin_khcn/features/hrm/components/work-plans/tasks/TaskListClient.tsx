@@ -9,7 +9,7 @@ import {
   CheckCircle2, Clock, PlayCircle,
   AlertCircle, Filter,
   LayoutGrid, List as ListIcon,
-  Calendar, User, MessageSquare, Send, Reply, X, ArrowLeftCircle, Split
+  Calendar, User, MessageSquare, Send, Reply, X, ArrowLeftCircle, Split, Target
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -29,7 +29,7 @@ export const TaskListClient = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<any>(null);
-  
+
   // New features state
   const [activeTab, setActiveTab] = useState<'ALL' | 'MY_TASKS' | 'DEPT_TASKS'>('ALL');
   const [rejectReason, setRejectReason] = useState('');
@@ -160,6 +160,34 @@ export const TaskListClient = () => {
       refetch();
     } catch (e: any) {
       toast.error('Lỗi khi trả lại công việc');
+    }
+  };
+
+  const handleCompleteTask = async () => {
+    if (!selectedTask) return;
+    try {
+      await hrmTasksApi.updateStatus(selectedTask.id.toString(), {
+        status: 'DONE',
+      });
+      toast.success('Đã hoàn thành công việc!');
+      setSelectedTask(null);
+      refetch();
+    } catch (e: any) {
+      toast.error('Lỗi khi hoàn thành công việc');
+    }
+  };
+
+  const handleRequestCoordination = async () => {
+    if (!selectedTask) return;
+    try {
+      await hrmTasksApi.addComment(selectedTask.id.toString(), {
+        authorCode: currentUser.code,
+        content: `⚠️ [ĐỀ NGHỊ PHỐI HỢP]: Tôi cần hỗ trợ để xử lý công việc này.`,
+      });
+      toast.success('Đã gửi đề nghị phối hợp');
+      fetchComments(selectedTask.id);
+    } catch (e: any) {
+      toast.error('Lỗi khi gửi đề nghị');
     }
   };
 
@@ -414,6 +442,11 @@ export const TaskListClient = () => {
                     <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest border border-white/30">
                       {selectedTask.priority || 'MEDIUM'} PRIORITY
                     </span>
+                    {selectedTask.plan && (
+                      <span className="px-3 py-1 bg-indigo-500/80 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest flex items-center border border-indigo-400">
+                        <Target className="w-3 h-3 mr-1" /> {selectedTask.plan.title}
+                      </span>
+                    )}
                     {selectedTask.status === 'DONE' && (
                       <span className="px-3 py-1 bg-emerald-500/80 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-widest flex items-center border border-emerald-400">
                         <CheckCircle2 className="w-3 h-3 mr-1" /> HOÀN THÀNH
@@ -456,7 +489,7 @@ export const TaskListClient = () => {
                         {selectedTask.description || 'Chưa có mô tả chi tiết cho công việc này.'}
                       </div>
                     </div>
-                    
+
                     {/* Chat Box / Trao đổi công việc */}
                     <div className="mt-8">
                       <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
@@ -494,8 +527,8 @@ export const TaskListClient = () => {
                           )}
                         </div>
                         <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-3xl flex items-center gap-2">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             disabled={selectedTask.status === 'DONE'}
                             value={chatMessage}
                             onChange={(e) => setChatMessage(e.target.value)}
@@ -503,8 +536,8 @@ export const TaskListClient = () => {
                             placeholder={selectedTask.status === 'DONE' ? "Công việc đã hoàn thành, không thể chat" : "Nhập tin nhắn trao đổi..."}
                             className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                           />
-                          <Button 
-                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim()} 
+                          <Button
+                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim()}
                             onClick={handleSendMessage}
                             className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0"
                           >
@@ -563,7 +596,7 @@ export const TaskListClient = () => {
                         </div>
                       </div>
                     )}
-                    
+
                     {/* Hành động */}
                     {selectedTask.status !== 'DONE' && (
                       <div className="pt-6">
@@ -571,20 +604,29 @@ export const TaskListClient = () => {
                           <span className="w-2 h-6 bg-slate-500 rounded-full mr-3"></span>
                           Hành động
                         </h4>
-                        <div className="grid grid-cols-2 gap-3">
-                          <Button 
-                            variant="outline" 
-                            className="rounded-xl border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 bg-white"
-                            onClick={() => setIsRejectOpen(true)}
+                        <div className="grid grid-cols-1 gap-3">
+                          <Button
+                            className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20"
+                            onClick={handleCompleteTask}
                           >
-                            <Reply className="w-4 h-4 mr-2" /> Trả lại
+                            <CheckCircle2 className="w-5 h-5 mr-2" /> Hoàn thành công việc
                           </Button>
-                          <Button 
-                            variant="outline" 
-                            className="rounded-xl border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 bg-white"
-                          >
-                            <Split className="w-4 h-4 mr-2" /> Chia việc
-                          </Button>
+                          <div className="grid grid-cols-2 gap-3">
+                            <Button
+                              variant="outline"
+                              className="rounded-xl border-amber-200 text-amber-600 hover:bg-amber-50 hover:text-amber-700 bg-white"
+                              onClick={handleRequestCoordination}
+                            >
+                              <Split className="w-4 h-4 mr-2" /> Xin phối hợp
+                            </Button>
+                            <Button
+                              variant="outline"
+                              className="rounded-xl border-rose-200 text-rose-600 hover:bg-rose-50 hover:text-rose-700 bg-white"
+                              onClick={() => setIsRejectOpen(true)}
+                            >
+                              <Reply className="w-4 h-4 mr-2" /> Trả lại
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -595,7 +637,7 @@ export const TaskListClient = () => {
           )}
         </DialogContent>
       </Dialog>
-      
+
       {/* Reject Task Dialog */}
       <Dialog open={isRejectOpen} onOpenChange={setIsRejectOpen}>
         <DialogContent className="max-w-md font-sans p-6 rounded-[2rem]">
@@ -618,7 +660,7 @@ export const TaskListClient = () => {
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* Smart Assign Dialog */}
       <Dialog
         open={!!taskToAssign}
