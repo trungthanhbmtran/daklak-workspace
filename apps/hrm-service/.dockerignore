@@ -7,3 +7,12 @@ __pycache__/
 .vscode
 venv/
 .DS_Store
+.git
+.env
+node_modules
+apps/*/node_modules
+dist
+apps/*/dist
+npm-debug.log
+.idea
+.vscode

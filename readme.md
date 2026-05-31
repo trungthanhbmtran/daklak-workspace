@@ -1,5 +1,6 @@
 # Daklak Workspace Deployment Guide
 npx prisma migrate dev --name init
+npx prisma migrate dev --name mo_ta_su_thay_doi
 npx prisma generate
 Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông qua GitHub Actions.
 
@@ -38,8 +39,17 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-servi
 docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
 
+
+echo "Xóa data cũ và tạo lại schema..."
+docker exec -it daklak-workspace-user-service-1 npx prisma migrate reset --force --skip-seed
+docker exec -it daklak-workspace-hrm-service-1 npx prisma migrate reset --force --skip-seed
+docker exec -it daklak-workspace-workflow-service-1 npx prisma migrate reset --force --skip-seed
+docker exec -it daklak-workspace-media-service-1 npx prisma migrate reset --force --skip-seed
+docker exec -it daklak-workspace-posts-service-1 npx prisma migrate reset --force --skip-seed
+docker exec -it daklak-workspace-document-service-1 npx prisma migrate reset --force --skip-seed
+
 # Khởi động lại các services
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d portal-goverment nginx
 
 # Chạy seeders (nếu cần dữ liệu mẫu)
 # Lưu ý: Nên chạy theo thứ tự dưới đây
