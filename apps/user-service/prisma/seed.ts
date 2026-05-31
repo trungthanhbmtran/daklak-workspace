@@ -2499,7 +2499,6 @@ async function main() {
     { code: 'MICROSERVICE', name: 'Dịch vụ hệ thống' },
     { code: 'PROVINCE', name: 'Danh mục Tỉnh/Thành' },
     { code: 'DISTRICT', name: 'Danh mục Quận/Huyện' },
-    { code: 'GEO_AREA', name: 'Danh mục Phường/Xã' },
     { code: 'GEO_AREA', name: 'Khu vực địa lý' },
     { code: 'DOCUMENT_TYPE', name: 'Loại văn bản' },
     { code: 'URGENCY_LEVEL', name: 'Độ khẩn' },
