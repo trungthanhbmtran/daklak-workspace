@@ -4293,7 +4293,7 @@ async function main() {
       pbacRoleCode = 'MANAGER';
     }
 
-    const pbacRole = await prisma.role.findUnique({ where: { code: pbacRoleCode }});
+    const pbacRole = await prisma.role.findUnique({ where: { code: pbacRoleCode } });
     const rolesConnect = [{ id: roleMap['AUTHOR']?.id || 1 }];
     if (pbacRole) {
       rolesConnect.push({ id: pbacRole.id });
@@ -4302,7 +4302,7 @@ async function main() {
     // We assume DEFAULT_PASSWORD is still in scope
     const user = await prisma.user.upsert({
       where: { email },
-      update: { 
+      update: {
         fullName,
         roles: { set: [], connect: rolesConnect }
       },
@@ -4503,6 +4503,14 @@ async function main() {
     true,
   );
   await assignLeader(
+    'vonguyenhoangnam@daklak.gov.vn',
+    'vonguyenhoangnam',
+    'Võ Nguyễn Hoàng Nam',
+    'H15.07.04',
+    'GIAM_DOC',
+    true,
+  );
+  await assignLeader(
     'lexuanquang@daklak.gov.vn',
     'lexuanquang',
     'Lê Xuân Quang',
@@ -4567,6 +4575,46 @@ async function main() {
     'H15.07.04.02',
     'TRUONG_PHONG',
     true,
+  );
+  await assignLeader(
+    'leanhtuan@daklak.gov.vn',
+    'leanhtuan',
+    'Lê Anh Tuấn',
+    'H15.07.04.01',
+    'TRUONG_PHONG',
+    true,
+  );
+  await assignLeader(
+    'chautrongphat@daklak.gov.vn',
+    'chautrongphat',
+    'Châu Trọng Phát',
+    'H15.07.04.01',
+    'KE_TOAN',
+    false,
+  );
+  await assignLeader(
+    'phamtheanh@daklak.gov.vn',
+    'phamtheanh',
+    'Phạm Thế Anh',
+    'H15.07.04.03',
+    'VIEN_CHUC',
+    false,
+  );
+  await assignLeader(
+    'nguyenvuhuy@daklak.gov.vn',
+    'nguyenvuhuy',
+    'Nguyễn Vũ Huy',
+    'H15.07.04.03',
+    'NHAN_VIEN',
+    false,
+  );
+  await assignLeader(
+    'lethithanhkieu@daklak.gov.vn',
+    'lethithanhkieu',
+    'Lê Thị Thanh Kiều',
+    'H15.07.04.02',
+    'VIEN_CHUC',
+    false,
   );
   await assignLeader(
     'truongphonghc_kttdc@daklak.gov.vn',
