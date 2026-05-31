@@ -3908,28 +3908,28 @@ async function main() {
       name: 'Sở Khoa học và Công nghệ',
       shortName: 'Sở KH&CN',
     },
-    { code: 'SO_GTVT', name: 'Sở Giao thông vận tải', shortName: 'Sở GTVT' },
-    { code: 'SO_YTE', name: 'Sở Y tế', shortName: 'Sở Y tế' },
-    { code: 'SO_GDDT', name: 'Sở Giáo dục và Đào tạo', shortName: 'Sở GD&ĐT' },
-    { code: 'SO_TC', name: 'Sở Tài chính', shortName: 'Sở Tài chính' },
-    { code: 'SO_KHDT', name: 'Sở Kế hoạch và Đầu tư', shortName: 'Sở KH&ĐT' },
-    { code: 'SO_NV', name: 'Sở Nội vụ', shortName: 'Sở Nội vụ' },
-    { code: 'SO_XD', name: 'Sở Xây dựng', shortName: 'Sở Xây dựng' },
-    { code: 'SO_TP', name: 'Sở Tư pháp', shortName: 'Sở Tư pháp' },
+    { code: 'H15.08', name: 'Sở Giao thông vận tải', shortName: 'Sở GTVT' },
+    { code: 'H15.09', name: 'Sở Y tế', shortName: 'Sở Y tế' },
+    { code: 'H15.10', name: 'Sở Giáo dục và Đào tạo', shortName: 'Sở GD&ĐT' },
+    { code: 'H15.11', name: 'Sở Tài chính', shortName: 'Sở Tài chính' },
+    { code: 'H15.12', name: 'Sở Kế hoạch và Đầu tư', shortName: 'Sở KH&ĐT' },
+    { code: 'H15.13', name: 'Sở Nội vụ', shortName: 'Sở Nội vụ' },
+    { code: 'H15.14', name: 'Sở Xây dựng', shortName: 'Sở Xây dựng' },
+    { code: 'H15.15', name: 'Sở Tư pháp', shortName: 'Sở Tư pháp' },
     {
-      code: 'SO_VHTT',
+      code: 'H15.16',
       name: 'Sở Văn hóa - Thể thao và Du lịch',
       shortName: 'Sở VHTTDL',
     },
-    { code: 'SO_CT', name: 'Sở Công thương', shortName: 'Sở Công thương' },
+    { code: 'H15.17', name: 'Sở Công thương', shortName: 'Sở Công thương' },
     {
-      code: 'SO_NN',
+      code: 'H15.18',
       name: 'Sở Nông nghiệp và Phát triển nông thôn',
       shortName: 'Sở NN&PTNT',
     },
-    { code: 'SO_DT', name: 'Sở Dân tộc và Tôn giáo', shortName: 'Sở Dân tộc' },
-    { code: 'TT_TINH', name: 'Thanh tra Tỉnh', shortName: 'Thanh tra Tỉnh' },
-    { code: 'VP_UBND', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND' },
+    { code: 'H15.19', name: 'Sở Dân tộc và Tôn giáo', shortName: 'Sở Dân tộc' },
+    { code: 'H15.20', name: 'Thanh tra Tỉnh', shortName: 'Thanh tra Tỉnh' },
+    { code: 'H15.01', name: 'Văn phòng UBND tỉnh', shortName: 'VP UBND' },
   ];
 
   for (const d of depts) {
@@ -3942,60 +3942,60 @@ async function main() {
 
   // Thêm ví dụ UBND Xã (Trực thuộc Tỉnh theo mô hình 2 cấp)
   await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_XA_TAN_LOI' },
+    where: { code: 'H15.51' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
     create: {
-      code: 'UBND_XA_TAN_LOI',
+      code: 'H15.51',
       name: 'UBND Phường Tân Lợi',
       parentId: province.id,
       typeId: ubndXaTypeId,
     },
   });
   await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_XA_TAN_LAP' },
+    where: { code: 'H15.52' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
     create: {
-      code: 'UBND_XA_TAN_LAP',
+      code: 'H15.52',
       name: 'UBND Phường Tân Lập',
       parentId: province.id,
       typeId: ubndXaTypeId,
     },
   });
   await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_XA_TAN_AN' },
+    where: { code: 'H15.53' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
     create: {
-      code: 'UBND_XA_TAN_AN',
+      code: 'H15.53',
       name: 'UBND Phường Tân An',
       parentId: province.id,
       typeId: ubndXaTypeId,
     },
   });
   await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_XA_THANH_NHAT' },
+    where: { code: 'H15.54' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
     create: {
-      code: 'UBND_XA_THANH_NHAT',
+      code: 'H15.54',
       name: 'UBND Phường Thành Nhất',
       parentId: province.id,
       typeId: ubndXaTypeId,
     },
   });
   await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_XA_HOA_PHU' },
+    where: { code: 'H15.55' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
     create: {
-      code: 'UBND_XA_HOA_PHU',
+      code: 'H15.55',
       name: 'UBND Xã Hòa Phú',
       parentId: province.id,
       typeId: ubndXaTypeId,
     },
   });
   await prisma.organizationUnit.upsert({
-    where: { code: 'UBND_XA_EA_KAO' },
+    where: { code: 'H15.56' },
     update: { parentId: province.id, typeId: ubndXaTypeId },
     create: {
-      code: 'UBND_XA_EA_KAO',
+      code: 'H15.56',
       name: 'UBND Phường Ea Kao',
       parentId: province.id,
       typeId: ubndXaTypeId,
@@ -4516,7 +4516,7 @@ async function main() {
     'truongphongcn_ioc@daklak.gov.vn',
     'truongphongcn_ioc',
     'Phạm Thị CN',
-    'H15.07.04.CN',
+    'H15.07.04.03',
     'TRUONG_PHONG',
     true,
   );
@@ -4568,7 +4568,7 @@ async function main() {
     'tranvantan@daklak.gov.vn',
     'tranvantan',
     'Trần Văn Tân',
-    'SO_TC',
+    'H15.11',
     'GIAM_DOC',
     true,
   );
@@ -4586,7 +4586,7 @@ async function main() {
     'vuvanhung@daklak.gov.vn',
     'vuvanhung',
     'Vũ Văn Hưng',
-    'UBND_XA_TAN_LAP',
+    'H15.52',
     'BI_THU_DANG_BO',
     true,
   );
@@ -4594,7 +4594,7 @@ async function main() {
     'tranducnhat@daklak.gov.vn',
     'tranducnhat',
     'Trần Đức Nhật',
-    'UBND_XA_TAN_LAP',
+    'H15.52',
     'CHU_TICH',
     true,
   );
@@ -4603,7 +4603,7 @@ async function main() {
     'nguyenducvinh@daklak.gov.vn',
     'nguyenducvinh',
     'Nguyễn Đức Vinh',
-    'UBND_XA_TAN_AN',
+    'H15.53',
     'BI_THU_DANG_BO',
     true,
   );
@@ -4611,7 +4611,7 @@ async function main() {
     'phamtrungnghia@daklak.gov.vn',
     'phamtrungnghia',
     'Phạm Trung Nghĩa',
-    'UBND_XA_TAN_AN',
+    'H15.53',
     'CHU_TICH',
     true,
   );
@@ -4620,7 +4620,7 @@ async function main() {
     'caodinhhuy@daklak.gov.vn',
     'caodinhhuy',
     'Cao Đình Huy',
-    'SO_XD',
+    'H15.14',
     'GIAM_DOC',
     true,
   );
@@ -4629,7 +4629,7 @@ async function main() {
     'nguyenthanhliem@daklak.gov.vn',
     'nguyenthanhliem',
     'Nguyễn Thanh Liêm',
-    'UBND_XA_THANH_NHAT',
+    'H15.54',
     'BI_THU_DANG_BO',
     true,
   );
@@ -4637,7 +4637,7 @@ async function main() {
     'nguyendinhtam@daklak.gov.vn',
     'nguyendinhtam',
     'Nguyễn Đình Tâm',
-    'UBND_XA_THANH_NHAT',
+    'H15.54',
     'CHU_TICH',
     true,
   );
@@ -4645,7 +4645,7 @@ async function main() {
     'phamtienhung@daklak.gov.vn',
     'phamtienhung',
     'Phạm Tiến Hưng',
-    'UBND_XA_HOA_PHU',
+    'H15.55',
     'BI_THU_DANG_BO',
     true,
   );
@@ -4653,7 +4653,7 @@ async function main() {
     'nguyenthehau@daklak.gov.vn',
     'nguyenthehau',
     'Nguyễn Thế Hậu',
-    'UBND_XA_HOA_PHU',
+    'H15.55',
     'CHU_TICH',
     true,
   );
@@ -4661,7 +4661,7 @@ async function main() {
     'danggiaduan@daklak.gov.vn',
     'danggiaduan',
     'Đặng Gia Duẩn',
-    'UBND_XA_EA_KAO',
+    'H15.56',
     'BI_THU_DANG_BO',
     true,
   );
@@ -4669,7 +4669,7 @@ async function main() {
     'ledaithang@daklak.gov.vn',
     'ledaithang',
     'Lê Đại Thắng',
-    'UBND_XA_EA_KAO',
+    'H15.56',
     'CHU_TICH',
     true,
   );
@@ -4738,7 +4738,8 @@ async function main() {
     'H15.07.01.01',
     'H15.07.01.02',
     'H15.07.04.01',
-    'H15.07.04.CN',
+    'H15.07.04.02',
+    'H15.07.04.03',
     'H15.07.02.01',
     'H15.07.02.02',
     'H15.07.02.03',
@@ -5032,7 +5033,11 @@ async function main() {
     'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
 
     // Task
-    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
+    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode OR resource.ownerId == currentUserId",
+    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+    'TASK.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.COMPLETE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
 
     // Objective
     'OBJECTIVE.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode",
