@@ -97,3 +97,41 @@ Dịch vụ mới thêm **Cổng thông tin Công dân (`portal-goverment`)** ch
   ```
 
 *Lưu ý: Đảm bảo tệp `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*
+
+## 6. Tài khoản thử nghiệm (Module Giao việc)
+Dưới đây là danh sách các tài khoản tiêu biểu dùng để test các luồng của chức năng Giao việc (Task Management) dựa theo phân quyền PBAC. Tất cả tài khoản đều dùng mật khẩu mặc định (thường là `Abc@123456`).
+
+### 6.1. Luồng Giao việc & Đánh giá (Dành cho Lãnh đạo Đơn vị - LEADER)
+> **Quyền hạn**: `TASK.*` (Toàn quyền sinh việc, giao việc xuyên suốt từ trên xuống, đánh giá, phê duyệt).
+- **Đỗ Hữu Huy** (Chủ tịch UBND Tỉnh)
+  - Username: `dohuuhuy` (Cơ quan: UBND Tỉnh Đắk Lắk - `H15`)
+- **Bùi Thanh Toàn** (Giám đốc Sở KHCN)
+  - Username: `buithanhtoan` (Cơ quan: Sở Khoa học & Công nghệ - `H15.07`)
+- **Phạm Gia Việt** (Phó Giám đốc Sở KHCN)
+  - Username: `phamgiaviet` (Cơ quan: Sở Khoa học & Công nghệ - `H15.07`)
+- **Lê Xuân Quang** (Phó Giám đốc Trung tâm IOC)
+  - Username: `lexuanquang` (Cơ quan: Trung tâm IOC - `H15.07.04`)
+- **Trần Duy Tân** (Phó Giám đốc Trung tâm IOC)
+  - Username: `tranduytan` (Cơ quan: Trung tâm IOC - `H15.07.04`)
+
+### 6.2. Luồng Giao việc nội bộ phòng & Quản lý (Dành cho Quản lý cấp phòng - MANAGER)
+> **Quyền hạn**: `TASK.CREATE`, `TASK.ASSIGN`, `TASK.COMPLETE`, `TASK.UPDATE`, `TASK.VIEW` (Chỉ giao việc trong phạm vi phòng ban mình quản lý hoặc công việc mình làm chủ sở hữu).
+- **Nguyễn Văn A** (Chánh Văn phòng Sở)
+  - Username: `nguyenvana` (Cơ quan: Văn phòng Sở KHCN - `H15.07.05`)
+- **Ngô Thị H** (Giám đốc Trung tâm IOC)
+  - Username: `ngothih` (Cơ quan: Trung tâm IOC - `H15.07.04`)
+- **Phạm Thị CN** (Trưởng phòng Hạ tầng Đô thị)
+  - Username: `truongphongcn_ioc` (Cơ quan: Phòng Hạ tầng đô thị IOC - `H15.07.04.03`)
+- **Lê Quang Thanh** (Trưởng phòng)
+  - Username: `lequangthanh` (Cơ quan: Phòng Hạ tầng đô thị IOC - `H15.07.04.03`)
+- **Lê Trọng Vũ** (Trưởng phòng)
+  - Username: `letrongvu` (Cơ quan: Phòng Khai thác và Quản lý dữ liệu - `H15.07.04.02`)
+
+### 6.3. Luồng Nhận việc & Báo cáo tiến độ (Dành cho Nhân viên/Chuyên viên - STAFF)
+> **Quyền hạn**: `TASK.VIEW`, `TASK.UPDATE`, `TASK.COMMENT`, `TASK.COMPLETE` (Chỉ được xem, nhận việc, cập nhật tiến độ, thảo luận, và báo cáo hoàn thành cho công việc được giao).
+- **Trần Trung Thành** (Công chức phụ trách)
+  - Username: `trungthanh` (Cơ quan: Sở KHCN - `H15.07`)
+- **Trần Trung Thành** (Nhân viên)
+  - Username: `trantrungthanh` (Cơ quan: Phòng Quản lý CĐMS - `H15.07.10`)
+- **Nguyễn Kiều Trang** (Nhân viên)
+  - Username: `nguyenkieutrang` (Cơ quan: Phòng Hành chính tổng hợp IOC - `H15.07.04.01`)
