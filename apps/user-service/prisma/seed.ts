@@ -1,5 +1,11 @@
 import * as bcrypt from 'bcrypt';
-import { PrismaClient } from '@generated/prisma/client';
+import type { PrismaClient as PrismaClientType } from '@generated/prisma/client';
+let PrismaClient: typeof PrismaClientType;
+try {
+  PrismaClient = require('@generated/prisma/client').PrismaClient;
+} catch (e) {
+  PrismaClient = require('../generated/prisma/client').PrismaClient;
+}
 import * as dotenv from 'dotenv';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
@@ -5006,43 +5012,186 @@ async function main() {
   }
   console.log('✅ Hoàn tất Seed PBAC Engine.');
 
-  for (const rd of roleDefinitions) {
-    const permConnect = await getPerms(rd.perms);
-    await prisma.systemConfig.upsert({
-      where: { key: `ROLE_SCOPE_${rd.code}` },
-      update: { value: rd.scope },
-      create: { key: `ROLE_SCOPE_${rd.code}`, value: rd.scope, description: `Scope for ${rd.code}` }
-    });
-
-    await prisma.role.upsert({
-      where: { code: rd.code },
-      update: {
-        name: rd.name,
-        permissions: { set: [], connect: permConnect }
-      },
-      create: {
-        code: rd.code,
-        name: rd.name,
-        permissions: { connect: permConnect }
-      }
-    });
-  }
-  console.log('✅ Hoàn tất Seed PBAC Engine.');
-
   // ==========================================================
-  // DÁN ĐOẠN CODE MỚI VÀO ĐÂY BẮT ĐẦU TỪ DÒNG NÀY
+  // MỞ RỘNG POLICY PBAC CHO HỆ THỐNG LIÊN THÔNG & HRM
   // ==========================================================
   console.log('🔹 Mở rộng Policy PBAC cho hệ thống liên thông & HRM...');
 
   const extendedPbacPolicies = {
     ...pbacPolicies,
+    // Document Incoming
     'DOC_INCOMING.PROCESS': "ALLOW IF currentUserId IN resource.processingUsers OR currentDepartmentId == resource.processingDepartmentId",
-    // ... (toàn bộ đoạn code tôi vừa cung cấp ở trên)
+    'DOC_INCOMING.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId",
+    'DOC_OUTGOING.ISSUE': "ALLOW IF user.positionLevel >= 2",
 
-    // ==========================================================
-    // KẾT THÚC ĐOẠN CODE MỚI
-    // ==========================================================
+    // Plan
+    'PLAN.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId OR resource.visibility == 'PUBLIC'",
+    'PLAN.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.collaborators",
+    'PLAN.APPROVE': "ALLOW IF user.positionLevel >= 3 AND resource.departmentId == currentDepartmentId",
+    'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
+
+    // Objective
+    'OBJECTIVE.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId",
+    'OBJECTIVE.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
+    'OBJECTIVE.APPROVE': "ALLOW IF user.positionLevel >= 3",
+
+    // KPI
+    'KPI.VIEW': "ALLOW IF resource.ownerId == currentUserId OR resource.managerId == currentUserId OR user.positionLevel >= 3",
+    'KPI.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
+    'KPI.EVALUATE': "ALLOW IF currentUserId == resource.managerId OR user.positionLevel >= 3",
+
+    // HRM
+    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR currentDepartmentId == resource.departmentId OR user.role == 'ADMIN'",
+    'HRM_EMPLOYEE.UPDATE': "ALLOW IF resource.id == currentUserId OR user.role == 'ADMIN'",
+
+    // Report
+    'REPORT.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId OR user.positionLevel >= 3",
+    'REPORT.EXPORT': "ALLOW IF user.positionLevel >= 2"
+  };
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_POLICIES_EXTENDED' },
+    update: { value: JSON.stringify(extendedPbacPolicies) },
+    create: { key: 'PBAC_POLICIES_EXTENDED', value: JSON.stringify(extendedPbacPolicies), description: 'Extended PBAC Policies' }
+  });
+
+
+
+  // ==========================================================
+  // SYNC ACCOUNTS & PBAC ROLES TỪ DANH SÁCH NHÂN VIÊN HRM
+  // ==========================================================
+  console.log('🔹 Tạo tài khoản và map quyền PBAC cho nhân viên (từ HRM)...');
+
+  const unitMap = Object.fromEntries((await prisma.organizationUnit.findMany()).map(u => [u.code, u.id]));
+  const jobMap = Object.fromEntries((await prisma.jobTitle.findMany()).map(j => [j.code, j.id]));
+
+  const EMPLOYEES = [
+    // --- Lãnh đạo Sở KHCN ---
+    { fullName: 'Bùi Thanh Toàn', firstname: 'Bùi Thanh', lastname: 'Toàn', employeeCode: 'NV_001', email: 'buithanhtoan@daklak.gov.vn', phone: '0901000001', identityCard: '001000001', departmentId: unitMap['H15.07'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['SENIOR_SPECIALIST'], partyTitleId: jobMap['BI_THU_DANG_BO'] },
+    { fullName: 'Phạm Gia Việt', firstname: 'Phạm Gia', lastname: 'Việt', employeeCode: 'NV_002', email: 'phamgiaviet@daklak.gov.vn', phone: '0901000002', identityCard: '001000002', departmentId: unitMap['H15.07'], jobTitleId: jobMap['PHO_GIAM_DOC'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+    { fullName: 'Ra Lan Trương Thanh Hà', firstname: 'Ra Lan Trương', lastname: 'Thanh Hà', employeeCode: 'NV_003', email: 'ralantruongthanhha@daklak.gov.vn', phone: '0901000003', identityCard: '001000003', departmentId: unitMap['H15.07'], jobTitleId: jobMap['PHO_GIAM_DOC'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'], partyTitleId: jobMap['PHO_BI_THU_DANG_BO'] },
+    { fullName: 'Trần Văn Sơn', firstname: 'Trần Văn', lastname: 'Sơn', employeeCode: 'NV_004', email: 'tranvanson@daklak.gov.vn', phone: '0901000004', identityCard: '001000004', departmentId: unitMap['H15.07'], jobTitleId: jobMap['PHO_GIAM_DOC'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+    { fullName: 'Lâm Vũ Mỹ Hạnh', firstname: 'Lâm Vũ Mỹ', lastname: 'Hạnh', employeeCode: 'NV_005', email: 'lamvumyhanh@daklak.gov.vn', phone: '0901000005', identityCard: '001000005', departmentId: unitMap['H15.07'], jobTitleId: jobMap['PHO_GIAM_DOC'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+
+    // --- Lãnh đạo các phòng ban Sở KHCN (Khối Công chức) ---
+    { fullName: 'Nguyễn Chiến Thắng', firstname: 'Nguyễn Chiến', lastname: 'Thắng', employeeCode: 'NV_020', email: 'nguyenvana@daklak.gov.vn', phone: '0902000020', identityCard: '002000020', departmentId: unitMap['H15.07.VP'], jobTitleId: jobMap['CHANH_VAN_PHONG'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'], partyTitleId: jobMap['DANG_UY_VIEN'] },
+    { fullName: 'Lê Thị B', firstname: 'Lê Thị', lastname: 'B', employeeCode: 'NV_021', email: 'lethib@daklak.gov.vn', phone: '0902000021', identityCard: '002000021', departmentId: unitMap['H15.07.KHTC'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+    { fullName: 'Trần Văn C', firstname: 'Trần Văn', lastname: 'C', employeeCode: 'NV_022', email: 'tranvanc@daklak.gov.vn', phone: '0902000022', identityCard: '002000022', departmentId: unitMap['H15.07.QLKH'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+    { fullName: 'Phạm Thị D', firstname: 'Phạm Thị', lastname: 'D', employeeCode: 'NV_023', email: 'phamthid@daklak.gov.vn', phone: '0902000023', identityCard: '002000023', departmentId: unitMap['H15.07.CDS'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+    { fullName: 'Hoàng Văn E', firstname: 'Hoàng Văn', lastname: 'E', employeeCode: 'NV_024', email: 'hoangvane@daklak.gov.vn', phone: '0902000024', identityCard: '002000024', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+    { fullName: 'Vũ Thị F', firstname: 'Vũ Thị', lastname: 'F', employeeCode: 'NV_025', email: 'vuthif@daklak.gov.vn', phone: '0902000025', identityCard: '002000025', departmentId: unitMap['H15.07.TDC'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['PRINCIPAL_SPECIALIST'] },
+
+    // Phó Trưởng phòng Sở KHCN
+    { fullName: 'Trương Văn Phó 1', firstname: 'Trương Văn', lastname: 'Phó 1', employeeCode: 'NV_036', email: 'phochvp_khcn@daklak.gov.vn', phone: '0902000036', identityCard: '002000036', departmentId: unitMap['H15.07.VP'], jobTitleId: jobMap['PHO_CHANH_VAN_PHONG'], civilServantRankId: jobMap['SPECIALIST'] },
+    { fullName: 'Ngô Thị Phó 2', firstname: 'Ngô Thị', lastname: 'Phó 2', employeeCode: 'NV_037', email: 'photp_khtc_khcn@daklak.gov.vn', phone: '0902000037', identityCard: '002000037', departmentId: unitMap['H15.07.KHTC'], jobTitleId: jobMap['PHO_PHONG'], civilServantRankId: jobMap['SPECIALIST'] },
+
+    // --- Lãnh đạo các Trung tâm khác thuộc Sở KHCN (Khối Viên chức) ---
+    { fullName: 'Đỗ Văn G', firstname: 'Đỗ Văn', lastname: 'G', employeeCode: 'NV_026', email: 'dovang@daklak.gov.vn', phone: '0902000026', identityCard: '002000026', departmentId: unitMap['H15.07.01'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['GRADE_2'] },
+    { fullName: 'Lý Văn I', firstname: 'Lý Văn', lastname: 'I', employeeCode: 'NV_028', email: 'lyvani@daklak.gov.vn', phone: '0902000028', identityCard: '002000028', departmentId: unitMap['H15.07.02'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['GRADE_2'] },
+
+    // Lãnh đạo các phòng thuộc các Trung tâm khác
+    { fullName: 'Hoàng Văn HC', firstname: 'Hoàng Văn', lastname: 'HC', employeeCode: 'NV_029', email: 'truongphonghc_dmsm@daklak.gov.vn', phone: '0902000029', identityCard: '002000029', departmentId: unitMap['H15.07.01.HC'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Lê Thị UT', firstname: 'Lê Thị', lastname: 'UT', employeeCode: 'NV_030', email: 'truongphongut_dmsm@daklak.gov.vn', phone: '0902000030', identityCard: '002000030', departmentId: unitMap['H15.07.01.UT'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Nguyễn Văn HC', firstname: 'Nguyễn Văn', lastname: 'HC', employeeCode: 'NV_033', email: 'truongphonghc_kttdc@daklak.gov.vn', phone: '0902000033', identityCard: '002000033', departmentId: unitMap['H15.07.02.HC'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Đinh Thị DL', firstname: 'Đinh Thị', lastname: 'DL', employeeCode: 'NV_034', email: 'truongphongdl_kttdc@daklak.gov.vn', phone: '0902000034', identityCard: '002000034', departmentId: unitMap['H15.07.02.DL'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Vũ Văn TN', firstname: 'Vũ Văn', lastname: 'TN', employeeCode: 'NV_035', email: 'truongphongtn_kttdc@daklak.gov.vn', phone: '0902000035', identityCard: '002000035', departmentId: unitMap['H15.07.02.TN'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+
+    // --- Cán bộ, nhân viên Trung tâm Giám sát, Điều hành Đô thị thông minh (IOC) ---
+    { fullName: 'Võ Nguyễn Hoàng Nam', firstname: 'Võ Nguyễn Hoàng', lastname: 'Nam', employeeCode: 'NV_100', email: 'vonguyenhoangnam@daklak.gov.vn', phone: '0903000100', identityCard: '003000100', departmentId: unitMap['H15.07.04'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['GRADE_2'] },
+    { fullName: 'Lê Xuân Quang', firstname: 'Lê Xuân', lastname: 'Quang', employeeCode: 'NV_101', email: 'lexuanquang@daklak.gov.vn', phone: '0903000101', identityCard: '003000101', departmentId: unitMap['H15.07.04'], jobTitleId: jobMap['PHO_GIAM_DOC'], civilServantRankId: jobMap['GRADE_2'] },
+    { fullName: 'Trần Duy Tân', firstname: 'Trần Duy', lastname: 'Tân', employeeCode: 'NV_102', email: 'tranduytan@daklak.gov.vn', phone: '0903000102', identityCard: '003000102', departmentId: unitMap['H15.07.04'], jobTitleId: jobMap['PHO_GIAM_DOC'], civilServantRankId: jobMap['GRADE_2'] },
+    { fullName: 'Lê Anh Tuấn', firstname: 'Lê Anh', lastname: 'Tuấn', employeeCode: 'NV_103', email: 'leanhtuan@daklak.gov.vn', phone: '0903000103', identityCard: '003000103', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Lê Quang Thanh', firstname: 'Lê Quang', lastname: 'Thanh', employeeCode: 'NV_104', email: 'lequangthanh@daklak.gov.vn', phone: '0903000104', identityCard: '003000104', departmentId: unitMap['H15.07.04.HT'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Lê Trọng Vũ', firstname: 'Lê Trọng', lastname: 'Vũ', employeeCode: 'NV_105', email: 'letrongvu@daklak.gov.vn', phone: '0903000105', identityCard: '003000105', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['TRUONG_PHONG'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Châu Trọng Phát', firstname: 'Châu Trọng', lastname: 'Phát', employeeCode: 'NV_106', email: 'chautrongphat@daklak.gov.vn', phone: '0903000106', identityCard: '003000106', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['KE_TOAN'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Nguyễn Thị Kim Oanh', firstname: 'Nguyễn Thị Kim', lastname: 'Oanh', employeeCode: 'NV_107', email: 'nguyenthikimoanh@daklak.gov.vn', phone: '0903000107', identityCard: '003000107', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['VIEN_CHUC'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Võ Thị Hiền', firstname: 'Võ Thị', lastname: 'Hiền', employeeCode: 'NV_108', email: 'vothihien@daklak.gov.vn', phone: '0903000108', identityCard: '003000108', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['VAN_THU'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Phạm Thế Anh', firstname: 'Phạm Thế', lastname: 'Anh', employeeCode: 'NV_109', email: 'phamtheanh@daklak.gov.vn', phone: '0903000109', identityCard: '003000109', departmentId: unitMap['H15.07.04.HT'], jobTitleId: jobMap['VIEN_CHUC'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Phan Đăng Việt Vinh Chuẩn', firstname: 'Phan Đăng Việt Vinh', lastname: 'Chuẩn', employeeCode: 'NV_110', email: 'phandangvietvinhchuan@daklak.gov.vn', phone: '0903000110', identityCard: '003000110', departmentId: unitMap['H15.07.04.HT'], jobTitleId: jobMap['VIEN_CHUC'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Nguyễn Minh Hóa', firstname: 'Nguyễn Minh', lastname: 'Hóa', employeeCode: 'NV_111', email: 'nguyenminhhoa@daklak.gov.vn', phone: '0903000111', identityCard: '003000111', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['VIEN_CHUC'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Châu Hòa Khánh Tâm', firstname: 'Châu Hòa Khánh', lastname: 'Tâm', employeeCode: 'NV_112', email: 'chauhoakhanhtam@daklak.gov.vn', phone: '0903000112', identityCard: '003000112', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['VIEN_CHUC'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Lê Thị Thanh Kiều', firstname: 'Lê Thị Thanh', lastname: 'Kiều', employeeCode: 'NV_113', email: 'lethithanhkieu@daklak.gov.vn', phone: '0903000113', identityCard: '003000113', departmentId: unitMap['H15.07.04.DL'], jobTitleId: jobMap['VIEN_CHUC'], civilServantRankId: jobMap['GRADE_3'] },
+    { fullName: 'Nguyễn Kiều Trang', firstname: 'Nguyễn Kiều', lastname: 'Trang', employeeCode: 'NV_114', email: 'nguyenkieutrang@daklak.gov.vn', phone: '0903000114', identityCard: '003000114', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'H Lisa Byă', firstname: 'H Lisa', lastname: 'Byă', employeeCode: 'NV_115', email: 'hlisabya@daklak.gov.vn', phone: '0903000115', identityCard: '003000115', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Nguyễn Thị Diễm Quyên', firstname: 'Nguyễn Thị Diễm', lastname: 'Quyên', employeeCode: 'NV_116', email: 'nguyenthidiemquyen@daklak.gov.vn', phone: '0903000116', identityCard: '003000116', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Y Sơm Êñuôl', firstname: 'Y Sơm', lastname: 'Êñuôl', employeeCode: 'NV_117', email: 'ysomenuol@daklak.gov.vn', phone: '0903000117', identityCard: '003000117', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Nguyễn Vũ Huy', firstname: 'Nguyễn Vũ', lastname: 'Huy', employeeCode: 'NV_118', email: 'nguyenvuhuy@daklak.gov.vn', phone: '0903000118', identityCard: '003000118', departmentId: unitMap['H15.07.04.HT'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Phùng Đình Hưng', firstname: 'Phùng Đình', lastname: 'Hưng', employeeCode: 'NV_119', email: 'phungdinhhung@daklak.gov.vn', phone: '0903000119', identityCard: '003000119', departmentId: unitMap['H15.07.04.HT'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Kiều Vũ Adrơng', firstname: 'Kiều Vũ', lastname: 'Adrơng', employeeCode: 'NV_120', email: 'kieuvuadrong@daklak.gov.vn', phone: '0903000120', identityCard: '003000120', departmentId: unitMap['H15.07.04.HT'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Nguyễn Thị Quỳnh Mai', firstname: 'Nguyễn Thị Quỳnh', lastname: 'Mai', employeeCode: 'NV_121', email: 'nguyenthiquynhmai@daklak.gov.vn', phone: '0903000121', identityCard: '003000121', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Nguyễn Quang Tú', firstname: 'Nguyễn Quang', lastname: 'Tú', employeeCode: 'NV_122', email: 'nguyenquangtu@daklak.gov.vn', phone: '0903000122', identityCard: '003000122', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Trần Trung Thành', firstname: 'Trần Trung', lastname: 'Thành', employeeCode: 'NV_123', email: 'trantrungthanh@daklak.gov.vn', phone: '0903000123', identityCard: '003000123', departmentId: unitMap['H15.07.QLCN'], jobTitleId: jobMap['NHAN_VIEN'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Nguyễn Sỹ Hợp', firstname: 'Nguyễn Sỹ', lastname: 'Hợp', employeeCode: 'NV_124', email: 'nguyensyhop@daklak.gov.vn', phone: '0903000124', identityCard: '003000124', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['BAO_VE'], civilServantRankId: jobMap['GRADE_4'] },
+    { fullName: 'Nguyễn Tiến Quang', firstname: 'Nguyễn Tiến', lastname: 'Quang', employeeCode: 'NV_125', email: 'nguyentienquang@daklak.gov.vn', phone: '0903000125', identityCard: '003000125', departmentId: unitMap['H15.07.04.HC'], jobTitleId: jobMap['BAO_VE'], civilServantRankId: jobMap['GRADE_4'] },
+
+    // --- Lãnh đạo các Sở khác (Khối Công chức cấp Tỉnh) ---
+    { fullName: 'Trương Ngọc Tuấn', firstname: 'Trương Ngọc', lastname: 'Tuấn', employeeCode: 'NV_010', email: 'truongngoctuan@daklak.gov.vn', phone: '0901000010', identityCard: '001000010', departmentId: unitMap['SO_NV'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['SENIOR_SPECIALIST'] },
+    { fullName: 'Trần Văn Tân', firstname: 'Trần Văn', lastname: 'Tân', employeeCode: 'NV_011', email: 'tranvantan@daklak.gov.vn', phone: '0901000011', identityCard: '001000011', departmentId: unitMap['SO_TC'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['SENIOR_SPECIALIST'] },
+    { fullName: 'Cao Đình Huy', firstname: 'Cao Đình', lastname: 'Huy', employeeCode: 'NV_012', email: 'caodinhhuy@daklak.gov.vn', phone: '0901000012', identityCard: '001000012', departmentId: unitMap['SO_XD'], jobTitleId: jobMap['GIAM_DOC'], civilServantRankId: jobMap['SENIOR_SPECIALIST'] }
+  ];
+
+  const pbacRoleMap = Object.fromEntries((await prisma.role.findMany()).map(r => [r.code, r.id]));
+  // Default password used in earlier parts of the file is DEFAULT_PASSWORD but we will hash one here just in case it's out of scope
+  const defaultPasswordStr = await bcrypt.hash('123456aA@', 10);
+
+  for (const emp of EMPLOYEES) {
+    if (!emp.departmentId || !emp.jobTitleId) continue;
+    const username = emp.email.split('@')[0];
+
+    // Logic xác định PBAC Role dựa vào chức danh
+    let pbacRoleCode = 'STAFF';
+    if ([jobMap['GIAM_DOC'], jobMap['PHO_GIAM_DOC'], jobMap['CHU_TICH'], jobMap['PHO_CHU_TICH']].includes(emp.jobTitleId)) {
+      pbacRoleCode = 'LEADER';
+    } else if ([jobMap['CHANH_VAN_PHONG'], jobMap['PHO_CHANH_VAN_PHONG'], jobMap['TRUONG_PHONG'], jobMap['PHO_PHONG']].includes(emp.jobTitleId)) {
+      pbacRoleCode = 'MANAGER';
+    }
+
+    const rolesConnect: { id: number }[] = [];
+    if (pbacRoleMap['AUTHOR']) rolesConnect.push({ id: pbacRoleMap['AUTHOR'] });
+    if (pbacRoleMap[pbacRoleCode]) rolesConnect.push({ id: pbacRoleMap[pbacRoleCode] });
+
+    const user = await prisma.user.upsert({
+      where: { email: emp.email },
+      update: {
+        fullName: emp.fullName,
+        roles: { set: [], connect: rolesConnect }
+      },
+      create: {
+        email: emp.email,
+        username,
+        fullName: emp.fullName,
+        roles: { connect: rolesConnect }
+      }
+    });
+
+    await prisma.credential.upsert({
+      where: { userId: user.id },
+      update: { passwordHash: defaultPasswordStr },
+      create: { userId: user.id, passwordHash: defaultPasswordStr }
+    });
+
+    const isUnitLeader = [jobMap['GIAM_DOC'], jobMap['TRUONG_PHONG'], jobMap['CHANH_VAN_PHONG']].includes(emp.jobTitleId);
+    const isDeputyLeader = [jobMap['PHO_GIAM_DOC'], jobMap['PHO_PHONG'], jobMap['PHO_CHANH_VAN_PHONG']].includes(emp.jobTitleId);
+
+    const existingPosition = await prisma.jobPosition.findFirst({
+      where: { userId: user.id, unitId: emp.departmentId, jobTitleId: emp.jobTitleId }
+    });
+
+    if (!existingPosition) {
+      await prisma.jobPosition.create({
+        data: {
+          userId: user.id,
+          unitId: emp.departmentId,
+          jobTitleId: emp.jobTitleId,
+          isPrimary: true,
+          isUnitLeader,
+          isDeputyLeader
+        }
+      });
+    }
   }
+  console.log('✅ Hoàn tất cấp tài khoản & PBAC Roles cho ' + EMPLOYEES.length + ' nhân viên.');
+
   console.log('🚀 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
 }
 
