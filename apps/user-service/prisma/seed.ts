@@ -61,6 +61,14 @@ async function main() {
 
     // Integration
     { code: 'INTEGRATION', name: 'Liên thông hệ thống' },
+
+    // PBAC
+    { code: 'DOCUMENT', name: 'Văn bản' },
+    { code: 'PLAN', name: 'Kế hoạch' },
+    { code: 'OBJECTIVE', name: 'Mục tiêu' },
+    { code: 'TASK', name: 'Công việc' },
+    { code: 'KPI', name: 'KPI' },
+    { code: 'REPORT', name: 'Báo cáo' },
   ];
 
   const resources: Record<string, { id: number; code: string; name: string }> =
@@ -86,6 +94,16 @@ async function main() {
     'APPROVE',
     'PUBLISH',
     'MANAGE',
+    'ASSIGN',
+    'PROCESS',
+    'SIGN',
+    'ISSUE',
+    'ARCHIVE',
+    'EXPORT',
+    'CLOSE',
+    'COMPLETE',
+    'COMMENT',
+    'EVALUATE'
   ];
   const allPermissions: { id: number }[] = [];
 
@@ -4912,7 +4930,123 @@ async function main() {
 
     console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Slot domains: ${slotDomains.length}, Geos: ${slotGeos.length}, Monitored Units: ${slotMonitored.length})`);
   }
+
+  // ==========================================================
+  // PBAC SEED: SCOPES, POLICIES, ROLES & MAPPINGS
+  // ==========================================================
+  console.log('🔹 Seeding PBAC Scopes & Policies into SystemConfig...');
+  const pbacScopes = ['SELF', 'DEPARTMENT', 'ORGANIZATION', 'GLOBAL'];
+  const pbacPolicies = {
+    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assignees OR currentUserId IN resource.supervisors OR currentUserId IN resource.collaborators",
+    'TASK.UPDATE': "ALLOW IF currentUserId IN resource.assignees AND resource.status NOT IN ('COMPLETED','CLOSED')",
+    'TASK.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
+    'DOCUMENT.UPDATE': "ALLOW IF resource.createdBy == currentUserId AND resource.status == 'DRAFT'",
+    'DOCUMENT.APPROVE': "ALLOW IF user.positionLevel >= 3",
+    'DOCUMENT.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId OR resource.visibility == 'PUBLIC'"
+  };
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_SCOPES' },
+    update: { value: JSON.stringify(pbacScopes) },
+    create: { key: 'PBAC_SCOPES', value: JSON.stringify(pbacScopes), description: 'PBAC Scopes' }
+  });
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_POLICIES' },
+    update: { value: JSON.stringify(pbacPolicies) },
+    create: { key: 'PBAC_POLICIES', value: JSON.stringify(pbacPolicies), description: 'PBAC Policies' }
+  });
+
+  console.log('🔹 Seeding PBAC Roles & RolePermissions...');
+  const getPerms = async (specs: string[]) => {
+    const all = await prisma.permission.findMany({ include: { resource: true } });
+    if (specs.includes('ALL')) return all.map(p => ({ id: p.id }));
+    const result: { id: number }[] = [];
+    for (const spec of specs) {
+      if (spec.endsWith('.*')) {
+        const resCode = spec.split('.')[0];
+        const matched = all.filter(p => p.resource.code === resCode);
+        result.push(...matched.map(p => ({ id: p.id })));
+      } else {
+        const [resCode, actCode] = spec.split('.');
+        const matched = all.find(p => p.resource.code === resCode && p.action === actCode);
+        if (matched) result.push({ id: matched.id });
+      }
+    }
+    return result;
+  };
+
+  const roleDefinitions = [
+    { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
+    { code: 'LEADER', name: 'Lãnh đạo đơn vị', scope: 'ORGANIZATION', perms: ['DOCUMENT.*', 'PLAN.*', 'OBJECTIVE.*', 'TASK.*', 'KPI.*', 'REPORT.*'] },
+    { code: 'MANAGER', name: 'Quản lý', scope: 'DEPARTMENT', perms: ['DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'DOCUMENT.ASSIGN', 'PLAN.VIEW', 'PLAN.UPDATE', 'OBJECTIVE.VIEW', 'OBJECTIVE.UPDATE', 'TASK.VIEW', 'TASK.CREATE', 'TASK.UPDATE', 'TASK.ASSIGN', 'TASK.COMPLETE', 'KPI.VIEW', 'REPORT.VIEW'] },
+    { code: 'STAFF', name: 'Nhân viên', scope: 'SELF', perms: ['DOCUMENT.VIEW', 'DOCUMENT.PROCESS', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'TASK.UPDATE', 'TASK.COMMENT', 'TASK.COMPLETE', 'KPI.VIEW'] },
+    { code: 'SUPERVISOR', name: 'Giám sát', scope: 'DEPARTMENT', perms: ['DOCUMENT.VIEW', 'PLAN.VIEW', 'OBJECTIVE.VIEW', 'TASK.VIEW', 'KPI.VIEW', 'REPORT.VIEW'] }
+  ];
+
+  for (const rd of roleDefinitions) {
+    const permConnect = await getPerms(rd.perms);
+    await prisma.systemConfig.upsert({
+      where: { key: `ROLE_SCOPE_${rd.code}` },
+      update: { value: rd.scope },
+      create: { key: `ROLE_SCOPE_${rd.code}`, value: rd.scope, description: `Scope for ${rd.code}` }
+    });
+
+    await prisma.role.upsert({
+      where: { code: rd.code },
+      update: {
+        name: rd.name,
+        permissions: { set: [], connect: permConnect }
+      },
+      create: {
+        code: rd.code,
+        name: rd.name,
+        permissions: { connect: permConnect }
+      }
+    });
+  }
+  console.log('✅ Hoàn tất Seed PBAC Engine.');
+
+  for (const rd of roleDefinitions) {
+    const permConnect = await getPerms(rd.perms);
+    await prisma.systemConfig.upsert({
+      where: { key: `ROLE_SCOPE_${rd.code}` },
+      update: { value: rd.scope },
+      create: { key: `ROLE_SCOPE_${rd.code}`, value: rd.scope, description: `Scope for ${rd.code}` }
+    });
+
+    await prisma.role.upsert({
+      where: { code: rd.code },
+      update: {
+        name: rd.name,
+        permissions: { set: [], connect: permConnect }
+      },
+      create: {
+        code: rd.code,
+        name: rd.name,
+        permissions: { connect: permConnect }
+      }
+    });
+  }
+  console.log('✅ Hoàn tất Seed PBAC Engine.');
+
+  // ==========================================================
+  // DÁN ĐOẠN CODE MỚI VÀO ĐÂY BẮT ĐẦU TỪ DÒNG NÀY
+  // ==========================================================
+  console.log('🔹 Mở rộng Policy PBAC cho hệ thống liên thông & HRM...');
+
+  const extendedPbacPolicies = {
+    ...pbacPolicies,
+    'DOC_INCOMING.PROCESS': "ALLOW IF currentUserId IN resource.processingUsers OR currentDepartmentId == resource.processingDepartmentId",
+    // ... (toàn bộ đoạn code tôi vừa cung cấp ở trên)
+
+    // ==========================================================
+    // KẾT THÚC ĐOẠN CODE MỚI
+    // ==========================================================
+  }
+  console.log('🚀 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
 }
+
 
 main()
   .then(() => prisma.$disconnect())
