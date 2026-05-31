@@ -40,13 +40,13 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-se
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
 
 
-echo "Xóa data cũ và tạo lại schema..."
-docker exec -it daklak-workspace-user-service-1 npx prisma migrate reset --force --skip-seed
-docker exec -it daklak-workspace-hrm-service-1 npx prisma migrate reset --force --skip-seed
-docker exec -it daklak-workspace-workflow-service-1 npx prisma migrate reset --force --skip-seed
-docker exec -it daklak-workspace-media-service-1 npx prisma migrate reset --force --skip-seed
-docker exec -it daklak-workspace-posts-service-1 npx prisma migrate reset --force --skip-seed
-docker exec -it daklak-workspace-document-service-1 npx prisma migrate reset --force --skip-seed
+# echo "Xóa data cũ và tạo lại schema..."
+# docker exec -it daklak-workspace-user-service-1 npx prisma migrate reset --force --skip-seed
+# docker exec -it daklak-workspace-hrm-service-1 npx prisma migrate reset --force --skip-seed
+# docker exec -it daklak-workspace-workflow-service-1 npx prisma migrate reset --force --skip-seed
+# docker exec -it daklak-workspace-media-service-1 npx prisma migrate reset --force --skip-seed
+# docker exec -it daklak-workspace-posts-service-1 npx prisma migrate reset --force --skip-seed
+# docker exec -it daklak-workspace-document-service-1 npx prisma migrate reset --force --skip-seed
 
 # Khởi động lại các services
 docker compose -f docker-compose.prod.yml up -d portal-goverment nginx
