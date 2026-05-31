@@ -33,7 +33,7 @@ interface MenuDto {
   path?: string;
   route?: string;
   icon?: string;
-  parentId?: number;
+  parentId?: number | null;
   service?: string;
   portal?: string;
   application?: string;
@@ -42,8 +42,8 @@ interface MenuDto {
   order?: number;
   active?: number;
   isActive?: boolean;
-  description?: string;
-  iconColor?: string;
+  description?: string | null;
+  iconColor?: string | null;
   requiredPermissionIds?: number[];
   [key: string]: unknown;
 }
@@ -77,7 +77,7 @@ export class MenusController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.MENU.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.menuService = this.client.getService(MICROSERVICES.MENU.SERVICE);
@@ -181,7 +181,7 @@ export class MenusController implements OnModuleInit {
         : [];
     }
     if (body.active !== undefined) payload.isActive = body.active !== 0;
-    
+
     return payload;
   }
 
