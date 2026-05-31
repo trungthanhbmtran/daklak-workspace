@@ -99,7 +99,7 @@ Dịch vụ mới thêm **Cổng thông tin Công dân (`portal-goverment`)** ch
 *Lưu ý: Đảm bảo tệp `.env` trên server chứa đầy đủ các biến môi trường cần thiết (JWT_SECRET, DATABASE_URL, v.v.)*
 
 ## 6. Tài khoản thử nghiệm (Module Giao việc)
-Dưới đây là danh sách các tài khoản tiêu biểu dùng để test các luồng của chức năng Giao việc (Task Management) dựa theo phân quyền PBAC. Tất cả tài khoản đều dùng mật khẩu mặc định (thường là `Abc@123456`).
+Dưới đây là danh sách các tài khoản tiêu biểu dùng để test các luồng của chức năng Giao việc (Task Management) dựa theo phân quyền PBAC. Tất cả tài khoản đều dùng mật khẩu mặc định là `Admin@123`.
 
 ### 6.1. Luồng Giao việc & Đánh giá (Dành cho Lãnh đạo Đơn vị - LEADER)
 > **Quyền hạn**: `TASK.*` (Toàn quyền sinh việc, giao việc xuyên suốt từ trên xuống, đánh giá, phê duyệt).
