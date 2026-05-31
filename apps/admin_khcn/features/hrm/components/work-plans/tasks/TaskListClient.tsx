@@ -429,9 +429,9 @@ export const TaskListClient = () => {
 
       {/* Task Detail Dialog */}
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-        <DialogContent className="max-w-3xl font-sans p-0 overflow-hidden rounded-[2rem] border-0 shadow-2xl bg-white dark:bg-slate-900">
+        <DialogContent className="w-[95vw] max-w-[95vw] lg:max-w-[85vw] xl:max-w-[75vw] h-[95vh] lg:h-[90vh] font-sans p-0 overflow-hidden rounded-3xl border-0 shadow-2xl bg-white dark:bg-slate-900 flex flex-col">
           {selectedTask && (
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
               {/* Cover/Header area */}
               <div className="bg-gradient-to-br from-indigo-600 to-violet-700 p-8 pb-12 relative text-white">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -478,25 +478,27 @@ export const TaskListClient = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <div className="md:col-span-2 space-y-6">
-                    <div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+                  <div className="lg:col-span-2 flex flex-col space-y-6">
+                    <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
                       <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
                         <span className="w-2 h-6 bg-indigo-500 rounded-full mr-3"></span>
                         Mô tả chi tiết
                       </h4>
-                      <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-3xl text-slate-700 dark:text-slate-300 whitespace-pre-wrap min-h-[150px] leading-relaxed border border-slate-100 dark:border-slate-800">
+                      <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed border border-slate-100 dark:border-slate-800 text-sm">
                         {selectedTask.description || 'Chưa có mô tả chi tiết cho công việc này.'}
                       </div>
                     </div>
 
                     {/* Chat Box / Trao đổi công việc */}
-                    <div className="mt-8">
-                      <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
-                        <span className="w-2 h-6 bg-cyan-500 rounded-full mr-3"></span>
-                        Trao đổi công việc
-                      </h4>
-                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800 flex flex-col h-[300px]">
+                    <div className="flex-1 min-h-[300px] flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-0 overflow-hidden">
+                      <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                        <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest flex items-center">
+                          <span className="w-2 h-6 bg-cyan-500 rounded-full mr-3"></span>
+                          Trao đổi công việc
+                        </h4>
+                      </div>
+                      <div className="flex-1 bg-slate-50/30 dark:bg-slate-900/30 flex flex-col overflow-hidden">
                         <div className="flex-1 overflow-y-auto p-4 space-y-4">
                           {isLoadingComments ? (
                             <div className="flex justify-center items-center h-full">
@@ -526,7 +528,7 @@ export const TaskListClient = () => {
                             ))
                           )}
                         </div>
-                        <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-b-3xl flex items-center gap-2">
+                        <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
                           <input
                             type="text"
                             disabled={selectedTask.status === 'DONE'}
@@ -534,7 +536,7 @@ export const TaskListClient = () => {
                             onChange={(e) => setChatMessage(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                             placeholder={selectedTask.status === 'DONE' ? "Công việc đã hoàn thành, không thể chat" : "Nhập tin nhắn trao đổi..."}
-                            className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                           />
                           <Button
                             disabled={selectedTask.status === 'DONE' || !chatMessage.trim()}
@@ -548,7 +550,7 @@ export const TaskListClient = () => {
                     </div>
                   </div>
 
-                  <div className="space-y-6">
+                  <div className="flex flex-col space-y-6">
                     <div>
                       <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
                         <span className="w-2 h-6 bg-rose-500 rounded-full mr-3"></span>
@@ -599,7 +601,7 @@ export const TaskListClient = () => {
 
                     {/* Hành động */}
                     {selectedTask.status !== 'DONE' && (
-                      <div className="pt-6">
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-6">
                         <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
                           <span className="w-2 h-6 bg-slate-500 rounded-full mr-3"></span>
                           Hành động
