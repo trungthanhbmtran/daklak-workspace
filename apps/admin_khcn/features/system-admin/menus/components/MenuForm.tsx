@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Plus, Edit, Trash2, LayoutDashboard, CornerDownRight,
-  ExternalLink, Lock, CheckCircle2
+  ExternalLink, Lock, CheckCircle2, ChevronDown, ChevronRight
 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,8 +19,11 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
+} from "@/components/ui/dialog";
 
-import { MenuItem } from "../types";
+import { MenuItem, Permission } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";
 import { renderIcon } from "../utils";
 import type { ViewState } from "..";
@@ -119,16 +122,6 @@ function MenuFormInner(props: any) {
 
   const parentPathPrefix = getParentPathPrefix(parentMenu?.id ?? parentId ?? null);
 
-  // Chuẩn hóa quyền từ API (có thể trả requiredPermissionId hoặc requiredPermissionIds)
-  const normalizedPermissionIds = useMemo(() => {
-    if (!selectedMenu) return EMPTY_PERMISSION_IDS;
-    if (selectedMenu.requiredPermissionIds?.length) return selectedMenu.requiredPermissionIds;
-    if (selectedMenu.requiredPermissionId != null && selectedMenu.requiredPermissionId !== 0) {
-      return [selectedMenu.requiredPermissionId];
-    }
-    return EMPTY_PERMISSION_IDS;
-  }, [selectedMenu]);
-
   // Khởi tạo Form với Default Values (create: dùng parentMenu cho service/portal khi có)
   const defaultValues = useMemo(() => {
     let initialSuffix = "";
@@ -163,11 +156,11 @@ function MenuFormInner(props: any) {
         portal: selectedMenu?.portal ?? "ADMIN_PORTAL",
         sort: selectedMenu?.sort ?? 1,
         active: selectedMenu?.active ?? 1,
-        requiredPermissionIds: normalizedPermissionIds,
+        requiredPermissionIds: selectedMenu?.requiredPermissionIds || EMPTY_PERMISSION_IDS,
       };
 
     return base;
-  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, serviceList, normalizedPermissionIds]);
+  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, serviceList]);
 
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(menuFormSchema) as unknown as Resolver<MenuFormValues>,
@@ -179,7 +172,7 @@ function MenuFormInner(props: any) {
 
   // Gom nhóm quyền
   const groupedPermissions = useMemo(() => {
-    return availablePermissions.reduce((acc: any, perm: any) => {
+    return availablePermissions.reduce((acc: Record<string, Permission[]>, perm: Permission) => {
       const groupKey = perm.module || "Hệ thống";
       if (!acc[groupKey]) acc[groupKey] = [];
       acc[groupKey].push(perm);
@@ -193,18 +186,9 @@ function MenuFormInner(props: any) {
     const fullPath = suffix ? `${parentPathPrefix.replace(/\/+$/, "")}/${suffix}` : parentPathPrefix.replace(/\/+$/, "") || "/";
 
     const payload: Partial<MenuItem> = {
-      name: values.name,
-      code: values.code,
+      ...values,
       path: fullPath,
-      icon: values.icon ?? "FileText",
-      description: values.description?.trim() || undefined,
-      iconColor: values.iconColor?.trim() || undefined,
-      service: values.service ?? "CORE_SERVICE",
-      portal: values.portal ?? "ADMIN_PORTAL",
       target: "SELF",
-      sort: values.sort ?? 1,
-      active: values.active ? 1 : 0,
-      requiredPermissionIds: values.requiredPermissionIds ?? [],
     };
 
     if (isCreate) {
@@ -340,7 +324,7 @@ function MenuFormInner(props: any) {
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger className="h-10 bg-background"><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
-                        {serviceList.map((s: any) => <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>)}
+                        {serviceList.map((s: { code: string, name: string }) => <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </FormItem>
@@ -409,67 +393,25 @@ function MenuFormInner(props: any) {
               </div>
             </div>
 
-            {/* 3. PHÂN QUYỀN (CHỐNG LỖI INFINITE LOOP TUYỆT ĐỐI) */}
-            <div className="p-6 space-y-4 bg-background min-h-[400px]">
+            {/* 3. PHÂN QUYỀN */}
+            <div className="p-6 space-y-4 bg-background border-t">
               <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-[13px] font-bold text-foreground flex items-center gap-2">
-                  <Lock className="h-4 w-4 text-primary" /> 3. Điều kiện hiển thị Menu (Access Control)
-                </h3>
+                <div className="space-y-1">
+                  <h3 className="text-[13px] font-bold text-foreground flex items-center gap-2">
+                    <Lock className="h-4 w-4 text-primary" /> 3. Điều kiện hiển thị Menu (Access Control)
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-1">
+                    Nhấn vào từng nhóm phân hệ bên dưới để chọn các quyền tương ứng. Đã chọn <strong className="text-primary">{form.watch("requiredPermissionIds")?.length || 0}</strong> quyền.
+                  </p>
+                </div>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background shadow-sm">
-                  {availablePermissions.length} Quyền
+                  {Object.keys(groupedPermissions).length} Nhóm phân hệ
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">
-                Tích chọn các quyền mà người dùng <strong className="text-foreground">BẮT BUỘC PHẢI CÓ</strong> để nhìn thấy Menu này.
-              </p>
 
-              <div className="space-y-4">
-                {Object.entries(groupedPermissions).map(([resourceName, perms]: any) => (
-                  <div key={resourceName} className="border rounded-lg bg-background overflow-hidden shadow-sm">
-                    <div className="bg-muted/40 px-4 py-2.5 border-b flex items-center justify-between">
-                      <span className="font-bold text-xs flex items-center gap-2">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-primary opacity-60" /> {resourceName}
-                      </span>
-                      <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60">
-                        {perms[0]?.module || 'N/A'}
-                      </code>
-                    </div>
-
-                    <div className="p-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                      {perms.map((perm: any) => (
-                        <FormField key={perm.id} control={form.control} name="requiredPermissionIds" render={({ field }) => {
-                          const isChecked = field.value?.includes(perm.id);
-                          return (
-                            <FormItem
-                              className="flex flex-row items-center space-x-2.5 space-y-0 p-2 rounded-md border transition-colors cursor-pointer hover:bg-muted/50 data-[state=checked]:bg-primary/5 data-[state=checked]:border-primary/30"
-                              data-state={isChecked ? "checked" : "unchecked"}
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={isChecked}
-                                  onCheckedChange={(checked) => {
-                                    const current = field.value || [];
-                                    const next = checked
-                                      ? [...current, perm.id]
-                                      : current.filter((val: number) => val !== perm.id);
-                                    field.onChange(next);
-                                  }}
-                                />
-                              </FormControl>
-                              <div className="space-y-0.5 leading-none">
-                                <FormLabel className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none ${isChecked ? "text-primary" : "text-foreground/80"}`}>
-                                  {perm.action}
-                                </FormLabel>
-                                <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase">
-                                  {perm.code ? perm.code.split('_').pop() : 'ACTION'}
-                                </p>
-                              </div>
-                            </FormItem>
-                          );
-                        }} />
-                      ))}
-                    </div>
-                  </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
+                {Object.entries(groupedPermissions).map(([resourceName, perms]: [string, unknown]) => (
+                  <PermissionCardDialog key={resourceName} resourceName={resourceName} perms={perms as Permission[]} form={form} />
                 ))}
               </div>
             </div>
@@ -487,5 +429,101 @@ function MenuFormInner(props: any) {
         </Button>
       </div>
     </Card>
+  );
+}
+
+// ============================================================================
+// 3. COMPONENT CON: NHÓM QUYỀN (PERMISSION CARD DIALOG)
+// ============================================================================
+function PermissionCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedIds = form.watch("requiredPermissionIds") || [];
+
+  const groupPermIds = perms.map((p: Permission) => p.id);
+  const selectedInGroup = selectedIds.filter((id: number) => groupPermIds.includes(id));
+  const hasSelected = selectedInGroup.length > 0;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <div
+          className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group"
+        >
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-[13px] flex items-center gap-2">
+              <CheckCircle2 className={`h-4 w-4 ${hasSelected ? 'text-primary' : 'text-muted-foreground opacity-40'}`} />
+              {resourceName}
+            </span>
+            <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60">
+              {perms[0]?.module || 'N/A'}
+            </code>
+          </div>
+
+          <div className="flex items-center justify-between">
+            {hasSelected ? (
+              <Badge variant="secondary" className="text-[10px] px-2 bg-primary/10 text-primary border-primary/20 shadow-none">
+                Đã chọn {selectedInGroup.length} quyền
+              </Badge>
+            ) : (
+              <span className="text-[11px] text-muted-foreground/80">Chưa cấu hình</span>
+            )}
+
+            <div className="h-6 w-6 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+              <ChevronRight className="h-3.5 w-3.5" />
+            </div>
+          </div>
+        </div>
+      </DialogTrigger>
+
+      {isOpen && (
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-background">
+          <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background z-10 shadow-sm">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Lock className="h-5 w-5 text-primary" /> Phân quyền: {resourceName}
+            </DialogTitle>
+            <DialogDescription className="text-xs mt-2">
+              Tích chọn các quyền thuộc nhóm <strong className="text-foreground">{resourceName}</strong> mà người dùng bắt buộc phải có.
+              Bạn đang chọn: <strong className="text-primary">{selectedInGroup.length}/{perms.length}</strong> quyền.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {perms.map((perm: Permission) => (
+                <FormField key={perm.id} control={form.control} name="requiredPermissionIds" render={({ field }) => {
+                  const isChecked = field.value?.includes(perm.id);
+                  return (
+                    <FormItem
+                      className="flex flex-row items-center space-x-2.5 space-y-0 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 data-[state=checked]:bg-primary/5 data-[state=checked]:border-primary/30 shadow-sm"
+                      data-state={isChecked ? "checked" : "unchecked"}
+                    >
+                      <FormControl>
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            const current = field.value || [];
+                            const next = checked
+                              ? [...current, perm.id]
+                              : current.filter((val: number) => val !== perm.id);
+                            field.onChange(next);
+                          }}
+                        />
+                      </FormControl>
+                      <div className="space-y-0.5 leading-none overflow-hidden">
+                        <FormLabel className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none truncate ${isChecked ? "text-primary" : "text-foreground/80"}`}>
+                          {perm.action}
+                        </FormLabel>
+                        <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase truncate">
+                          {perm.code ? perm.code.split('_').pop() : 'ACTION'}
+                        </p>
+                      </div>
+                    </FormItem>
+                  );
+                }} />
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      )}
+    </Dialog>
   );
 }

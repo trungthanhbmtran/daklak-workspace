@@ -26,34 +26,45 @@ import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 
-/** Map flat menu từ gRPC (camelCase/snake_case) sang frontend; trả requiredPermissionIds (mảng). */
-function toFrontendItem(m: any): any {
-  const parentId = m.parentId ?? m.parent_id;
-  const rawIds = m.requiredPermissionIds ?? m.required_permission_ids;
-  const requiredPermissionIds = Array.isArray(rawIds)
-    ? rawIds.map(Number).filter((id: number) => id > 0)
-    : (m.requiredPermissionId ?? m.required_permission_id) != null &&
-        (m.requiredPermissionId ?? m.required_permission_id) !== 0
-      ? [Number(m.requiredPermissionId ?? m.required_permission_id)]
-      : [];
-  const order = m.order ?? m.sort ?? 0;
-  const application = m.application ?? m.portal ?? 'ADMIN_PORTAL';
+interface MenuDto {
+  id?: number;
+  code?: string;
+  name?: string;
+  path?: string;
+  route?: string;
+  icon?: string;
+  parentId?: number;
+  service?: string;
+  portal?: string;
+  application?: string;
+  target?: string;
+  sort?: number;
+  order?: number;
+  active?: number;
+  isActive?: boolean;
+  description?: string;
+  iconColor?: string;
+  requiredPermissionIds?: number[];
+  [key: string]: unknown;
+}
+
+/** Map flat menu từ gRPC sang frontend. */
+function toFrontendItem(m: MenuDto): MenuDto {
   return {
     id: m.id,
     code: m.code ?? '',
     name: m.name ?? '',
-    path: m.route ?? m.path ?? '',
+    path: m.route ?? '',
     icon: m.icon ?? '',
-    parentId:
-      parentId === 0 || parentId === undefined ? null : Number(parentId),
+    parentId: m.parentId === 0 ? null : m.parentId,
     service: m.service ?? '',
-    portal: application,
+    portal: m.application ?? 'ADMIN_PORTAL',
     target: m.target ?? 'SELF',
-    sort: Number(order),
-    active: (m.isActive ?? m.is_active ?? true) ? 1 : 0,
+    sort: m.order ?? 0,
+    active: m.isActive ? 1 : 0,
     description: m.description ?? null,
-    iconColor: m.iconColor ?? m.icon_color ?? null,
-    requiredPermissionIds,
+    iconColor: m.iconColor ?? null,
+    requiredPermissionIds: m.requiredPermissionIds ?? [],
   };
 }
 
@@ -108,45 +119,24 @@ export class MenusController implements OnModuleInit {
     );
   }
 
-  /** Chuẩn hóa body từ frontend sang payload gRPC (camelCase; đọc cả path/route, sort/order, portal/application, active) */
-  private toCreatePayload(body: any) {
-    const code = String(body.code ?? '').trim() || `MENU_${Date.now()}`;
-    const name = String(body.name ?? '').trim() || 'Menu mới';
-    const route = body.path ?? body.route ?? '';
-    const icon = body.icon ?? '';
-    const order = Number(body.sort ?? body.order ?? 0) || 0;
-    const service = body.service ?? '';
-    const application = body.portal ?? body.application ?? 'ADMIN_PORTAL';
-    const target = body.target ?? 'SELF';
-    const parentId = body.parentId ?? body.parent_id;
-    const rawIds = body.requiredPermissionIds ?? body.required_permission_ids;
-    const requiredPermissionIds = Array.isArray(rawIds)
-      ? rawIds.map(Number).filter((id: number) => id > 0)
-      : (body.requiredPermissionId ?? body.required_permission_id) != null &&
-          (body.requiredPermissionId ?? body.required_permission_id) !== 0
-        ? [Number(body.requiredPermissionId ?? body.required_permission_id)]
-        : [];
-    const isActive =
-      body.active !== undefined
-        ? Boolean(Number(body.active))
-        : body.is_active !== undefined
-          ? !!body.is_active
-          : true;
+  /** Chuẩn hóa body từ frontend sang payload gRPC */
+  private toCreatePayload(body: MenuDto) {
     return {
-      code,
-      name,
-      route,
-      icon,
-      order,
-      description: body.description ?? undefined,
-      iconColor: body.iconColor ?? body.icon_color ?? undefined,
-      service,
-      application,
-      target,
-      parentId:
-        parentId === null || parentId === undefined ? 0 : Number(parentId),
-      requiredPermissionIds,
-      isActive,
+      code: body.code,
+      name: body.name,
+      route: body.path,
+      icon: body.icon,
+      order: body.sort,
+      description: body.description,
+      iconColor: body.iconColor,
+      service: body.service,
+      application: body.portal,
+      target: body.target,
+      parentId: body.parentId ?? 0,
+      requiredPermissionIds: Array.isArray(body.requiredPermissionIds)
+        ? body.requiredPermissionIds.map(Number).filter(Boolean)
+        : [],
+      isActive: body.active !== 0,
     };
   }
 
@@ -154,7 +144,7 @@ export class MenusController implements OnModuleInit {
   @ApiOperation({ summary: 'Tạo menu mới (PBAC: quyền gắn với Permission)' })
   @ApiBody({ description: 'Thông tin menu' })
   @ApiResponse({ status: 201, description: 'Menu đã tạo' })
-  async create(@Body() body: any) {
+  async create(@Body() body: MenuDto) {
     try {
       const payload = this.toCreatePayload(body);
       const res = (await firstValueFrom(
@@ -169,49 +159,36 @@ export class MenusController implements OnModuleInit {
     }
   }
 
-  /** Chuẩn hóa body cập nhật: gRPC camelCase; đọc path/route, sort/order, portal/application, active/is_active */
-  private toUpdatePayload(id: number, body: any) {
-    const parentId = body.parentId ?? body.parent_id;
-    const rawIds = body.requiredPermissionIds ?? body.required_permission_ids;
-    const requiredPermissionIds =
-      rawIds !== undefined
-        ? Array.isArray(rawIds)
-          ? rawIds.map(Number).filter((id: number) => id > 0)
-          : []
-        : undefined;
+  /** Chuẩn hóa body cập nhật sang gRPC */
+  private toUpdatePayload(id: number, body: MenuDto) {
     const payload: any = {
       id,
-      code: body.code != null ? String(body.code).trim() : undefined,
-      name: body.name != null ? String(body.name).trim() : undefined,
-      route: body.path ?? body.route,
+      code: body.code,
+      name: body.name,
+      route: body.path,
       icon: body.icon,
-      order:
-        body.sort !== undefined || body.order !== undefined
-          ? Number(body.sort ?? body.order ?? 0)
-          : undefined,
+      order: body.sort,
       description: body.description,
-      iconColor: body.iconColor ?? body.icon_color,
+      iconColor: body.iconColor,
       service: body.service,
-      application: body.portal ?? body.application,
+      application: body.portal,
       target: body.target,
     };
-    if (parentId !== undefined)
-      payload.parentId = parentId === null ? 0 : Number(parentId);
-    if (requiredPermissionIds !== undefined)
-      payload.requiredPermissionIds = requiredPermissionIds;
-    if (body.active !== undefined || body.is_active !== undefined) {
-      payload.isActive =
-        body.active !== undefined
-          ? Boolean(Number(body.active))
-          : !!body.is_active;
+    if (body.parentId !== undefined) payload.parentId = body.parentId ?? 0;
+    if (body.requiredPermissionIds !== undefined) {
+      payload.requiredPermissionIds = Array.isArray(body.requiredPermissionIds)
+        ? body.requiredPermissionIds.map(Number).filter(Boolean)
+        : [];
     }
+    if (body.active !== undefined) payload.isActive = body.active !== 0;
+    
     return payload;
   }
 
   @Put(':id')
   @ApiOperation({ summary: 'Cập nhật menu (PBAC: quyền gắn với Permission)' })
   @ApiResponse({ status: 200, description: 'Menu đã cập nhật' })
-  async update(@Param('id', ParseIntPipe) id: number, @Body() body: any) {
+  async update(@Param('id', ParseIntPipe) id: number, @Body() body: MenuDto) {
     try {
       const payload = this.toUpdatePayload(id, body);
       const res = (await firstValueFrom(

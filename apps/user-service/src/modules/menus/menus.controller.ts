@@ -5,30 +5,23 @@ import { MenusService } from './menus.service';
 
 @Controller()
 export class MenusController {
-  constructor(private readonly menusService: MenusService) {}
-
-  private normalizePermissionIds(raw: number[] | number | undefined): number[] {
-    if (raw == null) return [];
-    const arr = Array.isArray(raw) ? raw : [raw];
-    return arr.map(Number).filter((id) => id > 0);
-  }
+  constructor(private readonly menusService: MenusService) { }
 
   private mapMenuNode(node: any): any {
-    const parentId = node.parentId ?? node.parent_id ?? 0;
     return {
       id: node.id,
       code: node.code ?? '',
       name: node.name ?? '',
       route: node.route ?? '',
       icon: node.icon ?? '',
-      order: Number(node.order ?? 0),
+      order: node.order ?? 0,
       description: node.description ?? null,
-      iconColor: node.iconColor ?? node.icon_color ?? null,
+      iconColor: node.iconColor ?? null,
       service: node.service ?? '',
       application: node.application ?? 'ADMIN_PORTAL',
       target: node.target ?? 'SELF',
-      parentId,
-      isActive: node.isActive ?? node.is_active ?? true,
+      parentId: node.parentId ?? 0,
+      isActive: node.isActive ?? true,
       requiredPermissionIds: node.requiredPermissionIds ?? [],
       children:
         node.children && node.children.length
@@ -72,29 +65,20 @@ export class MenusController {
   @GrpcMethod('MenuService', 'Create')
   async create(data: any) {
     try {
-      const rawParentId = data.parentId ?? data.parent_id;
-      const parentId =
-        rawParentId === undefined || rawParentId === 0
-          ? null
-          : Number(rawParentId);
-      const requiredPermissionIds = this.normalizePermissionIds(
-        data.requiredPermissionIds ?? data.required_permission_ids,
-      );
-      const isActive = data.isActive ?? data.is_active;
       const menu = await this.menusService.create({
-        code: String(data.code ?? '').trim() || `MENU_${Date.now()}`,
-        name: String(data.name ?? '').trim() || 'Menu mới',
-        route: data.route ?? undefined,
-        icon: data.icon ?? undefined,
-        order: Number(data.order ?? 0) || 0,
-        description: data.description ?? undefined,
-        iconColor: data.iconColor ?? data.icon_color ?? undefined,
-        service: data.service ?? undefined,
-        application: data.application ?? 'ADMIN_PORTAL',
-        target: data.target ?? 'SELF',
-        parentId,
-        requiredPermissionIds,
-        isActive: isActive === undefined ? true : Boolean(isActive),
+        code: data.code,
+        name: data.name,
+        route: data.route,
+        icon: data.icon,
+        order: data.order,
+        description: data.description,
+        iconColor: data.iconColor,
+        service: data.service,
+        application: data.application,
+        target: data.target,
+        parentId: data.parentId === 0 ? null : data.parentId,
+        requiredPermissionIds: data.requiredPermissionIds ?? [],
+        isActive: data.isActive,
       });
       return { menu };
     } catch (e: any) {
@@ -107,40 +91,23 @@ export class MenusController {
   }
 
   @GrpcMethod('MenuService', 'Update')
-  async update(data: { id: number; [k: string]: any }) {
+  async update(data: { id: number;[k: string]: any }) {
     try {
       const { id, ...rest } = data;
-      const rawParentId = rest.parentId ?? rest.parent_id;
-      const parentId =
-        rawParentId === undefined
-          ? undefined
-          : rawParentId === 0
-            ? null
-            : Number(rawParentId);
-      const requiredPermissionIds =
-        rest.requiredPermissionIds !== undefined ||
-        rest.required_permission_ids !== undefined
-          ? this.normalizePermissionIds(
-              rest.requiredPermissionIds ?? rest.required_permission_ids ?? [],
-            )
-          : undefined;
-      const isActiveRaw = rest.isActive ?? rest.is_active;
-      const order = rest.order !== undefined ? Number(rest.order) : undefined;
       const menu = await this.menusService.update(id, {
-        code: rest.code != null ? String(rest.code).trim() : undefined,
-        name: rest.name != null ? String(rest.name).trim() : undefined,
+        code: rest.code,
+        name: rest.name,
         route: rest.route,
         icon: rest.icon,
-        order,
-        description:
-          rest.description !== undefined ? rest.description : undefined,
-        iconColor: rest.iconColor ?? rest.icon_color,
+        order: rest.order,
+        description: rest.description,
+        iconColor: rest.iconColor,
         service: rest.service,
         application: rest.application,
         target: rest.target,
-        parentId,
-        requiredPermissionIds,
-        isActive: isActiveRaw === undefined ? undefined : Boolean(isActiveRaw),
+        parentId: rest.parentId === 0 ? null : rest.parentId,
+        requiredPermissionIds: rest.requiredPermissionIds,
+        isActive: rest.isActive,
       });
       if (!menu) {
         throw new RpcException({
