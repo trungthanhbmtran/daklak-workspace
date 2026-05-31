@@ -302,7 +302,7 @@ export class UsersService implements OnModuleInit {
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
     
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email, roles, unitId, jobTitleCode },
+      { sub: user.id, email: user.email, username: user.username, fullName: user.fullName, roles, unitId, jobTitleCode },
       { expiresIn: jwtExpiresIn },
     );
     const unitName = firstPosition?.unit?.name ?? null;
@@ -374,7 +374,7 @@ export class UsersService implements OnModuleInit {
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email, roles, unitId, jobTitleCode },
+      { sub: user.id, email: user.email, username: user.username, fullName: user.fullName, roles, unitId, jobTitleCode },
       { expiresIn: jwtExpiresIn },
     );
     const unitName = firstPosition?.unit?.name ?? null;
