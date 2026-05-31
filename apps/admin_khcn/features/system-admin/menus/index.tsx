@@ -13,7 +13,7 @@ export type ViewState = {
 
 export function MenuClient() {
   const [viewState, setViewState] = useState<ViewState>({ mode: "idle" });
-  
+
   // Chỉ lấy API Menus ở đây để phân phát cho Sidebar và Form
   const { menus, isLoadingMenus } = useMenuApi();
 
@@ -23,15 +23,15 @@ export function MenuClient() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start h-[calc(100vh-120px)] overflow-hidden font-sans antialiased">
-      <MenuSidebar 
+      <MenuSidebar
         menus={menus}
         activeId={viewState.selectedId}
         onSelect={(id) => setViewState({ mode: "edit", selectedId: id })}
         onAddRoot={() => setViewState({ mode: "create_root" })}
         onAddChild={(id) => setViewState({ mode: "create_child", parentId: id })}
       />
-      
-      <MenuForm 
+
+      <MenuForm
         menus={menus}
         viewState={viewState}
         onSuccess={() => setViewState({ mode: "idle" })} // Đóng form khi save/delete xong

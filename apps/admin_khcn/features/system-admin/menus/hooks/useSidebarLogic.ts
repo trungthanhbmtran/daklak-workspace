@@ -19,14 +19,27 @@ export function useSidebarLogic(menus: MenuItem[]) {
     if (!searchTerm) return null;
     const ids = new Set<number>();
     const term = searchTerm.toLowerCase();
-    
+
+    const addChildren = (parentId: number) => {
+      menus.filter(m => m.parentId === parentId).forEach(child => {
+        if (!ids.has(child.id)) {
+          ids.add(child.id);
+          addChildren(child.id);
+        }
+      });
+    };
+
     menus.forEach(menu => {
       if (menu.name.toLowerCase().includes(term) || menu.code.toLowerCase().includes(term)) {
-        let current: MenuItem | undefined = menu;
+        ids.add(menu.id);
+
+        let current: MenuItem | undefined = menus.find(m => m.id === menu.parentId);
         while (current) {
           ids.add(current.id);
           current = menus.find(m => m.id === current?.parentId);
         }
+
+        addChildren(menu.id);
       }
     });
     return ids;

@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from "react";
-import { Plus, Edit, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Edit, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, ChevronRight } from "lucide-react";
 import { Resolver, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -14,15 +14,16 @@ import { Separator } from "@/components/ui/separator";
 
 import { Role, Permission } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface RoleFormProps {
-  selectedRole: Role | null; 
+  selectedRole: Role | null;
   createMode: boolean;
   permissions: Permission[]; // Danh sách phẳng chứa { id, action, resourceName, resourceCode }
-  onSave: (data: Partial<Role>) => void; 
-  onDelete: () => void; 
+  onSave: (data: Partial<Role>) => void;
+  onDelete: () => void;
   onCancel: () => void;
-  isSaving: boolean; 
+  isSaving: boolean;
   isDeleting: boolean;
 }
 
@@ -81,8 +82,8 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
               {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${selectedRole?.name}`}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1.5">
-               <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Security Level:</span>
-               <Badge variant="outline" className="text-[9px] h-4 font-mono uppercase bg-background">PBAC</Badge>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Security Level:</span>
+              <Badge variant="outline" className="text-[9px] h-4 font-mono uppercase bg-background">PBAC</Badge>
             </div>
           </div>
         </div>
@@ -96,7 +97,7 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
       <CardContent className="flex-1 overflow-y-auto p-0 scrollbar-thin">
         <Form {...form}>
           <form id="role-form" onSubmit={form.handleSubmit(onSave)}>
-            
+
             {/* 1. THÔNG TIN ĐỊNH DANH */}
             <div className="p-6 space-y-5">
               <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
@@ -109,14 +110,14 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
                     <FormControl><Input placeholder="VD: Quản trị viên" className="h-9 text-sm focus-visible:ring-1" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
-                )}/>
+                )} />
                 <FormField control={form.control} name="code" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Mã vai trò (Code) *</FormLabel>
                     <FormControl><Input placeholder="VD: ADMIN" className="h-9 font-mono text-sm uppercase" {...field} /></FormControl>
                     <FormMessage />
                   </FormItem>
-                )}/>
+                )} />
                 <FormField control={form.control} name="active" render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Trạng thái</FormLabel>
@@ -128,13 +129,13 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
                       </SelectContent>
                     </Select>
                   </FormItem>
-                )}/>
+                )} />
                 <FormField control={form.control} name="description" render={({ field }) => (
                   <FormItem className="lg:col-span-3">
                     <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Mô tả chức trách</FormLabel>
                     <FormControl><Input placeholder="Mô tả ngắn gọn phạm vi của vai trò này..." className="h-9 text-sm" {...field} /></FormControl>
                   </FormItem>
-                )}/>
+                )} />
               </div>
             </div>
 
@@ -147,55 +148,15 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
                   <Lock className="h-3.5 w-3.5 text-primary" /> 2. Quyền hạn trên tài nguyên
                 </div>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background">
-                   Tổng: {permissions.length} hành động
+                  Tổng: {permissions.length} hành động
                 </Badge>
               </div>
-              
-              <FormField control={form.control} name="permissionIds" render={() => (
-                <div className="grid grid-cols-1 gap-4">
-                  {Object.entries(groupedPermissions).map(([resourceName, perms]) => (
-                    <div key={resourceName} className="group border rounded-xl bg-card shadow-sm hover:border-primary/40 transition-all overflow-hidden">
-                      {/* Sub-Header cho từng Resource */}
-                      <div className="bg-muted/40 px-4 py-2 border-b flex items-center justify-between">
-                        <span className="font-bold text-xs text-foreground flex items-center gap-2">
-                           <CheckCircle2 className="h-3.5 w-3.5 text-primary opacity-60" />
-                           {resourceName}
-                        </span>
-                        <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60">
-                           {perms[0]?.module || 'N/A'}
-                        </code>
-                      </div>
-                      
-                      {/* Checkbox Matrix */}
-                      <div className="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        {perms.map(perm => (
-                          <FormField key={perm.id} control={form.control} name="permissionIds" render={({ field }) => {
-                            const isChecked = field.value?.includes(perm.id);
-                            return (
-                              <FormItem className="flex flex-row items-center space-x-2 space-y-0 p-1.5 rounded-md hover:bg-accent/50 transition-colors">
-                                <FormControl>
-                                  <Checkbox 
-                                    checked={isChecked}
-                                    onCheckedChange={(checked) => {
-                                      const currentValues = field.value || [];
-                                      return checked 
-                                        ? field.onChange([...currentValues, perm.id])
-                                        : field.onChange(currentValues.filter(value => value !== perm.id));
-                                    }}
-                                  />
-                                </FormControl>
-                                <FormLabel className="text-[11px] font-medium cursor-pointer leading-none">
-                                  {perm.action}
-                                </FormLabel>
-                              </FormItem>
-                            );
-                          }}/>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}/>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Object.entries(groupedPermissions).map(([resourceName, perms]) => (
+                  <PermissionCardDialog key={resourceName} resourceName={resourceName} perms={perms} form={form} />
+                ))}
+              </div>
             </div>
           </form>
         </Form>
@@ -209,5 +170,106 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
         </Button>
       </div>
     </Card>
+  );
+}
+
+// ============================================================================
+// COMPONENT CON: NHÓM QUYỀN (PERMISSION CARD DIALOG)
+// ============================================================================
+function PermissionCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const selectedIds = form.watch("permissionIds") || [];
+
+  const groupPermIds = perms.map((p: Permission) => p.id);
+  const selectedInGroup = selectedIds.filter((id: number) => groupPermIds.includes(id));
+  const hasSelected = selectedInGroup.length > 0;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <div
+          className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group min-h-[100px]"
+        >
+          <div className="flex items-start justify-between gap-2">
+            <span className="font-bold text-[13px] flex items-center gap-2 leading-tight">
+              <CheckCircle2 className={`h-4 w-4 shrink-0 ${hasSelected ? 'text-primary' : 'text-muted-foreground opacity-40'}`} />
+              <span className="line-clamp-2">{resourceName}</span>
+            </span>
+            <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60 shrink-0 bg-muted/50 px-1.5 py-0.5 rounded">
+              {perms[0]?.module || 'N/A'}
+            </code>
+          </div>
+
+          <div className="flex flex-wrap gap-1.5 items-center pr-8 mt-auto">
+            {hasSelected ? (
+              selectedInGroup.map((id: number) => {
+                const p = perms.find((x: Permission) => x.id === id);
+                return (
+                  <Badge key={id} variant="secondary" className="text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20 shadow-none font-medium truncate max-w-[120px]">
+                    {p?.action || 'Quyền'}
+                  </Badge>
+                );
+              })
+            ) : (
+              <span className="text-[11px] text-muted-foreground/60 italic">Chưa cấu hình...</span>
+            )}
+          </div>
+
+          <div className="absolute right-4 bottom-4 h-6 w-6 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+            <ChevronRight className="h-3.5 w-3.5" />
+          </div>
+        </div>
+      </DialogTrigger>
+
+      {isOpen && (
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-background">
+          <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background z-10 shadow-sm">
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+              <Lock className="h-5 w-5 text-primary" /> Phân quyền: {resourceName}
+            </DialogTitle>
+            <DialogDescription className="text-xs mt-2">
+              Tích chọn các quyền thuộc nhóm <strong className="text-foreground">{resourceName}</strong> mà vai trò này được phép truy cập.
+              Bạn đang chọn: <strong className="text-primary">{selectedInGroup.length}/{perms.length}</strong> quyền.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {perms.map((perm: Permission) => (
+                <FormField key={perm.id} control={form.control} name="permissionIds" render={({ field }) => {
+                  const isChecked = field.value?.includes(perm.id);
+                  return (
+                    <FormItem
+                      className="flex flex-row items-center space-x-2.5 space-y-0 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 data-[state=checked]:bg-primary/5 data-[state=checked]:border-primary/30 shadow-sm"
+                      data-state={isChecked ? "checked" : "unchecked"}
+                    >
+                      <FormControl>
+                        <Checkbox
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            const current = field.value || [];
+                            const next = checked
+                              ? [...current, perm.id]
+                              : current.filter((val: number) => val !== perm.id);
+                            field.onChange(next);
+                          }}
+                        />
+                      </FormControl>
+                      <div className="space-y-0.5 leading-none overflow-hidden">
+                        <FormLabel className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none truncate ${isChecked ? "text-primary" : "text-foreground/80"}`}>
+                          {perm.action}
+                        </FormLabel>
+                        <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase truncate">
+                          {perm.code ? perm.code.split('_').pop() : 'ACTION'}
+                        </p>
+                      </div>
+                    </FormItem>
+                  );
+                }} />
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      )}
+    </Dialog>
   );
 }
