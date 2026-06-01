@@ -21,6 +21,11 @@ export class TasksController {
     return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason);
   }
 
+  @GrpcMethod('TaskService', 'UpdateTask')
+  updateTask(data: { id: number; weight?: number; startDate?: string; dueDate?: string; priority?: string; baseScore?: number; title?: string; description?: string }) {
+    return this.tasksService.updateTask(data.id, data);
+  }
+
   @GrpcMethod('TaskService', 'RecommendAssignees')
   recommendAssignees(data: { rankCode: string; strategy: string }) {
     return this.tasksService.recommendAssignees(data);

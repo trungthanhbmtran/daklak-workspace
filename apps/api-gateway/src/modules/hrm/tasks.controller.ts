@@ -85,6 +85,22 @@ export class TasksController implements OnModuleInit {
     return response;
   }
 
+  @Put(':id')
+  async update(@Param('id') id: string, @Body() body: any) {
+    return firstValueFrom(
+      this.taskService.UpdateTask({
+        id: parseInt(id, 10),
+        weight: body.weight,
+        startDate: body.startDate,
+        dueDate: body.dueDate,
+        priority: body.priority,
+        baseScore: body.baseScore,
+        title: body.title,
+        description: body.description,
+      }),
+    );
+  }
+
   @Put(':id/status')
   async updateStatus(
     @Param('id') id: string, 

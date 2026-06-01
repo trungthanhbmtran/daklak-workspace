@@ -7,6 +7,7 @@ service TaskService {
   rpc CreateTask (CreateTaskRequest) returns (TaskResponse) {}
   rpc ListTasks (ListTasksRequest) returns (ListTasksResponse) {}
   rpc UpdateTaskStatus (UpdateTaskStatusRequest) returns (TaskResponse) {}
+  rpc UpdateTask (UpdateTaskRequest) returns (TaskResponse) {}
   rpc RecommendAssignees (RecommendAssigneesRequest) returns (RecommendAssigneesResponse) {}
   rpc AssignTask (AssignTaskRequest) returns (TaskResponse) {}
   rpc AddComment (AddCommentRequest) returns (TaskCommentResponse) {}
@@ -140,6 +141,17 @@ message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
   string rejectReason = 3; // optional
+}
+
+message UpdateTaskRequest {
+  int32 id = 1;
+  float weight = 2;
+  string startDate = 3;
+  string dueDate = 4;
+  string priority = 5;
+  float baseScore = 6;
+  string title = 7;
+  string description = 8;
 }
 
 message TaskTemplateResponse {

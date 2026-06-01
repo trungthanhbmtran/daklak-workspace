@@ -341,6 +341,30 @@ export class TasksService {
     };
   }
 
+  async updateTask(id: number, data: any) {
+    const updateData: any = {};
+    if (data.weight !== undefined && data.weight !== null && data.weight !== 0) updateData.weight = data.weight;
+    if (data.startDate) updateData.startDate = new Date(data.startDate);
+    if (data.dueDate) updateData.dueDate = new Date(data.dueDate);
+    if (data.priority) updateData.priority = data.priority;
+    if (data.baseScore !== undefined && data.baseScore !== null && data.baseScore !== 0) updateData.baseScore = data.baseScore;
+    if (data.title) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+
+    const t = await this.prisma.task.update({
+      where: { id },
+      data: updateData,
+    });
+
+    return {
+      ...t,
+      dueDate: t.dueDate?.toISOString() || '',
+      startDate: t.startDate?.toISOString() || '',
+      createdAt: t.createdAt?.toISOString() || '',
+      updatedAt: t.updatedAt?.toISOString() || '',
+    };
+  }
+
   async assignTask(id: number, assigneeCode: string, departmentId?: number) {
     const dataToUpdate: any = {};
     if (assigneeCode) dataToUpdate.assigneeCode = assigneeCode;
