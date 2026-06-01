@@ -17,8 +17,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: { id: number; status: string; rejectReason?: string }) {
-    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason);
+  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string }) {
+    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode);
   }
 
   @GrpcMethod('TaskService', 'UpdateTask')
@@ -32,8 +32,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: { id: number; assigneeCode: string; departmentId?: number }) {
-    return this.tasksService.assignTask(data.id, data.assigneeCode, data.departmentId);
+  assignTask(data: { id: number; assigneeCode: string; departmentId?: number; assignerCode?: string }) {
+    return this.tasksService.assignTask(data.id, data.assigneeCode, data.departmentId, data.assignerCode);
   }
 
   @GrpcMethod('TaskService', 'AddComment')

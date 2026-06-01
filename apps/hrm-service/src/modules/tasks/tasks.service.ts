@@ -207,7 +207,7 @@ export class TasksService {
     };
   }
 
-  async updateTaskStatus(id: number, status: string, rejectReason?: string) {
+  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string) {
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) {
       dataToUpdate.rejectReason = rejectReason;
@@ -222,7 +222,7 @@ export class TasksService {
       await this.prisma.taskComment.create({
         data: {
           taskId: id,
-          authorCode: null,
+          authorCode: actorCode || null,
           content: `Đã trả lại công việc với lý do: ${rejectReason}`,
           isSystemMessage: true,
         }
@@ -365,10 +365,12 @@ export class TasksService {
     };
   }
 
-  async assignTask(id: number, assigneeCode: string, departmentId?: number) {
+  async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
     const dataToUpdate: any = {};
     if (assigneeCode) dataToUpdate.assigneeCode = assigneeCode;
     if (departmentId !== undefined) dataToUpdate.departmentId = departmentId;
+    // Ghi đè lại người giao việc nếu được truyền từ Gateway
+    if (assignerCode) dataToUpdate.assignerCode = assignerCode;
 
     const t = await this.prisma.task.update({
       where: { id },

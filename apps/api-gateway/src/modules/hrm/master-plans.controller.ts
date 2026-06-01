@@ -9,11 +9,18 @@ import {
   Query,
   Inject,
   OnModuleInit,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
+import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 
+@ApiTags('HRM - Master Plans')
+@ApiBearerAuth('JWT-auth')
 @Controller('admin/hrm/master-plans')
+@UseGuards(JwtAuthGuard)
 export class MasterPlansController implements OnModuleInit {
   private masterPlanService: any;
 
@@ -102,7 +109,9 @@ export class MasterPlansController implements OnModuleInit {
   }
 
   @Post()
-  async create(@Body() body: any) {
+  async create(@Req() req: any, @Body() body: any) {
+    // Inject mã người tạo từ JWT token
+    body.createdByCode = req.user?.employeeCode || req.user?.username || 'system';
     const data = (await firstValueFrom(
       this.masterPlanService.Create(body),
     )) as any;
@@ -110,7 +119,9 @@ export class MasterPlansController implements OnModuleInit {
   }
 
   @Put(':id')
-  async update(@Param('id') id: string, @Body() body: any) {
+  async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    // Inject mã người cập nhật từ JWT token
+    body.updatedByCode = req.user?.employeeCode || req.user?.username || 'system';
     const data = (await firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
     )) as any;

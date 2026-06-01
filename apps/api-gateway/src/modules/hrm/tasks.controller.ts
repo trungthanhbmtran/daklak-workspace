@@ -103,6 +103,7 @@ export class TasksController implements OnModuleInit {
 
   @Put(':id/status')
   async updateStatus(
+    @Req() req: any,
     @Param('id') id: string, 
     @Body('status') status: string,
     @Body('rejectReason') rejectReason?: string
@@ -112,6 +113,8 @@ export class TasksController implements OnModuleInit {
         id: parseInt(id, 10),
         status,
         rejectReason,
+        // Inject người thực hiện từ JWT token
+        actorCode: req.user?.employeeCode || req.user?.username || '',
       }),
     );
   }
@@ -131,6 +134,7 @@ export class TasksController implements OnModuleInit {
 
   @Put(':id/assign')
   async assignTask(
+    @Req() req: any,
     @Param('id') id: string,
     @Body('assigneeCode') assigneeCode: string,
     @Body('departmentId') departmentId?: number,
@@ -140,6 +144,8 @@ export class TasksController implements OnModuleInit {
         id: parseInt(id, 10),
         assigneeCode,
         departmentId,
+        // Inject người giao việc từ JWT token (ghi đè lên assignerCode)
+        assignerCode: req.user?.employeeCode || req.user?.username || '',
       }),
     );
   }
