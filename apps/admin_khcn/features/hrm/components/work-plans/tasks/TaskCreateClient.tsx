@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Check, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -399,21 +399,28 @@ export function TaskCreateClient() {
         )}
       </div>
 
-      <Sheet open={!!selectedTaskForModal} onOpenChange={(open) => { if (!open) setSelectedTaskForModal(null); }}>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle className="text-slate-800">Giao việc: {selectedTaskForModal?.title}</SheetTitle>
-          </SheetHeader>
-          <div className="mt-6 space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
+      <Dialog open={!!selectedTaskForModal} onOpenChange={(open) => { if (!open) setSelectedTaskForModal(null); }}>
+        <DialogContent className="sm:max-w-[600px] p-0 border-0 overflow-hidden shadow-2xl rounded-2xl">
+          <DialogHeader className="bg-slate-50 px-6 py-5 border-b border-slate-100">
+            <DialogTitle className="text-slate-800 text-lg font-bold flex items-center gap-2">
+              <div className="bg-indigo-100 text-indigo-600 p-1.5 rounded-lg">
+                <Briefcase className="w-4 h-4" />
+              </div>
+              <span className="line-clamp-1">{selectedTaskForModal?.title || 'Giao việc'}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-6 py-2 overflow-y-auto max-h-[75vh]">
+            <div className="space-y-5 pb-6">
+              <div className="space-y-2 pt-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold text-slate-700">Người thực hiện</label>
+                  <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                    Người thực hiện <span className="text-red-500">*</span>
+                  </label>
                   <div className="flex items-center gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-6 text-[10px] px-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+                      className="h-7 text-[11px] px-2.5 font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 border-indigo-200 transition-colors"
                       onClick={() => {
                         if (user && assignableEmployees.length > 0) {
                           const me = assignableEmployees.find(e =>
@@ -434,12 +441,12 @@ export function TaskCreateClient() {
                       }}
                       type="button"
                     >
-                      <Sparkles className="w-3 h-3 mr-1" /> Giao cho tôi
+                      <Sparkles className="w-3 h-3 mr-1.5 text-indigo-500" /> Giao cho tôi
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-6 text-[10px] px-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                      className="h-7 text-[11px] px-2.5 font-medium bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 transition-colors"
                       onClick={() => {
                         if (assignableEmployees.length > 0) {
                           setAssignee(assignableEmployees[0].code);
@@ -450,7 +457,7 @@ export function TaskCreateClient() {
                       }}
                       type="button"
                     >
-                      <Sparkles className="w-3 h-3 mr-1" /> Giao việc nhanh
+                      <Sparkles className="w-3 h-3 mr-1.5 text-slate-400" /> Giao nhanh
                     </Button>
                   </div>
                 </div>
@@ -460,17 +467,29 @@ export function TaskCreateClient() {
                       variant="outline"
                       role="combobox"
                       aria-expanded={openAssignee}
-                      className="w-full justify-between h-11 bg-slate-50 hover:bg-slate-100 border-slate-200"
+                      className={cn(
+                        "w-full justify-between h-12 rounded-xl transition-all",
+                        assignee ? "bg-white border-indigo-200 shadow-sm ring-1 ring-indigo-50/50" : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-500"
+                      )}
                     >
-                      {selectedEmp ? selectedEmp.name : "Tìm kiếm tên, chức danh..."}
+                      {selectedEmp ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">
+                            {selectedEmp.name.charAt(0)}
+                          </div>
+                          <span className="font-semibold text-slate-900">{selectedEmp.name}</span>
+                        </div>
+                      ) : (
+                        "Tìm kiếm tên, chức danh..."
+                      )}
                       <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-[350px] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Tìm kiếm tên, chức danh..." className="h-10" />
-                      <CommandList>
-                        <CommandEmpty>Không tìm thấy nhân sự phù hợp</CommandEmpty>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-[450px] p-0 rounded-xl overflow-hidden shadow-xl border-slate-200" align="start">
+                    <Command className="bg-white">
+                      <CommandInput placeholder="Tìm kiếm tên, chức danh, phòng ban..." className="h-11 border-b border-slate-100" />
+                      <CommandList className="max-h-[300px]">
+                        <CommandEmpty className="py-6 text-center text-sm text-slate-500">Không tìm thấy nhân sự phù hợp</CommandEmpty>
                         <CommandGroup>
                           {assignableEmployees.map((emp) => {
                             return (
@@ -481,32 +500,39 @@ export function TaskCreateClient() {
                                   setAssignee(emp.code);
                                   setOpenAssignee(false);
                                 }}
+                                className="px-4 py-3 cursor-pointer data-[selected=true]:bg-slate-50 aria-selected:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                               >
                                 <Check
                                   className={cn(
-                                    "mr-2 h-4 w-4 shrink-0",
+                                    "mr-3 h-5 w-5 shrink-0 text-indigo-600 transition-opacity",
                                     assignee === emp.code ? "opacity-100" : "opacity-0"
                                   )}
                                 />
-                                <div className="flex flex-col py-1 w-full gap-1">
-                                  <div className="flex justify-between items-start w-full">
-                                    <span className="font-bold text-sm text-slate-800">{emp.name}</span>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${emp.performanceScore >= 90 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : emp.performanceScore >= 75 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                                      Hiệu suất: {emp.performanceScore}%
+                                <div className="flex flex-col w-full gap-1.5">
+                                  <div className="flex justify-between items-center w-full">
+                                    <span className="font-bold text-[15px] text-slate-900">{emp.name}</span>
+                                    <span className={cn(
+                                      "text-[10px] px-2 py-0.5 rounded-full font-bold border whitespace-nowrap ml-2",
+                                      emp.performanceScore >= 90 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 
+                                      emp.performanceScore >= 75 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 
+                                      'bg-amber-50 text-amber-700 border-amber-200'
+                                    )}>
+                                      HS: {emp.performanceScore}đ
                                     </span>
                                   </div>
-                                  <span className="text-[11px] text-slate-500">
+                                  <span className="text-[12px] font-medium text-slate-500 flex items-center gap-1.5">
+                                    <Briefcase className="w-3.5 h-3.5" />
                                     {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
-                                    {emp.department?.name ? ` • ${emp.department.name}` : ''}
+                                    {emp.department?.name ? <><span className="text-slate-300">•</span> {emp.department.name}</> : ''}
                                   </span>
-                                  <div className="flex flex-wrap gap-2 mt-0.5">
+                                  <div className="flex flex-wrap gap-2 mt-1">
                                     {emp.matchDomain && (
-                                      <span className="text-[10px] text-indigo-600 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100 flex items-center gap-1">
-                                        <Target className="w-3 h-3" /> Phù hợp lĩnh vực
+                                      <span className="text-[10px] font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100 flex items-center gap-1">
+                                        <Target className="w-3 h-3" /> Đúng chuyên môn
                                       </span>
                                     )}
                                     {emp.matchLocation && (
-                                      <span className="text-[10px] text-emerald-600 bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
+                                      <span className="text-[10px] font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100 flex items-center gap-1">
                                         <MapPin className="w-3 h-3" /> Đúng địa bàn
                                       </span>
                                     )}
@@ -523,90 +549,116 @@ export function TaskCreateClient() {
               </div>
 
               {selectedEmp && (
-                <div className={`space-y-4 p-4 rounded-xl border transition-colors duration-300 ${isOverload ? 'bg-red-50 border-red-200' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'}`}>
+                <div className={cn(
+                  "space-y-4 p-5 rounded-xl border transition-all duration-300 shadow-sm",
+                  isOverload ? 'bg-red-50/50 border-red-200' : 
+                  newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-50/50 border-amber-200' : 
+                  'bg-white border-slate-200'
+                )}>
                   {/* Thông tin nhân sự */}
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${isOverload ? 'bg-red-100 text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-100 text-amber-600' : 'bg-slate-200 text-slate-700'}`}>
+                  <div className="flex items-center gap-4">
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center font-bold text-xl shrink-0 shadow-sm",
+                      isOverload ? 'bg-red-100 text-red-600' : 
+                      newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-100 text-amber-600' : 
+                      'bg-indigo-50 text-indigo-600 border border-indigo-100'
+                    )}>
                       {selectedEmp.name.charAt(0)}
                     </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 leading-tight">{selectedEmp.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{selectedEmp.jobTitle?.name || 'Nhân viên'} {selectedEmp.department?.name ? `• ${selectedEmp.department.name}` : ''}</p>
+                    <div className="flex-1">
+                      <p className="font-bold text-[15px] text-slate-900 leading-tight mb-1">{selectedEmp.name}</p>
+                      <p className="text-xs font-medium text-slate-500 line-clamp-1">{selectedEmp.jobTitle?.name || 'Nhân viên'} {selectedEmp.department?.name ? `• ${selectedEmp.department.name}` : ''}</p>
                     </div>
                   </div>
 
                   {/* Thanh tiến độ Workload */}
-                  <div className="space-y-2 pt-2 border-t border-slate-200/60">
+                  <div className="space-y-2.5 pt-3 border-t border-slate-100">
                     <div className="flex justify-between items-center text-xs font-bold">
-                      <span className="text-slate-600 flex items-center gap-1">
-                        <Activity className="w-3 h-3" /> Tải công việc
+                      <span className="text-slate-600 flex items-center gap-1.5">
+                        <Activity className="w-4 h-4 text-slate-400" /> Khối lượng công việc
                       </span>
                       <div className="flex items-center gap-2">
                         {isOverload && (
-                          <span className="flex items-center gap-1 text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                            <AlertTriangle className="w-3 h-3" /> Quá tải
+                          <span className="flex items-center gap-1 text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md font-bold">
+                            <AlertTriangle className="w-3 h-3" /> QUÁ TẢI
                           </span>
                         )}
-                        <span className={isOverload ? 'text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'text-amber-600' : 'text-slate-600'}>
-                          {newLoad} / {selectedEmp.rankLimit} đ
+                        <span className={cn(
+                          "text-sm",
+                          isOverload ? 'text-red-600' : 
+                          newLoad >= selectedEmp.rankLimit * 0.8 ? 'text-amber-600' : 
+                          'text-indigo-600'
+                        )}>
+                          {newLoad} <span className="text-slate-400 font-medium">/ {selectedEmp.rankLimit} đ</span>
                         </span>
                       </div>
                     </div>
-                    <div className="h-2.5 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
+                    <div className="h-2.5 w-full bg-slate-100 rounded-full overflow-hidden shadow-inner">
                       <div
-                        className={`h-full transition-all duration-500 rounded-full ${isOverload ? 'bg-red-500' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-500' : 'bg-slate-500'}`}
+                        className={cn(
+                          "h-full transition-all duration-700 rounded-full",
+                          isOverload ? 'bg-red-500' : 
+                          newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-500' : 
+                          'bg-indigo-500'
+                        )}
                         style={{ width: `${Math.min((newLoad / selectedEmp.rankLimit) * 100, 100)}%` }}
                       />
                     </div>
                     {isOverload && (
-                      <p className="text-[10px] text-red-500 font-medium">
-                        * Nhân sự này đã vượt quá định mức công việc quy định. Hãy cân nhắc chọn người khác.
+                      <p className="text-[11px] text-red-600 font-medium bg-red-50 p-2 rounded-md border border-red-100">
+                        Nhân sự này đã vượt quá định mức công việc quy định. Hệ thống khuyến nghị chọn nhân sự khác để đảm bảo chất lượng công việc.
                       </p>
                     )}
                   </div>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Mức độ ưu tiên</label>
-                  <Select value={priority} onValueChange={setPriority}>
-                    <SelectTrigger className="h-11 bg-slate-50">
-                      <SelectValue placeholder="Chọn mức độ" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="HIGH"><span className="text-slate-800 font-medium">🔴 Cao</span></SelectItem>
-                      <SelectItem value="MEDIUM"><span className="text-slate-800 font-medium">🟡 Trung bình</span></SelectItem>
-                      <SelectItem value="LOW"><span className="text-slate-800 font-medium">🟢 Thấp</span></SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700">Mức độ ưu tiên</label>
+                    <Select value={priority} onValueChange={setPriority}>
+                      <SelectTrigger className="h-11 bg-white border-slate-200 rounded-lg shadow-sm">
+                        <SelectValue placeholder="Chọn mức độ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="HIGH"><span className="text-slate-800 font-medium flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-red-500"></div> Cao</span></SelectItem>
+                        <SelectItem value="MEDIUM"><span className="text-slate-800 font-medium flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500"></div> Trung bình</span></SelectItem>
+                        <SelectItem value="LOW"><span className="text-slate-800 font-medium flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500"></div> Thấp</span></SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700">Điểm đánh giá</label>
+                    <Input type="number" value={baseScore} onChange={e => setBaseScore(Number(e.target.value))} className="h-11 bg-white border-slate-200 rounded-lg shadow-sm" placeholder="VD: 10" />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700">Điểm đánh giá (Base Score)</label>
-                  <Input type="number" value={baseScore} onChange={e => setBaseScore(Number(e.target.value))} className="h-11 bg-slate-50" placeholder="VD: 10" />
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                      Ngày bắt đầu <span className="text-red-500">*</span>
+                    </label>
+                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="h-11 bg-white border-slate-200 rounded-lg shadow-sm" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-1.5">
+                      Hạn chót <span className="text-red-500">*</span>
+                    </label>
+                    <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required className="h-11 bg-white border-slate-200 rounded-lg shadow-sm" />
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    Ngày bắt đầu <span className="text-red-500">*</span>
-                  </label>
-                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="h-11 bg-slate-50" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    Hạn chót (Deadline) <span className="text-red-500">*</span>
-                  </label>
-                  <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required className="h-11 bg-slate-50" />
-                </div>
+              <div className="pt-2">
+                <Button type="button" onClick={handleSubmitModal} className="w-full h-12 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-200 transition-all active:scale-[0.98]">
+                  Xác nhận Giao việc
+                </Button>
               </div>
-
-              <Button type="button" onClick={handleSubmitModal} className="w-full mt-4 bg-slate-900 h-11 hover:bg-slate-800">Xác nhận Giao việc</Button>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
