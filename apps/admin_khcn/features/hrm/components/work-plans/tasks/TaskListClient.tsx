@@ -21,7 +21,6 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useSearchParams } from 'next/navigation';
 import { Search } from '@/components/ui/search';
-import { useUser } from '@/hooks/useUser';
 
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
@@ -40,12 +39,6 @@ export const TaskListClient = () => {
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
-  const { user } = useUser();
-  const currentUser = {
-    code: user?.employeeCode || '',
-    departmentId: user?.departmentId || 0,
-    isManager: user?.jobTitle?.code === 'GIAM_DOC' || user?.jobTitle?.code === 'PHO_GIAM_DOC' || user?.jobTitle?.code === 'TRUONG_PHONG'
-  };
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [assignStrategy, setAssignStrategy] = useState<string>('UNDER_QUOTA');
@@ -85,8 +78,7 @@ export const TaskListClient = () => {
   const { data, isLoading, refetch } = useTasksList({
     filter: activeFilter,
     search: searchQuery,
-    ...(activeTab === 'MY_TASKS' ? { assigneeCode: currentUser.code } : {}),
-    ...(activeTab === 'DEPT_TASKS' ? { departmentId: currentUser.departmentId } : {}),
+    tab: activeTab,
   });
   const tasks = data?.data || [];
   const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
@@ -144,7 +136,6 @@ export const TaskListClient = () => {
     setIsSendingMessage(true);
     try {
       await hrmTasksApi.addComment(selectedTask.id.toString(), {
-        authorCode: currentUser.code,
         content: trimmedMessage,
       });
       setChatMessage('');
@@ -191,7 +182,6 @@ export const TaskListClient = () => {
     if (!selectedTask) return;
     try {
       await hrmTasksApi.addComment(selectedTask.id.toString(), {
-        authorCode: currentUser.code,
         content: `⚠️ [ĐỀ NGHỊ PHỐI HỢP]: Tôi cần hỗ trợ để xử lý công việc này.`,
       });
       toast.success('Đã gửi đề nghị phối hợp');
