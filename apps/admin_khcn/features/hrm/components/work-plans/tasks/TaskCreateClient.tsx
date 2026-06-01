@@ -36,6 +36,7 @@ export function TaskCreateClient() {
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [planId, setPlanId] = useState('');
   const [openAssignee, setOpenAssignee] = useState(false);
+  const [planTaskAssignees, setPlanTaskAssignees] = useState<Record<string, string>>({});
 
   const { data: plansRes } = useQuery({
     queryKey: ["hrm-master-plans"],
@@ -79,21 +80,28 @@ export function TaskCreateClient() {
   });
   const selectedEmp = employees.find(e => e.code === assignee);
 
+  const getSupervisorFor = (empCode: string) => {
+    if (!employeesData?.data) return '';
+    const emp = employeesData.data.find(e => e.employeeCode === empCode);
+    if (!emp) return '';
+    const unitDomainIds = emp.department?.domainIds || [];
+    const jtDomainId = emp.jobTitle?.domainId;
+    const domainsToMatch = new Set([...unitDomainIds, jtDomainId].filter(d => d != null && d > 0));
+
+    let leader = employeesData.data.find((e) => {
+      if (e.jobTitle?.code !== 'PHO_GIAM_DOC' && e.jobTitle?.code !== 'GIAM_DOC') return false;
+      return e.jobTitle.domainId && domainsToMatch.has(e.jobTitle.domainId);
+    });
+
+    if (!leader) leader = employeesData.data.find((e) => e.jobTitle?.code === 'GIAM_DOC');
+    return leader ? leader.employeeCode : '';
+  };
+
   useEffect(() => {
-    if (assignee && employeesData?.data && selectedEmp) {
-      const unitDomainIds = selectedEmp.department?.domainIds || [];
-      const jtDomainId = selectedEmp.jobTitle?.domainId;
-      const domainsToMatch = new Set([...unitDomainIds, jtDomainId].filter(d => d != null && d > 0));
-
-      let leader = employeesData.data.find((e) => {
-        if (e.jobTitle?.code !== 'PHO_GIAM_DOC' && e.jobTitle?.code !== 'GIAM_DOC') return false;
-        return e.jobTitle.domainId && domainsToMatch.has(e.jobTitle.domainId);
-      });
-
-      if (!leader) leader = employeesData.data.find((e) => e.jobTitle?.code === 'GIAM_DOC');
-      if (leader) setSupervisor(leader.employeeCode);
+    if (assignee) {
+      setSupervisor(getSupervisorFor(assignee));
     }
-  }, [assignee, selectedEmp, employeesData?.data]);
+  }, [assignee, employeesData?.data]);
 
   const { data } = useTaskTemplatesList(selectedEmp?.rank);
   const templates = data?.data || [];
@@ -104,10 +112,49 @@ export function TaskCreateClient() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isOverload) return toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức!');
     try {
       const finalPlanId = planId === 'none' || planId === '' ? undefined : Number(planId);
-      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, title: taskName, taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
+      
+      if (finalPlanId) {
+        // Chế độ Giao việc theo Kế hoạch (Bulk)
+        const selectedPlan = masterPlans.find((p: any) => p.id.toString() === planId);
+        if (!selectedPlan || !selectedPlan.tasks) return;
+        const uniqueTasks = Array.from(new Set(selectedPlan.tasks.map((t: any) => t.title)))
+          .map(title => selectedPlan.tasks!.find((t: any) => t.title === title));
+          
+        const tasksToCreate = uniqueTasks.map((t: any) => {
+          const assignedCode = planTaskAssignees[t.title as string];
+          if (!assignedCode) return null;
+          return {
+             title: t.title,
+             taskName: t.title,
+             assigneeCode: assignedCode,
+             supervisorCode: getSupervisorFor(assignedCode),
+             weight: t.weight || 20,
+             priority: t.priority || 'MEDIUM',
+             baseScore: t.baseScore || t.targetValue || 10,
+             startDate: t.startDate ? t.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
+             dueDate: t.endDate ? t.endDate.split('T')[0] : new Date(Date.now() + 7*86400000).toISOString().split('T')[0],
+             planId: finalPlanId
+          };
+        }).filter(Boolean);
+
+        if (tasksToCreate.length === 0) {
+           return toast.error('Vui lòng chọn người thực hiện cho ít nhất 1 đầu mục công việc');
+        }
+
+        // Tạo từng task tuần tự (có thể gom lại tạo bulk ở backend sau)
+        for (const payload of tasksToCreate) {
+           await createTask(payload);
+        }
+        
+      } else {
+        // Chế độ Giao việc Đơn lẻ
+        if (!assignee) return toast.error('Vui lòng chọn người thực hiện!');
+        if (isOverload) return toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức!');
+        await createTask({ assigneeCode: assignee, supervisorCode: supervisor, title: taskName, taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
+      }
+      
       toast.success('Giao việc thành công!');
       router.push('/services/hrm/work-plans/tasks');
     } catch { toast.error('Lỗi khi giao việc'); }
@@ -181,23 +228,34 @@ export function TaskCreateClient() {
                         {uniqueTasks.map((t: any) => (
                            <div 
                              key={t.id || t.title}
-                             onClick={() => {
-                               setTaskName(t.title);
-                               setBaseScore(t.baseScore || t.targetValue || 10);
-                               if (t.weight) setTaskWeight(t.weight);
-                               if (t.priority) setPriority(t.priority);
-                               if (t.startDate) setStartDate(t.startDate.split('T')[0]);
-                               if (t.endDate) setDueDate(t.endDate.split('T')[0]);
-                             }}
-                             className={`p-3 rounded-lg border cursor-pointer transition-all ${taskName === t.title ? 'border-indigo-500 bg-indigo-50 shadow-sm' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
+                             className="p-4 rounded-xl border border-indigo-200 bg-white shadow-sm flex flex-col md:flex-row gap-4 items-start md:items-center justify-between"
                            >
-                              <div className="font-semibold text-sm text-slate-800">{t.title}</div>
-                              <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-2">
-                                <span>Ưu tiên: <span className={`font-medium ${t.priority === 'HIGH' ? 'text-red-600' : t.priority === 'LOW' ? 'text-green-600' : 'text-amber-600'}`}>{t.priority === 'HIGH' ? 'Cao' : t.priority === 'LOW' ? 'Thấp' : 'Trung bình'}</span></span>
-                                <span>•</span>
-                                <span>Trọng số: <span className="font-medium">{t.weight || 20}%</span></span>
-                                <span>•</span>
-                                <span>Điểm: <span className="font-medium">{t.baseScore || t.targetValue || 10}</span></span>
+                              <div className="flex-1">
+                                <div className="font-bold text-sm text-slate-800">{t.title}</div>
+                                <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-2">
+                                  <span>Ưu tiên: <span className={`font-medium ${t.priority === 'HIGH' ? 'text-red-600' : t.priority === 'LOW' ? 'text-green-600' : 'text-amber-600'}`}>{t.priority === 'HIGH' ? 'Cao' : t.priority === 'LOW' ? 'Thấp' : 'Trung bình'}</span></span>
+                                  <span>•</span>
+                                  <span>Trọng số: <span className="font-medium">{t.weight || 20}%</span></span>
+                                  <span>•</span>
+                                  <span>Điểm: <span className="font-medium">{t.baseScore || t.targetValue || 10}</span></span>
+                                </div>
+                              </div>
+                              <div className="w-full md:w-64 shrink-0">
+                                <Select 
+                                  value={planTaskAssignees[t.title as string] || ''} 
+                                  onValueChange={(val) => setPlanTaskAssignees({...planTaskAssignees, [t.title as string]: val})}
+                                >
+                                  <SelectTrigger className="w-full bg-slate-50">
+                                    <SelectValue placeholder="-- Chọn người thực hiện --" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    {assignableEmployees.map(emp => (
+                                      <SelectItem key={emp.code} value={emp.code}>
+                                        {emp.name} <span className="text-slate-400">({emp.jobTitle?.name || 'Nhân viên'})</span>
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                               </div>
                            </div>
                         ))}
@@ -206,224 +264,230 @@ export function TaskCreateClient() {
                   );
                 })()}
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <Target className="w-4 h-4 text-slate-400" />
-                    Tên công việc <span className="text-red-500">*</span>
-                  </label>
-                  <Input value={taskName} onChange={e => setTaskName(e.target.value)} required className="h-11 bg-slate-50 focus-visible:bg-white" placeholder="Nhập tên công việc cần giao..." />
-                </div>
+                {(!planId || planId === 'none') && (
+                  <>
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                        <Target className="w-4 h-4 text-slate-400" />
+                        Tên công việc <span className="text-red-500">*</span>
+                      </label>
+                      <Input value={taskName} onChange={e => setTaskName(e.target.value)} required className="h-11 bg-slate-50 focus-visible:bg-white" placeholder="Nhập tên công việc cần giao..." />
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Mức độ ưu tiên</label>
-                    <Select value={priority} onValueChange={setPriority}>
-                      <SelectTrigger className="h-11 bg-white">
-                        <SelectValue placeholder="Chọn mức độ" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="HIGH"><span className="text-red-600 font-medium">🔴 Cao</span></SelectItem>
-                        <SelectItem value="MEDIUM"><span className="text-amber-600 font-medium">🟡 Trung bình</span></SelectItem>
-                        <SelectItem value="LOW"><span className="text-green-600 font-medium">🟢 Thấp</span></SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700">Trọng số (ĐTB)</label>
-                    <Input type="number" value={baseScore} onChange={e => setBaseScore(Number(e.target.value))} className="h-11 bg-white" placeholder="VD: 10" />
-                  </div>
-                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Mức độ ưu tiên</label>
+                        <Select value={priority} onValueChange={setPriority}>
+                          <SelectTrigger className="h-11 bg-white">
+                            <SelectValue placeholder="Chọn mức độ" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="HIGH"><span className="text-red-600 font-medium">🔴 Cao</span></SelectItem>
+                            <SelectItem value="MEDIUM"><span className="text-amber-600 font-medium">🟡 Trung bình</span></SelectItem>
+                            <SelectItem value="LOW"><span className="text-green-600 font-medium">🟢 Thấp</span></SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700">Trọng số (ĐTB)</label>
+                        <Input type="number" value={baseScore} onChange={e => setBaseScore(Number(e.target.value))} className="h-11 bg-white" placeholder="VD: 10" />
+                      </div>
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                      Ngày bắt đầu <span className="text-red-500">*</span>
-                    </label>
-                    <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="h-11" />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                      Hạn chót (Deadline) <span className="text-red-500">*</span>
-                    </label>
-                    <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required className="h-11" />
-                  </div>
-                </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          Ngày bắt đầu <span className="text-red-500">*</span>
+                        </label>
+                        <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="h-11" />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                          Hạn chót (Deadline) <span className="text-red-500">*</span>
+                        </label>
+                        <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required className="h-11" />
+                      </div>
+                    </div>
+                  </>
+                )}
 
-
+                <Button type="submit" form="taskForm" className="w-full mt-4 bg-indigo-600">
+                  {planId && planId !== 'none' ? 'Giao các công việc đã chọn' : 'Giao việc ngay'}
+                </Button>
               </form>
             </CardContent>
           </Card>
         </div>
 
-        {/* Sidebar nhân sự */}
-        <div className="lg:col-span-4 space-y-6">
-          <Card className="sticky top-6">
-            <CardContent className="p-4 space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-bold">Người thực hiện</label>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-6 text-[10px] px-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
-                      onClick={() => {
-                        if (user && assignableEmployees.length > 0) {
-                          const me = assignableEmployees.find(e => 
-                            e.code === user.employeeCode || 
-                            e.code === user.username || 
-                            e.code === user.email ||
-                            e.name === user.fullName
-                          );
-                          if (me) {
-                            setAssignee(me.code);
-                            toast.success(`Đã chọn: ${me.name}`);
-                          } else {
-                            toast.error('Không tìm thấy thông tin của bạn trong danh sách nhân sự');
-                          }
-                        } else {
-                          toast.error('Chưa có thông tin đăng nhập');
-                        }
-                      }}
-                      type="button"
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" /> Giao cho tôi
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="h-6 text-[10px] px-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
-                      onClick={() => {
-                        if (assignableEmployees.length > 0) {
-                          setAssignee(assignableEmployees[0].code);
-                          toast.success(`Đã chọn nhanh: ${assignableEmployees[0].name}`);
-                        } else {
-                          toast.error('Không có nhân sự phù hợp');
-                        }
-                      }}
-                      type="button"
-                    >
-                      <Sparkles className="w-3 h-3 mr-1" /> Giao việc nhanh
-                    </Button>
-                  </div>
-                </div>
-                <Popover open={openAssignee} onOpenChange={setOpenAssignee}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={openAssignee}
-                      className="w-full justify-between h-11 bg-slate-50 hover:bg-slate-100 border-slate-200"
-                    >
-                      {selectedEmp ? selectedEmp.name : "Tìm kiếm tên, chức danh..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-[350px] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Tìm kiếm tên, chức danh..." className="h-10" />
-                      <CommandList>
-                        <CommandEmpty>Không tìm thấy nhân sự phù hợp</CommandEmpty>
-                        <CommandGroup>
-                          {assignableEmployees.map((emp) => {
-                            return (
-                              <CommandItem
-                                key={emp.code}
-                                value={`${emp.name} ${emp.jobTitle?.name || ''} ${emp.department?.name || ''}`}
-                                onSelect={() => {
-                                  setAssignee(emp.code);
-                                  setOpenAssignee(false);
-                                }}
-                              >
-                                <Check
-                                  className={cn(
-                                    "mr-2 h-4 w-4 shrink-0",
-                                    assignee === emp.code ? "opacity-100" : "opacity-0"
-                                  )}
-                                />
-                                <div className="flex flex-col py-1 w-full gap-1">
-                                  <div className="flex justify-between items-start w-full">
-                                    <span className="font-bold text-sm text-slate-800">{emp.name}</span>
-                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${emp.performanceScore >= 90 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : emp.performanceScore >= 75 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                                      Hiệu suất: {emp.performanceScore}%
-                                    </span>
-                                  </div>
-                                  <span className="text-[11px] text-slate-500">
-                                    {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
-                                    {emp.department?.name ? ` • ${emp.department.name}` : ''}
-                                  </span>
-                                  <div className="flex flex-wrap gap-2 mt-0.5">
-                                    {emp.matchDomain && (
-                                      <span className="text-[10px] text-indigo-600 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100 flex items-center gap-1">
-                                        <Target className="w-3 h-3" /> Phù hợp lĩnh vực
-                                      </span>
-                                    )}
-                                    {emp.matchLocation && (
-                                      <span className="text-[10px] text-emerald-600 bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
-                                        <MapPin className="w-3 h-3" /> Đúng địa bàn
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </CommandItem>
+        {/* Sidebar nhân sự (chỉ hiển thị khi giao việc đơn lẻ) */}
+        {(!planId || planId === 'none') && (
+          <div className="lg:col-span-4 space-y-6">
+            <Card className="sticky top-6">
+              <CardContent className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold">Người thực hiện</label>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] px-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+                        onClick={() => {
+                          if (user && assignableEmployees.length > 0) {
+                            const me = assignableEmployees.find(e => 
+                              e.code === user.employeeCode || 
+                              e.code === user.username || 
+                              e.code === user.email ||
+                              e.name === user.fullName
                             );
-                          })}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
-              </div>
-
-              {selectedEmp && (
-                <div className={`space-y-4 p-4 rounded-xl border-2 transition-colors duration-300 ${isOverload ? 'bg-red-50/50 border-red-200' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-50/50 border-amber-200' : 'bg-indigo-50/50 border-indigo-100'}`}>
-                  {/* Thông tin nhân sự */}
-                  <div className="flex items-start gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${isOverload ? 'bg-red-100 text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
-                      {selectedEmp.name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-slate-900 leading-tight">{selectedEmp.name}</p>
-                      <p className="text-xs text-slate-500 mt-0.5">{selectedEmp.jobTitle?.name || 'Nhân viên'} {selectedEmp.department?.name ? `• ${selectedEmp.department.name}` : ''}</p>
+                            if (me) {
+                              setAssignee(me.code);
+                              toast.success(`Đã chọn: ${me.name}`);
+                            } else {
+                              toast.error('Không tìm thấy thông tin của bạn trong danh sách nhân sự');
+                            }
+                          } else {
+                            toast.error('Chưa có thông tin đăng nhập');
+                          }
+                        }}
+                        type="button"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" /> Giao cho tôi
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 text-[10px] px-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                        onClick={() => {
+                          if (assignableEmployees.length > 0) {
+                            setAssignee(assignableEmployees[0].code);
+                            toast.success(`Đã chọn nhanh: ${assignableEmployees[0].name}`);
+                          } else {
+                            toast.error('Không có nhân sự phù hợp');
+                          }
+                        }}
+                        type="button"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" /> Giao việc nhanh
+                      </Button>
                     </div>
                   </div>
+                  <Popover open={openAssignee} onOpenChange={setOpenAssignee}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openAssignee}
+                        className="w-full justify-between h-11 bg-slate-50 hover:bg-slate-100 border-slate-200"
+                      >
+                        {selectedEmp ? selectedEmp.name : "Tìm kiếm tên, chức danh..."}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-[350px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder="Tìm kiếm tên, chức danh..." className="h-10" />
+                        <CommandList>
+                          <CommandEmpty>Không tìm thấy nhân sự phù hợp</CommandEmpty>
+                          <CommandGroup>
+                            {assignableEmployees.map((emp) => {
+                              return (
+                                <CommandItem
+                                  key={emp.code}
+                                  value={`${emp.name} ${emp.jobTitle?.name || ''} ${emp.department?.name || ''}`}
+                                  onSelect={() => {
+                                    setAssignee(emp.code);
+                                    setOpenAssignee(false);
+                                  }}
+                                >
+                                  <Check
+                                    className={cn(
+                                      "mr-2 h-4 w-4 shrink-0",
+                                      assignee === emp.code ? "opacity-100" : "opacity-0"
+                                    )}
+                                  />
+                                  <div className="flex flex-col py-1 w-full gap-1">
+                                    <div className="flex justify-between items-start w-full">
+                                      <span className="font-bold text-sm text-slate-800">{emp.name}</span>
+                                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${emp.performanceScore >= 90 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : emp.performanceScore >= 75 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                        Hiệu suất: {emp.performanceScore}%
+                                      </span>
+                                    </div>
+                                    <span className="text-[11px] text-slate-500">
+                                      {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
+                                      {emp.department?.name ? ` • ${emp.department.name}` : ''}
+                                    </span>
+                                    <div className="flex flex-wrap gap-2 mt-0.5">
+                                      {emp.matchDomain && (
+                                        <span className="text-[10px] text-indigo-600 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100 flex items-center gap-1">
+                                          <Target className="w-3 h-3" /> Phù hợp lĩnh vực
+                                        </span>
+                                      )}
+                                      {emp.matchLocation && (
+                                        <span className="text-[10px] text-emerald-600 bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
+                                          <MapPin className="w-3 h-3" /> Đúng địa bàn
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
 
-                  {/* Thanh tiến độ Workload */}
-                  <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                    <div className="flex justify-between items-center text-xs font-bold">
-                      <span className="text-slate-600 flex items-center gap-1">
-                        <Activity className="w-3 h-3" /> Tải công việc
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {isOverload && (
-                          <span className="flex items-center gap-1 text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                            <AlertTriangle className="w-3 h-3" /> Quá tải
-                          </span>
-                        )}
-                        <span className={isOverload ? 'text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'text-amber-600' : 'text-indigo-600'}>
-                          {newLoad} / {selectedEmp.rankLimit} đ
-                        </span>
+                {selectedEmp && (
+                  <div className={`space-y-4 p-4 rounded-xl border-2 transition-colors duration-300 ${isOverload ? 'bg-red-50/50 border-red-200' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-50/50 border-amber-200' : 'bg-indigo-50/50 border-indigo-100'}`}>
+                    {/* Thông tin nhân sự */}
+                    <div className="flex items-start gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 ${isOverload ? 'bg-red-100 text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-100 text-amber-600' : 'bg-indigo-100 text-indigo-600'}`}>
+                        {selectedEmp.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-sm text-slate-900 leading-tight">{selectedEmp.name}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{selectedEmp.jobTitle?.name || 'Nhân viên'} {selectedEmp.department?.name ? `• ${selectedEmp.department.name}` : ''}</p>
                       </div>
                     </div>
-                    <div className="h-2.5 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
-                      <div
-                        className={`h-full transition-all duration-500 rounded-full ${isOverload ? 'bg-red-500' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-500' : 'bg-indigo-500'}`}
-                        style={{ width: `${Math.min((newLoad / selectedEmp.rankLimit) * 100, 100)}%` }}
-                      />
-                    </div>
-                    {isOverload && (
-                      <p className="text-[10px] text-red-500 font-medium">
-                        * Nhân sự này đã vượt quá định mức công việc quy định. Hãy cân nhắc chọn người khác.
-                      </p>
-                    )}
-                  </div>
-                </div>
-              )}
 
-              <Button type="submit" form="taskForm" className="w-full mt-4 bg-indigo-600">Giao việc ngay</Button>
-            </CardContent>
-          </Card>
-        </div>
+                    {/* Thanh tiến độ Workload */}
+                    <div className="space-y-2 pt-2 border-t border-slate-200/60">
+                      <div className="flex justify-between items-center text-xs font-bold">
+                        <span className="text-slate-600 flex items-center gap-1">
+                          <Activity className="w-3 h-3" /> Tải công việc
+                        </span>
+                        <div className="flex items-center gap-2">
+                          {isOverload && (
+                            <span className="flex items-center gap-1 text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full uppercase tracking-wider">
+                              <AlertTriangle className="w-3 h-3" /> Quá tải
+                            </span>
+                          )}
+                          <span className={isOverload ? 'text-red-600' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'text-amber-600' : 'text-indigo-600'}>
+                            {newLoad} / {selectedEmp.rankLimit} đ
+                          </span>
+                        </div>
+                      </div>
+                      <div className="h-2.5 w-full bg-slate-200/80 rounded-full overflow-hidden shadow-inner">
+                        <div
+                          className={`h-full transition-all duration-500 rounded-full ${isOverload ? 'bg-red-500' : newLoad >= selectedEmp.rankLimit * 0.8 ? 'bg-amber-500' : 'bg-indigo-500'}`}
+                          style={{ width: `${Math.min((newLoad / selectedEmp.rankLimit) * 100, 100)}%` }}
+                        />
+                      </div>
+                      {isOverload && (
+                        <p className="text-[10px] text-red-500 font-medium">
+                          * Nhân sự này đã vượt quá định mức công việc quy định. Hãy cân nhắc chọn người khác.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   );
