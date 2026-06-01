@@ -12,7 +12,6 @@ export class TasksService {
       const authConditions: any[] = [
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
-        { authorCode: query.currentUserCode },
         { supervisorCode: query.currentUserCode },
       ];
       if (query.currentUserDept) {
@@ -133,7 +132,6 @@ export class TasksService {
       const authConditions: any[] = [
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
-        { authorCode: query.currentUserCode },
         { supervisorCode: query.currentUserCode },
       ];
       if (query.currentUserDept) {
