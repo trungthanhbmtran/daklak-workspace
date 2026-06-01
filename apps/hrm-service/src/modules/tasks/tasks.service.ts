@@ -151,12 +151,13 @@ export class TasksService {
   async createTask(data: any) {
     const t = await this.prisma.task.create({
       data: {
-        title: data.title,
+        title: data.title || data.taskName || 'Nhiệm vụ không tên',
         description: data.description,
         assigneeCode: data.assigneeCode || '',
         assignerCode: data.assignerCode || '',
         departmentId: data.departmentId || null,
         status: 'TODO',
+        priority: data.priority || 'MEDIUM',
         startDate: data.startDate ? new Date(data.startDate) : null,
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         baseScore: data.baseScore,

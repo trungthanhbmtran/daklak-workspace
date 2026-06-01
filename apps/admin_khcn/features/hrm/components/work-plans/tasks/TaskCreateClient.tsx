@@ -90,7 +90,7 @@ export function TaskCreateClient() {
     if (isOverload) return toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức!');
     try {
       const finalPlanId = planId === 'none' || planId === '' ? undefined : Number(planId);
-      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
+      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, title: taskName, taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
       toast.success('Giao việc thành công!');
       router.push('/services/hrm/work-plans/tasks');
     } catch { toast.error('Lỗi khi giao việc'); }
