@@ -253,7 +253,25 @@ export function TaskCreateClient() {
           <Card className="sticky top-6">
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <label className="text-xs font-bold">Người thực hiện</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-bold">Người thực hiện</label>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-6 text-[10px] px-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+                    onClick={() => {
+                      if (assignableEmployees.length > 0) {
+                        setAssignee(assignableEmployees[0].code);
+                        toast.success(`Đã chọn nhanh: ${assignableEmployees[0].name}`);
+                      } else {
+                        toast.error('Không có nhân sự phù hợp');
+                      }
+                    }}
+                    type="button"
+                  >
+                    <Sparkles className="w-3 h-3 mr-1" /> Giao việc nhanh
+                  </Button>
+                </div>
                 <Popover open={openAssignee} onOpenChange={setOpenAssignee}>
                   <PopoverTrigger asChild>
                     <Button
