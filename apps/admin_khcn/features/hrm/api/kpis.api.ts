@@ -1,49 +1,32 @@
 import apiClient from "@/lib/axiosInstance";
-
+import type { ApiResponse } from "@/lib/api.types";
 
 export const hrmKpiCriteriaApi = {
-  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return apiClient.get('/hrm/kpis/criteria', { params }).then((res: any) => {
-      const data = res.data || [];
-      return {
-        data,
-        meta: res.meta || { pagination: { total: data.length, page: 1, pageSize: 20, totalPages: 1 } }
-      };
-    });
+  list(params: any = {}): Promise<ApiResponse<any[]>> {
+    return apiClient.get('/hrm/kpis/criteria', { params }) as any;
   },
 
-  create(payload: any): Promise<{ success: boolean; data?: any }> {
-    return apiClient.post('/hrm/kpis/criteria', payload).then((res: any) => ({
-      success: true,
-      data: res
-    }));
+  create(payload: any): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/kpis/criteria', payload) as any;
   },
 
-  update(id: number, payload: any): Promise<{ success: boolean; data?: any }> {
-    return apiClient.put(`/hrm/kpis/criteria/${id}`, payload).then((res: any) => ({
-      success: true,
-      data: res
-    }));
+  update(id: number, payload: any): Promise<ApiResponse<any>> {
+    return apiClient.put(`/hrm/kpis/criteria/${id}`, payload) as any;
   },
 
-  deleteOne(id: number): Promise<{ success: boolean }> {
-    return apiClient.delete(`/hrm/kpis/criteria/${id}`).then((res: any) => ({
-      success: res?.success ?? true
-    }));
-  }
+  deleteOne(id: number): Promise<ApiResponse<void>> {
+    return apiClient.delete(`/hrm/kpis/criteria/${id}`) as any;
+  },
 };
 
 export const hrmKpiPlansApi = {
-  create(payload: any): Promise<any> {
-    return apiClient.post('/hrm/kpi-plans', payload).then((res: any) => res);
-  }
+  create(payload: any): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/kpi-plans', payload) as any;
+  },
 };
 
 export const hrmKpiEvaluationsApi = {
-  list(params: any = {}): Promise<{ data: any; meta: any }> {
-    return apiClient.get('/hrm/kpi-evaluations', { params }).then((res: any) => ({
-      data: res.data || {},
-      meta: res.meta || { pagination: { total: 0 } }
-    }));
-  }
+  list(params: any = {}): Promise<ApiResponse<any>> {
+    return apiClient.get('/hrm/kpi-evaluations', { params }) as any;
+  },
 };

@@ -11,7 +11,8 @@ export function useGetSystemConfigs() {
     queryKey: SYSTEM_CONFIGS_KEYS.all,
     queryFn: async () => {
       const res = await apiClient.get("/system-configs") as any;
-      if (res.status === "success" && res.data) {
+      // res là ApiResponse<config[]> — kiểm tra res.success (không phải res.status)
+      if (res.success && Array.isArray(res.data)) {
         const map: Record<string, string> = {};
         res.data.forEach((c: any) => {
           map[c.key] = c.value;
@@ -29,7 +30,7 @@ export function useUpdateSystemConfig() {
   return useMutation({
     mutationFn: async ({ key, value, description }: { key: string; value: string; description?: string }) => {
       const res = await apiClient.put("/system-configs", { key, value, description }) as any;
-      if (res.status !== "success") {
+      if (!res.success) {
         throw new Error(res.message || "Failed to update config");
       }
       return res;

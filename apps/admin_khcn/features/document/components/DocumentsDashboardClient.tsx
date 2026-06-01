@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
-import { useDocuments, useDocumentStats, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useDocumentStats, useListDocuments } from "@/features/document/hooks/useDocuments";
 
 export function DocumentsDashboardClient() {
   const [mounted, setMounted] = useState(false);
@@ -38,9 +38,7 @@ export function DocumentsDashboardClient() {
     };
   }, [stats]);
 
-  const myPendingTasks = useMemo(() => {
-    return extractDataArray(pendingTasksData);
-  }, [pendingTasksData]);
+  const myPendingTasks = useMemo(() => pendingTasksData?.data ?? [], [pendingTasksData]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "Không có";

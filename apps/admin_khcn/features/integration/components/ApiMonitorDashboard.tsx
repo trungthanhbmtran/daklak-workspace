@@ -85,10 +85,13 @@ export function ApiMonitorDashboard({ integrations }: Props) {
         headers: headerParams
       });
 
+      // Đây là raw axios đến external API (không phải apiClient → api-gateway)
+      // nên res.data là response thô từ hệ thống bên ngoài, không phải ApiResponse chuẩn
       if (Array.isArray(res.data)) {
         setData(res.data);
         toast.success('Lấy dữ liệu thành công');
-      } else if (res.data && Array.isArray(res.data.data)) {
+      } else if (res.data?.data && Array.isArray(res.data.data)) {
+        // External API trả về wrapper { data: [...] }
         setData(res.data.data);
         toast.success('Lấy dữ liệu thành công');
       } else {

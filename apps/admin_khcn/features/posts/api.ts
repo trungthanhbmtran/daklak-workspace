@@ -1,133 +1,151 @@
 // features/posts/api.ts
+// Tất cả API calls trả về ApiResponse thẳng từ interceptor axiosInstance.
+// Interceptor đã bóc lớp Axios → client nhận { success, data, meta, message }.
+// Consumer đọc res.data cho entity, res.meta cho pagination.
 
 import apiClient from "@/lib/axiosInstance";
+import type { ApiResponse } from "@/lib/api.types";
 import { Post, Category, Banner, PortalMenu, Comment, CitizenQuestion, CitizenFeedback } from "./types";
 
 export const postsApi = {
-  // Posts
-  getPosts: (params: any) =>
-    apiClient.get("/posts", { params }).then((res: any) => ({
-      data: res.data,
-      meta: res.meta,
-    })),
-  getPost: (id: string) => apiClient.get(`/posts/${id}`).then((res: any) => res.data),
-  createPost: (data: any) => apiClient.post("/posts", data).then((res: any) => res.data),
-  updatePost: (id: string, data: any) =>
-    apiClient.put(`/posts/${id}`, data).then((res: any) => res.data),
-  deletePost: (id: string) => apiClient.delete(`/posts/${id}`).then((res: any) => res.data),
-  reviewPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/review`, data).then((res: any) => res.data),
-  submitPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/submit`, data).then((res: any) => res.data),
-  approvePost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/approve`, data).then((res: any) => res.data),
-  rejectPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/reject`, data).then((res: any) => res.data),
-  publishPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/publish`, data).then((res: any) => res.data),
-  unpublishPost: (id: string, data: { note?: string }) =>
-    apiClient.post(`/posts/${id}/unpublish`, data).then((res: any) => res.data),
-  getPostHistory: (id: string) =>
-    apiClient.get(`/posts/${id}/history`).then((res: any) => res.data),
+  // ─── Posts ────────────────────────────────────────────────
+  getPosts: (params: any): Promise<ApiResponse<Post[]>> =>
+    apiClient.get("/posts", { params }) as any,
 
-  // Categories
-  getCategories: (params?: any) =>
-    apiClient.get("/posts/categories", { params }).then((res: any) => ({
-      data: res.data,
-      meta: res.meta,
-    })),
-  getCategory: (id: string) =>
-    apiClient.get(`/posts/categories/${id}`).then((res: any) => res.data),
-  createCategory: (data: any) =>
-    apiClient.post("/posts/categories", data).then((res: any) => res.data),
-  updateCategory: (id: string, data: any) =>
-    apiClient.put(`/posts/categories/${id}`, data).then((res: any) => res.data),
-  deleteCategory: (id: string) =>
-    apiClient.delete(`/posts/categories/${id}`).then((res: any) => res.data),
+  getPost: (id: string): Promise<ApiResponse<Post>> =>
+    apiClient.get(`/posts/${id}`) as any,
 
-  // Banners
-  getBanners: (params?: any) =>
-    apiClient.get("/banners", { params }).then((res: any) => ({
-      data: res.data,
-      meta: res.meta,
-    })),
-  getBanner: (id: string) => apiClient.get(`/banners/${id}`).then((res: any) => res.data),
-  createBanner: (data: any) =>
-    apiClient.post("/banners", data).then((res: any) => res.data),
-  updateBanner: (id: string, data: any) =>
-    apiClient.put(`/banners/${id}`, data).then((res: any) => res.data),
-  deleteBanner: (id: string) =>
-    apiClient.delete(`/banners/${id}`).then((res: any) => res.data),
+  createPost: (data: any): Promise<ApiResponse<Post>> =>
+    apiClient.post("/posts", data) as any,
 
-  // Portal Menus
-  getPortalMenus: (params?: any) =>
-    apiClient.get("/portal-menus", { params }).then((res: any) => res.data),
-  createPortalMenu: (data: any) =>
-    apiClient.post("/portal-menus", data).then((res: any) => res.data),
-  updatePortalMenu: (id: string, data: any) =>
-    apiClient.put(`/portal-menus/${id}`, data).then((res: any) => res.data),
-  deletePortalMenu: (id: string) =>
-    apiClient.delete(`/portal-menus/${id}`).then((res: any) => res.data),
-  getQuickSetupData: () =>
-    apiClient.get("/portal-menus/quick-setup").then((res: any) => res.data),
+  updatePost: (id: string, data: any): Promise<ApiResponse<Post>> =>
+    apiClient.put(`/posts/${id}`, data) as any,
 
-  // Interactions - Comments
-  getComments: (params: any) =>
-    apiClient.get("/interactions/comments", { params }).then((res: any) => ({
-      data: res.data,
-      meta: res.meta,
-    })),
-  updateCommentStatus: (id: string, status: string) =>
-    apiClient.put(`/interactions/comments/${id}/status`, { status }).then((res: any) => res.data),
-  deleteComment: (id: string) =>
-    apiClient.delete(`/interactions/comments/${id}`).then((res: any) => res.data),
+  deletePost: (id: string): Promise<ApiResponse<void>> =>
+    apiClient.delete(`/posts/${id}`) as any,
 
-  // Interactions - Questions
-  getQuestions: (params: any) =>
-    apiClient.get("/interactions/questions", { params }).then((res: any) => ({
-      data: res.data,
-      meta: res.meta,
-    })),
-  answerQuestion: (id: string, data: any) =>
-    apiClient.post(`/interactions/questions/${id}/answer`, data).then((res: any) => res.data),
-  getQuestion: (id: string) =>
-    apiClient.get(`/interactions/questions/${id}`).then((res: any) => res.data),
+  reviewPost: (id: string, data: { note?: string }): Promise<ApiResponse<Post>> =>
+    apiClient.post(`/posts/${id}/review`, data) as any,
 
-  // Interactions - Feedbacks
-  getFeedbacks: (params: any) =>
-    apiClient.get("/interactions/feedbacks", { params }).then((res: any) => ({
-      data: res.data,
-      meta: res.meta,
-    })),
-  updateFeedbackStatus: (id: string, status: string) =>
-    apiClient.put(`/interactions/feedbacks/${id}/status`, { status }).then((res: any) => res.data),
+  submitPost: (id: string, data: { note?: string }): Promise<ApiResponse<Post>> =>
+    apiClient.post(`/posts/${id}/submit`, data) as any,
 
-  // Tags
-  getTags: (params?: any) =>
-    apiClient.get("/posts/tags", { params }).then((res: any) => res.data),
-  createTag: (data: any) =>
-    apiClient.post("/posts/tags", data).then((res: any) => res.data),
+  approvePost: (id: string, data: { note?: string }): Promise<ApiResponse<Post>> =>
+    apiClient.post(`/posts/${id}/approve`, data) as any,
 
-  // Translation
-  // Translation with built-in Polling
-  translate: async (text: string, targetLang: string) => {
+  rejectPost: (id: string, data: { note?: string }): Promise<ApiResponse<Post>> =>
+    apiClient.post(`/posts/${id}/reject`, data) as any,
+
+  publishPost: (id: string, data: { note?: string }): Promise<ApiResponse<Post>> =>
+    apiClient.post(`/posts/${id}/publish`, data) as any,
+
+  unpublishPost: (id: string, data: { note?: string }): Promise<ApiResponse<Post>> =>
+    apiClient.post(`/posts/${id}/unpublish`, data) as any,
+
+  getPostHistory: (id: string): Promise<ApiResponse<any[]>> =>
+    apiClient.get(`/posts/${id}/history`) as any,
+
+  // ─── Categories ───────────────────────────────────────────
+  getCategories: (params?: any): Promise<ApiResponse<Category[]>> =>
+    apiClient.get("/posts/categories", { params }) as any,
+
+  getCategory: (id: string): Promise<ApiResponse<Category>> =>
+    apiClient.get(`/posts/categories/${id}`) as any,
+
+  createCategory: (data: any): Promise<ApiResponse<Category>> =>
+    apiClient.post("/posts/categories", data) as any,
+
+  updateCategory: (id: string, data: any): Promise<ApiResponse<Category>> =>
+    apiClient.put(`/posts/categories/${id}`, data) as any,
+
+  deleteCategory: (id: string): Promise<ApiResponse<void>> =>
+    apiClient.delete(`/posts/categories/${id}`) as any,
+
+  // ─── Banners ──────────────────────────────────────────────
+  getBanners: (params?: any): Promise<ApiResponse<Banner[]>> =>
+    apiClient.get("/banners", { params }) as any,
+
+  getBanner: (id: string): Promise<ApiResponse<Banner>> =>
+    apiClient.get(`/banners/${id}`) as any,
+
+  createBanner: (data: any): Promise<ApiResponse<Banner>> =>
+    apiClient.post("/banners", data) as any,
+
+  updateBanner: (id: string, data: any): Promise<ApiResponse<Banner>> =>
+    apiClient.put(`/banners/${id}`, data) as any,
+
+  deleteBanner: (id: string): Promise<ApiResponse<void>> =>
+    apiClient.delete(`/banners/${id}`) as any,
+
+  // ─── Portal Menus ─────────────────────────────────────────
+  getPortalMenus: (params?: any): Promise<ApiResponse<PortalMenu[]>> =>
+    apiClient.get("/portal-menus", { params }) as any,
+
+  createPortalMenu: (data: any): Promise<ApiResponse<PortalMenu>> =>
+    apiClient.post("/portal-menus", data) as any,
+
+  updatePortalMenu: (id: string, data: any): Promise<ApiResponse<PortalMenu>> =>
+    apiClient.put(`/portal-menus/${id}`, data) as any,
+
+  deletePortalMenu: (id: string): Promise<ApiResponse<void>> =>
+    apiClient.delete(`/portal-menus/${id}`) as any,
+
+  getQuickSetupData: (): Promise<ApiResponse<any>> =>
+    apiClient.get("/portal-menus/quick-setup") as any,
+
+  // ─── Interactions - Comments ──────────────────────────────
+  getComments: (params: any): Promise<ApiResponse<Comment[]>> =>
+    apiClient.get("/interactions/comments", { params }) as any,
+
+  updateCommentStatus: (id: string, status: string): Promise<ApiResponse<Comment>> =>
+    apiClient.put(`/interactions/comments/${id}/status`, { status }) as any,
+
+  deleteComment: (id: string): Promise<ApiResponse<void>> =>
+    apiClient.delete(`/interactions/comments/${id}`) as any,
+
+  // ─── Interactions - Questions ─────────────────────────────
+  getQuestions: (params: any): Promise<ApiResponse<CitizenQuestion[]>> =>
+    apiClient.get("/interactions/questions", { params }) as any,
+
+  answerQuestion: (id: string, data: any): Promise<ApiResponse<CitizenQuestion>> =>
+    apiClient.post(`/interactions/questions/${id}/answer`, data) as any,
+
+  getQuestion: (id: string): Promise<ApiResponse<CitizenQuestion>> =>
+    apiClient.get(`/interactions/questions/${id}`) as any,
+
+  // ─── Interactions - Feedbacks ─────────────────────────────
+  getFeedbacks: (params: any): Promise<ApiResponse<CitizenFeedback[]>> =>
+    apiClient.get("/interactions/feedbacks", { params }) as any,
+
+  updateFeedbackStatus: (id: string, status: string): Promise<ApiResponse<CitizenFeedback>> =>
+    apiClient.put(`/interactions/feedbacks/${id}/status`, { status }) as any,
+
+  // ─── Tags ─────────────────────────────────────────────────
+  getTags: (params?: any): Promise<ApiResponse<any[]>> =>
+    apiClient.get("/posts/tags", { params }) as any,
+
+  createTag: (data: any): Promise<ApiResponse<any>> =>
+    apiClient.post("/posts/tags", data) as any,
+
+  // ─── Translation (with built-in Polling) ──────────────────
+  translate: async (text: string, targetLang: string): Promise<any> => {
     // 1. Submit translation job
     const initRes = await apiClient.post("/translate", { text, targetLang }) as any;
-    
-    // Check if backend returned the old format directly (fallback)
-    if (initRes.translated_text || initRes.data?.translated_text) {
-      return initRes.data || initRes;
+
+    // Check if backend returned the translation directly (non-async fallback)
+    if (initRes.data?.translated_text) {
+      return initRes.data;
     }
 
     // 2. Extract jobId from new async format
-    const jobId = initRes.data?.jobId || initRes.jobId;
+    const jobId = initRes.data?.jobId;
     if (!jobId) {
       throw new Error("Không thể khởi tạo tiến trình dịch thuật.");
     }
 
     // 3. Start polling
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-    const maxRetries = 30; // Max 1 minute (2s * 30)
+    const maxRetries = 30;
     let retries = 0;
 
     while (retries < maxRetries) {
@@ -141,15 +159,13 @@ export const postsApi = {
         } else if (jobStatus.status === 'FAILED') {
           throw new Error(jobStatus.error || "Lỗi trong quá trình dịch thuật");
         }
-        // If PROCESSING, continue polling
         retries++;
       } catch (err) {
         console.warn("Polling translate error", err);
-        retries++; // Continue polling even if network blips
+        retries++;
       }
     }
 
     throw new Error("Quá thời gian chờ dịch thuật (Timeout).");
   },
-
 };

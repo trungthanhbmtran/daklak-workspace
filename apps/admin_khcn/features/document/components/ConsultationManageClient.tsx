@@ -33,7 +33,7 @@ export function ConsultationManageClient() {
     status: statusFilter === "ALL" ? "" : statusFilter,
   });
 
-  const consultations = useMemo(() => consultationsData?.data || [], [consultationsData]);
+  const consultations = useMemo(() => consultationsData?.data ?? [], [consultationsData]);
 
   const stats = useMemo(() => {
     const total = consultations.length;

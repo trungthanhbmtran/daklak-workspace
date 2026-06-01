@@ -35,13 +35,7 @@ export function TransparencyFinanceClient() {
     search: searchTerm,
   });
 
-  const reports = useMemo(() => {
-    if (!response) return [];
-    if (Array.isArray(response)) return response;
-    if (Array.isArray(response.data)) return response.data;
-    if (response.data && Array.isArray(response.data.data)) return response.data.data;
-    return [];
-  }, [response]);
+  const reports = useMemo(() => response?.data ?? [], [response]);
 
   return (
     <div className="p-6 space-y-6 bg-muted/5 min-h-screen">

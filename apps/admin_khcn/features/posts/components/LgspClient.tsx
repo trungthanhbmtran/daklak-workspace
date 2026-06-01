@@ -18,14 +18,16 @@ export function LgspClient() {
   const handleSync = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("/api/admin/integrations/documents/sync", {
+      const res = await axios.get("/api/admin/integrations/documents/sync", {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" }
-      });
-      if (response.data.success) {
-        setDocuments(response.data.data || []);
+      }) as any;
+      // Raw axios call (not apiClient), so res.data is the ApiResponse envelope
+      const apiResponse = res.data;
+      if (apiResponse?.success) {
+        setDocuments(apiResponse.data || []);
         toast.success("Đồng bộ thành công: Đã lấy các văn bản mới nhất từ trục liên thông LGSP.");
       } else {
-        toast.error("Lỗi đồng bộ: " + (response.data?.message || "Không thể đồng bộ văn bản."));
+        toast.error("Lỗi đồng bộ: " + (apiResponse?.message || "Không thể đồng bộ văn bản."));
       }
     } catch (error: any) {
       toast.error("Lỗi kết nối: " + error.message);

@@ -10,7 +10,7 @@ import { Filter, Plus, Clock, FileText, History, MessageSquare, ChevronRight } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
-import { useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useListDocuments } from "@/features/document/hooks/useDocuments";
 
 export function ProcessingDocumentsClient() {
   const searchParams = useSearchParams();
@@ -22,9 +22,7 @@ export function ProcessingDocumentsClient() {
     search: searchTerm,
   });
 
-  const docs = useMemo(() => {
-    return extractDataArray(documentsData);
-  }, [documentsData]);
+  const docs = useMemo(() => documentsData?.data ?? [], [documentsData]);
 
   return (
     <div className="p-6 space-y-8 bg-muted/5 min-h-screen">

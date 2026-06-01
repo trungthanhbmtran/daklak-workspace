@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
+import type { ApiResponse } from "@/lib/api.types";
 import type { HrmEmployee, HrmEmployeesListParams, HrmEmployeesListResponse } from "../types";
 
 const HRM_EMPLOYEES_PATH = "/hrm/employees";
@@ -36,53 +37,45 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
 
 export const hrmApi = {
   list(params: HrmEmployeesListParams = {}): Promise<HrmEmployeesListResponse> {
-    return apiClient.get(HRM_EMPLOYEES_PATH, { params }).then((res: any) => {
-      const data = res.data || [];
-      return {
-        data: data.map((row: unknown) => parseEmployeeRow(row as Record<string, unknown>)),
-        meta: res.meta || {},
-      };
-    });
+    return (apiClient.get(HRM_EMPLOYEES_PATH, { params }) as any as Promise<ApiResponse<any[]>>)
+      .then((res) => ({
+        data: (res.data ?? []).map((row: unknown) => parseEmployeeRow(row as Record<string, unknown>)),
+        meta: res.meta ?? {},
+      }));
   },
 
   search(keyword: string, pageSize = 20): Promise<HrmEmployee[]> {
     if (!keyword?.trim()) return Promise.resolve([]);
-    return apiClient
-      .get(HRM_EMPLOYEES_PATH, { params: { keyword: keyword.trim(), pageSize } })
-      .then((res: any) => {
-        const data = res.data || [];
-        return data.map((row: unknown) => parseEmployeeRow(row as Record<string, unknown>));
-      });
+    return (apiClient.get(HRM_EMPLOYEES_PATH, { params: { keyword: keyword.trim(), pageSize } }) as any as Promise<ApiResponse<any[]>>)
+      .then((res) => (res.data ?? []).map((row: unknown) => parseEmployeeRow(row as Record<string, unknown>)));
   },
 
   getOne(id: number): Promise<HrmEmployee | null> {
-    return apiClient.get(`${HRM_EMPLOYEES_PATH}/${id}`).then((res: any) => {
-      const d = res?.data;
-      if (!d || typeof d !== "object") return null;
-      return parseEmployeeRow(d as Record<string, unknown>);
-    });
+    return (apiClient.get(`${HRM_EMPLOYEES_PATH}/${id}`) as any as Promise<ApiResponse<any>>)
+      .then((res) => {
+        const d = res?.data;
+        if (!d || typeof d !== "object") return null;
+        return parseEmployeeRow(d as Record<string, unknown>);
+      });
   },
 
-  create(payload: any): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
-    return apiClient.post(HRM_EMPLOYEES_PATH, payload).then((res: any) => ({
-      success: res?.success ?? true,
-      message: res?.message,
-      data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
-    }));
+  create(payload: any): Promise<ApiResponse<HrmEmployee>> {
+    return (apiClient.post(HRM_EMPLOYEES_PATH, payload) as any as Promise<ApiResponse<any>>)
+      .then((res) => ({
+        ...res,
+        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
+      }));
   },
 
-  update(id: number, payload: any): Promise<{ success: boolean; message?: string; data?: HrmEmployee }> {
-    return apiClient.put(`${HRM_EMPLOYEES_PATH}/${id}`, payload).then((res: any) => ({
-      success: res?.success ?? true,
-      message: res?.message,
-      data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
-    }));
+  update(id: number, payload: any): Promise<ApiResponse<HrmEmployee>> {
+    return (apiClient.put(`${HRM_EMPLOYEES_PATH}/${id}`, payload) as any as Promise<ApiResponse<any>>)
+      .then((res) => ({
+        ...res,
+        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
+      }));
   },
 
-  deleteOne(id: number): Promise<{ success: boolean; message?: string }> {
-    return apiClient.delete(`${HRM_EMPLOYEES_PATH}/${id}`).then((res: any) => ({
-      success: res?.success ?? true,
-      message: res?.message,
-    }));
+  deleteOne(id: number): Promise<ApiResponse<void>> {
+    return apiClient.delete(`${HRM_EMPLOYEES_PATH}/${id}`) as any;
   },
 };

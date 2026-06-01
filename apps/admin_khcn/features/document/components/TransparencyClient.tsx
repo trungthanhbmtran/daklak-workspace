@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments, useDocumentStats } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export function TransparencyClient() {
@@ -33,7 +33,7 @@ export function TransparencyClient() {
     fiscalYear: fiscalYear,
   });
 
-  const reports = useMemo(() => extractDataArray(reportsData), [reportsData]);
+  const reports = useMemo(() => reportsData?.data ?? [], [reportsData]);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return "---";

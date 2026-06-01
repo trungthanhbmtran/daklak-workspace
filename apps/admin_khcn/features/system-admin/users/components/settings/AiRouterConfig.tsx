@@ -86,7 +86,7 @@ export function AiRouterConfig() {
     setIsFetchingModels(prev => ({ ...prev, [providerId]: true }));
     try {
       const res = await apiClient.post('/ai/models', { provider: providerType, apiKey }) as any;
-      if (res.status === 'success') {
+      if (res.success) {
         setFetchedModels(prev => ({ ...prev, [providerId]: res.data }));
         toast.success(`Đã tải ${res.data.length} model từ ${providerType}!`);
       } else {

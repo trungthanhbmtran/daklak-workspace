@@ -1,23 +1,24 @@
 import apiClient from "@/lib/axiosInstance";
-
+import type { ApiResponse } from "@/lib/api.types";
 
 export const hrmTaskTemplatesApi = {
-  list(params: any = {}): Promise<{ data: any[]; meta: any }> {
-    return apiClient.get("/hrm/task-templates", { params }).then((res: any) => ({
-      data: res.data || [],
-      meta: res.meta || { pagination: { total: 0 } },
-    }));
+  list(params: any = {}): Promise<ApiResponse<any[]>> {
+    return apiClient.get("/hrm/task-templates", { params }) as any;
   },
-  create(payload: any): Promise<any> {
-    return apiClient.post('/hrm/task-templates', payload).then((res: any) => res);
+
+  create(payload: any): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/task-templates', payload) as any;
   },
-  bulkUpdate(templates: any[]): Promise<any> {
-    return apiClient.post('/hrm/task-templates/bulk', { templates }).then((res: any) => res);
+
+  bulkUpdate(templates: any[]): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/task-templates/bulk', { templates }) as any;
   },
-  delete(id: string): Promise<any> {
-    return apiClient.delete(`/hrm/task-templates/${id}`).then((res: any) => res);
+
+  delete(id: string): Promise<ApiResponse<void>> {
+    return apiClient.delete(`/hrm/task-templates/${id}`) as any;
   },
-  update(id: string, payload: any): Promise<any> {
-    return apiClient.put(`/hrm/task-templates/${id}`, payload).then((res: any) => res);
-  }
+
+  update(id: string, payload: any): Promise<ApiResponse<any>> {
+    return apiClient.put(`/hrm/task-templates/${id}`, payload) as any;
+  },
 };

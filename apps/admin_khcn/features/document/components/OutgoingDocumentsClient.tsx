@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useDocuments, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
 
 export function OutgoingDocumentsClient() {
@@ -30,9 +30,7 @@ export function OutgoingDocumentsClient() {
     isIncoming: false,
   });
 
-  const documents = useMemo(() => {
-    return extractDataArray(response);
-  }, [response]);
+  const documents = useMemo(() => response?.data ?? [], [response]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Bạn có chắc chắn muốn xóa văn bản này?")) {

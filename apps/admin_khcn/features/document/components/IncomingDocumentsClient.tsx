@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "@/components/ui/search";
 import { useSearchParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDocuments, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
 
 // Lazy load heavy modals
 const DocumentUploadModal = dynamic(() => import("@/features/document/components/DocumentUploadModal").then(mod => mod.DocumentUploadModal), {
@@ -117,9 +117,7 @@ export function IncomingDocumentsClient() {
     pageSize: 50
   });
 
-  const documents = useMemo(() => {
-    return extractDataArray(response);
-  }, [response]);
+  const documents = useMemo(() => response?.data ?? [], [response]);
 
   const handleOpenDetail = useCallback((id: string) => {
     setSelectedDocId(id);

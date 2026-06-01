@@ -1,4 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
+import type { ApiResponse } from "@/lib/api.types";
 
 export interface RankQuotaPayload {
   taskName: string;
@@ -8,10 +9,9 @@ export interface RankQuotaPayload {
 }
 
 export const hrmRankQuotasApi = {
-  save: (rankCode: string, quotas: RankQuotaPayload[]): Promise<any> => {
-    return apiClient.post('/hrm/rank-quotas', { rankCode, quotas }).then((res: any) => res);
-  },
-  getByRank: (rankCode: string): Promise<any> => {
-    return apiClient.get(`/hrm/rank-quotas/${rankCode}`).then((res: any) => res);
-  }
+  save: (rankCode: string, quotas: RankQuotaPayload[]): Promise<ApiResponse<any>> =>
+    apiClient.post('/hrm/rank-quotas', { rankCode, quotas }) as any,
+
+  getByRank: (rankCode: string): Promise<ApiResponse<any>> =>
+    apiClient.get(`/hrm/rank-quotas/${rankCode}`) as any,
 };

@@ -3,162 +3,154 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import apiClient from "@/lib/axiosInstance";
+import type { ApiResponse } from "@/lib/api.types";
 
 const API_BASE = '/documents';
 
-/**
- * Hàm hỗ trợ bóc tách mảng dữ liệu từ phản hồi API
- * Chuẩn hóa theo cấu trúc { success, data, meta }
- */
-export const extractDataArray = (res: any) => {
-  if (!res) return [];
-  // Nếu là mảng trực tiếp (trường hợp hiếm)
-  if (Array.isArray(res)) return res;
-  // Trường hợp chuẩn: res.data là mảng
-  if (Array.isArray(res?.data)) return res.data;
-  return [];
-};
+// ─── Top-level Query Hooks ────────────────────────────────────────────────────
 
-// 1. Top-level Hooks
+/** Lấy danh mục tài liệu — trả về array thẳng (đã bóc .data) */
 export const useCategories = (groupCode: string) => {
   return useQuery({
     queryKey: ['document-categories', groupCode],
-    queryFn: async () => {
-      const response: any = await apiClient.get(`/categories`, {
-        params: { group: groupCode }
-      });
-      return extractDataArray(response);
+    queryFn: async (): Promise<any[]> => {
+      const res = await apiClient.get(`/categories`, { params: { group: groupCode } }) as any as ApiResponse<any[]>;
+      return res.data ?? [];
     },
     staleTime: 5 * 60 * 1000,
   });
 };
 
+/** Lấy danh sách tài liệu — trả về ApiResponse đầy đủ (consumer đọc .data + .meta) */
 export const useListDocuments = (params: any) => {
   return useQuery({
     queryKey: ['documents', params],
-    queryFn: async () => {
-      const response: any = await apiClient.get(API_BASE, { params });
-      // Trả về toàn bộ response để Page có thể lấy được cả meta nếu cần
-      return response;
+    queryFn: async (): Promise<ApiResponse<any[]>> => {
+      return apiClient.get(API_BASE, { params }) as any;
     },
   });
 };
 
+/** Lấy danh sách đợt lấy ý kiến — trả về ApiResponse đầy đủ */
 export const useListConsultations = (params?: any) => {
   return useQuery({
     queryKey: ['document-consultations', params],
-    queryFn: async () => {
-      const response: any = await apiClient.get(`${API_BASE}/consultations`, { params });
-      return response;
+    queryFn: async (): Promise<ApiResponse<any[]>> => {
+      return apiClient.get(`${API_BASE}/consultations`, { params }) as any;
     },
   });
 };
 
+/** Lấy chi tiết 1 đợt lấy ý kiến — trả về entity thẳng (đã bóc .data) */
 export const useGetConsultation = (id: string) => {
   return useQuery({
     queryKey: ['consultation', id],
-    queryFn: async () => {
+    queryFn: async (): Promise<any> => {
       if (!id) return null;
-      const response: any = await apiClient.get(`${API_BASE}/consultations/${id}`);
-      return response?.data;
+      const res = await apiClient.get(`${API_BASE}/consultations/${id}`) as any as ApiResponse<any>;
+      return res.data ?? null;
     },
     enabled: !!id,
   });
 };
 
+/** Lấy danh sách phản hồi theo đợt — trả về array thẳng */
 export const useListResponses = (id: string) => {
   return useQuery({
     queryKey: ['consultation-responses', id],
-    queryFn: async () => {
+    queryFn: async (): Promise<any[]> => {
       if (!id) return [];
-      const response: any = await apiClient.get(`${API_BASE}/consultations/${id}/responses`);
-      return response?.data || [];
+      const res = await apiClient.get(`${API_BASE}/consultations/${id}/responses`) as any as ApiResponse<any[]>;
+      return res.data ?? [];
     },
     enabled: !!id,
   });
 };
 
+/** Lấy danh sách biên bản — trả về ApiResponse đầy đủ */
 export const useListMinutes = (params?: any) => {
   return useQuery({
     queryKey: ['document-minutes', params],
-    queryFn: async () => {
-      const response: any = await apiClient.get(`${API_BASE}/minutes`, { params });
-      return response;
+    queryFn: async (): Promise<ApiResponse<any[]>> => {
+      return apiClient.get(`${API_BASE}/minutes`, { params }) as any;
     },
   });
 };
 
+/** Lấy chi tiết 1 tài liệu — trả về entity thẳng */
 export const useGetDocument = (id: string) => {
   return useQuery({
     queryKey: ['document', id],
-    queryFn: async () => {
+    queryFn: async (): Promise<any> => {
       if (!id) return null;
-      const response: any = await apiClient.get(`${API_BASE}/${id}`);
-      return response?.data;
+      const res = await apiClient.get(`${API_BASE}/${id}`) as any as ApiResponse<any>;
+      return res.data ?? null;
     },
     enabled: !!id,
   });
 };
 
+/** Lấy thống kê tài liệu — trả về entity thẳng */
 export const useDocumentStats = () => {
   return useQuery({
     queryKey: ['document-stats'],
-    queryFn: async () => {
-      const response: any = await apiClient.get(`${API_BASE}/stats`);
-      return response?.data;
+    queryFn: async (): Promise<any> => {
+      const res = await apiClient.get(`${API_BASE}/stats`) as any as ApiResponse<any>;
+      return res.data ?? null;
     },
   });
 };
 
+/** Lấy logs của tài liệu — trả về array thẳng */
 export const useDocumentLogs = (id: string) => {
   return useQuery({
     queryKey: ['document-logs', id],
-    queryFn: async () => {
+    queryFn: async (): Promise<any[]> => {
       if (!id) return [];
-      const response: any = await apiClient.get(`${API_BASE}/${id}/logs`);
-      return extractDataArray(response);
+      const res = await apiClient.get(`${API_BASE}/${id}/logs`) as any as ApiResponse<any[]>;
+      return res.data ?? [];
     },
     enabled: !!id,
   });
 };
 
+/** Lấy danh sách góp ý công chúng — trả về array thẳng */
 export const usePublicComments = (consultationId?: string, status?: string) => {
   return useQuery({
     queryKey: ['public-comments', consultationId, status],
-    queryFn: async () => {
+    queryFn: async (): Promise<any[]> => {
       const url = consultationId
         ? `${API_BASE}/consultations/${consultationId}/public-comments`
         : `${API_BASE}/consultations/public-comments`;
-      const response: any = await apiClient.get(url, {
-        params: { status }
-      });
-      return extractDataArray(response);
+      const res = await apiClient.get(url, { params: { status } }) as any as ApiResponse<any[]>;
+      return res.data ?? [];
     },
   });
 };
 
-// 2. Main Hook Wrapper
+// ─── Helper: bóc array từ ApiResponse (cho backward-compat) ──────────────────
+/** @deprecated Dùng trực tiếp res.data thay vì hàm này */
+export const extractDataArray = (res: ApiResponse<any[]> | null | undefined): any[] => {
+  if (!res) return [];
+  return Array.isArray(res.data) ? res.data : [];
+};
+
+// ─── Main Mutations Hook ──────────────────────────────────────────────────────
 export function useDocuments() {
   const queryClient = useQueryClient();
 
   const createDocumentMutation = useMutation({
-    mutationFn: async (data: any) => apiClient.post(API_BASE, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success('Văn bản đã được lưu!');
-    },
+    mutationFn: (data: any) => apiClient.post(API_BASE, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Văn bản đã được lưu!'); },
   });
 
   const createConsultationMutation = useMutation({
-    mutationFn: async (data: any) => apiClient.post(`${API_BASE}/consultations`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['document-consultations'] });
-      toast.success('Yêu cầu lấy ý kiến đã được phát hành!');
-    },
+    mutationFn: (data: any) => apiClient.post(`${API_BASE}/consultations`, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-consultations'] }); toast.success('Yêu cầu lấy ý kiến đã được phát hành!'); },
   });
 
   const updateDocumentMutation = useMutation({
-    mutationFn: async ({ id, ...data }: any) => apiClient.put(`${API_BASE}/${id}`, data),
+    mutationFn: ({ id, ...data }: any) => apiClient.put(`${API_BASE}/${id}`, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['documents'] });
       queryClient.invalidateQueries({ queryKey: ['document', variables.id] });
@@ -168,70 +160,50 @@ export function useDocuments() {
   });
 
   const deleteDocumentMutation = useMutation({
-    mutationFn: async (id: string) => apiClient.delete(`${API_BASE}/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success('Đã xóa văn bản!');
-    },
+    mutationFn: (id: string) => apiClient.delete(`${API_BASE}/${id}`),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Đã xóa văn bản!'); },
   });
 
   const extractMetadataMutation = useMutation({
-    mutationFn: async (fileId: string) => {
-      const response: any = await apiClient.post(`${API_BASE}/extract`, { fileId });
-      return response?.data;
+    mutationFn: async (fileId: string): Promise<any> => {
+      const res = await apiClient.post(`${API_BASE}/extract`, { fileId }) as any as ApiResponse<any>;
+      return res.data;
     },
   });
 
   const syncOnlineMutation = useMutation({
-    mutationFn: async () => apiClient.post(`${API_BASE}/sync`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['documents'] });
-      toast.success('Đã đồng bộ văn bản từ trục liên thông!');
-    },
+    mutationFn: () => apiClient.post(`${API_BASE}/sync`),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['documents'] }); toast.success('Đã đồng bộ văn bản từ trục liên thông!'); },
   });
 
   const moderateCommentMutation = useMutation({
-    mutationFn: async ({ id, status }: { id: string, status: string }) =>
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
       apiClient.put(`${API_BASE}/consultations/public-comments/${id}/moderate`, { status }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['public-comments'] });
-      toast.success('Đã cập nhật trạng thái kiểm duyệt!');
-    },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['public-comments'] }); toast.success('Đã cập nhật trạng thái kiểm duyệt!'); },
   });
 
   const createCategoryMutation = useMutation({
-    mutationFn: async (data: any) => apiClient.post(`${API_BASE}/categories`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
-      toast.success('Đã tạo danh mục mới!');
-    },
+    mutationFn: (data: any) => apiClient.post(`${API_BASE}/categories`, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-categories'] }); toast.success('Đã tạo danh mục mới!'); },
   });
 
   const updateCategoryMutation = useMutation({
-    mutationFn: async ({ id, ...data }: any) => apiClient.put(`${API_BASE}/categories/${id}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
-      toast.success('Đã cập nhật danh mục!');
-    },
+    mutationFn: ({ id, ...data }: any) => apiClient.put(`${API_BASE}/categories/${id}`, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-categories'] }); toast.success('Đã cập nhật danh mục!'); },
   });
 
   const deleteCategoryMutation = useMutation({
-    mutationFn: async (id: string) => apiClient.delete(`${API_BASE}/categories/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['document-categories'] });
-      toast.success('Đã xóa danh mục!');
-    },
+    mutationFn: (id: string) => apiClient.delete(`${API_BASE}/categories/${id}`),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-categories'] }); toast.success('Đã xóa danh mục!'); },
   });
 
   const createMinutesMutation = useMutation({
-    mutationFn: async (data: any) => apiClient.post(`${API_BASE}/minutes`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['document-minutes'] });
-      toast.success('Đã lưu biên bản cuộc họp!');
-    },
+    mutationFn: (data: any) => apiClient.post(`${API_BASE}/minutes`, data),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['document-minutes'] }); toast.success('Đã lưu biên bản cuộc họp!'); },
   });
 
   return {
+    // Query hooks (re-exported từ top-level)
     useCategories,
     useListDocuments,
     useListConsultations,
@@ -242,6 +214,7 @@ export function useDocuments() {
     useDocumentStats,
     useDocumentLogs,
     usePublicComments,
+    // Mutations
     createDocument: createDocumentMutation.mutateAsync,
     createConsultation: createConsultationMutation.mutateAsync,
     updateDocument: updateDocumentMutation.mutateAsync,
@@ -267,4 +240,3 @@ export function useDocuments() {
       createMinutesMutation.isPending,
   };
 }
-

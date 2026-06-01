@@ -1,6 +1,10 @@
 import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import { API_BASE_URL, API_TIMEOUT_MS } from "@/config/constants";
+import type { ApiResponse } from "@/lib/api.types";
+
+// Re-export for convenience
+export type { ApiResponse };
 
 // 1. KHỞI TẠO AXIOS
 const apiClient = axios.create({

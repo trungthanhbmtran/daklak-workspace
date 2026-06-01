@@ -1,39 +1,36 @@
 import apiClient from "@/lib/axiosInstance";
-import { HrmMasterPlan, HrmPlanObjective } from "../types";
+import type { ApiResponse } from "@/lib/api.types";
+import type { HrmMasterPlan, HrmPlanObjective } from "../types";
 
 export const hrmPlansApi = {
-  aiGenerate(payload: { text: string }): Promise<any> {
-    return apiClient.post('/hrm/master-plans/ai-generate', payload).then((res: any) => res);
+  aiGenerate(payload: { text: string }): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/master-plans/ai-generate', payload) as any;
   },
 
-  list(params: any = {}): Promise<{ data: HrmMasterPlan[]; meta: any }> {
-    return apiClient.get('/hrm/master-plans', { params }).then((res: any) => ({
-      data: res.data || [],
-      meta: res.meta || { pagination: { total: 0 } }
-    }));
+  list(params: any = {}): Promise<ApiResponse<HrmMasterPlan[]>> {
+    return apiClient.get('/hrm/master-plans', { params }) as any;
   },
-  
-  create(payload: any): Promise<{ success: boolean; data?: HrmMasterPlan }> {
-    return apiClient.post('/hrm/master-plans', payload).then((res: any) => res);
+
+  create(payload: any): Promise<ApiResponse<HrmMasterPlan>> {
+    return apiClient.post('/hrm/master-plans', payload) as any;
   },
-  
+
   getOne(id: number): Promise<HrmMasterPlan | null> {
-    return apiClient.get(`/hrm/master-plans/${id}`).then((res: any) => (res.data as unknown as HrmMasterPlan) || null);
+    return (apiClient.get(`/hrm/master-plans/${id}`) as any as Promise<ApiResponse<HrmMasterPlan>>)
+      .then((res) => res.data ?? null);
   },
 
-  update(id: number, payload: Partial<HrmMasterPlan>): Promise<{ success: boolean; data?: HrmMasterPlan }> {
-    return apiClient.put(`/hrm/master-plans/${id}`, payload).then((res: any) => res);
-  }
+  update(id: number, payload: Partial<HrmMasterPlan>): Promise<ApiResponse<HrmMasterPlan>> {
+    return apiClient.put(`/hrm/master-plans/${id}`, payload) as any;
+  },
 };
 
 export const hrmObjectivesApi = {
-  list(planId: number): Promise<{ data: HrmPlanObjective[] }> {
-    return apiClient.get(`/hrm/master-plans/${planId}/objectives`).then((res: any) => ({
-      data: res.data || []
-    }));
+  list(planId: number): Promise<ApiResponse<HrmPlanObjective[]>> {
+    return apiClient.get(`/hrm/master-plans/${planId}/objectives`) as any;
   },
-  
-  create(payload: any): Promise<{ success: boolean; data?: HrmPlanObjective }> {
-    return apiClient.post('/hrm/objectives', payload).then((res: any) => res);
-  }
+
+  create(payload: any): Promise<ApiResponse<HrmPlanObjective>> {
+    return apiClient.post('/hrm/objectives', payload) as any;
+  },
 };

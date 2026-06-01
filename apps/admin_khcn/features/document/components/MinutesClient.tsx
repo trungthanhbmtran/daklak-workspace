@@ -8,16 +8,15 @@ import { Search } from "@/components/ui/search";
 import { useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { MinutesForm } from "@/features/document/components/MinutesForm";
-import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useListMinutes } from "@/features/document/hooks/useDocuments";
 
 export function MinutesClient() {
   const [view, setView] = useState<'LIST' | 'CREATE'>('LIST');
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
 
-  const { useListMinutes } = useDocuments();
   const { data: minutesData, isLoading } = useListMinutes({ search: searchTerm });
-  const minutes = extractDataArray(minutesData);
+  const minutes = minutesData?.data ?? [];
 
   if (view === 'CREATE') {
     return (

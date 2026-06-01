@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 
-import { useDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
+import { useListConsultations } from "@/features/document/hooks/useDocuments";
 import { ConsultationCreateModal } from "@/features/document/components/ConsultationCreateModal";
 
 export function ConsultationsClient() {
@@ -31,8 +31,6 @@ export function ConsultationsClient() {
    const searchParams = useSearchParams();
    const searchTerm = searchParams.get('search') || "";
    const [statusFilter, setStatusFilter] = useState("OPEN");
-
-   const { useListConsultations } = useDocuments();
 
    const { data, isLoading } = useListConsultations({
       status: statusFilter,
@@ -44,9 +42,7 @@ export function ConsultationsClient() {
       setMounted(true);
    }, []);
 
-   const consultations = useMemo(() => {
-      return extractDataArray(data);
-   }, [data]);
+   const consultations = useMemo(() => data?.data ?? [], [data]);
 
    const formatDate = (date?: string) => {
       if (!date) return "--";
