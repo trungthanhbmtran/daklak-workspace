@@ -5,9 +5,12 @@ import { FileText, GitMerge, CheckCircle2, TrendingUp, Users, Target } from "luc
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MasterPlanForm } from "./MasterPlanForm";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export function MasterPlanDetail() {
   const { state, actions } = useMasterPlanContext();
+  const router = useRouter();
 
   if (state.mode === "create") {
     return <MasterPlanForm />;
@@ -150,10 +153,21 @@ export function MasterPlanDetail() {
                           </div>
                         </td>
                         <td className="p-4 text-right">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                            }`}>
-                            {task.status || (task.assigneeCode ? 'IN_PROGRESS' : 'TODO')}
-                          </span>
+                          {!task.assigneeCode ? (
+                            <Button 
+                              variant="secondary" 
+                              size="sm" 
+                              className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold"
+                              onClick={() => router.push(`/services/hrm/work-plans/tasks/create?planId=${selectedPlan.id}`)}
+                            >
+                              Giao việc
+                            </Button>
+                          ) : (
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                              }`}>
+                              {task.status || 'IN_PROGRESS'}
+                            </span>
+                          )}
                         </td>
                       </tr>
                     );

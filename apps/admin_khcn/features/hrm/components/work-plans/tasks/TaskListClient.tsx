@@ -314,9 +314,9 @@ export const TaskListClient = () => {
             Điều phối, theo dõi và quản lý tiến độ công việc toàn diện
           </p>
         </div>
-        <Link href="/services/hrm/work-plans/tasks/create">
+        <Link href="/services/hrm/work-plans/master-plans">
           <Button className="rounded-xl h-11 px-6 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors border-none">
-            <Plus className="mr-2 h-4 w-4" /> Giao việc mới
+            <Target className="mr-2 h-4 w-4" /> Kế hoạch & Giao việc
           </Button>
         </Link>
       </div>
@@ -347,76 +347,74 @@ export const TaskListClient = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800">
-        <div className="relative flex flex-col xl:flex-row justify-between items-center gap-4 p-2">
-          <div className="flex flex-col sm:flex-row gap-4 items-center w-full xl:w-auto flex-1">
-            <div className="w-full sm:max-w-[320px] relative group">
-              <Search placeholder="Tìm kiếm công việc..." className="w-full h-12 rounded-2xl bg-white/80 dark:bg-slate-800/80 border-slate-200/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 transition-all shadow-inner hover:shadow-md" />
-            </div>
-
-            <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-full sm:w-[360px] h-12">
-              <TabsList className="h-full w-full grid grid-cols-3 rounded-2xl bg-slate-200/60 dark:bg-slate-800/60 p-1.5 border border-slate-300/40 dark:border-slate-700/50 shadow-inner">
-                <TabsTrigger value="ALL" className="rounded-xl text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-md transition-all h-full">Tất cả</TabsTrigger>
-                <TabsTrigger value="MY_TASKS" className="rounded-xl text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-md transition-all h-full">Của tôi</TabsTrigger>
-                <TabsTrigger value="DEPT_TASKS" className="rounded-xl text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-md transition-all h-full">Phòng</TabsTrigger>
-              </TabsList>
-            </Tabs>
+      <div className="relative flex flex-col xl:flex-row justify-between items-center gap-4 mb-2">
+        <div className="flex flex-col sm:flex-row gap-4 items-center w-full xl:w-auto flex-1">
+          <div className="w-full sm:max-w-[320px] relative group">
+            <Search placeholder="Tìm kiếm công việc..." className="w-full h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-800 transition-all" />
           </div>
 
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto shrink-0">
-            <div className="flex-1 sm:flex-none">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px] h-12 rounded-2xl border-white/60 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm hover:shadow-md font-semibold text-slate-700 dark:text-slate-200">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-indigo-500" />
-                    <SelectValue placeholder="Trạng thái" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-200/80 shadow-2xl p-1">
-                  <SelectItem value="ALL" className="rounded-xl font-semibold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
-                  <SelectItem value="TODO" className="rounded-xl font-semibold py-2.5 cursor-pointer text-blue-600 focus:bg-blue-50 focus:text-blue-700">Cần làm</SelectItem>
-                  <SelectItem value="IN_PROGRESS" className="rounded-xl font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700">Đang xử lý</SelectItem>
-                  <SelectItem value="DONE" className="rounded-xl font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">Hoàn thành</SelectItem>
-                  <SelectItem value="OVERDUE" className="rounded-xl font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700">Quá hạn</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-full sm:w-[360px] h-11">
+            <TabsList className="h-full w-full grid grid-cols-3 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
+              <TabsTrigger value="ALL" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 transition-all h-full">Tất cả</TabsTrigger>
+              <TabsTrigger value="MY_TASKS" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 transition-all h-full">Của tôi</TabsTrigger>
+              <TabsTrigger value="DEPT_TASKS" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 transition-all h-full">Phòng</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
-            <div className="flex-1 sm:flex-none">
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-full sm:w-[170px] h-12 rounded-2xl border-white/60 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm hover:shadow-md font-semibold text-slate-700 dark:text-slate-200">
-                  <div className="flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-rose-500" />
-                    <SelectValue placeholder="Ưu tiên" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="rounded-2xl border-slate-200/80 shadow-2xl p-1">
-                  <SelectItem value="ALL" className="rounded-xl font-semibold py-2.5 cursor-pointer">Mọi ưu tiên</SelectItem>
-                  <SelectItem value="HIGH" className="rounded-xl font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700">🔴 Cao</SelectItem>
-                  <SelectItem value="MEDIUM" className="rounded-xl font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700">🟡 Trung bình</SelectItem>
-                  <SelectItem value="LOW" className="rounded-xl font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">🟢 Thấp</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto shrink-0">
+          <div className="flex-1 sm:flex-none">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[180px] h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all font-semibold text-slate-700 dark:text-slate-200">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4 text-indigo-500" />
+                  <SelectValue placeholder="Trạng thái" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-slate-200 shadow-lg p-1">
+                <SelectItem value="ALL" className="rounded-lg font-semibold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
+                <SelectItem value="TODO" className="rounded-lg font-semibold py-2.5 cursor-pointer text-blue-600 focus:bg-blue-50">Cần làm</SelectItem>
+                <SelectItem value="IN_PROGRESS" className="rounded-lg font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50">Đang xử lý</SelectItem>
+                <SelectItem value="DONE" className="rounded-lg font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50">Hoàn thành</SelectItem>
+                <SelectItem value="OVERDUE" className="rounded-lg font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50">Quá hạn</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-            <div className="hidden sm:flex items-center bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-300/40 dark:border-slate-700/50 shadow-inner">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                className={`rounded-xl h-9 w-11 p-0 transition-all duration-300 ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
-                onClick={() => setViewMode('grid')}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                className={`rounded-xl h-9 w-11 p-0 transition-all duration-300 ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
-                onClick={() => setViewMode('list')}
-              >
-                <ListIcon className="h-4 w-4" />
-              </Button>
-            </div>
+          <div className="flex-1 sm:flex-none">
+            <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+              <SelectTrigger className="w-full sm:w-[170px] h-11 rounded-xl border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 transition-all font-semibold text-slate-700 dark:text-slate-200">
+                <div className="flex items-center gap-2">
+                  <Filter className="w-4 h-4 text-rose-500" />
+                  <SelectValue placeholder="Ưu tiên" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-slate-200 shadow-lg p-1">
+                <SelectItem value="ALL" className="rounded-lg font-semibold py-2.5 cursor-pointer">Mọi ưu tiên</SelectItem>
+                <SelectItem value="HIGH" className="rounded-lg font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50">🔴 Cao</SelectItem>
+                <SelectItem value="MEDIUM" className="rounded-lg font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50">🟡 Trung bình</SelectItem>
+                <SelectItem value="LOW" className="rounded-lg font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50">🟢 Thấp</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="hidden sm:flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <Button
+              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-lg h-9 w-11 p-0 transition-all duration-300 ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+              onClick={() => setViewMode('grid')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              size="sm"
+              className={`rounded-lg h-9 w-11 p-0 transition-all duration-300 ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+              onClick={() => setViewMode('list')}
+            >
+              <ListIcon className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
