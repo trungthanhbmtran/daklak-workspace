@@ -59,6 +59,8 @@ export class TasksController implements OnModuleInit {
       finalDepartmentId = user.unitId;
     }
 
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+
     const response: any = await firstValueFrom(
       this.taskService.ListTasks({
         assigneeCode: finalAssigneeCode,
@@ -66,6 +68,9 @@ export class TasksController implements OnModuleInit {
         search,
         departmentId: finalDepartmentId,
         isSupervisor: isSupervisor === 'true',
+        currentUserCode: user?.username,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
       }),
     );
 

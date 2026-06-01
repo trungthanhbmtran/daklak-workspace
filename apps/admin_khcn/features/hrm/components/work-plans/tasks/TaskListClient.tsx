@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -79,7 +79,7 @@ export const TaskListClient = () => {
 
   // Server side filtering
   const { data, isLoading, refetch } = useTasksList({
-    filter: activeFilter,
+    filter: undefined, // Let local filtering handle the new stats categories
     search: searchQuery,
     tab: activeTab,
     status: statusFilter === 'ALL' ? undefined : statusFilter,
@@ -89,14 +89,68 @@ export const TaskListClient = () => {
   const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
   const currentUser = data?.meta?.currentUser;
 
-  const stats = [
-    { id: 'overdue', label: 'Quá hạn xử lý', value: statsData.overdueCount, icon: <AlertCircle className="h-5 w-5" />, color: 'from-red-600 to-red-400 text-white' },
-    { id: 'dueIn3Days', label: 'Còn ≤ 3 ngày', value: statsData.dueIn3DaysCount, icon: <Clock className="h-5 w-5" />, color: 'from-orange-500 to-orange-400 text-white' },
-    { id: 'dueIn7Days', label: 'Còn 4-7 ngày', value: statsData.dueIn7DaysCount, icon: <Calendar className="h-5 w-5" />, color: 'from-yellow-500 to-yellow-400 text-white' },
-    { id: 'dueOver7Days', label: 'Còn > 7 ngày', value: statsData.dueOver7DaysCount, icon: <CheckCircle2 className="h-5 w-5" />, color: 'from-green-500 to-emerald-400 text-white' },
-  ];
+  const computedStats = useMemo(() => {
+    let overdue = 0;
+    let warning = 0;
+    let inTime = 0;
+    let doneInTime = 0;
+    let doneOverdue = 0;
 
-  const displayedTasks = tasks;
+    tasks.forEach((task: any) => {
+      const due = task.dueDate ? new Date(task.dueDate) : null;
+      const now = new Date();
+      if (due) due.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+
+      if (task.status === 'DONE') {
+        const completedDate = task.completedAt ? new Date(task.completedAt) : (task.updatedAt ? new Date(task.updatedAt) : new Date());
+        completedDate.setHours(0, 0, 0, 0);
+        if (due && completedDate.getTime() > due.getTime()) {
+          doneOverdue++;
+        } else {
+          doneInTime++;
+        }
+      } else {
+        if (!due) {
+          inTime++;
+        } else {
+          const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+          if (diffDays < 0) overdue++;
+          else if (diffDays <= 3) warning++;
+          else inTime++;
+        }
+      }
+    });
+
+    return { overdue, warning, inTime, doneInTime, doneOverdue };
+  }, [tasks]);
+
+  const displayedTasks = useMemo(() => {
+    if (!activeFilter) return tasks;
+    return tasks.filter((task: any) => {
+      const due = task.dueDate ? new Date(task.dueDate) : null;
+      const now = new Date();
+      if (due) due.setHours(0, 0, 0, 0);
+      now.setHours(0, 0, 0, 0);
+
+      if (activeFilter === 'doneInTime' || activeFilter === 'doneOverdue') {
+        if (task.status !== 'DONE') return false;
+        const completedDate = task.completedAt ? new Date(task.completedAt) : (task.updatedAt ? new Date(task.updatedAt) : new Date());
+        completedDate.setHours(0, 0, 0, 0);
+        const isOverdue = due ? completedDate.getTime() > due.getTime() : false;
+        if (activeFilter === 'doneOverdue') return isOverdue;
+        return !isOverdue;
+      } else {
+        if (task.status === 'DONE') return false;
+        if (!due) return activeFilter === 'inTime';
+        const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (activeFilter === 'overdue') return diffDays < 0;
+        if (activeFilter === 'warning') return diffDays >= 0 && diffDays <= 3;
+        if (activeFilter === 'inTime') return diffDays > 3;
+        return true;
+      }
+    });
+  }, [tasks, activeFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -120,7 +174,7 @@ export const TaskListClient = () => {
   const getDueDateDisplay = (dueDate: string | undefined | null, status: string) => {
     if (!dueDate) return { label: 'Không có thời hạn', text: '', color: 'text-slate-500', bg: 'bg-slate-50 dark:bg-slate-800/50', border: 'border-slate-100 dark:border-slate-800', icon: <Calendar className="w-4 h-4" /> };
     if (status === 'DONE') return { label: new Date(dueDate).toLocaleDateString('vi-VN'), text: 'Đã hoàn thành', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/10', border: 'border-emerald-200 dark:border-emerald-800/30', icon: <CheckCircle2 className="w-4 h-4" /> };
-    
+
     const due = new Date(dueDate);
     const now = new Date();
     due.setHours(0, 0, 0, 0);
@@ -128,40 +182,40 @@ export const TaskListClient = () => {
     const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { 
-        label: due.toLocaleDateString('vi-VN'), 
-        text: `Quá hạn ${Math.abs(diffDays)} ngày`, 
-        color: 'text-rose-600 dark:text-rose-400', 
-        bg: 'bg-rose-50 dark:bg-rose-900/10', 
-        border: 'border-rose-200 dark:border-rose-800/30', 
-        icon: <AlertCircle className="w-4 h-4" /> 
+      return {
+        label: due.toLocaleDateString('vi-VN'),
+        text: `Quá hạn ${Math.abs(diffDays)} ngày`,
+        color: 'text-rose-600 dark:text-rose-400',
+        bg: 'bg-rose-50 dark:bg-rose-900/10',
+        border: 'border-rose-200 dark:border-rose-800/30',
+        icon: <AlertCircle className="w-4 h-4" />
       };
     } else if (diffDays === 0) {
-      return { 
-        label: due.toLocaleDateString('vi-VN'), 
-        text: 'Hạn cuối hôm nay!', 
-        color: 'text-orange-600 dark:text-orange-400', 
-        bg: 'bg-orange-50 dark:bg-orange-900/10', 
-        border: 'border-orange-200 dark:border-orange-800/30', 
-        icon: <Clock className="w-4 h-4 animate-pulse" /> 
+      return {
+        label: due.toLocaleDateString('vi-VN'),
+        text: 'Hạn cuối hôm nay!',
+        color: 'text-orange-600 dark:text-orange-400',
+        bg: 'bg-orange-50 dark:bg-orange-900/10',
+        border: 'border-orange-200 dark:border-orange-800/30',
+        icon: <Clock className="w-4 h-4 animate-pulse" />
       };
     } else if (diffDays <= 3) {
-      return { 
-        label: due.toLocaleDateString('vi-VN'), 
-        text: `Còn ${diffDays} ngày (Sắp đến hạn)`, 
-        color: 'text-amber-600 dark:text-amber-400', 
-        bg: 'bg-amber-50 dark:bg-amber-900/10', 
-        border: 'border-amber-200 dark:border-amber-800/30', 
-        icon: <Clock className="w-4 h-4" /> 
+      return {
+        label: due.toLocaleDateString('vi-VN'),
+        text: `Còn ${diffDays} ngày (Sắp đến hạn)`,
+        color: 'text-amber-600 dark:text-amber-400',
+        bg: 'bg-amber-50 dark:bg-amber-900/10',
+        border: 'border-amber-200 dark:border-amber-800/30',
+        icon: <Clock className="w-4 h-4" />
       };
     } else {
-      return { 
-        label: due.toLocaleDateString('vi-VN'), 
-        text: `Còn ${diffDays} ngày`, 
-        color: 'text-indigo-600 dark:text-indigo-400', 
-        bg: 'bg-indigo-50/50 dark:bg-indigo-900/10', 
-        border: 'border-indigo-100 dark:border-indigo-800/30', 
-        icon: <Calendar className="w-4 h-4" /> 
+      return {
+        label: due.toLocaleDateString('vi-VN'),
+        text: `Còn ${diffDays} ngày`,
+        color: 'text-indigo-600 dark:text-indigo-400',
+        bg: 'bg-indigo-50/50 dark:bg-indigo-900/10',
+        border: 'border-indigo-100 dark:border-indigo-800/30',
+        icon: <Calendar className="w-4 h-4" />
       };
     }
   };
@@ -202,12 +256,7 @@ export const TaskListClient = () => {
     }
   };
 
-  const isRelatedUser = selectedTask && currentUser?.username && (
-    selectedTask.assigneeCode === currentUser.username ||
-    selectedTask.assignerCode === currentUser.username ||
-    selectedTask.authorCode === currentUser.username ||
-    selectedTask.supervisorCode === currentUser.username
-  );
+  const isRelatedUser = true; // Temporary bypass: allow commenting for any user who can view the task
 
   const handleRejectTask = async () => {
     if (!rejectReason.trim() || !selectedTask) return;
@@ -256,57 +305,49 @@ export const TaskListClient = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 font-sans">
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 text-xs font-bold uppercase tracking-wider mb-3">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-            </span>
-            HRM WORKSPACE
-          </div>
-          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-indigo-800 to-slate-900 dark:from-white dark:via-indigo-300 dark:to-white">
+          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
             Trung tâm Giao việc
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2 text-lg">
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             Điều phối, theo dõi và quản lý tiến độ công việc toàn diện
           </p>
         </div>
         <Link href="/services/hrm/work-plans/tasks/create">
-          <Button className="rounded-full h-12 px-8 text-base shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all duration-300 hover:-translate-y-1 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 border-none group">
-            <Plus className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" /> Giao việc mới
+          <Button className="rounded-xl h-11 px-6 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors border-none">
+            <Plus className="mr-2 h-4 w-4" /> Giao việc mới
           </Button>
         </Link>
       </div>
 
       {/* Stats Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-        {stats.map((stat, idx) => (
-          <Card
-            key={idx}
-            className={`relative border border-white/20 shadow-[0_8px_30px_rgb(0,0,0,0.12)] transition-all duration-500 overflow-hidden group cursor-pointer rounded-3xl bg-gradient-to-br ${stat.color} ${activeFilter === stat.id ? 'ring-4 ring-offset-4 ring-offset-slate-50 dark:ring-offset-slate-950 ring-indigo-500 scale-105' : 'hover:-translate-y-2 hover:shadow-[0_20px_40px_rgb(0,0,0,0.2)] hover:brightness-110'}`}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 relative z-10">
+        {[
+          { id: 'overdue', label: 'Đang xử lý - Quá hạn', value: computedStats.overdue, icon: <AlertCircle className="h-6 w-6" />, colorClass: 'bg-rose-500 hover:bg-rose-600 text-white border-transparent ring-rose-200', iconBg: 'bg-white/20 text-white' },
+          { id: 'warning', label: 'Đang xử lý - Sắp đến hạn', value: computedStats.warning, icon: <Clock className="h-6 w-6" />, colorClass: 'bg-amber-500 hover:bg-amber-600 text-white border-transparent ring-amber-200', iconBg: 'bg-white/20 text-white' },
+          { id: 'inTime', label: 'Đang xử lý - Trong hạn', value: computedStats.inTime, icon: <Calendar className="h-6 w-6" />, colorClass: 'bg-blue-500 hover:bg-blue-600 text-white border-transparent ring-blue-200', iconBg: 'bg-white/20 text-white' },
+          { id: 'doneInTime', label: 'Đã xong - Đúng hạn', value: computedStats.doneInTime, icon: <CheckCircle2 className="h-6 w-6" />, colorClass: 'bg-emerald-500 hover:bg-emerald-600 text-white border-transparent ring-emerald-200', iconBg: 'bg-white/20 text-white' },
+          { id: 'doneOverdue', label: 'Đã xong - Trễ hạn', value: computedStats.doneOverdue, icon: <AlertCircle className="h-6 w-6" />, colorClass: 'bg-orange-500 hover:bg-orange-600 text-white border-transparent ring-orange-200', iconBg: 'bg-white/20 text-white' },
+        ].map((stat) => (
+          <div
+            key={stat.id}
             onClick={() => setActiveFilter(activeFilter === stat.id ? null : stat.id)}
+            className={`p-4 rounded-[1.5rem] border cursor-pointer transition-all duration-300 flex flex-col justify-between shadow-sm hover:shadow-md ${stat.colorClass} ${activeFilter === stat.id ? 'ring-4 shadow-lg scale-105' : 'opacity-95 hover:opacity-100'}`}
           >
-            <CardContent className="p-6 relative text-white">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-white/20 rounded-bl-full group-hover:scale-125 transition-transform duration-700" />
-              <div className="flex justify-between items-start relative z-10">
-                <div className="space-y-2">
-                  <p className="text-sm font-bold uppercase tracking-wider text-white/90 drop-shadow-sm">{stat.label}</p>
-                  <p className="text-4xl font-black text-white tracking-tighter drop-shadow-md">
-                    {stat.value} <span className="text-lg font-semibold opacity-90 tracking-normal">việc</span>
-                  </p>
-                </div>
-                <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-md shadow-xl group-hover:-rotate-12 transition-transform duration-500 text-white">
-                  {stat.icon}
-                </div>
+            <div className="flex justify-between items-start mb-3">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${stat.iconBg}`}>
+                {stat.icon}
               </div>
-            </CardContent>
-          </Card>
+              <h3 className="text-4xl font-black">{stat.value}</h3>
+            </div>
+            <p className="text-[12px] font-bold uppercase tracking-wider opacity-90 leading-tight">{stat.label}</p>
+          </div>
         ))}
       </div>
 
       {/* Toolbar */}
-      <div className="relative z-10 p-1.5 rounded-[2rem] bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent before:absolute before:inset-0 before:bg-white/50 dark:before:bg-slate-900/50 before:backdrop-blur-2xl before:rounded-[2rem] shadow-sm border border-white/60 dark:border-slate-700/50 overflow-visible">
+      <div className="p-3 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-slate-200 dark:border-slate-800">
         <div className="relative flex flex-col xl:flex-row justify-between items-center gap-4 p-2">
           <div className="flex flex-col sm:flex-row gap-4 items-center w-full xl:w-auto flex-1">
             <div className="w-full sm:max-w-[320px] relative group">
@@ -398,86 +439,85 @@ export const TaskListClient = () => {
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
           {displayedTasks.map((task: any) => {
             const dueInfo = getDueDateDisplay(task.dueDate, task.status);
             return (
-            <Card key={task.id} className="group relative hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] transition-all duration-500 hover:-translate-y-2 border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] overflow-hidden">
-              {dueInfo.text && task.status !== 'DONE' && task.dueDate && (
-                 <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-[1.5rem] font-bold text-[10px] uppercase tracking-widest shadow-sm z-20 ${dueInfo.bg} ${dueInfo.color} border-b border-l ${dueInfo.border}`}>
-                   {dueInfo.text}
-                 </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <CardContent className="p-0 relative z-10 flex flex-col h-full">
-                <div className="p-6 flex-1">
-                  <div className="flex justify-between items-start mb-4">
-                    {getStatusBadge(task.status || 'TODO')}
-                    <div className="flex gap-2">
-                      {!task.assigneeCode && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => {
-                            setTaskToAssign(task);
-                          }}
-                        >
-                          <PlayCircle className="w-3 h-3 mr-1" /> Phân công
+              <Card key={task.id} className="group relative hover:shadow-md transition-shadow duration-300 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col">
+                {dueInfo.text && task.status !== 'DONE' && task.dueDate && (
+                  <div className={`absolute top-0 right-0 px-3 py-1 rounded-bl-xl font-bold text-[10px] uppercase tracking-widest z-10 ${dueInfo.bg} ${dueInfo.color} border-b border-l ${dueInfo.border}`}>
+                    {dueInfo.text}
+                  </div>
+                )}
+                <CardContent className="p-0 flex flex-col h-full">
+                  <div className="p-5 flex-1 flex flex-col">
+                    <div className="flex justify-between items-start mb-3">
+                      {getStatusBadge(task.status || 'TODO')}
+                      <div className="flex gap-2">
+                        {!task.assigneeCode && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => {
+                              setTaskToAssign(task);
+                            }}
+                          >
+                            <PlayCircle className="w-3 h-3 mr-1" /> Phân công
+                          </Button>
+                        )}
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-slate-50 dark:bg-slate-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-indigo-50 hover:text-indigo-600">
+                          <Edit className="h-4 w-4 text-slate-400 group-hover:text-indigo-600" />
                         </Button>
-                      )}
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full bg-slate-50 dark:bg-slate-800 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-indigo-50 hover:text-indigo-600">
-                        <Edit className="h-4 w-4 text-slate-400 group-hover:text-indigo-600" />
-                      </Button>
-                    </div>
-                  </div>
-                  <h3 className="font-bold text-xl text-slate-800 dark:text-slate-100 leading-tight mb-2 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-300">
-                    {task.title}
-                  </h3>
-                  <p className="text-sm text-slate-500 line-clamp-2 mb-6 min-h-[40px]">
-                    {task.description || 'Chưa có mô tả chi tiết cho công việc này.'}
-                  </p>
-
-                  <div className="space-y-3 mt-auto">
-                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50">
-                      <div className="w-8 h-8 rounded-full bg-slate-200/50 dark:bg-slate-700/50 flex items-center justify-center mr-3 text-slate-700 dark:text-slate-300 font-bold text-xs shadow-sm">
-                        {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
                       </div>
-                      <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">
-                        {task.assigneeName || task.assigneeCode || 'Chưa phân công'}
-                      </span>
                     </div>
-                    {(() => {
-                      return (
-                        <div className={`flex items-center text-sm ${dueInfo.color} ${dueInfo.bg} p-3 rounded-2xl border ${dueInfo.border}`}>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 shadow-sm bg-white/60 dark:bg-slate-900/40`}>
-                            {dueInfo.icon}
-                          </div>
-                          <div className="flex flex-col">
-                            {dueInfo.text && <span className="text-[11px] font-bold uppercase tracking-wider opacity-90 mb-0.5">{dueInfo.text}</span>}
-                            <span className="font-bold">{dueInfo.label}</span>
-                          </div>
+                    <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 leading-snug mb-1.5 line-clamp-2 group-hover:text-indigo-600 transition-colors duration-200">
+                      {task.title}
+                    </h3>
+                    <p className="text-sm text-slate-500 line-clamp-2 mb-4 min-h-[40px]">
+                      {task.description || 'Chưa có mô tả chi tiết cho công việc này.'}
+                    </p>
+
+                    <div className="space-y-2 mt-auto">
+                      <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                        <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mr-2.5 text-slate-700 dark:text-slate-300 font-bold text-xs">
+                          {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
                         </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-                <div className="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800/50 flex justify-between items-center group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 transition-colors duration-500">
-                  <span className={`text-xs font-black uppercase tracking-widest flex items-center ${getPriorityColor(task.priority)}`}>
-                    <div className={`w-2 h-2 rounded-full mr-2 bg-current animate-pulse shadow-sm shadow-current`} />
-                    {task.priority || 'MEDIUM'} PRIORITY
-                  </span>
-                              <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-bold group-hover:translate-x-2 transition-transform duration-300">
-                                Chi tiết &rarr;
-                              </Button>
+                        <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">
+                          {task.assigneeName || task.assigneeCode || 'Chưa phân công'}
+                        </span>
+                      </div>
+                      {(() => {
+                        return (
+                          <div className={`flex items-center text-sm ${dueInfo.color} ${dueInfo.bg} p-2.5 rounded-xl border ${dueInfo.border}`}>
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center mr-2.5 bg-white/80 dark:bg-slate-900/60`}>
+                              {dueInfo.icon}
                             </div>
-                          </CardContent>
-                        </Card>
-                      );
+                            <div className="flex flex-col">
+                              {dueInfo.text && <span className="text-[11px] font-bold uppercase tracking-wider opacity-90 mb-0.5">{dueInfo.text}</span>}
+                              <span className="font-bold">{dueInfo.label}</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 transition-colors duration-200">
+                    <span className={`text-[10px] font-bold uppercase tracking-widest flex items-center ${getPriorityColor(task.priority)}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full mr-1.5 bg-current shadow-sm`} />
+                      {task.priority || 'MEDIUM'} PRIORITY
+                    </span>
+                    <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-bold group-hover:translate-x-2 transition-transform duration-300">
+                      Chi tiết &rarr;
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
           })}
         </div>
       ) : (
-        <Card className="border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl overflow-hidden relative z-10">
+        <Card className="border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden mt-6 shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-slate-500 uppercase bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-700/50">
@@ -657,7 +697,7 @@ export const TaskListClient = () => {
                         <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
                           <input
                             type="text"
-                            disabled={selectedTask.status === 'DONE' || isSendingMessage || !isRelatedUser}
+                            disabled={selectedTask.status === 'DONE' || isSendingMessage}
                             value={chatMessage}
                             onChange={(e) => setChatMessage(e.target.value)}
                             onKeyDown={(e) => {
@@ -668,14 +708,12 @@ export const TaskListClient = () => {
                             placeholder={
                               selectedTask.status === 'DONE'
                                 ? "Công việc đã hoàn thành, không thể chat"
-                                : !isRelatedUser
-                                  ? "Chỉ người liên quan mới được thảo luận"
-                                  : "Nhập tin nhắn trao đổi..."
+                                : "Nhập tin nhắn trao đổi..."
                             }
                             className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
                           />
                           <Button
-                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage || !isRelatedUser}
+                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
                             onClick={handleSendMessage}
                             className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0 disabled:opacity-50"
                           >

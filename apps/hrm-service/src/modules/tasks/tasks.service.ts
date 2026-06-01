@@ -5,8 +5,22 @@ import { PrismaService } from '../../database/prisma.service';
 export class TasksService {
   constructor(private prisma: PrismaService) { }
 
-  private async getTaskStats(assigneeCode?: string) {
-    const statsWhere = assigneeCode ? { assigneeCode } : {};
+  private async getTaskStats(query: any) {
+    const statsWhere: any = query.assigneeCode ? { assigneeCode: query.assigneeCode } : {};
+
+    if (!query.isAdmin && query.currentUserCode) {
+      const authConditions: any[] = [
+        { assigneeCode: query.currentUserCode },
+        { assignerCode: query.currentUserCode },
+        { authorCode: query.currentUserCode },
+        { supervisorCode: query.currentUserCode },
+      ];
+      if (query.currentUserDept) {
+        authConditions.push({ departmentId: query.currentUserDept });
+      }
+      statsWhere.AND = [{ OR: authConditions }];
+    }
+
     const baseWhere = { ...statsWhere, status: { notIn: ['DONE', 'ARCHIVED'] } };
 
     const now = new Date();
@@ -115,13 +129,28 @@ export class TasksService {
 
     this.applyDateFilter(query.filter, where);
 
+    if (!query.isAdmin && query.currentUserCode) {
+      const authConditions: any[] = [
+        { assigneeCode: query.currentUserCode },
+        { assignerCode: query.currentUserCode },
+        { authorCode: query.currentUserCode },
+        { supervisorCode: query.currentUserCode },
+      ];
+      if (query.currentUserDept) {
+        authConditions.push({ departmentId: query.currentUserDept });
+      }
+
+      where.AND = where.AND || [];
+      where.AND.push({ OR: authConditions });
+    }
+
     const [tasks, stats] = await Promise.all([
       this.prisma.task.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         include: { assignee: true }
       }),
-      this.getTaskStats(query.assigneeCode)
+      this.getTaskStats(query)
     ]);
 
     return {

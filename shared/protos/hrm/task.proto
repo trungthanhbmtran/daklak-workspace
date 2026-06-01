@@ -116,6 +116,9 @@ message ListTasksRequest {
   string search = 3; // optional
   int32 departmentId = 4; // optional
   bool isSupervisor = 5; // optional
+  string currentUserCode = 6; // optional
+  bool isAdmin = 7; // optional
+  int32 currentUserDept = 8; // optional
 }
 
 message TaskStats {
