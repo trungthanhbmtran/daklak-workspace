@@ -34,7 +34,7 @@ export class TasksController implements OnModuleInit {
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
-      body.assignerCode = req.user.username;
+      body.assignerCode = req.user.employeeCode || req.user.username;
     }
     return firstValueFrom(this.taskService.CreateTask(body));
   }
@@ -54,7 +54,7 @@ export class TasksController implements OnModuleInit {
     let finalDepartmentId = departmentId ? parseInt(departmentId, 10) : undefined;
 
     if (tab === 'MY_TASKS' && user) {
-      finalAssigneeCode = user.username;
+      finalAssigneeCode = user.employeeCode || user.username;
     } else if (tab === 'DEPT_TASKS' && user) {
       finalDepartmentId = user.unitId;
     }
@@ -68,7 +68,7 @@ export class TasksController implements OnModuleInit {
         search,
         departmentId: finalDepartmentId,
         isSupervisor: isSupervisor === 'true',
-        currentUserCode: user?.username,
+        currentUserCode: user?.employeeCode || user?.username,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
       }),
@@ -143,7 +143,7 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.AddComment({
         taskId: parseInt(id, 10),
-        authorCode: req.user?.username || '',
+        authorCode: req.user?.employeeCode || req.user?.username || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
       }),
