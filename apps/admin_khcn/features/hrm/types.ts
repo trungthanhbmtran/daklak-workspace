@@ -124,6 +124,7 @@ export interface HrmMasterPlan {
   status: "DRAFT" | "ACTIVE" | "COMPLETED" | "CANCELLED";
   createdAt: string;
   perspectives?: HrmPlanPerspective[];
+  tasks?: any[];
 }
 
 export interface HrmPlanPerspective {

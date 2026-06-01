@@ -8,7 +8,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, ComboboxEmpty } from '@/components/ui/combobox';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Save, AlertTriangle, Sparkles, PlusCircle, Target, Briefcase, Activity, MapPin } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
@@ -30,6 +33,7 @@ export function TaskCreateClient() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [planId, setPlanId] = useState('');
+  const [openAssignee, setOpenAssignee] = useState(false);
 
   const { data: plansRes } = useQuery({
     queryKey: ["hrm-master-plans"],
@@ -39,7 +43,8 @@ export function TaskCreateClient() {
 
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true } as any);
   const employees = employeesData?.data?.map(emp => {
-    const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(' ');
+    // Sửa lại thứ tự hiển thị tên cho đúng (firstname trước lastname hoặc ngược lại theo feedback của user)
+    const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(' ');
     // Mock performance score and matching since backend might not have it yet
     const performanceScore = (emp as any).performanceScore || Math.floor(Math.random() * 20 + 80); // 80-99
     const matchLocation = (emp as any).matchLocation ?? (Math.random() > 0.4);
@@ -59,7 +64,17 @@ export function TaskCreateClient() {
     };
   }) || [];
 
-  const assignableEmployees = [...employees].sort((a, b) => a.currentLoad - b.currentLoad);
+  const assignableEmployees = [...employees].sort((a, b) => {
+    // Ưu tiên chọn người phù hợp nhất:
+    // 1. Phù hợp lĩnh vực
+    if (a.matchDomain !== b.matchDomain) return a.matchDomain ? -1 : 1;
+    // 2. Đúng địa bàn
+    if (a.matchLocation !== b.matchLocation) return a.matchLocation ? -1 : 1;
+    // 3. Khối lượng công việc ít nhất
+    if (a.currentLoad !== b.currentLoad) return a.currentLoad - b.currentLoad;
+    // 4. Điểm hiệu suất cao nhất
+    return b.performanceScore - a.performanceScore;
+  });
   const selectedEmp = employees.find(e => e.code === assignee);
 
   useEffect(() => {
@@ -129,12 +144,69 @@ export function TaskCreateClient() {
               <form id="taskForm" onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    Kế hoạch / Mục tiêu liên kết
+                  </label>
+                  <Select value={planId} onValueChange={(val) => { setPlanId(val); }}>
+                    <SelectTrigger className="h-11 bg-slate-50 focus-visible:bg-white border-slate-200">
+                      <SelectValue placeholder="Chọn kế hoạch (Không bắt buộc)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none"><span className="text-slate-500 italic">Không liên kết kế hoạch</span></SelectItem>
+                      {masterPlans.map((plan: any) => (
+                        <SelectItem key={plan.id} value={plan.id.toString()}>
+                          <span className="font-medium text-slate-800">{plan.title}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {planId && planId !== 'none' && (() => {
+                  const selectedPlan = masterPlans.find((p: any) => p.id.toString() === planId);
+                  if (!selectedPlan || !selectedPlan.tasks) return null;
+                  const uniqueTasks = Array.from(new Set(selectedPlan.tasks.map((t: any) => t.title)))
+                    .map(title => selectedPlan.tasks!.find((t: any) => t.title === title));
+
+                  if (uniqueTasks.length === 0) return null;
+
+                  return (
+                    <div className="space-y-2 p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                      <label className="text-sm font-semibold text-indigo-900 flex items-center gap-2">
+                        <Briefcase className="w-4 h-4 text-indigo-500" />
+                        Danh sách công việc trong kế hoạch
+                      </label>
+                      <Select onValueChange={(val) => {
+                        const t = uniqueTasks.find((x: any) => x.title === val);
+                        if (t) {
+                          setTaskName(t.title);
+                          setBaseScore(t.baseScore || t.targetValue || 10);
+                          if (t.weight) setTaskWeight(t.weight);
+                          if (t.priority) setPriority(t.priority);
+                        }
+                      }}>
+                        <SelectTrigger className="h-11 bg-white border-indigo-200">
+                          <SelectValue placeholder="Chọn công việc để phân bổ..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {uniqueTasks.map((t: any) => (
+                            <SelectItem key={t.id || t.title} value={t.title}>
+                              <span className="font-medium text-slate-800">{t.title}</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  );
+                })()}
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
                     <Target className="w-4 h-4 text-slate-400" />
                     Tên công việc <span className="text-red-500">*</span>
                   </label>
                   <Input value={taskName} onChange={e => setTaskName(e.target.value)} required className="h-11 bg-slate-50 focus-visible:bg-white" placeholder="Nhập tên công việc cần giao..." />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50/50 rounded-xl border border-slate-100">
                   <div className="space-y-2">
                     <label className="text-sm font-semibold text-slate-700">Mức độ ưu tiên</label>
@@ -170,24 +242,7 @@ export function TaskCreateClient() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    Kế hoạch / Mục tiêu liên kết
-                  </label>
-                  <Select value={planId} onValueChange={setPlanId}>
-                    <SelectTrigger className="h-11 bg-slate-50 focus-visible:bg-white border-slate-200">
-                      <SelectValue placeholder="Chọn kế hoạch (Không bắt buộc)" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none"><span className="text-slate-500 italic">Không liên kết kế hoạch</span></SelectItem>
-                      {masterPlans.map((plan: any) => (
-                        <SelectItem key={plan.id} value={plan.id.toString()}>
-                          <span className="font-medium text-slate-800">{plan.title}</span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+
               </form>
             </CardContent>
           </Card>
@@ -199,48 +254,72 @@ export function TaskCreateClient() {
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
                 <label className="text-xs font-bold">Người thực hiện</label>
-                <Combobox
-                  value={assignee}
-                  onValueChange={(val) => setAssignee(val as string)}
-                >
-                  <ComboboxInput placeholder="Tìm kiếm tên, chức danh..." className="w-full h-10" />
-                  <ComboboxContent className="w-[var(--radix-select-trigger-width)] sm:w-[350px]">
-                    <ComboboxList>
-                      <ComboboxEmpty>Không tìm thấy nhân sự phù hợp</ComboboxEmpty>
-                      {assignableEmployees.map((emp) => {
-                        return (
-                          // @ts-ignore - Base UI ComboboxItem textValue prop is not in the type definition but works
-                          <ComboboxItem key={emp.code} value={emp.code} textValue={emp.name}>
-                            <div className="flex flex-col py-1.5 w-full gap-1.5">
-                              <div className="flex justify-between items-start w-full">
-                                <span className="font-bold text-sm text-slate-800">{emp.name}</span>
-                                <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${emp.performanceScore >= 90 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : emp.performanceScore >= 75 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
-                                  Hiệu suất: {emp.performanceScore}%
-                                </span>
-                              </div>
-                              <span className="text-[11px] text-slate-500">
-                                {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
-                                {emp.department?.name ? ` • ${emp.department.name}` : ''}
-                              </span>
-                              <div className="flex flex-wrap gap-2 mt-0.5">
-                                {emp.matchDomain && (
-                                  <span className="text-[10px] text-indigo-600 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100 flex items-center gap-1">
-                                    <Target className="w-3 h-3" /> Phù hợp lĩnh vực
+                <Popover open={openAssignee} onOpenChange={setOpenAssignee}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={openAssignee}
+                      className="w-full justify-between h-11 bg-slate-50 hover:bg-slate-100 border-slate-200"
+                    >
+                      {selectedEmp ? selectedEmp.name : "Tìm kiếm tên, chức danh..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] sm:w-[350px] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Tìm kiếm tên, chức danh..." className="h-10" />
+                      <CommandList>
+                        <CommandEmpty>Không tìm thấy nhân sự phù hợp</CommandEmpty>
+                        <CommandGroup>
+                          {assignableEmployees.map((emp) => {
+                            return (
+                              <CommandItem
+                                key={emp.code}
+                                value={`${emp.name} ${emp.jobTitle?.name || ''} ${emp.department?.name || ''}`}
+                                onSelect={() => {
+                                  setAssignee(emp.code);
+                                  setOpenAssignee(false);
+                                }}
+                              >
+                                <Check
+                                  className={cn(
+                                    "mr-2 h-4 w-4 shrink-0",
+                                    assignee === emp.code ? "opacity-100" : "opacity-0"
+                                  )}
+                                />
+                                <div className="flex flex-col py-1 w-full gap-1">
+                                  <div className="flex justify-between items-start w-full">
+                                    <span className="font-bold text-sm text-slate-800">{emp.name}</span>
+                                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${emp.performanceScore >= 90 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : emp.performanceScore >= 75 ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200'}`}>
+                                      Hiệu suất: {emp.performanceScore}%
+                                    </span>
+                                  </div>
+                                  <span className="text-[11px] text-slate-500">
+                                    {emp.jobTitle?.name ? `${emp.jobTitle.name}` : 'Nhân viên'}
+                                    {emp.department?.name ? ` • ${emp.department.name}` : ''}
                                   </span>
-                                )}
-                                {emp.matchLocation && (
-                                  <span className="text-[10px] text-emerald-600 bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
-                                    <MapPin className="w-3 h-3" /> Đúng địa bàn
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </ComboboxItem>
-                        );
-                      })}
-                    </ComboboxList>
-                  </ComboboxContent>
-                </Combobox>
+                                  <div className="flex flex-wrap gap-2 mt-0.5">
+                                    {emp.matchDomain && (
+                                      <span className="text-[10px] text-indigo-600 bg-indigo-50/50 px-1.5 py-0.5 rounded border border-indigo-100 flex items-center gap-1">
+                                        <Target className="w-3 h-3" /> Phù hợp lĩnh vực
+                                      </span>
+                                    )}
+                                    {emp.matchLocation && (
+                                      <span className="text-[10px] text-emerald-600 bg-emerald-50/50 px-1.5 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
+                                        <MapPin className="w-3 h-3" /> Đúng địa bàn
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </CommandItem>
+                            );
+                          })}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {selectedEmp && (
