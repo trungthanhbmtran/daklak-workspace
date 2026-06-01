@@ -1,16 +1,19 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { FileText, GitMerge, CheckCircle2, TrendingUp, Users, Target } from "lucide-react";
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MasterPlanForm } from "./MasterPlanForm";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { TaskAssignModal } from "../../tasks/TaskAssignModal";
 
 export function MasterPlanDetail() {
   const { state, actions } = useMasterPlanContext();
   const router = useRouter();
+  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  const [taskToAssign, setTaskToAssign] = useState<any>(null);
 
   if (state.mode === "create") {
     return <MasterPlanForm />;
@@ -158,7 +161,10 @@ export function MasterPlanDetail() {
                               variant="secondary" 
                               size="sm" 
                               className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold"
-                              onClick={() => router.push(`/services/hrm/work-plans/tasks/create?planId=${selectedPlan.id}`)}
+                              onClick={() => {
+                                setTaskToAssign(task);
+                                setAssignModalOpen(true);
+                              }}
                             >
                               Giao việc
                             </Button>
@@ -185,6 +191,17 @@ export function MasterPlanDetail() {
         </TabsContent>
 
       </Tabs>
+      
+      <TaskAssignModal 
+        isOpen={assignModalOpen}
+        task={taskToAssign}
+        onClose={(assignedTaskId) => {
+          setAssignModalOpen(false);
+          if (assignedTaskId) {
+            actions.refreshPlans();
+          }
+        }}
+      />
     </div>
   );
 }
