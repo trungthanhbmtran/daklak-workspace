@@ -367,7 +367,7 @@ export class TasksService {
 
   async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
     const dataToUpdate: any = {};
-    if (assigneeCode) dataToUpdate.assigneeCode = assigneeCode;
+    if (assigneeCode !== undefined) dataToUpdate.assigneeCode = assigneeCode;
     if (departmentId !== undefined) dataToUpdate.departmentId = departmentId;
     // Ghi đè lại người giao việc nếu được truyền từ Gateway
     if (assignerCode) dataToUpdate.assignerCode = assignerCode;
