@@ -325,7 +325,7 @@ export class DocumentService {
     ];
 
     for (const doc of mockExternalDocs) {
-      await this.create(doc);
+      await this.create({ ...doc, userId: 'SYSTEM', userName: 'Hệ thống tự động (VDX)' });
     }
 
     return { success: true, count: mockExternalDocs.length };

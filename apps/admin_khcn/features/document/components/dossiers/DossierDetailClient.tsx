@@ -62,7 +62,8 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
 
   const fetchCabinetFiles = async () => {
     try {
-      const res: any = await apiClient.get('/documents/cabinet?userId=1');
+      // Backend tự đọc userId từ JWT token (HttpOnly Cookie)
+      const res: any = await apiClient.get('/documents/cabinet');
       if (res?.data) {
         setCabinetFiles(res.data);
       }

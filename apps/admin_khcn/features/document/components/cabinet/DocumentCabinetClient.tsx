@@ -46,8 +46,8 @@ export function DocumentCabinetClient() {
   const fetchCabinet = async () => {
     try {
       setLoading(true);
-      // Gọi API lấy tủ văn bản (giả sử userId test = '1')
-      const res: any = await apiClient.get('/documents/cabinet?userId=1');
+      // Backend tự đọc userId từ JWT token (HttpOnly Cookie)
+      const res: any = await apiClient.get('/documents/cabinet');
       if (res?.data && res.data.length > 0) {
         setFiles(res.data);
       } else {
@@ -81,8 +81,8 @@ export function DocumentCabinetClient() {
       if (!mediaInfo) throw new Error("Upload thất bại từ hook");
 
       // 2. Lưu vào cơ sở dữ liệu Cabinet (Document Service)
+      // Backend tự lấy userId từ JWT token, không cần truyền từ client
       await apiClient.post('/documents/cabinet', {
-        userId: '1', // Test user id
         fileName: selectedFile.name,
         fileUrl: mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`,
         fileType: selectedFile.name.split('.').pop()?.toLowerCase() || 'unknown',

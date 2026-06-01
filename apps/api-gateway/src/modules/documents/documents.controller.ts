@@ -144,7 +144,8 @@ export class DocumentsController implements OnModuleInit {
     @Query('userId') userId: string,
     @Query('orgId') orgId: string,
   ) {
-    const finalUserId = userId || (req.user?.id ? String(req.user.id) : '');
+    // Ưu tiên userId từ JWT token, không để client tự truyền userId
+    const finalUserId = req.user?.id ? String(req.user.id) : (userId || '');
     return firstValueFrom(
       this.cabinetService.ListFiles({
         userId: finalUserId,
@@ -155,9 +156,8 @@ export class DocumentsController implements OnModuleInit {
 
   @Post('cabinet')
   async addCabinetFile(@Req() req: any, @Body() body: any) {
-    if (req.user?.id) {
-      body.userId = String(req.user.id);
-    }
+    // Luôn lấy userId từ JWT token, bỏ qua giá trị client có thể gửi
+    body.userId = req.user?.id ? String(req.user.id) : '';
     return firstValueFrom(this.cabinetService.AddFile(body));
   }
 
@@ -207,14 +207,23 @@ export class DocumentsController implements OnModuleInit {
   }
 
   @Post()
-  async createDocument(@Body() body: any) {
+  async createDocument(@Req() req: any, @Body() body: any) {
     console.log('body', body);
+    // Inject thông tin người tạo từ JWT token
+    body.userId = req.user?.id ? String(req.user.id) : undefined;
+    body.userName = req.user?.fullname || req.user?.username || undefined;
     return firstValueFrom(this.documentService.CreateDocument(body));
   }
 
   @Put(':id')
-  async updateDocument(@Param('id') id: string, @Body() body: any) {
-    const payload = { id, ...body };
+  async updateDocument(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+    // Inject thông tin người cập nhật từ JWT token
+    const payload = {
+      id,
+      ...body,
+      userId: req.user?.id ? String(req.user.id) : undefined,
+      userName: req.user?.fullname || req.user?.username || undefined,
+    };
     return firstValueFrom(this.documentService.UpdateDocument(payload));
   }
 
