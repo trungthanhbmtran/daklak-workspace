@@ -10,6 +10,7 @@ import {
   Inject,
   UseGuards,
   OnModuleInit,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -139,19 +140,24 @@ export class DocumentsController implements OnModuleInit {
   // --- Cabinet ---
   @Get('cabinet')
   async listCabinetFiles(
+    @Req() req: any,
     @Query('userId') userId: string,
     @Query('orgId') orgId: string,
   ) {
+    const finalUserId = userId || (req.user?.id ? String(req.user.id) : '');
     return firstValueFrom(
       this.cabinetService.ListFiles({
-        userId: userId || '',
+        userId: finalUserId,
         orgId: orgId || '',
       }),
     );
   }
 
   @Post('cabinet')
-  async addCabinetFile(@Body() body: any) {
+  async addCabinetFile(@Req() req: any, @Body() body: any) {
+    if (req.user?.id) {
+      body.userId = String(req.user.id);
+    }
     return firstValueFrom(this.cabinetService.AddFile(body));
   }
 

@@ -14,11 +14,9 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 
 import { useDocuments, useDocumentStats, useListDocuments, extractDataArray } from "@/features/document/hooks/useDocuments";
-import { useUser } from "@/hooks/useUser";
 
 export function DocumentsDashboardClient() {
   const [mounted, setMounted] = useState(false);
-  const { user } = useUser();
 
   useEffect(() => {
     setMounted(true);

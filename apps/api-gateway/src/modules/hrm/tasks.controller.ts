@@ -9,6 +9,7 @@ import {
   Inject,
   UseGuards,
   OnModuleInit,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -31,27 +32,49 @@ export class TasksController implements OnModuleInit {
   }
 
   @Post()
-  async create(@Body() body: any) {
+  async create(@Req() req: any, @Body() body: any) {
+    if (req.user) {
+      body.assignerCode = req.user.username;
+    }
     return firstValueFrom(this.taskService.CreateTask(body));
   }
 
   @Get()
   async list(
+    @Req() req: any,
+    @Query('tab') tab: string,
     @Query('assigneeCode') assigneeCode: string,
     @Query('filter') filter: string,
     @Query('search') search: string,
     @Query('departmentId') departmentId: string,
     @Query('isSupervisor') isSupervisor: string,
   ) {
-    return firstValueFrom(
+    const user = req.user;
+    let finalAssigneeCode = assigneeCode;
+    let finalDepartmentId = departmentId ? parseInt(departmentId, 10) : undefined;
+
+    if (tab === 'MY_TASKS' && user) {
+      finalAssigneeCode = user.username;
+    } else if (tab === 'DEPT_TASKS' && user) {
+      finalDepartmentId = user.unitId;
+    }
+
+    const response: any = await firstValueFrom(
       this.taskService.ListTasks({
-        assigneeCode,
+        assigneeCode: finalAssigneeCode,
         filter,
         search,
-        departmentId: departmentId ? parseInt(departmentId, 10) : undefined,
+        departmentId: finalDepartmentId,
         isSupervisor: isSupervisor === 'true',
       }),
     );
+
+    if (response && user) {
+      if (!response.meta) response.meta = {};
+      response.meta.currentUser = user;
+    }
+
+    return response;
   }
 
   @Put(':id/status')
@@ -108,13 +131,14 @@ export class TasksController implements OnModuleInit {
 
   @Post(':id/comments')
   async addComment(
+    @Req() req: any,
     @Param('id') id: string,
-    @Body() body: { authorCode: string; content: string; isSystemMessage?: boolean }
+    @Body() body: { content: string; isSystemMessage?: boolean }
   ) {
     return firstValueFrom(
       this.taskService.AddComment({
         taskId: parseInt(id, 10),
-        authorCode: body.authorCode,
+        authorCode: req.user?.username || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
       }),

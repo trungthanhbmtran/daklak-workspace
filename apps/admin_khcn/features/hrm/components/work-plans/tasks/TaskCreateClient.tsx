@@ -12,14 +12,12 @@ import { Combobox, ComboboxInput, ComboboxContent, ComboboxList, ComboboxItem, C
 import { toast } from 'sonner';
 import { Save, AlertTriangle, Sparkles, PlusCircle, Target, Briefcase, Activity, MapPin } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
-import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
-import { useUser } from '@/hooks/useUser';
 import { hrmPlansApi } from "@/features/hrm/api";
+import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
 import { useQuery } from "@tanstack/react-query";
 
 export function TaskCreateClient() {
   const router = useRouter();
-  const { user } = useUser();
   const [assignee, setAssignee] = useState('');
   const [supervisor, setSupervisor] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
@@ -92,7 +90,7 @@ export function TaskCreateClient() {
     if (isOverload) return toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức!');
     try {
       const finalPlanId = planId === 'none' || planId === '' ? undefined : Number(planId);
-      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, assignerCode: user?.employeeCode || '', taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
+      await createTask({ assigneeCode: assignee, supervisorCode: supervisor, taskName, weight: taskWeight, startDate, dueDate, priority, baseScore, templateId: selectedTemplateId, planId: finalPlanId });
       toast.success('Giao việc thành công!');
       router.push('/services/hrm/work-plans/tasks');
     } catch { toast.error('Lỗi khi giao việc'); }

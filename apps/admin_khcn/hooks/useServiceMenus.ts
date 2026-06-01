@@ -77,12 +77,12 @@ export interface SidebarItem {
 // 2. HELPER FUNCTIONS (XỬ LÝ DATA)
 // ----------------------------------------------------------------------
 
-/** Lấy danh sách menu chuẩn từ API (Dùng chung cho cả 2 hooks) */
-const fetchAndNormalizeMenus = async (): Promise<MenuNode[]> => {
-  const res = await menuApi.getMyMenus("ADMIN_PORTAL");
-  // Xử lý các dạng trả về có thể xảy ra của axios/fetch
-  const raw = (res as any)?.data?.items ?? (res as any)?.data ?? (res as any)?.items ?? res;
-  return Array.isArray(raw) ? raw : [];
+/** Lấy danh sách menu chuẩn từ API và lấy luôn metadata */
+const fetchAndNormalizeMenus = async (): Promise<{ items: MenuNode[], meta?: any }> => {
+  const res: any = await menuApi.getMyMenus("ADMIN_PORTAL");
+  const raw = res?.data?.items ?? res?.data ?? res?.items ?? res;
+  const items = Array.isArray(raw) ? raw : [];
+  return { items, meta: res?.meta || res?.data?.meta };
 };
 
 /** Bỏ qua node Gốc ảo (SYS_ROOT) nếu có */
@@ -133,7 +133,7 @@ export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
     enabled: !!config,
   });
 
-  const branches = getRealBranches(data ?? []);
+  const branches = getRealBranches(data?.items ?? []);
 
   // Tìm nhánh gốc của Service này
   const targetRoot = branches.find((b) => (b.service ?? "").trim() === config?.serviceCode);
@@ -171,7 +171,8 @@ export function useHubServices() {
     queryFn: fetchAndNormalizeMenus,
   });
 
-  const branches = getRealBranches(data ?? []);
+  const branches = getRealBranches(data?.items ?? []);
+  const currentUser = data?.meta?.currentUser;
 
   const apps = branches
     .filter((b) => {
@@ -193,5 +194,5 @@ export function useHubServices() {
       };
     });
 
-  return { apps, isLoading, isError };
+  return { apps, currentUser, isLoading, isError };
 }

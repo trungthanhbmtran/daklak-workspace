@@ -82,6 +82,7 @@ export const TaskListClient = () => {
   });
   const tasks = data?.data || [];
   const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
+  const currentUser = data?.meta?.currentUser;
 
   const stats = [
     { id: 'overdue', label: 'Quá hạn xử lý', value: statsData.overdueCount, icon: <AlertCircle className="h-5 w-5" />, color: 'from-red-600 to-red-400 text-white' },
@@ -511,12 +512,12 @@ export const TaskListClient = () => {
                             </div>
                           ) : (
                             taskComments.map((msg, idx) => (
-                              <div key={idx} className={`flex gap-3 ${msg.authorCode === currentUser.code ? 'flex-row-reverse' : ''}`}>
+                              <div key={idx} className={`flex gap-3 ${msg.authorCode === currentUser?.username ? 'flex-row-reverse' : ''}`}>
                                 <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-xs font-bold shrink-0">
                                   {msg.authorName?.charAt(0) || msg.authorCode?.charAt(0) || '?'}
                                 </div>
-                                <div className={`max-w-[75%] rounded-2xl p-3 ${msg.isSystemMessage ? 'bg-rose-50 text-rose-600 border border-rose-100' : msg.authorCode === currentUser.code ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-tl-none'}`}>
-                                  {!msg.isSystemMessage && msg.authorCode !== currentUser.code && (
+                                <div className={`max-w-[75%] rounded-2xl p-3 ${msg.isSystemMessage ? 'bg-rose-50 text-rose-600 border border-rose-100' : msg.authorCode === currentUser?.username ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-tl-none'}`}>
+                                  {!msg.isSystemMessage && msg.authorCode !== currentUser?.username && (
                                     <p className="text-xs font-bold mb-1 opacity-70">{msg.authorName || msg.authorCode}</p>
                                   )}
                                   <p className="text-sm">{msg.content}</p>

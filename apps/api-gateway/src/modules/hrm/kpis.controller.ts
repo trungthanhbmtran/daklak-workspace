@@ -10,6 +10,7 @@ import {
   Param,
   Put,
   Delete,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
@@ -62,15 +63,19 @@ export class KpisController implements OnModuleInit {
   }
 
   @Post('evaluations')
-  async createEvaluation(@Body() body: any) {
+  async createEvaluation(@Req() req: any, @Body() body: any) {
+    if (req.user) {
+      body.evaluatorCode = req.user.username;
+    }
     return firstValueFrom(this.kpiService.CreateEvaluation(body));
   }
 
   @Get('evaluations')
-  async findEvaluations(@Query('employeeCode') employeeCode: string) {
+  async findEvaluations(@Req() req: any, @Query('employeeCode') employeeCode: string) {
+    const code = employeeCode || req.user?.username;
     return firstValueFrom(
       this.kpiService.FindEvaluations({
-        employeeCode,
+        employeeCode: code,
       }),
     );
   }

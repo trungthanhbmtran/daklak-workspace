@@ -111,12 +111,20 @@ export class MenusController implements OnModuleInit {
           ? rawId
           : parseInt(String(rawId), 10)
         : 0;
-    return firstValueFrom(
+    const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
         app: app || 'ADMIN_PORTAL',
       }),
     );
+    
+    // Bổ sung meta chứa currentUser để Frontend (HubClient) dùng
+    if (response) {
+      if (!response.meta) response.meta = {};
+      response.meta.currentUser = req.user;
+    }
+    
+    return response;
   }
 
   /** Chuẩn hóa body từ frontend sang payload gRPC */

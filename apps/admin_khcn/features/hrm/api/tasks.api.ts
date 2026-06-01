@@ -26,7 +26,7 @@ export const hrmTasksApi = {
       data: res.data || []
     }));
   },
-  addComment(id: string, payload: { authorCode: string; content: string; isSystemMessage?: boolean }): Promise<any> {
+  addComment(id: string, payload: { authorCode?: string; content: string; isSystemMessage?: boolean }): Promise<any> {
     return apiClient.post(`/hrm/tasks/${id}/comments`, payload).then((res: any) => res.data || res);
   }
 };
