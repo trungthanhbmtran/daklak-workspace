@@ -64,6 +64,7 @@ message MasterPlanTaskPayload {
   string supervisor = 5;
   string rankCode = 6;
   int32 rankId = 7;
+  string description = 8;
 }
 
 message UpdateMasterPlanRequest {

@@ -83,6 +83,7 @@ export class MasterPlansService {
   }
 
   async create(data: any) {
+    console.log("MasterPlansService.create received data:", JSON.stringify(data, null, 2));
     const mp = await this.prisma.masterPlan.create({
       data: {
         title: data.title,
