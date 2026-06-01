@@ -18,9 +18,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { hrmPlansApi } from "@/features/hrm/api";
 import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
 import { useQuery } from "@tanstack/react-query";
+import { useUser } from '@/hooks/useUser';
 
 export function TaskCreateClient() {
   const router = useRouter();
+  const { user } = useUser();
   const [assignee, setAssignee] = useState('');
   const [supervisor, setSupervisor] = useState('');
   const [taskWeight, setTaskWeight] = useState(20);
@@ -43,8 +45,8 @@ export function TaskCreateClient() {
 
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true } as any);
   const employees = employeesData?.data?.map(emp => {
-    // Sửa lại thứ tự hiển thị tên cho đúng (firstname trước lastname hoặc ngược lại theo feedback của user)
-    const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(' ');
+    // Sửa lại thứ tự hiển thị tên cho đúng (lastname trước firstname)
+    const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(' ');
     // Mock performance score and matching since backend might not have it yet
     const performanceScore = (emp as any).performanceScore || Math.floor(Math.random() * 20 + 80); // 80-99
     const matchLocation = (emp as any).matchLocation ?? (Math.random() > 0.4);
@@ -175,26 +177,31 @@ export function TaskCreateClient() {
                         <Briefcase className="w-4 h-4 text-indigo-500" />
                         Danh sách công việc trong kế hoạch
                       </label>
-                      <Select onValueChange={(val) => {
-                        const t = uniqueTasks.find((x: any) => x.title === val);
-                        if (t) {
-                          setTaskName(t.title);
-                          setBaseScore(t.baseScore || t.targetValue || 10);
-                          if (t.weight) setTaskWeight(t.weight);
-                          if (t.priority) setPriority(t.priority);
-                        }
-                      }}>
-                        <SelectTrigger className="h-11 bg-white border-indigo-200">
-                          <SelectValue placeholder="Chọn công việc để phân bổ..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {uniqueTasks.map((t: any) => (
-                            <SelectItem key={t.id || t.title} value={t.title}>
-                              <span className="font-medium text-slate-800">{t.title}</span>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="mt-3 grid gap-3 max-h-[300px] overflow-y-auto pr-1">
+                        {uniqueTasks.map((t: any) => (
+                           <div 
+                             key={t.id || t.title}
+                             onClick={() => {
+                               setTaskName(t.title);
+                               setBaseScore(t.baseScore || t.targetValue || 10);
+                               if (t.weight) setTaskWeight(t.weight);
+                               if (t.priority) setPriority(t.priority);
+                               if (t.startDate) setStartDate(t.startDate.split('T')[0]);
+                               if (t.endDate) setDueDate(t.endDate.split('T')[0]);
+                             }}
+                             className={`p-3 rounded-lg border cursor-pointer transition-all ${taskName === t.title ? 'border-indigo-500 bg-indigo-50 shadow-sm' : 'border-slate-200 bg-white hover:border-indigo-300'}`}
+                           >
+                              <div className="font-semibold text-sm text-slate-800">{t.title}</div>
+                              <div className="text-xs text-slate-500 mt-1 flex flex-wrap gap-2">
+                                <span>Ưu tiên: <span className={`font-medium ${t.priority === 'HIGH' ? 'text-red-600' : t.priority === 'LOW' ? 'text-green-600' : 'text-amber-600'}`}>{t.priority === 'HIGH' ? 'Cao' : t.priority === 'LOW' ? 'Thấp' : 'Trung bình'}</span></span>
+                                <span>•</span>
+                                <span>Trọng số: <span className="font-medium">{t.weight || 20}%</span></span>
+                                <span>•</span>
+                                <span>Điểm: <span className="font-medium">{t.baseScore || t.targetValue || 10}</span></span>
+                              </div>
+                           </div>
+                        ))}
+                      </div>
                     </div>
                   );
                 })()}
@@ -255,22 +262,50 @@ export function TaskCreateClient() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold">Người thực hiện</label>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-6 text-[10px] px-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
-                    onClick={() => {
-                      if (assignableEmployees.length > 0) {
-                        setAssignee(assignableEmployees[0].code);
-                        toast.success(`Đã chọn nhanh: ${assignableEmployees[0].name}`);
-                      } else {
-                        toast.error('Không có nhân sự phù hợp');
-                      }
-                    }}
-                    type="button"
-                  >
-                    <Sparkles className="w-3 h-3 mr-1" /> Giao việc nhanh
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-6 text-[10px] px-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-indigo-200"
+                      onClick={() => {
+                        if (user && assignableEmployees.length > 0) {
+                          const me = assignableEmployees.find(e => 
+                            e.code === user.employeeCode || 
+                            e.code === user.username || 
+                            e.code === user.email ||
+                            e.name === user.fullName
+                          );
+                          if (me) {
+                            setAssignee(me.code);
+                            toast.success(`Đã chọn: ${me.name}`);
+                          } else {
+                            toast.error('Không tìm thấy thông tin của bạn trong danh sách nhân sự');
+                          }
+                        } else {
+                          toast.error('Chưa có thông tin đăng nhập');
+                        }
+                      }}
+                      type="button"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" /> Giao cho tôi
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-6 text-[10px] px-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                      onClick={() => {
+                        if (assignableEmployees.length > 0) {
+                          setAssignee(assignableEmployees[0].code);
+                          toast.success(`Đã chọn nhanh: ${assignableEmployees[0].name}`);
+                        } else {
+                          toast.error('Không có nhân sự phù hợp');
+                        }
+                      }}
+                      type="button"
+                    >
+                      <Sparkles className="w-3 h-3 mr-1" /> Giao việc nhanh
+                    </Button>
+                  </div>
                 </div>
                 <Popover open={openAssignee} onOpenChange={setOpenAssignee}>
                   <PopoverTrigger asChild>
