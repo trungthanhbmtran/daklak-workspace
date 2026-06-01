@@ -35,6 +35,9 @@ export class TasksController implements OnModuleInit {
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
+      if (!body.supervisorCode) {
+        body.supervisorCode = body.assignerCode;
+      }
     }
     return firstValueFrom(this.taskService.CreateTask(body));
   }
