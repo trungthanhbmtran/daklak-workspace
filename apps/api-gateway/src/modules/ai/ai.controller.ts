@@ -27,7 +27,7 @@ export class AiController {
   @Post('generate')
   async generateText(@Body() body: { prompt: string }) {
     if (!body.prompt) {
-      return { status: 'error', message: 'Prompt is required' };
+      return { success: false, data: null, message: 'Prompt is required' };
     }
 
     try {
@@ -44,10 +44,10 @@ export class AiController {
       this.rmqClient.emit('ai_generate_task', { jobId, prompt: body.prompt });
 
       // Return 202 immediately
-      return { status: 'success', data: { jobId, status: 'PROCESSING' } };
+      return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing AI task', err);
-      return { status: 'error', message: 'Không thể tạo tác vụ xử lý AI' };
+      return { success: false, data: null, message: 'Không thể tạo tác vụ xử lý AI' };
     }
   }
 
@@ -56,14 +56,11 @@ export class AiController {
     try {
       const jobData = await this.redisService.get(`ai_job_${jobId}`);
       if (!jobData) {
-        return {
-          status: 'error',
-          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
-        };
+        return { success: false, data: null, message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)' };
       }
-      return { status: 'success', data: JSON.parse(jobData) };
+      return { success: true, data: JSON.parse(jobData) };
     } catch (err: any) {
-      return { status: 'error', message: err.message };
+      return { success: false, data: null, message: err.message };
     }
   }
 
@@ -129,9 +126,9 @@ export class AiController {
         body.provider,
         body.apiKey,
       );
-      return { status: 'success', data: models };
+      return { success: true, data: models };
     } catch (err: any) {
-      return { status: 'error', message: err.message };
+      return { success: false, data: null, message: err.message };
     }
   }
 }

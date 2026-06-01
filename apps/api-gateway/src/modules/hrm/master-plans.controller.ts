@@ -44,22 +44,20 @@ export class MasterPlansController implements OnModuleInit {
     @Query('title') title: string,
     @Query('durationDays') durationDays: string,
   ) {
-    const data = (await firstValueFrom(
+    return firstValueFrom(
       this.masterPlanService.GetHistoricalFeasibility({
         type,
         title,
         durationDays: parseInt(durationDays || '0', 10),
       }),
-    )) as any;
-    return data;
+    );
   }
 
   @Get(':id')
   async findById(@Param('id') id: string) {
-    const data = (await firstValueFrom(
+    return firstValueFrom(
       this.masterPlanService.FindById({ id: parseInt(id, 10) }),
-    )) as any;
-    return { status: 'success', data };
+    );
   }
 
   @Post('ai-generate')
@@ -102,7 +100,7 @@ export class MasterPlansController implements OnModuleInit {
     };
 
     return {
-      status: 'success',
+      success: true,
       data: mockPlan,
       message: 'AI đã phân tích và đề xuất thành công',
     };
@@ -110,29 +108,23 @@ export class MasterPlansController implements OnModuleInit {
 
   @Post()
   async create(@Req() req: any, @Body() body: any) {
-    // Inject mã người tạo từ JWT token
     body.createdByCode = req.user?.employeeCode || req.user?.username || 'system';
-    const data = (await firstValueFrom(
-      this.masterPlanService.Create(body),
-    )) as any;
-    return { status: 'success', data, message: 'Tạo Kế hoạch thành công' };
+    return firstValueFrom(this.masterPlanService.Create(body));
   }
 
   @Put(':id')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    // Inject mã người cập nhật từ JWT token
     body.updatedByCode = req.user?.employeeCode || req.user?.username || 'system';
-    const data = (await firstValueFrom(
+    return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
-    )) as any;
-    return { status: 'success', data, message: 'Cập nhật Kế hoạch thành công' };
+    );
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    const data = (await firstValueFrom(
+    return firstValueFrom(
       this.masterPlanService.Delete({ id: parseInt(id, 10) }),
-    )) as any;
-    return { status: 'success', data, message: 'Xóa Kế hoạch thành công' };
+    );
   }
 }
+

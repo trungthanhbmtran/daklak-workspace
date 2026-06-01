@@ -48,7 +48,7 @@ export class TranslateController implements OnModuleInit {
   @Post()
   async translate(@Body() body: { text: string; targetLang: string }) {
     if (!body.text || !body.targetLang) {
-      return { status: 'error', message: 'Missing text or targetLang' };
+      return { success: false, data: null, message: 'Missing text or targetLang' };
     }
 
     try {
@@ -69,10 +69,10 @@ export class TranslateController implements OnModuleInit {
       });
 
       // Return 202 immediately
-      return { status: 'success', data: { jobId, status: 'PROCESSING' } };
+      return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing translation task', err);
-      return { status: 'error', message: 'Không thể tạo tác vụ dịch thuật' };
+      return { success: false, data: null, message: 'Không thể tạo tác vụ dịch thuật' };
     }
   }
 
@@ -81,14 +81,11 @@ export class TranslateController implements OnModuleInit {
     try {
       const jobData = await this.redisService.get(`translate_job_${jobId}`);
       if (!jobData) {
-        return {
-          status: 'error',
-          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
-        };
+        return { success: false, data: null, message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)' };
       }
-      return { status: 'success', data: JSON.parse(jobData) };
+      return { success: true, data: JSON.parse(jobData) };
     } catch (err: any) {
-      return { status: 'error', message: err.message };
+      return { success: false, data: null, message: err.message };
     }
   }
 

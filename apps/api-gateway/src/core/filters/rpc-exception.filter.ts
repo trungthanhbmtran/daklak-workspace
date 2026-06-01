@@ -9,60 +9,96 @@ import {
 import { Response } from 'express';
 import { status as GrpcStatus } from '@grpc/grpc-js';
 
+/**
+ * Chuẩn hoá toàn bộ lỗi về dạng duy nhất:
+ * {
+ *   success: false,
+ *   data: null,
+ *   meta: null,
+ *   message: string,
+ *   code: string,
+ *   statusCode: number,
+ *   timestamp: string,
+ * }
+ */
 @Catch()
 export class RpcExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(RpcExceptionFilter.name);
+
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const timestamp = new Date().toISOString();
 
-    // Nếu đã là HttpException thì giữ nguyên
+    // HttpException (NestJS built-in)
     if (exception instanceof HttpException) {
-      return response
-        .status(exception.getStatus())
-        .json(exception.getResponse());
+      const httpRes = exception.getResponse() as any;
+      const message =
+        typeof httpRes === 'string'
+          ? httpRes
+          : httpRes?.message ?? exception.message;
+      return response.status(exception.getStatus()).json({
+        success: false,
+        data: null,
+        meta: null,
+        message: Array.isArray(message) ? message.join('; ') : String(message),
+        code: exception.constructor.name,
+        statusCode: exception.getStatus(),
+        timestamp,
+      });
     }
 
-    // Map gRPC code sang HTTP status
-    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    // gRPC RpcException — map code → HTTP status
+    let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
+    let code = 'INTERNAL_ERROR';
     const message =
-      exception.details || exception.message || 'Internal server error';
+      exception?.details ?? exception?.message ?? 'Internal server error';
 
-    // Log the full exception for debugging
     this.logger.error(
-      `gRPC Error caught: [${exception.code}] ${message}`,
-      exception.stack,
+      `[${exception?.code ?? 'UNKNOWN'}] ${message}`,
+      exception?.stack,
     );
 
-    switch (exception.code) {
+    switch (exception?.code) {
       case GrpcStatus.INVALID_ARGUMENT:
-        status = HttpStatus.BAD_REQUEST;
+        statusCode = HttpStatus.BAD_REQUEST;
+        code = 'INVALID_ARGUMENT';
         break;
       case GrpcStatus.NOT_FOUND:
-        status = HttpStatus.NOT_FOUND;
+        statusCode = HttpStatus.NOT_FOUND;
+        code = 'NOT_FOUND';
         break;
       case GrpcStatus.ALREADY_EXISTS:
-        status = HttpStatus.CONFLICT;
+        statusCode = HttpStatus.CONFLICT;
+        code = 'ALREADY_EXISTS';
         break;
       case GrpcStatus.PERMISSION_DENIED:
-        status = HttpStatus.FORBIDDEN;
+        statusCode = HttpStatus.FORBIDDEN;
+        code = 'PERMISSION_DENIED';
         break;
       case GrpcStatus.UNAUTHENTICATED:
-        status = HttpStatus.UNAUTHORIZED;
+        statusCode = HttpStatus.UNAUTHORIZED;
+        code = 'UNAUTHENTICATED';
         break;
       case GrpcStatus.UNIMPLEMENTED:
-        status = HttpStatus.NOT_IMPLEMENTED;
+        statusCode = HttpStatus.NOT_IMPLEMENTED;
+        code = 'UNIMPLEMENTED';
         break;
       case GrpcStatus.RESOURCE_EXHAUSTED:
-        status = HttpStatus.TOO_MANY_REQUESTS;
+        statusCode = HttpStatus.TOO_MANY_REQUESTS;
+        code = 'RESOURCE_EXHAUSTED';
         break;
     }
 
-    response.status(status).json({
+    response.status(statusCode).json({
       success: false,
-      message,
-      statusCode: status,
-      timestamp: new Date().toISOString(),
+      data: null,
+      meta: null,
+      message: String(message),
+      code,
+      statusCode,
+      timestamp,
     });
   }
 }
+

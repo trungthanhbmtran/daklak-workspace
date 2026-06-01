@@ -29,14 +29,14 @@ export class ConfigsController implements OnModuleInit {
     const response = (await firstValueFrom(
       this.configService.GetConfigs({}),
     )) as any;
-    return { status: 'success', data: response.configs || [] };
+    // Trả về array trực tiếp — interceptor tự wrap { success, data, meta }
+    return response.configs || [];
   }
 
   @Put()
   async updateConfig(
     @Body() body: { key: string; value: string; description?: string },
   ) {
-    const data = await firstValueFrom(this.configService.UpdateConfig(body));
-    return { status: 'success', data, message: 'Cập nhật cấu hình thành công' };
+    return firstValueFrom(this.configService.UpdateConfig(body));
   }
 }
