@@ -459,7 +459,7 @@ export const TaskListClient = () => {
                         )}
                       </div>
                       <div className="flex gap-2 shrink-0">
-                        {!task.assigneeCode && (
+                        {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
                           <Button
                             variant="secondary"
                             size="sm"
@@ -486,10 +486,10 @@ export const TaskListClient = () => {
                     <div className="space-y-2 mt-auto">
                       <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50">
                         <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mr-2.5 text-slate-700 dark:text-slate-300 font-bold text-xs">
-                          {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
+                          {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
                         </div>
                         <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">
-                          {task.assigneeName || task.assigneeCode || 'Chưa phân công'}
+                          {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}
                         </span>
                       </div>
                       {(() => {
@@ -558,9 +558,9 @@ export const TaskListClient = () => {
                     <td className="px-6 py-5">
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center text-xs font-bold mr-3 shadow-sm border border-indigo-100/50">
-                          {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
+                          {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
                         </div>
-                        <span className="font-medium">{task.assigneeName || task.assigneeCode || 'Chưa phân công'}</span>
+                        <span className="font-medium">{task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}</span>
                       </div>
                     </td>
                     <td className="px-6 py-5">
@@ -579,7 +579,7 @@ export const TaskListClient = () => {
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        {!task.assigneeCode && (
+                        {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
                           <Button variant="ghost" size="icon" onClick={() => setTaskToAssign(task)} className="h-9 w-9 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white transition-colors shadow-sm">
                             <PlayCircle className="h-4 w-4" />
                           </Button>
@@ -746,17 +746,17 @@ export const TaskListClient = () => {
                       </h4>
                       <div className="bg-gradient-to-b from-indigo-50 to-white dark:from-indigo-900/20 dark:to-slate-800/50 p-6 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center text-center">
                         <div className="w-20 h-20 rounded-full bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 flex justify-center items-center font-black text-3xl mb-4 shadow-xl shadow-indigo-200/50 border-4 border-indigo-50 dark:border-indigo-900/50">
-                          {(selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?'}
+                          {selectedTask.assigneeCode === 'UNASSIGNED' ? '?' : ((selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?')}
                         </div>
                         <p className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-1">
-                          {selectedTask.assigneeName || selectedTask.assigneeCode || 'Chưa phân công'}
+                          {selectedTask.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (selectedTask.assigneeName || selectedTask.assigneeCode || 'Chưa phân công')}
                         </p>
-                        {selectedTask.assigneeCode && (
+                        {selectedTask.assigneeCode && selectedTask.assigneeCode !== 'UNASSIGNED' && (
                           <p className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-100/50 dark:bg-indigo-900/50 px-3 py-1 rounded-full uppercase tracking-wider">
                             ID: {selectedTask.assigneeCode}
                           </p>
                         )}
-                        {!selectedTask.assigneeCode && (
+                        {(!selectedTask.assigneeCode || selectedTask.assigneeCode === 'UNASSIGNED') && (
                           <Button
                             className="mt-4 rounded-full w-full bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg"
                             onClick={() => setTaskToAssign(selectedTask)}

@@ -140,7 +140,7 @@ export function MasterPlanDetail() {
                           <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-md text-xs font-bold">
                             {rankInfo ? (rankInfo.nameVi || rankInfo.name) : (perspective || 'Tất cả')}
                           </span>
-                          {task.assigneeName && (
+                          {task.assigneeName && task.assigneeCode !== 'UNASSIGNED' && (
                             <div className="mt-2 text-xs font-semibold text-slate-600 flex items-center gap-1">
                               <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-700">
                                 {task.assigneeName.charAt(0)}
@@ -156,7 +156,7 @@ export function MasterPlanDetail() {
                           </div>
                         </td>
                         <td className="p-4 text-right">
-                          {!task.assigneeCode ? (
+                          {!task.assigneeCode || task.assigneeCode === 'UNASSIGNED' ? (
                             <Button 
                               variant="secondary" 
                               size="sm" 

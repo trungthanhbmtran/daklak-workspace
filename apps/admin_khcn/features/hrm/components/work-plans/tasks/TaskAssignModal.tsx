@@ -46,7 +46,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   useEffect(() => {
     if (task && isOpen) {
       setTaskState({
-        assigneeCode: task.assigneeCode || '',
+        assigneeCode: (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') ? task.assigneeCode : '',
         priority: task.priority || 'MEDIUM',
         baseScore: task.baseScore || task.targetValue || 10,
         startDate: task.startDate ? task.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
