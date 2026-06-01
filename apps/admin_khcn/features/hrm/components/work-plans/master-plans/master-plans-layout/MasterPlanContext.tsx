@@ -39,7 +39,7 @@ export function useMasterPlanContext() {
 export function MasterPlanProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<ViewMode>("idle");
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState<string>("info");
+  const [activeTab, setActiveTab] = useState<string>("tasks");
 
   // Fetch Master Plans
   const { data: plansRes, isLoading: isLoadingPlans, refetch: refreshPlans } = useQuery({
