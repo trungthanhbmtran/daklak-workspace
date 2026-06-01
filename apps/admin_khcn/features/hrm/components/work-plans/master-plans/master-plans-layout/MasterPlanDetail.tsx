@@ -109,52 +109,55 @@ export function MasterPlanDetail() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {selectedPlan.tasks && selectedPlan.tasks.length > 0 ? (
-                  (() => {
-                    const uniqueTasks = Array.from(new Set(selectedPlan.tasks.map((t: any) => t.title)))
-                      .map(title => selectedPlan.tasks.find((t: any) => t.title === title));
-
-                    return uniqueTasks.map((task: any, index: number) => {
-                      // Extract info from description if available
-                      const desc = task.description || '';
-                      const perspectiveMatch = desc.match(/Góc độ: (.*?)\n/);
-                      const unitMatch = desc.match(/Đơn vị tính: (.*?)\n/);
-                      
-                      const perspective = perspectiveMatch ? perspectiveMatch[1] : (task.perspective || '');
-                      const unit = unitMatch ? unitMatch[1] : (task.metric || 'Lượt');
-                      
-                      const rankInfo = state.ranks.find(r => r.code === perspective);
-                      
-                      return (
-                        <tr key={`${task.id}-${index}`} className="hover:bg-slate-50/50">
-                          <td className="p-4">
-                            <div className="font-medium text-slate-800 mb-1">{task.title}</div>
-                            {task.description && (
-                              <div className="text-xs text-slate-500 whitespace-pre-wrap mt-2 bg-slate-50 p-2 rounded border border-slate-100">
-                                {task.description}
-                              </div>
-                            )}
-                          </td>
-                          <td className="p-4">
-                            <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-md text-xs font-bold">
-                              {rankInfo ? (rankInfo.nameVi || rankInfo.name) : (perspective || 'Tất cả')}
-                            </span>
-                          </td>
-                          <td className="p-4 text-center">
-                            <div className="inline-flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-                              <span className="font-black text-slate-800">{task.baseScore || task.target || 0}</span>
-                              <span className="text-[10px] uppercase font-bold text-slate-500">{unit}</span>
+                  selectedPlan.tasks.map((task: any, index: number) => {
+                    // Extract info from description if available
+                    const desc = task.description || '';
+                    const perspectiveMatch = desc.match(/Góc độ: (.*?)\n/);
+                    const unitMatch = desc.match(/Đơn vị tính: (.*?)\n/);
+                    
+                    const perspective = perspectiveMatch ? perspectiveMatch[1] : (task.perspective || '');
+                    const unit = unitMatch ? unitMatch[1] : (task.metric || 'Lượt');
+                    
+                    const rankInfo = state.ranks.find(r => r.code === perspective);
+                    
+                    return (
+                      <tr key={`${task.id || index}`} className="hover:bg-slate-50/50">
+                        <td className="p-4">
+                          <div className="font-medium text-slate-800 mb-1">{task.title}</div>
+                          {task.description && (
+                            <div className="text-xs text-slate-500 whitespace-pre-wrap mt-2 bg-slate-50 p-2 rounded border border-slate-100">
+                              {task.description}
                             </div>
-                          </td>
-                          <td className="p-4 text-right">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-                              }`}>
-                              {task.status || 'TODO'}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    });
-                  })()
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-md text-xs font-bold">
+                            {rankInfo ? (rankInfo.nameVi || rankInfo.name) : (perspective || 'Tất cả')}
+                          </span>
+                          {task.assigneeName && (
+                            <div className="mt-2 text-xs font-semibold text-slate-600 flex items-center gap-1">
+                              <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-700">
+                                {task.assigneeName.charAt(0)}
+                              </span>
+                              {task.assigneeName}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="inline-flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                            <span className="font-black text-slate-800">{task.baseScore || task.target || 0}</span>
+                            <span className="text-[10px] uppercase font-bold text-slate-500">{unit}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-right">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                            }`}>
+                            {task.status || (task.assigneeCode ? 'IN_PROGRESS' : 'TODO')}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-slate-500">

@@ -452,8 +452,15 @@ export const TaskListClient = () => {
                 <CardContent className="p-0 flex flex-col h-full">
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex justify-between items-start mb-3">
-                      {getStatusBadge(task.status || 'TODO')}
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 items-center max-w-[70%]">
+                        {getStatusBadge(task.status || 'TODO')}
+                        {task.plan && (
+                          <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 dark:border-indigo-900/30 text-[10px] px-1.5 font-bold flex items-center gap-1 max-w-full">
+                            <Target className="w-3 h-3 shrink-0" /> <span className="truncate">{task.plan.title}</span>
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex gap-2 shrink-0">
                         {!task.assigneeCode && (
                           <Button
                             variant="secondary"
@@ -533,8 +540,13 @@ export const TaskListClient = () => {
               <tbody>
                 {displayedTasks.map((task: any) => (
                   <tr key={task.id} className="bg-transparent border-b border-slate-100/50 dark:border-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all duration-300 group hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:hover:shadow-[0_4px_20px_rgb(0,0,0,0.2)]">
-                    <td className="px-6 py-5 font-semibold text-slate-900 dark:text-white max-w-xs truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-                      {task.title}
+                    <td className="px-6 py-5 font-semibold text-slate-900 dark:text-white max-w-xs group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                      <div className="truncate mb-1">{task.title}</div>
+                      {task.plan && (
+                        <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-indigo-100">
+                          <Target className="w-3 h-3" /> {task.plan.title}
+                        </div>
+                      )}
                     </td>
                     <td className="px-6 py-5">
                       {getStatusBadge(task.status || 'TODO')}

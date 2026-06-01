@@ -26,7 +26,7 @@ import {
   UserCheck
 } from 'lucide-react';
 
-import { hrmPlansApi } from "@/features/hrm/api";
+import { hrmPlansApi, hrmTasksApi } from "@/features/hrm/api";
 import { useTaskTemplatesList, useCreateTask, useHrmEmployeesList } from '../../../hooks';
 import { useUser } from '@/hooks/useUser';
 
@@ -139,16 +139,18 @@ export function TaskCreateClient() {
     }
 
     try {
-      await createTask({
-        assigneeCode: state.assigneeCode,
-        title: taskTitle,
-        taskName: taskTitle,
+      // Cập nhật thông tin chi tiết của task
+      await hrmTasksApi.update(taskId, {
         weight: state.weight,
         startDate: state.startDate,
         dueDate: state.dueDate,
         priority: state.priority,
         baseScore: state.baseScore,
-        planId: Number(planId)
+      });
+
+      // Gán người thực hiện
+      await hrmTasksApi.assignTask(taskId, {
+        assigneeCode: state.assigneeCode,
       });
 
       toast.success(`Đã giao việc thành công: ${taskTitle}`);

@@ -12,6 +12,9 @@ export const hrmTasksApi = {
   create(payload: any): Promise<any> {
     return apiClient.post('/hrm/tasks', payload).then((res: any) => res);
   },
+  update(id: string, payload: any): Promise<any> {
+    return apiClient.put(`/hrm/tasks/${id}`, payload).then((res: any) => res);
+  },
   updateStatus(id: string, payload: any): Promise<any> {
     return apiClient.put(`/hrm/tasks/${id}/status`, payload).then((res: any) => res);
   },
