@@ -117,6 +117,55 @@ export const TaskListClient = () => {
     }
   };
 
+  const getDueDateDisplay = (dueDate: string | undefined | null, status: string) => {
+    if (!dueDate) return { label: 'Không có thời hạn', text: '', color: 'text-slate-500', bg: 'bg-slate-50 dark:bg-slate-800/50', border: 'border-slate-100 dark:border-slate-800', icon: <Calendar className="w-4 h-4" /> };
+    if (status === 'DONE') return { label: new Date(dueDate).toLocaleDateString('vi-VN'), text: 'Đã hoàn thành', color: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-900/10', border: 'border-emerald-200 dark:border-emerald-800/30', icon: <CheckCircle2 className="w-4 h-4" /> };
+    
+    const due = new Date(dueDate);
+    const now = new Date();
+    due.setHours(0, 0, 0, 0);
+    now.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((due.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { 
+        label: due.toLocaleDateString('vi-VN'), 
+        text: `Quá hạn ${Math.abs(diffDays)} ngày`, 
+        color: 'text-rose-600 dark:text-rose-400', 
+        bg: 'bg-rose-50 dark:bg-rose-900/10', 
+        border: 'border-rose-200 dark:border-rose-800/30', 
+        icon: <AlertCircle className="w-4 h-4" /> 
+      };
+    } else if (diffDays === 0) {
+      return { 
+        label: due.toLocaleDateString('vi-VN'), 
+        text: 'Hạn cuối hôm nay!', 
+        color: 'text-orange-600 dark:text-orange-400', 
+        bg: 'bg-orange-50 dark:bg-orange-900/10', 
+        border: 'border-orange-200 dark:border-orange-800/30', 
+        icon: <Clock className="w-4 h-4 animate-pulse" /> 
+      };
+    } else if (diffDays <= 3) {
+      return { 
+        label: due.toLocaleDateString('vi-VN'), 
+        text: `Còn ${diffDays} ngày (Sắp đến hạn)`, 
+        color: 'text-amber-600 dark:text-amber-400', 
+        bg: 'bg-amber-50 dark:bg-amber-900/10', 
+        border: 'border-amber-200 dark:border-amber-800/30', 
+        icon: <Clock className="w-4 h-4" /> 
+      };
+    } else {
+      return { 
+        label: due.toLocaleDateString('vi-VN'), 
+        text: `Còn ${diffDays} ngày`, 
+        color: 'text-indigo-600 dark:text-indigo-400', 
+        bg: 'bg-indigo-50/50 dark:bg-indigo-900/10', 
+        border: 'border-indigo-100 dark:border-indigo-800/30', 
+        icon: <Calendar className="w-4 h-4" /> 
+      };
+    }
+  };
+
   const fetchComments = async (taskId: number, silent = false) => {
     if (!silent) setIsLoadingComments(true);
     try {
@@ -257,60 +306,76 @@ export const TaskListClient = () => {
       </div>
 
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl p-4 rounded-3xl shadow-sm border border-slate-200/50 dark:border-slate-800/50 relative z-10">
-        <div className="flex-1 flex gap-4 items-center w-full">
-          <Search placeholder="Tìm kiếm công việc..." className="w-full sm:max-w-[300px] rounded-2xl" />
-          <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-[400px]">
-            <TabsList className="grid w-full grid-cols-3 rounded-full bg-slate-100 dark:bg-slate-800 p-1">
-              <TabsTrigger value="ALL" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Tất cả</TabsTrigger>
-              <TabsTrigger value="MY_TASKS" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Việc của tôi</TabsTrigger>
-              <TabsTrigger value="DEPT_TASKS" className="rounded-full text-xs data-[state=active]:bg-white data-[state=active]:text-indigo-600 data-[state=active]:shadow-sm">Việc của phòng</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 flex-wrap">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px] rounded-xl border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50">
-              <SelectValue placeholder="Trạng thái" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
-              <SelectItem value="TODO">Cần làm</SelectItem>
-              <SelectItem value="IN_PROGRESS">Đang xử lý</SelectItem>
-              <SelectItem value="DONE">Hoàn thành</SelectItem>
-              <SelectItem value="OVERDUE">Quá hạn</SelectItem>
-            </SelectContent>
-          </Select>
+      <div className="relative z-10 p-1.5 rounded-[2rem] bg-gradient-to-br from-indigo-500/10 via-purple-500/5 to-transparent before:absolute before:inset-0 before:bg-white/50 dark:before:bg-slate-900/50 before:backdrop-blur-2xl before:rounded-[2rem] shadow-sm border border-white/60 dark:border-slate-700/50 overflow-visible">
+        <div className="relative flex flex-col xl:flex-row justify-between items-center gap-4 p-2">
+          <div className="flex flex-col sm:flex-row gap-4 items-center w-full xl:w-auto flex-1">
+            <div className="w-full sm:max-w-[320px] relative group">
+              <Search placeholder="Tìm kiếm công việc..." className="w-full h-12 rounded-2xl bg-white/80 dark:bg-slate-800/80 border-slate-200/50 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-800 transition-all shadow-inner hover:shadow-md" />
+            </div>
 
-          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-[160px] rounded-xl border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50">
-              <SelectValue placeholder="Ưu tiên" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Mọi ưu tiên</SelectItem>
-              <SelectItem value="HIGH">Cao</SelectItem>
-              <SelectItem value="MEDIUM">Trung bình</SelectItem>
-              <SelectItem value="LOW">Thấp</SelectItem>
-            </SelectContent>
-          </Select>
+            <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-full sm:w-[360px] h-12">
+              <TabsList className="h-full w-full grid grid-cols-3 rounded-2xl bg-slate-200/60 dark:bg-slate-800/60 p-1.5 border border-slate-300/40 dark:border-slate-700/50 shadow-inner">
+                <TabsTrigger value="ALL" className="rounded-xl text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-md transition-all h-full">Tất cả</TabsTrigger>
+                <TabsTrigger value="MY_TASKS" className="rounded-xl text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-md transition-all h-full">Của tôi</TabsTrigger>
+                <TabsTrigger value="DEPT_TASKS" className="rounded-xl text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 data-[state=active]:shadow-md transition-all h-full">Phòng</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
 
-          <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              className={`rounded-lg px-4 transition-all duration-300 ${viewMode === 'grid' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
-              onClick={() => setViewMode('grid')}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              className={`rounded-lg px-4 transition-all duration-300 ${viewMode === 'list' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
-              onClick={() => setViewMode('list')}
-            >
-              <ListIcon className="h-4 w-4" />
-            </Button>
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-4 w-full sm:w-auto shrink-0">
+            <div className="flex-1 sm:flex-none">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[180px] h-12 rounded-2xl border-white/60 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm hover:shadow-md font-semibold text-slate-700 dark:text-slate-200">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-4 h-4 text-indigo-500" />
+                    <SelectValue placeholder="Trạng thái" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-slate-200/80 shadow-2xl p-1">
+                  <SelectItem value="ALL" className="rounded-xl font-semibold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
+                  <SelectItem value="TODO" className="rounded-xl font-semibold py-2.5 cursor-pointer text-blue-600 focus:bg-blue-50 focus:text-blue-700">Cần làm</SelectItem>
+                  <SelectItem value="IN_PROGRESS" className="rounded-xl font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700">Đang xử lý</SelectItem>
+                  <SelectItem value="DONE" className="rounded-xl font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">Hoàn thành</SelectItem>
+                  <SelectItem value="OVERDUE" className="rounded-xl font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700">Quá hạn</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex-1 sm:flex-none">
+              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+                <SelectTrigger className="w-full sm:w-[170px] h-12 rounded-2xl border-white/60 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 hover:bg-white dark:hover:bg-slate-800 transition-all shadow-sm hover:shadow-md font-semibold text-slate-700 dark:text-slate-200">
+                  <div className="flex items-center gap-2">
+                    <Filter className="w-4 h-4 text-rose-500" />
+                    <SelectValue placeholder="Ưu tiên" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="rounded-2xl border-slate-200/80 shadow-2xl p-1">
+                  <SelectItem value="ALL" className="rounded-xl font-semibold py-2.5 cursor-pointer">Mọi ưu tiên</SelectItem>
+                  <SelectItem value="HIGH" className="rounded-xl font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50 focus:text-rose-700">🔴 Cao</SelectItem>
+                  <SelectItem value="MEDIUM" className="rounded-xl font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50 focus:text-amber-700">🟡 Trung bình</SelectItem>
+                  <SelectItem value="LOW" className="rounded-xl font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50 focus:text-emerald-700">🟢 Thấp</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="hidden sm:flex items-center bg-slate-200/60 dark:bg-slate-800/60 p-1.5 rounded-2xl border border-slate-300/40 dark:border-slate-700/50 shadow-inner">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-xl h-9 w-11 p-0 transition-all duration-300 ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                onClick={() => setViewMode('grid')}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                className={`rounded-xl h-9 w-11 p-0 transition-all duration-300 ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'}`}
+                onClick={() => setViewMode('list')}
+              >
+                <ListIcon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -368,21 +433,27 @@ export const TaskListClient = () => {
 
                   <div className="space-y-3 mt-auto">
                     <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-slate-50/80 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/50">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center mr-3 text-indigo-600 dark:text-indigo-400 font-bold text-xs shadow-sm">
+                      <div className="w-8 h-8 rounded-full bg-slate-200/50 dark:bg-slate-700/50 flex items-center justify-center mr-3 text-slate-700 dark:text-slate-300 font-bold text-xs shadow-sm">
                         {(task.assigneeName || task.assigneeCode)?.charAt(0) || '?'}
                       </div>
                       <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">
                         {task.assigneeName || task.assigneeCode || 'Chưa phân công'}
                       </span>
                     </div>
-                    <div className="flex items-center text-sm text-slate-600 dark:text-slate-400 bg-rose-50/50 dark:bg-rose-900/10 p-3 rounded-2xl border border-rose-100 dark:border-rose-900/20">
-                      <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center mr-3 text-rose-600 dark:text-rose-400 shadow-sm">
-                        <Calendar className="h-4 w-4" />
-                      </div>
-                      <span className="font-medium text-rose-600 dark:text-rose-400">
-                        {task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : 'Không có hạn'}
-                      </span>
-                    </div>
+                    {(() => {
+                      const dueInfo = getDueDateDisplay(task.dueDate, task.status);
+                      return (
+                        <div className={`flex items-center text-sm ${dueInfo.color} ${dueInfo.bg} p-3 rounded-2xl border ${dueInfo.border}`}>
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 shadow-sm bg-white/60 dark:bg-slate-900/40`}>
+                            {dueInfo.icon}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-bold">{dueInfo.label}</span>
+                            {dueInfo.text && <span className="text-xs font-semibold opacity-80">{dueInfo.text}</span>}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/30 border-t border-slate-100 dark:border-slate-800/50 flex justify-between items-center group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 transition-colors duration-500">
@@ -435,8 +506,19 @@ export const TaskListClient = () => {
                         <span className="font-medium">{task.assigneeName || task.assigneeCode || 'Chưa phân công'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-5 text-slate-500 font-medium">
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString('vi-VN') : '-'}
+                    <td className="px-6 py-5">
+                      {(() => {
+                        const dueInfo = getDueDateDisplay(task.dueDate, task.status);
+                        return (
+                          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${dueInfo.bg} ${dueInfo.border} ${dueInfo.color}`}>
+                            {dueInfo.icon}
+                            <div className="flex flex-col leading-tight">
+                              <span className="font-bold text-sm">{dueInfo.label}</span>
+                              {dueInfo.text && <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{dueInfo.text}</span>}
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="px-6 py-5 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
@@ -577,10 +659,10 @@ export const TaskListClient = () => {
                               }
                             }}
                             placeholder={
-                              selectedTask.status === 'DONE' 
-                                ? "Công việc đã hoàn thành, không thể chat" 
-                                : !isRelatedUser 
-                                  ? "Chỉ người liên quan mới được thảo luận" 
+                              selectedTask.status === 'DONE'
+                                ? "Công việc đã hoàn thành, không thể chat"
+                                : !isRelatedUser
+                                  ? "Chỉ người liên quan mới được thảo luận"
                                   : "Nhập tin nhắn trao đổi..."
                             }
                             className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
