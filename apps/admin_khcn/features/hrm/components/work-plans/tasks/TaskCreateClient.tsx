@@ -85,6 +85,17 @@ export function TaskCreateClient() {
   const newLoad = selectedEmp ? selectedEmp.currentLoad + taskWeight : 0;
   const isOverload = selectedEmp ? newLoad > selectedEmp.rankLimit : false;
 
+  const openModalForTask = (t: any) => {
+    setSelectedTaskForModal(t);
+    setTaskName(t.title);
+    setStartDate(t.startDate ? t.startDate.split('T')[0] : new Date().toISOString().split('T')[0]);
+    setDueDate(t.endDate ? t.endDate.split('T')[0] : new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]);
+    setPriority(t.priority || 'MEDIUM');
+    setBaseScore(t.baseScore || t.targetValue || 10);
+    setTaskWeight(t.weight || 20);
+    setAssignee('');
+  };
+
   const handleSubmitModal = async () => {
     if (!assignee) return toast.error('Vui lòng chọn người thực hiện!');
     if (isOverload) return toast.error('Cảnh báo: Khối lượng công việc vượt quá định mức!');
@@ -94,13 +105,13 @@ export function TaskCreateClient() {
       const t = selectedTaskForModal;
       await createTask({
         assigneeCode: assignee,
-        title: t.title,
-        taskName: t.title,
-        weight: t.weight || 20,
-        startDate: t.startDate ? t.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
-        dueDate: t.endDate ? t.endDate.split('T')[0] : new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
-        priority: t.priority || 'MEDIUM',
-        baseScore: t.baseScore || t.targetValue || 10,
+        title: taskName,
+        taskName: taskName,
+        weight: taskWeight,
+        startDate: startDate,
+        dueDate: dueDate,
+        priority: priority,
+        baseScore: baseScore,
         planId: finalPlanId
       });
 
@@ -200,7 +211,7 @@ export function TaskCreateClient() {
                               {assignedTasks[t.title] ? (
                                 <Badge className="bg-slate-100 text-slate-700 hover:bg-slate-200 border-slate-200"><Check className="w-3 h-3 mr-1" /> Đã giao</Badge>
                               ) : (
-                                <Button type="button" variant="outline" size="sm" onClick={() => setSelectedTaskForModal(t)}>
+                                <Button type="button" variant="outline" size="sm" onClick={() => openModalForTask(t)}>
                                   Giao việc
                                 </Button>
                               )}
@@ -556,7 +567,42 @@ export function TaskCreateClient() {
                 </div>
               )}
 
-              <Button type="button" onClick={handleSubmitModal} className="w-full mt-4 bg-indigo-600 h-11">Xác nhận Giao việc</Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Mức độ ưu tiên</label>
+                  <Select value={priority} onValueChange={setPriority}>
+                    <SelectTrigger className="h-11 bg-slate-50">
+                      <SelectValue placeholder="Chọn mức độ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="HIGH"><span className="text-slate-800 font-medium">🔴 Cao</span></SelectItem>
+                      <SelectItem value="MEDIUM"><span className="text-slate-800 font-medium">🟡 Trung bình</span></SelectItem>
+                      <SelectItem value="LOW"><span className="text-slate-800 font-medium">🟢 Thấp</span></SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700">Điểm đánh giá (Base Score)</label>
+                  <Input type="number" value={baseScore} onChange={e => setBaseScore(Number(e.target.value))} className="h-11 bg-slate-50" placeholder="VD: 10" />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    Ngày bắt đầu <span className="text-red-500">*</span>
+                  </label>
+                  <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} required className="h-11 bg-slate-50" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
+                    Hạn chót (Deadline) <span className="text-red-500">*</span>
+                  </label>
+                  <Input type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} required className="h-11 bg-slate-50" />
+                </div>
+              </div>
+
+              <Button type="button" onClick={handleSubmitModal} className="w-full mt-4 bg-slate-900 h-11 hover:bg-slate-800">Xác nhận Giao việc</Button>
             </div>
           </div>
         </SheetContent>
