@@ -60,9 +60,8 @@ export function MasterPlanForm() {
   const [newLegalBasis, setNewLegalBasis] = useState('');
   const [newMetricFactor, setNewMetricFactor] = useState(20);
   const [newTargetValue, setNewTargetValue] = useState(100);
-  const [newUnit, setNewUnit] = useState('%');
+  const [newUnit, setNewUnit] = useState('');
   const [newSupervisor, setNewSupervisor] = useState('');
-  const [newRankId, setNewRankId] = useState<number>(0);
 
   const handleAiGenerateFramework = async () => {
     if (!planTitle.trim() || !planObjective.trim()) {
@@ -89,12 +88,12 @@ export function MasterPlanForm() {
             if (jobStatus.status === 'COMPLETED') {
               clearInterval(intervalId);
               let result = jobStatus.result || jobStatus.data;
-              
+
               if (!Array.isArray(result)) {
-                  console.error("Kết quả trả về từ AI không phải Array:", result);
-                  toast.error("Kết quả trả về từ AI bị lỗi định dạng.");
-                  setAiStep(0);
-                  return;
+                console.error("Kết quả trả về từ AI không phải Array:", result);
+                toast.error("Kết quả trả về từ AI bị lỗi định dạng.");
+                setAiStep(0);
+                return;
               }
 
               const feasibility = result.find((r: any) => r.type === 'FEASIBILITY_ANALYSIS');
@@ -152,7 +151,14 @@ export function MasterPlanForm() {
 
   const handleAddItem = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    if (!newTitle.trim()) {
+      toast.error('Vui lòng nhập Nội dung chỉ tiêu');
+      return;
+    }
+    if (!newUnit) {
+      toast.error('Vui lòng chọn Đơn vị tính');
+      return;
+    }
 
     const newItem: TargetPlanItem = {
       id: `custom-${Date.now()}`,
@@ -164,8 +170,8 @@ export function MasterPlanForm() {
       targetValue: newTargetValue,
       unit: newUnit,
       supervisor: newSupervisor || 'Chưa phân công',
-      rankType: newRankId > 0 ? state.ranks.find((r: any) => r.id === newRankId)?.code || 'ALL' : 'ALL',
-      rankId: newRankId,
+      rankType: 'ALL',
+      rankId: 0,
       aiStatus: 'CUSTOM'
     };
 
@@ -318,41 +324,13 @@ export function MasterPlanForm() {
             <FolderPlus className="w-4 h-4 text-indigo-600" /> Thêm chỉ tiêu thủ công
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            <div className="md:col-span-8">
+            <div className="md:col-span-12">
               <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Nội dung chỉ tiêu / Hành động</Label>
               <Input
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 className="h-10 text-sm focus-visible:ring-indigo-500"
-                required
               />
-            </div>
-            <div className="md:col-span-4">
-              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Ngạch / Đối tượng phân bổ</Label>
-              <Select value={newRankId.toString()} onValueChange={v => setNewRankId(Number(v))}>
-                <SelectTrigger className="h-10 text-sm bg-white focus:ring-indigo-500">
-                  <SelectValue placeholder="Chọn Ngạch/Đối tượng" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="0">Tất cả đối tượng</SelectItem>
-                  {state.congChucRanks.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel>Ngạch Công chức</SelectLabel>
-                      {state.congChucRanks.map((rank: any) => (
-                        <SelectItem key={rank.id} value={rank.id.toString()}>{rank.name}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                  {state.vienChucRanks.length > 0 && (
-                    <SelectGroup>
-                      <SelectLabel>Chức danh nghề nghiệp Viên chức</SelectLabel>
-                      {state.vienChucRanks.map((rank: any) => (
-                        <SelectItem key={rank.id} value={rank.id.toString()}>{rank.name}</SelectItem>
-                      ))}
-                    </SelectGroup>
-                  )}
-                </SelectContent>
-              </Select>
             </div>
             <div className="md:col-span-4">
               <Label className="text-xs font-bold text-slate-700 mb-1.5 block">
@@ -363,7 +341,6 @@ export function MasterPlanForm() {
                 value={newMetricFactor}
                 onChange={e => setNewMetricFactor(Number(e.target.value))}
                 className="h-10 text-sm font-mono text-center focus-visible:ring-indigo-500"
-                required
               />
             </div>
             <div className="md:col-span-4">
@@ -373,12 +350,11 @@ export function MasterPlanForm() {
                 value={newTargetValue}
                 onChange={e => setNewTargetValue(Number(e.target.value))}
                 className="h-10 text-sm font-mono text-center focus-visible:ring-indigo-500"
-                required
               />
             </div>
             <div className="md:col-span-4">
               <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Đơn vị tính</Label>
-              <Select value={newUnit} onValueChange={setNewUnit} required>
+              <Select value={newUnit} onValueChange={setNewUnit}>
                 <SelectTrigger className="h-10 text-sm bg-white focus:ring-indigo-500 text-center">
                   <SelectValue placeholder="Chọn đơn vị" />
                 </SelectTrigger>
@@ -405,7 +381,6 @@ export function MasterPlanForm() {
               <thead className="bg-slate-50 text-slate-500 text-xs uppercase">
                 <tr>
                   <th className="p-3">Nội dung</th>
-                  <th className="p-3 text-center">Ngạch</th>
                   <th className="p-3 text-center">Định mức</th>
                   <th className="p-3 text-center">Mục tiêu</th>
                   <th className="p-3 text-center">Thao tác</th>
@@ -415,9 +390,6 @@ export function MasterPlanForm() {
                 {items.map(item => (
                   <tr key={item.id} className="hover:bg-slate-50">
                     <td className="p-3 font-medium text-slate-800">{item.title}</td>
-                    <td className="p-3 text-center text-xs font-mono bg-indigo-50/50 text-indigo-700">
-                      {item.rankType}
-                    </td>
                     <td className="p-3 text-center font-mono">{item.metricFactor}</td>
                     <td className="p-3 text-center font-mono font-bold text-indigo-600">{item.targetValue} {item.unit}</td>
                     <td className="p-3 text-center">
