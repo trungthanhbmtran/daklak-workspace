@@ -773,7 +773,7 @@ export const TaskListClient = () => {
                           className="w-full rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
                           onClick={async () => {
                             try {
-                              await hrmTasksApi.assignTask(taskToAssign.id, { assigneeCode: '', departmentId: rec.departmentId });
+                              await hrmTasksApi.assignTask(taskToAssign.id.toString(), { assigneeCode: '', departmentId: rec.departmentId });
                               toast.success('Đã giao việc cho Phòng ban!');
                               setTaskToAssign(null);
                               refetch();
@@ -827,7 +827,7 @@ export const TaskListClient = () => {
                           className="w-full rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white"
                           onClick={async () => {
                             try {
-                              await hrmTasksApi.assignTask(taskToAssign.id, { assigneeCode: rec.employeeCode });
+                              await hrmTasksApi.assignTask(taskToAssign.id.toString(), { assigneeCode: rec.employeeCode });
                               toast.success('Đã giao việc cho cá nhân!');
                               setTaskToAssign(null);
                               refetch();
