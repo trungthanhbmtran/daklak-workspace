@@ -98,7 +98,7 @@ export class MasterPlansService {
       const taskData: any[] = [];
       for (const task of data.tasks) {
         let employees: any[] = [];
-        if (task.rankCode) {
+        if (task.rankCode && task.rankCode !== 'ALL') {
           const ranks: any[] = await this.prisma.$queryRaw`SELECT id FROM admin_systems.job_titles WHERE code = ${task.rankCode}`;
           if (ranks.length > 0) {
             employees = await this.prisma.employee.findMany({
@@ -109,24 +109,47 @@ export class MasterPlansService {
           employees = await this.prisma.employee.findMany({
             where: { civilServantRankId: task.rankId, status: 'active' }
           });
-        } else {
-          employees = await this.prisma.employee.findMany({
-            where: { status: 'active' }
-          });
         }
 
-        for (const emp of employees) {
+        if (employees.length === 0) {
+          let systemUser = await this.prisma.employee.findUnique({ where: { employeeCode: 'UNASSIGNED' } });
+          if (!systemUser) {
+            systemUser = await this.prisma.employee.create({
+              data: {
+                employeeCode: 'UNASSIGNED',
+                firstname: 'Hệ',
+                lastname: 'Thống',
+                email: 'unassigned@system.local',
+                status: 'inactive'
+              }
+            });
+          }
+
           taskData.push({
             title: task.title,
             description: task.description,
-            assigneeCode: emp.employeeCode,
-            assignerCode: emp.employeeCode,
-            status: 'TODO',
+            assigneeCode: 'UNASSIGNED',
+            assignerCode: 'UNASSIGNED',
+            status: 'TEMPLATE',
             priority: 'MEDIUM',
             weight: task.weight,
             baseScore: task.targetValue,
             planId: mp.id,
           });
+        } else {
+          for (const emp of employees) {
+            taskData.push({
+              title: task.title,
+              description: task.description,
+              assigneeCode: emp.employeeCode,
+              assignerCode: emp.employeeCode,
+              status: 'TODO',
+              priority: 'MEDIUM',
+              weight: task.weight,
+              baseScore: task.targetValue,
+              planId: mp.id,
+            });
+          }
         }
       }
 
