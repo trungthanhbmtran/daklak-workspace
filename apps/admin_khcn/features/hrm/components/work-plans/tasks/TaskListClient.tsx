@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useSearchParams } from 'next/navigation';
 import { Search } from '@/components/ui/search';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
@@ -29,6 +30,8 @@ export const TaskListClient = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
 
   // New features state
   const [activeTab, setActiveTab] = useState<'ALL' | 'MY_TASKS' | 'DEPT_TASKS'>('ALL');
@@ -79,6 +82,8 @@ export const TaskListClient = () => {
     filter: activeFilter,
     search: searchQuery,
     tab: activeTab,
+    status: statusFilter === 'ALL' ? undefined : statusFilter,
+    priority: priorityFilter === 'ALL' ? undefined : priorityFilter,
   });
   const tasks = data?.data || [];
   const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
@@ -238,7 +243,9 @@ export const TaskListClient = () => {
               <div className="flex justify-between items-start relative z-10">
                 <div className="space-y-2">
                   <p className="text-sm font-bold uppercase tracking-wider text-white/90 drop-shadow-sm">{stat.label}</p>
-                  <p className="text-5xl font-black text-white tracking-tighter drop-shadow-md">{stat.value}</p>
+                  <p className="text-4xl font-black text-white tracking-tighter drop-shadow-md">
+                    {stat.value} <span className="text-lg font-semibold opacity-90 tracking-normal">việc</span>
+                  </p>
                 </div>
                 <div className="p-4 rounded-2xl bg-white/20 backdrop-blur-md shadow-xl group-hover:-rotate-12 transition-transform duration-500 text-white">
                   {stat.icon}
@@ -261,15 +268,37 @@ export const TaskListClient = () => {
             </TabsList>
           </Tabs>
         </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0">
-          <Button variant="outline" className="rounded-full border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-800">
-            <Filter className="mr-2 h-4 w-4 text-slate-500" /> Bộ lọc
-          </Button>
-          <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-full border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md">
+        <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 flex-wrap">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[160px] rounded-xl border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50">
+              <SelectValue placeholder="Trạng thái" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Tất cả trạng thái</SelectItem>
+              <SelectItem value="TODO">Cần làm</SelectItem>
+              <SelectItem value="IN_PROGRESS">Đang xử lý</SelectItem>
+              <SelectItem value="DONE">Hoàn thành</SelectItem>
+              <SelectItem value="OVERDUE">Quá hạn</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-[160px] rounded-xl border-slate-200/60 dark:border-slate-700/60 bg-white/50 dark:bg-slate-800/50">
+              <SelectValue placeholder="Ưu tiên" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">Mọi ưu tiên</SelectItem>
+              <SelectItem value="HIGH">Cao</SelectItem>
+              <SelectItem value="MEDIUM">Trung bình</SelectItem>
+              <SelectItem value="LOW">Thấp</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="flex items-center bg-slate-100/50 dark:bg-slate-800/50 p-1 rounded-xl border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md">
             <Button
               variant={viewMode === 'grid' ? 'default' : 'ghost'}
               size="sm"
-              className={`rounded-full px-4 transition-all duration-300 ${viewMode === 'grid' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`rounded-lg px-4 transition-all duration-300 ${viewMode === 'grid' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
               onClick={() => setViewMode('grid')}
             >
               <LayoutGrid className="h-4 w-4" />
@@ -277,7 +306,7 @@ export const TaskListClient = () => {
             <Button
               variant={viewMode === 'list' ? 'default' : 'ghost'}
               size="sm"
-              className={`rounded-full px-4 transition-all duration-300 ${viewMode === 'list' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
+              className={`rounded-lg px-4 transition-all duration-300 ${viewMode === 'list' ? 'bg-indigo-600 hover:bg-indigo-700 shadow-md text-white' : 'text-slate-500 hover:text-slate-800'}`}
               onClick={() => setViewMode('list')}
             >
               <ListIcon className="h-4 w-4" />
