@@ -398,9 +398,16 @@ export const TaskListClient = () => {
           </p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10">
-          {displayedTasks.map((task: any) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative z-10 mt-6">
+          {displayedTasks.map((task: any) => {
+            const dueInfo = getDueDateDisplay(task.dueDate, task.status);
+            return (
             <Card key={task.id} className="group relative hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] dark:hover:shadow-[0_20px_40px_rgb(0,0,0,0.4)] transition-all duration-500 hover:-translate-y-2 border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] overflow-hidden">
+              {dueInfo.text && task.status !== 'DONE' && task.dueDate && (
+                 <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-[1.5rem] font-bold text-[10px] uppercase tracking-widest shadow-sm z-20 ${dueInfo.bg} ${dueInfo.color} border-b border-l ${dueInfo.border}`}>
+                   {dueInfo.text}
+                 </div>
+              )}
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <CardContent className="p-0 relative z-10 flex flex-col h-full">
                 <div className="p-6 flex-1">
@@ -441,15 +448,14 @@ export const TaskListClient = () => {
                       </span>
                     </div>
                     {(() => {
-                      const dueInfo = getDueDateDisplay(task.dueDate, task.status);
                       return (
                         <div className={`flex items-center text-sm ${dueInfo.color} ${dueInfo.bg} p-3 rounded-2xl border ${dueInfo.border}`}>
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 shadow-sm bg-white/60 dark:bg-slate-900/40`}>
                             {dueInfo.icon}
                           </div>
                           <div className="flex flex-col">
+                            {dueInfo.text && <span className="text-[11px] font-bold uppercase tracking-wider opacity-90 mb-0.5">{dueInfo.text}</span>}
                             <span className="font-bold">{dueInfo.label}</span>
-                            {dueInfo.text && <span className="text-xs font-semibold opacity-80">{dueInfo.text}</span>}
                           </div>
                         </div>
                       );
@@ -461,13 +467,14 @@ export const TaskListClient = () => {
                     <div className={`w-2 h-2 rounded-full mr-2 bg-current animate-pulse shadow-sm shadow-current`} />
                     {task.priority || 'MEDIUM'} PRIORITY
                   </span>
-                  <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-bold group-hover:translate-x-2 transition-transform duration-300">
-                    Chi tiết &rarr;
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                              <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-bold group-hover:translate-x-2 transition-transform duration-300">
+                                Chi tiết &rarr;
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+          })}
         </div>
       ) : (
         <Card className="border border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl shadow-slate-200/40 dark:shadow-none rounded-3xl overflow-hidden relative z-10">
@@ -513,8 +520,8 @@ export const TaskListClient = () => {
                           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${dueInfo.bg} ${dueInfo.border} ${dueInfo.color}`}>
                             {dueInfo.icon}
                             <div className="flex flex-col leading-tight">
+                              {dueInfo.text && <span className="text-[10px] font-bold uppercase tracking-wider opacity-90 mb-0.5">{dueInfo.text}</span>}
                               <span className="font-bold text-sm">{dueInfo.label}</span>
-                              {dueInfo.text && <span className="text-[10px] font-semibold uppercase tracking-wider opacity-80">{dueInfo.text}</span>}
                             </div>
                           </div>
                         );
