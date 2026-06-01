@@ -148,6 +148,13 @@ export const TaskListClient = () => {
     }
   };
 
+  const isRelatedUser = selectedTask && currentUser?.username && (
+    selectedTask.assigneeCode === currentUser.username ||
+    selectedTask.assignerCode === currentUser.username ||
+    selectedTask.authorCode === currentUser.username ||
+    selectedTask.supervisorCode === currentUser.username
+  );
+
   const handleRejectTask = async () => {
     if (!rejectReason.trim() || !selectedTask) return;
     try {
@@ -532,7 +539,7 @@ export const TaskListClient = () => {
                         <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
                           <input
                             type="text"
-                            disabled={selectedTask.status === 'DONE' || isSendingMessage}
+                            disabled={selectedTask.status === 'DONE' || isSendingMessage || !isRelatedUser}
                             value={chatMessage}
                             onChange={(e) => setChatMessage(e.target.value)}
                             onKeyDown={(e) => {
@@ -540,11 +547,17 @@ export const TaskListClient = () => {
                                 handleSendMessage();
                               }
                             }}
-                            placeholder={selectedTask.status === 'DONE' ? "Công việc đã hoàn thành, không thể chat" : "Nhập tin nhắn trao đổi..."}
+                            placeholder={
+                              selectedTask.status === 'DONE' 
+                                ? "Công việc đã hoàn thành, không thể chat" 
+                                : !isRelatedUser 
+                                  ? "Chỉ người liên quan mới được thảo luận" 
+                                  : "Nhập tin nhắn trao đổi..."
+                            }
                             className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
                           />
                           <Button
-                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
+                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage || !isRelatedUser}
                             onClick={handleSendMessage}
                             className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0 disabled:opacity-50"
                           >
