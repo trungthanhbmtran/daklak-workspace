@@ -21,6 +21,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useSearchParams } from 'next/navigation';
 import { Search } from '@/components/ui/search';
+import { useUser } from '@/hooks/useUser';
 
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
@@ -39,9 +40,12 @@ export const TaskListClient = () => {
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
 
-  // Mock currentUser for testing UI
-  const currentUser = { code: 'truongngoctuan', departmentId: 1, isManager: true };
-
+  const { user } = useUser();
+  const currentUser = {
+    code: user?.employeeCode || '',
+    departmentId: user?.departmentId || 0,
+    isManager: user?.jobTitle?.code === 'GIAM_DOC' || user?.jobTitle?.code === 'PHO_GIAM_DOC' || user?.jobTitle?.code === 'TRUONG_PHONG'
+  };
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [assignStrategy, setAssignStrategy] = useState<string>('UNDER_QUOTA');
@@ -136,7 +140,7 @@ export const TaskListClient = () => {
   const handleSendMessage = async () => {
     const trimmedMessage = chatMessage.trim();
     if (!trimmedMessage || !selectedTask || isSendingMessage) return;
-    
+
     setIsSendingMessage(true);
     try {
       await hrmTasksApi.addComment(selectedTask.id.toString(), {
