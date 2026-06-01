@@ -23,6 +23,8 @@ import { useSearchParams } from 'next/navigation';
 import { Search } from '@/components/ui/search';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
+import { SmartAssignDrawer } from './SmartAssignDrawer';
+
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
@@ -44,38 +46,7 @@ export const TaskListClient = () => {
 
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
-  const [assignStrategy, setAssignStrategy] = useState<string>('UNDER_QUOTA');
-  const [topEmployees, setTopEmployees] = useState<any[]>([]);
-  const [topDepartments, setTopDepartments] = useState<any[]>([]);
-  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
 
-  const fetchRecommendations = async (strategy: string) => {
-    if (!taskToAssign) return;
-    setIsLoadingRecs(true);
-    try {
-      const res = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy });
-      if (res.success) {
-        if (Array.isArray(res.data)) {
-          setTopEmployees(res.data);
-          setTopDepartments([]);
-        } else {
-          setTopEmployees(res.data?.topEmployees || []);
-          setTopDepartments(res.data?.topDepartments || []);
-        }
-      }
-    } catch (e: any) {
-      toast.error('Lỗi khi lấy danh sách gợi ý');
-    } finally {
-      setIsLoadingRecs(false);
-    }
-  };
-
-  // Fetch recommendations automatically when task is selected
-  useEffect(() => {
-    if (taskToAssign) {
-      fetchRecommendations(assignStrategy);
-    }
-  }, [taskToAssign?.id, assignStrategy]);
 
   // Server side filtering
   const { data, isLoading, refetch } = useTasksList({
@@ -86,8 +57,8 @@ export const TaskListClient = () => {
     priority: priorityFilter === 'ALL' ? undefined : priorityFilter,
   });
   const tasks = data?.data || [];
-  const statsData = data?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
-  const currentUser = data?.meta?.currentUser;
+  const statsData = (data as any)?.stats || { overdueCount: 0, dueIn3DaysCount: 0, dueIn7DaysCount: 0, dueOver7DaysCount: 0 };
+  const currentUser: any = (data as any)?.meta?.currentUser;
 
   const computedStats = useMemo(() => {
     let overdue = 0;
@@ -851,179 +822,13 @@ export const TaskListClient = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Smart Assign Dialog */}
-      <Dialog
+      {/* Smart Assign Drawer */}
+      <SmartAssignDrawer
+        task={taskToAssign}
         open={!!taskToAssign}
-        onOpenChange={(open) => {
-          if (!open) {
-            setTaskToAssign(null);
-            setTopEmployees([]);
-            setTopDepartments([]);
-          }
-        }}
-      >
-        <DialogContent className="max-w-4xl font-sans">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold flex items-center">
-              <PlayCircle className="w-5 h-5 mr-2 text-indigo-600" /> Phân công thông minh
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 mt-4">
-            <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-              <h4 className="font-semibold text-slate-800 mb-1">{taskToAssign?.title}</h4>
-              <p className="text-sm text-slate-500">
-                Hệ thống tự động tính toán dựa trên khối lượng công việc hiện tại và hiệu suất của Phòng ban / Nhân viên.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              <Label className="font-bold text-slate-700 mb-2">Chiến lược phân công ưu tiên</Label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div
-                  onClick={() => {
-                    setAssignStrategy('HIGH_PERFORMANCE');
-                    fetchRecommendations('HIGH_PERFORMANCE');
-                  }}
-                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'HIGH_PERFORMANCE' ? 'border-indigo-500 bg-indigo-50 shadow-md scale-105 z-10' : 'border-slate-100 hover:border-indigo-200 bg-white'}`}
-                >
-                  <p className={`font-bold text-sm ${assignStrategy === 'HIGH_PERFORMANCE' ? 'text-indigo-700' : 'text-slate-700'}`}>🏆 Giỏi nhất</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Đảm bảo chất lượng công việc cao nhất</p>
-                </div>
-                <div
-                  onClick={() => {
-                    setAssignStrategy('UNDER_QUOTA');
-                    fetchRecommendations('UNDER_QUOTA');
-                  }}
-                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'UNDER_QUOTA' ? 'border-emerald-500 bg-emerald-50 shadow-md scale-105 z-10' : 'border-slate-100 hover:border-emerald-200 bg-white'}`}
-                >
-                  <p className={`font-bold text-sm ${assignStrategy === 'UNDER_QUOTA' ? 'text-emerald-700' : 'text-slate-700'}`}>⚖️ Chưa đủ mức</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Ưu tiên người/phòng đang rảnh rỗi</p>
-                </div>
-                <div
-                  onClick={() => {
-                    setAssignStrategy('LOW_PERFORMANCE');
-                    fetchRecommendations('LOW_PERFORMANCE');
-                  }}
-                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'LOW_PERFORMANCE' ? 'border-amber-500 bg-amber-50 shadow-md scale-105 z-10' : 'border-slate-100 hover:border-amber-200 bg-white'}`}
-                >
-                  <p className={`font-bold text-sm ${assignStrategy === 'LOW_PERFORMANCE' ? 'text-amber-700' : 'text-slate-700'}`}>📈 Cần cải thiện</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Tạo cơ hội nâng cao hiệu suất</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Cột Đề xuất Phòng ban */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
-                  <span className="w-2 h-6 bg-emerald-500 rounded-full mr-2"></span> Top Đề xuất Phòng ban
-                </h4>
-                {isLoadingRecs ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {topDepartments.map((rec: any, idx: number) => (
-                      <div key={rec.departmentId} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
-                              P{rec.departmentId}
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm text-slate-800">Phòng ban {rec.departmentId}</p>
-                              <p className="text-xs text-slate-500">{rec.employeeCount} nhân sự</p>
-                            </div>
-                          </div>
-                          {idx === 0 && <Badge className="bg-emerald-500">Phù hợp nhất</Badge>}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-3">
-                          <div>Tải TB: <b className="text-slate-700">{Math.round(rec.currentLoad)}</b></div>
-                          <div>Hiệu suất TB: <b className="text-slate-700">{Math.round(rec.performanceScore)}</b></div>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="w-full rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
-                          onClick={async () => {
-                            try {
-                              await hrmTasksApi.assignTask(taskToAssign.id.toString(), { assigneeCode: '', departmentId: rec.departmentId });
-                              toast.success('Đã giao việc cho Phòng ban!');
-                              setTaskToAssign(null);
-                              refetch();
-                            } catch (e: any) {
-                              toast.error('Giao việc thất bại');
-                            }
-                          }}
-                        >
-                          Giao cho Phòng này
-                        </Button>
-                      </div>
-                    ))}
-                    {topDepartments.length === 0 && !isLoadingRecs && (
-                      <p className="text-xs text-slate-400 text-center py-4">Không có gợi ý phòng ban</p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Cột Đề xuất Cá nhân */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
-                  <span className="w-2 h-6 bg-indigo-500 rounded-full mr-2"></span> Top Đề xuất Cá nhân
-                </h4>
-                {isLoadingRecs ? (
-                  <div className="flex justify-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {topEmployees.map((rec: any, idx: number) => (
-                      <div key={rec.employeeCode} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold">
-                              {rec.employeeName?.charAt(0) || '?'}
-                            </div>
-                            <div>
-                              <p className="font-bold text-sm text-slate-800">{rec.employeeName}</p>
-                              <p className="text-xs text-slate-500">Phòng {rec.departmentId || '?'}</p>
-                            </div>
-                          </div>
-                          {idx === 0 && <Badge className="bg-indigo-500">Phù hợp nhất</Badge>}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-3">
-                          <div>Tải việc: <b className="text-slate-700">{Math.round(rec.currentLoad)}</b></div>
-                          <div>Hiệu suất: <b className="text-slate-700">{Math.round(rec.performanceScore)}</b></div>
-                        </div>
-                        <Button
-                          size="sm"
-                          className="w-full rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white"
-                          onClick={async () => {
-                            try {
-                              await hrmTasksApi.assignTask(taskToAssign.id.toString(), { assigneeCode: rec.employeeCode });
-                              toast.success('Đã giao việc cho cá nhân!');
-                              setTaskToAssign(null);
-                              refetch();
-                            } catch (e: any) {
-                              toast.error('Giao việc thất bại');
-                            }
-                          }}
-                        >
-                          Giao trực tiếp
-                        </Button>
-                      </div>
-                    ))}
-                    {topEmployees.length === 0 && !isLoadingRecs && (
-                      <p className="text-xs text-slate-400 text-center py-4">Không có gợi ý cá nhân</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+        onOpenChange={(open) => !open && setTaskToAssign(null)}
+        onAssignSuccess={() => refetch()}
+      />
     </div>
   );
 };

@@ -190,11 +190,12 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     },
   });
 
-  const { data: postData, isLoading: isFetching } = useQuery<Post>({
+  const { data: postResponse, isLoading: isFetching } = useQuery({
     queryKey: ["post", editId],
     queryFn: async () => await postsApi.getPost(editId!),
     enabled: isEdit,
   });
+  const postData = postResponse?.data;
 
   useEffect(() => {
     if (postData && languages.length > 0) {

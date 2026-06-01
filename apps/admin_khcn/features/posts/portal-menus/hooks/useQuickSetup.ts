@@ -28,9 +28,9 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
   const fetchQuickSetupData = async () => {
     try {
       const result = await postsApi.getQuickSetupData();
-      if (!result) return;
+      if (!result || !result.data) return;
 
-      const { docGroups, complianceModules, defaultPages } = result;
+      const { docGroups, complianceModules, defaultPages } = result.data;
       setDocGroups(Array.isArray(docGroups) ? docGroups : []);
       setComplianceModules(Array.isArray(complianceModules) ? complianceModules : []);
       setSystemPages(Array.isArray(defaultPages) ? defaultPages : []);
@@ -81,7 +81,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
   const importCategoryTree = async (rootCategory: Category, finalize = true) => {
     if (finalize) setIsImporting(true);
     try {
-      const rootMenu = await postsApi.createPortalMenu({
+      const rootMenuRes = await postsApi.createPortalMenu({
         name: rootCategory.name,
         translations: typeof rootCategory.translations === 'string'
           ? rootCategory.translations
@@ -94,8 +94,9 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
         target: "_self",
         position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
+      const rootMenu = rootMenuRes.data;
 
-      if (rootCategory.children && rootCategory.children.length > 0) {
+      if (rootCategory.children && rootCategory.children.length > 0 && rootMenu) {
         await importChildren(rootCategory.children, rootMenu.id, `/chuyen-muc/${rootCategory.slug}`);
       }
 
@@ -115,7 +116,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
   const importChildren = async (children: Category[], parentMenuId: string, parentPath: string) => {
     for (let i = 0; i < children.length; i++) {
       const child = children[i];
-      const childMenu = await postsApi.createPortalMenu({
+      const childMenuRes = await postsApi.createPortalMenu({
         name: child.name,
         translations: typeof child.translations === 'string'
           ? child.translations
@@ -129,8 +130,9 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
         target: "_self",
         position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
+      const childMenu = childMenuRes.data;
 
-      if (child.children && child.children.length > 0) {
+      if (child.children && child.children.length > 0 && childMenu) {
         await importChildren(child.children, childMenu.id, `${parentPath}/${child.slug}`);
       }
     }
@@ -146,7 +148,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
         'CONSULTATION': '/lay-y-kien',
       };
 
-      const groupMenu = await postsApi.createPortalMenu({
+      const groupMenuRes = await postsApi.createPortalMenu({
         name: group.name,
         translations: JSON.stringify({ en: { name: group.name } }),
         type: "URL",
@@ -156,6 +158,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
         target: "_self",
         position: activeTab === "ALL" ? "HORIZONTAL" : activeTab as any
       });
+      const groupMenu = groupMenuRes.data;
 
       const { data: docCategories } = await postsApi.getCategories({ group: group.id });
 
@@ -165,7 +168,7 @@ export function useQuickSetup({ activeTab, menusLength, onSuccess, onClose }: Us
           name: cat.name,
           translations: cat.translations ? JSON.stringify(cat.translations) : "{}",
           type: "URL",
-          parentId: groupMenu.id,
+          parentId: groupMenu?.id,
           link: `${pathMap[group.id] || "/van-ban"}?category=${cat.slug}`,
           isActive: true,
           order: i + 1,

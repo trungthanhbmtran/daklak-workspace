@@ -116,9 +116,10 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
   };
 
   useEffect(() => {
-    if (categoryData) {
+    const categoryDetails = categoryData?.data;
+    if (categoryDetails) {
       // Parse translations if it's a string
-      let parsedTranslations = categoryData.translations || {};
+      let parsedTranslations = categoryDetails.translations || {};
       if (typeof parsedTranslations === 'string') {
         try {
           parsedTranslations = JSON.parse(parsedTranslations);
@@ -128,10 +129,10 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
       }
 
       form.reset({
-        ...categoryData,
+        ...categoryDetails,
         translations: parsedTranslations,
-        parentId: categoryData.parentId || null,
-        linkType: (categoryData.linkType === "external" ? "external" : "internal") as "internal" | "external",
+        parentId: categoryDetails.parentId || null,
+        linkType: (categoryDetails.linkType === "external" ? "external" : "internal") as "internal" | "external",
       });
     }
   }, [categoryData, form]);

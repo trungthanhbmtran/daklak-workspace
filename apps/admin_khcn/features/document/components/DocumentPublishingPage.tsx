@@ -49,8 +49,8 @@ export default function DocumentPublishingPage() {
 
   const docs = useMemo(() => {
     if (!searchResults) return [];
-    const raw = searchResults.data || searchResults;
-    const list = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+    const raw = (searchResults as any).data || searchResults;
+    const list = Array.isArray(raw) ? raw : (Array.isArray((raw as any)?.data) ? (raw as any).data : []);
     return list.filter((d: any) => d && typeof d === 'object');
   }, [searchResults]);
 

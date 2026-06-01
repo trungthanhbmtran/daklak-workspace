@@ -63,7 +63,7 @@ export const hrmApi = {
     return (apiClient.post(HRM_EMPLOYEES_PATH, payload) as any as Promise<ApiResponse<any>>)
       .then((res) => ({
         ...res,
-        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
+        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : ({} as HrmEmployee),
       }));
   },
 
@@ -71,7 +71,7 @@ export const hrmApi = {
     return (apiClient.put(`${HRM_EMPLOYEES_PATH}/${id}`, payload) as any as Promise<ApiResponse<any>>)
       .then((res) => ({
         ...res,
-        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : undefined,
+        data: res?.data ? parseEmployeeRow(res.data as Record<string, unknown>) : ({} as HrmEmployee),
       }));
   },
 

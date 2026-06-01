@@ -241,8 +241,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
   const submittedCount = statsPosts.filter((p: Post) => p.status === 'SUBMITTED' || p.status === 'UNDER_REVIEW').length;
   const draftCount = statsPosts.filter((p: Post) => p.status === 'DRAFT').length;
 
-  const totalItems = data?.meta?.total || 0;
-  const totalPages = data?.meta?.totalPages || 1;
+  const totalItems = Number((data?.meta as any)?.total || 0);
+  const totalPages = Number((data?.meta as any)?.totalPages || 1);
 
   const getPageNumbers = () => {
     const pages = [];
