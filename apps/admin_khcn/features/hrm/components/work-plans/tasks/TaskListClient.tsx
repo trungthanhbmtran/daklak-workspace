@@ -37,6 +37,7 @@ export const TaskListClient = () => {
   const [chatMessage, setChatMessage] = useState('');
   const [taskComments, setTaskComments] = useState<any[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   // Mock currentUser for testing UI
   const currentUser = { code: 'truongngoctuan', departmentId: 1, isManager: true };
@@ -114,15 +115,15 @@ export const TaskListClient = () => {
     }
   };
 
-  const fetchComments = async (taskId: number) => {
-    setIsLoadingComments(true);
+  const fetchComments = async (taskId: number, silent = false) => {
+    if (!silent) setIsLoadingComments(true);
     try {
       const res = await hrmTasksApi.getComments(taskId.toString());
       setTaskComments(res.data || []);
     } catch (e: any) {
       toast.error('Lỗi tải tin nhắn công việc');
     } finally {
-      setIsLoadingComments(false);
+      if (!silent) setIsLoadingComments(false);
     }
   };
 
@@ -133,16 +134,21 @@ export const TaskListClient = () => {
   }, [selectedTask?.id]);
 
   const handleSendMessage = async () => {
-    if (!chatMessage.trim() || !selectedTask) return;
+    const trimmedMessage = chatMessage.trim();
+    if (!trimmedMessage || !selectedTask || isSendingMessage) return;
+    
+    setIsSendingMessage(true);
     try {
       await hrmTasksApi.addComment(selectedTask.id.toString(), {
         authorCode: currentUser.code,
-        content: chatMessage,
+        content: trimmedMessage,
       });
       setChatMessage('');
-      fetchComments(selectedTask.id);
+      fetchComments(selectedTask.id, true); // silent reload để không bị chớp spinner
     } catch (e: any) {
       toast.error('Gửi tin nhắn thất bại');
+    } finally {
+      setIsSendingMessage(false);
     }
   };
 
@@ -185,7 +191,7 @@ export const TaskListClient = () => {
         content: `⚠️ [ĐỀ NGHỊ PHỐI HỢP]: Tôi cần hỗ trợ để xử lý công việc này.`,
       });
       toast.success('Đã gửi đề nghị phối hợp');
-      fetchComments(selectedTask.id);
+      fetchComments(selectedTask.id, true);
     } catch (e: any) {
       toast.error('Lỗi khi gửi đề nghị');
     }
@@ -531,19 +537,27 @@ export const TaskListClient = () => {
                         <div className="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center gap-2">
                           <input
                             type="text"
-                            disabled={selectedTask.status === 'DONE'}
+                            disabled={selectedTask.status === 'DONE' || isSendingMessage}
                             value={chatMessage}
                             onChange={(e) => setChatMessage(e.target.value)}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                                handleSendMessage();
+                              }
+                            }}
                             placeholder={selectedTask.status === 'DONE' ? "Công việc đã hoàn thành, không thể chat" : "Nhập tin nhắn trao đổi..."}
-                            className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                            className="flex-1 bg-slate-100 dark:bg-slate-700 border-none rounded-full px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none disabled:opacity-50"
                           />
                           <Button
-                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim()}
+                            disabled={selectedTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
                             onClick={handleSendMessage}
-                            className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0"
+                            className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shrink-0 disabled:opacity-50"
                           >
-                            <Send className="w-4 h-4" />
+                            {isSendingMessage ? (
+                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
                           </Button>
                         </div>
                       </div>
