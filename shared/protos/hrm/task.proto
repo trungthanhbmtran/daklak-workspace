@@ -94,6 +94,7 @@ message TaskResponse {
   string rejectReason = 21;
   string assignerName = 22;  // Tên người giao việc
   string priority = 23;      // Mức độ ưu tiên
+  string supervisorName = 24; // Tên người theo dõi chỉ đạo
 }
 
 message CreateTaskRequest {

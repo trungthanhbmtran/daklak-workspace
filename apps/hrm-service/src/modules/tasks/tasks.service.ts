@@ -167,6 +167,7 @@ export class TasksService {
         include: {
           assignee: true,
           assigner: true,
+          supervisor: true,
           plan: { select: { id: true, title: true } }
         }
       }),
@@ -184,6 +185,9 @@ export class TasksService {
         assignerName: t.assigner
           ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
           : (t.assignerCode || ''),
+        supervisorName: t.supervisor
+          ? `${t.supervisor.firstname} ${t.supervisor.lastname}`.trim()
+          : (t.supervisorCode || ''),
         dueDate: t.dueDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',

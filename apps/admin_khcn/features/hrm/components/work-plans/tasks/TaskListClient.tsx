@@ -508,6 +508,21 @@ export const TaskListClient = () => {
                         </div>
                       </div>
 
+                      {/* Lãnh đạo chỉ đạo (nếu có) */}
+                      {task.supervisorCode && (
+                        <div className="flex items-center text-sm bg-amber-50/50 dark:bg-amber-900/10 p-2.5 rounded-xl border border-amber-100 dark:border-amber-900/30">
+                          <div className="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center mr-2.5 text-amber-700 dark:text-amber-300 font-bold text-xs shrink-0">
+                            {(task.supervisorName || task.supervisorCode)?.charAt(0) || '?'}
+                          </div>
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-600/70 dark:text-amber-500/70 mb-0.5">Theo dõi / Chỉ đạo</span>
+                            <span className="truncate font-medium text-amber-900 dark:text-amber-100">
+                              {task.supervisorName || task.supervisorCode}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
                       {/* Hạn xử lý */}
                       <div className={`flex items-center text-sm ${dueInfo.color} ${dueInfo.bg} p-2.5 rounded-xl border ${dueInfo.border}`}>
                         <div className="w-7 h-7 rounded-full flex items-center justify-center mr-2.5 bg-white/80 dark:bg-slate-900/60">
@@ -543,7 +558,7 @@ export const TaskListClient = () => {
                   <th className="px-6 py-5 font-bold tracking-wider">Tên công việc</th>
                   <th className="px-6 py-5 font-bold tracking-wider">Trạng thái</th>
                   <th className="px-6 py-5 font-bold tracking-wider">Mức độ ưu tiên</th>
-                  <th className="px-6 py-5 font-bold tracking-wider">Người nhận</th>
+                  <th className="px-6 py-5 font-bold tracking-wider">Thực hiện / Chỉ đạo</th>
                   <th className="px-6 py-5 font-bold tracking-wider">Hạn chót</th>
                   <th className="px-6 py-5 text-right font-bold tracking-wider">Thao tác</th>
                 </tr>
@@ -569,11 +584,21 @@ export const TaskListClient = () => {
                       </span>
                     </td>
                     <td className="px-6 py-5">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center text-xs font-bold mr-3 shadow-sm border border-indigo-100/50">
-                          {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center">
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center text-xs font-bold mr-2.5 shadow-sm border border-indigo-100/50 shrink-0">
+                            {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
+                          </div>
+                          <span className="font-medium text-sm truncate">{task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}</span>
                         </div>
-                        <span className="font-medium">{task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}</span>
+                        {task.supervisorCode && (
+                          <div className="flex items-center">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-100 to-amber-50 text-amber-600 flex justify-center items-center text-xs font-bold mr-2.5 shadow-sm border border-amber-100/50 shrink-0">
+                              {(task.supervisorName || task.supervisorCode)?.charAt(0) || '?'}
+                            </div>
+                            <span className="font-medium text-sm text-amber-700 dark:text-amber-500 truncate">{task.supervisorName || task.supervisorCode} (CĐ)</span>
+                          </div>
+                        )}
                       </div>
                     </td>
                     <td className="px-6 py-5">
