@@ -20,7 +20,7 @@ export class TasksService {
       statsWhere.AND = [{ OR: authConditions }];
     }
 
-    const baseWhere = { ...statsWhere, status: { notIn: ['DONE', 'ARCHIVED'] } };
+    const baseWhere = { ...statsWhere, status: { notIn: ['DONE', 'ARCHIVED', 'TEMPLATE'] } };
 
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -44,21 +44,21 @@ export class TasksService {
       this.prisma.task.count({
         where: {
           ...baseWhere,
-          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE'] },
+          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] },
           dueDate: { gte: now, lte: in3Days }
         }
       }),
       this.prisma.task.count({
         where: {
           ...baseWhere,
-          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE'] },
+          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] },
           dueDate: { gt: in3Days, lte: in7Days }
         }
       }),
       this.prisma.task.count({
         where: {
           ...baseWhere,
-          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE'] },
+          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] },
           OR: [
             { dueDate: { gt: in7Days } },
             { dueDate: null }
@@ -82,8 +82,8 @@ export class TasksService {
     const in7Days = new Date(now);
     in7Days.setDate(in7Days.getDate() + 7);
 
-    // Bắt buộc loại bỏ DONE, ARCHIVED khi có filter ngày
-    where.status = { notIn: ['DONE', 'ARCHIVED'] };
+    // Bắt buộc loại bỏ DONE, ARCHIVED, TEMPLATE khi có filter ngày
+    where.status = { notIn: ['DONE', 'ARCHIVED', 'TEMPLATE'] };
 
     switch (filter) {
       case 'overdue':
@@ -93,15 +93,15 @@ export class TasksService {
         ];
         break;
       case 'dueIn3Days':
-        where.status = { notIn: ['DONE', 'ARCHIVED', 'OVERDUE'] };
+        where.status = { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] };
         where.dueDate = { gte: now, lte: in3Days };
         break;
       case 'dueIn7Days':
-        where.status = { notIn: ['DONE', 'ARCHIVED', 'OVERDUE'] };
+        where.status = { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] };
         where.dueDate = { gt: in3Days, lte: in7Days };
         break;
       case 'dueOver7Days':
-        where.status = { notIn: ['DONE', 'ARCHIVED', 'OVERDUE'] };
+        where.status = { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] };
         where.OR = [
           { dueDate: { gt: in7Days } },
           { dueDate: null }
@@ -111,7 +111,10 @@ export class TasksService {
   }
 
   async listTasks(query: any) {
-    const where: any = {};
+    const where: any = {
+      // Không hiển thị task dạng template (chưa được giao)
+      status: { not: 'TEMPLATE' },
+    };
     if (query.assigneeCode) {
       if (query.isSupervisor) {
         where.supervisorCode = query.assigneeCode;
@@ -124,6 +127,14 @@ export class TasksService {
     }
     if (query.search) {
       where.title = { contains: query.search };
+    }
+    // Lọc theo status cụ thể (từ dropdown trạng thái) - nhưng vẫn không cho TEMPLATE
+    if (query.status && query.status !== 'ALL') {
+      where.status = query.status;
+    }
+    // Lọc theo mức độ ưu tiên
+    if (query.priority && query.priority !== 'ALL') {
+      where.priority = query.priority;
     }
 
     this.applyDateFilter(query.filter, where);
@@ -366,11 +377,18 @@ export class TasksService {
   }
 
   async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
+    // Lấy task hiện tại để kiểm tra status
+    const currentTask = await this.prisma.task.findUnique({ where: { id }, select: { status: true } });
+
     const dataToUpdate: any = {};
     if (assigneeCode !== undefined) dataToUpdate.assigneeCode = assigneeCode;
     if (departmentId !== undefined) dataToUpdate.departmentId = departmentId;
     // Ghi đè lại người giao việc nếu được truyền từ Gateway
     if (assignerCode) dataToUpdate.assignerCode = assignerCode;
+    // Nếu task đang là TEMPLATE (tạo từ master-plans), chuyển sang TODO khi được giao
+    if (currentTask?.status === 'TEMPLATE') {
+      dataToUpdate.status = 'TODO';
+    }
 
     const t = await this.prisma.task.update({
       where: { id },

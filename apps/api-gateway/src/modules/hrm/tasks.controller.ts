@@ -51,6 +51,8 @@ export class TasksController implements OnModuleInit {
     @Query('search') search: string,
     @Query('departmentId') departmentId: string,
     @Query('isSupervisor') isSupervisor: string,
+    @Query('status') status: string,
+    @Query('priority') priority: string,
   ) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
@@ -69,6 +71,8 @@ export class TasksController implements OnModuleInit {
         assigneeCode: finalAssigneeCode,
         filter,
         search,
+        status,
+        priority,
         departmentId: finalDepartmentId,
         isSupervisor: isSupervisor === 'true',
         currentUserCode: user?.employeeCode || user?.username,
