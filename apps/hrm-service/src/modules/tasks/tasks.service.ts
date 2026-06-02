@@ -410,8 +410,6 @@ export class TasksService {
 
     // Ghi đè lại người giao việc nếu được truyền từ Gateway
     if (assignerCode) {
-      dataToUpdate.assignerCode = assignerCode;
-
       // Kiểm tra xem assignerCode có phải là employee code hợp lệ không (tránh FK violation)
       // assignerCode có thể là username (không phải employee) nếu user chưa có employee record
       const assignerEmployee = await this.prisma.employee.findUnique({
@@ -419,9 +417,12 @@ export class TasksService {
         select: { employeeCode: true }
       });
 
-      // Chỉ set supervisorCode nếu assignerCode là employee hợp lệ VÀ task chưa có supervisor
-      if (assignerEmployee && (!currentTask?.supervisorCode || currentTask.supervisorCode === 'UNASSIGNED')) {
-        dataToUpdate.supervisorCode = assignerCode;
+      if (assignerEmployee) {
+        dataToUpdate.assignerCode = assignerCode;
+        // Chỉ set supervisorCode nếu assignerCode là employee hợp lệ VÀ task chưa có supervisor
+        if (!currentTask?.supervisorCode || currentTask.supervisorCode === 'UNASSIGNED') {
+          dataToUpdate.supervisorCode = assignerCode;
+        }
       }
     }
 
@@ -439,16 +440,27 @@ export class TasksService {
       ...t,
       dueDate: t.dueDate?.toISOString() || '',
       createdAt: t.createdAt?.toISOString() || '',
-      updatedAt: t.updatedAt?.toISOString() || '',
+      updatedAt: t.updatedAt?.toISOString() || ''
     };
   }
 
 
   async addComment(data: any) {
+    let finalAuthorCode = data.isSystemMessage ? null : data.authorCode;
+
+    if (finalAuthorCode) {
+      const emp = await this.prisma.employee.findUnique({
+        where: { employeeCode: finalAuthorCode }
+      });
+      if (!emp) {
+        finalAuthorCode = null;
+      }
+    }
+
     const c = await this.prisma.taskComment.create({
       data: {
         taskId: data.taskId,
-        authorCode: data.isSystemMessage ? null : data.authorCode,
+        authorCode: finalAuthorCode,
         content: data.content,
         isSystemMessage: data.isSystemMessage || false,
       },
@@ -458,7 +470,7 @@ export class TasksService {
       id: c.id,
       taskId: c.taskId,
       authorCode: c.authorCode || '',
-      authorName: c.author ? `${c.author.firstname} ${c.author.lastname}` : 'Hệ thống',
+      authorName: c.author ? `${c.author.firstname} ${c.author.lastname}` : (c.isSystemMessage ? 'Hệ thống' : 'Quản trị viên'),
       authorAvatar: c.author?.avatar || '',
       content: c.content,
       isSystemMessage: c.isSystemMessage,
@@ -480,7 +492,7 @@ export class TasksService {
         id: c.id,
         taskId: c.taskId,
         authorCode: c.authorCode || '',
-        authorName: c.author ? `${c.author.firstname} ${c.author.lastname}` : 'Hệ thống',
+        authorName: c.author ? `${c.author.firstname} ${c.author.lastname}` : (c.isSystemMessage ? 'Hệ thống' : 'Quản trị viên'),
         authorAvatar: c.author?.avatar || '',
         content: c.content,
         isSystemMessage: c.isSystemMessage,
