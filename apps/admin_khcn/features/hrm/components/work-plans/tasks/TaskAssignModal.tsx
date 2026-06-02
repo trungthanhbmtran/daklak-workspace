@@ -116,20 +116,23 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   return (
     <Dialog open={isOpen} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-2xl bg-white p-6 rounded-2xl border border-slate-200">
+      <DialogContent className="max-w-4xl w-[96vw] max-h-[92vh] overflow-y-auto bg-white dark:bg-slate-900 p-0 rounded-[2rem] border border-slate-200 dark:border-slate-700 shadow-2xl">
+        <div className="p-8">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <UserCheck className="w-5 h-5 text-indigo-600" />
+          <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
+              <UserCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
             Phân công công việc
           </DialogTitle>
-          <DialogDescription className="text-sm font-semibold text-slate-600 mt-2 p-3 bg-slate-50 rounded-lg border border-slate-200">
+          <DialogDescription className="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 leading-relaxed">
             {task.title}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 py-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 py-6">
           {/* Người thực hiện */}
-          <div className="space-y-2 sm:col-span-2">
+          <div className="space-y-2 lg:col-span-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người thực hiện <span className="text-red-500">*</span></label>
               <Button
@@ -267,17 +270,18 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-4 pt-4 border-t border-slate-100">
-          <Button variant="ghost" onClick={() => onClose()} className="font-semibold text-slate-600 hover:text-slate-900 rounded-full h-11 px-6">
+        <div className="flex items-center justify-end gap-3 mt-2 pt-5 border-t border-slate-100 dark:border-slate-700">
+          <Button variant="ghost" onClick={() => onClose()} className="font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl h-11 px-6">
             Hủy
           </Button>
           <Button 
             onClick={handleSubmit} 
             disabled={!taskState.assigneeCode || isOverload || isSubmitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-full h-11 px-8 shadow-sm"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-11 px-8 shadow-sm"
           >
             {isSubmitting ? "Đang xử lý..." : "Xác nhận giao việc"}
           </Button>
+        </div>
         </div>
       </DialogContent>
     </Dialog>
