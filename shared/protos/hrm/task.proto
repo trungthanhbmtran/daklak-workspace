@@ -12,6 +12,7 @@ service TaskService {
   rpc AssignTask (AssignTaskRequest) returns (TaskResponse) {}
   rpc AddComment (AddCommentRequest) returns (TaskCommentResponse) {}
   rpc GetComments (GetCommentsRequest) returns (GetCommentsResponse) {}
+  rpc GetSubTasks (GetSubTasksRequest) returns (GetSubTasksResponse) {}
 }
 
 message AssignTaskRequest {
@@ -243,4 +244,35 @@ message GetCommentsResponse {
   bool success = 1;
   string message = 2;
   repeated TaskCommentResponse data = 3;
+}
+
+// Chuỗi giao việc - mỗi node là một bước trong timeline
+message DelegationNode {
+  int32 id = 1;
+  string title = 2;
+  string status = 3;
+  string priority = 4;
+  string assigneeCode = 5;
+  string assigneeName = 6;
+  string assignerCode = 7;
+  string assignerName = 8;
+  int32 departmentId = 9;
+  int32 parentId = 10;
+  string dueDate = 11;
+  string createdAt = 12;
+  bool isParent = 13;      // Đây là task cha (cấp trên đã giao task này)
+  bool isCurrent = 14;     // Đây là task đang xem
+  bool isChild = 15;       // Task con (bất kỳ cấp nào)
+  bool isGrandChild = 16;  // Giữ lại để tương thích
+  int32 level = 17;        // Cấp độ: -1=cha, 0=hiện tại, 1,2,3...=các cấp con (không giới hạn)
+}
+
+message GetSubTasksRequest {
+  int32 taskId = 1;
+}
+
+message GetSubTasksResponse {
+  bool success = 1;
+  string message = 2;
+  repeated DelegationNode data = 3;
 }

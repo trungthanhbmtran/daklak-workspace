@@ -47,6 +47,9 @@ export const TaskListClient = () => {
   // Smart Assign states
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
 
+  // Delegation chain (chuỗi giao việc)
+  const [delegationChain, setDelegationChain] = useState<any[]>([]);
+  const [isLoadingChain, setIsLoadingChain] = useState(false);
 
   // Server side filtering
   const { data, isLoading, refetch } = useTasksList({
@@ -206,6 +209,12 @@ export const TaskListClient = () => {
   useEffect(() => {
     if (selectedTask?.id) {
       fetchComments(selectedTask.id);
+      // Lấy chuỗi giao việc
+      setIsLoadingChain(true);
+      hrmTasksApi.getSubTasks(selectedTask.id.toString())
+        .then((res: any) => setDelegationChain(res?.data || []))
+        .catch(() => setDelegationChain([]))
+        .finally(() => setIsLoadingChain(false));
     }
   }, [selectedTask?.id]);
 
@@ -754,6 +763,100 @@ export const TaskListClient = () => {
                   </div>
 
                   <div className="flex flex-col space-y-6">
+                    {/* Chuỗi giao việc - Delegation Timeline */}
+                    {(isLoadingChain || delegationChain.length > 0) && (
+                      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 p-5">
+                        <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
+                          <span className="w-2 h-6 bg-amber-500 rounded-full mr-3"></span>
+                          Chuỗi giao việc
+                        </h4>
+                        {isLoadingChain ? (
+                          <div className="flex justify-center py-4">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-amber-500"></div>
+                          </div>
+                        ) : (
+                          <div className="space-y-1">
+                            {delegationChain.map((node: any, idx: number) => {
+                              const isLast = idx === delegationChain.length - 1;
+                              const level: number = node.level ?? (node.isParent ? -1 : node.isCurrent ? 0 : 1);
+                              const statusColors: Record<string, string> = {
+                                DONE: 'bg-emerald-500',
+                                IN_PROGRESS: 'bg-amber-500',
+                                TODO: 'bg-blue-500',
+                                TEMPLATE: 'bg-slate-400',
+                                OVERDUE: 'bg-rose-500',
+                              };
+                              const dotColor = statusColors[node.status] || 'bg-slate-400';
+
+                              // Màu card theo level
+                              const bgColor = node.isCurrent
+                                ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700'
+                                : node.isParent
+                                ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200'
+                                : level === 1
+                                ? 'bg-emerald-50/60 dark:bg-emerald-900/10 border-emerald-100'
+                                : level === 2
+                                ? 'bg-violet-50/60 dark:bg-violet-900/10 border-violet-100'
+                                : level === 3
+                                ? 'bg-orange-50/60 dark:bg-orange-900/10 border-orange-100'
+                                : 'bg-rose-50/60 dark:bg-rose-900/10 border-rose-100'; // cấp 4+
+
+                              // Label theo level
+                              const levelLabel = node.isParent
+                                ? '↑ Task gốc'
+                                : node.isCurrent
+                                ? '▶ Task này'
+                                : level === 1
+                                ? `↓ Giao tiếp cấp 1`
+                                : `↓ Giao tiếp cấp ${level}`;
+
+                              // Indent theo cấp (cấp con thụt vào)
+                              const indentPx = Math.max(0, level) * 12;
+
+                              return (
+                                <div key={node.id} className="flex items-stretch gap-2" style={{ paddingLeft: `${indentPx}px` }}>
+                                  {/* Timeline dot + line */}
+                                  <div className="flex flex-col items-center w-6 shrink-0">
+                                    <div className={`w-3 h-3 rounded-full ${dotColor} mt-3.5 shrink-0 shadow-sm ring-2 ring-white dark:ring-slate-800`}></div>
+                                    {!isLast && <div className="w-0.5 flex-1 bg-slate-200 dark:bg-slate-700 mt-1"></div>}
+                                  </div>
+                                  {/* Node content */}
+                                  <div className={`flex-1 border rounded-xl p-3 mb-1.5 ${bgColor}`}>
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                        {levelLabel}
+                                      </span>
+                                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full text-white ${dotColor}`}>
+                                        {node.status}
+                                      </span>
+                                    </div>
+                                    <p className="font-semibold text-sm text-slate-800 dark:text-slate-100 line-clamp-1 mb-2">{node.title}</p>
+                                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                                      {node.assignerName && (
+                                        <span className="flex items-center gap-1">
+                                          <span className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[9px]">
+                                            {node.assignerName?.charAt(0)}
+                                          </span>
+                                          <span className="text-slate-400">giao</span>
+                                        </span>
+                                      )}
+                                      <span className="flex items-center gap-1">
+                                        <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-[9px]">
+                                          {(node.assigneeName || node.assigneeCode)?.charAt(0) || '?'}
+                                        </span>
+                                        <span className="font-medium text-slate-700 dark:text-slate-300">{node.assigneeName || node.assigneeCode}</span>
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Người tiếp nhận */}
                     <div>
                       <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-widest mb-4 flex items-center">
                         <span className="w-2 h-6 bg-rose-500 rounded-full mr-3"></span>

@@ -484,4 +484,87 @@ export class TasksService {
       }))
     };
   }
+
+  /**
+   * Lấy chuỗi giao việc (delegation chain) đệ quy không giới hạn cấp.
+   * Dùng BFS để duyệt toàn bộ cây: task cha → task hiện tại → con cấp 1 → con cấp 2 → ...
+   * Mỗi node có field `level` để frontend xác định độ sâu và style phù hợp.
+   */
+  async getSubTasks(taskId: number) {
+    const mapTask = (t: any, level: number, isParent = false, isCurrent = false) => ({
+      id: t.id,
+      title: t.title,
+      status: t.status,
+      priority: t.priority,
+      assigneeCode: t.assigneeCode,
+      assigneeName: t.assignee
+        ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+        : t.assigneeCode,
+      assignerCode: t.assignerCode,
+      assignerName: t.assigner
+        ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+        : (t.assignerCode || ''),
+      departmentId: t.departmentId || 0,
+      parentId: t.parentId || 0,
+      dueDate: t.dueDate?.toISOString() || '',
+      createdAt: t.createdAt?.toISOString() || '',
+      updatedAt: t.updatedAt?.toISOString() || '',
+      level,       // -1 = task cha gốc, 0 = task hiện tại, 1,2,3... = các cấp con
+      isParent,
+      isCurrent,
+      isChild: !isParent && !isCurrent,
+      isGrandChild: false, // không dùng nữa, giữ để tương thích proto
+    });
+
+    // Lấy task gốc kèm task cha (nếu có)
+    const rootTask = await this.prisma.task.findUnique({
+      where: { id: taskId },
+      include: {
+        assignee: true,
+        assigner: true,
+        parent: {
+          include: { assignee: true, assigner: true }
+        }
+      }
+    });
+
+    if (!rootTask) {
+      return { success: false, message: 'Task không tồn tại', data: [] };
+    }
+
+    const result: any[] = [];
+
+    // Thêm task cha vào đầu timeline (nếu có)
+    if (rootTask.parent) {
+      result.push(mapTask(rootTask.parent, -1, true, false));
+    }
+
+    // Task hiện tại (level 0)
+    result.push(mapTask(rootTask, 0, false, true));
+
+    // BFS: duyệt toàn bộ cây con không giới hạn độ sâu
+    const queue: Array<{ id: number; level: number }> = [{ id: taskId, level: 0 }];
+
+    while (queue.length > 0) {
+      const { id, level } = queue.shift()!;
+
+      const children = await this.prisma.task.findMany({
+        where: { parentId: id },
+        include: { assignee: true, assigner: true },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      for (const child of children) {
+        result.push(mapTask(child, level + 1, false, false));
+        // Tiếp tục duyệt xuống các cấp sâu hơn
+        queue.push({ id: child.id, level: level + 1 });
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Lấy chuỗi giao việc thành công',
+      data: result,
+    };
+  }
 }

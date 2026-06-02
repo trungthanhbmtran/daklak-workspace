@@ -45,4 +45,9 @@ export class TasksController {
   getComments(data: { taskId: number }) {
     return this.tasksService.getComments(data.taskId);
   }
+
+  @GrpcMethod('TaskService', 'GetSubTasks')
+  getSubTasks(data: { taskId: number }) {
+    return this.tasksService.getSubTasks(data.taskId);
+  }
 }

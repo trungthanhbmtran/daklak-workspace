@@ -33,4 +33,8 @@ export const hrmTasksApi = {
   addComment(id: string, payload: { authorCode?: string; content: string; isSystemMessage?: boolean }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${id}/comments`, payload) as any;
   },
+
+  getSubTasks(id: string): Promise<ApiResponse<any[]>> {
+    return apiClient.get(`/hrm/tasks/${id}/subtasks`) as any;
+  },
 };

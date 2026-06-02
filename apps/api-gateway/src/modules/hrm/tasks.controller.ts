@@ -185,4 +185,13 @@ export class TasksController implements OnModuleInit {
       }),
     );
   }
+
+  @Get(':id/subtasks')
+  async getSubTasks(@Param('id') id: string) {
+    return firstValueFrom(
+      this.taskService.GetSubTasks({
+        taskId: parseInt(id, 10),
+      }),
+    );
+  }
 }
