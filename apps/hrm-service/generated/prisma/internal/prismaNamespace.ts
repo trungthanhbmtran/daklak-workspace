@@ -1188,6 +1188,8 @@ export const MasterPlanScalarFieldEnum = {
   startDate: 'startDate',
   endDate: 'endDate',
   status: 'status',
+  departmentId: 'departmentId',
+  createdByCode: 'createdByCode',
   documentId: 'documentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -1372,6 +1374,7 @@ export const MasterPlanOrderByRelevanceFieldEnum = {
   description: 'description',
   type: 'type',
   status: 'status',
+  createdByCode: 'createdByCode',
   documentId: 'documentId'
 } as const
 

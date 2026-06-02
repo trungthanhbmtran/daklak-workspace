@@ -28,10 +28,12 @@ export type AggregateMasterPlan = {
 
 export type MasterPlanAvgAggregateOutputType = {
   id: number | null
+  departmentId: number | null
 }
 
 export type MasterPlanSumAggregateOutputType = {
   id: number | null
+  departmentId: number | null
 }
 
 export type MasterPlanMinAggregateOutputType = {
@@ -42,6 +44,8 @@ export type MasterPlanMinAggregateOutputType = {
   startDate: Date | null
   endDate: Date | null
   status: string | null
+  departmentId: number | null
+  createdByCode: string | null
   documentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -55,6 +59,8 @@ export type MasterPlanMaxAggregateOutputType = {
   startDate: Date | null
   endDate: Date | null
   status: string | null
+  departmentId: number | null
+  createdByCode: string | null
   documentId: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -68,6 +74,8 @@ export type MasterPlanCountAggregateOutputType = {
   startDate: number
   endDate: number
   status: number
+  departmentId: number
+  createdByCode: number
   documentId: number
   createdAt: number
   updatedAt: number
@@ -77,10 +85,12 @@ export type MasterPlanCountAggregateOutputType = {
 
 export type MasterPlanAvgAggregateInputType = {
   id?: true
+  departmentId?: true
 }
 
 export type MasterPlanSumAggregateInputType = {
   id?: true
+  departmentId?: true
 }
 
 export type MasterPlanMinAggregateInputType = {
@@ -91,6 +101,8 @@ export type MasterPlanMinAggregateInputType = {
   startDate?: true
   endDate?: true
   status?: true
+  departmentId?: true
+  createdByCode?: true
   documentId?: true
   createdAt?: true
   updatedAt?: true
@@ -104,6 +116,8 @@ export type MasterPlanMaxAggregateInputType = {
   startDate?: true
   endDate?: true
   status?: true
+  departmentId?: true
+  createdByCode?: true
   documentId?: true
   createdAt?: true
   updatedAt?: true
@@ -117,6 +131,8 @@ export type MasterPlanCountAggregateInputType = {
   startDate?: true
   endDate?: true
   status?: true
+  departmentId?: true
+  createdByCode?: true
   documentId?: true
   createdAt?: true
   updatedAt?: true
@@ -217,6 +233,8 @@ export type MasterPlanGroupByOutputType = {
   startDate: Date | null
   endDate: Date | null
   status: string
+  departmentId: number | null
+  createdByCode: string | null
   documentId: string | null
   createdAt: Date
   updatedAt: Date
@@ -253,6 +271,8 @@ export type MasterPlanWhereInput = {
   startDate?: Prisma.DateTimeNullableFilter<"MasterPlan"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"MasterPlan"> | Date | string | null
   status?: Prisma.StringFilter<"MasterPlan"> | string
+  departmentId?: Prisma.IntNullableFilter<"MasterPlan"> | number | null
+  createdByCode?: Prisma.StringNullableFilter<"MasterPlan"> | string | null
   documentId?: Prisma.StringNullableFilter<"MasterPlan"> | string | null
   createdAt?: Prisma.DateTimeFilter<"MasterPlan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MasterPlan"> | Date | string
@@ -267,6 +287,8 @@ export type MasterPlanOrderByWithRelationInput = {
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdByCode?: Prisma.SortOrderInput | Prisma.SortOrder
   documentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -285,6 +307,8 @@ export type MasterPlanWhereUniqueInput = Prisma.AtLeast<{
   startDate?: Prisma.DateTimeNullableFilter<"MasterPlan"> | Date | string | null
   endDate?: Prisma.DateTimeNullableFilter<"MasterPlan"> | Date | string | null
   status?: Prisma.StringFilter<"MasterPlan"> | string
+  departmentId?: Prisma.IntNullableFilter<"MasterPlan"> | number | null
+  createdByCode?: Prisma.StringNullableFilter<"MasterPlan"> | string | null
   documentId?: Prisma.StringNullableFilter<"MasterPlan"> | string | null
   createdAt?: Prisma.DateTimeFilter<"MasterPlan"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MasterPlan"> | Date | string
@@ -299,6 +323,8 @@ export type MasterPlanOrderByWithAggregationInput = {
   startDate?: Prisma.SortOrderInput | Prisma.SortOrder
   endDate?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrderInput | Prisma.SortOrder
+  createdByCode?: Prisma.SortOrderInput | Prisma.SortOrder
   documentId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -320,6 +346,8 @@ export type MasterPlanScalarWhereWithAggregatesInput = {
   startDate?: Prisma.DateTimeNullableWithAggregatesFilter<"MasterPlan"> | Date | string | null
   endDate?: Prisma.DateTimeNullableWithAggregatesFilter<"MasterPlan"> | Date | string | null
   status?: Prisma.StringWithAggregatesFilter<"MasterPlan"> | string
+  departmentId?: Prisma.IntNullableWithAggregatesFilter<"MasterPlan"> | number | null
+  createdByCode?: Prisma.StringNullableWithAggregatesFilter<"MasterPlan"> | string | null
   documentId?: Prisma.StringNullableWithAggregatesFilter<"MasterPlan"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"MasterPlan"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"MasterPlan"> | Date | string
@@ -332,6 +360,8 @@ export type MasterPlanCreateInput = {
   startDate?: Date | string | null
   endDate?: Date | string | null
   status?: string
+  departmentId?: number | null
+  createdByCode?: string | null
   documentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -346,6 +376,8 @@ export type MasterPlanUncheckedCreateInput = {
   startDate?: Date | string | null
   endDate?: Date | string | null
   status?: string
+  departmentId?: number | null
+  createdByCode?: string | null
   documentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -359,6 +391,8 @@ export type MasterPlanUpdateInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -373,6 +407,8 @@ export type MasterPlanUncheckedUpdateInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -387,6 +423,8 @@ export type MasterPlanCreateManyInput = {
   startDate?: Date | string | null
   endDate?: Date | string | null
   status?: string
+  departmentId?: number | null
+  createdByCode?: string | null
   documentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -399,6 +437,8 @@ export type MasterPlanUpdateManyMutationInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -412,6 +452,8 @@ export type MasterPlanUncheckedUpdateManyInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -436,6 +478,8 @@ export type MasterPlanCountOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
+  createdByCode?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -443,6 +487,7 @@ export type MasterPlanCountOrderByAggregateInput = {
 
 export type MasterPlanAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
 }
 
 export type MasterPlanMaxOrderByAggregateInput = {
@@ -453,6 +498,8 @@ export type MasterPlanMaxOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
+  createdByCode?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -466,6 +513,8 @@ export type MasterPlanMinOrderByAggregateInput = {
   startDate?: Prisma.SortOrder
   endDate?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
+  createdByCode?: Prisma.SortOrder
   documentId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -473,6 +522,7 @@ export type MasterPlanMinOrderByAggregateInput = {
 
 export type MasterPlanSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  departmentId?: Prisma.SortOrder
 }
 
 export type MasterPlanCreateNestedOneWithoutTasksInput = {
@@ -498,6 +548,8 @@ export type MasterPlanCreateWithoutTasksInput = {
   startDate?: Date | string | null
   endDate?: Date | string | null
   status?: string
+  departmentId?: number | null
+  createdByCode?: string | null
   documentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -511,6 +563,8 @@ export type MasterPlanUncheckedCreateWithoutTasksInput = {
   startDate?: Date | string | null
   endDate?: Date | string | null
   status?: string
+  departmentId?: number | null
+  createdByCode?: string | null
   documentId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -539,6 +593,8 @@ export type MasterPlanUpdateWithoutTasksInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -552,6 +608,8 @@ export type MasterPlanUncheckedUpdateWithoutTasksInput = {
   startDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  departmentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdByCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   documentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -596,6 +654,8 @@ export type MasterPlanSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   startDate?: boolean
   endDate?: boolean
   status?: boolean
+  departmentId?: boolean
+  createdByCode?: boolean
   documentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -613,12 +673,14 @@ export type MasterPlanSelectScalar = {
   startDate?: boolean
   endDate?: boolean
   status?: boolean
+  departmentId?: boolean
+  createdByCode?: boolean
   documentId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MasterPlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "type" | "startDate" | "endDate" | "status" | "documentId" | "createdAt" | "updatedAt", ExtArgs["result"]["masterPlan"]>
+export type MasterPlanOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "type" | "startDate" | "endDate" | "status" | "departmentId" | "createdByCode" | "documentId" | "createdAt" | "updatedAt", ExtArgs["result"]["masterPlan"]>
 export type MasterPlanInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tasks?: boolean | Prisma.MasterPlan$tasksArgs<ExtArgs>
   _count?: boolean | Prisma.MasterPlanCountOutputTypeDefaultArgs<ExtArgs>
@@ -637,6 +699,8 @@ export type $MasterPlanPayload<ExtArgs extends runtime.Types.Extensions.Internal
     startDate: Date | null
     endDate: Date | null
     status: string
+    departmentId: number | null
+    createdByCode: string | null
     documentId: string | null
     createdAt: Date
     updatedAt: Date
@@ -1017,6 +1081,8 @@ export interface MasterPlanFieldRefs {
   readonly startDate: Prisma.FieldRef<"MasterPlan", 'DateTime'>
   readonly endDate: Prisma.FieldRef<"MasterPlan", 'DateTime'>
   readonly status: Prisma.FieldRef<"MasterPlan", 'String'>
+  readonly departmentId: Prisma.FieldRef<"MasterPlan", 'Int'>
+  readonly createdByCode: Prisma.FieldRef<"MasterPlan", 'String'>
   readonly documentId: Prisma.FieldRef<"MasterPlan", 'String'>
   readonly createdAt: Prisma.FieldRef<"MasterPlan", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"MasterPlan", 'DateTime'>
