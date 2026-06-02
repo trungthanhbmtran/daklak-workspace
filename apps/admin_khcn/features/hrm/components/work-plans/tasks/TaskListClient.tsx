@@ -643,7 +643,7 @@ export const TaskListClient = () => {
 
       {/* Task Detail Dialog */}
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-        <DialogContent className="w-[96vw] sm:w-[90vw] max-w-[1200px] max-h-[95vh] sm:max-h-[90vh] font-sans p-0 overflow-hidden rounded-2xl sm:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
+        <DialogContent className="w-[100vw] sm:w-[96vw] max-w-none h-[100dvh] sm:h-[96vh] sm:max-h-[96vh] font-sans p-0 overflow-hidden rounded-none sm:rounded-[2rem] border-0 sm:border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
           {selectedTask && (
             <div className="flex flex-col flex-1 min-h-0 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl">
               {/* Header Bar */}
@@ -665,7 +665,7 @@ export const TaskListClient = () => {
 
               {/* Main Body */}
               <div className="flex-1 overflow-y-auto p-4 md:p-8">
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto h-full">
+                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full h-full mx-auto max-w-[2000px]">
                   
                   {/* Left Column - Content & Chat */}
                   <div className="xl:col-span-2 flex flex-col gap-6">
