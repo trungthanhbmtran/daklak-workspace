@@ -122,6 +122,10 @@ export class TasksService {
         where.assigneeCode = query.assigneeCode;
       }
     }
+    // Lọc theo người giao việc (tab ASSIGNED_BY_ME)
+    if (query.assignerCode) {
+      where.assignerCode = query.assignerCode;
+    }
     if (query.departmentId) {
       where.departmentId = query.departmentId;
     }
@@ -139,7 +143,9 @@ export class TasksService {
 
     this.applyDateFilter(query.filter, where);
 
-    if (!query.isAdmin && query.currentUserCode) {
+    // Nếu đã chỉ định assignerCode cụ thể (tab ASSIGNED_BY_ME), bỏ qua auth filter
+    // để người giao việc thấy TẤT CẢ task họ đã giao (kể cả giao cho người khác phòng)
+    if (!query.assignerCode && !query.isAdmin && query.currentUserCode) {
       const authConditions: any[] = [
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
@@ -152,6 +158,7 @@ export class TasksService {
       where.AND = where.AND || [];
       where.AND.push({ OR: authConditions });
     }
+
 
     const [tasks, stats] = await Promise.all([
       this.prisma.task.findMany({

@@ -36,7 +36,7 @@ export const TaskListClient = () => {
   const [priorityFilter, setPriorityFilter] = useState<string>('ALL');
 
   // New features state
-  const [activeTab, setActiveTab] = useState<'ALL' | 'MY_TASKS' | 'DEPT_TASKS'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | 'MY_TASKS' | 'ASSIGNED_BY_ME' | 'DEPT_TASKS'>('ALL');
   const [rejectReason, setRejectReason] = useState('');
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
@@ -324,10 +324,11 @@ export const TaskListClient = () => {
             <Search placeholder="Tìm kiếm công việc..." className="w-full h-11 rounded-xl bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:bg-white dark:focus:bg-slate-800 transition-all" />
           </div>
 
-          <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-full sm:w-[360px] h-11">
-            <TabsList className="h-full w-full grid grid-cols-3 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
+          <Tabs value={activeTab} onValueChange={(val: any) => setActiveTab(val)} className="w-full sm:w-[480px] h-11">
+            <TabsList className="h-full w-full grid grid-cols-4 rounded-xl bg-slate-100 dark:bg-slate-800 p-1 border border-slate-200 dark:border-slate-700">
               <TabsTrigger value="ALL" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 transition-all h-full">Tất cả</TabsTrigger>
               <TabsTrigger value="MY_TASKS" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 transition-all h-full">Của tôi</TabsTrigger>
+              <TabsTrigger value="ASSIGNED_BY_ME" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400 transition-all h-full">Đã giao</TabsTrigger>
               <TabsTrigger value="DEPT_TASKS" className="rounded-lg text-[13px] font-bold tracking-wide data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700 data-[state=active]:text-indigo-600 dark:data-[state=active]:text-indigo-400 transition-all h-full">Phòng</TabsTrigger>
             </TabsList>
           </Tabs>
@@ -401,12 +402,23 @@ export const TaskListClient = () => {
             <CheckCircle2 className="h-10 w-10 text-slate-400" />
           </div>
           <h3 className="text-xl font-bold text-slate-700 dark:text-slate-300">
-            {activeFilter ? "Không có công việc nào phù hợp với bộ lọc" : "Hoan hô! Không có công việc nào"}
+            {activeFilter
+              ? 'Không có công việc nào phù hợp với bộ lọc'
+              : activeTab === 'ASSIGNED_BY_ME'
+              ? 'Bạn chưa giao công việc nào'
+              : activeTab === 'MY_TASKS'
+              ? 'Bạn chưa có công việc nào được giao'
+              : 'Hoan hô! Không có công việc nào'}
           </h3>
           <p className="text-slate-500 mt-2">
-            {activeFilter ? "Thử chọn một bộ lọc khác hoặc bỏ chọn." : "Bạn đã hoàn thành tất cả hoặc chưa có công việc được giao."}
+            {activeFilter
+              ? 'Thử chọn một bộ lọc khác hoặc bỏ chọn.'
+              : activeTab === 'ASSIGNED_BY_ME'
+              ? 'Hãy phân công công việc từ Kế hoạch & Giao việc.'
+              : 'Bạn đã hoàn thành tất cả hoặc chưa có công việc được giao.'}
           </p>
         </div>
+
       ) : viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-6">
           {displayedTasks.map((task: any) => {
@@ -459,9 +471,14 @@ export const TaskListClient = () => {
                         <div className="w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center mr-2.5 text-slate-700 dark:text-slate-300 font-bold text-xs">
                           {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
                         </div>
-                        <span className="truncate flex-1 font-medium text-slate-800 dark:text-slate-200">
-                          {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}
-                        </span>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">
+                            {activeTab === 'ASSIGNED_BY_ME' ? 'Giao cho' : 'Người thực hiện'}
+                          </span>
+                          <span className="truncate font-medium text-slate-800 dark:text-slate-200">
+                            {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}
+                          </span>
+                        </div>
                       </div>
                       {(() => {
                         return (

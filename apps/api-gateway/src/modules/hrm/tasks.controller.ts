@@ -56,10 +56,15 @@ export class TasksController implements OnModuleInit {
   ) {
     const user = req.user;
     let finalAssigneeCode = assigneeCode;
+    let finalAssignerCode: string | undefined = undefined;
     let finalDepartmentId = departmentId ? parseInt(departmentId, 10) : undefined;
 
     if (tab === 'MY_TASKS' && user) {
+      // Công việc được giao CHO tôi (tôi là người thực hiện)
       finalAssigneeCode = user.employeeCode || user.username;
+    } else if (tab === 'ASSIGNED_BY_ME' && user) {
+      // Công việc TÔI đã giao cho người khác (tôi là người giao việc)
+      finalAssignerCode = user.employeeCode || user.username;
     } else if (tab === 'DEPT_TASKS' && user) {
       finalDepartmentId = user.unitId;
     }
@@ -69,6 +74,7 @@ export class TasksController implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.taskService.ListTasks({
         assigneeCode: finalAssigneeCode,
+        assignerCode: finalAssignerCode,
         filter,
         search,
         status,
@@ -88,6 +94,7 @@ export class TasksController implements OnModuleInit {
 
     return response;
   }
+
 
   @Put(':id')
   async update(@Param('id') id: string, @Body() body: any) {
