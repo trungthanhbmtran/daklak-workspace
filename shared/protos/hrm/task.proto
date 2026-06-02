@@ -90,6 +90,8 @@ message TaskResponse {
   string startDate = 19;
   int32 parentId = 20;
   string rejectReason = 21;
+  string assignerName = 22;  // Tên người giao việc
+  string priority = 23;      // Mức độ ưu tiên
 }
 
 message CreateTaskRequest {

@@ -164,7 +164,11 @@ export class TasksService {
       this.prisma.task.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        include: { assignee: true }
+        include: {
+          assignee: true,
+          assigner: true,
+          plan: { select: { id: true, title: true } }
+        }
       }),
       this.getTaskStats(query)
     ]);
@@ -174,10 +178,16 @@ export class TasksService {
       message: 'Lấy danh sách nhiệm vụ thành công',
       data: tasks.map((t: any) => ({
         ...t,
-        assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}` : t.assigneeCode,
+        assigneeName: t.assignee
+          ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+          : (t.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : t.assigneeCode),
+        assignerName: t.assigner
+          ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+          : (t.assignerCode || ''),
         dueDate: t.dueDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',
+        plan: t.plan || null,
       })),
       meta: {
         pagination: {
