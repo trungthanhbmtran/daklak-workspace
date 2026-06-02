@@ -19,6 +19,7 @@ message AssignTaskRequest {
   int32 id = 1;
   string assigneeCode = 2;
   int32 departmentId = 3;
+  string assignerCode = 4;
 }
 
 message RecommendAssigneesRequest {
