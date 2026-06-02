@@ -53,16 +53,16 @@ export const TaskListClient = () => {
   const [isLoadingChain, setIsLoadingChain] = useState(false);
 
   // Fetch priority categories
-  const { data: prioritiesRes } = useGetCategoryByGroup('TASK_PRIORITY');
+  const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
   const priorities = prioritiesRes?.data || [];
 
   const getPriorityName = (code: string) => {
     const codeUpper = (code || 'MEDIUM').toUpperCase();
     const matched = priorities.find((p: any) => p.code?.toUpperCase() === codeUpper);
     if (matched?.name) return matched.name;
-    
+
     // Fallback
-    switch(codeUpper) {
+    switch (codeUpper) {
       case 'HIGH': return 'Cao';
       case 'MEDIUM': return 'Trung bình';
       case 'LOW': return 'Thấp';
@@ -433,17 +433,17 @@ export const TaskListClient = () => {
             {activeFilter
               ? 'Không có công việc nào phù hợp với bộ lọc'
               : activeTab === 'ASSIGNED_BY_ME'
-              ? 'Bạn chưa giao công việc nào'
-              : activeTab === 'MY_TASKS'
-              ? 'Bạn chưa có công việc nào được giao'
-              : 'Hoan hô! Không có công việc nào'}
+                ? 'Bạn chưa giao công việc nào'
+                : activeTab === 'MY_TASKS'
+                  ? 'Bạn chưa có công việc nào được giao'
+                  : 'Hoan hô! Không có công việc nào'}
           </h3>
           <p className="text-slate-500 mt-2">
             {activeFilter
               ? 'Thử chọn một bộ lọc khác hoặc bỏ chọn.'
               : activeTab === 'ASSIGNED_BY_ME'
-              ? 'Hãy phân công công việc từ Kế hoạch & Giao việc.'
-              : 'Bạn đã hoàn thành tất cả hoặc chưa có công việc được giao.'}
+                ? 'Hãy phân công công việc từ Kế hoạch & Giao việc.'
+                : 'Bạn đã hoàn thành tất cả hoặc chưa có công việc được giao.'}
           </p>
         </div>
 
@@ -781,23 +781,23 @@ export const TaskListClient = () => {
                               const bgColor = node.isCurrent
                                 ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-700'
                                 : node.isParent
-                                ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200'
-                                : level === 1
-                                ? 'bg-emerald-50/60 dark:bg-emerald-900/10 border-emerald-100'
-                                : level === 2
-                                ? 'bg-violet-50/60 dark:bg-violet-900/10 border-violet-100'
-                                : level === 3
-                                ? 'bg-orange-50/60 dark:bg-orange-900/10 border-orange-100'
-                                : 'bg-rose-50/60 dark:bg-rose-900/10 border-rose-100'; // cấp 4+
+                                  ? 'bg-slate-50 dark:bg-slate-800/50 border-slate-200'
+                                  : level === 1
+                                    ? 'bg-emerald-50/60 dark:bg-emerald-900/10 border-emerald-100'
+                                    : level === 2
+                                      ? 'bg-violet-50/60 dark:bg-violet-900/10 border-violet-100'
+                                      : level === 3
+                                        ? 'bg-orange-50/60 dark:bg-orange-900/10 border-orange-100'
+                                        : 'bg-rose-50/60 dark:bg-rose-900/10 border-rose-100'; // cấp 4+
 
                               // Label theo level
                               const levelLabel = node.isParent
                                 ? '↑ Task gốc'
                                 : node.isCurrent
-                                ? '▶ Task này'
-                                : level === 1
-                                ? `↓ Giao tiếp cấp 1`
-                                : `↓ Giao tiếp cấp ${level}`;
+                                  ? '▶ Task này'
+                                  : level === 1
+                                    ? `↓ Giao tiếp cấp 1`
+                                    : `↓ Giao tiếp cấp ${level}`;
 
                               // Indent theo cấp (cấp con thụt vào)
                               const indentPx = Math.max(0, level) * 12;
