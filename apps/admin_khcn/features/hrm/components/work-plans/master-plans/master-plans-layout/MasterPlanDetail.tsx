@@ -120,12 +120,12 @@ export function MasterPlanDetail() {
                     const desc = task.description || '';
                     const perspectiveMatch = desc.match(/Góc độ: (.*?)\n/);
                     const unitMatch = desc.match(/Đơn vị tính: (.*?)\n/);
-                    
+
                     const perspective = perspectiveMatch ? perspectiveMatch[1] : (task.perspective || '');
                     const unit = unitMatch ? unitMatch[1] : (task.metric || 'Lượt');
-                    
+
                     const rankInfo = state.ranks.find(r => r.code === perspective);
-                    
+
                     return (
                       <tr key={`${task.id || index}`} className="hover:bg-slate-50/50">
                         <td className="p-4">
@@ -157,9 +157,9 @@ export function MasterPlanDetail() {
                         </td>
                         <td className="p-4 text-right">
                           {!task.assigneeCode || task.assigneeCode === 'UNASSIGNED' ? (
-                            <Button 
-                              variant="secondary" 
-                              size="sm" 
+                            <Button
+                              variant="secondary"
+                              size="sm"
                               className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold"
                               onClick={() => {
                                 setTaskToAssign(task);
@@ -169,7 +169,7 @@ export function MasterPlanDetail() {
                               Giao việc
                             </Button>
                           ) : (
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
                               }`}>
                               {task.status || 'IN_PROGRESS'}
                             </span>
@@ -191,8 +191,8 @@ export function MasterPlanDetail() {
         </TabsContent>
 
       </Tabs>
-      
-      <TaskAssignModal 
+
+      <TaskAssignModal
         isOpen={assignModalOpen}
         task={taskToAssign}
         onClose={(assignedTaskId) => {

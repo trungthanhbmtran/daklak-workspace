@@ -4539,14 +4539,6 @@ async function main() {
     true,
   );
   await assignLeader(
-    'ngothih@daklak.gov.vn',
-    'ngothih',
-    'Ngô Thị H',
-    'H15.07.04',
-    'GIAM_DOC',
-    true,
-  );
-  await assignLeader(
     'lyvani@daklak.gov.vn',
     'lyvani',
     'Lý Văn I',
@@ -4596,22 +4588,8 @@ async function main() {
     'TRUONG_PHONG',
     true,
   );
-  await assignLeader(
-    'truongphonghc_ioc@daklak.gov.vn',
-    'truongphonghc_ioc',
-    'Trần Văn HC',
-    'H15.07.04.01',
-    'TRUONG_PHONG',
-    true,
-  );
-  await assignLeader(
-    'truongphongcn_ioc@daklak.gov.vn',
-    'truongphongcn_ioc',
-    'Phạm Thị CN',
-    'H15.07.04.03',
-    'TRUONG_PHONG',
-    true,
-  );
+
+
   await assignLeader(
     'lequangthanh@daklak.gov.vn',
     'lequangthanh',
@@ -4897,6 +4875,25 @@ async function main() {
     await setStaffing(code, 'PHO_TRUONG_PHONG', 1);
     await setStaffing(code, 'SPECIALIST', 3);
   }
+
+  // Cập nhật thêm định biên các chức danh khác (từ hrm-service)
+  // Phòng Hành chính - Tổng hợp IOC
+  await setStaffing('H15.07.04.01', 'KE_TOAN', 1);
+  await setStaffing('H15.07.04.01', 'VIEN_CHUC', 1);
+  await setStaffing('H15.07.04.01', 'VAN_THU', 1);
+  await setStaffing('H15.07.04.01', 'NHAN_VIEN', 4);
+  await setStaffing('H15.07.04.01', 'BAO_VE', 2);
+
+  // Phòng Khai thác và Quản lý dữ liệu IOC
+  await setStaffing('H15.07.04.02', 'VIEN_CHUC', 1);
+
+  // Phòng Hạ tầng - Đô thị thông minh IOC
+  await setStaffing('H15.07.04.03', 'VIEN_CHUC', 2);
+  await setStaffing('H15.07.04.03', 'NHAN_VIEN', 3);
+
+  // Phòng Quản lý Công nghệ và Đổi mới sáng tạo
+  await setStaffing('H15.07.10', 'VIEN_CHUC', 2);
+  await setStaffing('H15.07.10', 'NHAN_VIEN', 3);
 
   // ==========================================================
   // 10. CATEGORIES (Danh mục dùng chung)
