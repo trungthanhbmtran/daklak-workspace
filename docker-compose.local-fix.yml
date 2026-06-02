@@ -1,9 +1,0 @@
-services:
-  hrm-service:
-    image: daklak-hrm-service:local
-
-  api-gateway:
-    image: daklak-api-gateway:local
-
-  admin-frontend:
-    image: daklak-admin-khcn:local

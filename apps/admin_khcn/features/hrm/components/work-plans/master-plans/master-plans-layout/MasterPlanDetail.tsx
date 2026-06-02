@@ -195,10 +195,25 @@ export function MasterPlanDetail() {
                               Giao việc
                             </Button>
                           ) : (
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
-                              }`}>
-                              {task.status || 'IN_PROGRESS'}
-                            </span>
+                            <div className="flex items-center justify-end gap-2">
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
+                                }`}>
+                                {task.status || 'IN_PROGRESS'}
+                              </span>
+                              {task.status !== 'DONE' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 rounded-full text-xs"
+                                  onClick={() => {
+                                    setTaskToAssign(task);
+                                    setAssignModalOpen(true);
+                                  }}
+                                >
+                                  Chuyển giao
+                                </Button>
+                              )}
+                            </div>
                           )}
                         </td>
                       </tr>

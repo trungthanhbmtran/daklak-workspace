@@ -84,6 +84,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   const currentEmp = employees.find(e => e.code === taskState.assigneeCode);
   const isOverload = currentEmp ? (currentEmp.currentLoad + taskState.weight > currentEmp.rankLimit) : false;
 
+  const isTransfer = task?.assigneeCode && task.assigneeCode !== 'UNASSIGNED';
+
   const handleSubmit = async () => {
     if (!taskState.assigneeCode) return toast.error('Vui lòng chọn người thực hiện!');
     if (isOverload) return toast.error('Không thể giao! Khối lượng công việc vượt quá định mức của nhân sự.');
@@ -103,7 +105,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         assigneeCode: taskState.assigneeCode
       });
 
-      toast.success(`Đã giao việc thành công: ${task.title}`);
+      toast.success(isTransfer ? `Đã chuyển giao việc thành công: ${task.title}` : `Đã giao việc thành công: ${task.title}`);
       onClose(taskId);
     } catch {
       toast.error('Lỗi khi giao việc');
@@ -123,7 +125,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
               <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center">
                 <UserCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
               </div>
-              Phân công công việc
+              {isTransfer ? 'Chuyển giao công việc' : 'Phân công công việc'}
             </DialogTitle>
             <DialogDescription className="text-sm font-semibold text-slate-600 dark:text-slate-400 mt-3 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 leading-relaxed">
               {task.title}
@@ -282,7 +284,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
               disabled={!taskState.assigneeCode || isOverload || isSubmitting}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-11 px-8 shadow-sm"
             >
-              {isSubmitting ? "Đang xử lý..." : "Xác nhận giao việc"}
+              {isSubmitting ? "Đang xử lý..." : (isTransfer ? "Xác nhận chuyển giao" : "Xác nhận giao việc")}
             </Button>
           </div>
         </div>
