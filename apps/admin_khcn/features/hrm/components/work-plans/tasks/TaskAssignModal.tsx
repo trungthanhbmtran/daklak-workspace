@@ -174,7 +174,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                             className={cn("p-3 cursor-pointer border-b border-slate-100 last:border-0", idx === 0 && "bg-indigo-50/50")}
                           >
                             <Check className={cn("mr-3 h-4 w-4 text-indigo-600", taskState.assigneeCode === emp.code ? "opacity-100" : "opacity-0")} />
-                            <div className="flex flex-col flex-1 gap-1">
+                            <div className="flex flex-col flex-1 gap-1.5">
                               <div className="flex justify-between font-bold text-slate-800 text-sm">
                                 <div className="flex items-center gap-1.5">
                                   <span>{emp.name}</span>
@@ -182,10 +182,13 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                                 </div>
                                 <span className="text-xs text-indigo-600">Tải: {emp.currentLoad}/{emp.rankLimit}đ</span>
                               </div>
-                              <div className="text-xs text-slate-500 flex items-center gap-2">
-                                <span>{emp.jobTitle?.name || 'Chuyên viên'}</span>
-                                {emp.matchDomain && <span className="text-emerald-600 font-medium">✓Đúng môn</span>}
-                                {emp.matchLocation && <span className="text-blue-600 font-medium">✓Đúng tuyến</span>}
+                              <div className="text-xs text-slate-600">
+                                <span className="font-semibold text-slate-700">Lĩnh vực / Phòng ban:</span> {emp.department?.name || 'Đơn vị chuyên môn'}
+                              </div>
+                              <div className="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap mt-0.5">
+                                <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{emp.jobTitle?.name || 'Chuyên viên'}</span>
+                                {emp.matchDomain && <span className="text-emerald-600 font-medium bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">✓ Phù hợp chuyên môn</span>}
+                                {emp.matchLocation && <span className="text-blue-600 font-medium bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">✓ Đúng tuyến</span>}
                               </div>
                             </div>
                           </CommandItem>

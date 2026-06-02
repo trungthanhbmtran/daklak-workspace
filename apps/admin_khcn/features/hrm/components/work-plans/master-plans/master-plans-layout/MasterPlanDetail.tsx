@@ -35,7 +35,18 @@ export function MasterPlanDetail() {
     );
   }
 
-  const progress = selectedPlan.totalTasks > 0 ? Math.round((selectedPlan.completedTasks / selectedPlan.totalTasks) * 100) : 0;
+  let progress = 0;
+  if (selectedPlan.tasks && selectedPlan.tasks.length > 0) {
+    const totalWeight = selectedPlan.tasks.reduce((sum: number, t: any) => sum + (t.weight || 0), 0);
+    if (totalWeight > 0) {
+      const completedWeight = selectedPlan.tasks.reduce((sum: number, t: any) => sum + (t.status === 'DONE' ? (t.weight || 0) : 0), 0);
+      progress = Math.round((completedWeight / totalWeight) * 100);
+    } else {
+      progress = selectedPlan.totalTasks > 0 ? Math.round((selectedPlan.completedTasks / selectedPlan.totalTasks) * 100) : 0;
+    }
+  } else {
+    progress = selectedPlan.totalTasks > 0 ? Math.round((selectedPlan.completedTasks / selectedPlan.totalTasks) * 100) : 0;
+  }
 
   return (
     <div className="flex-1 min-w-0 h-full flex flex-col overflow-hidden bg-white border border-slate-200/60 rounded-xl shadow-sm">
@@ -94,6 +105,21 @@ export function MasterPlanDetail() {
               </h3>
               <p className="text-3xl font-black text-slate-900">{selectedPlan.totalTasks}</p>
               <p className="text-xs text-slate-500">Mục tiêu cá nhân được giao</p>
+            </div>
+
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 space-y-2">
+              <h3 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <svg className="w-4 h-4 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Thời gian thực hiện
+              </h3>
+              <p className="text-sm font-bold text-slate-800 mt-2">
+                {selectedPlan.startDate ? new Date(selectedPlan.startDate).toLocaleDateString('vi-VN') : 'Chưa xác định'} 
+                {' - '} 
+                {selectedPlan.endDate ? new Date(selectedPlan.endDate).toLocaleDateString('vi-VN') : 'Chưa xác định'}
+              </p>
+              <p className="text-xs text-slate-500">Kế hoạch triển khai</p>
             </div>
           </div>
         </TabsContent>

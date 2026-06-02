@@ -52,6 +52,8 @@ export function MasterPlanForm() {
 
   const [planTitle, setPlanTitle] = useState('');
   const [planObjective, setPlanObjective] = useState('');
+  const [planStartDate, setPlanStartDate] = useState('');
+  const [planEndDate, setPlanEndDate] = useState('');
 
   const { data: units = [] } = useGetCategoryByGroup('UNIT');
 
@@ -59,7 +61,7 @@ export function MasterPlanForm() {
   const [newPerspective, setNewPerspective] = useState<GovPerspective>('DIGITAL_TRANSFORM');
   const [newLegalBasis, setNewLegalBasis] = useState('');
   const [newMetricFactor, setNewMetricFactor] = useState(20);
-  const [newTargetValue, setNewTargetValue] = useState(100);
+  const [newTargetValue, setNewTargetValue] = useState<number | ''>('');
   const [newUnit, setNewUnit] = useState('');
   const [newSupervisor, setNewSupervisor] = useState('');
 
@@ -159,6 +161,10 @@ export function MasterPlanForm() {
       toast.error('Vui lòng chọn Đơn vị tính');
       return;
     }
+    if (newTargetValue === '') {
+      toast.error('Vui lòng nhập Giá trị mục tiêu cần đạt');
+      return;
+    }
 
     const newItem: TargetPlanItem = {
       id: `custom-${Date.now()}`,
@@ -194,7 +200,10 @@ export function MasterPlanForm() {
     try {
       const payload = {
         title: planTitle.trim() || `Kế hoạch ${framework} - Quý ${Math.floor(new Date().getMonth() / 3) + 1}/${new Date().getFullYear()}`,
+        description: planObjective,
         type: framework,
+        startDate: planStartDate || undefined,
+        endDate: planEndDate || undefined,
         tasks: items.map(item => ({
           title: item.title,
           description: `Góc độ: ${item.perspective}\nĐơn vị tính: ${item.unit}\nCăn cứ pháp lý: ${item.legalBasis || 'Không có'}\nĐơn vị giám sát: ${item.supervisor || 'N/A'}`,
@@ -249,6 +258,26 @@ export function MasterPlanForm() {
               value={planObjective}
               onChange={e => setPlanObjective(e.target.value)}
               placeholder="VD: Hoàn thành 100% dịch vụ công trực tuyến..."
+              className="h-10 text-sm focus-visible:ring-indigo-500"
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b border-slate-100 pb-6">
+          <div>
+            <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Thời gian bắt đầu</Label>
+            <Input
+              type="date"
+              value={planStartDate}
+              onChange={e => setPlanStartDate(e.target.value)}
+              className="h-10 text-sm focus-visible:ring-indigo-500"
+            />
+          </div>
+          <div>
+            <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Thời gian kết thúc</Label>
+            <Input
+              type="date"
+              value={planEndDate}
+              onChange={e => setPlanEndDate(e.target.value)}
               className="h-10 text-sm focus-visible:ring-indigo-500"
             />
           </div>
@@ -344,11 +373,12 @@ export function MasterPlanForm() {
               />
             </div>
             <div className="md:col-span-4">
-              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Mục tiêu</Label>
+              <Label className="text-xs font-bold text-slate-700 mb-1.5 block">Mục tiêu (Số lượng / Yêu cầu đạt)</Label>
               <Input
                 type="number"
                 value={newTargetValue}
-                onChange={e => setNewTargetValue(Number(e.target.value))}
+                onChange={e => setNewTargetValue(e.target.value === '' ? '' : Number(e.target.value))}
+                placeholder="VD: 100, 50..."
                 className="h-10 text-sm font-mono text-center focus-visible:ring-indigo-500"
               />
             </div>
