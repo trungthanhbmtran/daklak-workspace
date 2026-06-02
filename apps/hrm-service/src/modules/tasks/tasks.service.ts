@@ -377,14 +377,33 @@ export class TasksService {
   }
 
   async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
-    // Lấy task hiện tại để kiểm tra status
-    const currentTask = await this.prisma.task.findUnique({ where: { id }, select: { status: true } });
+    // Lấy task hiện tại để kiểm tra status và supervisorCode
+    const currentTask = await this.prisma.task.findUnique({
+      where: { id },
+      select: { status: true, supervisorCode: true }
+    });
 
     const dataToUpdate: any = {};
     if (assigneeCode !== undefined) dataToUpdate.assigneeCode = assigneeCode;
     if (departmentId !== undefined) dataToUpdate.departmentId = departmentId;
+
     // Ghi đè lại người giao việc nếu được truyền từ Gateway
-    if (assignerCode) dataToUpdate.assignerCode = assignerCode;
+    if (assignerCode) {
+      dataToUpdate.assignerCode = assignerCode;
+
+      // Kiểm tra xem assignerCode có phải là employee code hợp lệ không (tránh FK violation)
+      // assignerCode có thể là username (không phải employee) nếu user chưa có employee record
+      const assignerEmployee = await this.prisma.employee.findUnique({
+        where: { employeeCode: assignerCode },
+        select: { employeeCode: true }
+      });
+
+      // Chỉ set supervisorCode nếu assignerCode là employee hợp lệ VÀ task chưa có supervisor
+      if (assignerEmployee && (!currentTask?.supervisorCode || currentTask.supervisorCode === 'UNASSIGNED')) {
+        dataToUpdate.supervisorCode = assignerCode;
+      }
+    }
+
     // Nếu task đang là TEMPLATE (tạo từ master-plans), chuyển sang TODO khi được giao
     if (currentTask?.status === 'TEMPLATE') {
       dataToUpdate.status = 'TODO';
@@ -402,6 +421,7 @@ export class TasksService {
       updatedAt: t.updatedAt?.toISOString() || '',
     };
   }
+
 
   async addComment(data: any) {
     const c = await this.prisma.taskComment.create({
