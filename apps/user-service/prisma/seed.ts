@@ -5505,6 +5505,175 @@ async function main() {
   }
   console.log('✅ Hoàn tất cấp tài khoản & PBAC Roles cho ' + EMPLOYEES.length + ' nhân viên.');
 
+  // ==========================================================
+  // IOC - PHÂN QUYỀN THEO QUẢN LÝ CÔNG VIỆC
+  // Chỉ cấp quyền HRM/Task cho các user thuộc Trung tâm IOC
+  // ==========================================================
+  console.log('🔹 [IOC] Phân quyền Menu & Role theo Quản lý Công việc...');
+
+  // 1. Tạo role IOC_TASK_USER — chỉ có quyền về TASK, PLAN, OBJECTIVE, KPI, HRM_EMPLOYEE (VIEW)
+  const iocTaskPerms = await getPerms([
+    'HRM_EMPLOYEE.VIEW',
+    'HRM_EMPLOYEE.READ',
+    'PLAN.VIEW',
+    'PLAN.READ',
+    'PLAN.CREATE',
+    'PLAN.UPDATE',
+    'OBJECTIVE.VIEW',
+    'OBJECTIVE.READ',
+    'OBJECTIVE.CREATE',
+    'OBJECTIVE.UPDATE',
+    'TASK.VIEW',
+    'TASK.READ',
+    'TASK.CREATE',
+    'TASK.UPDATE',
+    'TASK.ASSIGN',
+    'TASK.COMPLETE',
+    'TASK.COMMENT',
+    'TASK.EVALUATE',
+    'KPI.VIEW',
+    'KPI.READ',
+    'KPI.UPDATE',
+    'KPI.EVALUATE',
+  ]);
+
+  const iocLeaderPerms = await getPerms([
+    'HRM_EMPLOYEE.*',
+    'PLAN.*',
+    'OBJECTIVE.*',
+    'TASK.*',
+    'KPI.*',
+    'REPORT.VIEW',
+    'REPORT.READ',
+    'REPORT.EXPORT',
+  ]);
+
+  // Role cho Giám đốc / Phó Giám đốc IOC
+  const iocLeaderRole = await prisma.role.upsert({
+    where: { code: 'IOC_LEADER' },
+    update: { name: 'Lãnh đạo Trung tâm IOC (Quản lý Công việc)', permissions: { set: iocLeaderPerms } },
+    create: {
+      code: 'IOC_LEADER',
+      name: 'Lãnh đạo Trung tâm IOC (Quản lý Công việc)',
+      permissions: { connect: iocLeaderPerms },
+    },
+  });
+
+  // Role cho Trưởng phòng / Phó phòng IOC
+  const iocManagerPerms = await getPerms([
+    'HRM_EMPLOYEE.VIEW',
+    'HRM_EMPLOYEE.READ',
+    'HRM_EMPLOYEE.MANAGE',
+    'PLAN.VIEW',
+    'PLAN.READ',
+    'PLAN.CREATE',
+    'PLAN.UPDATE',
+    'OBJECTIVE.VIEW',
+    'OBJECTIVE.READ',
+    'OBJECTIVE.UPDATE',
+    'TASK.VIEW',
+    'TASK.READ',
+    'TASK.CREATE',
+    'TASK.UPDATE',
+    'TASK.ASSIGN',
+    'TASK.COMPLETE',
+    'TASK.COMMENT',
+    'KPI.VIEW',
+    'KPI.READ',
+    'KPI.EVALUATE',
+    'REPORT.VIEW',
+    'REPORT.READ',
+  ]);
+
+  const iocManagerRole = await prisma.role.upsert({
+    where: { code: 'IOC_MANAGER' },
+    update: { name: 'Quản lý Phòng IOC (Quản lý Công việc)', permissions: { set: iocManagerPerms } },
+    create: {
+      code: 'IOC_MANAGER',
+      name: 'Quản lý Phòng IOC (Quản lý Công việc)',
+      permissions: { connect: iocManagerPerms },
+    },
+  });
+
+  // Role cho Viên chức / Nhân viên IOC
+  const iocStaffRole = await prisma.role.upsert({
+    where: { code: 'IOC_STAFF' },
+    update: { name: 'Viên chức / Nhân viên IOC (Quản lý Công việc)', permissions: { set: iocTaskPerms } },
+    create: {
+      code: 'IOC_STAFF',
+      name: 'Viên chức / Nhân viên IOC (Quản lý Công việc)',
+      permissions: { connect: iocTaskPerms },
+    },
+  });
+
+  console.log('✅ [IOC] Đã tạo 3 roles: IOC_LEADER, IOC_MANAGER, IOC_STAFF');
+
+  // 2. Danh sách email + role mapping cho tất cả user IOC
+  const iocUserRoles: { email: string; roleCode: string }[] = [
+    // Giám đốc & Phó Giám đốc Trung tâm IOC
+    { email: 'vonguyenhoangnam@daklak.gov.vn', roleCode: 'IOC_LEADER' },
+    { email: 'lexuanquang@daklak.gov.vn', roleCode: 'IOC_LEADER' },
+    { email: 'tranduytan@daklak.gov.vn', roleCode: 'IOC_LEADER' },
+    // Trưởng phòng các phòng IOC
+    { email: 'leanhtuan@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
+    { email: 'lequangthanh@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
+    { email: 'letrongvu@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
+    { email: 'truongphonghc_ioc@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
+    { email: 'truongphongcn_ioc@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
+    // Viên chức / Nhân viên IOC
+    { email: 'chautrongphat@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'nguyenthikimoanh@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'vothihien@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'phamtheanh@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'phandangvietvinhchuan@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'lethithanhkieu@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'nguyenkieutrang@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'hlisabya@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'nguyenthidiemquyen@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'ysomenuol@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'nguyenvuhuy@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'phungdinhhung@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'kieuvuadrong@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'nguyensyhop@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+    { email: 'nguyentienquang@daklak.gov.vn', roleCode: 'IOC_STAFF' },
+  ];
+
+  const iocRoleIdMap: Record<string, number> = {
+    IOC_LEADER: iocLeaderRole.id,
+    IOC_MANAGER: iocManagerRole.id,
+    IOC_STAFF: iocStaffRole.id,
+  };
+
+  // AUTHOR role ID (cần để đọc/viết bài)
+  const authorRoleId = pbacRoleMap['AUTHOR'];
+
+  let iocUpdated = 0;
+  for (const { email, roleCode } of iocUserRoles) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      console.log(`⚠️  [IOC] Không tìm thấy user: ${email}`);
+      continue;
+    }
+
+    const rolesConnect: { id: number }[] = [{ id: iocRoleIdMap[roleCode] }];
+    if (authorRoleId) rolesConnect.push({ id: authorRoleId });
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        roles: {
+          // set: [] xóa hết role cũ, rồi connect roles mới (chỉ IOC + AUTHOR)
+          set: [],
+          connect: rolesConnect,
+        },
+      },
+    });
+
+    iocUpdated++;
+    console.log(`✅ [IOC] Cập nhật ${email} → ${roleCode}`);
+  }
+
+  console.log(`✅ [IOC] Hoàn tất phân quyền Quản lý Công việc cho ${iocUpdated} users Trung tâm IOC.`);
   console.log('🚀 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
 }
 
