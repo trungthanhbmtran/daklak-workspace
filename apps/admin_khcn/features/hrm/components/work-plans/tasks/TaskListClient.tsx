@@ -810,7 +810,12 @@ export const TaskListClient = () => {
                                     {!isLast && <div className="w-0.5 flex-1 bg-slate-200 dark:bg-slate-700 mt-1"></div>}
                                   </div>
                                   {/* Node content */}
-                                  <div className={`flex-1 border rounded-xl p-3 mb-1.5 ${bgColor}`}>
+                                  <div 
+                                    onClick={() => node.id !== selectedTask?.id && setSelectedTask(node)}
+                                    className={`flex-1 border rounded-xl p-3 mb-1.5 transition-all duration-200 ${
+                                      node.id !== selectedTask?.id ? 'cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:ring-2 hover:ring-indigo-500/50' : 'ring-2 ring-indigo-500 shadow-sm'
+                                    } ${bgColor}`}
+                                  >
                                     <div className="flex items-center justify-between mb-1">
                                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                         {levelLabel}
@@ -819,7 +824,9 @@ export const TaskListClient = () => {
                                         {node.status}
                                       </span>
                                     </div>
-                                    <p className="font-semibold text-sm text-slate-800 dark:text-slate-100 line-clamp-1 mb-2">{node.title}</p>
+                                    <p className={`font-semibold text-sm line-clamp-1 mb-2 ${node.id === selectedTask?.id ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-100'}`}>
+                                      {node.title}
+                                    </p>
                                     <div className="flex items-center gap-2 text-xs text-slate-500">
                                       {node.assignerName && (
                                         <span className="flex items-center gap-1">
