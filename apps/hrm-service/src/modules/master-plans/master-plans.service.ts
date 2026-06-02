@@ -9,6 +9,7 @@ export class MasterPlansService {
     const where: any = {};
     if (query.type) where.type = query.type;
     if (query.status) where.status = query.status;
+    if (query.departmentId) where.departmentId = query.departmentId;
 
     const masterPlans = await this.prisma.masterPlan.findMany({
       where,
@@ -92,6 +93,8 @@ export class MasterPlansService {
         startDate: data.startDate ? new Date(data.startDate) : null,
         endDate: data.endDate ? new Date(data.endDate) : null,
         documentId: data.documentId,
+        departmentId: data.departmentId,
+        createdByCode: data.createdByCode,
       }
     });
 

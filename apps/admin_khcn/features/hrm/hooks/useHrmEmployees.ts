@@ -9,10 +9,10 @@ import type { HrmEmployeesListParams } from "../types";
  * Danh sách nhân viên có phân trang (trang HRM).
  */
 export function useHrmEmployeesList(params: HrmEmployeesListParams = {}) {
-  const { page = 1, pageSize = 10, keyword, departmentId, jobTitleId, status, assignableOnly } = params;
+  const { page = 1, pageSize = 10, keyword, departmentId, jobTitleId, status } = params;
   return useQuery({
-    queryKey: hrmKeys.list({ page, pageSize, keyword, departmentId, jobTitleId, status, assignableOnly }),
-    queryFn: () => hrmApi.list({ page, pageSize, keyword, departmentId, jobTitleId, status, assignableOnly }),
+    queryKey: hrmKeys.list({ page, pageSize, keyword, departmentId, jobTitleId, status }),
+    queryFn: () => hrmApi.list({ page, pageSize, keyword, departmentId, jobTitleId, status }),
   });
 }
 

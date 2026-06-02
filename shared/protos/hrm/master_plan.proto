@@ -40,6 +40,7 @@ message MasterPlanList {
 message FindAllMasterPlansRequest {
   string type = 1;
   string status = 2;
+  int32 departmentId = 3;
 }
 
 message FindMasterPlanByIdRequest {
@@ -54,6 +55,8 @@ message CreateMasterPlanRequest {
   string endDate = 5;
   string documentId = 6;
   repeated MasterPlanTaskPayload tasks = 7;
+  int32 departmentId = 8;
+  string createdByCode = 9;
 }
 
 message MasterPlanTaskPayload {

@@ -68,17 +68,20 @@ model TaskComment {
 }
 
 model MasterPlan {
-  id          Int       @id @default(autoincrement())
-  title       String    @map("title")
-  description String?   @db.Text
-  type        String    @default("SMART_GOAL") // SMART_GOAL, OKR, MASTER_PLAN
-  
-  startDate   DateTime? @map("start_date") @db.Date
-  endDate     DateTime? @map("end_date") @db.Date
-  status      String    @default("ACTIVE") // DRAFT, ACTIVE, COMPLETED, CANCELLED
-  
-  // Document Reference (Nghị quyết, Chủ trương sinh ra MasterPlan này)
-  documentId  String?   @map("document_id")
+    id          Int       @id @default(autoincrement())
+    title       String    @map("title")
+    description String?   @db.Text
+    type        String    @default("SMART_GOAL") // SMART_GOAL, OKR, MASTER_PLAN
+    
+    startDate   DateTime? @map("start_date") @db.Date
+    endDate     DateTime? @map("end_date") @db.Date
+    status      String    @default("ACTIVE") // DRAFT, ACTIVE, COMPLETED, CANCELLED
+    
+    departmentId Int?      @map("department_id")
+    createdByCode String?  @map("created_by_code")
+
+    // Document Reference (Nghị quyết, Chủ trương sinh ra MasterPlan này)
+    documentId  String?   @map("document_id")
 
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")

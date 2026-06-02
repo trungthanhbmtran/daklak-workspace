@@ -176,20 +176,22 @@ export class EmployeeController implements OnModuleInit {
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
 
-      // PBAC Task Assignment Filtering (Server-Side) based on Unit Code hierarchy and Role Categories
-      if (req.assignableOnly && req.callerUnitId) {
+      // NATIVE PBAC: Áp dụng lọc dữ liệu tự động theo JWT token để đảm bảo bảo mật
+      const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+
+      if (!isAdmin && req.callerUnitId) {
         const callerUnitCode = dicts.unitMap[req.callerUnitId]?.code;
         
         // Lấy category của người gọi API dựa vào job code
         const callerJt: any = Object.values(dicts.jtMap).find((jt: any) => jt.code === req.callerJobCode);
         const isCallerLeader = callerJt && ['EXECUTIVE', 'MANAGER'].includes(callerJt.category);
 
-        if (callerUnitCode && isCallerLeader) {
+        if (callerUnitCode) {
           const callerLevel = callerUnitCode.split('.').length;
 
           res.data = res.data.filter((emp: any) => {
-            // Không giao việc cho chính mình
-            if (emp.email === req.callerEmail) return false;
+            // Loại bỏ chính mình nếu đang dùng cờ giao việc (nếu frontend vẫn truyền)
+            if (req.assignableOnly && emp.email === req.callerEmail) return false;
             
             const targetUnitCode = emp.department?.code;
             if (!targetUnitCode) return false;
@@ -197,23 +199,30 @@ export class EmployeeController implements OnModuleInit {
             const targetLevel = targetUnitCode.split('.').length;
             const isTargetLeader = ['EXECUTIVE', 'MANAGER'].includes(emp.jobTitle?.category);
 
-            // 1. Cấp trên giao việc cho Lãnh đạo cấp dưới trực tiếp (Level + 1)
-            // Ví dụ: Lãnh đạo Sở -> Lãnh đạo Phòng/Trung tâm, Lãnh đạo Trung tâm -> Lãnh đạo Phòng thuộc Trung tâm
-            if (targetLevel === callerLevel + 1 && targetUnitCode.startsWith(callerUnitCode) && isTargetLeader) {
-              return true;
-            }
-            
-            // 2. Lãnh đạo giao việc cho Chuyên viên / Nhân viên trong cùng đơn vị
-            // Ví dụ: Lãnh đạo Phòng -> Chuyên viên, Lãnh đạo Phòng thuộc Trung tâm -> Chuyên viên
-            if (targetUnitCode === callerUnitCode && !isTargetLeader) {
-              return true;
+            // Cho phép thấy chính mình (nếu không phải trường hợp assignableOnly)
+            if (emp.email === req.callerEmail) return true;
+
+            if (isCallerLeader) {
+              // 1. Cấp trên thấy: Lãnh đạo cấp dưới trực tiếp (Level + 1)
+              if (targetLevel === callerLevel + 1 && targetUnitCode.startsWith(callerUnitCode) && isTargetLeader) {
+                return true;
+              }
+              // 2. Lãnh đạo thấy: Nhân viên trong cùng đơn vị
+              if (targetUnitCode === callerUnitCode && !isTargetLeader) {
+                return true;
+              }
+            } else {
+              // Nhân viên thường: Chỉ thấy người trong cùng đơn vị
+              if (targetUnitCode === callerUnitCode) {
+                return true;
+              }
             }
 
             return false;
           });
         } else {
-          // Nếu không phải lãnh đạo hoặc không có mã đơn vị, trả về danh sách rỗng (không có quyền giao việc)
-          res.data = [];
+          // Không có mã đơn vị, chỉ thấy chính mình
+          res.data = res.data.filter((emp: any) => emp.email === req.callerEmail);
         }
       }
     }

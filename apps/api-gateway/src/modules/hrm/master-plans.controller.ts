@@ -32,10 +32,17 @@ export class MasterPlansController implements OnModuleInit {
 
   @Get()
   async findAll(
+    @Req() req: any,
     @Query('type') type?: string,
     @Query('status') status?: string,
   ) {
-    return firstValueFrom(this.masterPlanService.FindAll({ type, status }));
+    const user = req.user;
+    let departmentId: number | undefined;
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    if (!isAdmin && user?.unitId) {
+      departmentId = parseInt(user.unitId, 10);
+    }
+    return firstValueFrom(this.masterPlanService.FindAll({ type, status, departmentId }));
   }
 
   @Get('advanced/historical-feasibility')
@@ -109,6 +116,9 @@ export class MasterPlansController implements OnModuleInit {
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     body.createdByCode = req.user?.employeeCode || req.user?.username || 'system';
+    if (req.user?.unitId) {
+      body.departmentId = parseInt(req.user.unitId, 10);
+    }
     return firstValueFrom(this.masterPlanService.Create(body));
   }
 
