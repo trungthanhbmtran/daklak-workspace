@@ -2556,18 +2556,10 @@ async function main() {
     { code: 'UBND_TINH', name: 'UBND Cấp Tỉnh', level: 1 },
     { code: 'HDND_TINH', name: 'HĐND Cấp Tỉnh', level: 1 },
     { code: 'SO_NGANH', name: 'Sở, Ban, Ngành', level: 2 },
-    { code: 'UBND_HUYEN', name: 'UBND Cấp Huyện', level: 2 },
-    { code: 'HDND_HUYEN', name: 'HĐND Cấp Huyện', level: 2 },
     { code: 'PHONG_BAN_SO', name: 'Phòng chuyên môn cấp Sở', level: 3 },
-    {
-      code: 'PHONG_BAN_HUYEN',
-      name: 'Phòng, Ban chuyên môn cấp Huyện',
-      level: 3,
-    },
+    { code: 'PHONG_BAN_TRUNG_TAM', name: 'Phòng chuyên môn cấp Trung tâm', level: 4 },
     { code: 'VAN_PHONG', name: 'Văn phòng', level: 3 },
     { code: 'THANH_TRA', name: 'Thanh tra', level: 3 },
-    { code: 'UBND_XA', name: 'UBND Cấp Xã/Phường', level: 3 },
-    { code: 'HDND_XA', name: 'HĐND Cấp Xã', level: 3 },
     { code: 'DVSN', name: 'Đơn vị sự nghiệp', level: 2 },
     { code: 'CHI_CUC', name: 'Chi cục / Tổng cục', level: 2 },
     { code: 'TRUNG_TAM', name: 'Trung tâm', level: 3 },
@@ -3708,31 +3700,22 @@ async function main() {
       jt: 'CHU_TICH',
       types: [
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
         'HDND_TINH',
-        'HDND_HUYEN',
-        'HDND_XA',
-      ],
+        ],
     },
     {
       jt: 'PHO_CHU_TICH',
       types: [
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
         'HDND_TINH',
-        'HDND_HUYEN',
-        'HDND_XA',
-      ],
+        ],
     },
-    { jt: 'UY_VIEN_UBND', types: ['UBND_TINH', 'UBND_HUYEN', 'UBND_XA'] },
+    { jt: 'UY_VIEN_UBND', types: ['UBND_TINH'] },
     { jt: 'GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     { jt: 'PHO_GIAM_DOC', types: ['SO_NGANH', 'DVSN', 'TRUNG_TAM', 'CHI_CUC'] },
     {
       jt: 'TRUONG_PHONG',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'DVSN',
         'TRUNG_TAM',
@@ -3742,7 +3725,6 @@ async function main() {
     {
       jt: 'PHO_PHONG',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'DVSN',
         'TRUNG_TAM',
@@ -3759,7 +3741,6 @@ async function main() {
     {
       jt: 'SPECIALIST',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'DVSN',
@@ -3769,16 +3750,15 @@ async function main() {
     },
     {
       jt: 'SENIOR_SPECIALIST',
-      types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
     },
     {
       jt: 'PRINCIPAL_SPECIALIST',
-      types: ['PHONG_BAN_HUYEN', 'PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
+      types: ['PHONG_BAN_SO', 'VAN_PHONG', 'CHI_CUC'],
     },
     {
       jt: 'OFFICER',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'DVSN',
@@ -3788,7 +3768,6 @@ async function main() {
     {
       jt: 'STAFF',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'THANH_TRA',
@@ -3799,7 +3778,6 @@ async function main() {
     {
       jt: 'CONG_CHUC_PHU_TRACH',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'DVSN',
@@ -3809,7 +3787,6 @@ async function main() {
     {
       jt: 'CAN_BO_PHU_TRACH',
       types: [
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'DVSN',
@@ -3822,8 +3799,6 @@ async function main() {
         'CQ_DANG',
         'SO_NGANH',
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
         'DVSN',
         'CHI_CUC',
       ],
@@ -3834,8 +3809,6 @@ async function main() {
         'CQ_DANG',
         'SO_NGANH',
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
         'DVSN',
         'CHI_CUC',
       ],
@@ -3846,8 +3819,6 @@ async function main() {
         'CQ_DANG',
         'SO_NGANH',
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
         'DVSN',
         'CHI_CUC',
       ],
@@ -3856,7 +3827,6 @@ async function main() {
       jt: 'BI_THU_CHI_BO',
       types: [
         'CQ_DANG',
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'THANH_TRA',
@@ -3865,15 +3835,12 @@ async function main() {
         'CHI_CUC',
         'SO_NGANH',
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
-      ],
+        ],
     },
     {
       jt: 'PHO_BI_THU_CHI_BO',
       types: [
         'CQ_DANG',
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'THANH_TRA',
@@ -3882,15 +3849,12 @@ async function main() {
         'CHI_CUC',
         'SO_NGANH',
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
-      ],
+        ],
     },
     {
       jt: 'CHI_UY_VIEN',
       types: [
         'CQ_DANG',
-        'PHONG_BAN_HUYEN',
         'PHONG_BAN_SO',
         'VAN_PHONG',
         'THANH_TRA',
@@ -3899,15 +3863,20 @@ async function main() {
         'CHI_CUC',
         'SO_NGANH',
         'UBND_TINH',
-        'UBND_HUYEN',
-        'UBND_XA',
-      ],
+        ],
     },
     { jt: 'BI_THU', types: ['CQ_DANG'] },
     { jt: 'PHO_BI_THU', types: ['CQ_DANG'] },
     { jt: 'TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
     { jt: 'PHO_TRUONG_BAN', types: ['CQ_DANG', 'TO_CHUC_CTXH'] },
   ];
+
+  // Dynamically add PHONG_BAN_TRUNG_TAM to any link that supports PHONG_BAN_SO
+  for (const link of links) {
+    if (link.types.includes('PHONG_BAN_SO') && !link.types.includes('PHONG_BAN_TRUNG_TAM')) {
+      link.types.push('PHONG_BAN_TRUNG_TAM');
+    }
+  }
 
   const templatesToCreate: { unitTypeId: number; jobTitleId: number }[] = [];
   for (const link of links) {
@@ -3936,10 +3905,8 @@ async function main() {
   // ==========================================================
   console.log('📦 Seeding Organization Units...');
   const ubndTinhTypeId = unitTypeMap['UBND_TINH'].id;
-  const ubndHuyenTypeId = unitTypeMap['UBND_HUYEN'].id;
-  const ubndXaTypeId = unitTypeMap['UBND_XA'].id;
   const soTypeId = unitTypeMap['SO_NGANH'].id;
-  const phongTypeId = unitTypeMap['PHONG_BAN_HUYEN'].id;
+  const phongTypeId = unitTypeMap['PHONG_BAN_SO'].id; // fallback changed from HUYEN to SO
   const dvsnTypeId = unitTypeMap['DVSN'].id;
   const trungTamTypeId = unitTypeMap['TRUNG_TAM'].id;
 
@@ -3993,66 +3960,12 @@ async function main() {
   }
 
   // Thêm ví dụ UBND Xã (Trực thuộc Tỉnh theo mô hình 2 cấp)
-  await prisma.organizationUnit.upsert({
-    where: { code: 'H15.51' },
-    update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: {
-      code: 'H15.51',
-      name: 'UBND Phường Tân Lợi',
-      parentId: province.id,
-      typeId: ubndXaTypeId,
-    },
-  });
-  await prisma.organizationUnit.upsert({
-    where: { code: 'H15.52' },
-    update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: {
-      code: 'H15.52',
-      name: 'UBND Phường Tân Lập',
-      parentId: province.id,
-      typeId: ubndXaTypeId,
-    },
-  });
-  await prisma.organizationUnit.upsert({
-    where: { code: 'H15.53' },
-    update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: {
-      code: 'H15.53',
-      name: 'UBND Phường Tân An',
-      parentId: province.id,
-      typeId: ubndXaTypeId,
-    },
-  });
-  await prisma.organizationUnit.upsert({
-    where: { code: 'H15.54' },
-    update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: {
-      code: 'H15.54',
-      name: 'UBND Phường Thành Nhất',
-      parentId: province.id,
-      typeId: ubndXaTypeId,
-    },
-  });
-  await prisma.organizationUnit.upsert({
-    where: { code: 'H15.55' },
-    update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: {
-      code: 'H15.55',
-      name: 'UBND Xã Hòa Phú',
-      parentId: province.id,
-      typeId: ubndXaTypeId,
-    },
-  });
-  await prisma.organizationUnit.upsert({
-    where: { code: 'H15.56' },
-    update: { parentId: province.id, typeId: ubndXaTypeId },
-    create: {
-      code: 'H15.56',
-      name: 'UBND Phường Ea Kao',
-      parentId: province.id,
-      typeId: ubndXaTypeId,
-    },
-  });
+  
+  
+  
+  
+  
+  
 
   // Thêm Đơn vị sự nghiệp tiêu biểu
   const soKhcn = await prisma.organizationUnit.findUnique({
@@ -4172,74 +4085,74 @@ async function main() {
   // Các phòng thuộc Trung tâm Đổi mới Sáng tạo
   await createDept('H15.07.01', {
     code: 'H15.07.01.01',
-    name: 'Phòng Hành chính - Tổng hợp',
-    typeCode: 'VAN_PHONG',
+      name: 'Phòng Hành chính - Tổng hợp',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.01', {
     code: 'H15.07.01.02',
-    name: 'Phòng Ươm tạo và Phát triển',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Ươm tạo và Phát triển',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
 
   // Các phòng thuộc Trung tâm IOC
   await createDept('H15.07.04', {
     code: 'H15.07.04.01',
-    name: 'Phòng Hành chính - Tổng hợp',
-    typeCode: 'VAN_PHONG',
+      name: 'Phòng Hành chính - Tổng hợp',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.04', {
     code: 'H15.07.04.02',
-    name: 'Phòng Khai thác và Quản lý dữ liệu',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Khai thác và Quản lý dữ liệu',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.04', {
     code: 'H15.07.04.03',
-    name: 'Phòng Hạ tầng - Đô thị thông minh',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Hạ tầng - Đô thị thông minh',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
 
   // Các phòng thuộc Trung tâm Kỹ thuật Tiêu chuẩn - Đo lường - Chất lượng
   await createDept('H15.07.02', {
     code: 'H15.07.02.01',
-    name: 'Phòng Hành chính - Tổ chức',
-    typeCode: 'VAN_PHONG',
+      name: 'Phòng Hành chính - Tổ chức',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.02', {
     code: 'H15.07.02.02',
-    name: 'Phòng Đo lường',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Đo lường',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.02', {
     code: 'H15.07.02.03',
-    name: 'Phòng Thử nghiệm',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Thử nghiệm',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
 
   // Các phòng thuộc Trung tâm Thông tin - Ứng dụng Khoa học và Công nghệ
   await createDept('H15.07.03', {
     code: 'H15.07.03.01',
-    name: 'Phòng Hành chính - Tổng hợp',
-    typeCode: 'VAN_PHONG',
+      name: 'Phòng Hành chính - Tổng hợp',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.03', {
     code: 'H15.07.03.02',
-    name: 'Phòng Thông tin KH&CN',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Thông tin KH&CN',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.03', {
     code: 'H15.07.03.03',
-    name: 'Phòng Ứng dụng KH&CN',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Ứng dụng KH&CN',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.03', {
     code: 'H15.07.03.04',
-    name: 'Phòng Dịch vụ KH&CN',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Phòng Dịch vụ KH&CN',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
   await createDept('H15.07.03', {
     code: 'H15.07.03.05',
-    name: 'Trại Thực nghiệm KH&CN',
-    typeCode: 'PHONG_BAN_SO',
+      name: 'Trại Thực nghiệm KH&CN',
+      typeCode: 'PHONG_BAN_TRUNG_TAM',
   });
 
   // ==========================

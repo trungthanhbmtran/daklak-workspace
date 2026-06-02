@@ -75,11 +75,11 @@ export function OrganizationUnitEdit() {
     unitTypes.forEach((t) => {
       const name = t.name;
       // 1. Nhóm Đảng & Đoàn thể (Lãnh đạo chính trị)
-      if (['Thành ủy', 'Huyện ủy', 'Đảng ủy', 'Chi bộ', 'Đảng bộ', 'Ban Đảng', 'Đoàn thanh niên', 'Công đoàn', 'Mặt trận'].some(k => name.includes(k))) {
+      if (['Thành ủy', 'Đảng ủy', 'Chi bộ', 'Đảng bộ', 'Ban Đảng', 'Đoàn thanh niên', 'Công đoàn', 'Mặt trận'].some(k => name.includes(k))) {
         groups.party.push(t);
       }
       // 2. Nhóm Hành chính Nhà nước (Quản lý chuyên môn)
-      else if (['Sở', 'Cục', 'Vụ', 'Tổng cục', 'Chi cục', 'Phòng chuyên môn', 'UBND', 'HĐND', 'Văn phòng', 'Thanh tra'].some(k => name.includes(k))) {
+      else if (['Sở', 'Cục', 'Vụ', 'Tổng cục', 'Chi cục', 'Phòng chuyên môn cấp Sở', 'UBND', 'HĐND', 'Văn phòng', 'Thanh tra'].some(k => name.includes(k))) {
         groups.state.push(t);
       }
       // 3. Nhóm Sự nghiệp (Dịch vụ công)

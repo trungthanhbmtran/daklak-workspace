@@ -100,7 +100,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
       });
 
       await hrmTasksApi.assignTask(taskId, {
-        assigneeCode: taskState.assigneeCode,
+        assigneeCode: taskState.assigneeCode
       });
 
       toast.success(`Đã giao việc thành công: ${task.title}`);
