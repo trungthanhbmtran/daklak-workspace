@@ -643,9 +643,9 @@ export const TaskListClient = () => {
 
       {/* Task Detail Dialog */}
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
-        <DialogContent className="w-[95vw] max-w-[1200px] h-[90vh] font-sans p-0 overflow-hidden rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
+        <DialogContent className="w-[96vw] sm:w-[90vw] max-w-[1200px] max-h-[95vh] sm:max-h-[90vh] font-sans p-0 overflow-hidden rounded-2xl sm:rounded-[2rem] border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
           {selectedTask && (
-            <div className="flex flex-col h-full bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl">
+            <div className="flex flex-col flex-1 min-h-0 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl">
               {/* Header Bar */}
               <div className="flex items-center justify-between px-8 py-5 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 sticky top-0 z-10">
                 <div className="flex items-center gap-3">
