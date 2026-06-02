@@ -22,6 +22,7 @@ import { Label } from '@/components/ui/label';
 import { useSearchParams } from 'next/navigation';
 import { Search } from '@/components/ui/search';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 import { SmartAssignDrawer } from './SmartAssignDrawer';
 
@@ -50,6 +51,24 @@ export const TaskListClient = () => {
   // Delegation chain (chuỗi giao việc)
   const [delegationChain, setDelegationChain] = useState<any[]>([]);
   const [isLoadingChain, setIsLoadingChain] = useState(false);
+
+  // Fetch priority categories
+  const { data: prioritiesRes } = useGetCategoryByGroup('TASK_PRIORITY');
+  const priorities = prioritiesRes?.data || [];
+
+  const getPriorityName = (code: string) => {
+    const codeUpper = (code || 'MEDIUM').toUpperCase();
+    const matched = priorities.find((p: any) => p.code?.toUpperCase() === codeUpper);
+    if (matched?.name) return matched.name;
+    
+    // Fallback
+    switch(codeUpper) {
+      case 'HIGH': return 'Cao';
+      case 'MEDIUM': return 'Trung bình';
+      case 'LOW': return 'Thấp';
+      default: return codeUpper;
+    }
+  };
 
   // Server side filtering
   const { data, isLoading, refetch } = useTasksList({
@@ -475,69 +494,17 @@ export const TaskListClient = () => {
                       {task.description || 'Chưa có mô tả chi tiết cho công việc này.'}
                     </p>
 
-                    <div className="mt-auto space-y-3">
-                      {/* Mini timeline: Người giao → Người thực hiện → Phòng ban */}
-                      <div className="bg-slate-50 dark:bg-slate-800/40 rounded-2xl p-3 border border-slate-100 dark:border-slate-700/50">
-                        <div className="relative flex flex-col gap-0">
-
-                          {/* Node 1: Người giao việc */}
-                          {task.assignerCode && task.assignerCode !== 'UNASSIGNED' && task.assignerCode !== task.assigneeCode && (
-                            <div className="flex items-center gap-2.5 pb-2">
-                              <div className="relative flex flex-col items-center shrink-0 w-6">
-                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-800 shadow-sm z-10"></div>
-                                {/* line xuống */}
-                                <div className="w-px flex-1 bg-slate-200 dark:bg-slate-700 mt-0.5 h-full absolute top-3 left-1/2 -translate-x-1/2"></div>
-                              </div>
-                              <div className="flex items-center gap-2 min-w-0 flex-1 pb-1">
-                                <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300 font-black text-[10px] shrink-0 shadow-sm">
-                                  {(task.assignerName || task.assignerCode)?.charAt(0) || 'G'}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-[9px] font-bold uppercase tracking-wider text-emerald-500 leading-none mb-0.5">Người giao</p>
-                                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">{task.assignerName || task.assignerCode}</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Node 2: Người thực hiện */}
-                          <div className={`flex items-center gap-2.5 ${task.departmentId ? 'pb-2' : ''}`}>
-                            <div className="relative flex flex-col items-center shrink-0 w-6">
-                              <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-slate-800 shadow-sm z-10"></div>
-                              {task.departmentId && (
-                                <div className="w-px bg-slate-200 dark:bg-slate-700 mt-0.5 h-full absolute top-3 left-1/2 -translate-x-1/2"></div>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 min-w-0 flex-1">
-                              <div className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-700 dark:text-indigo-300 font-black text-[10px] shrink-0 shadow-sm">
-                                {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
-                              </div>
-                              <div className="min-w-0">
-                                <p className="text-[9px] font-bold uppercase tracking-wider text-indigo-500 leading-none mb-0.5">Người thực hiện</p>
-                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">
-                                  {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Node 3: Phòng ban (nếu có) */}
-                          {task.departmentId && (
-                            <div className="flex items-center gap-2.5">
-                              <div className="flex flex-col items-center shrink-0 w-6">
-                                <div className="w-2.5 h-2.5 rounded-full bg-violet-500 ring-2 ring-white dark:ring-slate-800 shadow-sm z-10"></div>
-                              </div>
-                              <div className="flex items-center gap-2 min-w-0 flex-1">
-                                <div className="w-6 h-6 rounded-full bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center text-violet-700 font-black text-[10px] shrink-0 shadow-sm">
-                                  <User className="w-3 h-3" />
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="text-[9px] font-bold uppercase tracking-wider text-violet-500 leading-none mb-0.5">Nhóm được giao</p>
-                                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 truncate">Phòng ban #{task.departmentId}</p>
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                    <div className="space-y-2 mt-auto">
+                      {/* Người thực hiện (chỉ hiển thị assignee trên card) */}
+                      <div className="flex items-center text-sm bg-slate-50 dark:bg-slate-800/50 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700/50">
+                        <div className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center mr-2.5 text-indigo-700 dark:text-indigo-300 font-bold text-xs shrink-0">
+                          {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
+                        </div>
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Người thực hiện</span>
+                          <span className="truncate font-medium text-slate-800 dark:text-slate-200">
+                            {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}
+                          </span>
                         </div>
                       </div>
 
@@ -556,7 +523,7 @@ export const TaskListClient = () => {
                   <div className="px-5 py-3 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center group-hover:bg-indigo-50/50 dark:group-hover:bg-indigo-900/20 transition-colors duration-200">
                     <span className={`text-[10px] font-bold uppercase tracking-widest flex items-center ${getPriorityColor(task.priority)}`}>
                       <div className={`w-1.5 h-1.5 rounded-full mr-1.5 bg-current shadow-sm`} />
-                      {task.priority || 'MEDIUM'} PRIORITY
+                      Ưu tiên: {getPriorityName(task.priority)}
                     </span>
                     <Button variant="link" onClick={() => setSelectedTask(task)} className="px-0 text-indigo-600 font-bold group-hover:translate-x-2 transition-transform duration-300">
                       Chi tiết &rarr;
