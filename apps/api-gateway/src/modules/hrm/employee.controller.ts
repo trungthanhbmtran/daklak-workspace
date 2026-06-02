@@ -25,6 +25,10 @@ export class EmployeeController implements OnModuleInit {
   private employeeService: any;
   private orgService: any;
   private catService: any;
+  
+  // Cache for dictionaries to optimize API speed
+  private dictCache: { data: any; expiresAt: number } | null = null;
+  private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
   constructor(
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
@@ -48,6 +52,9 @@ export class EmployeeController implements OnModuleInit {
    * Lấy danh sách map của JobTitle và Unit từ user-service
    */
   private async fetchDictionaries() {
+    if (this.dictCache && this.dictCache.expiresAt > Date.now()) {
+      return this.dictCache.data;
+    }
     try {
       const results = await Promise.allSettled([
         firstValueFrom(this.orgService.ListJobTitles({})),
@@ -93,7 +100,13 @@ export class EmployeeController implements OnModuleInit {
       };
       flattenNodes(treeRes?.nodes || []);
 
-      return { jtMap, unitMap, catMap };
+      const data = { jtMap, unitMap, catMap };
+      this.dictCache = {
+        data,
+        expiresAt: Date.now() + this.CACHE_TTL_MS,
+      };
+
+      return data;
     } catch (error) {
       return { jtMap: {}, unitMap: {}, catMap: {} };
     }
