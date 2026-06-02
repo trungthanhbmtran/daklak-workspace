@@ -68,7 +68,8 @@ export class EmployeeController implements OnModuleInit {
           name: jt.name, 
           code: jt.code, 
           monitoredUnitIds: jt.monitoredUnitIds || [],
-          domainId: jt.domainId || null
+          domainId: jt.domainId || null,
+          category: jt.category || ''
         };
       });
 
@@ -162,18 +163,13 @@ export class EmployeeController implements OnModuleInit {
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
 
-      // PBAC Task Assignment Filtering (Server-Side) based on Unit Code hierarchy
+      // PBAC Task Assignment Filtering (Server-Side) based on Unit Code hierarchy and Role Categories
       if (req.assignableOnly && req.callerUnitId) {
         const callerUnitCode = dicts.unitMap[req.callerUnitId]?.code;
-        const leaderJobCodes = [
-          'CHU_TICH', 'PHO_CHU_TICH',
-          'GIAM_DOC', 'PHO_GIAM_DOC',
-          'TRUONG_PHONG', 'PHO_PHONG',
-          'CHANH_VAN_PHONG', 'PHO_CHANH_VAN_PHONG'
-        ];
         
-        // Kiểm tra xem người gọi API có thuộc nhóm lãnh đạo quản lý không
-        const isCallerLeader = leaderJobCodes.includes(req.callerJobCode || '');
+        // Lấy category của người gọi API dựa vào job code
+        const callerJt: any = Object.values(dicts.jtMap).find((jt: any) => jt.code === req.callerJobCode);
+        const isCallerLeader = callerJt && ['EXECUTIVE', 'MANAGER'].includes(callerJt.category);
 
         if (callerUnitCode && isCallerLeader) {
           const callerLevel = callerUnitCode.split('.').length;
@@ -186,8 +182,7 @@ export class EmployeeController implements OnModuleInit {
             if (!targetUnitCode) return false;
 
             const targetLevel = targetUnitCode.split('.').length;
-            const targetJobCode = emp.jobTitle?.code || 'CHUYEN_VIEN';
-            const isTargetLeader = leaderJobCodes.includes(targetJobCode);
+            const isTargetLeader = ['EXECUTIVE', 'MANAGER'].includes(emp.jobTitle?.category);
 
             // 1. Cấp trên giao việc cho Lãnh đạo cấp dưới trực tiếp (Level + 1)
             // Ví dụ: Lãnh đạo Sở -> Lãnh đạo Phòng/Trung tâm, Lãnh đạo Trung tâm -> Lãnh đạo Phòng thuộc Trung tâm
