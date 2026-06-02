@@ -162,31 +162,51 @@ export class EmployeeController implements OnModuleInit {
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
 
-      // PBAC Task Assignment Filtering (Server-Side)
-      if (req.assignableOnly && req.callerJobCode) {
-        res.data = res.data.filter((emp: any) => {
-          // Không giao việc cho chính mình
-          if (emp.email === req.callerEmail) return false;
-          
-          const targetCode = emp.jobTitle?.code || 'CHUYEN_VIEN';
-          
-          if (req.callerJobCode === 'GIAM_DOC') {
-            return ['PHO_GIAM_DOC', 'TRUONG_PHONG', 'CHANH_VAN_PHONG'].includes(targetCode);
-          }
-          if (req.callerJobCode === 'PHO_GIAM_DOC') {
-            return ['TRUONG_PHONG', 'CHANH_VAN_PHONG', 'PHO_PHONG', 'PHO_CHANH_VAN_PHONG'].includes(targetCode);
-          }
-          if (['TRUONG_PHONG', 'CHANH_VAN_PHONG'].includes(req.callerJobCode)) {
-            if (emp.departmentId !== req.callerUnitId) return false;
-            return ['PHO_PHONG', 'PHO_CHANH_VAN_PHONG', 'CHUYEN_VIEN', 'NHAN_VIEN'].includes(targetCode);
-          }
-          if (['PHO_PHONG', 'PHO_CHANH_VAN_PHONG'].includes(req.callerJobCode)) {
-            if (emp.departmentId !== req.callerUnitId) return false;
-            return ['CHUYEN_VIEN', 'NHAN_VIEN'].includes(targetCode);
-          }
-          
-          return false;
-        });
+      // PBAC Task Assignment Filtering (Server-Side) based on Unit Code hierarchy
+      if (req.assignableOnly && req.callerUnitId) {
+        const callerUnitCode = dicts.unitMap[req.callerUnitId]?.code;
+        const leaderJobCodes = [
+          'CHU_TICH', 'PHO_CHU_TICH',
+          'GIAM_DOC', 'PHO_GIAM_DOC',
+          'TRUONG_PHONG', 'PHO_PHONG',
+          'CHANH_VAN_PHONG', 'PHO_CHANH_VAN_PHONG'
+        ];
+        
+        // Kiểm tra xem người gọi API có thuộc nhóm lãnh đạo quản lý không
+        const isCallerLeader = leaderJobCodes.includes(req.callerJobCode || '');
+
+        if (callerUnitCode && isCallerLeader) {
+          const callerLevel = callerUnitCode.split('.').length;
+
+          res.data = res.data.filter((emp: any) => {
+            // Không giao việc cho chính mình
+            if (emp.email === req.callerEmail) return false;
+            
+            const targetUnitCode = emp.department?.code;
+            if (!targetUnitCode) return false;
+
+            const targetLevel = targetUnitCode.split('.').length;
+            const targetJobCode = emp.jobTitle?.code || 'CHUYEN_VIEN';
+            const isTargetLeader = leaderJobCodes.includes(targetJobCode);
+
+            // 1. Cấp trên giao việc cho Lãnh đạo cấp dưới trực tiếp (Level + 1)
+            // Ví dụ: Lãnh đạo Sở -> Lãnh đạo Phòng/Trung tâm, Lãnh đạo Trung tâm -> Lãnh đạo Phòng thuộc Trung tâm
+            if (targetLevel === callerLevel + 1 && targetUnitCode.startsWith(callerUnitCode) && isTargetLeader) {
+              return true;
+            }
+            
+            // 2. Lãnh đạo giao việc cho Chuyên viên / Nhân viên trong cùng đơn vị
+            // Ví dụ: Lãnh đạo Phòng -> Chuyên viên, Lãnh đạo Phòng thuộc Trung tâm -> Chuyên viên
+            if (targetUnitCode === callerUnitCode && !isTargetLeader) {
+              return true;
+            }
+
+            return false;
+          });
+        } else {
+          // Nếu không phải lãnh đạo hoặc không có mã đơn vị, trả về danh sách rỗng (không có quyền giao việc)
+          res.data = [];
+        }
       }
     }
     return res;
