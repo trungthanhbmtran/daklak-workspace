@@ -120,6 +120,9 @@ message ListTasksRequest {
   string currentUserCode = 6; // optional
   bool isAdmin = 7; // optional
   int32 currentUserDept = 8; // optional
+  string assignerCode = 9; // optional - lọc theo người giao việc (tab Đã giao)
+  string status = 10; // optional - lọc theo trạng thái
+  string priority = 11; // optional - lọc theo mức độ ưu tiên
 }
 
 message TaskStats {
