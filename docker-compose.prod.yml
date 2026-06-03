@@ -89,7 +89,7 @@ services:
       rabbitmq:
         condition: service_healthy
     env_file:
-      - .env.production
+      - .env.productions
     environment:
       DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_systems
       REDIS_HOST: redis
