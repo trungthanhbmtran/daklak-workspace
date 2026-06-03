@@ -89,15 +89,17 @@ export class EmployeeController implements OnModuleInit {
       const unitMap: Record<number, any> = {};
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
-          if (n.id) {
-            unitMap[n.id] = {
+          const nId = parseInt(n.id, 10);
+          if (nId) {
+            unitMap[nId] = {
+              id: nId,  // BUG FIX: cần field id để filter descendantUnitIds
               name: n.name,
               code: n.code,
-              parentId: n.parentId ?? null,
+              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
               domainIds: n.domainIds || [],
-              isLeaf: n.isLeaf ?? (!(n.children?.length)),  // dùng field từ proto
+              isLeaf: n.isLeaf ?? (!(n.children?.length)),
               depth: n.depth ?? 0,
-              directChildIds: (n.children || []).map((c: any) => c.id),
+              directChildIds: (n.children || []).map((c: any) => parseInt(c.id, 10)).filter(Boolean),
             };
           }
           if (n.children?.length) flattenNodes(n.children);
@@ -195,10 +197,12 @@ export class EmployeeController implements OnModuleInit {
           if (callerUnit?.isLeaf) {
             res.data = [];
           } else {
-            const directChildIds = new Set<number>(callerUnit?.directChildIds || []);
+            const directChildIds = new Set<number>(
+              (callerUnit?.directChildIds || []).map((id: any) => parseInt(id, 10)).filter(Boolean)
+            );
             res.data = res.data.filter((emp: any) => {
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
-              const empUnitId = emp.department?.id || emp.departmentId;
+              const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
               return directChildIds.has(empUnitId);
             });
           }
