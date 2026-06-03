@@ -28,6 +28,8 @@ message MasterPlan {
   int32 totalTasks = 11;
   int32 completedTasks = 12;
   repeated task.TaskResponse tasks = 13;
+  int32 departmentId = 14;
+  string createdByCode = 15;
 }
 
 message MasterPlanList {
