@@ -22,11 +22,29 @@ export function MasterPlanDetail() {
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [addRootTaskOpen, setAddRootTaskOpen] = useState(false);
 
+  const selectedPlan = state.masterPlans.find(p => p.id === state.selectedId);
+  const currentUserCode = user?.employeeCode || user?.username || '';
+  const currentUserUnit = user?.unitId ? parseInt(user.unitId, 10) : undefined;
+
+  // Load tất cả task của plan (flat list) — bao gồm mọi cấp sub-task
+  const {
+    data: planTasksRes,
+    isLoading: planTasksLoading,
+    refetch: refetchPlanTasks,
+  } = useQuery({
+    queryKey: ['plan-tasks', selectedPlan?.id],
+    queryFn: () => hrmTasksApi.listByPlan(selectedPlan!.id),
+    enabled: !!selectedPlan?.id,
+  });
+
+  const handleRefresh = useCallback(() => {
+    refetchPlanTasks();
+    actions.refreshPlans();
+  }, [refetchPlanTasks, actions]);
+
   if (state.mode === "create") {
     return <MasterPlanForm />;
   }
-
-  const selectedPlan = state.masterPlans.find(p => p.id === state.selectedId);
 
   if (!selectedPlan) {
     return (
@@ -42,26 +60,7 @@ export function MasterPlanDetail() {
     );
   }
 
-  const currentUserCode = user?.employeeCode || user?.username || '';
-  const currentUserUnit = user?.unitId ? parseInt(user.unitId, 10) : undefined;
-
-  // Load tất cả task của plan (flat list) — bao gồm mọi cấp sub-task
-  const {
-    data: planTasksRes,
-    isLoading: planTasksLoading,
-    refetch: refetchPlanTasks,
-  } = useQuery({
-    queryKey: ['plan-tasks', selectedPlan.id],
-    queryFn: () => hrmTasksApi.listByPlan(selectedPlan.id),
-    enabled: !!selectedPlan.id,
-  });
-
   const allPlanTasks: any[] = planTasksRes?.data || [];
-
-  const handleRefresh = useCallback(() => {
-    refetchPlanTasks();
-    actions.refreshPlans();
-  }, [refetchPlanTasks, actions]);
 
   // Tiến độ
   const doneTasks = allPlanTasks.filter(t => t.status === 'DONE').length;
@@ -80,9 +79,8 @@ export function MasterPlanDetail() {
                 <span className="bg-indigo-100 text-indigo-700 text-[10px] font-black px-2 py-0.5 rounded border border-indigo-200 uppercase tracking-wider">
                   {selectedPlan.type || 'KẾ HOẠCH'}
                 </span>
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${
-                  selectedPlan.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'
-                }`}>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded border uppercase tracking-wider ${selectedPlan.status === 'ACTIVE' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'
+                  }`}>
                   {selectedPlan.status === 'ACTIVE' ? 'ĐANG THỰC THI' : 'BẢN NHÁP'}
                 </span>
               </div>
