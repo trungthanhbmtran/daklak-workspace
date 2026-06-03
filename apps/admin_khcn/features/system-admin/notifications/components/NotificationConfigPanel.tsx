@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { integrationApi } from "../api";
+import { integrationApi } from "../../users/api";
 import { Loader2 } from "lucide-react";
 
 export function NotificationConfigPanel() {
