@@ -4538,16 +4538,53 @@ async function main() {
     const domainData: { unitId: number, domainId: number }[] = [];
 
     const domainMapping: Record<string, string[]> = {
+      // Sở KHCN — toàn bộ lĩnh vực
       'H15.07': allDomainCodes,
-      'H15.07.09': ['CHUYEN_DOI_SO', 'DU_LIEU_SO', 'KINH_TE_SO', 'AN_TOAN_THONG_TIN', 'HA_TANG_SO'],
-      'H15.07.04': ['DU_LIEU_SO', 'HA_TANG_SO', 'THONG_TIN_TRUYEN_THONG', 'CHUYEN_DOI_SO'],
-      'H15.07.03': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
-      'H15.07.07': ['NGAN_SACH', 'H15.07'],
+
+      // Văn phòng Sở — hành chính tổng hợp toàn Sở
       'H15.07.05': ['H15.07'],
-      'H15.07.10': ['H15.07'],
+
+      // Phòng Kế hoạch - Tài chính
+      'H15.07.07': ['NGAN_SACH', 'H15.07'],
+
+      // Phòng Quản lý Khoa học
       'H15.07.08': ['H15.07'],
-      'H15.07.TCDLCL': ['H15.07'],
+
+      // Phòng Chuyển đổi số
+      'H15.07.09': ['CHUYEN_DOI_SO', 'DU_LIEU_SO', 'KINH_TE_SO', 'AN_TOAN_THONG_TIN', 'HA_TANG_SO'],
+
+      // Phòng Quản lý Công nghệ & Đổi mới sáng tạo
+      'H15.07.10': ['H15.07'],
+
+      // Phòng Quản lý TCĐLCL
+      'H15.07.11': ['H15.07'],
+
+      // TT Thông tin Ứng dụng KH&CN (H15.07.03)
+      'H15.07.03': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU', 'BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
+      'H15.07.03.01': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN'],
+      'H15.07.03.02': ['THONG_TIN_TRUYEN_THONG', 'BAO_CHI', 'XUAT_BAN', 'THONG_TIN_DIEN_TU'],
+      'H15.07.03.03': ['THONG_TIN_DIEN_TU', 'BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO'],
+      'H15.07.03.04': ['BUU_CHINH', 'VIEN_THONG', 'TRUYEN_THONG_CO_SO', 'THONG_TIN_DOI_NGOAI'],
+      'H15.07.03.05': ['H15.07'],
+
+      // TT Kỹ thuật TCĐLCL (H15.07.02)
+      'H15.07.02': ['H15.07'],
+      'H15.07.02.01': ['H15.07'],
+      'H15.07.02.02': ['H15.07'],
+      'H15.07.02.03': ['H15.07'],
+
+      // TT IOC — Giám sát Đô thị Thông minh (H15.07.04)
+      'H15.07.04': ['DU_LIEU_SO', 'HA_TANG_SO', 'THONG_TIN_TRUYEN_THONG', 'CHUYEN_DOI_SO', 'AN_TOAN_THONG_TIN'],
+      'H15.07.04.01': ['DU_LIEU_SO', 'CHUYEN_DOI_SO'],                                        // HC-TH IOC
+      'H15.07.04.02': ['DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'CHUYEN_DOI_SO'],                   // Khai thác dữ liệu
+      'H15.07.04.03': ['HA_TANG_SO', 'AN_TOAN_THONG_TIN', 'THONG_TIN_TRUYEN_THONG'],          // Hạ tầng ĐT thông minh
+
+      // TT ĐMST (H15.07.01)
+      'H15.07.01': ['H15.07'],
+      'H15.07.01.01': ['H15.07'],
+      'H15.07.01.02': ['H15.07'],
     };
+
 
     for (const unit of soKhcnUnits) {
       for (const geo of allGeoAreas) {
