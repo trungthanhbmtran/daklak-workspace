@@ -104,9 +104,9 @@ export class TasksController implements OnModuleInit {
 
     const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
 
-    // Tính ancestor unit IDs cho visibility theo cây tổ chức
+    // Tính ancestor unit IDs cho visibility và phân quyền theo cây tổ chức
     let callerAncestorUnitIds: number[] = [];
-    if (!isAdmin && user?.unitId && !planId) {  // Skip khi query by planId
+    if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
       callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
     }

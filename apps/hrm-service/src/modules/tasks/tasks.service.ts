@@ -270,23 +270,40 @@ export class TasksService implements OnModuleInit {
       }
     });
 
+    const isUserAdmin = query.isAdmin;
+    const currentUserCode = query.currentUserCode;
+    const callerAncestorUnitIds = Array.isArray(query.callerAncestorUnitIds) ? query.callerAncestorUnitIds.map(Number) : [];
+
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ theo kế hoạch thành công',
-      data: tasks.map((t: any) => ({
-        ...t,
-        assigneeName: t.assignee
-          ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
-          : (t.assigneeCode === 'UNASSIGNED' || !t.assigneeCode ? 'Chưa phân công' : t.assigneeCode),
-        assignerName: t.assigner
-          ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
-          : (t.assignerCode || ''),
-        dueDate: t.dueDate?.toISOString() || '',
-        startDate: t.startDate?.toISOString() || '',
-        createdAt: t.createdAt?.toISOString() || '',
-        updatedAt: t.updatedAt?.toISOString() || '',
-        plan: t.plan || null,
-      })),
+      data: tasks.map((t: any) => {
+        // Phân quyền cho từng task
+        const canEdit = isUserAdmin 
+          || t.assignerCode === currentUserCode 
+          || t.assigneeCode === currentUserCode 
+          || (t.departmentId && callerAncestorUnitIds.includes(t.departmentId));
+          
+        return {
+          ...t,
+          assigneeName: t.assignee
+            ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+            : (t.assigneeCode === 'UNASSIGNED' || !t.assigneeCode ? 'Chưa phân công' : t.assigneeCode),
+          assignerName: t.assigner
+            ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+            : (t.assignerCode || ''),
+          dueDate: t.dueDate?.toISOString() || '',
+          startDate: t.startDate?.toISOString() || '',
+          createdAt: t.createdAt?.toISOString() || '',
+          updatedAt: t.updatedAt?.toISOString() || '',
+          plan: t.plan || null,
+          permissions: {
+            canEdit,
+            canAssign: canEdit,
+            canAddSubTask: canEdit
+          }
+        };
+      }),
       meta: { pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 } }
     };
   }

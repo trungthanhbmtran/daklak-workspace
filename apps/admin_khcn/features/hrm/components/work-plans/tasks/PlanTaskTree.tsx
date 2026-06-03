@@ -15,14 +15,14 @@ import { TaskAssignModal } from './TaskAssignModal';
 
 /** Build cây task từ flat list — không biết trước số cấp */
 export function buildTaskTree(flatTasks: any[]): any[] {
-  const map = new Map<number, any>();
+  const map = new Map<string, any>();
   for (const t of flatTasks) {
-    map.set(t.id, { ...t, children: [] });
+    map.set(String(t.id), { ...t, children: [] });
   }
   const roots: any[] = [];
   for (const t of map.values()) {
-    if (t.parentId && map.has(t.parentId)) {
-      map.get(t.parentId)!.children.push(t);
+    if (t.parentId && map.has(String(t.parentId))) {
+      map.get(String(t.parentId))!.children.push(t);
     } else {
       roots.push(t);
     }
@@ -31,13 +31,13 @@ export function buildTaskTree(flatTasks: any[]): any[] {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-  TEMPLATE:    { label: 'Chờ giao',    icon: <Circle className="w-3 h-3" />,        cls: 'bg-slate-100 text-slate-600 border-slate-200' },
-  TODO:        { label: 'Chờ thực hiện', icon: <Clock className="w-3 h-3" />,        cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3 h-3" />,  cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  REVIEWING:   { label: 'Chờ duyệt',   icon: <Clock className="w-3 h-3" />,          cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-  DONE:        { label: 'Hoàn thành',  icon: <CheckCircle2 className="w-3 h-3" />,   cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  OVERDUE:     { label: 'Quá hạn',     icon: <AlertTriangle className="w-3 h-3" />,  cls: 'bg-red-50 text-red-700 border-red-200' },
-  RETURNED:    { label: 'Trả lại',     icon: <RotateCcw className="w-3 h-3" />,      cls: 'bg-orange-50 text-orange-700 border-orange-200' },
+  TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3 h-3" />, cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+  TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3 h-3" />, cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3 h-3" />, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3 h-3" />, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+  DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3 h-3" />, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3 h-3" />, cls: 'bg-red-50 text-red-700 border-red-200' },
+  RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3 h-3" />, cls: 'bg-orange-50 text-orange-700 border-orange-200' },
 };
 
 // Màu theo cấp (depth)
@@ -55,24 +55,23 @@ interface TaskRowProps {
   task: any;
   depth: number;
   currentUserCode: string;
+  currentUserUnit?: number;
   planId: number;
   onRefresh: () => void;
 }
 
-function TaskRow({ task, depth, currentUserCode, planId, onRefresh }: TaskRowProps) {
+function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefresh }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2); // Mở 2 cấp đầu mặc định
   const [subTaskModalOpen, setSubTaskModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   const hasChildren = task.children?.length > 0;
 
-  // Quyền động — không hardcode cấp
-  const isAssignedToMe = task.assigneeCode === currentUserCode;
-  const isAssignedByMe = task.assignerCode === currentUserCode;
-  const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
-
-  const canAddSubTask = isAssignedToMe;
-  const canAssign = isAssignedByMe || isUnassigned;
+  // Quyền: Lấy từ backend cấp sẵn (nếu có), fallback về logic cơ bản nếu thiếu
+  const permissions = task.permissions || {};
+  const canEdit = permissions.canEdit ?? (currentUserCode === task.assignerCode || currentUserUnit === 1 || currentUserCode === task.assigneeCode);
+  const canAssign = permissions.canAssign ?? canEdit;
+  const canAddSubTask = permissions.canAddSubTask ?? canEdit;
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
   const depthCls = DEPTH_COLORS[Math.min(depth, DEPTH_COLORS.length - 1)];
@@ -103,13 +102,7 @@ function TaskRow({ task, depth, currentUserCode, planId, onRefresh }: TaskRowPro
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
-                {depth === 0 ? (
-                  <Badge className="text-[10px] bg-indigo-600 hover:bg-indigo-600 font-bold px-1.5 py-0">Cấp 1: Đầu việc lớn</Badge>
-                ) : depth === 1 ? (
-                  <Badge className="text-[10px] bg-violet-600 hover:bg-violet-600 font-bold px-1.5 py-0">Cấp 2: Việc Phòng/Trung tâm</Badge>
-                ) : (
-                  <Badge className="text-[10px] bg-sky-600 hover:bg-sky-600 font-bold px-1.5 py-0">Cấp {depth + 1}: Việc cá nhân</Badge>
-                )}
+                <Badge className="text-[10px] bg-indigo-600 hover:bg-indigo-600 font-bold px-1.5 py-0">Nhiệm vụ Cấp {depth + 1}</Badge>
               </div>
               <p className={cn(
                 'font-semibold text-slate-800 text-sm leading-snug',
@@ -163,7 +156,7 @@ function TaskRow({ task, depth, currentUserCode, planId, onRefresh }: TaskRowPro
                 </Button>
               )}
 
-              {(canAssign && (isUnassigned || task.status === 'TEMPLATE')) && (
+              {(canAssign && (task.status === 'TEMPLATE')) && (
                 <Button
                   size="sm"
                   className="h-8 px-4 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1 shadow-md shadow-indigo-200 animate-pulse-once"
