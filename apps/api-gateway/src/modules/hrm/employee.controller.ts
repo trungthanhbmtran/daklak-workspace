@@ -193,17 +193,28 @@ export class EmployeeController implements OnModuleInit {
         const callerCode: string = callerUnit?.code || '';
 
         if (req.assignableOnly) {
-          // ── CHẾ ĐỘ GIAO VIỆC: chỉ cấp dưới TRỰC TIẾP (direct children) ──
+          // ── CHẾ ĐỘ GIAO VIỆC: theo đúng phân cấp tổ chức ──
           if (callerUnit?.isLeaf) {
-            res.data = [];
-          } else {
-            const directChildIds = new Set<number>(
-              (callerUnit?.directChildIds || []).map((id: any) => parseInt(id, 10)).filter(Boolean)
-            );
+            // Đơn vị là leaf (phòng ban lá): Trưởng phòng giao cho nhân viên trong phòng
             res.data = res.data.filter((emp: any) => {
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
               const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-              return directChildIds.has(empUnitId);
+              return empUnitId === callerUnitId; // cùng đơn vị, khác người
+            });
+          } else {
+            // Đơn vị có cấp dưới: chỉ thấy LÃNH ĐẠO của các đơn vị con TRỰC TIẾP
+            // (Giám đốc IOC chỉ thấy Trưởng phòng, không thấy nhân viên phòng)
+            const directChildIds = new Set<number>(
+              (callerUnit?.directChildIds || []).map((id: any) => parseInt(id, 10)).filter(Boolean)
+            );
+            const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
+            res.data = res.data.filter((emp: any) => {
+              if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
+              const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
+              if (!directChildIds.has(empUnitId)) return false;
+              // Chỉ lấy lãnh đạo (Trưởng phòng / Giám đốc) của đơn vị con
+              const jtCategory = dicts.jtMap[emp.jobTitleId]?.category || '';
+              return leaderCategories.has(jtCategory);
             });
           }
 
