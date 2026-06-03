@@ -163,7 +163,7 @@ export function MasterPlanDetail() {
         <TabsContent value="tasks" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
-              <h3 className="font-bold text-slate-800 text-sm">Danh sách Nhiệm vụ gốc</h3>
+              <h3 className="font-bold text-slate-800 text-sm">Danh sách Nhiệm vụ gốc (Chỉ tiêu)</h3>
               <Button
                 size="sm"
                 variant="outline"
@@ -179,39 +179,89 @@ export function MasterPlanDetail() {
             <table className="w-full text-left text-sm">
               <thead className="bg-white border-b border-slate-100 text-slate-500 text-xs font-semibold uppercase">
                 <tr>
-                  <th className="p-4">Nội dung</th>
-                  <th className="p-4">Người thực hiện</th>
-                  <th className="p-4 text-center">Trạng thái</th>
-                  <th className="p-4 text-right">Hành động</th>
+                  <th className="p-4">Nội dung / Diễn giải</th>
+                  <th className="p-4">Góc độ / Người nhận</th>
+                  <th className="p-4 text-center">Chỉ tiêu / Định mức</th>
+                  <th className="p-4 text-right">Trạng thái & Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {allPlanTasks.filter(t => !t.parentId).length > 0 ? (
-                  allPlanTasks.filter(t => !t.parentId).map((task: any) => (
-                    <tr key={task.id} className="hover:bg-slate-50/50">
-                      <td className="p-4 font-medium text-slate-800">{task.title}</td>
-                      <td className="p-4 text-sm text-slate-600">
-                        {task.assigneeName || task.assigneeCode || '—'}
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="text-xs bg-slate-100 px-2 py-1 rounded-full">{task.status}</span>
-                      </td>
-                      <td className="p-4 text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-7 rounded-full text-xs"
-                          onClick={() => { setTaskToAssign(task); setAssignModalOpen(true); }}
-                        >
-                          {task.assigneeCode === 'UNASSIGNED' ? 'Giao việc' : 'Chuyển giao'}
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
+                  allPlanTasks.filter(t => !t.parentId).map((task: any, index: number) => {
+                    const desc = task.description || '';
+                    const perspectiveMatch = desc.match(/Góc độ: (.*?)\n/);
+                    const unitMatch = desc.match(/Đơn vị tính: (.*?)\n/);
+
+                    const perspective = perspectiveMatch ? perspectiveMatch[1] : (task.perspective || '');
+                    const unit = unitMatch ? unitMatch[1] : (task.metric || 'Lượt');
+                    
+                    const rankInfo = state.ranks.find(r => r.code === perspective);
+
+                    return (
+                      <tr key={task.id || index} className="hover:bg-slate-50/50">
+                        <td className="p-4">
+                          <div className="font-medium text-slate-800 mb-1">{task.title}</div>
+                          {task.description && (
+                            <div className="text-xs text-slate-500 whitespace-pre-wrap mt-2 bg-slate-50 p-2 rounded border border-slate-100">
+                              {task.description}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className="bg-indigo-50 text-indigo-700 border border-indigo-100 px-2.5 py-1 rounded-md text-xs font-bold">
+                            {rankInfo ? (rankInfo.nameVi || rankInfo.name) : (perspective || 'Tất cả')}
+                          </span>
+                          {task.assigneeName && task.assigneeCode !== 'UNASSIGNED' && (
+                            <div className="mt-2 text-xs font-semibold text-slate-600 flex items-center gap-1">
+                              <span className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px] text-slate-700">
+                                {task.assigneeName.charAt(0)}
+                              </span>
+                              {task.assigneeName}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <div className="inline-flex items-center gap-1.5 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+                            <span className="font-black text-slate-800">{task.baseScore || task.target || 0}</span>
+                            <span className="text-[10px] uppercase font-bold text-slate-500">{unit}</span>
+                          </div>
+                        </td>
+                        <td className="p-4 text-right">
+                          {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') ? (
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 rounded-full text-xs bg-indigo-50 text-indigo-700 hover:bg-indigo-100 font-semibold"
+                              onClick={() => { setTaskToAssign(task); setAssignModalOpen(true); }}
+                            >
+                              Giao việc
+                            </Button>
+                          ) : (
+                            <div className="flex items-center justify-end gap-2">
+                              <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${task.status === 'DONE' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'
+                                }`}>
+                                {task.status || 'IN_PROGRESS'}
+                              </span>
+                              {task.status !== 'DONE' && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-8 rounded-full text-xs"
+                                  onClick={() => { setTaskToAssign(task); setAssignModalOpen(true); }}
+                                >
+                                  Chuyển giao
+                                </Button>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
                     <td colSpan={4} className="p-8 text-center text-slate-500">
-                      Chưa có nhiệm vụ nào. Chuyển sang tab <strong>Triển khai</strong> để thêm.
+                      Chưa có nhiệm vụ nào. Chuyển sang tab <strong>Giám sát</strong> để thêm.
                     </td>
                   </tr>
                 )}

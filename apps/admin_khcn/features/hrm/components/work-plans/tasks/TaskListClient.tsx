@@ -303,23 +303,6 @@ export const TaskListClient = () => {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 font-sans">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100">
-            Trung tâm Giao việc
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
-            Điều phối, theo dõi và quản lý tiến độ công việc toàn diện
-          </p>
-        </div>
-        <Link href="/services/hrm/work-plans/master-plans">
-          <Button className="rounded-xl h-11 px-6 bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors border-none">
-            <Target className="mr-2 h-4 w-4" /> Kế hoạch & Giao việc
-          </Button>
-        </Link>
-      </div>
-
       {/* Stats Section */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 relative z-10">
         {[
