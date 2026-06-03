@@ -338,7 +338,7 @@ export class TasksService implements OnModuleInit {
         scoringMethod: data.scoringMethod || 'MANUAL',
         bonusPerDay: data.bonusPerDay,
         penaltyPerDay: data.penaltyPerDay,
-        supervisorCode: data.supervisorCode,
+        supervisorCode: data.supervisorCode || null,
         planId,
         parentId: data.parentId ? parseInt(data.parentId, 10) : null,
       }
@@ -525,11 +525,15 @@ export class TasksService implements OnModuleInit {
     };
   }
 
-  async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
+  async assignTask(id: number, assigneeCode: string, coAssigneeCodes?: string[], departmentId?: number, assignerCode?: string) {
     const currentTask = await this.prisma.task.findUnique({
       where: { id },
-      select: { status: true, assignerCode: true }
+      select: { id: true, title: true, planId: true, priority: true, startDate: true, dueDate: true, status: true, assignerCode: true }
     });
+
+    if (!currentTask) {
+      throw new Error('Không tìm thấy nhiệm vụ gốc.');
+    }
 
     const dataToUpdate: any = {};
     if (assigneeCode !== undefined) dataToUpdate.assigneeCode = assigneeCode;
@@ -541,7 +545,7 @@ export class TasksService implements OnModuleInit {
         throw new Error('Không được phân công công việc cho chính mình.');
       }
       // Không được giao lại cho người đã giao cho mình
-      if (currentTask && assigneeCode === currentTask.assignerCode && assigneeCode !== 'UNASSIGNED') {
+      if (assigneeCode === currentTask.assignerCode && assigneeCode !== 'UNASSIGNED') {
         throw new Error('Không được giao lại công việc cho người đã giao việc cho bạn.');
       }
 
@@ -552,9 +556,6 @@ export class TasksService implements OnModuleInit {
       });
       if (assignerEmployee) {
         dataToUpdate.assignerCode = assignerCode;
-        // supervisorCode không cần lưu riêng:
-        // Người giao việc (assignerCode) tự nhiên thấy task.
-        // Chuỗi phân cấp A→B→C theo dõi qua parent_id sub-tasks.
       }
     }
 
@@ -577,6 +578,47 @@ export class TasksService implements OnModuleInit {
         body: `Bạn vừa được phân công công việc: "${t.title}".\nHạn hoàn thành: ${t.dueDate ? t.dueDate.toISOString().split('T')[0] : 'Chưa xác định'}.\nVui lòng truy cập hệ thống để xem chi tiết.`,
         metadata: { dynamicConfig }
       });
+    }
+
+    // Xử lý tạo Sub-tasks cho người phối hợp
+    if (coAssigneeCodes && coAssigneeCodes.length > 0) {
+      // Fetch department ids cho những người phối hợp
+      const coEmployees = await this.prisma.employee.findMany({
+        where: { employeeCode: { in: coAssigneeCodes } },
+        select: { employeeCode: true, departmentId: true, email: true }
+      });
+
+      for (const emp of coEmployees) {
+        const coTask = await this.prisma.task.create({
+          data: {
+            title: `[Phối hợp] ${currentTask.title}`,
+            description: `Nhiệm vụ phối hợp được tự động tạo từ công việc gốc.`,
+            assigneeCode: emp.employeeCode,
+            assignerCode: assignerCode || '',
+            departmentId: emp.departmentId || null,
+            status: 'TODO',
+            priority: currentTask.priority || 'MEDIUM',
+            startDate: currentTask.startDate,
+            dueDate: currentTask.dueDate,
+            baseScore: 0, // Trọng số mặc định cho phối hợp là 0 để không ảnh hưởng điểm chính
+            weight: 0,
+            scoringMethod: 'MANUAL',
+            planId: currentTask.planId,
+            parentId: currentTask.id,
+          }
+        });
+
+        // Gửi thông báo cho người phối hợp
+        if (emp.email) {
+          const dynamicConfig = await this.getDynamicConfig();
+          this.notificationClient.emit('notify', {
+            recipient: emp.email || emp.employeeCode,
+            subject: `[HRM] Nhiệm vụ phối hợp mới: ${coTask.title}`,
+            body: `Bạn vừa được phân công phối hợp thực hiện công việc: "${currentTask.title}".\nHạn hoàn thành: ${coTask.dueDate ? coTask.dueDate.toISOString().split('T')[0] : 'Chưa xác định'}.\nVui lòng truy cập hệ thống để xem chi tiết.`,
+            metadata: { dynamicConfig }
+          });
+        }
+      }
     }
 
     return {

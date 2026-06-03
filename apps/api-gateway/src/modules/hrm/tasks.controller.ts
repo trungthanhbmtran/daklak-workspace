@@ -190,12 +190,14 @@ export class TasksController implements OnModuleInit {
     @Req() req: any,
     @Param('id') id: string,
     @Body('assigneeCode') assigneeCode: string,
+    @Body('coAssigneeCodes') coAssigneeCodes?: string[],
     @Body('departmentId') departmentId?: number,
   ) {
     return firstValueFrom(
       this.taskService.AssignTask({
         id: parseInt(id, 10),
         assigneeCode,
+        coAssigneeCodes: coAssigneeCodes || [],
         departmentId,
         // Inject người giao việc từ JWT token (ghi đè lên assignerCode)
         assignerCode: req.user?.employeeCode || req.user?.username || '',

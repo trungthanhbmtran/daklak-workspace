@@ -34,6 +34,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   const [taskState, setTaskState] = useState({
     assigneeCode: '',
+    coAssigneeCodes: [] as string[],
     priority: 'MEDIUM',
     baseScore: 10,
     startDate: new Date().toISOString().split('T')[0],
@@ -47,6 +48,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     if (task && isOpen) {
       setTaskState({
         assigneeCode: (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') ? task.assigneeCode : '',
+        coAssigneeCodes: [],
         priority: task.priority || 'MEDIUM',
         baseScore: task.baseScore || task.targetValue || 10,
         startDate: task.startDate ? task.startDate.split('T')[0] : new Date().toISOString().split('T')[0],
@@ -82,8 +84,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   const isTransfer = task?.assigneeCode && task.assigneeCode !== 'UNASSIGNED';
 
   const handleSubmit = async () => {
-    if (!taskState.assigneeCode) return toast.error('Vui lòng chọn người thực hiện!');
-    if (isOverload) return toast.error('Không thể giao! Khối lượng công việc vượt quá định mức của nhân sự.');
+    if (!taskState.assigneeCode) return toast.error('Vui lòng chọn người chủ trì chính!');
+    if (isOverload) return toast.error('Người chủ trì chính đang quá tải khối lượng công việc.');
 
     setIsSubmitting(true);
     try {
@@ -97,7 +99,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
       });
 
       await hrmTasksApi.assignTask(taskId, {
-        assigneeCode: taskState.assigneeCode
+        assigneeCode: taskState.assigneeCode,
+        coAssigneeCodes: taskState.coAssigneeCodes
       });
 
       toast.success(isTransfer ? `Đã chuyển giao việc thành công: ${task.title}` : `Đã giao việc thành công: ${task.title}`);
@@ -139,7 +142,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                   onClick={() => {
                     if (assignableEmployees.length > 0) {
                       setTaskState(p => ({ ...p, assigneeCode: assignableEmployees[0].code }));
-                      toast.success(`Giao thông minh cho: ${assignableEmployees[0].name}`);
+                      toast.success(`Đã chọn chủ trì chính: ${assignableEmployees[0].name}`);
                     }
                   }}
                   type="button"
@@ -147,10 +150,15 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                   <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Giao thông minh
                 </Button>
               </div>
+
               <Popover open={openPopover} onOpenChange={setOpenPopover}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className={cn("w-full justify-between h-11 bg-slate-50 border-slate-200 text-left font-semibold px-4", !currentEmp && "text-slate-500")}>
-                    <span className="truncate">{currentEmp ? currentEmp.name : "Chọn cán bộ phù hợp..."}</span>
+                    <span className="truncate">
+                      {currentEmp
+                        ? `${currentEmp.name}${taskState.coAssigneeCodes.length > 0 ? ` và ${taskState.coAssigneeCodes.length} người khác` : ''}`
+                        : "Chọn cán bộ (Chủ trì & Phối hợp)..."}
+                    </span>
                     <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                   </Button>
                 </PopoverTrigger>
@@ -160,70 +168,118 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                     <CommandList>
                       <CommandEmpty>Không tìm thấy nhân sự phù hợp</CommandEmpty>
                       <CommandGroup>
-                      {assignableEmployees.map((emp: any, idx: number) => (
-                          <CommandItem
-                            key={emp.code}
-                            value={`${emp.name} ${emp.jobTitle?.name || ''}`}
-                            onSelect={() => {
-                              setTaskState(p => ({ ...p, assigneeCode: emp.code }));
-                              setOpenPopover(false);
-                            }}
-                            className={cn("p-3 cursor-pointer border-b border-slate-100 last:border-0",
-                              idx === 0 && "bg-indigo-50/50",
-                              emp.isOverloaded && "opacity-50"
-                            )}
-                          >
-                            <Check className={cn("mr-3 h-4 w-4 text-indigo-600", taskState.assigneeCode === emp.code ? "opacity-100" : "opacity-0")} />
-                            <div className="flex flex-col flex-1 gap-1.5">
-                              <div className="flex justify-between font-bold text-slate-800 text-sm">
-                                <div className="flex items-center gap-1.5">
-                                  <span>{emp.name}</span>
-                                  {idx === 0 && !emp.isOverloaded && <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Đề xuất #1</span>}
-                                  {emp.isOverloaded && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Quá tải</span>}
-                                </div>
-                                <span className={cn("text-xs", emp.isOverloaded ? "text-red-600" : "text-indigo-600")}>
-                                  Còn: {emp.availableCapacity}/{emp.rankLimit}đ
-                                </span>
-                              </div>
-                              <div className="text-xs text-slate-600">
-                                <span className="font-semibold text-slate-700">Phòng ban:</span> {emp.department?.name || 'Đơn vị chuyên môn'}
-                              </div>
-                              <div className="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap mt-0.5">
-                                <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{emp.jobTitle?.name || 'Chuyên viên'}</span>
-                                <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{emp.civilServantRank?.name || ''}</span>
-                              </div>
-                            </div>
-                          </CommandItem>
-                        ))}
+                        {assignableEmployees.map((emp: any, idx: number) => {
+                          const isMain = taskState.assigneeCode === emp.code;
+                          const isCo = taskState.coAssigneeCodes.includes(emp.code);
+                          const isSelected = isMain || isCo;
 
+                          return (
+                            <CommandItem
+                              key={emp.code}
+                              value={`${emp.name} ${emp.jobTitle?.name || ''}`}
+                              onSelect={() => {
+                                setTaskState(p => {
+                                  if (isMain) return { ...p, assigneeCode: '' };
+                                  if (isCo) return { ...p, coAssigneeCodes: p.coAssigneeCodes.filter(c => c !== emp.code) };
+                                  if (!p.assigneeCode) return { ...p, assigneeCode: emp.code };
+                                  return { ...p, coAssigneeCodes: [...p.coAssigneeCodes, emp.code] };
+                                });
+                              }}
+                              className={cn("p-3 cursor-pointer border-b border-slate-100 last:border-0",
+                                idx === 0 && "bg-indigo-50/50",
+                                emp.isOverloaded && "opacity-50"
+                              )}
+                            >
+                              <div className={cn("mr-3 flex items-center justify-center w-5 h-5 rounded-md border", isSelected ? "bg-indigo-600 border-indigo-600" : "border-slate-300")}>
+                                <Check className={cn("h-3.5 w-3.5 text-white", isSelected ? "opacity-100" : "opacity-0")} />
+                              </div>
+                              <div className="flex flex-col flex-1 gap-1.5">
+                                <div className="flex justify-between font-bold text-slate-800 text-sm">
+                                  <div className="flex items-center gap-1.5">
+                                    <span>{emp.name}</span>
+                                    {isMain && <span className="text-[10px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-sm whitespace-nowrap">Chủ trì</span>}
+                                    {isCo && <span className="text-[10px] bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Phối hợp</span>}
+                                    {emp.isOverloaded && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Quá tải</span>}
+                                  </div>
+                                  <span className={cn("text-xs", emp.isOverloaded ? "text-red-600" : "text-indigo-600")}>
+                                    Còn: {emp.availableCapacity}/{emp.rankLimit}đ
+                                  </span>
+                                </div>
+                                <div className="text-xs text-slate-600">
+                                  <span className="font-semibold text-slate-700">Phòng ban:</span> {emp.department?.name || 'Đơn vị chuyên môn'}
+                                </div>
+                              </div>
+                            </CommandItem>
+                          );
+                        })}
                       </CommandGroup>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
 
-              {currentEmp && (
-                <div className="mt-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-bold text-slate-600 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" /> Năng lực hiện tại</span>
-                    <span className={cn("font-bold", currentEmp.isOverloaded ? "text-red-600" : "text-indigo-600")}>
-                      {currentEmp.currentLoad} / {currentEmp.rankLimit} đ (còn {currentEmp.availableCapacity}đ)
-                    </span>
-                  </div>
-                  <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className={cn("h-full rounded-full transition-all", currentEmp.isOverloaded ? "bg-red-500" : "bg-indigo-600")}
-                      style={{ width: `${Math.min((currentEmp.currentLoad / currentEmp.rankLimit) * 100, 100)}%` }}
-                    />
-                  </div>
-                  {currentEmp.isOverloaded && (
-                    <p className="text-[11px] text-red-600 font-medium mt-1.5 flex items-start gap-1">
-                      <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /> Cán bộ này đã quá định mức. Vui lòng chọn người khác.
-                    </p>
+              {/* Hiển thị danh sách đã chọn */}
+              {(taskState.assigneeCode || taskState.coAssigneeCodes.length > 0) && (
+                <div className="mt-3 space-y-2">
+                  <div className="text-xs font-bold text-slate-600 uppercase tracking-wider">Danh sách nhân sự được giao</div>
+
+                  {/* Người chủ trì chính */}
+                  {currentEmp && (
+                    <div className="bg-indigo-50/50 p-2.5 rounded-lg border border-indigo-100 flex items-start gap-3">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-800 text-sm">{currentEmp.name}</span>
+                          <span className="text-[10px] bg-indigo-600 text-white px-2 py-0.5 rounded-full font-semibold">Chủ trì chính</span>
+                        </div>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-medium text-slate-600 flex items-center gap-1"><Activity className="w-3.5 h-3.5" /> Năng lực hiện tại:</span>
+                          <span className={cn("font-bold", currentEmp.isOverloaded ? "text-red-600" : "text-indigo-600")}>
+                            {currentEmp.currentLoad} / {currentEmp.rankLimit} đ (còn {currentEmp.availableCapacity}đ)
+                          </span>
+                        </div>
+                        {currentEmp.isOverloaded && (
+                          <p className="text-[11px] text-red-600 font-medium mt-1 flex items-start gap-1">
+                            <AlertTriangle className="w-3 h-3 shrink-0" /> Cán bộ này đã quá định mức!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Danh sách phối hợp */}
+                  {taskState.coAssigneeCodes.length > 0 && (
+                    <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 flex flex-col gap-2">
+                      {taskState.coAssigneeCodes.map(code => {
+                        const coEmp = assignableEmployees.find((e: any) => e.code === code);
+                        if (!coEmp) return null;
+                        return (
+                          <div key={code} className="flex items-center justify-between text-sm py-1 border-b border-slate-100 last:border-0">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-700">{coEmp.name}</span>
+                              <span className="text-[10px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-sm">Phối hợp</span>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 text-[10px] px-2 text-indigo-600 hover:bg-indigo-100"
+                              onClick={() => {
+                                // Swap thành chủ trì
+                                setTaskState(p => ({
+                                  ...p,
+                                  assigneeCode: code,
+                                  coAssigneeCodes: [...p.coAssigneeCodes.filter(c => c !== code), ...(p.assigneeCode ? [p.assigneeCode] : [])]
+                                }));
+                              }}
+                            >
+                              Đặt làm Chủ trì
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
               )}
-
             </div>
 
             {/* Độ ưu tiên */}
