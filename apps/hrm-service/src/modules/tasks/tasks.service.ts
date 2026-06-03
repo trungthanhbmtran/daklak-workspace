@@ -50,7 +50,6 @@ export class TasksService implements OnModuleInit {
       const authConditions: any[] = [
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
-        { supervisorCode: query.currentUserCode },
       ];
       if (query.currentUserDept) {
         authConditions.push({ departmentId: query.currentUserDept });
@@ -187,7 +186,6 @@ export class TasksService implements OnModuleInit {
       const authConditions: any[] = [
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
-        { supervisorCode: query.currentUserCode },
       ];
       if (query.currentUserDept) {
         authConditions.push({ departmentId: query.currentUserDept });

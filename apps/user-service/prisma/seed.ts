@@ -5061,12 +5061,14 @@ async function main() {
       where: { email: emp.email },
       update: {
         fullName: emp.fullName,
+        employeeCode: emp.employeeCode,   // sync từ HRM
         roles: { set: [], connect: rolesConnect }
       },
       create: {
         email: emp.email,
         username,
         fullName: emp.fullName,
+        employeeCode: emp.employeeCode,   // sync từ HRM
         roles: { connect: rolesConnect }
       }
     });
