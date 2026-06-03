@@ -450,7 +450,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
-    // Lấy task hiện tại để kiểm tra status và supervisorCode
+    // Lấy task hiện tại để kiểm tra chuỗi phân cấp giao việc
     const currentTask = await this.prisma.task.findUnique({
       where: { id },
       select: { status: true, supervisorCode: true, assignerCode: true }
@@ -478,10 +478,20 @@ export class TasksService implements OnModuleInit {
 
       if (assignerEmployee) {
         dataToUpdate.assignerCode = assignerCode;
-        // Chỉ set supervisorCode nếu assignerCode là employee hợp lệ VÀ task chưa có supervisor
-        if (!currentTask?.supervisorCode || currentTask.supervisorCode === 'UNASSIGNED') {
-          dataToUpdate.supervisorCode = assignerCode;
+
+        // ── LOGIC NGƯỜI THEO DÕI (supervisorCode) ──
+        // Phân cấp giao việc: A → B → C
+        // Khi B giao lại cho C: A (người đã giao cho B) trở thành người theo dõi
+        // supervisorCode = assignerCode CŨ (người đã giao cho người giao hiện tại)
+        const oldAssignerCode = currentTask?.assignerCode;
+        if (
+          oldAssignerCode &&
+          oldAssignerCode !== 'UNASSIGNED' &&
+          oldAssignerCode !== assignerCode
+        ) {
+          dataToUpdate.supervisorCode = oldAssignerCode;
         }
+        // Lần giao đầu tiên (old assigner = UNASSIGNED): không set supervisor
       }
     }
 
