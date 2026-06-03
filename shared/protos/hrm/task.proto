@@ -115,6 +115,8 @@ message CreateTaskRequest {
   int32 departmentId = 13;
   string startDate = 14;
   int32 parentId = 15;
+  string status = 16;
+  string priority = 17;
 }
 
 message ListTasksRequest {
