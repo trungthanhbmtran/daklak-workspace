@@ -4,6 +4,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 
+const PROTO_ROOT = process.env.PROTO_PATH || require('path').join(process.cwd(), '../../shared/protos');
+
 @Module({
   imports: [
     ClientsModule.registerAsync([
@@ -29,8 +31,31 @@ import { TasksService } from './tasks.service';
         transport: Transport.GRPC,
         options: {
           package: 'integration',
-          protoPath: require('path').join(process.cwd(), '../../shared/protos/users/integration.proto'),
+          protoPath: require('path').join(PROTO_ROOT, 'users/integration.proto'),
           url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [PROTO_ROOT],
+          },
+        },
+      },
+      {
+        name: 'USER_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'user',
+          protoPath: require('path').join(PROTO_ROOT, 'users/user.proto'),
+          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
+          loader: {
+            keepCase: false,
+            longs: String,
+            enums: String,
+            defaults: true,
+            includeDirs: [PROTO_ROOT],
+          },
         },
       },
     ]),
