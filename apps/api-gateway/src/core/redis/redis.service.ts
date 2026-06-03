@@ -6,19 +6,30 @@ export class RedisService implements OnModuleDestroy {
   private readonly redis: Redis;
   private readonly logger = new Logger(RedisService.name);
 
+  private hasLoggedError = false;
+
   constructor() {
     this.redis = new Redis({
       host: process.env.REDIS_HOST || '127.0.0.1',
       port: parseInt(process.env.REDIS_PORT || '6379', 10),
       db: parseInt(process.env.REDIS_DB || '0', 10),
+      retryStrategy: (times) => {
+        // Chỉ retry tối đa 3 lần nếu không có Redis, tránh spam log console
+        if (times > 3) return null; 
+        return Math.min(times * 500, 2000);
+      },
     });
 
     this.redis.on('connect', () => {
       this.logger.log('Connected to Redis');
+      this.hasLoggedError = false;
     });
 
     this.redis.on('error', (err) => {
-      this.logger.error('Redis error', err);
+      if (!this.hasLoggedError) {
+        this.logger.error('Redis error', err);
+        this.hasLoggedError = true;
+      }
     });
   }
 
