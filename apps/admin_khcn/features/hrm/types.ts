@@ -34,6 +34,7 @@ export interface HrmEmployeesListParams {
   departmentId?: number;
   jobTitleId?: number;
   status?: string;
+  assignableOnly?: boolean; // Chỉ lấy cấp dưới trực tiếp để giao việc
 }
 
 /** Meta phân trang từ gateway/hrm-service */

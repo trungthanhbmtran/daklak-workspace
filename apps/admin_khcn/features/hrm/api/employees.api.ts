@@ -31,7 +31,8 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
     } as HrmEmployee["jobTitle"],
     civilServantRank: (row.civilServantRank ?? row.civil_servant_rank ?? row.civilServantRankInfo) as HrmEmployee["civilServantRank"],
     partyTitle: (row.partyTitle ?? row.party_title ?? row.partyTitleInfo) as HrmEmployee["partyTitle"],
-    currentTaskCount: Math.floor(Math.random() * 5),
+    currentTaskCount: row.currentTaskCount != null ? Number(row.currentTaskCount) : 0,
+
   };
 }
 
