@@ -93,6 +93,8 @@ message OrganizationUnitNode {
   repeated int32 domain_ids = 10;
   repeated string domain_names = 11;
   string scope = 12;
+  bool is_leaf = 13;   // true nếu không có đơn vị con (thành phần thấp nhất)
+  int32 depth = 14;    // Độ sâu trong cây (root = 0)
 }
 
 message OrganizationTreeResponse {

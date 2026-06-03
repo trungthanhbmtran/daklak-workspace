@@ -25,7 +25,7 @@ export class EmployeeController implements OnModuleInit {
   private employeeService: any;
   private orgService: any;
   private catService: any;
-  
+
   // Cache for dictionaries to optimize API speed
   private dictCache: { data: any; expiresAt: number } | null = null;
   private readonly CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -71,9 +71,9 @@ export class EmployeeController implements OnModuleInit {
 
       const jtMap: Record<string, any> = {};
       (jobTitlesRes?.items || []).forEach((jt: any) => {
-        jtMap[jt.id] = { 
-          name: jt.name, 
-          code: jt.code, 
+        jtMap[jt.id] = {
+          name: jt.name,
+          code: jt.code,
           monitoredUnitIds: jt.monitoredUnitIds || [],
           domainId: jt.domainId || null,
           category: jt.category || ''
@@ -85,14 +85,19 @@ export class EmployeeController implements OnModuleInit {
         catMap[c.id] = { name: c.name, code: c.code };
       });
 
-      const unitMap: Record<string, any> = {};
+      // unitMap: lưu thông tin node kèm isLeaf + directChildIds từ proto (không cần tự tính)
+      const unitMap: Record<number, any> = {};
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
           if (n.id) {
-            unitMap[n.id] = { 
-              name: n.name, 
+            unitMap[n.id] = {
+              name: n.name,
               code: n.code,
-              domainIds: n.domainIds || []
+              parentId: n.parentId ?? null,
+              domainIds: n.domainIds || [],
+              isLeaf: n.isLeaf ?? (!(n.children?.length)),  // dùng field từ proto
+              depth: n.depth ?? 0,
+              directChildIds: (n.children || []).map((c: any) => c.id),
             };
           }
           if (n.children?.length) flattenNodes(n.children);
@@ -159,8 +164,9 @@ export class EmployeeController implements OnModuleInit {
       req.callerEmail = user.email;
       req.callerUnitId = user.unitId;
       req.callerJobCode = user.jobTitleCode;
+      req.callerEmployeeCode = user.employeeCode || user.username;
     }
-    
+
     // Convert boolean flag
     if (req.assignableOnly === 'true' || req.assignableOnly === true) {
       req.assignableOnly = true;
@@ -180,49 +186,30 @@ export class EmployeeController implements OnModuleInit {
       const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
 
       if (!isAdmin && req.callerUnitId) {
-        const callerUnitCode = dicts.unitMap[req.callerUnitId]?.code;
-        
-        // Lấy category của người gọi API dựa vào job code
-        const callerJt: any = Object.values(dicts.jtMap).find((jt: any) => jt.code === req.callerJobCode);
-        const isCallerLeader = callerJt && ['EXECUTIVE', 'MANAGER'].includes(callerJt.category);
+        const callerUnitId = parseInt(req.callerUnitId, 10);
+        const callerUnit = dicts.unitMap[callerUnitId];
 
-        if (callerUnitCode) {
-          const callerLevel = callerUnitCode.split('.').length;
-
-          res.data = res.data.filter((emp: any) => {
-            // Loại bỏ chính mình nếu đang dùng cờ giao việc (nếu frontend vẫn truyền)
-            if (req.assignableOnly && emp.email === req.callerEmail) return false;
-            
-            const targetUnitCode = emp.department?.code;
-            if (!targetUnitCode) return false;
-
-            const targetLevel = targetUnitCode.split('.').length;
-            const isTargetLeader = ['EXECUTIVE', 'MANAGER'].includes(emp.jobTitle?.category);
-
-            // Cho phép thấy chính mình (nếu không phải trường hợp assignableOnly)
-            if (emp.email === req.callerEmail) return true;
-
-            if (isCallerLeader) {
-              // 1. Cấp trên thấy: Lãnh đạo cấp dưới trực tiếp (Level + 1)
-              if (targetLevel === callerLevel + 1 && targetUnitCode.startsWith(callerUnitCode) && isTargetLeader) {
-                return true;
-              }
-              // 2. Lãnh đạo thấy: Nhân viên trong cùng đơn vị
-              if (targetUnitCode === callerUnitCode && !isTargetLeader) {
-                return true;
-              }
-            } else {
-              // Nhân viên thường: Chỉ thấy người trong cùng đơn vị
-              if (targetUnitCode === callerUnitCode) {
-                return true;
-              }
-            }
-
-            return false;
-          });
+        if (req.assignableOnly) {
+          // ── CHẾ ĐỘ GIAO VIỆC: dùng directChildIds từ proto tree (isLeaf = không được giao) ──
+          if (callerUnit?.isLeaf) {
+            // Leaf node – thành phần thấp nhất, không có cấp dưới để giao việc
+            res.data = [];
+          } else {
+            const directChildIds = new Set<number>(callerUnit?.directChildIds || []);
+            res.data = res.data.filter((emp: any) => {
+              // Loại chính mình
+              if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
+              const empUnitId = emp.department?.id || emp.departmentId;
+              return directChildIds.has(empUnitId);
+            });
+          }
         } else {
-          // Không có mã đơn vị, chỉ thấy chính mình
-          res.data = res.data.filter((emp: any) => emp.email === req.callerEmail);
+          // ── CHẾ ĐỘ XEM THÔNG THƯỜNG: cùng đơn vị + đơn vị con trực tiếp ──
+          const directChildIds = new Set<number>(callerUnit?.directChildIds || []);
+          res.data = res.data.filter((emp: any) => {
+            const empUnitId = emp.department?.id || emp.departmentId;
+            return empUnitId === callerUnitId || directChildIds.has(empUnitId);
+          });
         }
       }
     }

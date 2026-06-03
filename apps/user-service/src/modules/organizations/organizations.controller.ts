@@ -38,9 +38,10 @@ export class OrganizationsController {
     };
   }
 
-  private mapUnitNode(node: any): any {
+  private mapUnitNode(node: any, depth = 0): any {
     const { domainIds, domainNames } = this.domainIdsAndNames(node);
     const { geographicAreaIds, geographicAreaNames } = this.geoAreaIdsAndNames(node);
+    const hasChildren = node.children && node.children.length > 0;
     return {
       id: node.id,
       code: node.code,
@@ -55,10 +56,11 @@ export class OrganizationsController {
       geographicAreaIds,
       geographicAreaNames,
       scope: node.scope ?? '',
-      children:
-        node.children && node.children.length
-          ? node.children.map((c: any) => this.mapUnitNode(c))
-          : [],
+      isLeaf: !hasChildren,
+      depth,
+      children: hasChildren
+        ? node.children.map((c: any) => this.mapUnitNode(c, depth + 1))
+        : [],
     };
   }
 

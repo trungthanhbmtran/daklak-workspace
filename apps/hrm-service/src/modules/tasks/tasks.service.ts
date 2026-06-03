@@ -453,7 +453,7 @@ export class TasksService implements OnModuleInit {
     // Lấy task hiện tại để kiểm tra status và supervisorCode
     const currentTask = await this.prisma.task.findUnique({
       where: { id },
-      select: { status: true, supervisorCode: true }
+      select: { status: true, supervisorCode: true, assignerCode: true }
     });
 
     const dataToUpdate: any = {};
@@ -462,6 +462,13 @@ export class TasksService implements OnModuleInit {
 
     // Ghi đè lại người giao việc nếu được truyền từ Gateway
     if (assignerCode) {
+      if (assigneeCode === assignerCode) {
+        throw new Error('Không được phân công công việc cho chính mình.');
+      }
+      if (currentTask && assigneeCode === currentTask.assignerCode && assigneeCode !== 'UNASSIGNED') {
+        throw new Error('Không được giao lại công việc cho người đã giao việc cho bạn.');
+      }
+
       // Kiểm tra xem assignerCode có phải là employee code hợp lệ không (tránh FK violation)
       // assignerCode có thể là username (không phải employee) nếu user chưa có employee record
       const assignerEmployee = await this.prisma.employee.findUnique({
