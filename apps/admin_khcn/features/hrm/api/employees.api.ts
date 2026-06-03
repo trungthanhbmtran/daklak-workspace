@@ -6,6 +6,9 @@ const HRM_EMPLOYEES_PATH = "/hrm/employees";
 
 function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
   return {
+    // Giữ nguyên TẤT CẢ field từ backend (bao gồm priorityScore, isOverloaded, availableCapacity, rankLimit...)
+    ...(row as any),
+    // Override các field cần parse kiểu dữ liệu cụ thể
     id: Number(row.id),
     firstname: String(row.firstname ?? ""),
     lastname: String(row.lastname ?? ""),
@@ -32,9 +35,9 @@ function parseEmployeeRow(row: Record<string, unknown>): HrmEmployee {
     civilServantRank: (row.civilServantRank ?? row.civil_servant_rank ?? row.civilServantRankInfo) as HrmEmployee["civilServantRank"],
     partyTitle: (row.partyTitle ?? row.party_title ?? row.partyTitleInfo) as HrmEmployee["partyTitle"],
     currentTaskCount: row.currentTaskCount != null ? Number(row.currentTaskCount) : 0,
-
   };
 }
+
 
 export const hrmApi = {
   list(params: HrmEmployeesListParams = {}): Promise<HrmEmployeesListResponse> {

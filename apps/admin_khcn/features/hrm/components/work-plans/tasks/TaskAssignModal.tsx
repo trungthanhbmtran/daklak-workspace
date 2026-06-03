@@ -58,22 +58,23 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   const { data: employeesData } = useHrmEmployeesList({ pageSize: 200, assignableOnly: true } as any);
 
-  // Backend đã filter + score + sort sẵn theo PBAC — client chỉ map sang shape UI
+  // Backend đã filter + score + sort sẵn — client chỉ render, không tính lại
   const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
     const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(' ');
     return {
       code: emp.employeeCode,
       name: fullName,
-      rankLimit: emp.rankLimit || 100,
-      availableCapacity: emp.availableCapacity ?? (emp.rankLimit - (emp.currentTaskCount || 0)),
-      currentLoad: emp.currentTaskCount || 0,
-      priorityScore: emp.priorityScore || 0,
-      isOverloaded: emp.isOverloaded || false,
+      rankLimit: emp.rankLimit,
+      availableCapacity: emp.availableCapacity,
+      currentLoad: emp.currentTaskCount,
+      priorityScore: emp.priorityScore,
+      isOverloaded: emp.isOverloaded,
       department: emp.department,
       jobTitle: emp.jobTitle,
       civilServantRank: emp.civilServantRank,
     };
   });
+
 
   const currentEmp = assignableEmployees.find((e: any) => e.code === taskState.assigneeCode);
   const isOverload = currentEmp?.isOverloaded || false;
