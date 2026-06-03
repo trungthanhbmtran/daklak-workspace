@@ -110,7 +110,7 @@ message CreateTaskRequest {
   string scoringMethod = 8;
   float bonusPerDay = 9;
   float penaltyPerDay = 10;
-  string supervisorCode = 11;
+  optional string supervisorCode = 11;
   int32 planId = 12;
   int32 departmentId = 13;
   string startDate = 14;
@@ -131,6 +131,8 @@ message ListTasksRequest {
   string assignerCode = 9; // optional - lọc theo người giao việc (tab Đã giao)
   string status = 10; // optional - lọc theo trạng thái
   string priority = 11; // optional - lọc theo mức độ ưu tiên
+  int32 planId = 12; // optional - id kế hoạch
+  repeated int32 callerAncestorUnitIds = 13; // optional - danh sách id đơn vị cha
 }
 
 message TaskStats {
