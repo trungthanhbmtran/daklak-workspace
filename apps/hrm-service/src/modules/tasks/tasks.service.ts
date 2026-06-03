@@ -180,6 +180,14 @@ export class TasksService implements OnModuleInit {
 
     this.applyDateFilter(query.filter, where);
 
+    // Lọc theo planId — khi query theo plan thì bỏ qua auth filter (plan visibility đã kiểm tra)
+    if (query.planId) {
+      where.planId = parseInt(query.planId, 10);
+      // Khi filter theo planId, bỏ điều kiện TEMPLATE để thấy cả task chưa giao
+      delete where.status;
+      return this.listTasksByPlan(where, query);
+    }
+
     // Nếu đã chỉ định assignerCode cụ thể (tab ASSIGNED_BY_ME), bỏ qua auth filter
     // để người giao việc thấy TẤT CẢ task họ đã giao (kể cả giao cho người khác phòng)
     if (!query.assignerCode && !query.isAdmin && query.currentUserCode) {
@@ -250,15 +258,61 @@ export class TasksService implements OnModuleInit {
     };
   }
 
+  /** Lấy toàn bộ task thuộc 1 kế hoạch (flat list), client tự build tree theo parentId */
+  private async listTasksByPlan(where: any, query: any) {
+    const tasks = await this.prisma.task.findMany({
+      where,
+      orderBy: [{ parentId: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        assignee: true,
+        assigner: true,
+        plan: { select: { id: true, title: true } }
+      }
+    });
+
+    return {
+      success: true,
+      message: 'Lấy danh sách nhiệm vụ theo kế hoạch thành công',
+      data: tasks.map((t: any) => ({
+        ...t,
+        assigneeName: t.assignee
+          ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+          : (t.assigneeCode === 'UNASSIGNED' || !t.assigneeCode ? 'Chưa phân công' : t.assigneeCode),
+        assignerName: t.assigner
+          ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+          : (t.assignerCode || ''),
+        dueDate: t.dueDate?.toISOString() || '',
+        startDate: t.startDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+        plan: t.plan || null,
+      })),
+      meta: { pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 } }
+    };
+  }
+
   async createTask(data: any) {
+    // Propagate planId từ task cha nếu không có — đảm bảo toàn bộ cây task thuộc cùng kế hoạch
+    let planId = data.planId || null;
+    if (data.parentId && !planId) {
+      const parent = await this.prisma.task.findUnique({
+        where: { id: parseInt(data.parentId, 10) },
+        select: { planId: true }
+      });
+      planId = parent?.planId || null;
+    }
+
+    // Sub-task tạo bởi người được giao → status TEMPLATE (chưa giao), gốc → TODO
+    const initialStatus = data.parentId ? 'TEMPLATE' : (data.status || 'TODO');
+
     const t = await this.prisma.task.create({
       data: {
         title: data.title || data.taskName || 'Nhiệm vụ không tên',
         description: data.description,
-        assigneeCode: data.assigneeCode || '',
+        assigneeCode: data.assigneeCode || 'UNASSIGNED',
         assignerCode: data.assignerCode || '',
         departmentId: data.departmentId || null,
-        status: 'TODO',
+        status: initialStatus,
         priority: data.priority || 'MEDIUM',
         startDate: data.startDate ? new Date(data.startDate) : null,
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
@@ -268,8 +322,8 @@ export class TasksService implements OnModuleInit {
         bonusPerDay: data.bonusPerDay,
         penaltyPerDay: data.penaltyPerDay,
         supervisorCode: data.supervisorCode,
-        planId: data.planId,
-        parentId: data.parentId || null,
+        planId,
+        parentId: data.parentId ? parseInt(data.parentId, 10) : null,
       }
     });
 

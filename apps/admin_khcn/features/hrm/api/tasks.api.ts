@@ -6,8 +6,32 @@ export const hrmTasksApi = {
     return apiClient.get("/hrm/tasks", { params }) as any;
   },
 
+  /** Lấy TOÀN BỘ task của 1 kế hoạch (flat list, bao gồm sub-tasks mọi cấp).
+   *  Client tự build tree theo parentId. Auth filter bị bỏ qua — plan visibility đã kiểm tra.
+   */
+  listByPlan(planId: number): Promise<ApiResponse<any[]>> {
+    return apiClient.get("/hrm/tasks", { params: { planId } }) as any;
+  },
+
   create(payload: any): Promise<ApiResponse<any>> {
     return apiClient.post('/hrm/tasks', payload) as any;
+  },
+
+  /** Tạo nhiệm vụ con dưới task được giao. planId tự động propagate từ task cha phía backend. */
+  createSubTask(parentId: string | number, payload: {
+    title: string;
+    description?: string;
+    priority?: string;
+    dueDate?: string;
+    assignerCode?: string;
+    planId?: number;
+  }): Promise<ApiResponse<any>> {
+    return apiClient.post('/hrm/tasks', {
+      ...payload,
+      parentId: String(parentId),
+      assigneeCode: 'UNASSIGNED',
+      status: 'TEMPLATE',
+    }) as any;
   },
 
   update(id: string, payload: any): Promise<ApiResponse<any>> {

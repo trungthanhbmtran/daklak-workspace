@@ -82,6 +82,7 @@ export class TasksController implements OnModuleInit {
     @Query('filter') filter: string,
     @Query('search') search: string,
     @Query('departmentId') departmentId: string,
+    @Query('planId') planId: string,          // Lấy toàn bộ task của 1 kế hoạch
     @Query('isSupervisor') isSupervisor: string,
     @Query('status') status: string,
     @Query('priority') priority: string,
@@ -105,7 +106,7 @@ export class TasksController implements OnModuleInit {
 
     // Tính ancestor unit IDs cho visibility theo cây tổ chức
     let callerAncestorUnitIds: number[] = [];
-    if (!isAdmin && user?.unitId) {
+    if (!isAdmin && user?.unitId && !planId) {  // Skip khi query by planId
       const unitMap = await this.getUnitMap();
       callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
     }
@@ -119,6 +120,7 @@ export class TasksController implements OnModuleInit {
         status,
         priority,
         departmentId: finalDepartmentId,
+        planId: planId ? parseInt(planId, 10) : undefined,  // Pass planId cho plan tree
         isSupervisor: isSupervisor === 'true',
         currentUserCode: user?.employeeCode || user?.username,
         isAdmin,
