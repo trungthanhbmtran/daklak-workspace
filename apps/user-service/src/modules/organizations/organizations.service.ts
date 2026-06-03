@@ -35,25 +35,11 @@ export class OrganizationsService {
       },
     });
 
-    // Bước 2: Tính toán Path dựa trên ID vừa tạo
-    let newPath = `/${unit.id}/`;
-    if (data.parentId) {
-      const parent = await this.prisma.organizationUnit.findUnique({
-        where: { id: data.parentId },
-      });
-      if (!parent) {
-        throw new RpcException({
-          message: 'Đơn vị cha không tồn tại',
-          code: GRPC.NOT_FOUND,
-        });
-      }
-      newPath = `${parent.hierarchyPath}${unit.id}/`;
-    }
-
-    // Bước 3: Update Path và gán nhiều lĩnh vực
+    // Bước 2 & 3: Dùng chính code làm hierarchyPath (mã liên thông đã mã hóa phân cấp)
+    // VD: H15.07.04.02 → tự nó là materialized path theo chấm (dot notation)
     await this.prisma.organizationUnit.update({
       where: { id: unit.id },
-      data: { hierarchyPath: newPath },
+      data: { hierarchyPath: data.code },
     });
     if (domainIds.length > 0) {
       await this.prisma.unitDomain.createMany({
@@ -213,18 +199,11 @@ export class OrganizationsService {
     if (data.typeId !== undefined && data.typeId > 0)
       updateData.typeId = data.typeId;
     if (data.scope !== undefined) updateData.scope = data.scope || null;
-    // Đổi đơn vị cha: parentId === null = chuyển lên gốc; parentId > 0 = chuyển sang đơn vị cha mới; không gửi / 0 = giữ nguyên.
-    if (data.parentId === null) {
-      updateData.parentId = null;
-      updateData.hierarchyPath = `/${id}/`;
-    } else if (data.parentId !== undefined && data.parentId > 0) {
-      updateData.parentId = data.parentId;
-      const parent = await this.prisma.organizationUnit.findUnique({
-        where: { id: data.parentId },
-      });
-      if (parent?.hierarchyPath != null) {
-        updateData.hierarchyPath = `${parent.hierarchyPath}${id}/`;
-      }
+    // Đổi đơn vị cha: luôn dùng code làm hierarchyPath
+    if (data.code !== undefined && String(data.code).trim() !== '') {
+      updateData.hierarchyPath = String(data.code).trim();
+    } else if (updateData.code) {
+      updateData.hierarchyPath = updateData.code;
     }
 
     await this.prisma.organizationUnit.update({
@@ -347,9 +326,14 @@ export class OrganizationsService {
       });
     }
 
+    // hierarchyPath = code, nên dùng startsWith(code + '.') để lấy con cháu
+    // Đồng thời lấy cả root (where code = rootId's code)
     const units = await this.prisma.organizationUnit.findMany({
       where: {
-        hierarchyPath: { startsWith: root.hierarchyPath || '' },
+        OR: [
+          { id: rootId },
+          { hierarchyPath: { startsWith: (root.code || root.hierarchyPath || '') + '.' } },
+        ],
       },
       orderBy: { hierarchyPath: 'asc' },
       include: {
