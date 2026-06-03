@@ -5100,8 +5100,6 @@ async function main() {
     { email: 'leanhtuan@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
     { email: 'lequangthanh@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
     { email: 'letrongvu@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
-    { email: 'truongphonghc_ioc@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
-    { email: 'truongphongcn_ioc@daklak.gov.vn', roleCode: 'IOC_MANAGER' },
     // Viên chức / Nhân viên IOC
     { email: 'chautrongphat@daklak.gov.vn', roleCode: 'IOC_STAFF' },
     { email: 'nguyenthikimoanh@daklak.gov.vn', roleCode: 'IOC_STAFF' },
