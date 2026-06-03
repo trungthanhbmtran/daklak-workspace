@@ -4315,70 +4315,145 @@ async function main() {
     }
   };
 
-  // Sở KHCN
+  // ========================================
+  // SỞ KHOA HỌC & CÔNG NGHỆ (H15.07)
+  // ========================================
   await setStaffing('H15.07', 'GIAM_DOC', 1);
   await setStaffing('H15.07', 'PHO_GIAM_DOC', 4);
 
-  // Các phòng ban thuộc Sở
+  // ── Văn phòng Sở (H15.07.05) ──
   await setStaffing('H15.07.05', 'CHANH_VAN_PHONG', 1);
   await setStaffing('H15.07.05', 'PHO_CHANH_VAN_PHONG', 2);
   await setStaffing('H15.07.05', 'SPECIALIST', 5);
 
-  const phongBanCodes = [
-    'H15.07.07',
-    'H15.07.08',
-    'H15.07.09',
-    'H15.07.10',
-    'H15.07.11',
-  ];
-  for (const code of phongBanCodes) {
-    await setStaffing(code, 'TRUONG_PHONG', 1);
-    await setStaffing(code, 'PHO_TRUONG_PHONG', 2);
-    await setStaffing(code, 'SPECIALIST', 4);
-  }
+  // ── Phòng ban chuyên môn Sở KHCN ──
+  // H15.07.06 - Thanh tra Sở
+  await setStaffing('H15.07.06', 'CHANH_THANH_TRA', 1);
+  await setStaffing('H15.07.06', 'PHO_CHANH_THANH_TRA', 1);
+  await setStaffing('H15.07.06', 'THANH_TRA_VIEN', 3);
 
-  // Các Trung tâm
-  const trungTamCodes = ['H15.07.01', 'H15.07.04', 'H15.07.02'];
-  for (const code of trungTamCodes) {
-    await setStaffing(code, 'GIAM_DOC', 1);
-    await setStaffing(code, 'PHO_GIAM_DOC', 2);
-  }
+  // H15.07.07 - Phòng Kế hoạch - Tài chính
+  await setStaffing('H15.07.07', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.07', 'PHO_PHONG', 2);
+  await setStaffing('H15.07.07', 'SPECIALIST', 4);
 
-  // Các phòng thuộc Trung tâm
-  const phongTrungTamCodes = [
-    'H15.07.01.01',
-    'H15.07.01.02',
-    'H15.07.04.01',
-    'H15.07.04.02',
-    'H15.07.04.03',
-    'H15.07.02.01',
-    'H15.07.02.02',
-    'H15.07.02.03',
-  ];
-  for (const code of phongTrungTamCodes) {
-    await setStaffing(code, 'TRUONG_PHONG', 1);
-    await setStaffing(code, 'PHO_TRUONG_PHONG', 1);
-    await setStaffing(code, 'SPECIALIST', 3);
-  }
+  // H15.07.08 - Phòng Quản lý Khoa học
+  await setStaffing('H15.07.08', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.08', 'PHO_PHONG', 2);
+  await setStaffing('H15.07.08', 'SPECIALIST', 4);
 
-  // Cập nhật thêm định biên các chức danh khác (từ hrm-service)
-  // Phòng Hành chính - Tổng hợp IOC
+  // H15.07.09 - Phòng Chuyển đổi số
+  await setStaffing('H15.07.09', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.09', 'PHO_PHONG', 2);
+  await setStaffing('H15.07.09', 'SPECIALIST', 4);
+
+  // H15.07.10 - Phòng Quản lý Công nghệ & Đổi mới sáng tạo
+  await setStaffing('H15.07.10', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.10', 'PHO_PHONG', 2);
+  await setStaffing('H15.07.10', 'SPECIALIST', 4);
+
+  // H15.07.11 - Phòng Quản lý TCĐLCL
+  await setStaffing('H15.07.11', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.11', 'PHO_PHONG', 2);
+  await setStaffing('H15.07.11', 'SPECIALIST', 4);
+
+  // ========================================
+  // TRUNG TÂM ĐỔI MỚI SÁNG TẠO (H15.07.01)
+  // ========================================
+  await setStaffing('H15.07.01', 'GIAM_DOC', 1);
+  await setStaffing('H15.07.01', 'PHO_GIAM_DOC', 2);
+
+  // H15.07.01.01 - Phòng Hành chính - Tổng hợp
+  await setStaffing('H15.07.01.01', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.01.01', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.01.01', 'VIEN_CHUC', 3);
+
+  // H15.07.01.02 - Phòng Đào tạo & Phát triển
+  await setStaffing('H15.07.01.02', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.01.02', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.01.02', 'VIEN_CHUC', 4);
+
+  // ========================================
+  // TRUNG TÂM KỸ THUẬT TCĐLCL (H15.07.02)
+  // ========================================
+  await setStaffing('H15.07.02', 'GIAM_DOC', 1);
+  await setStaffing('H15.07.02', 'PHO_GIAM_DOC', 2);
+
+  // H15.07.02.01 - Phòng Hành chính - Tổ chức
+  await setStaffing('H15.07.02.01', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.02.01', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.02.01', 'VIEN_CHUC', 3);
+
+  // H15.07.02.02 - Phòng Đo lường
+  await setStaffing('H15.07.02.02', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.02.02', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.02.02', 'VIEN_CHUC', 4);
+
+  // H15.07.02.03 - Phòng Thử nghiệm
+  await setStaffing('H15.07.02.03', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.02.03', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.02.03', 'VIEN_CHUC', 4);
+
+  // ========================================
+  // TRUNG TÂM THÔNG TIN ỨNG DỤNG KH&CN (H15.07.03)
+  // ========================================
+  await setStaffing('H15.07.03', 'GIAM_DOC', 1);
+  await setStaffing('H15.07.03', 'PHO_GIAM_DOC', 2);
+
+  // H15.07.03.01 - Phòng Hành chính - Tổng hợp
+  await setStaffing('H15.07.03.01', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.01', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.01', 'VIEN_CHUC', 3);
+
+  // H15.07.03.02 - Phòng Thông tin KH&CN
+  await setStaffing('H15.07.03.02', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.02', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.02', 'VIEN_CHUC', 4);
+
+  // H15.07.03.03 - Phòng Ứng dụng KH&CN
+  await setStaffing('H15.07.03.03', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.03', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.03', 'VIEN_CHUC', 4);
+
+  // H15.07.03.04 - Phòng Dịch vụ KH&CN
+  await setStaffing('H15.07.03.04', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.04', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.04', 'VIEN_CHUC', 3);
+
+  // H15.07.03.05 - Trại Thực nghiệm KH&CN
+  await setStaffing('H15.07.03.05', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.03.05', 'VIEN_CHUC', 5);
+
+  // ========================================
+  // TRUNG TÂM IOC - GIÁM SÁT ĐÔ THỊ THÔNG MINH (H15.07.04)
+  // ========================================
+  await setStaffing('H15.07.04', 'GIAM_DOC', 1);
+  await setStaffing('H15.07.04', 'PHO_GIAM_DOC', 2);
+
+  // H15.07.04.01 - Phòng Hành chính - Tổng hợp
+  // Thực tế: 1 TP + 1 KT + 1 VC + 1 VT + 4 NV + 2 BV = 10 người
+  await setStaffing('H15.07.04.01', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.04.01', 'PHO_TRUONG_PHONG', 1);
   await setStaffing('H15.07.04.01', 'KE_TOAN', 1);
-  await setStaffing('H15.07.04.01', 'VIEN_CHUC', 1);
   await setStaffing('H15.07.04.01', 'VAN_THU', 1);
+  await setStaffing('H15.07.04.01', 'VIEN_CHUC', 1);
   await setStaffing('H15.07.04.01', 'NHAN_VIEN', 4);
   await setStaffing('H15.07.04.01', 'BAO_VE', 2);
 
-  // Phòng Khai thác và Quản lý dữ liệu IOC
-  await setStaffing('H15.07.04.02', 'VIEN_CHUC', 1);
+  // H15.07.04.02 - Phòng Khai thác & Quản lý dữ liệu
+  // Thực tế: 1 TP + 3 VC + 3 NV = 7 người
+  await setStaffing('H15.07.04.02', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.04.02', 'PHO_TRUONG_PHONG', 1);
+  await setStaffing('H15.07.04.02', 'VIEN_CHUC', 3);
+  await setStaffing('H15.07.04.02', 'NHAN_VIEN', 3);
 
-  // Phòng Hạ tầng - Đô thị thông minh IOC
+  // H15.07.04.03 - Phòng Hạ tầng - Đô thị thông minh
+  // Thực tế: 1 TP + 2 VC + 3 NV = 6 người
+  await setStaffing('H15.07.04.03', 'TRUONG_PHONG', 1);
+  await setStaffing('H15.07.04.03', 'PHO_TRUONG_PHONG', 1);
   await setStaffing('H15.07.04.03', 'VIEN_CHUC', 2);
   await setStaffing('H15.07.04.03', 'NHAN_VIEN', 3);
 
-  // Phòng Quản lý Công nghệ và Đổi mới sáng tạo
-  await setStaffing('H15.07.10', 'VIEN_CHUC', 2);
-  await setStaffing('H15.07.10', 'NHAN_VIEN', 3);
 
   // ==========================================================
   // 10. CATEGORIES (Danh mục dùng chung)
