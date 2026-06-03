@@ -58,7 +58,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     }
   }, [task, isOpen]);
 
-  const { data: employeesData } = useHrmEmployeesList({ pageSize: 200, assignableOnly: true } as any);
+  const [crossDepartment, setCrossDepartment] = useState(false);
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 200, assignableOnly: true, crossDepartment } as any);
 
   // Backend đã filter + score + sort sẵn — client chỉ render, không tính lại
   const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
@@ -135,20 +136,31 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
             <div className="space-y-2 lg:col-span-2">
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người thực hiện <span className="text-red-500">*</span></label>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="h-7 px-3 text-[11px] bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold rounded-full"
-                  onClick={() => {
-                    if (assignableEmployees.length > 0) {
-                      setTaskState(p => ({ ...p, assigneeCode: assignableEmployees[0].code }));
-                      toast.success(`Đã chọn chủ trì chính: ${assignableEmployees[0].name}`);
-                    }
-                  }}
-                  type="button"
-                >
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Giao thông minh
-                </Button>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-600 hover:text-indigo-600 select-none">
+                    <input 
+                      type="checkbox" 
+                      checked={crossDepartment} 
+                      onChange={(e) => setCrossDepartment(e.target.checked)} 
+                      className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+                    />
+                    Giao liên phòng ban
+                  </label>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="h-7 px-3 text-[11px] bg-indigo-100 text-indigo-700 hover:bg-indigo-200 font-bold rounded-full"
+                    onClick={() => {
+                      if (assignableEmployees.length > 0) {
+                        setTaskState(p => ({ ...p, assigneeCode: assignableEmployees[0].code }));
+                        toast.success(`Đã chọn chủ trì chính: ${assignableEmployees[0].name}`);
+                      }
+                    }}
+                    type="button"
+                  >
+                    <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Giao thông minh
+                  </Button>
+                </div>
               </div>
 
               <Popover open={openPopover} onOpenChange={setOpenPopover}>

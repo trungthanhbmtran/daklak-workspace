@@ -35,6 +35,7 @@ export interface HrmEmployeesListParams {
   jobTitleId?: number;
   status?: string;
   assignableOnly?: boolean; // Chỉ lấy cấp dưới trực tiếp để giao việc
+  crossDepartment?: boolean; // Cho phép xem Lãnh đạo phòng ban khác
 }
 
 /** Meta phân trang từ gateway/hrm-service */

@@ -173,6 +173,9 @@ export class EmployeeController implements OnModuleInit {
     if (req.assignableOnly === 'true' || req.assignableOnly === true) {
       req.assignableOnly = true;
     }
+    if (req.crossDepartment === 'true' || req.crossDepartment === true) {
+      req.crossDepartment = true;
+    }
 
     const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.ListEmployees(req)),
@@ -194,7 +197,18 @@ export class EmployeeController implements OnModuleInit {
 
         if (req.assignableOnly) {
           // ── CHẾ ĐỘ GIAO VIỆC: theo đúng phân cấp tổ chức ──
-          if (callerUnit?.isLeaf) {
+          if (req.crossDepartment) {
+            // Giao việc liên phòng ban: thấy nhân sự phòng mình + Lãnh đạo các phòng khác
+            const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
+            res.data = res.data.filter((emp: any) => {
+              if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
+              const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
+              if (empUnitId === callerUnitId) return true; // Cùng phòng ban
+
+              const jtCategory = dicts.jtMap[emp.jobTitleId]?.category || '';
+              return leaderCategories.has(jtCategory); // Khác phòng thì phải là Lãnh đạo
+            });
+          } else if (callerUnit?.isLeaf) {
             // Đơn vị là leaf (phòng ban lá): Trưởng phòng giao cho nhân viên trong phòng
             res.data = res.data.filter((emp: any) => {
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
