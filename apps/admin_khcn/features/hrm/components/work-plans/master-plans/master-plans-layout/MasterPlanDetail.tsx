@@ -286,9 +286,6 @@ export function MasterPlanDetail() {
           </div>
         </TabsContent>
 
-          </div>
-        </TabsContent>
-
         {/* ── Tab: Triển khai — Cây nhiệm vụ phân cấp ── */}
         <TabsContent value="execution" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30">
           <PlanTaskTree
