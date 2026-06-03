@@ -450,52 +450,39 @@ export class TasksService implements OnModuleInit {
   }
 
   async assignTask(id: number, assigneeCode: string, departmentId?: number, assignerCode?: string) {
-    // Lấy task hiện tại để kiểm tra chuỗi phân cấp giao việc
     const currentTask = await this.prisma.task.findUnique({
       where: { id },
-      select: { status: true, supervisorCode: true, assignerCode: true }
+      select: { status: true, assignerCode: true }
     });
 
     const dataToUpdate: any = {};
     if (assigneeCode !== undefined) dataToUpdate.assigneeCode = assigneeCode;
     if (departmentId !== undefined) dataToUpdate.departmentId = departmentId;
 
-    // Ghi đè lại người giao việc nếu được truyền từ Gateway
     if (assignerCode) {
+      // Không được giao việc cho chính mình
       if (assigneeCode === assignerCode) {
         throw new Error('Không được phân công công việc cho chính mình.');
       }
+      // Không được giao lại cho người đã giao cho mình
       if (currentTask && assigneeCode === currentTask.assignerCode && assigneeCode !== 'UNASSIGNED') {
         throw new Error('Không được giao lại công việc cho người đã giao việc cho bạn.');
       }
 
-      // Kiểm tra xem assignerCode có phải là employee code hợp lệ không (tránh FK violation)
-      // assignerCode có thể là username (không phải employee) nếu user chưa có employee record
+      // Ghi đè người giao việc nếu là employee hợp lệ
       const assignerEmployee = await this.prisma.employee.findUnique({
         where: { employeeCode: assignerCode },
         select: { employeeCode: true }
       });
-
       if (assignerEmployee) {
         dataToUpdate.assignerCode = assignerCode;
-
-        // ── LOGIC NGƯỜI THEO DÕI (supervisorCode) ──
-        // Phân cấp giao việc: A → B → C
-        // Khi B giao lại cho C: A (người đã giao cho B) trở thành người theo dõi
-        // supervisorCode = assignerCode CŨ (người đã giao cho người giao hiện tại)
-        const oldAssignerCode = currentTask?.assignerCode;
-        if (
-          oldAssignerCode &&
-          oldAssignerCode !== 'UNASSIGNED' &&
-          oldAssignerCode !== assignerCode
-        ) {
-          dataToUpdate.supervisorCode = oldAssignerCode;
-        }
-        // Lần giao đầu tiên (old assigner = UNASSIGNED): không set supervisor
+        // supervisorCode không cần lưu riêng:
+        // Người giao việc (assignerCode) tự nhiên thấy task.
+        // Chuỗi phân cấp A→B→C theo dõi qua parent_id sub-tasks.
       }
     }
 
-    // Nếu task đang là TEMPLATE (tạo từ master-plans), chuyển sang TODO khi được giao
+    // TEMPLATE → TODO khi được giao lần đầu
     if (currentTask?.status === 'TEMPLATE') {
       dataToUpdate.status = 'TODO';
     }

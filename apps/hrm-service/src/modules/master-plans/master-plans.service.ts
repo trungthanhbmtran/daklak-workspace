@@ -24,7 +24,6 @@ export class MasterPlansService {
             OR: [
               { assigneeCode: query.currentUserCode },
               { assignerCode: query.currentUserCode },
-              { supervisorCode: query.currentUserCode }
             ]
           }
         }
