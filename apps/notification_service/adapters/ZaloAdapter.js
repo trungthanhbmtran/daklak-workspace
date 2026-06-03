@@ -8,12 +8,13 @@ const https = require('https');
  */
 class ZaloAdapter extends BaseAdapter {
   async send({ recipient, subject, body, metadata = {} }) {
-    const token = this.config.accessToken || this.config.token;
+    const dyn = metadata.dynamicConfig?.zalo || {};
+    const token = dyn.accessToken || dyn.token || this.config.accessToken || this.config.token;
     if (!token) return { success: false, error: 'Missing Zalo access token' };
     const userId = recipient || metadata.user_id || metadata.recipient_id;
     if (!userId) return { success: false, error: 'Missing recipient (user_id)' };
     const text = subject ? `${subject}\n${body}` : (body || '');
-    const apiUrl = this.config.apiUrl || 'https://graph.zalo.me/v2.0/me/message';
+    const apiUrl = dyn.apiUrl || this.config.apiUrl || 'https://graph.zalo.me/v2.0/me/message';
     const payload = JSON.stringify({
       recipient: { user_id: userId },
       message: { text },

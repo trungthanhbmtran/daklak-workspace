@@ -19,21 +19,28 @@ class SmtpAdapter extends BaseAdapter {
     this._transporter = null;
   }
 
-  _getTransporter() {
-    if (this._transporter) return this._transporter;
-    const host = resolveEnv(this.config.host);
-    const port = resolveEnv(this.config.port);
-    const secure = resolveEnv(this.config.secure);
-    const user = resolveEnv(this.config.user);
-    const passwordRef = resolveEnv(this.config.passwordRef);
+  _getTransporter(dyn = {}) {
+    // If no dynamic config, use cached transporter
+    if (Object.keys(dyn).length === 0 && this._transporter) return this._transporter;
+    
+    const host = resolveEnv(dyn.host) || resolveEnv(this.config.host);
+    const port = resolveEnv(dyn.port) || resolveEnv(this.config.port);
+    const secure = dyn.secure !== undefined ? resolveEnv(dyn.secure) : resolveEnv(this.config.secure);
+    const user = resolveEnv(dyn.user) || resolveEnv(this.config.user);
+    const passwordRef = resolveEnv(dyn.password) || resolveEnv(this.config.passwordRef);
     const portNum = port ? parseInt(port, 10) : 587;
-    this._transporter = nodemailer.createTransport({
+    
+    const transporter = nodemailer.createTransport({
       host: host || 'localhost',
       port: portNum,
       secure: secure === 'true' || secure === true,
       auth: user && passwordRef ? { user, pass: passwordRef } : undefined,
     });
-    return this._transporter;
+    
+    if (Object.keys(dyn).length === 0) {
+      this._transporter = transporter;
+    }
+    return transporter;
   }
 
   async isReady() {
@@ -42,8 +49,9 @@ class SmtpAdapter extends BaseAdapter {
   }
 
   async send({ recipient, subject, body, metadata = {} }) {
-    const transporter = this._getTransporter();
-    const from = metadata.from || resolveEnv(this.config.from) || resolveEnv(this.config.user) || 'noreply@localhost';
+    const dyn = metadata.dynamicConfig?.smtp || {};
+    const transporter = this._getTransporter(dyn);
+    const from = dyn.from || metadata.from || resolveEnv(this.config.from) || resolveEnv(this.config.user) || 'noreply@localhost';
     const mailOptions = {
       from,
       to: recipient,

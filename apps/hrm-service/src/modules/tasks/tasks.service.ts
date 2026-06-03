@@ -1,9 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { PrismaService } from '../../database/prisma.service';
+import { ClientProxy } from '@nestjs/microservices';
+import { OnModuleInit } from '@nestjs/common';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
-export class TasksService {
-  constructor(private prisma: PrismaService) { }
+export class TasksService implements OnModuleInit {
+  private integrationService: any;
+
+  constructor(
+    private prisma: PrismaService,
+    @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
+    @Inject('INTEGRATION_PACKAGE') private integrationClient: any,
+  ) { }
+
+  onModuleInit() {
+    this.integrationService = this.integrationClient.getService('IntegrationService');
+  }
+
+  // Lấy động cấu hình tích hợp
+  private async getDynamicConfig() {
+    try {
+      const res = await firstValueFrom<any>(this.integrationService.FindAll({ search: '' }));
+      const data = res?.data || res || [];
+      if (!data || !Array.isArray(data)) return {};
+      const config: Record<string, any> = {};
+      for (const item of data) {
+        if (item.isActive && item.configData) {
+          try {
+            const parsed = typeof item.configData === 'string' ? JSON.parse(item.configData) : item.configData;
+            if (item.integrationCode === 'NOTIFY_TELEGRAM') config.telegram = parsed;
+            if (item.integrationCode === 'NOTIFY_ZALO') config.zalo = parsed;
+            if (item.integrationCode === 'NOTIFY_SMTP') config.smtp = parsed;
+            if (item.integrationCode === 'NOTIFY_INAPP') config.inApp = parsed;
+          } catch (e) { }
+        }
+      }
+      return config;
+    } catch (error) {
+      console.warn('Failed to fetch dynamic config from user-service:', error.message);
+      return {};
+    }
+  }
 
   private async getTaskStats(query: any) {
     const statsWhere: any = query.assigneeCode ? { assigneeCode: query.assigneeCode } : {};
@@ -247,8 +285,22 @@ export class TasksService {
 
     const t = await this.prisma.task.update({
       where: { id },
-      data: dataToUpdate
+      data: dataToUpdate,
+      include: { assignee: true, assigner: true }
     });
+
+    if (t.assignerCode && t.assigner) {
+      if (status === 'RETURNED' || status === 'DONE') {
+        const title = status === 'RETURNED' ? 'bị trả lại' : 'được hoàn thành';
+        const dynamicConfig = await this.getDynamicConfig();
+        this.notificationClient.emit('notify', {
+          recipient: t.assigner.email || t.assignerCode,
+          subject: `[HRM] Công việc ${title}: ${t.title}`,
+          body: `Công việc "${t.title}" đã ${title}.\nNgười thực hiện: ${actorCode}${status === 'RETURNED' ? `\nLý do: ${rejectReason}` : ''}\nVui lòng truy cập hệ thống để xem chi tiết.`,
+          metadata: { dynamicConfig }
+        });
+      }
+    }
 
     if (rejectReason && status === 'RETURNED') {
       await this.prisma.taskComment.create({
@@ -433,8 +485,19 @@ export class TasksService {
 
     const t = await this.prisma.task.update({
       where: { id },
-      data: dataToUpdate
+      data: dataToUpdate,
+      include: { assignee: true }
     });
+
+    if (assigneeCode && t.assignee && t.assigneeCode !== 'UNASSIGNED') {
+      const dynamicConfig = await this.getDynamicConfig();
+      this.notificationClient.emit('notify', {
+        recipient: t.assignee.email || t.assigneeCode,
+        subject: `[HRM] Phân công công việc mới: ${t.title}`,
+        body: `Bạn vừa được phân công công việc: "${t.title}".\nHạn hoàn thành: ${t.dueDate ? t.dueDate.toISOString().split('T')[0] : 'Chưa xác định'}.\nVui lòng truy cập hệ thống để xem chi tiết.`,
+        metadata: { dynamicConfig }
+      });
+    }
 
     return {
       ...t,

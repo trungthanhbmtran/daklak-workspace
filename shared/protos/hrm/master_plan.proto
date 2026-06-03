@@ -41,6 +41,9 @@ message FindAllMasterPlansRequest {
   string type = 1;
   string status = 2;
   int32 departmentId = 3;
+  string currentUserCode = 4;
+  bool isAdmin = 5;
+  int32 currentUserDept = 6;
 }
 
 message FindMasterPlanByIdRequest {

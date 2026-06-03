@@ -1,9 +1,41 @@
 import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TasksController } from './tasks.controller';
 import { TasksService } from './tasks.service';
 
 @Module({
+  imports: [
+    ClientsModule.registerAsync([
+      {
+        name: 'NOTIFICATION_SERVICE',
+        imports: [ConfigModule],
+        inject: [ConfigService],
+        useFactory: (config: ConfigService) => ({
+          transport: Transport.RMQ,
+          options: {
+            urls: [config.get<string>('RABBITMQ_URL') || 'amqp://guest:guest@localhost:5672'],
+            queue: config.get<string>('NOTIFICATION_QUEUE') || 'notifications',
+            queueOptions: {
+              durable: false,
+            },
+          },
+        }),
+      },
+    ]),
+    ClientsModule.register([
+      {
+        name: 'INTEGRATION_PACKAGE',
+        transport: Transport.GRPC,
+        options: {
+          package: 'integration',
+          protoPath: require('path').join(process.cwd(), '../../shared/protos/users/integration.proto'),
+          url: process.env.USER_SERVICE_ADDR || 'user-service:50051',
+        },
+      },
+    ]),
+  ],
   controllers: [TasksController],
   providers: [TasksService]
 })
-export class TasksModule {}
+export class TasksModule { }

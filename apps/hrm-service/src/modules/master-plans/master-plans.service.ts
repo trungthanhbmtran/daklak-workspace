@@ -11,6 +11,28 @@ export class MasterPlansService {
     if (query.status) where.status = query.status;
     if (query.departmentId) where.departmentId = query.departmentId;
 
+    if (!query.isAdmin && query.currentUserCode) {
+      const authConditions: any[] = [];
+      
+      if (query.currentUserDept) {
+        authConditions.push({ departmentId: query.currentUserDept });
+      }
+
+      authConditions.push({
+        tasks: {
+          some: {
+            OR: [
+              { assigneeCode: query.currentUserCode },
+              { assignerCode: query.currentUserCode },
+              { supervisorCode: query.currentUserCode }
+            ]
+          }
+        }
+      });
+
+      where.AND = [{ OR: authConditions }];
+    }
+
     const masterPlans = await this.prisma.masterPlan.findMany({
       where,
       orderBy: { createdAt: 'desc' },

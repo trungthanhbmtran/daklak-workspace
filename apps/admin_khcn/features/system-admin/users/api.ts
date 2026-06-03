@@ -97,4 +97,34 @@ export const userApi = {
     const data = unwrapData<{ success?: boolean; message?: string } | null>(res);
     return { success: data?.success ?? true, message: data?.message };
   },
+
+  /** Cập nhật tùy chọn nhận thông báo cá nhân (PUT /admin/users/:id/notification-prefs) */
+  updateNotificationPrefs: async (id: number, prefs: Record<string, any>): Promise<{ success: boolean; data?: any }> => {
+    const res = await apiClient.put(`/admin/users/${id}/notification-prefs`, {
+      notificationPrefs: JSON.stringify(prefs),
+    });
+    return { success: true, data: unwrapData(res) };
+  },
+};
+
+export const notificationApi = {
+  getEvents: async (): Promise<any[]> => {
+    const res = await apiClient.get("/admin/notifications/events");
+    return unwrapData<any[]>(res);
+  },
+};
+
+export const integrationApi = {
+  list: async () => {
+    const res = await apiClient.get("/admin/integrations");
+    return unwrapData<any[]>(res);
+  },
+  create: async (body: any) => {
+    const res = await apiClient.post("/admin/integrations", body);
+    return unwrapData<any>(res);
+  },
+  update: async (id: number, body: any) => {
+    const res = await apiClient.put(`/admin/integrations/${id}`, body);
+    return unwrapData<any>(res);
+  },
 };

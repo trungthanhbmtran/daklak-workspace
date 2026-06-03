@@ -7,7 +7,8 @@ const https = require('https');
  */
 class TelegramAdapter extends BaseAdapter {
   async send({ recipient, subject, body, metadata = {} }) {
-    const token = this.config.botToken || this.config.token;
+    const dyn = metadata.dynamicConfig?.telegram || {};
+    const token = dyn.botToken || dyn.token || this.config.botToken || this.config.token;
     if (!token) return { success: false, error: 'Missing Telegram bot token' };
     const chatId = recipient || metadata.chat_id;
     if (!chatId) return { success: false, error: 'Missing recipient (chat_id)' };

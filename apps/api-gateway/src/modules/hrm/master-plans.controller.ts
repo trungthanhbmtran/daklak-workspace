@@ -35,14 +35,19 @@ export class MasterPlansController implements OnModuleInit {
     @Req() req: any,
     @Query('type') type?: string,
     @Query('status') status?: string,
+    @Query('departmentId') reqDepartmentId?: string,
   ) {
     const user = req.user;
-    let departmentId: number | undefined;
     const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
-    if (!isAdmin && user?.unitId) {
-      departmentId = parseInt(user.unitId, 10);
-    }
-    return firstValueFrom(this.masterPlanService.FindAll({ type, status, departmentId }));
+    
+    return firstValueFrom(this.masterPlanService.FindAll({ 
+      type, 
+      status, 
+      departmentId: reqDepartmentId ? parseInt(reqDepartmentId, 10) : undefined,
+      currentUserCode: user?.employeeCode || user?.username,
+      isAdmin,
+      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined
+    }));
   }
 
   @Get('advanced/historical-feasibility')

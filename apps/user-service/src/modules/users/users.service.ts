@@ -31,7 +31,7 @@ export class UsersService implements OnModuleInit {
     @Inject(CACHE_MANAGER) private cache: Cache,
     @Inject('NOTIFICATION_SERVICE') private readonly notiClient: ClientProxy,
     @Inject('WORKFLOW_SERVICE') private readonly workflowClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.workflowEngine =
@@ -300,7 +300,7 @@ export class UsersService implements OnModuleInit {
     const firstPosition = user.jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
-    
+
     const accessToken = this.jwt.sign(
       { sub: user.id, email: user.email, username: user.username, fullName: user.fullName, roles, unitId, jobTitleCode, employeeCode: user.employeeCode },
       { expiresIn: jwtExpiresIn },

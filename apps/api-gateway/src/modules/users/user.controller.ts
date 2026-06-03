@@ -36,7 +36,7 @@ export class UserController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.userService = this.client.getService(MICROSERVICES.USER.SERVICE);
