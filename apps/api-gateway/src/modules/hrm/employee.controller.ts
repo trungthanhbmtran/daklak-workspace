@@ -236,7 +236,7 @@ export class EmployeeController implements OnModuleInit {
           const RANK_LIMITS: Record<string, number> = {
             GRADE_1: 200, GRADE_2: 160, GRADE_3: 120, GRADE_4: 80,
             SENIOR_SPECIALIST: 150, PRINCIPAL_SPECIALIST: 120, SPECIALIST: 100,
-            OFFICER: 80, VIEN_CHUC: 100, NHAN_VIEN: 80, BAO_VE: 60,
+            OFFICER: 80, VIEN_CHUC: 100, NHAN_VIEN: 80, BAO_VE: 60
           };
           res.data = res.data.map((emp: any) => {
             const rankCode = emp.civilServantRank?.code || emp.civilServantRankCode || '';
