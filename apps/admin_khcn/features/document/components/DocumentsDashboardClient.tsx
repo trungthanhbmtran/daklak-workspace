@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { 
-  Inbox, Send, FileText, AlertTriangle, Clock, 
-  CheckCircle2, TrendingUp, BarChart3, Activity, 
+import {
+  Inbox, Send, FileText, AlertTriangle, Clock,
+  CheckCircle2, TrendingUp, BarChart3, Activity,
   ShieldAlert, Calendar, ArrowRight, CornerUpRight,
   MessageSquareShare, PieChart, ClipboardCheck, Settings2
 } from "lucide-react";
@@ -21,7 +21,7 @@ export function DocumentsDashboardClient() {
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   const { data: stats, isLoading: statsLoading } = useDocumentStats();
   const { data: pendingTasksData, isLoading: tasksLoading } = useListDocuments({
     status: 'PROCESSING',
@@ -170,7 +170,7 @@ export function DocumentsDashboardClient() {
             <CardContent className="p-0">
               <div className="divide-y divide-border/50">
                 {myPendingTasks.length === 0 ? (
-                   <div className="p-10 text-center text-muted-foreground italic text-sm">Không có nhiệm vụ nào cần xử lý ngay.</div>
+                  <div className="p-10 text-center text-muted-foreground italic text-sm">Không có nhiệm vụ nào cần xử lý ngay.</div>
                 ) : (
                   myPendingTasks.map((task: any) => (
                     <div key={task.id} className="p-5 hover:bg-muted/30 transition-colors bg-background flex flex-col sm:flex-row gap-4 justify-between sm:items-center">
@@ -233,7 +233,7 @@ export function DocumentsDashboardClient() {
                 </div>
               </Card>
             </Link>
-            
+
             <Link href="/services/documents/transparency">
               <Card className="p-4 hover:border-primary/50 transition-all cursor-pointer bg-background border shadow-sm group">
                 <div className="flex items-center gap-3">
@@ -316,11 +316,7 @@ export function DocumentsDashboardClient() {
             </CardContent>
           </Card>
 
-          <Link href="/services/documents/categories">
-             <Button variant="ghost" className="w-full text-xs font-bold text-muted-foreground hover:text-primary">
-                <Settings2 className="h-4 w-4 mr-2" /> Thiết lập Danh mục chung
-             </Button>
-          </Link>
+
         </div>
       </div>
     </div>

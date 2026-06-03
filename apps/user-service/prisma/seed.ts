@@ -3026,14 +3026,7 @@ async function main() {
       order: 9,
       res: 'DOC_MINUTES',
     },
-    {
-      code: 'DOC_MENU_CATEGORIES',
-      name: 'Danh mục dùng chung',
-      route: 'categories',
-      icon: 'settings-outline',
-      order: 10,
-      res: 'DOC_CATEGORIES',
-    },
+
     {
       code: 'DOC_MENU_PROCEDURES',
       name: 'Thủ tục hành chính',
@@ -3158,15 +3151,7 @@ async function main() {
       res: 'HRM_EMPLOYEE',
       action: 'MANAGE',
     },
-    {
-      code: 'HRM_MENU_NOTIFICATIONS',
-      name: 'Thông báo',
-      route: 'notifications',
-      icon: 'notifications-outline',
-      order: 8,
-      res: 'HRM_EMPLOYEE',
-      action: 'VIEW',
-    },
+
   ];
 
   for (const { res, action, ...m } of hrmMenus) {
