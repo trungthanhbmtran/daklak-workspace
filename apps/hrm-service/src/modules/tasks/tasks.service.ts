@@ -187,8 +187,15 @@ export class TasksService implements OnModuleInit {
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
       ];
-      if (query.currentUserDept) {
-        authConditions.push({ departmentId: query.currentUserDept });
+
+      // QUY TẮC: Thấy task nếu task thuộc kế hoạch của đơn vị cấp trên
+      // (Giám đốc IOC thấy tất cả task trong kế hoạch của Sở)
+      const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
+        ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
+        : (query.currentUserDept ? [query.currentUserDept] : []);
+
+      if (ancestorIds.length > 0) {
+        authConditions.push({ departmentId: { in: ancestorIds } });
       }
 
       where.AND = where.AND || [];

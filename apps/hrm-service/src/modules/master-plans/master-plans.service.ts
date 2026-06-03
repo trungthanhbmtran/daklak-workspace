@@ -14,10 +14,18 @@ export class MasterPlansService {
     if (!query.isAdmin && query.currentUserCode) {
       const authConditions: any[] = [];
       
-      if (query.currentUserDept) {
-        authConditions.push({ departmentId: query.currentUserDept });
+      // QUY TẮC 1: Kế hoạch thuộc đơn vị của user hoặc đơn vị CẤP TRÊN
+      // (Giám đốc IOC thấy kế hoạch của Sở vì Sở là cấp trên của IOC)
+      const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds) 
+        ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
+        : (query.currentUserDept ? [query.currentUserDept] : []);
+
+      if (ancestorIds.length > 0) {
+        authConditions.push({ departmentId: { in: ancestorIds } });
       }
 
+      // QUY TẮC 2: User là người được giao hoặc người giao của bất kỳ task nào trong kế hoạch
+      // (Trưởng phòng thấy kế hoạch vì là assignee/assigner của task)
       authConditions.push({
         tasks: {
           some: {

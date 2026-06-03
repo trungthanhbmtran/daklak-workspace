@@ -16,6 +16,7 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { MICROSERVICES } from '../../core/constants/services';
 
 @ApiTags('HRM - Master Plans')
 @ApiBearerAuth('JWT-auth')
@@ -23,11 +24,52 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @UseGuards(JwtAuthGuard)
 export class MasterPlansController implements OnModuleInit {
   private masterPlanService: any;
+  private orgService: any;
 
-  constructor(@Inject('MASTER_PLAN_PACKAGE') private client: any) {}
+  // Cache org tree to avoid repeated gRPC calls
+  private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
+
+  constructor(
+    @Inject('MASTER_PLAN_PACKAGE') private client: any,
+    @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
+  ) {}
 
   onModuleInit() {
     this.masterPlanService = this.client.getService('MasterPlanService');
+    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+  }
+
+  /** Lấy unitMap từ org tree, có cache 5 phút */
+  private async getUnitMap(): Promise<Record<number, any>> {
+    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now()) {
+      return this.unitMapCache.data;
+    }
+    try {
+      const treeRes: any = await firstValueFrom(this.orgService.GetFullTree({}));
+      const unitMap: Record<number, any> = {};
+      const flatten = (nodes: any[]) => {
+        for (const n of nodes) {
+          const nId = parseInt(n.id, 10);
+          if (nId) unitMap[nId] = { id: nId, parentId: n.parentId ? parseInt(n.parentId, 10) : null };
+          if (n.children?.length) flatten(n.children);
+        }
+      };
+      flatten(treeRes?.nodes || []);
+      this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
+      return unitMap;
+    } catch { return {}; }
+  }
+
+  /** Trả về danh sách unitId từ đơn vị hiện tại lên đến root (bao gồm chính nó) */
+  private getAncestorUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
+    const ids: number[] = [];
+    let current = unitMap[unitId];
+    if (current) ids.push(unitId);
+    while (current?.parentId) {
+      ids.push(current.parentId);
+      current = unitMap[current.parentId];
+    }
+    return ids;
   }
 
   @Get()
@@ -40,13 +82,21 @@ export class MasterPlansController implements OnModuleInit {
     const user = req.user;
     const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
     
+    // Tính chuỗi đơn vị cha của user để kiểm tra kế hoạch được tạo bởi đơn vị cấp trên
+    let callerAncestorUnitIds: number[] = [];
+    if (!isAdmin && user?.unitId) {
+      const unitMap = await this.getUnitMap();
+      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+    }
+
     return firstValueFrom(this.masterPlanService.FindAll({ 
       type, 
       status, 
       departmentId: reqDepartmentId ? parseInt(reqDepartmentId, 10) : undefined,
       currentUserCode: user?.employeeCode || user?.username,
       isAdmin,
-      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined
+      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+      callerAncestorUnitIds,  // Danh sách đơn vị cha để lọc kế hoạch cấp trên
     }));
   }
 

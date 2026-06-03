@@ -22,13 +22,48 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @ApiBearerAuth('JWT-auth')
 export class TasksController implements OnModuleInit {
   private taskService: any;
+  private orgService: any;
+
+  // Cache org tree (5 phút)
+  private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
 
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
   ) {}
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
+    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+  }
+
+  private async getUnitMap(): Promise<Record<number, any>> {
+    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now()) return this.unitMapCache.data;
+    try {
+      const treeRes: any = await firstValueFrom(this.orgService.GetFullTree({}));
+      const unitMap: Record<number, any> = {};
+      const flatten = (nodes: any[]) => {
+        for (const n of nodes) {
+          const nId = parseInt(n.id, 10);
+          if (nId) unitMap[nId] = { id: nId, parentId: n.parentId ? parseInt(n.parentId, 10) : null };
+          if (n.children?.length) flatten(n.children);
+        }
+      };
+      flatten(treeRes?.nodes || []);
+      this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
+      return unitMap;
+    } catch { return {}; }
+  }
+
+  private getAncestorUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
+    const ids: number[] = [];
+    let current = unitMap[unitId];
+    if (current) ids.push(unitId);
+    while (current?.parentId) {
+      ids.push(current.parentId);
+      current = unitMap[current.parentId];
+    }
+    return ids;
   }
 
   @Post()
@@ -68,6 +103,13 @@ export class TasksController implements OnModuleInit {
 
     const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
 
+    // Tính ancestor unit IDs cho visibility theo cây tổ chức
+    let callerAncestorUnitIds: number[] = [];
+    if (!isAdmin && user?.unitId) {
+      const unitMap = await this.getUnitMap();
+      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+    }
+
     const response: any = await firstValueFrom(
       this.taskService.ListTasks({
         assigneeCode: finalAssigneeCode,
@@ -81,6 +123,7 @@ export class TasksController implements OnModuleInit {
         currentUserCode: user?.employeeCode || user?.username,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds,  // Danh sách đơn vị cha để lọc task cấp trên
       }),
     );
 
