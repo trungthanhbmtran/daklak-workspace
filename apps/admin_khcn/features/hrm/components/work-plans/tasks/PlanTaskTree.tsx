@@ -102,6 +102,15 @@ function TaskRow({ task, depth, currentUserCode, planId, onRefresh }: TaskRowPro
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                {depth === 0 ? (
+                  <Badge className="text-[10px] bg-indigo-600 hover:bg-indigo-600 font-bold px-1.5 py-0">Cấp 1: Đầu việc lớn</Badge>
+                ) : depth === 1 ? (
+                  <Badge className="text-[10px] bg-violet-600 hover:bg-violet-600 font-bold px-1.5 py-0">Cấp 2: Việc Phòng/Trung tâm</Badge>
+                ) : (
+                  <Badge className="text-[10px] bg-sky-600 hover:bg-sky-600 font-bold px-1.5 py-0">Cấp {depth + 1}: Việc cá nhân</Badge>
+                )}
+              </div>
               <p className={cn(
                 'font-semibold text-slate-800 text-sm leading-snug',
                 depth === 0 && 'text-base font-bold',
@@ -142,26 +151,25 @@ function TaskRow({ task, depth, currentUserCode, planId, onRefresh }: TaskRowPro
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center gap-1.5 shrink-0 transition-opacity">
               {canAddSubTask && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-7 px-2.5 text-[11px] font-bold text-violet-700 border-violet-200 hover:bg-violet-50 rounded-full gap-1"
+                  className="h-8 px-3 text-[11px] font-bold text-violet-700 border-violet-200 hover:bg-violet-50 rounded-full gap-1 shadow-sm"
                   onClick={() => setSubTaskModalOpen(true)}
                 >
-                  <PlusCircle className="w-3 h-3" /> Thêm việc con
+                  <PlusCircle className="w-3.5 h-3.5" /> Thêm việc con
                 </Button>
               )}
 
               {(canAssign && (isUnassigned || task.status === 'TEMPLATE')) && (
                 <Button
                   size="sm"
-                  variant="outline"
-                  className="h-7 px-2.5 text-[11px] font-bold text-indigo-700 border-indigo-200 hover:bg-indigo-50 rounded-full gap-1"
+                  className="h-8 px-4 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1 shadow-md shadow-indigo-200 animate-pulse-once"
                   onClick={() => setAssignModalOpen(true)}
                 >
-                  <UserCheck className="w-3 h-3" /> Giao việc
+                  <UserCheck className="w-3.5 h-3.5" /> Giao việc ngay
                 </Button>
               )}
 
@@ -240,8 +248,8 @@ export function PlanTaskTree({
 }: PlanTaskTreeProps) {
   const tree = buildTaskTree(tasks);
 
-  // Người tạo kế hoạch (cùng đơn vị) mới có thể thêm đầu việc gốc
-  const canAddRoot = planCreatorUnit && currentUserUnit && planCreatorUnit === currentUserUnit;
+  // Bất kỳ ai truy cập được kế hoạch này đều có thể thêm đầu việc lớn (nếu có quyền tác vụ)
+  const canAddRoot = true;
 
   if (isLoading) {
     return (
@@ -264,9 +272,9 @@ export function PlanTaskTree({
           <Button
             size="sm"
             onClick={onAddRootTask}
-            className="h-8 px-3 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1"
+            className="h-9 px-4 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1.5 shadow-md shadow-indigo-200"
           >
-            <PlusCircle className="w-3.5 h-3.5" /> Thêm đầu việc
+            <PlusCircle className="w-4 h-4" /> Thêm đầu việc lớn
           </Button>
         )}
       </div>
