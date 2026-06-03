@@ -56,33 +56,27 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     }
   }, [task, isOpen]);
 
-  const { data: employeesData } = useHrmEmployeesList({ pageSize: 100, assignableOnly: true } as any);
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 200, assignableOnly: true } as any);
 
-  const employees = employeesData?.data?.map(emp => {
+  // Backend đã filter + score + sort sẵn theo PBAC — client chỉ map sang shape UI
+  const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
     const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(' ');
     return {
       code: emp.employeeCode,
       name: fullName,
-      rank: emp.civilServantRank?.code || 'CHUYEN_VIEN',
-      rankLimit: (emp.civilServantRank as any)?.limit || 100,
+      rankLimit: emp.rankLimit || 100,
+      availableCapacity: emp.availableCapacity ?? (emp.rankLimit - (emp.currentTaskCount || 0)),
       currentLoad: emp.currentTaskCount || 0,
+      priorityScore: emp.priorityScore || 0,
+      isOverloaded: emp.isOverloaded || false,
       department: emp.department,
       jobTitle: emp.jobTitle,
-      performanceScore: (emp as any).performanceScore || Math.floor(Math.random() * 20 + 80),
-      matchLocation: (emp as any).matchLocation ?? (Math.random() > 0.4),
-      matchDomain: (emp as any).matchDomain ?? (Math.random() > 0.3),
+      civilServantRank: emp.civilServantRank,
     };
-  }) || [];
-
-  const assignableEmployees = [...employees].sort((a, b) => {
-    if (a.matchDomain !== b.matchDomain) return a.matchDomain ? -1 : 1;
-    if (a.matchLocation !== b.matchLocation) return a.matchLocation ? -1 : 1;
-    if (a.currentLoad !== b.currentLoad) return a.currentLoad - b.currentLoad;
-    return b.performanceScore - a.performanceScore;
   });
 
-  const currentEmp = employees.find(e => e.code === taskState.assigneeCode);
-  const isOverload = currentEmp ? (currentEmp.currentLoad + taskState.weight > currentEmp.rankLimit) : false;
+  const currentEmp = assignableEmployees.find((e: any) => e.code === taskState.assigneeCode);
+  const isOverload = currentEmp?.isOverloaded || false;
 
   const isTransfer = task?.assigneeCode && task.assigneeCode !== 'UNASSIGNED';
 
@@ -165,7 +159,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                     <CommandList>
                       <CommandEmpty>Không tìm thấy nhân sự phù hợp</CommandEmpty>
                       <CommandGroup>
-                        {assignableEmployees.map((emp, idx) => (
+                      {assignableEmployees.map((emp: any, idx: number) => (
                           <CommandItem
                             key={emp.code}
                             value={`${emp.name} ${emp.jobTitle?.name || ''}`}
@@ -173,53 +167,62 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                               setTaskState(p => ({ ...p, assigneeCode: emp.code }));
                               setOpenPopover(false);
                             }}
-                            className={cn("p-3 cursor-pointer border-b border-slate-100 last:border-0", idx === 0 && "bg-indigo-50/50")}
+                            className={cn("p-3 cursor-pointer border-b border-slate-100 last:border-0",
+                              idx === 0 && "bg-indigo-50/50",
+                              emp.isOverloaded && "opacity-50"
+                            )}
                           >
                             <Check className={cn("mr-3 h-4 w-4 text-indigo-600", taskState.assigneeCode === emp.code ? "opacity-100" : "opacity-0")} />
                             <div className="flex flex-col flex-1 gap-1.5">
                               <div className="flex justify-between font-bold text-slate-800 text-sm">
                                 <div className="flex items-center gap-1.5">
                                   <span>{emp.name}</span>
-                                  {idx === 0 && <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Đề xuất #1</span>}
+                                  {idx === 0 && !emp.isOverloaded && <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Đề xuất #1</span>}
+                                  {emp.isOverloaded && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded-sm whitespace-nowrap">Quá tải</span>}
                                 </div>
-                                <span className="text-xs text-indigo-600">Tải: {emp.currentLoad}/{emp.rankLimit}đ</span>
+                                <span className={cn("text-xs", emp.isOverloaded ? "text-red-600" : "text-indigo-600")}>
+                                  Còn: {emp.availableCapacity}/{emp.rankLimit}đ
+                                </span>
                               </div>
                               <div className="text-xs text-slate-600">
-                                <span className="font-semibold text-slate-700">Lĩnh vực / Phòng ban:</span> {emp.department?.name || 'Đơn vị chuyên môn'}
+                                <span className="font-semibold text-slate-700">Phòng ban:</span> {emp.department?.name || 'Đơn vị chuyên môn'}
                               </div>
                               <div className="text-[11px] text-slate-500 flex items-center gap-2 flex-wrap mt-0.5">
                                 <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{emp.jobTitle?.name || 'Chuyên viên'}</span>
-                                {emp.matchDomain && <span className="text-emerald-600 font-medium bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">✓ Phù hợp chuyên môn</span>}
-                                {emp.matchLocation && <span className="text-blue-600 font-medium bg-blue-50 px-1.5 py-0.5 rounded border border-blue-100">✓ Đúng tuyến</span>}
+                                <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">{emp.civilServantRank?.name || ''}</span>
                               </div>
                             </div>
                           </CommandItem>
                         ))}
+
                       </CommandGroup>
                     </CommandList>
                   </Command>
                 </PopoverContent>
               </Popover>
 
-              {/* Cảnh báo quá tải cục bộ */}
               {currentEmp && (
                 <div className="mt-2 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                   <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-bold text-slate-600 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" /> Dự kiến tải công việc</span>
-                    <span className={cn("font-bold", isOverload ? "text-red-600" : "text-indigo-600")}>
-                      {currentEmp.currentLoad + taskState.weight} / {currentEmp.rankLimit} đ
+                    <span className="font-bold text-slate-600 flex items-center gap-1.5"><Activity className="w-3.5 h-3.5" /> Năng lực hiện tại</span>
+                    <span className={cn("font-bold", currentEmp.isOverloaded ? "text-red-600" : "text-indigo-600")}>
+                      {currentEmp.currentLoad} / {currentEmp.rankLimit} đ (còn {currentEmp.availableCapacity}đ)
                     </span>
                   </div>
                   <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                    <div className={cn("h-full rounded-full transition-all", isOverload ? "bg-red-500" : "bg-indigo-600")} style={{ width: `${Math.min(((currentEmp.currentLoad + taskState.weight) / currentEmp.rankLimit) * 100, 100)}%` }} />
+                    <div
+                      className={cn("h-full rounded-full transition-all", currentEmp.isOverloaded ? "bg-red-500" : "bg-indigo-600")}
+                      style={{ width: `${Math.min((currentEmp.currentLoad / currentEmp.rankLimit) * 100, 100)}%` }}
+                    />
                   </div>
-                  {isOverload && (
+                  {currentEmp.isOverloaded && (
                     <p className="text-[11px] text-red-600 font-medium mt-1.5 flex items-start gap-1">
-                      <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /> Cán bộ này vượt quá định mức nếu nhận việc. Vui lòng chọn người khác hoặc giảm trọng số.
+                      <AlertTriangle className="w-3 h-3 mt-0.5 shrink-0" /> Cán bộ này đã quá định mức. Vui lòng chọn người khác.
                     </p>
                   )}
                 </div>
               )}
+
             </div>
 
             {/* Độ ưu tiên */}

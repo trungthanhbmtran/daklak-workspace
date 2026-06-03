@@ -188,30 +188,66 @@ export class EmployeeController implements OnModuleInit {
       if (!isAdmin && req.callerUnitId) {
         const callerUnitId = parseInt(req.callerUnitId, 10);
         const callerUnit = dicts.unitMap[callerUnitId];
+        const callerCode: string = callerUnit?.code || '';
 
         if (req.assignableOnly) {
-          // ── CHẾ ĐỘ GIAO VIỆC: dùng directChildIds từ proto tree (isLeaf = không được giao) ──
+          // ── CHẾ ĐỘ GIAO VIỆC: chỉ cấp dưới TRỰC TIẾP (direct children) ──
           if (callerUnit?.isLeaf) {
-            // Leaf node – thành phần thấp nhất, không có cấp dưới để giao việc
             res.data = [];
           } else {
             const directChildIds = new Set<number>(callerUnit?.directChildIds || []);
             res.data = res.data.filter((emp: any) => {
-              // Loại chính mình
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
               const empUnitId = emp.department?.id || emp.departmentId;
               return directChildIds.has(empUnitId);
             });
           }
+
+          // ── BACKEND SCORING: tính điểm ưu tiên & sort sẵn cho client render ──
+          const RANK_LIMITS: Record<string, number> = {
+            GRADE_1: 200, GRADE_2: 160, GRADE_3: 120, GRADE_4: 80,
+            SENIOR_SPECIALIST: 150, PRINCIPAL_SPECIALIST: 120, SPECIALIST: 100,
+            OFFICER: 80, VIEN_CHUC: 100, NHAN_VIEN: 80, BAO_VE: 60,
+          };
+          res.data = res.data.map((emp: any) => {
+            const rankCode = emp.civilServantRank?.code || emp.civilServantRankCode || '';
+            const rankLimit = RANK_LIMITS[rankCode] || 100;
+            const currentLoad = emp.currentTaskCount || 0;
+            const availableCapacity = Math.max(0, rankLimit - currentLoad);
+            // priorityScore: ưu tiên người có nhiều capacity, penalize nếu gần đầy
+            const priorityScore = availableCapacity * 10 + (rankLimit * 0.5);
+            return {
+              ...emp,
+              rankLimit,
+              availableCapacity,
+              priorityScore: Math.round(priorityScore),
+              isOverloaded: currentLoad >= rankLimit,
+            };
+          });
+          // Sort: chưa quá tải trước, rồi theo priorityScore giảm dần
+          res.data.sort((a: any, b: any) => {
+            if (a.isOverloaded !== b.isOverloaded) return a.isOverloaded ? 1 : -1;
+            return b.priorityScore - a.priorityScore;
+          });
+
         } else {
-          // ── CHẾ ĐỘ XEM THÔNG THƯỜNG: cùng đơn vị + đơn vị con trực tiếp ──
-          const directChildIds = new Set<number>(callerUnit?.directChildIds || []);
+          // ── CHẾ ĐỘ DANH SÁCH CÁN BỘ: tất cả nhân viên trực thuộc (mọi cấp) ──
+          const descendantUnitIds = new Set<number>(
+            Object.values(dicts.unitMap as Record<number, any>)
+              .filter((u: any) =>
+                u.code === callerCode ||
+                u.code.startsWith(callerCode + '.')
+              )
+              .map((u: any) => u.id)
+              .filter(Boolean)
+          );
           res.data = res.data.filter((emp: any) => {
             const empUnitId = emp.department?.id || emp.departmentId;
-            return empUnitId === callerUnitId || directChildIds.has(empUnitId);
+            return descendantUnitIds.has(empUnitId);
           });
         }
       }
+
     }
     return res;
   }
