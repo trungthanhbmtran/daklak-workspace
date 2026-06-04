@@ -150,7 +150,8 @@ export class MasterPlansService {
           title: task.title,
           description: task.description,
           assigneeCode: 'UNASSIGNED',
-          assignerCode: 'UNASSIGNED',
+          // Người tạo kế hoạch = người giao việc mặc định (sẽ được cập nhật khi assign thực tế)
+          assignerCode: data.createdByCode || 'UNASSIGNED',
           status: 'TEMPLATE',
           priority: 'MEDIUM',
           weight: task.weight,

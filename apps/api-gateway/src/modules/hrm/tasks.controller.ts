@@ -203,8 +203,10 @@ export class TasksController implements OnModuleInit {
     const taskId = parseInt(id, 10);
     const taskData: any = await firstValueFrom(this.taskService.GetTask({ id: taskId }));
 
-    // Chỉ owner (người được giao hiện tại) hoặc admin mới được phân công lại
-    if (!isAdmin && taskData.assigneeCode !== assignerCode) {
+    // Task UNASSIGNED/TEMPLATE: bất kỳ ai đã đăng nhập đều có thể giao
+    // Task đã có người xử lý: chỉ chính người đó hoặc admin mới được giao lại
+    const isUnassigned = taskData.assigneeCode === 'UNASSIGNED' || taskData.status === 'TEMPLATE';
+    if (!isAdmin && !isUnassigned && taskData.assigneeCode !== assignerCode) {
       throw new Error('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
     }
 
