@@ -232,13 +232,13 @@ export class TasksService implements OnModuleInit {
       data: tasks.map((t: any) => ({
         ...t,
         assigneeName: t.assignee
-          ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+          ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim()
           : (t.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : t.assigneeCode),
         assignerName: t.assigner
-          ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+          ? `${t.assigner.lastname} ${t.assigner.firstname}`.trim()
           : (t.assignerCode || ''),
         supervisorName: t.supervisor
-          ? `${t.supervisor.firstname} ${t.supervisor.lastname}`.trim()
+          ? `${t.supervisor.lastname} ${t.supervisor.firstname}`.trim()
           : (t.supervisorCode || ''),
         dueDate: t.dueDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
@@ -289,10 +289,10 @@ export class TasksService implements OnModuleInit {
         return {
           ...t,
           assigneeName: t.assignee
-            ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+            ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim()
             : (t.assigneeCode === 'UNASSIGNED' || !t.assigneeCode ? 'Chưa phân công' : t.assigneeCode),
           assignerName: t.assigner
-            ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+            ? `${t.assigner.lastname} ${t.assigner.firstname}`.trim()
             : (t.assignerCode || ''),
           dueDate: t.dueDate?.toISOString() || '',
           startDate: t.startDate?.toISOString() || '',
@@ -459,7 +459,7 @@ export class TasksService implements OnModuleInit {
 
       return {
         employeeCode: emp.employeeCode,
-        employeeName: `${emp.firstname} ${emp.lastname}`,
+        employeeName: `${emp.lastname} ${emp.firstname}`.trim(),
         departmentId: emp.departmentId,
         currentLoad,
         performanceScore,
@@ -861,7 +861,7 @@ export class TasksService implements OnModuleInit {
       id: c.id,
       taskId: c.taskId,
       authorCode: c.authorCode || '',
-      authorName: c.author ? `${c.author.firstname} ${c.author.lastname}` : (c.isSystemMessage ? 'Hệ thống' : 'Quản trị viên'),
+      authorName: c.author ? `${c.author.lastname} ${c.author.firstname}`.trim() : (c.isSystemMessage ? 'Hệ thống' : 'Quản trị viên'),
       authorAvatar: c.author?.avatar || '',
       content: c.content,
       isSystemMessage: c.isSystemMessage,
@@ -883,7 +883,7 @@ export class TasksService implements OnModuleInit {
         id: c.id,
         taskId: c.taskId,
         authorCode: c.authorCode || '',
-        authorName: c.author ? `${c.author.firstname} ${c.author.lastname}` : (c.isSystemMessage ? 'Hệ thống' : 'Quản trị viên'),
+        authorName: c.author ? `${c.author.lastname} ${c.author.firstname}`.trim() : (c.isSystemMessage ? 'Hệ thống' : 'Quản trị viên'),
         authorAvatar: c.author?.avatar || '',
         content: c.content,
         isSystemMessage: c.isSystemMessage,
@@ -905,11 +905,11 @@ export class TasksService implements OnModuleInit {
       priority: t.priority,
       assigneeCode: t.assigneeCode,
       assigneeName: t.assignee
-        ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim()
+        ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim()
         : t.assigneeCode,
       assignerCode: t.assignerCode,
       assignerName: t.assigner
-        ? `${t.assigner.firstname} ${t.assigner.lastname}`.trim()
+        ? `${t.assigner.lastname} ${t.assigner.firstname}`.trim()
         : (t.assignerCode || ''),
       departmentId: t.departmentId || 0,
       parentId: t.parentId || 0,
