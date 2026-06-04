@@ -9,7 +9,7 @@ import {
   CheckCircle2, Clock, PlayCircle,
   AlertCircle, Filter,
   LayoutGrid, List as ListIcon,
-  Calendar, User, MessageSquare, Send, Reply, X, ArrowLeftCircle, Split, Target
+  Calendar, User, Users, Split, MessageSquare, Send, Reply, X, ArrowLeftCircle, Target
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,6 +26,8 @@ import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/
 
 import { SmartAssignDrawer } from './SmartAssignDrawer';
 import { SubTaskModal } from './SubTaskModal';
+import { CoordinationModal } from './CoordinationModal';
+import { AssignCoordinationModal } from './AssignCoordinationModal';
 
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
@@ -53,7 +55,13 @@ export const TaskListClient = () => {
   const [delegationChain, setDelegationChain] = useState<any[]>([]);
   const [isLoadingChain, setIsLoadingChain] = useState(false);
 
-  // Sub task modal
+  // Coordination modal (người thực hiện xin phối hợp lên lãnh đạo)
+  const [isCoordinationModalOpen, setIsCoordinationModalOpen] = useState(false);
+
+  // Assign coordination modal (lãnh đạo phân công chủ trì + phối hợp)
+  const [isAssignCoordinationOpen, setIsAssignCoordinationOpen] = useState(false);
+
+  // Sub task modal (phân rã nhiệm vụ - giao xuống cấp dưới)
   const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
 
   // Fetch priority categories
@@ -292,17 +300,9 @@ export const TaskListClient = () => {
     }
   };
 
-  const handleRequestCoordination = async () => {
+  const handleRequestCoordination = () => {
     if (!selectedTask) return;
-    try {
-      await hrmTasksApi.addComment(selectedTask.id.toString(), {
-        content: `⚠️ [ĐỀ NGHỊ PHỐI HỢP]: Tôi cần hỗ trợ để xử lý công việc này.`,
-      });
-      toast.success('Đã gửi đề nghị phối hợp');
-      fetchComments(selectedTask.id, true);
-    } catch (e: any) {
-      toast.error('Lỗi khi gửi đề nghị');
-    }
+    setIsCoordinationModalOpen(true);
   };
 
   return (
@@ -632,291 +632,346 @@ export const TaskListClient = () => {
       <Dialog open={!!selectedTask} onOpenChange={(open) => !open && setSelectedTask(null)}>
         <DialogContent className="w-[100vw] sm:w-[98vw] xl:w-[95vw] max-w-[1600px] h-[100dvh] sm:h-[97vh] font-sans p-0 overflow-hidden rounded-none sm:rounded-[2rem] border-0 sm:border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
           {selectedTask && (
-            <div className="flex flex-col flex-1 min-h-0 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-xl">
-              {/* Header Bar */}
-              <div className="flex items-center justify-between px-8 py-5 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 sticky top-0 z-10">
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
-                    {selectedTask.plan && (
-                      <Badge variant="outline" className="bg-indigo-50/80 text-indigo-700 border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-300 px-2.5 py-1 rounded-lg font-bold flex items-center gap-1.5 shadow-sm">
-                        <Target className="w-3.5 h-3.5" /> {selectedTask.plan.title}
-                      </Badge>
-                    )}
-                    <div className="scale-90 origin-left">
-                      {getStatusBadge(selectedTask.status || 'TODO')}
-                    </div>
-                  </div>
+            <div className="flex flex-col flex-1 min-h-0">
+
+              {/* ── TOP HEADER BAR ── */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  {/* Status */}
+                  <div className="scale-90 origin-left shrink-0">{getStatusBadge(selectedTask.status || 'TODO')}</div>
+                  {/* Priority badge */}
+                  <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border border-current ${getPriorityColor(selectedTask.priority)} bg-white dark:bg-slate-800`}>
+                    <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
+                    {getPriorityName(selectedTask.priority)}
+                  </span>
+                  {/* Plan badge */}
+                  {selectedTask.plan && (
+                    <Badge variant="outline" className="hidden md:flex bg-indigo-50 text-indigo-700 border-indigo-200 px-2.5 py-1 rounded-lg font-bold items-center gap-1.5 shrink-0">
+                      <Target className="w-3.5 h-3.5" /> {selectedTask.plan.title}
+                    </Badge>
+                  )}
+                  {/* Title (truncated) */}
+                  <h2 className="font-black text-slate-700 dark:text-slate-200 text-[15px] truncate">{selectedTask.title}</h2>
                 </div>
-                {/* Close button is handled by DialogPrimitive.Close automatically in DialogContent, but we can add our custom UI elements here if needed */}
+                {/* Due Date pill */}
+                {selectedTask.dueDate && (
+                  <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold shrink-0 ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).color} ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).bg} border ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).border}`}>
+                    <Calendar className="w-4 h-4" />
+                    {new Date(selectedTask.dueDate).toLocaleDateString('vi-VN')}
+                  </div>
+                )}
               </div>
 
-              {/* Main Body */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-8">
-                <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 w-full h-full mx-auto max-w-[2000px]">
-                  
-                  {/* Left Column - Content & Chat */}
-                  <div className="xl:col-span-2 flex flex-col gap-6">
-                    {/* Title & Description Card */}
-                    <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200/60 dark:border-slate-700/60 transition-all hover:shadow-md">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className={`px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest flex items-center shadow-sm ${getPriorityColor(selectedTask.priority)} bg-white dark:bg-slate-800 border border-current`}>
-                          <div className="w-1.5 h-1.5 rounded-full mr-2 bg-current animate-pulse"></div>
-                          ƯU TIÊN: {getPriorityName(selectedTask.priority)}
-                        </span>
-                        {selectedTask.status === 'DONE' && (
-                          <span className="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-full text-[11px] font-black uppercase tracking-widest border border-emerald-200 dark:border-emerald-800 flex items-center shadow-sm">
-                            <CheckCircle2 className="w-3 h-3 mr-1.5" /> Đã hoàn thành
-                          </span>
-                        )}
-                      </div>
-                      
-                      <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white leading-tight mb-6">
-                        {selectedTask.title}
-                      </h2>
-                      
+              {/* ── MAIN BODY (3 columns) ── */}
+              <div className="flex-1 overflow-y-auto">
+                <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px_280px] gap-0 h-full divide-x divide-slate-200/60 dark:divide-slate-800">
+
+                  {/* ════ COL 1: Mô tả + Chat ════ */}
+                  <div className="flex flex-col gap-0 overflow-y-auto">
+
+                    {/* Description */}
+                    <div className="p-6 md:p-8 border-b border-slate-100 dark:border-slate-800">
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <div className="w-4 h-[2px] bg-slate-300 rounded" /> Mô tả công việc
+                      </h3>
                       <div className="relative">
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 rounded-full"></div>
-                        <div className="pl-6 text-slate-600 dark:text-slate-300 leading-relaxed text-[15px] whitespace-pre-wrap">
-                          {selectedTask.description || <span className="italic opacity-60">Chưa có mô tả chi tiết...</span>}
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-400 to-indigo-200 rounded-full" />
+                        <div className="pl-5 text-slate-600 dark:text-slate-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
+                          {selectedTask.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
                         </div>
                       </div>
                     </div>
 
-                    {/* Chat Box */}
-                    <div className="flex-1 min-h-[400px] flex flex-col bg-white dark:bg-slate-800/80 rounded-3xl shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-                      <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-slate-50/50 dark:bg-slate-800/50">
-                        <h4 className="text-[13px] font-black text-slate-700 dark:text-slate-200 uppercase tracking-widest flex items-center">
-                          <MessageSquare className="w-4 h-4 mr-2 text-indigo-500" />
-                          Trao đổi & Cập nhật tiến độ
+                    {/* Chat */}
+                    <div className="flex flex-col flex-1 min-h-[360px]">
+                      <div className="px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
+                        <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                          <MessageSquare className="w-3.5 h-3.5 text-indigo-500" /> Trao đổi & Tiến độ
                         </h4>
-                        <Badge variant="secondary" className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">{taskComments.length} tin nhắn</Badge>
+                        <Badge variant="secondary" className="rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+                          {taskComments.length} tin
+                        </Badge>
                       </div>
-                      
-                      <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-50/30 dark:bg-slate-900/20">
+                      <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/20 dark:bg-slate-900/10 max-h-[400px]">
                         {isLoadingComments ? (
-                          <div className="flex justify-center items-center h-full">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+                          <div className="flex justify-center items-center h-32">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
                           </div>
                         ) : taskComments.length === 0 ? (
-                          <div className="flex flex-col items-center justify-center h-full text-slate-400">
-                            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
-                              <MessageSquare className="w-8 h-8 opacity-40 text-indigo-500" />
+                          <div className="flex flex-col items-center justify-center py-12 text-center">
+                            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                              <MessageSquare className="w-7 h-7 text-slate-300" />
                             </div>
-                            <p className="text-sm font-medium">Chưa có trao đổi nào</p>
-                            <p className="text-xs opacity-60 mt-1">Bắt đầu thảo luận về công việc này!</p>
+                            <p className="text-sm font-medium text-slate-400">Chưa có trao đổi nào</p>
                           </div>
                         ) : (
                           taskComments.map((msg, idx) => (
-                            <div key={idx} className={`flex gap-4 ${msg.authorCode === currentUser?.username ? 'flex-row-reverse' : ''}`}>
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/50 dark:to-indigo-800/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 text-sm font-black shadow-sm shrink-0 ring-4 ring-white dark:ring-slate-800">
-                                {msg.authorName?.charAt(0) || msg.authorCode?.charAt(0) || '?'}
+                            <div key={idx} className={`flex gap-3 ${msg.authorCode === currentUser?.username ? 'flex-row-reverse' : ''}`}>
+                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/50 dark:to-indigo-800/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 text-xs font-black shrink-0 ring-2 ring-white dark:ring-slate-800">
+                                {msg.authorName?.charAt(0) || msg.authorCode?.charAt(0) || '🔔'}
                               </div>
-                              <div className={`max-w-[85%] md:max-w-[75%] rounded-[1.5rem] p-4 shadow-sm ${msg.isSystemMessage ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 border border-amber-100 dark:border-amber-800/50' : msg.authorCode === currentUser?.username ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-tl-sm'}`}>
+                              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[13.5px] shadow-sm ${msg.isSystemMessage ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-200 border border-amber-100 dark:border-amber-800/50' : msg.authorCode === currentUser?.username ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-600 rounded-tl-sm'}`}>
                                 {!msg.isSystemMessage && msg.authorCode !== currentUser?.username && (
-                                  <p className="text-[11px] font-black mb-1.5 opacity-60 tracking-wide">{msg.authorName || msg.authorCode}</p>
+                                  <p className="text-[10px] font-black mb-1 opacity-50">{msg.authorName || msg.authorCode}</p>
                                 )}
-                                <p className="text-[14px] leading-relaxed break-words">{msg.content}</p>
-                                <p className={`text-[10px] font-medium mt-2 text-right ${msg.authorCode === currentUser?.username ? 'text-indigo-200' : 'opacity-40'}`}>
-                                  {new Date(msg.createdAt).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})} • {new Date(msg.createdAt).toLocaleDateString('vi-VN')}
+                                <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+                                <p className={`text-[10px] mt-1.5 text-right ${msg.authorCode === currentUser?.username ? 'text-indigo-200' : 'opacity-30'}`}>
+                                  {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · {new Date(msg.createdAt).toLocaleDateString('vi-VN')}
                                 </p>
                               </div>
                             </div>
                           ))
                         )}
                       </div>
-                      
-                      <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-100 dark:border-slate-700">
-                        <div className="flex items-center gap-3 bg-slate-50 dark:bg-slate-900 rounded-[1.5rem] p-2 border border-slate-200/60 dark:border-slate-700/60 focus-within:ring-2 focus-within:ring-indigo-500/50 focus-within:border-indigo-500 transition-all">
+                      <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800">
+                        <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-2 border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-indigo-400/50 focus-within:border-indigo-400 transition-all">
                           <input
                             type="text"
                             disabled={selectedTask.status === 'DONE' || isSendingMessage}
                             value={chatMessage}
-                            onChange={(e) => setChatMessage(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
-                                handleSendMessage();
-                              }
-                            }}
-                            placeholder={
-                              selectedTask.status === 'DONE'
-                                ? "Công việc đã đóng, không thể gửi tin nhắn"
-                                : "Nhập nội dung trao đổi..."
-                            }
-                            className="flex-1 bg-transparent border-none px-4 py-2 text-[14px] focus:ring-0 outline-none disabled:opacity-50 text-slate-800 dark:text-white"
+                            onChange={e => setChatMessage(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSendMessage(); }}
+                            placeholder={selectedTask.status === 'DONE' ? 'Công việc đã đóng' : 'Nhập nội dung trao đổi...'}
+                            className="flex-1 bg-transparent border-none text-[13.5px] focus:ring-0 outline-none disabled:opacity-40 text-slate-800 dark:text-white"
                           />
                           <Button
                             disabled={selectedTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
                             onClick={handleSendMessage}
-                            className="rounded-full w-10 h-10 p-0 bg-indigo-600 hover:bg-indigo-700 shadow-md hover:shadow-lg disabled:opacity-50 transition-all shrink-0"
+                            className="rounded-full w-9 h-9 p-0 bg-indigo-600 hover:bg-indigo-700 shadow-md disabled:opacity-40"
                           >
-                            {isSendingMessage ? (
-                              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            ) : (
-                              <Send className="w-4 h-4 ml-0.5 text-white" />
-                            )}
+                            {isSendingMessage ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Send className="w-3.5 h-3.5 ml-0.5 text-white" />}
                           </Button>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Right Column - Metadata & Actions */}
-                  <div className="flex flex-col gap-6">
-                    
+                  {/* ════ COL 2: Nhân sự + Thao tác ════ */}
+                  <div className="flex flex-col gap-0 bg-white dark:bg-slate-900 overflow-y-auto">
+
+                    {/* Roles Card */}
+                    <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                        <div className="w-4 h-[2px] bg-slate-300 rounded" /> Phân công nhân sự
+                      </h3>
+
+                      <div className="space-y-3">
+                        {/* Chủ trì */}
+                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/40">
+                          <div className="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center text-white font-black text-base shrink-0">
+                            {selectedTask.assigneeCode === 'UNASSIGNED' ? '?' : ((selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?')}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[10px] font-black text-violet-500 uppercase tracking-widest">👑 Chủ trì</p>
+                            <p className="font-bold text-[14px] text-slate-800 dark:text-slate-100 truncate">
+                              {selectedTask.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (selectedTask.assigneeName || selectedTask.assigneeCode || 'Chưa phân công')}
+                            </p>
+                          </div>
+                          {(!selectedTask.assigneeCode || selectedTask.assigneeCode === 'UNASSIGNED') && (
+                            <Button size="sm" variant="ghost" className="rounded-full text-xs font-bold text-violet-600 bg-violet-100 hover:bg-violet-200" onClick={() => setTaskToAssign(selectedTask)}>
+                              Giao
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Phối hợp */}
+                        {(selectedTask.coAssigneeCodes || []).length > 0 && (
+                          <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
+                            <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">🤝 Phối hợp ({(selectedTask.coAssigneeCodes || []).length})</p>
+                            <div className="flex flex-wrap gap-1.5">
+                              {(selectedTask.coAssigneeCodes || []).map((code: string) => (
+                                <span key={code} className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full border border-amber-200 dark:border-amber-700">
+                                  {code}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Lãnh đạo chỉ đạo */}
+                        {selectedTask.supervisorCode && (
+                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60">
+                            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-black text-sm shrink-0">
+                              {(selectedTask.supervisorName || selectedTask.supervisorCode)?.charAt(0)}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">⚡ Lãnh đạo chỉ đạo</p>
+                              <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">
+                                {selectedTask.supervisorName || selectedTask.supervisorCode}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Lãnh đạo giao (Assigner) */}
+                        {selectedTask.assignerCode && (
+                          <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/60 dark:border-indigo-800/30">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-500 font-black text-sm shrink-0">
+                              {(selectedTask.assignerName || selectedTask.assignerCode)?.charAt(0) || '?'}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">📋 Người giao</p>
+                              <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">
+                                {selectedTask.assignerName || selectedTask.assignerCode}
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Action Panel */}
                     {selectedTask.status !== 'DONE' && (
-                      <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/60">
-                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-2"></div>
-                          Thao tác xử lý
-                        </h4>
-                        <div className="flex flex-col gap-3">
-                          <Button
-                            className="w-full h-12 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[14px] shadow-lg shadow-emerald-500/25 transition-all hover:-translate-y-0.5"
-                            onClick={handleCompleteTask}
-                          >
-                            <CheckCircle2 className="w-5 h-5 mr-2" /> Hoàn thành công việc
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className="w-full h-11 rounded-xl border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800/50 dark:hover:bg-indigo-900/40 font-bold text-[13px] transition-colors"
-                            onClick={() => setIsSubTaskModalOpen(true)}
-                          >
-                            <Split className="w-4 h-4 mr-2" /> Phân rã nhiệm vụ
-                          </Button>
-                          <div className="grid grid-cols-2 gap-3">
+                      <div className="p-5 border-b border-slate-100 dark:border-slate-800">
+                        <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+                          <div className="w-4 h-[2px] bg-slate-300 rounded" /> Thao tác
+                        </h3>
+                        <div className="flex flex-col gap-2.5">
+
+                          {/* Hoàn thành - chủ trì */}
+                          {selectedTask.assigneeCode === currentUser?.employeeCode && (
                             <Button
-                              variant="outline"
-                              className="h-11 rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 hover:text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800/50 dark:hover:bg-amber-900/40 font-bold text-[13px] transition-colors"
-                              onClick={handleRequestCoordination}
+                              className="w-full h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[13px] shadow-lg shadow-emerald-500/20 transition-all hover:-translate-y-0.5"
+                              onClick={handleCompleteTask}
                             >
-                              <Split className="w-4 h-4 mr-2" /> Xin phối hợp
+                              <CheckCircle2 className="w-4 h-4 mr-2" /> Hoàn thành công việc
                             </Button>
+                          )}
+
+                          {/* Phân rã + Chủ trì & phối hợp - assigner hoặc assignee */}
+                          {(selectedTask.assignerCode === currentUser?.employeeCode || selectedTask.assigneeCode === currentUser?.employeeCode) && (
+                            <div className="grid grid-cols-2 gap-2">
+                              <Button
+                                variant="outline"
+                                className="h-10 rounded-xl border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 font-bold text-[12px]"
+                                onClick={() => setIsSubTaskModalOpen(true)}
+                              >
+                                <Split className="w-3.5 h-3.5 mr-1.5" /> Phân rã
+                              </Button>
+                              {selectedTask.assignerCode === currentUser?.employeeCode && (
+                                <Button
+                                  variant="outline"
+                                  className="h-10 rounded-xl border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 font-bold text-[12px]"
+                                  onClick={() => setIsAssignCoordinationOpen(true)}
+                                >
+                                  <User className="w-3.5 h-3.5 mr-1.5" /> Phân công
+                                </Button>
+                              )}
+                            </div>
+                          )}
+
+                          {/* Xin phối hợp + Trả lại */}
+                          <div className="grid grid-cols-2 gap-2">
+                            {selectedTask.assigneeCode === currentUser?.employeeCode && (
+                              <Button
+                                variant="outline"
+                                className="h-10 rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 font-bold text-[12px]"
+                                onClick={handleRequestCoordination}
+                              >
+                                <Users className="w-3.5 h-3.5 mr-1.5" /> Xin phối hợp
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
-                              className="h-11 rounded-xl border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 hover:text-rose-800 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800/50 dark:hover:bg-rose-900/40 font-bold text-[13px] transition-colors"
+                              className={`h-10 rounded-xl border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold text-[12px] ${selectedTask.assigneeCode === currentUser?.employeeCode ? '' : 'col-span-2'}`}
                               onClick={() => setIsRejectOpen(true)}
                             >
-                              <Reply className="w-4 h-4 mr-2" /> Trả lại
+                              <Reply className="w-3.5 h-3.5 mr-1.5" /> Trả lại
                             </Button>
                           </div>
                         </div>
                       </div>
                     )}
 
-                    {/* Info Card */}
-                    <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-1 shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden">
-                      
-                      {/* Due Date */}
-                      <div className="p-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between bg-rose-50/30 dark:bg-rose-900/10">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-900/50 flex items-center justify-center text-rose-600">
-                            <Calendar className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-black text-rose-600/70 dark:text-rose-400/70 uppercase tracking-widest mb-0.5">Hạn chót</p>
-                            <p className="font-bold text-[15px] text-slate-800 dark:text-white">
-                              {selectedTask.dueDate ? new Date(selectedTask.dueDate).toLocaleDateString('vi-VN') : 'Không giới hạn'}
+                    {/* Due Date */}
+                    <div className="p-5">
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                        <div className="w-4 h-[2px] bg-slate-300 rounded" /> Thời hạn
+                      </h3>
+                      <div className={`flex items-center gap-3 p-3 rounded-2xl border ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).bg} ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).border}`}>
+                        <div className={getDueDateDisplay(selectedTask.dueDate, selectedTask.status).color}>
+                          {getDueDateDisplay(selectedTask.dueDate, selectedTask.status).icon}
+                        </div>
+                        <div>
+                          {getDueDateDisplay(selectedTask.dueDate, selectedTask.status).text && (
+                            <p className={`text-[10px] font-black uppercase tracking-wider ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).color}`}>
+                              {getDueDateDisplay(selectedTask.dueDate, selectedTask.status).text}
                             </p>
-                          </div>
+                          )}
+                          <p className={`font-bold text-[14px] ${getDueDateDisplay(selectedTask.dueDate, selectedTask.status).color}`}>
+                            {getDueDateDisplay(selectedTask.dueDate, selectedTask.status).label}
+                          </p>
                         </div>
                       </div>
+                    </div>
+                  </div>
 
-                      {/* Assignee */}
-                      <div className="p-5 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-black text-lg">
-                            {selectedTask.assigneeCode === 'UNASSIGNED' ? '?' : ((selectedTask.assigneeName || selectedTask.assigneeCode)?.charAt(0) || '?')}
-                          </div>
-                          <div className="max-w-[150px]">
-                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Người thực hiện</p>
-                            <p className="font-bold text-[15px] text-slate-800 dark:text-white truncate">
-                              {selectedTask.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (selectedTask.assigneeName || selectedTask.assigneeCode || 'Chưa phân công')}
-                            </p>
-                          </div>
-                        </div>
-                        {(!selectedTask.assigneeCode || selectedTask.assigneeCode === 'UNASSIGNED') && (
-                          <Button size="sm" variant="ghost" className="rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 font-bold" onClick={() => setTaskToAssign(selectedTask)}>
-                            Giao ngay
-                          </Button>
-                        )}
-                      </div>
-
-                      {/* Supervisor */}
-                      {selectedTask.supervisorCode && (
-                        <div className="p-5 flex items-center justify-between bg-amber-50/30 dark:bg-amber-900/10">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center text-amber-600 dark:text-amber-400 font-black text-lg">
-                              {(selectedTask.supervisorName || selectedTask.supervisorCode)?.charAt(0) || '?'}
-                            </div>
-                            <div className="max-w-[200px]">
-                              <p className="text-[11px] font-black text-amber-600/70 dark:text-amber-400/70 uppercase tracking-widest mb-0.5">Lãnh đạo theo dõi / Chỉ đạo</p>
-                              <p className="font-bold text-[15px] text-slate-800 dark:text-white truncate">
-                                {selectedTask.supervisorName || selectedTask.supervisorCode}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                  {/* ════ COL 3: Cây công việc ════ */}
+                  <div className="flex flex-col bg-slate-50/60 dark:bg-slate-900/50 overflow-y-auto border-t xl:border-t-0 border-slate-200 dark:border-slate-800">
+                    <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 sticky top-0 backdrop-blur-md z-10">
+                      <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <ArrowLeftCircle className="w-3.5 h-3.5 text-indigo-400 rotate-180" />
+                        Cây công việc
+                      </h3>
                     </div>
 
-                    {/* Delegation Chain */}
-                    {(isLoadingChain || delegationChain.length > 0) && (
-                      <div className="bg-white dark:bg-slate-800/80 rounded-3xl p-6 shadow-sm border border-slate-200/60 dark:border-slate-700/60 overflow-hidden flex flex-col">
-                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-5 flex items-center">
-                          <div className="w-1.5 h-1.5 rounded-full bg-slate-400 mr-2"></div>
-                          Chuỗi giao việc
-                        </h4>
-                        
-                        {isLoadingChain ? (
-                          <div className="flex justify-center py-6">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
+                    <div className="flex-1 p-4">
+                      {isLoadingChain ? (
+                        <div className="flex justify-center py-10">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500" />
+                        </div>
+                      ) : delegationChain.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-10 text-center">
+                          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-2">
+                            <Split className="w-6 h-6 text-slate-300" />
                           </div>
-                        ) : (
-                          <div className="relative pl-3 space-y-4 before:absolute before:inset-y-2 before:left-[17px] before:w-0.5 before:bg-slate-100 dark:before:bg-slate-700/50 max-h-[300px] overflow-y-auto pr-2">
+                          <p className="text-xs font-medium text-slate-400">Chưa có cây công việc</p>
+                          <p className="text-[11px] text-slate-300 mt-1">Sử dụng &quot;Phân rã&quot; để tạo task con</p>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <div className="absolute left-[18px] top-6 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700" />
+                          <div className="space-y-2">
                             {delegationChain.map((node: any, idx: number) => {
                               const isCurrent = node.id === selectedTask?.id;
-                              
-                              const statusColors: Record<string, string> = {
-                                DONE: 'bg-emerald-500', IN_PROGRESS: 'bg-amber-500', TODO: 'bg-blue-500', TEMPLATE: 'bg-slate-400', OVERDUE: 'bg-rose-500',
+                              const statusColors: Record<string, { dot: string; badge: string; label: string }> = {
+                                DONE: { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
+                                IN_PROGRESS: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
+                                TODO: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Chờ' },
+                                OVERDUE: { dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700', label: 'Trễ' },
                               };
-                              const dotColor = statusColors[node.status] || 'bg-slate-400';
-
+                              const sc = statusColors[node.status] || { dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', label: node.status };
                               return (
-                                <div 
-                                  key={node.id} 
+                                <div
+                                  key={node.id}
                                   onClick={() => !isCurrent && setSelectedTask(node)}
-                                  className={`relative flex items-start gap-4 p-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800 shadow-sm' : 'hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer'}`}
+                                  className={`relative flex items-start gap-3 pl-9 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-white dark:hover:bg-slate-800 cursor-pointer'}`}
                                 >
-                                  {/* Dot */}
-                                  <div className={`absolute left-[-4px] top-5 w-3 h-3 rounded-full ${dotColor} ring-4 ring-white dark:ring-slate-800 z-10 shadow-sm`}></div>
-                                  
-                                  <div className="flex-1 ml-4 min-w-0">
-                                    <div className="flex items-center justify-between mb-1">
-                                      <span className={`text-[10px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400'}`}>
-                                        {node.isParent ? 'Công việc gốc' : isCurrent ? 'Đang chọn' : 'Việc nhánh'}
+                                  <div className={`absolute left-[13px] top-[18px] w-[11px] h-[11px] rounded-full ${sc.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm z-10`} />
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-1 mb-1">
+                                      <span className={`text-[9.5px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                        {node.isParent ? '🌳 Gốc' : isCurrent ? '▶ Đang xem' : idx === delegationChain.length - 1 ? '🌿 Lá' : '🪵 Nhánh'}
                                       </span>
-                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full text-white ${dotColor} shadow-sm shrink-0 ml-2`}>
-                                        {node.status}
-                                      </span>
+                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${sc.badge}`}>{sc.label}</span>
                                     </div>
-                                    <p className={`font-bold text-[13px] line-clamp-2 mb-2 leading-snug ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                                    <p className={`font-bold text-[12.5px] line-clamp-2 leading-snug mb-1.5 ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
                                       {node.title}
                                     </p>
-                                    <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
-                                      <div className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[9px] text-slate-700 dark:text-slate-300 shrink-0">
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500">
                                         {(node.assigneeName || node.assigneeCode)?.charAt(0) || '?'}
                                       </div>
-                                      <span className="truncate">{node.assigneeName || node.assigneeCode || 'Chưa phân công'}</span>
+                                      <span className="text-[11px] text-slate-500 truncate">{node.assigneeName || node.assigneeCode || 'Chưa phân công'}</span>
                                     </div>
                                   </div>
                                 </div>
                               );
                             })}
                           </div>
-                        )}
-                      </div>
-                    )}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                 </div>
@@ -973,6 +1028,29 @@ export const TaskListClient = () => {
         }}
         parentTask={selectedTask}
         planId={selectedTask?.planId}
+      />
+
+      <CoordinationModal
+        task={selectedTask}
+        open={isCoordinationModalOpen}
+        onOpenChange={setIsCoordinationModalOpen}
+        onSuccess={() => {
+          if (selectedTask?.id) {
+            fetchComments(selectedTask.id, true);
+          }
+        }}
+      />
+
+      <AssignCoordinationModal
+        task={selectedTask}
+        open={isAssignCoordinationOpen}
+        onOpenChange={setIsAssignCoordinationOpen}
+        onSuccess={() => {
+          refetch();
+          if (selectedTask?.id) {
+            fetchComments(selectedTask.id, true);
+          }
+        }}
       />
     </div>
   );

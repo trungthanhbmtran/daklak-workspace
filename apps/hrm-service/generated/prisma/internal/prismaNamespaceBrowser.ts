@@ -130,7 +130,8 @@ export const TaskScalarFieldEnum = {
   parentId: 'parentId',
   rootTaskId: 'rootTaskId',
   progress: 'progress',
-  rejectReason: 'rejectReason'
+  rejectReason: 'rejectReason',
+  coAssigneeCodesJson: 'coAssigneeCodesJson'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
@@ -324,7 +325,8 @@ export const TaskOrderByRelevanceFieldEnum = {
   scoringMethod: 'scoringMethod',
   supervisorCode: 'supervisorCode',
   workflowInstId: 'workflowInstId',
-  rejectReason: 'rejectReason'
+  rejectReason: 'rejectReason',
+  coAssigneeCodesJson: 'coAssigneeCodesJson'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]

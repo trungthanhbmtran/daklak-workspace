@@ -286,6 +286,46 @@ export class TasksController implements OnModuleInit {
     );
   }
 
+  @Post(':id/coordinate')
+  async requestCoordination(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body('message') message?: string,
+    @Body('leadCode') leadCode?: string,
+    @Body('coordinatorCodes') coordinatorCodes?: string[],
+  ) {
+    const user = req.user;
+    const requesterCode = user?.employeeCode || user?.username;
+    const taskId = parseInt(id, 10);
+
+    const taskData: any = await firstValueFrom(this.taskService.GetTask({ id: taskId }));
+    if (!taskData) throw new Error('Task not found.');
+
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    const isOwner = taskData.assigneeCode === requesterCode;
+    const isAssigner = taskData.assignerCode === requesterCode;
+
+    // Supervisor assigns roles: must be assigner or admin
+    if (leadCode && !isAdmin && !isAssigner) {
+      throw new Error('Only the task assigner can assign Lead and Coordinators.');
+    }
+
+    // Request coordination: must be current assignee
+    if (!leadCode && !isAdmin && !isOwner) {
+      throw new Error('You do not have permission to send a coordination request (not the current assignee).');
+    }
+
+    return firstValueFrom(
+      this.taskService.RequestCoordination({
+        taskId,
+        requesterCode,
+        message: message || '',
+        leadCode: leadCode || '',
+        coordinatorCodes: coordinatorCodes || [],
+      }),
+    );
+  }
+
   @Get(':id/subtasks')
   async getSubTasks(@Param('id') id: string) {
     return firstValueFrom(

@@ -59,4 +59,14 @@ export const hrmTasksApi = {
   getSubTasks(id: string): Promise<ApiResponse<any[]>> {
     return apiClient.get(`/hrm/tasks/${id}/subtasks`) as any;
   },
+
+  /** Gửi yêu cầu phối hợp lên LÃNH ĐẠO TRỰC TIẾP (người đang xử lý gọi). */
+  requestCoordination(id: string | number, payload?: { message?: string }): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload || {}) as any;
+  },
+
+  /** Supervisor assigns Lead + Coordinators for task (no sub-task creation). */
+  assignCoordination(id: string | number, payload: { leadCode: string; coordinatorCodes: string[] }): Promise<ApiResponse<any>> {
+    return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload) as any;
+  },
 };

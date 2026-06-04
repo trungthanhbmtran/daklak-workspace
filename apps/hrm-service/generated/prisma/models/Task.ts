@@ -78,6 +78,7 @@ export type TaskMinAggregateOutputType = {
   rootTaskId: number | null
   progress: number | null
   rejectReason: string | null
+  coAssigneeCodesJson: string | null
 }
 
 export type TaskMaxAggregateOutputType = {
@@ -106,6 +107,7 @@ export type TaskMaxAggregateOutputType = {
   rootTaskId: number | null
   progress: number | null
   rejectReason: string | null
+  coAssigneeCodesJson: string | null
 }
 
 export type TaskCountAggregateOutputType = {
@@ -135,6 +137,7 @@ export type TaskCountAggregateOutputType = {
   rootTaskId: number
   progress: number
   rejectReason: number
+  coAssigneeCodesJson: number
   _all: number
 }
 
@@ -191,6 +194,7 @@ export type TaskMinAggregateInputType = {
   rootTaskId?: true
   progress?: true
   rejectReason?: true
+  coAssigneeCodesJson?: true
 }
 
 export type TaskMaxAggregateInputType = {
@@ -219,6 +223,7 @@ export type TaskMaxAggregateInputType = {
   rootTaskId?: true
   progress?: true
   rejectReason?: true
+  coAssigneeCodesJson?: true
 }
 
 export type TaskCountAggregateInputType = {
@@ -248,6 +253,7 @@ export type TaskCountAggregateInputType = {
   rootTaskId?: true
   progress?: true
   rejectReason?: true
+  coAssigneeCodesJson?: true
   _all?: true
 }
 
@@ -364,6 +370,7 @@ export type TaskGroupByOutputType = {
   rootTaskId: number | null
   progress: number
   rejectReason: string | null
+  coAssigneeCodesJson: string | null
   _count: TaskCountAggregateOutputType | null
   _avg: TaskAvgAggregateOutputType | null
   _sum: TaskSumAggregateOutputType | null
@@ -416,6 +423,7 @@ export type TaskWhereInput = {
   rootTaskId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
+  coAssigneeCodesJson?: Prisma.StringNullableFilter<"Task"> | string | null
   plan?: Prisma.XOR<Prisma.MasterPlanNullableScalarRelationFilter, Prisma.MasterPlanWhereInput> | null
   parent?: Prisma.XOR<Prisma.TaskNullableScalarRelationFilter, Prisma.TaskWhereInput> | null
   subTasks?: Prisma.TaskListRelationFilter
@@ -454,6 +462,7 @@ export type TaskOrderByWithRelationInput = {
   rootTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  coAssigneeCodesJson?: Prisma.SortOrderInput | Prisma.SortOrder
   plan?: Prisma.MasterPlanOrderByWithRelationInput
   parent?: Prisma.TaskOrderByWithRelationInput
   subTasks?: Prisma.TaskOrderByRelationAggregateInput
@@ -496,6 +505,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   rootTaskId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
+  coAssigneeCodesJson?: Prisma.StringNullableFilter<"Task"> | string | null
   plan?: Prisma.XOR<Prisma.MasterPlanNullableScalarRelationFilter, Prisma.MasterPlanWhereInput> | null
   parent?: Prisma.XOR<Prisma.TaskNullableScalarRelationFilter, Prisma.TaskWhereInput> | null
   subTasks?: Prisma.TaskListRelationFilter
@@ -534,6 +544,7 @@ export type TaskOrderByWithAggregationInput = {
   rootTaskId?: Prisma.SortOrderInput | Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrderInput | Prisma.SortOrder
+  coAssigneeCodesJson?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TaskCountOrderByAggregateInput
   _avg?: Prisma.TaskAvgOrderByAggregateInput
   _max?: Prisma.TaskMaxOrderByAggregateInput
@@ -571,6 +582,7 @@ export type TaskScalarWhereWithAggregatesInput = {
   rootTaskId?: Prisma.IntNullableWithAggregatesFilter<"Task"> | number | null
   progress?: Prisma.FloatWithAggregatesFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
+  coAssigneeCodesJson?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
 }
 
 export type TaskCreateInput = {
@@ -593,6 +605,7 @@ export type TaskCreateInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -631,6 +644,7 @@ export type TaskUncheckedCreateInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -656,6 +670,7 @@ export type TaskUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -694,6 +709,7 @@ export type TaskUncheckedUpdateInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -726,6 +742,7 @@ export type TaskCreateManyInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskUpdateManyMutationInput = {
@@ -748,6 +765,7 @@ export type TaskUpdateManyMutationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskUncheckedUpdateManyInput = {
@@ -777,6 +795,7 @@ export type TaskUncheckedUpdateManyInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskListRelationFilter = {
@@ -827,6 +846,7 @@ export type TaskCountOrderByAggregateInput = {
   rootTaskId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
+  coAssigneeCodesJson?: Prisma.SortOrder
 }
 
 export type TaskAvgOrderByAggregateInput = {
@@ -868,6 +888,7 @@ export type TaskMaxOrderByAggregateInput = {
   rootTaskId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
+  coAssigneeCodesJson?: Prisma.SortOrder
 }
 
 export type TaskMinOrderByAggregateInput = {
@@ -896,6 +917,7 @@ export type TaskMinOrderByAggregateInput = {
   rootTaskId?: Prisma.SortOrder
   progress?: Prisma.SortOrder
   rejectReason?: Prisma.SortOrder
+  coAssigneeCodesJson?: Prisma.SortOrder
 }
 
 export type TaskSumOrderByAggregateInput = {
@@ -1250,6 +1272,7 @@ export type TaskCreateWithoutAssignerInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -1286,6 +1309,7 @@ export type TaskUncheckedCreateWithoutAssignerInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1321,6 +1345,7 @@ export type TaskCreateWithoutAssigneeInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -1357,6 +1382,7 @@ export type TaskUncheckedCreateWithoutAssigneeInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1392,6 +1418,7 @@ export type TaskCreateWithoutSupervisorInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -1428,6 +1455,7 @@ export type TaskUncheckedCreateWithoutSupervisorInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1489,6 +1517,7 @@ export type TaskScalarWhereInput = {
   rootTaskId?: Prisma.IntNullableFilter<"Task"> | number | null
   progress?: Prisma.FloatFilter<"Task"> | number
   rejectReason?: Prisma.StringNullableFilter<"Task"> | string | null
+  coAssigneeCodesJson?: Prisma.StringNullableFilter<"Task"> | string | null
 }
 
 export type TaskUpsertWithWhereUniqueWithoutAssigneeInput = {
@@ -1543,6 +1572,7 @@ export type TaskCreateWithoutSubTasksInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   rootTask?: Prisma.TaskCreateNestedOneWithoutDescendantsInput
@@ -1580,6 +1610,7 @@ export type TaskUncheckedCreateWithoutSubTasksInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
 }
@@ -1609,6 +1640,7 @@ export type TaskCreateWithoutParentInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
   rootTask?: Prisma.TaskCreateNestedOneWithoutDescendantsInput
@@ -1645,6 +1677,7 @@ export type TaskUncheckedCreateWithoutParentInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1680,6 +1713,7 @@ export type TaskCreateWithoutDescendantsInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -1717,6 +1751,7 @@ export type TaskUncheckedCreateWithoutDescendantsInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
 }
@@ -1746,6 +1781,7 @@ export type TaskCreateWithoutRootTaskInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -1782,6 +1818,7 @@ export type TaskUncheckedCreateWithoutRootTaskInput = {
   parentId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -1828,6 +1865,7 @@ export type TaskUpdateWithoutSubTasksInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   rootTask?: Prisma.TaskUpdateOneWithoutDescendantsNestedInput
@@ -1865,6 +1903,7 @@ export type TaskUncheckedUpdateWithoutSubTasksInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -1916,6 +1955,7 @@ export type TaskUpdateWithoutDescendantsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -1953,6 +1993,7 @@ export type TaskUncheckedUpdateWithoutDescendantsInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -1993,6 +2034,7 @@ export type TaskCreateWithoutCommentsInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   plan?: Prisma.MasterPlanCreateNestedOneWithoutTasksInput
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
@@ -2030,6 +2072,7 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
 }
@@ -2070,6 +2113,7 @@ export type TaskUpdateWithoutCommentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -2107,6 +2151,7 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
 }
@@ -2131,6 +2176,7 @@ export type TaskCreateWithoutPlanInput = {
   updatedAt?: Date | string
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   parent?: Prisma.TaskCreateNestedOneWithoutSubTasksInput
   subTasks?: Prisma.TaskCreateNestedManyWithoutParentInput
   rootTask?: Prisma.TaskCreateNestedOneWithoutDescendantsInput
@@ -2167,6 +2213,7 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
   subTasks?: Prisma.TaskUncheckedCreateNestedManyWithoutParentInput
   descendants?: Prisma.TaskUncheckedCreateNestedManyWithoutRootTaskInput
   comments?: Prisma.TaskCommentUncheckedCreateNestedManyWithoutTaskInput
@@ -2224,6 +2271,7 @@ export type TaskCreateManyAssignerInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskCreateManyAssigneeInput = {
@@ -2252,6 +2300,7 @@ export type TaskCreateManyAssigneeInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskCreateManySupervisorInput = {
@@ -2280,6 +2329,7 @@ export type TaskCreateManySupervisorInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskUpdateWithoutAssignerInput = {
@@ -2302,6 +2352,7 @@ export type TaskUpdateWithoutAssignerInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -2338,6 +2389,7 @@ export type TaskUncheckedUpdateWithoutAssignerInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -2369,6 +2421,7 @@ export type TaskUncheckedUpdateManyWithoutAssignerInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskUpdateWithoutAssigneeInput = {
@@ -2391,6 +2444,7 @@ export type TaskUpdateWithoutAssigneeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -2427,6 +2481,7 @@ export type TaskUncheckedUpdateWithoutAssigneeInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -2458,6 +2513,7 @@ export type TaskUncheckedUpdateManyWithoutAssigneeInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskUpdateWithoutSupervisorInput = {
@@ -2480,6 +2536,7 @@ export type TaskUpdateWithoutSupervisorInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -2516,6 +2573,7 @@ export type TaskUncheckedUpdateWithoutSupervisorInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -2547,6 +2605,7 @@ export type TaskUncheckedUpdateManyWithoutSupervisorInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskCreateManyParentInput = {
@@ -2575,6 +2634,7 @@ export type TaskCreateManyParentInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskCreateManyRootTaskInput = {
@@ -2603,6 +2663,7 @@ export type TaskCreateManyRootTaskInput = {
   parentId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskUpdateWithoutParentInput = {
@@ -2625,6 +2686,7 @@ export type TaskUpdateWithoutParentInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
   rootTask?: Prisma.TaskUpdateOneWithoutDescendantsNestedInput
@@ -2661,6 +2723,7 @@ export type TaskUncheckedUpdateWithoutParentInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -2692,6 +2755,7 @@ export type TaskUncheckedUpdateManyWithoutParentInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskUpdateWithoutRootTaskInput = {
@@ -2714,6 +2778,7 @@ export type TaskUpdateWithoutRootTaskInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   plan?: Prisma.MasterPlanUpdateOneWithoutTasksNestedInput
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
@@ -2750,6 +2815,7 @@ export type TaskUncheckedUpdateWithoutRootTaskInput = {
   parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -2781,6 +2847,7 @@ export type TaskUncheckedUpdateManyWithoutRootTaskInput = {
   parentId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type TaskCreateManyPlanInput = {
@@ -2809,6 +2876,7 @@ export type TaskCreateManyPlanInput = {
   rootTaskId?: number | null
   progress?: number
   rejectReason?: string | null
+  coAssigneeCodesJson?: string | null
 }
 
 export type TaskUpdateWithoutPlanInput = {
@@ -2831,6 +2899,7 @@ export type TaskUpdateWithoutPlanInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   parent?: Prisma.TaskUpdateOneWithoutSubTasksNestedInput
   subTasks?: Prisma.TaskUpdateManyWithoutParentNestedInput
   rootTask?: Prisma.TaskUpdateOneWithoutDescendantsNestedInput
@@ -2867,6 +2936,7 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   subTasks?: Prisma.TaskUncheckedUpdateManyWithoutParentNestedInput
   descendants?: Prisma.TaskUncheckedUpdateManyWithoutRootTaskNestedInput
   comments?: Prisma.TaskCommentUncheckedUpdateManyWithoutTaskNestedInput
@@ -2898,6 +2968,7 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   rootTaskId?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   progress?: Prisma.FloatFieldUpdateOperationsInput | number
   rejectReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  coAssigneeCodesJson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -2976,6 +3047,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   rootTaskId?: boolean
   progress?: boolean
   rejectReason?: boolean
+  coAssigneeCodesJson?: boolean
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   parent?: boolean | Prisma.Task$parentArgs<ExtArgs>
   subTasks?: boolean | Prisma.Task$subTasksArgs<ExtArgs>
@@ -3017,9 +3089,10 @@ export type TaskSelectScalar = {
   rootTaskId?: boolean
   progress?: boolean
   rejectReason?: boolean
+  coAssigneeCodesJson?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "assigneeCode" | "assignerCode" | "departmentId" | "status" | "priority" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "supervisorCode" | "documentIds" | "workflowInstId" | "startDate" | "dueDate" | "completionDate" | "createdAt" | "updatedAt" | "planId" | "parentId" | "rootTaskId" | "progress" | "rejectReason", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "assigneeCode" | "assignerCode" | "departmentId" | "status" | "priority" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "supervisorCode" | "documentIds" | "workflowInstId" | "startDate" | "dueDate" | "completionDate" | "createdAt" | "updatedAt" | "planId" | "parentId" | "rootTaskId" | "progress" | "rejectReason" | "coAssigneeCodesJson", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   parent?: boolean | Prisma.Task$parentArgs<ExtArgs>
@@ -3073,6 +3146,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     rootTaskId: number | null
     progress: number
     rejectReason: string | null
+    coAssigneeCodesJson: string | null
   }, ExtArgs["result"]["task"]>
   composites: {}
 }
@@ -3477,6 +3551,7 @@ export interface TaskFieldRefs {
   readonly rootTaskId: Prisma.FieldRef<"Task", 'Int'>
   readonly progress: Prisma.FieldRef<"Task", 'Float'>
   readonly rejectReason: Prisma.FieldRef<"Task", 'String'>
+  readonly coAssigneeCodesJson: Prisma.FieldRef<"Task", 'String'>
 }
     
 

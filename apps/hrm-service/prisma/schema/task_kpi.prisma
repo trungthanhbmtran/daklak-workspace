@@ -52,6 +52,10 @@ model Task {
   assigner       Employee? @relation("TaskAssigner", fields: [assignerCode], references: [employeeCode])
   supervisor     Employee? @relation("TaskSupervisor", fields: [supervisorCode], references: [employeeCode])
 
+  // Tính năng Phối hợp: danh sách employeeCode của người tham gia phối hợp (không phải người chịu trách nhiệm chính)
+  // Lưu dạng JSON string vì MySQL không hỗ trợ native array type
+  coAssigneeCodesJson String?  @default("[]") @map("co_assignee_codes") @db.Text
+
   comments       TaskComment[]
 
   @@map("tasks")

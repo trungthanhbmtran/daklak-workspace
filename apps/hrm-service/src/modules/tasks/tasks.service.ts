@@ -194,10 +194,11 @@ export class TasksService implements OnModuleInit {
       const authConditions: any[] = [
         { assigneeCode: query.currentUserCode },
         { assignerCode: query.currentUserCode },
+        // Người phối hợp cũng thấy task (co-assignee)
+        { coAssigneeCodesJson: { contains: query.currentUserCode } },
       ];
 
       // QUY TẮC: Thấy task nếu task thuộc kế hoạch của đơn vị cấp trên
-      // (Giám đốc IOC thấy tất cả task trong kế hoạch của Sở)
       const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
         ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
         : (query.currentUserDept ? [query.currentUserDept] : []);
@@ -243,6 +244,7 @@ export class TasksService implements OnModuleInit {
         createdAt: t.createdAt?.toISOString() || '',
         updatedAt: t.updatedAt?.toISOString() || '',
         plan: t.plan || null,
+        coAssigneeCodes: this.parseCoAssigneeCodes(t.coAssigneeCodesJson),
       })),
       meta: {
         pagination: {
@@ -585,52 +587,149 @@ export class TasksService implements OnModuleInit {
       });
     }
 
-    // Xử lý tạo Sub-tasks cho người phối hợp
-    if (coAssigneeCodes && coAssigneeCodes.length > 0) {
-      // Fetch department ids cho những người phối hợp
-      const coEmployees = await this.prisma.employee.findMany({
-        where: { employeeCode: { in: coAssigneeCodes } },
-        select: { employeeCode: true, departmentId: true, email: true }
-      });
-
-      for (const emp of coEmployees) {
-        const coTask = await this.prisma.task.create({
-          data: {
-            title: `[Phối hợp] ${currentTask.title}`,
-            description: `Nhiệm vụ phối hợp được tự động tạo từ công việc gốc.`,
-            assigneeCode: emp.employeeCode,
-            assignerCode: assignerCode || '',
-            departmentId: emp.departmentId || null,
-            status: 'TODO',
-            priority: currentTask.priority || 'MEDIUM',
-            startDate: currentTask.startDate,
-            dueDate: currentTask.dueDate,
-            baseScore: 0, // Trọng số mặc định cho phối hợp là 0 để không ảnh hưởng điểm chính
-            weight: 0,
-            scoringMethod: 'MANUAL',
-            planId: currentTask.planId,
-            parentId: currentTask.id,
-          }
-        });
-
-        // Gửi thông báo cho người phối hợp
-        if (emp.email) {
-          const dynamicConfig = await this.getDynamicConfig();
-          this.notificationClient.emit('notify', {
-            recipient: emp.email || emp.employeeCode,
-            subject: `[HRM] Nhiệm vụ phối hợp mới: ${coTask.title}`,
-            body: `Bạn vừa được phân công phối hợp thực hiện công việc: "${currentTask.title}".\nHạn hoàn thành: ${coTask.dueDate ? coTask.dueDate.toISOString().split('T')[0] : 'Chưa xác định'}.\nVui lòng truy cập hệ thống để xem chi tiết.`,
-            metadata: { dynamicConfig }
-          });
-        }
-      }
-    }
-
     return {
       ...t,
       dueDate: t.dueDate?.toISOString() || '',
       createdAt: t.createdAt?.toISOString() || '',
-      updatedAt: t.updatedAt?.toISOString() || ''
+      updatedAt: t.updatedAt?.toISOString() || '',
+      coAssigneeCodes: this.parseCoAssigneeCodes((t as any).coAssigneeCodesJson),
+    };
+  }
+
+  /** Parse JSON string thành mảng employeeCode của người phối hợp */
+  private parseCoAssigneeCodes(json: string | null | undefined): string[] {
+    if (!json) return [];
+    try { return JSON.parse(json); } catch { return []; }
+  }
+
+  /**
+   * Two cases in one endpoint:
+   *
+   * A) Assignee requests coordination: escalates to direct supervisor (assignerCode).
+   *    - data.leadCode = undefined, data.requesterCode = assigneeCode
+   *
+   * B) Supervisor assigns Lead & Coordinators after receiving request:
+   *    - data.leadCode = who becomes the new lead
+   *    - data.coordinatorCodes = list of coordinators
+   *    - data.requesterCode = assigner (supervisor)
+   */
+  async requestCoordination(data: {
+    taskId: number;
+    requesterCode: string;
+    message?: string;
+    // Role assignment (for supervisors)
+    leadCode?: string;
+    coordinatorCodes?: string[];
+  }) {
+    const task = await this.prisma.task.findUnique({
+      where: { id: data.taskId },
+      include: { assigner: true, assignee: true }
+    });
+    if (!task) throw new Error('Task not found.');
+
+    // === CASE B: Supervisor assigns Lead & Coordinators ===
+    if (data.leadCode) {
+      const isAssigner = task.assignerCode === data.requesterCode;
+      if (!isAssigner) {
+        throw new Error('Only the task assigner can assign lead and coordinators.');
+      }
+
+      const coordinatorCodes = data.coordinatorCodes || [];
+
+      // Update task: assigneeCode = lead, coAssigneeCodesJson = coordinators
+      await this.prisma.task.update({
+        where: { id: data.taskId },
+        data: {
+          assigneeCode: data.leadCode,
+          coAssigneeCodesJson: coordinatorCodes.length > 0 ? JSON.stringify(coordinatorCodes) : null,
+        }
+      });
+
+      // Write system message
+      const coordinatorStr = coordinatorCodes.length > 0
+        ? `Coordinators: ${coordinatorCodes.join(', ')}`
+        : 'No coordinators assigned';
+      await this.prisma.taskComment.create({
+        data: {
+          taskId: data.taskId,
+          authorCode: null,
+          content: `👥 [ASSIGNED]: Supervisor ${data.requesterCode} assigned roles:\n🎯 Lead: ${data.leadCode}\n🤝 ${coordinatorStr}`,
+          isSystemMessage: true,
+        }
+      });
+
+      // Notify new lead (if different from previous assignee)
+      const dynamicConfig = await this.getDynamicConfig();
+      if (data.leadCode !== task.assigneeCode) {
+        const leadEmp = await this.prisma.employee.findFirst({
+          where: { employeeCode: data.leadCode },
+          select: { email: true }
+        });
+        if (leadEmp?.email) {
+          this.notificationClient.emit('notify', {
+            recipient: leadEmp.email,
+            subject: `[HRM] You are the Lead: ${task.title}`,
+            body: `You have been assigned as Lead for task: "${task.title}".\nDue: ${task.dueDate ? task.dueDate.toISOString().split('T')[0] : 'Not set'}.\nPlease log in to view details.`,
+            metadata: { dynamicConfig }
+          });
+        }
+      }
+
+      // Notify each coordinator
+      if (coordinatorCodes.length > 0) {
+        const coEmps = await this.prisma.employee.findMany({
+          where: { employeeCode: { in: coordinatorCodes } },
+          select: { employeeCode: true, email: true }
+        });
+        for (const emp of coEmps) {
+          if (emp.email) {
+            this.notificationClient.emit('notify', {
+              recipient: emp.email,
+              subject: `[HRM] You are a Coordinator: ${task.title}`,
+              body: `You have been assigned as coordinator for task: "${task.title}".\nLead: ${data.leadCode}.\nDue: ${task.dueDate ? task.dueDate.toISOString().split('T')[0] : 'Not set'}.\nPlease log in to view details.`,
+              metadata: { dynamicConfig }
+            });
+          }
+        }
+      }
+
+      return {
+        success: true,
+        message: 'Lead & Coordinators assigned successfully',
+        data: { leadCode: data.leadCode, coordinatorCodes }
+      };
+    }
+
+    // === CASE A: Assignee requests coordination → escalate to supervisor ===
+    const supervisorCode = task.assignerCode;
+    if (!supervisorCode || supervisorCode === data.requesterCode) {
+      throw new Error('Cannot determine direct supervisor to send coordination request.');
+    }
+
+    const requestMsg = data.message?.trim() || 'I need support to complete this task.';
+    await this.prisma.taskComment.create({
+      data: {
+        taskId: data.taskId,
+        authorCode: null,
+        content: `🤝 [COORDINATION REQUEST]: ${data.requesterCode} sent a coordination request to supervisor.\nMessage: ${requestMsg}`,
+        isSystemMessage: true,
+      }
+    });
+
+    if (task.assigner?.email) {
+      const dynamicConfig = await this.getDynamicConfig();
+      this.notificationClient.emit('notify', {
+        recipient: task.assigner.email,
+        subject: `[HRM] Coordination request: ${task.title}`,
+        body: `${data.requesterCode} has sent a coordination request for task: "${task.title}".\n\nMessage: ${requestMsg}\n\nPlease log in to review and assign roles if needed.`,
+        metadata: { dynamicConfig }
+      });
+    }
+
+    return {
+      success: true,
+      message: `Coordination request sent to supervisor (${supervisorCode}) successfully`,
+      data: { supervisorCode }
     };
   }
 

@@ -65,4 +65,9 @@ export class TasksController {
   getSubTasks(data: { taskId: number }) {
     return this.tasksService.getSubTasks(data.taskId);
   }
+
+  @GrpcMethod('TaskService', 'RequestCoordination')
+  requestCoordination(data: { taskId: number; collaboratorCodes: string[]; requesterCode: string }) {
+    return this.tasksService.requestCoordination(data);
+  }
 }
