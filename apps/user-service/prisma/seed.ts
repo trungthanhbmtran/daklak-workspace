@@ -109,7 +109,8 @@ async function main() {
     'CLOSE',
     'COMPLETE',
     'COMMENT',
-    'EVALUATE'
+    'EVALUATE',
+    'BREAKDOWN'
   ];
   const allPermissions: { id: number }[] = [];
 
@@ -5100,6 +5101,7 @@ async function main() {
     'TASK.CREATE',
     'TASK.UPDATE',
     'TASK.ASSIGN',
+    'TASK.BREAKDOWN',
     'TASK.COMPLETE',
     'TASK.COMMENT',
     'TASK.EVALUATE',
@@ -5148,6 +5150,7 @@ async function main() {
     'TASK.CREATE',
     'TASK.UPDATE',
     'TASK.ASSIGN',
+    'TASK.BREAKDOWN',
     'TASK.COMPLETE',
     'TASK.COMMENT',
     'KPI.VIEW',
