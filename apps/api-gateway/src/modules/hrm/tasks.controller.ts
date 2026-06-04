@@ -23,6 +23,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 export class TasksController implements OnModuleInit {
   private taskService: any;
   private orgService: any;
+  private employeeService: any;
 
   // Cache org tree (5 phút)
   private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
@@ -30,11 +31,13 @@ export class TasksController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
+    @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly empClient: any,
   ) {}
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
     this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.employeeService = this.empClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
   }
 
   private async getUnitMap(): Promise<Record<number, any>> {
@@ -193,14 +196,67 @@ export class TasksController implements OnModuleInit {
     @Body('coAssigneeCodes') coAssigneeCodes?: string[],
     @Body('departmentId') departmentId?: number,
   ) {
+    const user = req.user;
+    const assignerCode = user?.employeeCode || user?.username;
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+
+    const taskId = parseInt(id, 10);
+    const taskData: any = await firstValueFrom(this.taskService.GetTask({ id: taskId }));
+
+    // Chỉ owner (người được giao hiện tại) hoặc admin mới được phân công lại
+    if (!isAdmin && taskData.assigneeCode !== assignerCode) {
+      throw new Error('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
+    }
+
+    // Nếu không phải admin và có chỉ định người nhận (khác UNASSIGNED), kiểm tra phạm vi quản lý
+    if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED') {
+      const targetEmp: any = await firstValueFrom(this.employeeService.FindOne({ id: 0, employeeCode: assigneeCode }));
+      if (targetEmp?.data?.departmentId) {
+        const unitMap = await this.getUnitMap();
+        const assignerAncestorIds = this.getAncestorUnitIds(unitMap, parseInt(targetEmp.data.departmentId, 10));
+        
+        // Người giao phải thuộc cây đơn vị của người nhận (tức là người giao là sếp của người nhận)
+        if (user.unitId && !assignerAncestorIds.includes(parseInt(user.unitId, 10))) {
+          throw new Error('Bạn chỉ được phép giao việc cho nhân sự thuộc phạm vi quản lý của mình.');
+        }
+      }
+    }
+
     return firstValueFrom(
       this.taskService.AssignTask({
-        id: parseInt(id, 10),
+        id: taskId,
         assigneeCode,
         coAssigneeCodes: coAssigneeCodes || [],
         departmentId,
         // Inject người giao việc từ JWT token (ghi đè lên assignerCode)
-        assignerCode: req.user?.employeeCode || req.user?.username || '',
+        assignerCode,
+      }),
+    );
+  }
+
+  @Post(':id/breakdown')
+  async breakdownTask(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
+    const user = req.user;
+    const assignerCode = user?.employeeCode || user?.username;
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+
+    const taskId = parseInt(id, 10);
+    const taskData: any = await firstValueFrom(this.taskService.GetTask({ id: taskId }));
+
+    // Chỉ owner (người được giao hiện tại) hoặc admin mới được tạo task con
+    if (!isAdmin && taskData.assigneeCode !== assignerCode) {
+      throw new Error('Bạn không có quyền phân rã nhiệm vụ này (Không phải người đang xử lý).');
+    }
+
+    return firstValueFrom(
+      this.taskService.BreakdownTask({
+        ...body,
+        parentId: taskId,
+        assignerCode,
       }),
     );
   }

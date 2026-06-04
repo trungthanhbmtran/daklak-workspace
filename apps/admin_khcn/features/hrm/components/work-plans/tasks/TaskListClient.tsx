@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useGetCategoryByGroup } from "@/features/system-admin/categories/hooks/useCategoryApi";
 
 import { SmartAssignDrawer } from './SmartAssignDrawer';
+import { SubTaskModal } from './SubTaskModal';
 
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
@@ -51,6 +52,9 @@ export const TaskListClient = () => {
   // Delegation chain (chuỗi giao việc)
   const [delegationChain, setDelegationChain] = useState<any[]>([]);
   const [isLoadingChain, setIsLoadingChain] = useState(false);
+
+  // Sub task modal
+  const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
 
   // Fetch priority categories
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
@@ -773,6 +777,13 @@ export const TaskListClient = () => {
                           >
                             <CheckCircle2 className="w-5 h-5 mr-2" /> Hoàn thành công việc
                           </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full h-11 rounded-xl border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-800 dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800/50 dark:hover:bg-indigo-900/40 font-bold text-[13px] transition-colors"
+                            onClick={() => setIsSubTaskModalOpen(true)}
+                          >
+                            <Split className="w-4 h-4 mr-2" /> Phân rã nhiệm vụ
+                          </Button>
                           <div className="grid grid-cols-2 gap-3">
                             <Button
                               variant="outline"
@@ -944,6 +955,24 @@ export const TaskListClient = () => {
         open={!!taskToAssign}
         onOpenChange={(open) => !open && setTaskToAssign(null)}
         onAssignSuccess={() => refetch()}
+      />
+
+      <SubTaskModal
+        isOpen={isSubTaskModalOpen}
+        onClose={(created) => {
+          setIsSubTaskModalOpen(false);
+          if (created) {
+            refetch();
+            // Refresh delegation chain if open
+            if (selectedTask?.id) {
+              hrmTasksApi.getSubTasks(selectedTask.id.toString())
+                .then((res: any) => setDelegationChain(res?.data || []))
+                .catch(() => setDelegationChain([]));
+            }
+          }
+        }}
+        parentTask={selectedTask}
+        planId={selectedTask?.planId}
       />
     </div>
   );

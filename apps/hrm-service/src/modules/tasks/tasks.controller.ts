@@ -26,6 +26,21 @@ export class TasksController {
     return this.tasksService.updateTask(data.id, data);
   }
 
+  @GrpcMethod('TaskService', 'GetTask')
+  getTask(data: { id: number }) {
+    return this.tasksService.getTask(data.id);
+  }
+
+  @GrpcMethod('TaskService', 'BreakdownTask')
+  breakdownTask(data: any) {
+    return this.tasksService.breakdownTask(data);
+  }
+
+  @GrpcMethod('TaskService', 'UpdateTaskProgress')
+  updateTaskProgress(data: { id: number; progress: number; actorCode?: string }) {
+    return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode);
+  }
+
   @GrpcMethod('TaskService', 'RecommendAssignees')
   recommendAssignees(data: { rankCode: string; strategy: string }) {
     return this.tasksService.recommendAssignees(data);

@@ -26,11 +26,9 @@ export const hrmTasksApi = {
     assignerCode?: string;
     planId?: number;
   }): Promise<ApiResponse<any>> {
-    return apiClient.post('/hrm/tasks', {
+    return apiClient.post(`/hrm/tasks/${parentId}/breakdown`, {
       ...payload,
-      parentId: String(parentId),
       assigneeCode: 'UNASSIGNED',
-      status: 'TEMPLATE',
     }) as any;
   },
 

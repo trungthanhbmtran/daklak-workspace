@@ -605,14 +605,6 @@ export type KpiCriteriaScalarRelationFilter = {
   isNot?: Prisma.KpiCriteriaWhereInput
 }
 
-export type FloatFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type KpiCriteriaCreateNestedOneWithoutDetailsInput = {
   create?: Prisma.XOR<Prisma.KpiCriteriaCreateWithoutDetailsInput, Prisma.KpiCriteriaUncheckedCreateWithoutDetailsInput>
   connectOrCreate?: Prisma.KpiCriteriaCreateOrConnectWithoutDetailsInput

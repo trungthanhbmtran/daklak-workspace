@@ -389,6 +389,11 @@ export class TasksService implements OnModuleInit {
       });
     }
 
+    // Nếu status là DONE, tự động cập nhật progress = 100 và tính lại tiến độ parent
+    if (status === 'DONE') {
+      await this.updateTaskProgress(id, 100, actorCode);
+    }
+
     return {
       ...t,
       dueDate: t.dueDate?.toISOString() || '',
@@ -627,6 +632,108 @@ export class TasksService implements OnModuleInit {
       createdAt: t.createdAt?.toISOString() || '',
       updatedAt: t.updatedAt?.toISOString() || ''
     };
+  }
+
+  async getTask(id: number) {
+    const task = await this.prisma.task.findUnique({
+      where: { id },
+      include: { assignee: true, assigner: true, plan: true }
+    });
+    if (!task) throw new Error('Task not found');
+    return {
+      ...task,
+      dueDate: task.dueDate?.toISOString() || '',
+      startDate: task.startDate?.toISOString() || '',
+      createdAt: task.createdAt?.toISOString() || '',
+      updatedAt: task.updatedAt?.toISOString() || ''
+    };
+  }
+
+  async breakdownTask(data: any) {
+    const parent = await this.prisma.task.findUnique({
+      where: { id: data.parentId }
+    });
+    if (!parent) throw new Error('Không tìm thấy nhiệm vụ cha');
+    
+    const child = await this.prisma.task.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        assigneeCode: data.assigneeCode || 'UNASSIGNED',
+        assignerCode: data.assignerCode || '',
+        departmentId: data.departmentId || null,
+        status: 'TODO',
+        priority: parent.priority,
+        planId: parent.planId,
+        parentId: parent.id,
+        rootTaskId: parent.rootTaskId || parent.id,
+        startDate: data.startDate ? new Date(data.startDate) : parent.startDate,
+        dueDate: data.dueDate ? new Date(data.dueDate) : parent.dueDate,
+        baseScore: data.baseScore || 0,
+        weight: data.weight || 0,
+        scoringMethod: parent.scoringMethod
+      }
+    });
+    return {
+      ...child,
+      startDate: child.startDate?.toISOString() || '',
+      dueDate: child.dueDate?.toISOString() || '',
+      createdAt: child.createdAt?.toISOString() || '',
+      updatedAt: child.updatedAt?.toISOString() || ''
+    };
+  }
+
+  async updateTaskProgress(id: number, progress: number, actorCode?: string) {
+    const t = await this.prisma.task.update({
+      where: { id },
+      data: { progress }
+    });
+
+    // Recalculate parent progress if applicable
+    if (t.parentId) {
+      await this.recalculateParentProgress(t.parentId);
+    }
+
+    return t;
+  }
+
+  private async recalculateParentProgress(parentId: number) {
+    const parent = await this.prisma.task.findUnique({
+      where: { id: parentId },
+      include: { subTasks: true }
+    });
+
+    if (!parent || !parent.subTasks || parent.subTasks.length === 0) return;
+
+    let totalProgress = 0;
+    let allCompleted = true;
+
+    for (const child of parent.subTasks) {
+      totalProgress += child.progress || 0;
+      if (child.progress < 100) {
+        allCompleted = false;
+      }
+    }
+
+    const avgProgress = totalProgress / parent.subTasks.length;
+
+    const dataToUpdate: any = { progress: avgProgress };
+    if (allCompleted) {
+      dataToUpdate.status = 'DONE';
+    } else if (parent.status === 'DONE') {
+      // Nếu task cha đang là DONE nhưng có task con mới chưa xong, chuyển về IN_PROGRESS
+      dataToUpdate.status = 'IN_PROGRESS';
+    }
+
+    await this.prisma.task.update({
+      where: { id: parentId },
+      data: dataToUpdate
+    });
+
+    // Recursively update upwards
+    if (parent.parentId) {
+      await this.recalculateParentProgress(parent.parentId);
+    }
   }
 
 

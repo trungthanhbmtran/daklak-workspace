@@ -38,6 +38,12 @@ model Task {
   parent         Task?     @relation("SubTasks", fields: [parentId], references: [id])
   subTasks       Task[]    @relation("SubTasks")
 
+  rootTaskId     Int?      @map("root_task_id")
+  rootTask       Task?     @relation("RootTask", fields: [rootTaskId], references: [id])
+  descendants    Task[]    @relation("RootTask")
+
+  progress       Float     @default(0) @map("progress")
+
   // Tính năng Trả lại việc
   rejectReason   String?   @db.Text @map("reject_reason")
 
