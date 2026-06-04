@@ -69,4 +69,9 @@ export const hrmTasksApi = {
   assignCoordination(id: string | number, payload: { leadCode: string; coordinatorCodes: string[] }): Promise<ApiResponse<any>> {
     return apiClient.post(`/hrm/tasks/${id}/coordinate`, payload) as any;
   },
+
+  /** Cập nhật % tiến độ hoàn thành của task (0–100). */
+  updateProgress(id: string | number, progress: number): Promise<ApiResponse<any>> {
+    return apiClient.put(`/hrm/tasks/${id}/progress`, { progress }) as any;
+  },
 };

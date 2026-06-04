@@ -326,6 +326,21 @@ export class TasksController implements OnModuleInit {
     );
   }
 
+  @Put(':id/progress')
+  async updateProgress(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body('progress') progress: number,
+  ) {
+    return firstValueFrom(
+      this.taskService.UpdateTaskProgress({
+        id: parseInt(id, 10),
+        progress,
+        actorCode: req.user?.employeeCode || req.user?.username || '',
+      }),
+    );
+  }
+
   @Get(':id/subtasks')
   async getSubTasks(@Param('id') id: string) {
     return firstValueFrom(

@@ -189,14 +189,12 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
                 const isLead = emp.employeeCode === leadCode;
                 const isCoordinator = coordinatorCodes.includes(emp.employeeCode);
                 return (
-                  <div key={emp.employeeCode} className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all ${
-                    isLead ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20'
-                    : isCoordinator ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20'
-                    : 'border-transparent bg-slate-50 dark:bg-slate-800 hover:border-slate-200'
-                  }`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${
-                      isLead ? 'bg-violet-500' : isCoordinator ? 'bg-amber-500' : 'bg-slate-400'
+                  <div key={emp.employeeCode} className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all ${isLead ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20'
+                      : isCoordinator ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20'
+                        : 'border-transparent bg-slate-50 dark:bg-slate-800 hover:border-slate-200'
                     }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${isLead ? 'bg-violet-500' : isCoordinator ? 'bg-amber-500' : 'bg-slate-400'
+                      }`}>
                       {isLead ? <Crown className="w-4 h-4" /> : emp.employeeName?.charAt(0) || '?'}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -208,9 +206,8 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
                       <button
                         onClick={() => setLeadCode(emp.employeeCode)}
                         title="Set as Lead"
-                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all ${
-                          isLead ? 'bg-violet-500 text-white' : 'bg-violet-50 text-violet-600 hover:bg-violet-100 border border-violet-200'
-                        }`}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all ${isLead ? 'bg-violet-500 text-white' : 'bg-violet-50 text-violet-600 hover:bg-violet-100 border border-violet-200'
+                          }`}
                       >
                         {isLead ? <CheckCheck className="w-3 h-3" /> : 'Lead'}
                       </button>
@@ -218,9 +215,8 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
                         onClick={() => toggleCoordinator(emp.employeeCode)}
                         title="Add as Coordinator"
                         disabled={isLead}
-                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all disabled:opacity-30 ${
-                          isCoordinator ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200'
-                        }`}
+                        className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all disabled:opacity-30 ${isCoordinator ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200'
+                          }`}
                       >
                         {isCoordinator ? <CheckCheck className="w-3 h-3" /> : 'Coordinator'}
                       </button>

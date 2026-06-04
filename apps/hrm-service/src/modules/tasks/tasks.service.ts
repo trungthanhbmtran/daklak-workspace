@@ -916,22 +916,20 @@ export class TasksService implements OnModuleInit {
       dueDate: t.dueDate?.toISOString() || '',
       createdAt: t.createdAt?.toISOString() || '',
       updatedAt: t.updatedAt?.toISOString() || '',
-      level,       // -1 = task cha gốc, 0 = task hiện tại, 1,2,3... = các cấp con
+      level,
       isParent,
       isCurrent,
       isChild: !isParent && !isCurrent,
-      isGrandChild: false, // không dùng nữa, giữ để tương thích proto
+      isGrandChild: false,
     });
 
-    // Lấy task gốc kèm task cha (nếu có)
+    // Query 1: lấy task hiện tại + task cha
     const rootTask = await this.prisma.task.findUnique({
       where: { id: taskId },
       include: {
         assignee: true,
         assigner: true,
-        parent: {
-          include: { assignee: true, assigner: true }
-        }
+        parent: { include: { assignee: true, assigner: true } }
       }
     });
 
@@ -940,32 +938,50 @@ export class TasksService implements OnModuleInit {
     }
 
     const result: any[] = [];
-
-    // Thêm task cha vào đầu timeline (nếu có)
     if (rootTask.parent) {
       result.push(mapTask(rootTask.parent, -1, true, false));
     }
-
-    // Task hiện tại (level 0)
     result.push(mapTask(rootTask, 0, false, true));
 
-    // BFS: duyệt toàn bộ cây con không giới hạn độ sâu
-    const queue: Array<{ id: number; level: number }> = [{ id: taskId, level: 0 }];
-
-    while (queue.length > 0) {
-      const { id, level } = queue.shift()!;
-
-      const children = await this.prisma.task.findMany({
-        where: { parentId: id },
+    // Query 2: lấy tất cả tasks cùng planId (nếu có) hoặc toàn bộ cây theo parentId
+    // Build cây trên memory thay vì N+1 queries
+    let allRelated: any[];
+    if (rootTask.planId) {
+      allRelated = await this.prisma.task.findMany({
+        where: { planId: rootTask.planId, id: { not: taskId } },
         include: { assignee: true, assigner: true },
-        orderBy: { createdAt: 'asc' }
+        orderBy: [{ parentId: 'asc' }, { createdAt: 'asc' }],
       });
+    } else {
+      // Không có planId: lấy trực tiếp con cấp 1 rồi mở rộng trong memory
+      allRelated = await this.prisma.task.findMany({
+        where: { parentId: taskId },
+        include: { assignee: true, assigner: true },
+        orderBy: { createdAt: 'asc' },
+      });
+    }
 
-      for (const child of children) {
-        result.push(mapTask(child, level + 1, false, false));
-        // Tiếp tục duyệt xuống các cấp sâu hơn
-        queue.push({ id: child.id, level: level + 1 });
+    // Build level map từ taskId = level 0
+    const levelMap = new Map<number, number>();
+    levelMap.set(taskId, 0);
+    const remaining = [...allRelated];
+    const ordered: { task: any; level: number }[] = [];
+    let guard = allRelated.length + 1;
+
+    while (remaining.length > 0 && guard-- > 0) {
+      for (let i = remaining.length - 1; i >= 0; i--) {
+        const t = remaining[i];
+        const parentLevel = levelMap.get(t.parentId ?? taskId);
+        if (parentLevel !== undefined) {
+          levelMap.set(t.id, parentLevel + 1);
+          ordered.push({ task: t, level: parentLevel + 1 });
+          remaining.splice(i, 1);
+        }
       }
+    }
+
+    for (const { task, level } of ordered) {
+      result.push(mapTask(task, level, false, false));
     }
 
     return {

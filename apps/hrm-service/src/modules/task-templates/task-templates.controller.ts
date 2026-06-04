@@ -12,36 +12,18 @@ export class TaskTemplatesController {
   }
 
   @GrpcMethod('TaskTemplateService', 'Create')
-  async create(data: any) {
-    try {
-      console.log('CreateTemplate payload:', data);
-      return await this.taskTemplatesService.create(data);
-    } catch (error) {
-      console.error('Error creating template:', error);
-      throw error;
-    }
+  create(data: any) {
+    return this.taskTemplatesService.create(data);
   }
 
   @GrpcMethod('TaskTemplateService', 'BulkUpdate')
-  async bulkUpdate(data: { templates: any[] }) {
-    try {
-      console.log('BulkUpdate templates count:', data.templates?.length);
-      return await this.taskTemplatesService.bulkUpdate(data.templates || []);
-    } catch (error) {
-      console.error('Error bulk updating templates:', error);
-      throw error;
-    }
+  bulkUpdate(data: { templates: any[] }) {
+    return this.taskTemplatesService.bulkUpdate(data.templates || []);
   }
 
   @GrpcMethod('TaskTemplateService', 'Update')
-  async update(data: any) {
-    try {
-      console.log('UpdateTemplate payload:', data);
-      return await this.taskTemplatesService.update(data.id, data);
-    } catch (error) {
-      console.error('Error updating template:', error);
-      throw error;
-    }
+  update(data: any) {
+    return this.taskTemplatesService.update(data.id, data);
   }
 
   @GrpcMethod('TaskTemplateService', 'Delete')
