@@ -157,7 +157,7 @@ export function CreateUserModal({
   }, [isOpen, form]);
 
   const fillFromHrm = (emp: HrmEmployee) => {
-    const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(" ").trim() || undefined;
+    const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(" ").trim() || undefined;
     form.setValue("fullName", fullName ?? "");
     form.setValue("phoneNumber", emp.phone ?? "");
     form.setValue("email", emp.email || form.getValues("email"));
@@ -238,7 +238,7 @@ export function CreateUserModal({
                       </div>
                       <div className="flex-1 min-w-0 space-y-1.5">
                         <h4 className="font-semibold text-primary truncate">
-                          {[selectedHrmEmp.lastname, selectedHrmEmp.firstname].filter(Boolean).join(" ")}
+                          {[selectedHrmEmp.firstname, selectedHrmEmp.lastname].filter(Boolean).join(" ")}
                         </h4>
                         <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
                           {selectedHrmEmp.identityCard && <span>CCCD: <strong className="font-mono text-foreground">{selectedHrmEmp.identityCard}</strong></span>}
@@ -291,7 +291,7 @@ export function CreateUserModal({
                               <BadgeCheck className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground group-hover:text-primary transition-colors" />
                               <div className="min-w-0 flex-1 space-y-1">
                                 <p className="font-medium text-sm text-foreground group-hover:text-primary transition-colors">
-                                  {[emp.lastname, emp.firstname].filter(Boolean).join(" ")}
+                                  {[emp.firstname, emp.lastname].filter(Boolean).join(" ")}
                                 </p>
                                 <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
                                   <span>CCCD: <strong className="font-medium text-foreground/80">{emp.identityCard || "—"}</strong></span>
