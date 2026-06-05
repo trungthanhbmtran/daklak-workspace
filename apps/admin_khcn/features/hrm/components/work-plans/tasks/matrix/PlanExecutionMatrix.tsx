@@ -29,13 +29,13 @@ function flattenTree(nodes: any[], prefix = '', depth = 0): MatrixRow[] {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-  TEMPLATE:    { label: 'Chờ giao',       icon: <Circle className="w-3.5 h-3.5" />,        cls: 'text-slate-500' },
-  TODO:        { label: 'Chờ thực hiện',  icon: <Clock className="w-3.5 h-3.5" />,          cls: 'text-blue-600' },
-  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />,     cls: 'text-amber-600' },
-  REVIEWING:   { label: 'Chờ duyệt',      icon: <Clock className="w-3.5 h-3.5" />,          cls: 'text-violet-600' },
-  DONE:        { label: 'Hoàn thành',     icon: <CheckCircle2 className="w-3.5 h-3.5" />,   cls: 'text-emerald-600' },
-  OVERDUE:     { label: 'Quá hạn',        icon: <AlertTriangle className="w-3.5 h-3.5" />,  cls: 'text-red-600' },
-  RETURNED:    { label: 'Trả lại',        icon: <RotateCcw className="w-3.5 h-3.5" />,      cls: 'text-orange-600' },
+  TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'text-slate-500' },
+  TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-blue-600' },
+  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-amber-600' },
+  REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-violet-600' },
+  DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'text-emerald-600' },
+  OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-red-600' },
+  RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-orange-600' },
 };
 
 // Row background theo depth
@@ -138,7 +138,7 @@ export function PlanExecutionMatrix({ tasks, planTitle, isLoading }: PlanExecuti
         </div>
         <div className="h-2.5 bg-slate-100 rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
+            className="h-full bg-linear-to-br from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
             style={{ width: `${stats.pct}%` }}
           />
         </div>
