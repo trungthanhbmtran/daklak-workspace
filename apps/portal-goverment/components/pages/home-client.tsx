@@ -594,7 +594,7 @@ export default function HomeClient({ initialPortalMenus, initialPosts, initialBa
   const leaders = React.useMemo(() => {
     const list = Array.isArray(leadersData) ? leadersData : []
     return list.map((e: any) => ({
-      name: ((e.firstname || "") + " " + (e.lastname || "")).trim() || "Cán bộ UBND",
+      name: ((e.lastname || "") + " " + (e.firstname || "")).trim() || "Cán bộ UBND",
       role: e.jobTitle?.name || (currentLang === "en" ? "Commune Official" : "Cán bộ Xã"),
       phone: e.phone || "0262.3812.345",
       hasStar: e.jobTitleId === 1 || e.jobTitle?.id === 1 || e.jobTitle?.code === "giamDoc",

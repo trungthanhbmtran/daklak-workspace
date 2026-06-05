@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useHubServices } from "@/hooks/useServiceMenus";
+import { useUser } from "@/hooks/useUser";
 import { HeaderUserProfile } from "@/components/layouts/header-user-profile";
 
 // 2. TÁCH HEADER COMPONENT: Cho code gọn gàng
@@ -86,14 +87,16 @@ function AppCard({ app }: { app: AppItem }) {
 }
 
 export function HubClient() {
-  const { apps, currentUser, isLoading } = useHubServices();
+  const { apps, isLoading } = useHubServices();
+  const { user } = useUser();
+  const displayName = user?.fullName?.trim() || 'Bạn';
 
   return (
     <div className="min-h-screen bg-muted/30">
       <PortalHeader />
       <main className="container mx-auto py-12 px-4 max-w-6xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {[currentUser?.lastname, currentUser?.firstname].filter(Boolean).join(' ') || 'Bạn'}!</h1>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Xin chào, {displayName}!</h1>
           <p className="text-muted-foreground mt-2">Vui lòng chọn phân hệ nghiệp vụ để bắt đầu làm việc.</p>
         </div>
         {isLoading ? (

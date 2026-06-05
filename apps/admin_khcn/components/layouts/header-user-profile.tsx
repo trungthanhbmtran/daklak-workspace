@@ -23,8 +23,8 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
   const { handleLogout, isPending } = useLogout();
   const { user } = useUser();
 
-  const fullName = [user?.lastname, user?.firstname].filter(Boolean).join(" ") || "Người dùng";
-  const initial = user?.firstname?.charAt(0) || fullName.charAt(0) || "U";
+  const fullName = user?.fullName?.trim() || "Người dùng";
+  const initial = fullName.charAt(0).toUpperCase() || "U";
   const email = user?.email || "user@daklak.gov.vn";
 
   return (
