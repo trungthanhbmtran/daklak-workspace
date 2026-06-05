@@ -60,127 +60,113 @@ interface TaskRowProps {
   onRefresh: () => void;
 }
 
-import { CornerDownRight } from 'lucide-react';
+const STATUS_COLORS: Record<string, string> = {
+  TEMPLATE: 'bg-slate-300',
+  TODO: 'bg-blue-500',
+  IN_PROGRESS: 'bg-amber-500',
+  REVIEWING: 'bg-violet-500',
+  DONE: 'bg-emerald-500',
+  OVERDUE: 'bg-red-500',
+  RETURNED: 'bg-orange-500',
+};
 
 function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefresh }: TaskRowProps) {
-  const [expanded, setExpanded] = useState(depth < 2); // Mở 2 cấp đầu mặc định
+  const [expanded, setExpanded] = useState(depth < 2);
   const [subTaskModalOpen, setSubTaskModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   const hasChildren = task.children?.length > 0;
 
-  // Quyền: Lấy từ backend cấp sẵn (nếu có), fallback về logic cơ bản nếu thiếu
   const permissions = task.permissions || {};
   const canEdit = permissions.canEdit ?? (currentUserCode === task.assignerCode || currentUserUnit === 1 || currentUserCode === task.assigneeCode);
   const canAssign = permissions.canAssign ?? canEdit;
   const canAddSubTask = permissions.canAddSubTask ?? canEdit;
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+  const statusColor = STATUS_COLORS[task.status] || STATUS_COLORS.TODO;
   const depthCls = DEPTH_COLORS[Math.min(depth, DEPTH_COLORS.length - 1)];
 
   return (
     <div className="relative">
-      {/* Row */}
       <div
         className={cn(
-          'group flex items-start gap-2 pr-4 py-3 border-b border-slate-100/50 hover:bg-slate-50/80 transition-colors rounded-sm relative',
-          depth === 0 && cn('px-4', depthCls),
+          'group flex items-center gap-2 pr-4 py-1.5 border-b border-slate-50 hover:bg-slate-50/80 transition-colors relative',
+          depth === 0 && cn('px-4 py-2 border-b-slate-100', depthCls),
         )}
       >
         {depth > 0 && (
-          <div className="absolute left-[-22px] top-[18px] flex items-center">
+          <div className="absolute left-[-22px] top-1/2 -translate-y-1/2 flex items-center">
             <div className="w-[18px] h-px bg-slate-200"></div>
           </div>
         )}
 
-        {/* Expand toggle */}
         <button
-          className="mt-0.5 w-5 h-5 shrink-0 flex items-center justify-center text-slate-400 hover:text-slate-700 relative z-10 bg-white group-hover:bg-slate-50"
+          className="w-5 h-5 shrink-0 flex items-center justify-center text-slate-400 hover:text-slate-700 relative z-10 bg-white group-hover:bg-slate-50 rounded"
           onClick={() => setExpanded(v => !v)}
         >
-          {hasChildren
-            ? (expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />)
-            : <span className="w-3.5 h-3.5 inline-block" />}
+          {hasChildren ? (
+            expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />
+          ) : (
+            <span className="w-3.5 h-3.5 inline-block" />
+          )}
         </button>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <p className={cn(
-                'font-semibold text-slate-800 text-sm truncate',
-                depth === 0 && 'text-sm font-bold',
-              )}>
-                {task.title}
-              </p>
+        <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5 min-w-0 flex-1">
+            <span 
+              className={cn("w-2 h-2 rounded-full shrink-0", statusColor)} 
+              title={statusCfg.label}
+            />
+            <p className={cn(
+              'text-sm truncate text-slate-700',
+              depth === 0 ? 'font-bold text-slate-900' : 'font-medium',
+              task.status === 'DONE' && 'text-slate-500 line-through opacity-70'
+            )} title={task.title}>
+              {task.title}
+            </p>
+            {task.children?.length > 0 && (
+              <span className="text-[10px] text-slate-400 shrink-0">
+                ({task.children.length})
+              </span>
+            )}
+          </div>
 
-              {/* Assignee + Status */}
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <Badge variant="outline" className={cn('text-[10px] font-bold border px-1.5 py-0 gap-1', statusCfg.cls)}>
-                  {statusCfg.icon} {statusCfg.label}
-                </Badge>
-
-                {task.assigneeCode && task.assigneeCode !== 'UNASSIGNED' ? (
-                  <span className="text-xs text-slate-500 flex items-center gap-1">
-                    <span className="w-4 h-4 rounded-full bg-indigo-100 flex items-center justify-center text-[9px] text-indigo-700 font-bold">
-                      {(task.assigneeName || task.assigneeCode).charAt(0).toUpperCase()}
-                    </span>
-                    {task.assigneeName || task.assigneeCode}
-                  </span>
-                ) : (
-                  <span className="text-xs text-slate-400 italic">Chưa phân công</span>
-                )}
-
-                {task.dueDate && (
-                  <span className="text-[11px] text-slate-400 flex items-center gap-0.5">
-                    <Clock className="w-3 h-3" />
-                    {new Date(task.dueDate).toLocaleDateString('vi-VN')}
-                  </span>
-                )}
-
-                {task.children?.length > 0 && (
-                  <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">
-                    {task.children.length} việc con
-                  </span>
-                )}
-              </div>
+          <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+              {canAddSubTask && (
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-slate-400 hover:text-violet-600 hover:bg-violet-50" onClick={() => setSubTaskModalOpen(true)} title="Thêm việc con">
+                  <PlusCircle className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50" onClick={() => setAssignModalOpen(true)} title="Giao việc">
+                  <UserCheck className="w-3.5 h-3.5" />
+                </Button>
+              )}
+              {task.assigneeCode && task.assigneeCode !== 'UNASSIGNED' && task.status !== 'DONE' && canAssign && (
+                <Button size="icon" variant="ghost" className="h-6 w-6 text-slate-400 hover:text-slate-700 hover:bg-slate-200" onClick={() => setAssignModalOpen(true)} title="Chuyển giao">
+                  <RotateCcw className="w-3 h-3" />
+                </Button>
+              )}
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-              {canAddSubTask && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-2 text-[11px] font-bold text-violet-700 border-violet-200 hover:bg-violet-50 rounded-md gap-1"
-                  onClick={() => setSubTaskModalOpen(true)}
-                  title="Thêm việc con"
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Thêm con</span>
-                </Button>
+            <div className="flex items-center gap-3 text-xs text-slate-500 w-[180px] justify-end">
+              {task.dueDate && (
+                <span className={cn("flex items-center gap-1 shrink-0", task.status === 'OVERDUE' && 'text-red-500 font-medium')} title="Hạn chót">
+                  <Clock className="w-3 h-3" />
+                  {new Date(task.dueDate).toLocaleDateString('vi-VN')}
+                </span>
               )}
-
-              {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
-                <Button
-                  size="sm"
-                  className="h-7 px-3 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md gap-1"
-                  onClick={() => setAssignModalOpen(true)}
-                >
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Giao việc</span>
-                </Button>
-              )}
-
-              {task.assigneeCode && task.assigneeCode !== 'UNASSIGNED' && task.status !== 'DONE' && canAssign && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 px-2 text-[11px] text-slate-500 hover:text-slate-800 rounded-md gap-1 border border-transparent hover:border-slate-200"
-                  onClick={() => setAssignModalOpen(true)}
-                >
-                  Chuyển giao
-                </Button>
+              
+              {task.assigneeCode && task.assigneeCode !== 'UNASSIGNED' ? (
+                <span className="flex items-center gap-1.5 truncate max-w-[100px]" title={task.assigneeName || task.assigneeCode}>
+                  <span className="w-4 h-4 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-[9px] text-slate-600 font-bold shrink-0">
+                    {(task.assigneeName || task.assigneeCode).charAt(0).toUpperCase()}
+                  </span>
+                  <span className="truncate">{task.assigneeName || task.assigneeCode}</span>
+                </span>
+              ) : (
+                <span className="italic text-slate-400 truncate max-w-[100px]">Chưa giao</span>
               )}
             </div>
           </div>
