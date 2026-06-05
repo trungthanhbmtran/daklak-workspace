@@ -60,6 +60,8 @@ interface TaskRowProps {
   onRefresh: () => void;
 }
 
+import { CornerDownRight } from 'lucide-react';
+
 function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefresh }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2); // Mở 2 cấp đầu mặc định
   const [subTaskModalOpen, setSubTaskModalOpen] = useState(false);
@@ -75,21 +77,25 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
   const depthCls = DEPTH_COLORS[Math.min(depth, DEPTH_COLORS.length - 1)];
-  const indentPx = depth * 20;
 
   return (
-    <>
+    <div className="relative">
       {/* Row */}
       <div
         className={cn(
-          'group flex items-start gap-2 px-4 py-3 border-b border-slate-100 hover:bg-white/80 transition-colors rounded-sm',
-          depth === 0 && depthCls,
+          'group flex items-start gap-2 pr-4 py-3 border-b border-slate-100/50 hover:bg-slate-50/80 transition-colors rounded-sm relative',
+          depth === 0 && cn('px-4', depthCls),
         )}
-        style={{ paddingLeft: `${16 + indentPx}px` }}
       >
+        {depth > 0 && (
+          <div className="absolute left-[-22px] top-[18px] flex items-center">
+            <div className="w-[18px] h-px bg-slate-200"></div>
+          </div>
+        )}
+
         {/* Expand toggle */}
         <button
-          className="mt-0.5 w-5 h-5 shrink-0 flex items-center justify-center text-slate-400 hover:text-slate-700"
+          className="mt-0.5 w-5 h-5 shrink-0 flex items-center justify-center text-slate-400 hover:text-slate-700 relative z-10 bg-white group-hover:bg-slate-50"
           onClick={() => setExpanded(v => !v)}
         >
           {hasChildren
@@ -182,16 +188,20 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
       </div>
 
       {/* Sub-task rows (đệ quy) */}
-      {expanded && hasChildren && task.children.map((child: any) => (
-        <TaskRow
-          key={child.id}
-          task={child}
-          depth={depth + 1}
-          currentUserCode={currentUserCode}
-          planId={planId}
-          onRefresh={onRefresh}
-        />
-      ))}
+      {expanded && hasChildren && (
+        <div className={cn("ml-6 pl-6", depth === 0 && "ml-6 pl-6", "border-l border-slate-200")}>
+          {task.children.map((child: any) => (
+            <TaskRow
+              key={child.id}
+              task={child}
+              depth={depth + 1}
+              currentUserCode={currentUserCode}
+              planId={planId}
+              onRefresh={onRefresh}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Modals */}
       <SubTaskModal
@@ -212,7 +222,7 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
           if (taskId) onRefresh();
         }}
       />
-    </>
+    </div>
   );
 }
 
