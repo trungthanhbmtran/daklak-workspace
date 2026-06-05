@@ -190,8 +190,8 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
                 const isCoordinator = coordinatorCodes.includes(emp.employeeCode);
                 return (
                   <div key={emp.employeeCode} className={`flex items-center gap-3 p-2.5 rounded-xl border-2 transition-all ${isLead ? 'border-violet-400 bg-violet-50 dark:bg-violet-900/20'
-                      : isCoordinator ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20'
-                        : 'border-transparent bg-slate-50 dark:bg-slate-800 hover:border-slate-200'
+                    : isCoordinator ? 'border-amber-300 bg-amber-50 dark:bg-amber-900/20'
+                      : 'border-transparent bg-slate-50 dark:bg-slate-800 hover:border-slate-200'
                     }`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 ${isLead ? 'bg-violet-500' : isCoordinator ? 'bg-amber-500' : 'bg-slate-400'
                       }`}>

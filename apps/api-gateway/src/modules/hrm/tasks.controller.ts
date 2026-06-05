@@ -32,7 +32,7 @@ export class TasksController implements OnModuleInit {
     @Inject(MICROSERVICES.TASK.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly empClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.taskService = this.client.getService(MICROSERVICES.TASK.SERVICE);
@@ -160,7 +160,7 @@ export class TasksController implements OnModuleInit {
   @Put(':id/status')
   async updateStatus(
     @Req() req: any,
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body('status') status: string,
     @Body('rejectReason') rejectReason?: string
   ) {
@@ -212,11 +212,12 @@ export class TasksController implements OnModuleInit {
 
     // Nếu không phải admin và có chỉ định người nhận (khác UNASSIGNED), kiểm tra phạm vi quản lý
     if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED') {
-      const targetEmp: any = await firstValueFrom(this.employeeService.FindOne({ id: 0, employeeCode: assigneeCode }));
+      const empListRes: any = await firstValueFrom(this.employeeService.ListEmployees({ keyword: assigneeCode }));
+      const targetEmp = { data: empListRes?.data?.[0] };
       if (targetEmp?.data?.departmentId) {
         const unitMap = await this.getUnitMap();
         const assignerAncestorIds = this.getAncestorUnitIds(unitMap, parseInt(targetEmp.data.departmentId, 10));
-        
+
         // Người giao phải thuộc cây đơn vị của người nhận (tức là người giao là sếp của người nhận)
         if (user.unitId && !assignerAncestorIds.includes(parseInt(user.unitId, 10))) {
           throw new Error('Bạn chỉ được phép giao việc cho nhân sự thuộc phạm vi quản lý của mình.');

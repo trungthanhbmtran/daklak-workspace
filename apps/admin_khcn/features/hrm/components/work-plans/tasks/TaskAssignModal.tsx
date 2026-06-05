@@ -63,7 +63,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   // Backend đã filter + score + sort sẵn — client chỉ render, không tính lại
   const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
-    const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(' ');
+    const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(' ');
     return {
       code: emp.employeeCode,
       name: fullName,
@@ -138,10 +138,10 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                 <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người thực hiện <span className="text-red-500">*</span></label>
                 <div className="flex items-center gap-3">
                   <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-600 hover:text-indigo-600 select-none">
-                    <input 
-                      type="checkbox" 
-                      checked={crossDepartment} 
-                      onChange={(e) => setCrossDepartment(e.target.checked)} 
+                    <input
+                      type="checkbox"
+                      checked={crossDepartment}
+                      onChange={(e) => setCrossDepartment(e.target.checked)}
                       className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
                     />
                     Giao liên phòng ban
