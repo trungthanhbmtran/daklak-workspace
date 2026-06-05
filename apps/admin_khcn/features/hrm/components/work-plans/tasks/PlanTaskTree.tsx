@@ -40,17 +40,6 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls:
   RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3 h-3" />, cls: 'bg-orange-50 text-orange-700 border-orange-200' },
 };
 
-// Màu theo cấp (depth)
-const DEPTH_COLORS = [
-  'bg-indigo-50 border-l-2 border-l-indigo-400',
-  'bg-violet-50 border-l-2 border-l-violet-400',
-  'bg-sky-50 border-l-2 border-l-sky-400',
-  'bg-teal-50 border-l-2 border-l-teal-400',
-  'bg-slate-50 border-l-2 border-l-slate-300',
-];
-
-// ─── TaskRow ─────────────────────────────────────────────────────────────────
-
 interface TaskRowProps {
   task: any;
   depth: number;
@@ -58,49 +47,61 @@ interface TaskRowProps {
   currentUserUnit?: number;
   planId: number;
   onRefresh: () => void;
+  isLastChild?: boolean;
 }
 
 import { CornerDownRight } from 'lucide-react';
 
-function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefresh }: TaskRowProps) {
+function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefresh, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2); // Mở 2 cấp đầu mặc định
   const [subTaskModalOpen, setSubTaskModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
 
   const hasChildren = task.children?.length > 0;
 
-  // Quyền: Lấy từ backend cấp sẵn (nếu có), fallback về logic cơ bản nếu thiếu
   const permissions = task.permissions || {};
   const canEdit = permissions.canEdit ?? (currentUserCode === task.assignerCode || currentUserUnit === 1 || currentUserCode === task.assigneeCode);
   const canAssign = permissions.canAssign ?? canEdit;
   const canAddSubTask = permissions.canAddSubTask ?? canEdit;
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
-  const depthCls = DEPTH_COLORS[Math.min(depth, DEPTH_COLORS.length - 1)];
 
   return (
     <div className="relative">
+      {/* Nét đứt dọc nối các sub-tasks cùng cấp (nếu không phải là phần tử cuối) */}
+      {depth > 0 && !isLastChild && (
+        <div className="absolute left-[-16px] top-8 bottom-[-8px] w-px bg-slate-200/80"></div>
+      )}
+
       {/* Row */}
       <div
         className={cn(
-          'group flex items-start gap-2 pr-4 py-3 border-b border-slate-100/50 hover:bg-slate-50/80 transition-colors rounded-sm relative',
-          depth === 0 && cn('px-4', depthCls),
+          'group flex items-start gap-2 pr-4 py-2 hover:bg-slate-50/80 transition-colors rounded-md relative my-0.5',
+          depth === 0 && 'px-2',
         )}
       >
+        {/* Nét ngang nối từ nét dọc của cha */}
         {depth > 0 && (
-          <div className="absolute left-[-22px] top-[18px] flex items-center">
-            <div className="w-[18px] h-px bg-slate-200"></div>
+          <div className="absolute left-[-16px] top-[18px] flex items-center">
+            {/* L-shaped curve or straight line */}
+            <div className={cn(
+              "w-[12px] border-b border-slate-200/80",
+              isLastChild ? "h-[18px] border-l rounded-bl-lg absolute bottom-0 left-0" : "h-px absolute"
+            )}></div>
           </div>
         )}
 
         {/* Expand toggle */}
         <button
-          className="mt-0.5 w-5 h-5 shrink-0 flex items-center justify-center text-slate-400 hover:text-slate-700 relative z-10 bg-white group-hover:bg-slate-50"
+          className={cn(
+            "mt-0.5 w-5 h-5 shrink-0 flex items-center justify-center text-slate-400 hover:text-slate-800 relative z-10 rounded transition-colors",
+            hasChildren ? "hover:bg-slate-200/50" : ""
+          )}
           onClick={() => setExpanded(v => !v)}
         >
           {hasChildren
             ? (expanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />)
-            : <span className="w-3.5 h-3.5 inline-block" />}
+            : <span className="w-1.5 h-1.5 rounded-full bg-slate-200/50 inline-block" />}
         </button>
 
         {/* Content */}
@@ -189,8 +190,10 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
       {/* Sub-task rows (đệ quy) */}
       {expanded && hasChildren && (
-        <div className={cn("ml-6 pl-6", depth === 0 && "ml-6 pl-6", "border-l border-slate-200")}>
-          {task.children.map((child: any) => (
+        <div className={cn("ml-6 pl-4", depth === 0 && "ml-4 pl-4", "relative")}>
+          {/* Nét dọc chính của block con - chạy xuyên suốt ngoại trừ phần của con cuối cùng */}
+          <div className="absolute left-[-4px] top-0 bottom-4 w-px bg-slate-200/80"></div>
+          {task.children.map((child: any, index: number) => (
             <TaskRow
               key={child.id}
               task={child}
@@ -198,6 +201,7 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
               currentUserCode={currentUserCode}
               planId={planId}
               onRefresh={onRefresh}
+              isLastChild={index === task.children.length - 1}
             />
           ))}
         </div>
@@ -283,14 +287,14 @@ export function PlanTaskTree({
       </div>
 
       {/* Tree rows */}
-      <div className="divide-y divide-slate-50">
+      <div className="divide-y divide-slate-50/50 p-2">
         {tree.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-sm">
             <Circle className="w-8 h-8 mx-auto mb-2 opacity-30" />
             Chưa có nhiệm vụ nào. Thêm đầu việc để bắt đầu triển khai.
           </div>
         ) : (
-          tree.map((task) => (
+          tree.map((task, index) => (
             <TaskRow
               key={task.id}
               task={task}
@@ -298,6 +302,7 @@ export function PlanTaskTree({
               currentUserCode={currentUserCode}
               planId={planId}
               onRefresh={onRefresh}
+              isLastChild={index === tree.length - 1}
             />
           ))
         )}
