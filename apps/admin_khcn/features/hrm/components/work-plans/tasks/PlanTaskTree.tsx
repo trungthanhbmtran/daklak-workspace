@@ -105,20 +105,17 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
         {/* Content */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <Badge className="text-[10px] bg-indigo-600 hover:bg-indigo-600 font-bold px-1.5 py-0">Nhiệm vụ Cấp {depth + 1}</Badge>
-              </div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-1 min-w-0">
               <p className={cn(
-                'font-semibold text-slate-800 text-sm leading-snug',
-                depth === 0 && 'text-base font-bold',
+                'font-semibold text-slate-800 text-sm truncate',
+                depth === 0 && 'text-sm font-bold',
               )}>
                 {task.title}
               </p>
 
               {/* Assignee + Status */}
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge variant="outline" className={cn('text-[10px] font-bold border px-1.5 py-0 gap-1', statusCfg.cls)}>
                   {statusCfg.icon} {statusCfg.label}
                 </Badge>
@@ -143,32 +140,35 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
                 {task.children?.length > 0 && (
                   <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">
-                    {task.children.length} nhiệm vụ con
+                    {task.children.length} việc con
                   </span>
                 )}
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-1.5 shrink-0 transition-opacity">
+            <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
               {canAddSubTask && (
                 <Button
                   size="sm"
                   variant="outline"
-                  className="h-8 px-3 text-[11px] font-bold text-violet-700 border-violet-200 hover:bg-violet-50 rounded-full gap-1 shadow-sm"
+                  className="h-7 px-2 text-[11px] font-bold text-violet-700 border-violet-200 hover:bg-violet-50 rounded-md gap-1"
                   onClick={() => setSubTaskModalOpen(true)}
+                  title="Thêm việc con"
                 >
-                  <PlusCircle className="w-3.5 h-3.5" /> Thêm việc con
+                  <PlusCircle className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Thêm con</span>
                 </Button>
               )}
 
               {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
                 <Button
                   size="sm"
-                  className="h-8 px-4 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-full gap-1 shadow-md shadow-indigo-200 animate-pulse-once"
+                  className="h-7 px-3 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md gap-1"
                   onClick={() => setAssignModalOpen(true)}
                 >
-                  <UserCheck className="w-3.5 h-3.5" /> Giao việc ngay
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Giao việc</span>
                 </Button>
               )}
 
@@ -176,7 +176,7 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-7 px-2.5 text-[11px] text-slate-500 hover:text-slate-800 rounded-full gap-1"
+                  className="h-7 px-2 text-[11px] text-slate-500 hover:text-slate-800 rounded-md gap-1 border border-transparent hover:border-slate-200"
                   onClick={() => setAssignModalOpen(true)}
                 >
                   Chuyển giao
