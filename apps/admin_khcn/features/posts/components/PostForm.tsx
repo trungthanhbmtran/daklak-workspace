@@ -132,35 +132,33 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
     }
   };
 
-  const [languages, setLanguages] = useState<any[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
 
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const langs = await categoryApi.fetchByGroup('LANGUAGE');
-        const activeLangs = langs.filter((c: any) => c.active === 1);
-        setLanguages(activeLangs);
+  const { data: languages = [] } = useQuery({
+    queryKey: ['portal-languages'],
+    queryFn: async () => {
+      const langs = await categoryApi.fetchByGroup('LANGUAGE');
+      return langs.filter((c: any) => c.active === 1);
+    },
+    staleTime: 5 * 60_000,
+  });
 
-        // Đảm bảo translations object có đầy đủ keys cho các ngôn ngữ
-        const currentTranslations = form.getValues("translations") || {};
-        const newTranslations = { ...currentTranslations };
-        let hasNew = false;
-        activeLangs.forEach(l => {
-          if (l.code !== 'vi' && !newTranslations[l.code]) {
-            newTranslations[l.code] = { title: "", description: "", content: "" };
-            hasNew = true;
-          }
-        });
-        if (hasNew) {
-          form.setValue("translations", newTranslations);
+  useEffect(() => {
+    if (languages.length > 0) {
+      const currentTranslations = form.getValues("translations") || {};
+      const newTranslations = { ...currentTranslations };
+      let hasNew = false;
+      languages.forEach(l => {
+        if (l.code !== 'vi' && !newTranslations[l.code]) {
+          newTranslations[l.code] = { title: "", description: "", content: "" };
+          hasNew = true;
         }
-      } catch (error) {
-        console.error("Error fetching languages:", error);
+      });
+      if (hasNew) {
+        form.setValue("translations", newTranslations);
       }
-    };
-    fetchLanguages();
-  }, []);
+    }
+  }, [languages, form]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>, onChangeOriginal: (...event: any[]) => void) => {
     const newTitle = e.target.value;

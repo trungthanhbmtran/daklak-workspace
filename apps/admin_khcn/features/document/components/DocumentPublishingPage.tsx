@@ -17,7 +17,6 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useDocuments } from "@/features/document/hooks/useDocuments";
 import { toast } from "sonner";
-import apiClient from "@/lib/axiosInstance";
 
 export default function DocumentPublishingPage() {
   const [mounted, setMounted] = useState(false);

@@ -14,15 +14,13 @@ import {
   getBannerBackgroundStyle, 
   renderBannerWatermark 
 } from "./banner-helpers";
+import { useImageUpload } from "../../hooks/useImageUpload";
+import { toast } from "sonner";
 
 interface SloganCustomizerProps {
   customStyles: any;
   setCustomStyles: React.Dispatch<React.SetStateAction<any>>;
   updateStyle: (key: string, value: any) => void;
-  isUploadingBg: boolean;
-  handleBgImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
-  isUploadingWatermark: boolean;
-  handleWatermarkUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
   watchedName?: string;
   watchedDescription?: string;
 }
@@ -31,13 +29,23 @@ export function SloganCustomizer({
   customStyles,
   setCustomStyles,
   updateStyle,
-  isUploadingBg,
-  handleBgImageUpload,
-  isUploadingWatermark,
-  handleWatermarkUpload,
   watchedName,
   watchedDescription
 }: SloganCustomizerProps) {
+  const { isUploading: isUploadingBg, handleImageUpload: handleBgImageUpload } = useImageUpload({
+    onSuccess: (_, url) => {
+      updateStyle("bgImage", url);
+      toast.success("Tải hình nền biểu ngữ thành công!");
+    }
+  });
+
+  const { isUploading: isUploadingWatermark, handleImageUpload: handleWatermarkUpload } = useImageUpload({
+    onSuccess: (_, url) => {
+      updateStyle("watermarkUrl", url);
+      toast.success("Tải biểu tượng cổ động thành công!");
+    }
+  });
+
   return (
     <Card className="shadow-sm border border-amber-200 bg-amber-50/5">
       <CardHeader className="pb-3 border-b bg-amber-50/10">

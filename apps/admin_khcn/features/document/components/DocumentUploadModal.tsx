@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useDocuments } from "../hooks/useDocuments";
-import apiClient from "@/lib/axiosInstance";
+import { useDocumentFormData } from "../hooks/useDocumentFormData";
 import { toast } from "sonner";
 
 import {
@@ -52,24 +52,14 @@ type DocumentFormValues = z.infer<typeof documentSchema>;
 export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { isOpen: boolean, onClose: () => void, isIncoming?: boolean }) {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [categories, setCategories] = useState<{
-    types: any[],
-    fields: any[],
-    urgencies: any[],
-    securityLevels: any[],
-    reportTypes: any[]
-  }>({
-    types: [],
-    fields: [],
-    urgencies: [],
-    securityLevels: [],
-    reportTypes: []
-  });
-
   const [isProcessing, setIsProcessing] = useState(false);
   const [signatureStatus, setSignatureStatus] = useState<'VALID' | 'INVALID' | 'NONE' | null>(null);
   const { uploadFile, isUploading } = useFileUpload();
   const { createDocument, extractMetadata, isLoading: isCreating } = useDocuments();
+
+  // Categories load bằng React Query — cache 5 phút, không cần useEffect
+  const { data: formCategories } = useDocumentFormData();
+  const categories = formCategories ?? { types: [], fields: [], urgencies: [], securityLevels: [], reportTypes: [] };
 
   const form = useForm<DocumentFormValues>({
     resolver: zodResolver(documentSchema) as any,
@@ -97,60 +87,24 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
     },
   });
 
+  // Khi categories load xong, tự động set default values nếu chưa có
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const extractList = (res: any) => {
-          const data = res?.data || res;
-          if (Array.isArray(data)) return data;
-          if (data && typeof data === 'object' && Array.isArray(data.data)) return data.data;
-          return [];
-        };
-        // Fetch from shared system categories (/api/v1/admin/categories)
-        const [typeRes, domainRes, urgencyRes, securityRes, reportRes]: any = await Promise.all([
-          apiClient.get("/categories", { params: { group: "DOCUMENT_TYPE" } }),
-          apiClient.get("/categories", { params: { group: "DOCUMENT_DOMAIN" } }),
-          apiClient.get("/categories", { params: { group: "URGENCY_LEVEL" } }),
-          apiClient.get("/categories", { params: { group: "SECURITY_LEVEL" } }),
-          apiClient.get("/categories", { params: { group: "TRANSPARENCY_CAT" } }).catch(() => ({ data: [] }))
-        ]);
-
-        const types = extractList(typeRes);
-        const fields = extractList(domainRes);
-        const urgencies = extractList(urgencyRes);
-        const securityLevels = extractList(securityRes);
-        const reportTypes = extractList(reportRes);
-
-        setCategories({
-          types,
-          fields,
-          urgencies,
-          securityLevels,
-          reportTypes
-        });
-
-        // Thiết lập giá trị mặc định nếu chưa có
-        if (types.length > 0 && !form.getValues("typeId")) {
-          form.setValue("typeId", String(types[0].id));
-        }
-        if (fields.length > 0 && !form.getValues("fieldId")) {
-          form.setValue("fieldId", String(fields[0].id));
-        }
-        if (urgencies.length > 0 && !form.getValues("urgency")) {
-          const normalUrgency = urgencies.find((u: any) => u.code === 'NORMAL');
-          form.setValue("urgency", normalUrgency ? String(normalUrgency.id) : String(urgencies[0].id));
-        }
-        if (securityLevels.length > 0 && !form.getValues("securityLevel")) {
-          const normalSecurity = securityLevels.find((s: any) => s.code === 'NORMAL');
-          form.setValue("securityLevel", normalSecurity ? String(normalSecurity.id) : String(securityLevels[0].id));
-        }
-
-      } catch (error) {
-        console.error("[DocumentUpload] Error loading shared categories:", error);
-      }
-    };
-    if (isOpen) loadCategories();
-  }, [isOpen, form]);
+    const { types, fields, urgencies, securityLevels } = categories;
+    if (types.length > 0 && !form.getValues("typeId")) {
+      form.setValue("typeId", String(types[0].id));
+    }
+    if (fields.length > 0 && !form.getValues("fieldId")) {
+      form.setValue("fieldId", String(fields[0].id));
+    }
+    if (urgencies.length > 0 && !form.getValues("urgency")) {
+      const normalUrgency = urgencies.find((u: any) => u.code === 'NORMAL');
+      form.setValue("urgency", normalUrgency ? String(normalUrgency.id) : String(urgencies[0].id));
+    }
+    if (securityLevels.length > 0 && !form.getValues("securityLevel")) {
+      const normalSecurity = securityLevels.find((s: any) => s.code === 'NORMAL');
+      form.setValue("securityLevel", normalSecurity ? String(normalSecurity.id) : String(securityLevels[0].id));
+    }
+  }, [categories, form]);
 
   const processFileMetadata = async (file: File) => {
     setIsProcessing(true);

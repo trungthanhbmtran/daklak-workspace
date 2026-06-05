@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Send, Users, ArrowUpCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { hrmTasksApi } from '../../../api';
+import { hrmTasksApi } from "@/features/hrm/api";
 
 interface CoordinationModalProps {
   task: any | null;
@@ -20,29 +21,33 @@ interface CoordinationModalProps {
  * Lãnh đạo nhận thông báo và sẽ vào phân rã thêm công việc nếu cần.
  */
 export function CoordinationModal({ task, open, onOpenChange, onSuccess }: CoordinationModalProps) {
+  const queryClient = useQueryClient();
   const [message, setMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async () => {
-    if (!task) return;
-    setIsSubmitting(true);
-    try {
-      await hrmTasksApi.requestCoordination(task.id.toString(), {
-        message: message.trim() || undefined,
-      });
+  const requestMutation = useMutation({
+    mutationFn: () => hrmTasksApi.requestCoordination(task.id.toString(), {
+      message: message.trim() || undefined,
+    }),
+    onSuccess: () => {
       toast.success('Đã gửi yêu cầu phối hợp đến lãnh đạo!');
+      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
       setMessage('');
       onSuccess();
       onOpenChange(false);
-    } catch (e: any) {
+    },
+    onError: (e: any) => {
       toast.error(e?.response?.data?.message || e?.message || 'Lỗi khi gửi yêu cầu phối hợp');
-    } finally {
-      setIsSubmitting(false);
     }
+  });
+
+  const handleSubmit = () => {
+    if (!task) return;
+    requestMutation.mutate();
   };
 
+
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!isSubmitting) { setMessage(''); onOpenChange(o); } }}>
+    <Dialog open={open} onOpenChange={(o) => { if (!requestMutation.isPending) { setMessage(''); onOpenChange(o); } }}>
       <DialogContent className="max-w-md rounded-3xl p-0 overflow-hidden border-0 shadow-2xl">
         <DialogHeader className="px-6 pt-6 pb-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-100 dark:border-amber-800/30">
           <DialogTitle className="flex items-center gap-3 text-lg font-bold text-amber-900 dark:text-amber-100">
@@ -92,17 +97,17 @@ export function CoordinationModal({ task, open, onOpenChange, onSuccess }: Coord
           <Button
             variant="outline"
             onClick={() => { setMessage(''); onOpenChange(false); }}
-            disabled={isSubmitting}
+            disabled={requestMutation.isPending}
             className="rounded-xl h-10"
           >
             Hủy
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={isSubmitting}
+            disabled={requestMutation.isPending}
             className="rounded-xl h-10 bg-amber-500 hover:bg-amber-600 text-white font-bold shadow-md disabled:opacity-50"
           >
-            {isSubmitting ? (
+            {requestMutation.isPending ? (
               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
             ) : (
               <Send className="w-4 h-4 mr-2" />

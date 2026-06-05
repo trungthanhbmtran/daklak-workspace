@@ -15,6 +15,9 @@ export const hrmKeys = {
   masterPlans: () => [...hrmKeys.all, "masterPlans"] as const,
   tasks: () => [...hrmKeys.all, "tasks"] as const,
   tasksList: (params: Record<string, unknown>) => [...hrmKeys.tasks(), "list", params] as const,
+  taskDetail: (id: number) => [...hrmKeys.tasks(), "detail", id] as const,
+  taskComments: (id: number) => [...hrmKeys.tasks(), id, "comments"] as const,
+  taskSubtasks: (id: number) => [...hrmKeys.tasks(), id, "subtasks"] as const,
   taskTemplates: () => [...hrmKeys.all, "taskTemplates"] as const,
   taskTemplatesList: (rank?: string) => [...hrmKeys.taskTemplates(), "list", rank] as const,
 };

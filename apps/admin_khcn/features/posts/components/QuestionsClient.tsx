@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsApi } from "@/features/posts/api";
 import { CitizenQuestion } from "@/features/posts/types";
 import { toast } from "sonner";
@@ -19,27 +20,20 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 
 export function QuestionsClient() {
-  const [questions, setQuestions] = useState<CitizenQuestion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedQuestion, setSelectedQuestion] = useState<CitizenQuestion | null>(null);
   const [answerContent, setAnswerContent] = useState("");
   const [isPublic, setIsPublic] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  useEffect(() => {
-    fetchQuestions();
-  }, []);
-
-  const fetchQuestions = async () => {
-    try {
+  const { data: questions = [], isLoading: loading } = useQuery({
+    queryKey: ['questions', 1, 50],
+    queryFn: async () => {
       const response = await postsApi.getQuestions({ page: 1, limit: 50 });
-      setQuestions(response.data || []);
-    } catch {
-      toast.error("Không thể tải danh sách câu hỏi");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response.data || [];
+    },
+    staleTime: 60_000,
+  });
 
   const openAnswerDialog = (q: CitizenQuestion) => {
     setSelectedQuestion(q);
@@ -48,20 +42,30 @@ export function QuestionsClient() {
     setIsDialogOpen(true);
   };
 
-  const handleAnswer = async () => {
+  const answerMutation = useMutation({
+    mutationFn: (data: { id: string, answerContent: string, isPublic: boolean }) => 
+      postsApi.answerQuestion(data.id, { answerContent: data.answerContent, isPublic: data.isPublic }),
+    onSuccess: () => {
+      toast.success("Đã gửi câu trả lời");
+      setIsDialogOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['questions'] });
+    },
+    onError: () => {
+      toast.error("Lỗi khi gửi câu trả lời");
+    }
+  });
+
+  const handleAnswer = () => {
     if (!selectedQuestion) return;
     if (!answerContent.trim()) {
       toast.error("Vui lòng nhập nội dung câu trả lời");
       return;
     }
-    try {
-      await postsApi.answerQuestion(selectedQuestion.id, { answerContent, isPublic });
-      toast.success("Đã gửi câu trả lời");
-      setIsDialogOpen(false);
-      fetchQuestions();
-    } catch {
-      toast.error("Lỗi khi gửi câu trả lời");
-    }
+    answerMutation.mutate({ 
+      id: selectedQuestion.id, 
+      answerContent, 
+      isPublic 
+    });
   };
 
   const getStatusBadge = (status: string) => {

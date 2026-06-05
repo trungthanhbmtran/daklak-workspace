@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { PlayCircle } from 'lucide-react';
 import { toast } from 'sonner';
-import { hrmTasksApi } from '../../../api';
+import { hrmTasksApi } from "@/features/hrm/api";
 
 interface SmartAssignDrawerProps {
   task: any | null;
@@ -15,63 +16,54 @@ interface SmartAssignDrawerProps {
 }
 
 export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }: SmartAssignDrawerProps) {
+  const queryClient = useQueryClient();
   const [assignStrategy, setAssignStrategy] = useState<string>('LOW_PERFORMANCE');
-  const [topEmployees, setTopEmployees] = useState<any[]>([]);
-  const [topDepartments, setTopDepartments] = useState<any[]>([]);
-  const [isLoadingRecs, setIsLoadingRecs] = useState(false);
 
-  const fetchRecommendations = async (strategy: string) => {
-    if (!task) return;
-    setIsLoadingRecs(true);
-    try {
-      const res = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy });
+  const { data: recommendations, isLoading: isLoadingRecs } = useQuery({
+    queryKey: ['smart-assign', task?.id, assignStrategy],
+    queryFn: async () => {
+      const res: any = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: assignStrategy });
       if (res.success) {
         if (Array.isArray(res.data)) {
-          setTopEmployees(res.data);
-          setTopDepartments([]);
-        } else {
-          setTopEmployees((res.data as any)?.topEmployees || []);
-          setTopDepartments((res.data as any)?.topDepartments || []);
+          return { topEmployees: res.data, topDepartments: [] };
         }
+        return {
+          topEmployees: res.data?.topEmployees || [],
+          topDepartments: res.data?.topDepartments || [],
+        };
       }
-    } catch (e: any) {
-      toast.error('Lỗi khi lấy danh sách gợi ý');
-    } finally {
-      setIsLoadingRecs(false);
-    }
-  };
+      throw new Error('Lỗi lấy danh sách gợi ý');
+    },
+    enabled: !!open && !!task,
+    staleTime: 60_000,
+  });
 
-  useEffect(() => {
-    if (open && task) {
-      fetchRecommendations(assignStrategy);
-    } else if (!open) {
-      setTopEmployees([]);
-      setTopDepartments([]);
-    }
-  }, [open, task?.id, assignStrategy]);
+  const topEmployees = recommendations?.topEmployees || [];
+  const topDepartments = recommendations?.topDepartments || [];
 
-  const handleAssignToDepartment = async (departmentId: number) => {
-    if (!task) return;
-    try {
-      await hrmTasksApi.assignTask(task.id.toString(), { assigneeCode: '', departmentId });
-      toast.success('Đã giao việc cho Phòng ban!');
+  const assignMutation = useMutation({
+    mutationFn: (data: { departmentId?: number, employeeCode?: string }) => 
+      hrmTasksApi.assignTask(task.id.toString(), {
+        assigneeCode: data.employeeCode || '',
+        departmentId: data.departmentId,
+      }),
+    onSuccess: (_, variables) => {
+      toast.success(variables.departmentId ? 'Đã giao việc cho Phòng ban!' : 'Đã giao việc trực tiếp cho cá nhân!');
+      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
       onAssignSuccess();
       onOpenChange(false);
-    } catch (e: any) {
-      toast.error('Giao việc thất bại');
-    }
+    },
+    onError: () => toast.error('Giao việc thất bại')
+  });
+
+  const handleAssignToDepartment = (departmentId: number) => {
+    if (!task) return;
+    assignMutation.mutate({ departmentId });
   };
 
-  const handleAssignToEmployee = async (employeeCode: string) => {
+  const handleAssignToEmployee = (employeeCode: string) => {
     if (!task) return;
-    try {
-      await hrmTasksApi.assignTask(task.id.toString(), { assigneeCode: employeeCode });
-      toast.success('Đã giao việc trực tiếp cho cá nhân!');
-      onAssignSuccess();
-      onOpenChange(false);
-    } catch (e: any) {
-      toast.error('Giao việc thất bại');
-    }
+    assignMutation.mutate({ employeeCode });
   };
 
   return (
@@ -152,6 +144,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                         </div>
                         <Button
                           size="sm"
+                          disabled={assignMutation.isPending}
                           className="w-full rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
                           onClick={() => handleAssignToDepartment(rec.departmentId)}
                         >
@@ -199,6 +192,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                         </div>
                         <Button
                           size="sm"
+                          disabled={assignMutation.isPending}
                           className="w-full rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white"
                           onClick={() => handleAssignToEmployee(rec.employeeCode)}
                         >

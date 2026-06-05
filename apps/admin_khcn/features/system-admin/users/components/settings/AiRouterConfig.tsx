@@ -12,7 +12,7 @@ import {
 import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 import { useGetSystemConfigs, useUpdateSystemConfig } from '../../hooks/useSystemConfigs';
 import { toast } from 'sonner';
-import apiClient from '@/lib/axiosInstance';
+import { useAiFetchModels } from '../../hooks/useAiModels';
 import { AiProviderConfig } from '../SystemSettingsClient';
 
 export function AiRouterConfig() {
@@ -20,8 +20,9 @@ export function AiRouterConfig() {
   const updateConfig = useUpdateSystemConfig();
   
   const [aiProviders, setAiProviders] = useState<AiProviderConfig[]>([]);
-  const [fetchedModels, setFetchedModels] = useState<Record<string, string[]>>({});
-  const [isFetchingModels, setIsFetchingModels] = useState<Record<string, boolean>>({});
+
+  // Hook tách biệt cho fetch AI models — loại bỏ apiClient trực tiếp
+  const { fetchedModels, isFetching: isFetchingModels, fetchModels } = useAiFetchModels();
 
   const { data: aiProviderCategories = [] } = useGetCategoryByGroup("AI_PROVIDER_TYPE");
 
@@ -77,26 +78,8 @@ export function AiRouterConfig() {
     }
   };
 
-  const handleFetchModels = async (providerId: string, providerType: string, apiKey: string) => {
-    if (!apiKey) {
-      toast.error('Vui lòng nhập API Key trước khi tải danh sách Model!');
-      return;
-    }
-    
-    setIsFetchingModels(prev => ({ ...prev, [providerId]: true }));
-    try {
-      const res = await apiClient.post('/ai/models', { provider: providerType, apiKey }) as any;
-      if (res.success) {
-        setFetchedModels(prev => ({ ...prev, [providerId]: res.data }));
-        toast.success(`Đã tải ${res.data.length} model từ ${providerType}!`);
-      } else {
-        toast.error(res.message || 'Lỗi tải danh sách Model');
-      }
-    } catch (err: any) {
-      toast.error(err.message || 'Lỗi kết nối đến Backend');
-    } finally {
-      setIsFetchingModels(prev => ({ ...prev, [providerId]: false }));
-    }
+  const handleFetchModels = (providerId: string, providerType: string, apiKey: string) => {
+    fetchModels(providerId, providerType, apiKey);
   };
 
   return (

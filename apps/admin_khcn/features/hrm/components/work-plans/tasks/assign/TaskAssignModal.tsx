@@ -18,9 +18,9 @@ import {
   AlertTriangle,
   UserCheck
 } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrmTasksApi } from "@/features/hrm/api";
-import { useHrmEmployeesList } from '../../../hooks';
-import { useUser } from '@/hooks/useUser';
+import { useHrmEmployeesList } from "@/features/hrm/hooks";
 
 interface TaskAssignModalProps {
   isOpen: boolean;
@@ -29,7 +29,7 @@ interface TaskAssignModalProps {
 }
 
 export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps) {
-  const { user } = useUser();
+  const queryClient = useQueryClient();
   const [openPopover, setOpenPopover] = useState(false);
 
   const [taskState, setTaskState] = useState({
@@ -41,8 +41,6 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     dueDate: new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0],
     weight: 20
   });
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (task && isOpen) {
@@ -84,12 +82,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   const isTransfer = task?.assigneeCode && task.assigneeCode !== 'UNASSIGNED';
 
-  const handleSubmit = async () => {
-    if (!taskState.assigneeCode) return toast.error('Vui lòng chọn người chủ trì chính!');
-    if (isOverload) return toast.error('Người chủ trì chính đang quá tải khối lượng công việc.');
-
-    setIsSubmitting(true);
-    try {
+  const assignMutation = useMutation({
+    mutationFn: async () => {
       const taskId = task.id;
       await hrmTasksApi.update(taskId, {
         weight: taskState.weight,
@@ -103,14 +97,22 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         assigneeCode: taskState.assigneeCode,
         coAssigneeCodes: taskState.coAssigneeCodes
       });
-
+      return taskId;
+    },
+    onSuccess: (taskId) => {
       toast.success(isTransfer ? `Đã chuyển giao việc thành công: ${task.title}` : `Đã giao việc thành công: ${task.title}`);
+      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
       onClose(taskId);
-    } catch {
+    },
+    onError: () => {
       toast.error('Lỗi khi giao việc');
-    } finally {
-      setIsSubmitting(false);
     }
+  });
+
+  const handleSubmit = () => {
+    if (!taskState.assigneeCode) return toast.error('Vui lòng chọn người chủ trì chính!');
+    if (isOverload) return toast.error('Người chủ trì chính đang quá tải khối lượng công việc.');
+    assignMutation.mutate();
   };
 
   if (!task) return null;
@@ -364,10 +366,10 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={!taskState.assigneeCode || isOverload || isSubmitting}
+              disabled={!taskState.assigneeCode || isOverload || assignMutation.isPending}
               className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl h-11 px-8 shadow-sm"
             >
-              {isSubmitting ? "Đang xử lý..." : (isTransfer ? "Xác nhận chuyển giao" : "Xác nhận giao việc")}
+              {assignMutation.isPending ? "Đang xử lý..." : (isTransfer ? "Xác nhận chuyển giao" : "Xác nhận giao việc")}
             </Button>
           </div>
         </div>

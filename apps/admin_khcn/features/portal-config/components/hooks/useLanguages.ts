@@ -1,23 +1,22 @@
-import { useState, useEffect } from 'react';
-import apiClient from '@/lib/axiosInstance';
+import { useQuery } from '@tanstack/react-query';
+import { portalLanguagesApi } from '../../api';
 
-export function useLanguages(initialLanguages = []) {
-  const [languages, setLanguages]: any = useState(initialLanguages);
+/**
+ * Hook lấy danh sách ngôn ngữ active — dùng React Query để cache.
+ * Không dùng useEffect/useState thuần nữa.
+ */
+export function useLanguages(initialLanguages: any[] = []) {
+  const { data } = useQuery({
+    queryKey: ['portal-languages'],
+    queryFn: async () => {
+      const res: any = await portalLanguagesApi.getActive();
+      const all = Array.isArray(res?.data) ? res.data : [];
+      const langs = all.filter((c: any) => c.active === 1);
+      return langs.length > 0 ? langs : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }];
+    },
+    staleTime: 5 * 60_000,
+    placeholderData: initialLanguages.length > 0 ? initialLanguages : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }],
+  });
 
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const res: unknown = await apiClient.get('/categories');
-        const all = Array.isArray((res as any)?.data) ? (res as any).data : [];
-        const langs = all.filter((c: any) => c.group === 'LANGUAGE' && c.active === 1);
-        setLanguages(langs.length > 0 ? langs : [{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }]);
-      } catch (error) {
-        console.error('Error fetching languages', error);
-        setLanguages([{ code: 'vi', name: 'Tiếng Việt' }, { code: 'en', name: 'English' }]);
-      }
-    };
-    fetchLanguages();
-  }, []);
-
-  return languages;
+  return data ?? (initialLanguages.length > 0 ? initialLanguages : [{ code: 'vi', name: 'Tiếng Việt' }]);
 }

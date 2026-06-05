@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { RefreshCw, Send, FileText } from "lucide-react";
@@ -8,56 +8,48 @@ import { toast } from "sonner";
 import axios from "axios";
 
 export function LgspClient() {
-  const [loading, setLoading] = useState(false);
-  const [documents, setDocuments] = useState<any[]>([]);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    handleSync();
-  }, []);
-
-  const handleSync = async () => {
-    setLoading(true);
-    try {
+  const { data: documents = [], isLoading: loading, refetch: handleSync, isFetching } = useQuery({
+    queryKey: ['lgsp-documents'],
+    queryFn: async () => {
       const res = await axios.get("/api/admin/integrations/documents/sync", {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" }
-      }) as any;
-      // Raw axios call (not apiClient), so res.data is the ApiResponse envelope
-      const apiResponse = res.data;
-      if (apiResponse?.success) {
-        setDocuments(apiResponse.data || []);
-        toast.success("Đồng bộ thành công: Đã lấy các văn bản mới nhất từ trục liên thông LGSP.");
-      } else {
-        toast.error("Lỗi đồng bộ: " + (apiResponse?.message || "Không thể đồng bộ văn bản."));
+      });
+      if (res.data?.success) {
+        return res.data.data || [];
       }
-    } catch (error: any) {
-      toast.error("Lỗi kết nối: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+      throw new Error(res.data?.message || "Không thể đồng bộ văn bản.");
+    },
+    staleTime: 60_000,
+  });
 
-  const handleSendTest = async () => {
-    setLoading(true);
-    try {
-      const payload = {
-        title: "Văn bản thử nghiệm " + new Date().getTime(),
-        content: "Nội dung văn bản thử nghiệm",
-        source: "Hệ thống Admin"
-      };
+  const sendMutation = useMutation({
+    mutationFn: async (payload: any) => {
       const response = await axios.post("/api/admin/integrations/documents/send", payload, {
         params: { serviceCode: "LGSP_QUAN_LY_VAN_BAN" }
       });
-      if (response.data?.success) {
-        toast.success("Gửi thành công: Văn bản đã được đẩy lên trục LGSP.");
-        handleSync();
-      } else {
-        toast.error("Lỗi gửi văn bản: " + (response.data?.message || "Không thể gửi văn bản."));
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Không thể gửi văn bản.");
       }
-    } catch (error: any) {
-      toast.error("Lỗi kết nối: " + error.message);
-    } finally {
-      setLoading(false);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Gửi thành công: Văn bản đã được đẩy lên trục LGSP.");
+      queryClient.invalidateQueries({ queryKey: ['lgsp-documents'] });
+    },
+    onError: (error: any) => {
+      toast.error("Lỗi gửi văn bản: " + error.message);
     }
+  });
+
+  const handleSendTest = () => {
+    const payload = {
+      title: "Văn bản thử nghiệm " + new Date().getTime(),
+      content: "Nội dung văn bản thử nghiệm",
+      source: "Hệ thống Admin"
+    };
+    sendMutation.mutate(payload);
   };
 
   return (
@@ -68,17 +60,17 @@ export function LgspClient() {
           <p className="text-gray-500">Giao tiếp, nhận và gửi văn bản qua trục liên thông quốc gia.</p>
         </div>
         <div className="flex space-x-3">
-          <Button onClick={handleSync} disabled={loading} variant="outline" className="flex items-center gap-2">
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Đồng bộ văn bản
+          <Button onClick={() => { toast.success("Đang đồng bộ..."); handleSync(); }} disabled={isFetching} variant="outline" className="flex items-center gap-2">
+            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} /> Đồng bộ văn bản
           </Button>
-          <Button onClick={handleSendTest} disabled={loading} className="flex items-center gap-2">
+          <Button onClick={handleSendTest} disabled={sendMutation.isPending} className="flex items-center gap-2">
             <Send className="w-4 h-4" /> Kiểm tra gửi VB
           </Button>
         </div>
       </div>
 
       <div className="space-y-4">
-        {documents.map(doc => (
+        {documents.map((doc: any) => (
           <Card key={doc.id}>
             <CardHeader className="py-4">
               <div className="flex justify-between items-center">

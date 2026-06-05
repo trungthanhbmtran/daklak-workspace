@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Crown, Users, Search, CheckCheck, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { hrmTasksApi } from '../../../api';
+import { hrmTasksApi } from "@/features/hrm/api";
 
 interface AssignCoordinationModalProps {
   task: any | null;
@@ -23,15 +24,23 @@ interface AssignCoordinationModalProps {
  * No new sub-task is created — same task, clear role separation.
  */
 export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }: AssignCoordinationModalProps) {
-  const [employees, setEmployees] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
 
   // Lead: defaults to current assignee
   const [leadCode, setLeadCode] = useState<string>('');
   // Coordinators: array of employeeCodes
   const [coordinatorCodes, setCoordinatorCodes] = useState<string[]>([]);
+
+  const { data: employees = [], isLoading } = useQuery({
+    queryKey: ['assignees', task?.id],
+    queryFn: async () => {
+      const res: any = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: 'HIGH_PERFORMANCE' });
+      return Array.isArray(res.data) ? res.data : (res.data?.topEmployees || []);
+    },
+    enabled: !!open && !!task,
+    staleTime: 60_000,
+  });
 
   useEffect(() => {
     if (!open || !task) {
@@ -43,16 +52,8 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
     // Initialize defaults
     setLeadCode(task.assigneeCode || '');
     setCoordinatorCodes(task.coAssigneeCodes || []);
-
-    setIsLoading(true);
-    hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: 'HIGH_PERFORMANCE' })
-      .then((res: any) => {
-        const list = Array.isArray(res.data) ? res.data : (res.data?.topEmployees || []);
-        setEmployees(list);
-      })
-      .catch(() => toast.error('Error loading employee list'))
-      .finally(() => setIsLoading(false));
   }, [open, task?.id]);
+
 
   const filteredEmployees = employees.filter((emp: any) => {
     const name = (emp.employeeName || '').toLowerCase();
@@ -68,34 +69,38 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
     );
   };
 
-  const handleSubmit = async () => {
+  const assignMutation = useMutation({
+    mutationFn: () => hrmTasksApi.assignCoordination(task.id.toString(), {
+      leadCode,
+      coordinatorCodes,
+    }),
+    onSuccess: () => {
+      toast.success('Lead & Coordinators assigned successfully!');
+      queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
+      onSuccess();
+      onOpenChange(false);
+    },
+    onError: (e: any) => {
+      toast.error(e?.response?.data?.message || e?.message || 'Error assigning roles');
+    }
+  });
+
+  const handleSubmit = () => {
     if (!task || !leadCode) {
       toast.error('Please select a Lead');
       return;
     }
-    setIsSubmitting(true);
-    try {
-      await hrmTasksApi.assignCoordination(task.id.toString(), {
-        leadCode,
-        coordinatorCodes,
-      });
-      toast.success('Lead & Coordinators assigned successfully!');
-      onSuccess();
-      onOpenChange(false);
-    } catch (e: any) {
-      toast.error(e?.response?.data?.message || e?.message || 'Error assigning roles');
-    } finally {
-      setIsSubmitting(false);
-    }
+    assignMutation.mutate();
   };
 
+
   const getDisplayName = (code: string) => {
-    const emp = employees.find(e => e.employeeCode === code);
+    const emp = employees.find((e: any) => e.employeeCode === code);
     return emp?.employeeName || code;
   };
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!isSubmitting) { onOpenChange(o); } }}>
+    <Dialog open={open} onOpenChange={(o) => { if (!assignMutation.isPending) { onOpenChange(o); } }}>
       <DialogContent className="max-w-lg rounded-3xl p-0 overflow-hidden border-0 shadow-2xl">
         <DialogHeader className="px-6 pt-6 pb-4 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border-b border-violet-100 dark:border-violet-800/30">
           <DialogTitle className="flex items-center gap-3 text-lg font-bold text-violet-900 dark:text-violet-100">
@@ -235,20 +240,13 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
               <span>1 Lead + <span className="font-bold text-amber-600">{coordinatorCodes.length} coordinator(s)</span></span>
             )}
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting} className="rounded-xl h-10">
-              Cancel
-            </Button>
+          <div className="p-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 rounded-b-3xl shrink-0">
+            <Button variant="ghost" className="rounded-xl font-medium" onClick={() => onOpenChange(false)} disabled={assignMutation.isPending}>Cancel</Button>
             <Button
-              disabled={!leadCode || isSubmitting}
+              className="rounded-xl font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200 dark:shadow-none"
               onClick={handleSubmit}
-              className="rounded-xl h-10 bg-violet-500 hover:bg-violet-600 text-white font-bold shadow-md disabled:opacity-50"
+              disabled={!leadCode || assignMutation.isPending}
             >
-              {isSubmitting ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-              ) : (
-                <Users className="w-4 h-4 mr-2" />
-              )}
               Confirm Assignment
             </Button>
           </div>

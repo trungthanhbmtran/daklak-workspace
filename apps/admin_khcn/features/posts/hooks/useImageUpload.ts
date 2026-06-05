@@ -4,7 +4,7 @@ import imageCompression from "browser-image-compression";
 import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
 
-export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onRemove?: () => void }) => {
+export const useImageUpload = (options?: { onSuccess?: (id: string, url: string) => void; onRemove?: () => void }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -24,7 +24,6 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
 
       // Gateway wraps everything in { success: true, data: ... }
       const uploadInfo = res.data;
-      // console.log("Upload Info:", uploadInfo);
 
       await axios.put(uploadInfo.uploadUrl, compressed, { headers: { "Content-Type": compressed.type } });
 
@@ -32,7 +31,7 @@ export const useImageUpload = (options?: { onSuccess?: (id: string) => void; onR
       const conf = confirmRes.data;
 
       setPreviewUrl(conf.downloadUrl);
-      options?.onSuccess?.(uploadInfo.fileId);
+      options?.onSuccess?.(uploadInfo.fileId, conf.downloadUrl);
     } catch (error) {
       toast.error("Lỗi tải ảnh");
     } finally {

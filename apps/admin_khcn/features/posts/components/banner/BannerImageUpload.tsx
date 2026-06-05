@@ -3,24 +3,26 @@ import { UseFormReturn } from "react-hook-form";
 import { ImagePlus, Loader2, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useImageUpload } from "../../hooks/useImageUpload";
+import { useRef } from "react";
 
 interface BannerImageUploadProps {
   form: UseFormReturn<any>;
-  fileInputRef: React.RefObject<HTMLInputElement | null>;
-  isUploading: boolean;
-  previewUrl: string | null;
-  handleImageUpload: (e: React.ChangeEvent<HTMLInputElement>) => Promise<void>;
-  removeImage: () => void;
 }
 
-export function BannerImageUpload({
-  form,
-  fileInputRef,
-  isUploading,
-  previewUrl,
-  handleImageUpload,
-  removeImage
-}: BannerImageUploadProps) {
+export function BannerImageUpload({ form }: BannerImageUploadProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
+    onSuccess: (id) => {
+      form.setValue("imageUrl", id, { shouldValidate: true, shouldDirty: true });
+    },
+    onRemove: () => {
+      form.setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true });
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  });
+
   const imageUrlValue = form.watch("imageUrl");
 
   return (

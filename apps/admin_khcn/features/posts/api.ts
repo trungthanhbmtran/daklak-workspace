@@ -127,6 +127,16 @@ export const postsApi = {
   createTag: (data: any): Promise<ApiResponse<any>> =>
     apiClient.post("/posts/tags", data) as any,
 
+  /**
+   * Thống kê bài viết — backend tính sẵn.
+   * Thay thế pattern fetch limit:1000 để đếm client-side.
+   */
+  getPostStats: (params?: { categoryId?: string; authorId?: string }): Promise<ApiResponse<{
+    total: number; published: number; draft: number; pending: number;
+    reviewing: number; rejected: number; totalViews: number;
+  }>> =>
+    apiClient.get("/posts/stats", { params }) as any,
+
   // ─── Translation (with built-in Polling) ──────────────────
   translate: async (text: string, targetLang: string): Promise<any> => {
     // 1. Submit translation job

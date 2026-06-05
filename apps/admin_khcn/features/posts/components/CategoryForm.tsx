@@ -80,12 +80,20 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
 
   const [isUploadingDoc, setIsUploadingDoc] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [languages, setLanguages] = useState<CategoryItem[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
 
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (id) => form.setValue("thumbnail", id, { shouldDirty: true }),
     onRemove: () => form.setValue("thumbnail", "", { shouldDirty: true })
+  });
+
+  const { data: languages = [] } = useQuery({
+    queryKey: ['portal-languages'],
+    queryFn: async () => {
+      const langs = await categoryApi.fetchByGroup('LANGUAGE');
+      return langs.filter((c: any) => c.active === 1);
+    },
+    staleTime: 5 * 60_000,
   });
 
   const { data: categories } = useQuery({
@@ -101,19 +109,6 @@ export function CategoryForm({ onBack, editId }: CategoryFormProps) {
     queryFn: async () => await postsApi.getCategory(editId!),
     enabled: isEdit,
   });
-
-  useEffect(() => {
-    fetchLanguages();
-  }, []);
-
-  const fetchLanguages = async () => {
-    try {
-      const langs = await categoryApi.fetchByGroup('LANGUAGE');
-      setLanguages(langs.filter(c => c.active === 1));
-    } catch (error) {
-      console.error("Error fetching languages:", error);
-    }
-  };
 
   useEffect(() => {
     const categoryDetails = categoryData?.data;

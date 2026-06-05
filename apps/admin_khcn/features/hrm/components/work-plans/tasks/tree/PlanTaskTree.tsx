@@ -8,8 +8,8 @@ import {
   Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SubTaskModal } from './SubTaskModal';
-import { TaskAssignModal } from './TaskAssignModal';
+import { SubTaskModal } from '../subtask/SubTaskModal';
+import { TaskAssignModal } from '../assign/TaskAssignModal';
 
 // ─── Utils ──────────────────────────────────────────────────────────────────
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsApi } from "@/features/posts/api";
 import { CitizenFeedback } from "@/features/posts/types";
 import { toast } from "sonner";
@@ -16,35 +17,33 @@ import {
 } from "@/components/ui/dialog";
 
 export function FeedbacksClient() {
-  const [feedbacks, setFeedbacks] = useState<CitizenFeedback[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [selectedFeedback, setSelectedFeedback] = useState<CitizenFeedback | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  useEffect(() => {
-    fetchFeedbacks();
-  }, []);
-
-  const fetchFeedbacks = async () => {
-    try {
+  const { data: feedbacks = [], isLoading: loading } = useQuery({
+    queryKey: ['feedbacks', 1, 50],
+    queryFn: async () => {
       const response = await postsApi.getFeedbacks({ page: 1, limit: 50 });
-      setFeedbacks(response.data || []);
-    } catch {
-      toast.error("Không thể tải danh sách góp ý");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response.data || [];
+    },
+    staleTime: 60_000,
+  });
 
-  const handleUpdateStatus = async (id: string, status: string) => {
-    try {
-      await postsApi.updateFeedbackStatus(id, status);
-      toast.success(status === 'READ' ? "Đã đánh dấu là đã đọc" : "Đã chuyển trạng thái sang đã xử lý");
-      fetchFeedbacks();
-      if (selectedFeedback && selectedFeedback.id === id) setIsDialogOpen(false);
-    } catch {
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string, status: string }) => postsApi.updateFeedbackStatus(id, status),
+    onSuccess: (_, variables) => {
+      toast.success(variables.status === 'READ' ? "Đã đánh dấu là đã đọc" : "Đã chuyển trạng thái sang đã xử lý");
+      queryClient.invalidateQueries({ queryKey: ['feedbacks'] });
+      if (selectedFeedback && selectedFeedback.id === variables.id) setIsDialogOpen(false);
+    },
+    onError: () => {
       toast.error("Lỗi khi cập nhật trạng thái");
     }
+  });
+
+  const handleUpdateStatus = (id: string, status: string) => {
+    updateStatusMutation.mutate({ id, status });
   };
 
   const openDetailDialog = (f: CitizenFeedback) => {

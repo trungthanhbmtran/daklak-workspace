@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { useTheme } from "next-themes";
 import axios from "axios";
-import apiClient from "@/lib/axiosInstance";
+import { portalConfigApi } from "@/features/portal-config/api";
 
 export interface TypographySettings {
   heading: string;
@@ -280,10 +280,10 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem(`themeConfig:${stage}`, JSON.stringify(cfg));
     }
 
-    // Lưu lên DB qua apiClient → gateway → posts-service
+    // Lưu lên DB qua portalConfigApi → gateway → posts-service
     try {
       const appearanceConfig = mapConfigToAppearance(cfg);
-      await apiClient.post("/portal-configs/upsert", {
+      await portalConfigApi.upsert({
         code: "theme_appearance",
         name: "Cấu hình giao diện Portal",
         description: JSON.stringify(appearanceConfig),
@@ -291,7 +291,6 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
       setIsDirty(false);
     } catch (err) {
       console.error("[ThemeProvider] saveTheme API error:", err);
-      // Mạng lỗi nhưng local đã lưu thành công — không block UX
       setIsDirty(false);
     }
   };

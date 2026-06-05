@@ -21,10 +21,11 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { useQuery } from "@tanstack/react-query";
+import { portalLanguagesApi } from "@/features/portal-config/api";
 
 interface BannerBasicInfoProps {
   form: UseFormReturn<any>;
-  languages: any[];
   activeLangTab: string;
   setActiveLangTab: (tab: string) => void;
   watchedPosition: string;
@@ -34,7 +35,6 @@ interface BannerBasicInfoProps {
 
 export function BannerBasicInfo({
   form,
-  languages,
   activeLangTab,
   setActiveLangTab,
   watchedPosition,
@@ -42,6 +42,18 @@ export function BannerBasicInfo({
   setDesignType
 }: BannerBasicInfoProps) {
   const { data: categories = [] } = useGetCategoryByGroup("BANNER_POSITION");
+
+  // Languages fetch moved inside component to prevent parent re-renders
+  const { data: languages = [] } = useQuery({
+    queryKey: ['portal-languages'],
+    queryFn: async () => {
+      const res: any = await portalLanguagesApi.getActive();
+      const all = Array.isArray(res?.data) ? res.data : [];
+      return all.filter((c: any) => c.active === 1);
+    },
+    staleTime: 5 * 60_000,
+    placeholderData: [],
+  });
 
   const renderPositions = React.useMemo(() => {
     return categories
@@ -127,7 +139,7 @@ export function BannerBasicInfo({
               <TabsTrigger value="vi" className="flex items-center gap-2">
                 <Globe className="h-3.5 w-3.5" /> Tiếng Việt
               </TabsTrigger>
-              {languages.filter(l => l.code !== 'vi').map(lang => (
+              {languages.filter((l: any) => l.code !== 'vi').map((lang: any) => (
                 <TabsTrigger key={lang.code} value={lang.code} className="flex items-center gap-2">
                   <Globe className="h-3.5 w-3.5" /> {lang.name}
                 </TabsTrigger>
@@ -168,7 +180,7 @@ export function BannerBasicInfo({
               />
             </TabsContent>
 
-            {languages.filter(l => l.code !== 'vi').map(lang => (
+            {languages.filter((l: any) => l.code !== 'vi').map((lang: any) => (
               <TabsContent key={lang.code} value={lang.code} className="space-y-6 animate-in fade-in-50 duration-300">
                 <div className="p-4 rounded-xl bg-blue-50/30 border border-blue-100/50 mb-6 flex items-center gap-3">
                   <div className="bg-blue-100 p-2 rounded-lg"><Globe className="h-4 w-4 text-blue-600" /></div>

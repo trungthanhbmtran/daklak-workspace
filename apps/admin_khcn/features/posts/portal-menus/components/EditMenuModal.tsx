@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "@/features/system-admin/organization/api";
 import { postsApi } from "../../api";
-import apiClient from "@/lib/axiosInstance";
+import { portalConfigApi } from "@/features/portal-config/api";
 
 interface EditMenuModalProps {
   isOpen: boolean;
@@ -80,17 +80,13 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
 
   // Tải danh sách trang thiết kế trực quan từ portal-configs
   const { data: portalConfigsForMenu } = useQuery({
-    queryKey: ["portal-configs-for-menu"],
+    queryKey: ["portal-configs"],
     queryFn: async () => {
-      try {
-        const res = await apiClient.get("/portal-configs");
-        return Array.isArray(res?.data) ? res.data : [];
-      } catch (e) {
-        console.error("Failed to fetch configs for menu", e);
-        return [];
-      }
+      const res: any = await portalConfigApi.getAll();
+      return Array.isArray(res?.data) ? res.data : [];
     },
     enabled: isOpen,
+    staleTime: 60_000,
   });
 
   const customPageList = React.useMemo(() => {

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { postsApi } from "@/features/posts/api";
 import { Comment } from "@/features/posts/types";
 import { toast } from "sonner";
@@ -18,43 +19,42 @@ import {
 } from "@/components/ui/alert-dialog";
 
 export function CommentsClient() {
-  const [comments, setComments] = useState<Comment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchComments();
-  }, []);
-
-  const fetchComments = async () => {
-    try {
+  const { data: comments = [], isLoading: loading } = useQuery({
+    queryKey: ['comments', 'PENDING', 1, 50],
+    queryFn: async () => {
       const response = await postsApi.getComments({ status: 'PENDING', page: 1, limit: 50 });
-      setComments(response.data || []);
-    } catch {
-      toast.error("Không thể tải danh sách bình luận");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return response.data || [];
+    },
+    staleTime: 60_000,
+  });
 
-  const handleUpdateStatus = async (id: string, status: string) => {
-    try {
-      await postsApi.updateCommentStatus(id, status);
-      toast.success(`Đã chuyển trạng thái sang ${status}`);
-      setComments(prev => prev.filter(c => c.id !== id));
-    } catch {
-      toast.error("Lỗi khi cập nhật trạng thái");
-    }
-  };
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string, status: string }) => postsApi.updateCommentStatus(id, status),
+    onSuccess: (_, variables) => {
+      toast.success(`Đã chuyển trạng thái sang ${variables.status}`);
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
+    },
+    onError: () => toast.error("Lỗi khi cập nhật trạng thái")
+  });
 
-  const confirmDelete = async (id: string) => {
-    try {
-      await postsApi.deleteComment(id);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => postsApi.deleteComment(id),
+    onSuccess: () => {
       toast.success("Đã xóa bình luận");
-      setComments(prev => prev.filter(c => c.id !== id));
-    } catch {
-      toast.error("Lỗi khi xóa bình luận");
-    }
+      queryClient.invalidateQueries({ queryKey: ['comments'] });
+    },
+    onError: () => toast.error("Lỗi khi xóa bình luận")
+  });
+
+  const handleUpdateStatus = (id: string, status: string) => {
+    updateStatusMutation.mutate({ id, status });
+  };
+
+  const confirmDelete = (id: string) => {
+    deleteMutation.mutate(id);
   };
 
   return (

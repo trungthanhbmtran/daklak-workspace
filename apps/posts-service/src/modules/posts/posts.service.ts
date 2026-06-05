@@ -701,5 +701,35 @@ export class PostsService implements OnModuleInit {
       data: { viewCount: { increment: 1 } },
     });
   }
+
+  /**
+   * Thống kê tổng hợp bài viết — backend tính, client chỉ render.
+   * Thay thế pattern client fetch limit:1000 để đếm.
+   */
+  async getStats(query: { categoryId?: string; authorId?: string } = {}) {
+    const base: any = { isDeleted: false };
+    if (query.categoryId) base.categoryId = query.categoryId;
+    if (query.authorId)   base.authorId   = query.authorId;
+
+    const [total, published, draft, pending, reviewing, rejected, viewsAgg] = await Promise.all([
+      this.prisma.post.count({ where: base }),
+      this.prisma.post.count({ where: { ...base, status: 'PUBLISHED' } }),
+      this.prisma.post.count({ where: { ...base, status: 'DRAFT' } }),
+      this.prisma.post.count({ where: { ...base, status: 'SUBMITTED' } }),
+      this.prisma.post.count({ where: { ...base, status: 'REVIEWING' } }),
+      this.prisma.post.count({ where: { ...base, status: 'REJECTED' } }),
+      this.prisma.post.aggregate({ where: base, _sum: { viewCount: true } }),
+    ]);
+
+    return {
+      total,
+      published,
+      draft,
+      pending,
+      reviewing,
+      rejected,
+      totalViews: viewsAgg._sum.viewCount ?? 0,
+    };
+  }
 }
 

@@ -10,10 +10,6 @@ import { ArrowLeft, Save, Loader2, Eye } from "lucide-react";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Form } from "@/components/ui/form";
-import axios from "axios";
-import imageCompression from "browser-image-compression";
-import apiClient from "@/lib/axiosInstance";
-import { categoryApi } from "@/features/system-admin/categories/api";
 import { toast } from "sonner";
 
 import { bannerSchema } from "../schemas";
@@ -36,7 +32,6 @@ interface BannerFormProps {
 
 export function BannerForm({ onBack, editId }: BannerFormProps) {
   const queryClient = useQueryClient();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const isEdit = !!editId;
 
   const form = useForm<BannerFormValues>({
@@ -59,9 +54,6 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     },
   });
 
-  const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [languages, setLanguages] = useState<any[]>([]);
   const [activeLangTab, setActiveLangTab] = useState<string>("vi");
 
   const [customStyles, setCustomStyles] = useState<any>(DEFAULT_STYLES);
@@ -71,120 +63,8 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
     form.setValue("designType", type, { shouldValidate: true });
   };
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
-  const [isUploadingBg, setIsUploadingBg] = useState(false);
-  const [isUploadingWatermark, setIsUploadingWatermark] = useState(false);
-
-  const uploadCustomFile = async (file: File): Promise<string> => {
-    const compressed = await imageCompression(file, {
-      maxSizeMB: 0.6,
-      maxWidthOrHeight: 1200,
-      fileType: 'image/webp'
-    });
-
-    const res: any = await apiClient.post("/media/request-upload", {
-      originalName: file.name,
-      mimeType: compressed.type,
-      size: compressed.size,
-    });
-
-    const { uploadUrl, fileId } = res.data;
-
-    await axios.put(uploadUrl, compressed, {
-      headers: { "Content-Type": compressed.type }
-    });
-
-    const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId });
-    return confirmRes.data.downloadUrl;
-  };
-
-  const handleBgImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingBg(true);
-    try {
-      const url = await uploadCustomFile(file);
-      updateStyle("bgImage", url);
-      toast.success("Tải hình nền biểu ngữ thành công!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Không thể tải hình nền lên. Vui lòng thử lại.");
-    } finally {
-      setIsUploadingBg(false);
-    }
-  };
-
-  const handleWatermarkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setIsUploadingWatermark(true);
-    try {
-      const url = await uploadCustomFile(file);
-      updateStyle("watermarkUrl", url);
-      toast.success("Tải biểu tượng cổ động thành công!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Không thể tải biểu tượng lên. Vui lòng thử lại.");
-    } finally {
-      setIsUploadingWatermark(false);
-    }
-  };
 
   const watchedPosition = form.watch("position");
-
-  useEffect(() => {
-    const fetchLanguages = async () => {
-      try {
-        const langs = await categoryApi.fetchByGroup('LANGUAGE');
-        setLanguages(langs.filter((c: any) => c.active === 1));
-      } catch (error) {
-        console.error("Error fetching languages:", error);
-      }
-    };
-    fetchLanguages();
-  }, []);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploading(true);
-    try {
-      const compressed = await imageCompression(file, {
-        maxSizeMB: 0.8,
-        maxWidthOrHeight: 1920,
-        fileType: 'image/webp'
-      });
-
-      const res: any = await apiClient.post("/media/request-upload", {
-        originalName: file.name,
-        mimeType: compressed.type,
-        size: compressed.size,
-      });
-
-      const { uploadUrl, fileId } = res.data;
-
-      await axios.put(uploadUrl, compressed, {
-        headers: { "Content-Type": compressed.type }
-      });
-
-      const confirmRes: any = await apiClient.post("/media/confirm-upload", { fileId });
-
-      setPreviewUrl(confirmRes.data.downloadUrl);
-      form.setValue("imageUrl", fileId, { shouldValidate: true, shouldDirty: true });
-
-    } catch (error: any) {
-      console.error("Upload error:", error);
-      toast.error("Không thể tải ảnh lên. Vui lòng thử lại.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const removeImage = () => {
-    setPreviewUrl(null);
-    form.setValue("imageUrl", "", { shouldValidate: true, shouldDirty: true });
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
 
   const watchedName = form.watch("name");
   useEffect(() => {
@@ -351,7 +231,6 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
             <div className="lg:col-span-8 space-y-6">
               <BannerBasicInfo
                 form={form}
-                languages={languages}
                 activeLangTab={activeLangTab}
                 setActiveLangTab={setActiveLangTab}
                 watchedPosition={watchedPosition}
@@ -364,10 +243,6 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
                   customStyles={customStyles}
                   setCustomStyles={setCustomStyles}
                   updateStyle={updateStyle}
-                  isUploadingBg={isUploadingBg}
-                  handleBgImageUpload={handleBgImageUpload}
-                  isUploadingWatermark={isUploadingWatermark}
-                  handleWatermarkUpload={handleWatermarkUpload}
                   watchedName={watchedName}
                   watchedDescription={watchedDescription}
                 />
@@ -378,11 +253,6 @@ export function BannerForm({ onBack, editId }: BannerFormProps) {
               {designType === "image" && (
                 <BannerImageUpload
                   form={form}
-                  fileInputRef={fileInputRef}
-                  isUploading={isUploading}
-                  previewUrl={previewUrl}
-                  handleImageUpload={handleImageUpload}
-                  removeImage={removeImage}
                 />
               )}
 

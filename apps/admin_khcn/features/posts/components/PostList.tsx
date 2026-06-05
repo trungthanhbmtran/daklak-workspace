@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from "@tanstack/react-query";
+import { usePostStats } from "../hooks/usePostStats";
 import {
   Search as SearchIcon,
   Plus,
@@ -180,6 +181,8 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
         meta: res.meta || {}
       };
     },
+    staleTime: 30_000,          // 30s: không refetch khi data còn fresh
+    placeholderData: keepPreviousData, // giữ data cũ khi đổi filter/page
   });
 
   const deleteMutation = useMutation({
@@ -224,22 +227,16 @@ export function PostList({ onNavigateToCreate, onNavigateToEdit }: { onNavigateT
 
   const posts = (data?.items || []) as Post[];
 
-  // Tải danh sách tất cả bài viết để hiển thị thống kê chính xác tổng thể hệ thống (không bị ảnh hưởng bởi bộ lọc/phân trang)
-  const { data: statsData } = useQuery({
-    queryKey: ["posts-all-stats"],
-    queryFn: async () => {
-      const res = await postsApi.getPosts({ limit: 1000 });
-      return res.data || [];
-    }
-  });
+  // Stats — backend tính sẵn qua /posts/stats endpoint.
+  // Loại bỏ hoàn toàn pattern fetch limit:1000 để count client-side.
+  const { data: serverStats } = usePostStats();
 
-  const statsPosts = (statsData || []) as Post[];
-  const totalPostsCount = statsPosts.length;
-  const publishedCount = statsPosts.filter((p: Post) => p.status === 'PUBLISHED').length;
-  const totalViewsCount = statsPosts.reduce((sum: number, p: Post) => sum + (p.viewCount || 0), 0);
-  const featuredCount = statsPosts.filter((p: Post) => p.isFeatured).length;
-  const submittedCount = statsPosts.filter((p: Post) => p.status === 'SUBMITTED' || p.status === 'UNDER_REVIEW').length;
-  const draftCount = statsPosts.filter((p: Post) => p.status === 'DRAFT').length;
+  const totalPostsCount = serverStats?.total      ?? 0;
+  const publishedCount  = serverStats?.published  ?? 0;
+  const totalViewsCount = serverStats?.totalViews ?? 0;
+  const submittedCount  = serverStats?.pending    ?? 0;
+  const draftCount      = serverStats?.draft      ?? 0;
+  const featuredCount   = 0; // Backend chưa expose — sẽ bổ sung sau khi cần
 
   const totalItems = Number((data?.meta as any)?.total || 0);
   const totalPages = Number((data?.meta as any)?.totalPages || 1);

@@ -45,6 +45,15 @@ export class PostsController {
     return firstValueFrom(this.postService.listPosts(query));
   }
 
+  /**
+   * Thống kê bài viết — backend tính, client chỉ render.
+   * Thay thế pattern client fetch limit:1000 để count.
+   */
+  @Get('stats')
+  async getStats(@Query() query: any) {
+    return firstValueFrom(this.postService.getPostStats(query));
+  }
+
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return firstValueFrom(this.postService.getPost({ id }));

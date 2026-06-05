@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import apiClient from "@/lib/axiosInstance";
+import { portalConfigApi } from "../../api";
 import { Row } from "@/modules/page-builder/core/types";
 
 export interface CustomPageMeta {
@@ -29,9 +29,10 @@ export function usePortalBuilder(languages: any[]) {
     const { data: dbConfigs, isLoading, refetch } = useQuery({
         queryKey: ["portal-configs"],
         queryFn: async () => {
-            const res: any = await apiClient.get("/portal-configs");
+            const res: any = await portalConfigApi.getAll();
             return Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
-        }
+        },
+        staleTime: 60_000,
     });
 
     // 2. DERIVED STATE: Tự động tính toán Danh sách trang từ Cache (Không dùng useEffect & useState)
@@ -111,15 +112,8 @@ export function usePortalBuilder(languages: any[]) {
                 });
             }
 
-            // Gọi tuần tự API để lưu cấu hình
-            for (const item of itemsToSave) {
-                const existing = dbConfigs?.find((c: any) => c.code === item.code);
-                if (existing) {
-                    await apiClient.put(`/portal-configs/${existing.id}`, item);
-                } else {
-                    await apiClient.post("/portal-configs", item);
-                }
-            }
+            // Batch upsert — 1 request thay vì N requests tuần tự
+            await portalConfigApi.batchUpsert(itemsToSave);
 
             toast.success(`Xuất bản thành công "${targetPageMeta?.title?.vi || targetPageId}"!`);
             refetch();
@@ -143,15 +137,15 @@ export function usePortalBuilder(languages: any[]) {
             // UI cập nhật ngay lập tức nhờ Cache Mutation
             setPagesList(updatedList);
 
-            await apiClient.post("/admin/portal-configs", {
+            await portalConfigApi.batchUpsert([{
                 code: "custom_page_list",
                 name: "Danh sách trang thiết kế trực quan",
                 description: JSON.stringify(updatedList)
-            });
+            }]);
 
             const layoutConfig = dbConfigs?.find((c: any) => c.code === `custom_page_layout_${pageId}`);
             if (layoutConfig) {
-                await apiClient.delete(`/portal-configs/${layoutConfig.id}`);
+                await portalConfigApi.update(layoutConfig.id, { code: layoutConfig.code, name: layoutConfig.name, description: '' });
             }
 
             toast.success("Đã xóa trang tùy chỉnh thành công!");

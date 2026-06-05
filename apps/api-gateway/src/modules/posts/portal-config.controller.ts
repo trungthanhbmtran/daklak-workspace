@@ -72,4 +72,19 @@ export class PortalConfigController {
     );
     return { success: true, data: res.data };
   }
+
+  /**
+   * Batch upsert — lưu nhiều config trong 1 request.
+   * Client gọi 1 lần thay vì N lần riêng lẻ.
+   */
+  @Post('batch-upsert')
+  @Roles(Role.ADMIN)
+  async batchUpsert(
+    @Body() dto: { items: { code: string; name: string; description?: string }[] },
+  ) {
+    const res: any = await firstValueFrom(
+      this.configService.batchUpsert({ items: dto.items }),
+    );
+    return { success: true, data: res.data };
+  }
 }

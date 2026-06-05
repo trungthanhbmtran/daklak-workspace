@@ -1,46 +1,31 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { FolderOpen, Search, Filter, Plus, Calendar, Clock, ChevronRight, Loader2 } from "lucide-react";
+import {
+  FolderOpen, Search, Filter, Plus,
+  Calendar, Clock, ChevronRight, Loader2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import apiClient from "@/lib/axiosInstance";
-import { toast } from "sonner";
 import { CreateDossierModal } from "./CreateDossierModal";
+import { useDossierList } from "../../hooks/useDocumentFormData";
 
 export function DossierListClient() {
-  const [dossiers, setDossiers] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchDossiers();
-  }, []);
-
-  const fetchDossiers = async () => {
-    try {
-      setLoading(true);
-      const res: any = await apiClient.get('/documents/dossiers/list');
-      if (res?.data) {
-        setDossiers(res.data);
-      }
-    } catch (e) {
-      toast.error("Không thể tải danh sách hồ sơ");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query — loại bỏ useEffect + apiClient trực tiếp
+  const { data: dossiers = [], isLoading, refetch } = useDossierList();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'PROCESSING': return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Đang xử lý</Badge>;
-      case 'WAITING_FOR_DOCS': return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Chờ bổ sung</Badge>;
-      case 'COMPLETED': return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Hoàn thành</Badge>;
-      case 'REJECTED': return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Từ chối</Badge>;
-      default: return <Badge variant="outline">Mới tiếp nhận</Badge>;
+      case "PROCESSING":      return <Badge className="bg-blue-100 text-blue-700 hover:bg-blue-100">Đang xử lý</Badge>;
+      case "WAITING_FOR_DOCS": return <Badge className="bg-amber-100 text-amber-700 hover:bg-amber-100">Chờ bổ sung</Badge>;
+      case "COMPLETED":       return <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">Hoàn thành</Badge>;
+      case "REJECTED":        return <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100">Từ chối</Badge>;
+      default:                return <Badge variant="outline">Mới tiếp nhận</Badge>;
     }
   };
 
@@ -62,20 +47,24 @@ export function DossierListClient() {
           <Input placeholder="Tìm mã hồ sơ, người nộp..." className="pl-10 bg-slate-50 border-none" />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-full"><Filter className="h-4 w-4 mr-2"/> Lọc Trạng thái</Button>
+          <Button variant="outline" size="sm" className="rounded-full">
+            <Filter className="h-4 w-4 mr-2" /> Lọc Trạng thái
+          </Button>
           <Button variant="secondary" size="sm" className="rounded-full bg-slate-100">Đang xử lý</Button>
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-slate-400"/></div>
+      {isLoading ? (
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        </div>
       ) : (
         <div className="grid gap-4">
           {dossiers.length === 0 ? (
-            <p className="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">Chưa có hồ sơ nào được tiếp nhận.</p>
-          ) : dossiers.map((hs) => {
-            // Note: Since completeness logic might need to fetch components per dossier or get it from API response
-            // We use placeholder progress if not provided by backend.
+            <p className="text-center text-slate-500 py-10 bg-slate-50 rounded-xl border border-dashed border-slate-300">
+              Chưa có hồ sơ nào được tiếp nhận.
+            </p>
+          ) : dossiers.map((hs: any) => {
             const completeness = hs.completeness || 0;
             const totalRequired = hs.totalRequired || 1;
             const progress = totalRequired > 0 ? Math.round((completeness / totalRequired) * 100) : 0;
@@ -84,7 +73,6 @@ export function DossierListClient() {
               <Card key={hs.id} className="group border-slate-200 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer">
                 <CardContent className="p-0">
                   <div className="p-5 flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                    
                     {/* Info Left */}
                     <div className="flex gap-4 items-start flex-1">
                       <div className="h-12 w-12 rounded-xl bg-indigo-50 flex items-center justify-center shrink-0">
@@ -98,7 +86,9 @@ export function DossierListClient() {
                         <h3 className="text-lg font-bold text-slate-800 leading-tight mb-2 group-hover:text-indigo-700 transition-colors">
                           {hs.procedureName || "Hồ sơ chưa phân loại"}
                         </h3>
-                        <p className="text-sm text-slate-600">Người nộp: <span className="font-medium text-slate-800">{hs.senderName}</span></p>
+                        <p className="text-sm text-slate-600">
+                          Người nộp: <span className="font-medium text-slate-800">{hs.senderName}</span>
+                        </p>
                       </div>
                     </div>
 
@@ -109,15 +99,19 @@ export function DossierListClient() {
                         <span className="font-semibold text-slate-700">{progress}%</span>
                       </div>
                       <div className="w-full bg-slate-100 rounded-full h-2">
-                        <div 
-                          className={`h-2 rounded-full ${progress === 100 ? 'bg-emerald-500' : progress > 50 ? 'bg-blue-500' : 'bg-amber-500'}`} 
+                        <div
+                          className={`h-2 rounded-full ${progress === 100 ? "bg-emerald-500" : progress > 50 ? "bg-blue-500" : "bg-amber-500"}`}
                           style={{ width: `${progress}%` }}
-                        ></div>
+                        />
                       </div>
-                      
+
                       <div className="flex gap-4 text-xs text-slate-500 mt-2">
-                        <div className="flex items-center gap-1"><Calendar className="h-3 w-3"/> Nộp: {new Date(hs.receiveDate || hs.createdAt).toLocaleDateString('vi-VN')}</div>
-                        <div className="flex items-center gap-1 text-rose-500 font-medium"><Clock className="h-3 w-3"/> Hạn: {new Date(hs.dueDate || hs.createdAt).toLocaleDateString('vi-VN')}</div>
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-3 w-3" /> Nộp: {new Date(hs.receiveDate || hs.createdAt).toLocaleDateString("vi-VN")}
+                        </div>
+                        <div className="flex items-center gap-1 text-rose-500 font-medium">
+                          <Clock className="h-3 w-3" /> Hạn: {new Date(hs.dueDate || hs.createdAt).toLocaleDateString("vi-VN")}
+                        </div>
                       </div>
                     </div>
 
@@ -131,15 +125,16 @@ export function DossierListClient() {
                   </div>
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
       )}
 
-      <CreateDossierModal 
-        open={isModalOpen} 
-        onOpenChange={setIsModalOpen} 
-        onSuccess={fetchDossiers}
+      {/* CreateDossierModal tự invalidate cache sau khi tạo — không cần fetchDossiers callback */}
+      <CreateDossierModal
+        open={isModalOpen}
+        onOpenChange={setIsModalOpen}
+        onSuccess={() => refetch()}
       />
     </div>
   );

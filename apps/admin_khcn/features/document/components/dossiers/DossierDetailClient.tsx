@@ -1,20 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, AlertCircle, Upload, Search, Download, Trash2, Link as LinkIcon, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle2, AlertCircle, Upload, Download, Trash2, Link as LinkIcon, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useDossierComponents, useCabinetFiles, useDossierComponentMutations } from "../../hooks/useDocumentFormData";
 
 export function DossierDetailClient({ dossierId }: { dossierId: string }) {
-  // Mock data
   const dossier = {
     id: dossierId,
     procedureName: "Đăng ký đề tài Khoa học công nghệ cấp Tỉnh",
@@ -23,55 +21,17 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
     submitDate: "2023-10-15",
   };
 
-  const [components, setComponents] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isCabinetModalOpen, setIsCabinetModalOpen] = useState(false);
   const [isAddComponentModalOpen, setIsAddComponentModalOpen] = useState(false);
-  const [cabinetFiles, setCabinetFiles] = useState<any[]>([]);
   const [selectedCompId, setSelectedCompId] = useState<string | null>(null);
-  
+
   const { uploadFile, isUploading } = useFileUpload();
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    fetchDossierAndComponents();
-  }, [dossierId]);
-
-  const fetchDossierAndComponents = async () => {
-    try {
-      setLoading(true);
-      const res: any = await apiClient.get(`/documents/dossiers/${dossierId}/components`);
-      if (res?.data && res.data.length > 0) {
-        setComponents(res.data);
-      } else {
-        // Fallback mock nếu chưa có data trong DB
-        setComponents([
-          { id: "comp-1", name: "Đơn đăng ký đề tài", isRequired: true, status: "VALID", fileUrl: "DonDangKy_Form01.pdf", source: "UPLOAD" },
-          { id: "comp-2", name: "Thuyết minh đề tài nghiên cứu", isRequired: true, status: "PENDING_REVIEW", fileUrl: "ThuyetMinh_V1.pdf", source: "UPLOAD" },
-          { id: "comp-3", name: "Bản sao CCCD", isRequired: true, status: "MISSING", fileUrl: null, source: null },
-          { id: "comp-4", name: "Giấy chứng minh năng lực", isRequired: false, status: "VALID", fileUrl: "ChungChi.pdf", source: "CABINET" }
-        ]);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Lỗi tải thành phần hồ sơ");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchCabinetFiles = async () => {
-    try {
-      // Backend tự đọc userId từ JWT token (HttpOnly Cookie)
-      const res: any = await apiClient.get('/documents/cabinet');
-      if (res?.data) {
-        setCabinetFiles(res.data);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Không thể tải danh sách Tủ văn bản");
-    }
-  };
+  // React Query hooks thay thế useEffect + apiClient trực tiếp
+  const { data: components = [], isLoading: loading } = useDossierComponents(dossierId);
+  const { data: cabinetFiles = [] } = useCabinetFiles(isCabinetModalOpen || isAddComponentModalOpen);
+  const { updateComponent, addComponent } = useDossierComponentMutations(dossierId);
 
   const handleUploadClick = (compId: string) => {
     setSelectedCompId(compId);
@@ -81,24 +41,14 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
     if (!selectedFile || !selectedCompId) return;
-
     try {
       toast.info("Đang xử lý tải lên...");
       const mediaInfo = await uploadFile(selectedFile);
       if (!mediaInfo) throw new Error("Upload thất bại");
-
       const fileUrl = mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`;
-      
-      await apiClient.put(`/documents/dossiers/components/${selectedCompId}`, {
-        status: 'VALID',
-        fileUrl,
-        source: 'UPLOAD'
-      });
-
+      await updateComponent.mutateAsync({ id: selectedCompId, status: 'VALID', fileUrl, source: 'UPLOAD' });
       toast.success("Tải tài liệu thành công!");
-      fetchDossierAndComponents(); // Tải lại danh sách
     } catch (error) {
-      console.error(error);
       toast.error("Tải tài liệu thất bại!");
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -108,45 +58,32 @@ export function DossierDetailClient({ dossierId }: { dossierId: string }) {
 
   const handleCabinetClick = (compId: string) => {
     setSelectedCompId(compId);
-    fetchCabinetFiles();
     setIsCabinetModalOpen(true);
   };
 
   const handleSelectFromCabinet = async (fileUrl: string) => {
     if (!selectedCompId) return;
     try {
-      await apiClient.put(`/documents/dossiers/components/${selectedCompId}`, {
-        status: 'VALID',
-        fileUrl,
-        source: 'CABINET'
-      });
+      await updateComponent.mutateAsync({ id: selectedCompId, status: 'VALID', fileUrl, source: 'CABINET' });
       toast.success("Đã đính kèm tài liệu từ Tủ văn bản!");
       setIsCabinetModalOpen(false);
-      fetchDossierAndComponents();
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("Lỗi khi đính kèm tài liệu");
     }
   };
 
-  const handleAddFromCabinetClick = () => {
-    fetchCabinetFiles();
-    setIsAddComponentModalOpen(true);
-  };
-
   const handleSelectComponentFromCabinet = async (fileUrl: string, fileName: string) => {
     try {
-      await apiClient.post(`/documents/dossiers/${dossierId}/components`, {
-        name: fileName,
-        fileUrl: fileUrl
-      });
+      await addComponent.mutateAsync({ name: fileName, fileUrl });
       toast.success("Đã thêm thành phần hồ sơ mới!");
       setIsAddComponentModalOpen(false);
-      fetchDossierAndComponents();
-    } catch (error) {
-      console.error(error);
+    } catch {
       toast.error("Lỗi khi thêm thành phần hồ sơ");
     }
+  };
+
+  const handleAddFromCabinetClick = () => {
+    setIsAddComponentModalOpen(true);
   };
 
   const getStatusIcon = (status: string) => {

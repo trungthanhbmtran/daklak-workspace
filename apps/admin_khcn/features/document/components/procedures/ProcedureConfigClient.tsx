@@ -1,23 +1,23 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Plus, Settings2, FileText, Trash2, Edit, Save, Loader2, Upload, Paperclip } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
-import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useProcedureList, useProcedureMutations } from "../../hooks/useDocumentFormData";
 
 export function ProcedureConfigClient() {
-  const [procedures, setProcedures] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  // React Query hooks — loại bỏ useEffect + apiClient trực tiếp
+  const { data: procedures = [], isLoading: loading } = useProcedureList();
+  const { createProcedure, deleteProcedure } = useProcedureMutations();
 
   // Modal states
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newProcName, setNewProcName] = useState("");
   const [newProcCode, setNewProcCode] = useState("");
   const [newProcCategory, setNewProcCategory] = useState("Khoa học công nghệ");
@@ -28,24 +28,6 @@ export function ProcedureConfigClient() {
   const { uploadFile, isUploading } = useFileUpload();
   const [uploadingCompId, setUploadingCompId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    fetchProcedures();
-  }, []);
-
-  const fetchProcedures = async () => {
-    try {
-      setLoading(true);
-      const res: any = await apiClient.get('/documents/procedures/list');
-      if (res?.data) {
-        setProcedures(res.data);
-      }
-    } catch (e) {
-      toast.error("Không thể tải danh sách TTHC");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleAddComponent = () => {
     setComponents([...components, { id: Date.now().toString(), name: "", isRequired: true }]);
@@ -101,22 +83,17 @@ export function ProcedureConfigClient() {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      await apiClient.post('/documents/procedures', {
+      await createProcedure.mutateAsync({
         name: newProcName,
         code: newProcCode,
         category: newProcCategory,
-        requiredDocs: validComponents
+        requiredDocs: validComponents,
       });
       toast.success("Đã lưu Mẫu hồ sơ thành công!");
       setIsModalOpen(false);
-      fetchProcedures();
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("Lỗi khi lưu Mẫu hồ sơ");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -130,10 +107,9 @@ export function ProcedureConfigClient() {
   const handleDelete = async (id: string) => {
     if (!confirm("Bạn có chắc chắn muốn xóa mẫu hồ sơ này?")) return;
     try {
-      await apiClient.delete(`/documents/procedures/${id}`);
+      await deleteProcedure.mutateAsync(id);
       toast.success("Xóa thành công");
-      fetchProcedures();
-    } catch (e) {
+    } catch {
       toast.error("Xóa thất bại");
     }
   };
@@ -286,8 +262,8 @@ export function ProcedureConfigClient() {
           </div>
           <DialogFooter className="mt-6">
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
-            <Button onClick={handleSubmit} disabled={isSubmitting} className="bg-indigo-600 hover:bg-indigo-700">
-              {isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Lưu Mẫu hồ sơ
+            <Button onClick={handleSubmit} disabled={createProcedure.isPending} className="bg-indigo-600 hover:bg-indigo-700">
+              {createProcedure.isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />} Lưu Mẫu hồ sơ
             </Button>
           </DialogFooter>
         </DialogContent>

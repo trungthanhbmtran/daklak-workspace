@@ -1,69 +1,32 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { Folder, File, Upload, Search, Filter, MoreVertical, FileText, Image as ImageIcon, Loader2 } from "lucide-react";
+import React, { useRef } from "react";
+import {
+  Folder, File, Upload, Search, Filter, MoreVertical,
+  FileText, Image as ImageIcon, Loader2
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import apiClient from "@/lib/axiosInstance";
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useState } from "react";
+import {
+  useCabinetFiles,
+  useCabinetMutations,
+  useDossierList,
+} from "../../hooks/useDocumentFormData";
 
 export function DocumentCabinetClient() {
-  const [files, setFiles] = useState<any[]>([]);
-  const [dossiers, setDossiers] = useState<any[]>([]);
   const [activeFolder, setActiveFolder] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadFile, isUploading } = useFileUpload();
 
-  useEffect(() => {
-    fetchCabinet();
-    fetchDossiers();
-  }, []);
-
-  const fetchDossiers = async () => {
-    try {
-      const res: any = await apiClient.get('/documents/dossiers/list');
-      if (res?.data && res.data.length > 0) {
-        setDossiers(res.data);
-      } else {
-        setDossiers([
-          { id: "HS-2023-001", procedureName: "Đăng ký KHCN cấp Tỉnh" },
-          { id: "HS-2023-002", procedureName: "Cấp phép hoạt động đo lường" }
-        ]);
-      }
-    } catch (e) {
-      console.log(e);
-      setDossiers([
-        { id: "HS-2023-001", procedureName: "Đăng ký KHCN cấp Tỉnh" },
-        { id: "HS-2023-002", procedureName: "Cấp phép hoạt động đo lường" }
-      ]);
-    }
-  };
-
-  const fetchCabinet = async () => {
-    try {
-      setLoading(true);
-      // Backend tự đọc userId từ JWT token (HttpOnly Cookie)
-      const res: any = await apiClient.get('/documents/cabinet');
-      if (res?.data && res.data.length > 0) {
-        setFiles(res.data);
-      } else {
-        // Fallback mock data nếu DB rỗng để demo UI
-        setFiles([
-          { id: "f1", name: "CCCD_NguyenVanA.pdf", type: "pdf", size: 2400000, createdAt: "2023-10-12", tags: '["Cá nhân", "Định danh"]' },
-          { id: "f2", name: "GiayPhepKinhDoanh_CtyX.pdf", type: "pdf", size: 1100000, createdAt: "2023-10-10", tags: '["Doanh nghiệp"]' },
-        ]);
-      }
-    } catch (error) {
-      console.error(error);
-      toast.error("Không thể tải tủ văn bản");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // React Query hooks — loại bỏ useEffect + apiClient trực tiếp
+  const { data: files = [], isLoading } = useCabinetFiles();
+  const { data: dossiers = [] } = useDossierList();
+  const { addFile } = useCabinetMutations();
 
   const handleUpload = () => {
     fileInputRef.current?.click();
@@ -76,36 +39,33 @@ export function DocumentCabinetClient() {
     try {
       toast.info("Đang xử lý tải lên...");
 
-      // 1. Dùng chung hook uploadFile đã có
+      // 1. Upload file qua shared hook
       const mediaInfo = await uploadFile(selectedFile);
       if (!mediaInfo) throw new Error("Upload thất bại từ hook");
 
-      // 2. Lưu vào cơ sở dữ liệu Cabinet (Document Service)
-      // Backend tự lấy userId từ JWT token, không cần truyền từ client
-      await apiClient.post('/documents/cabinet', {
+      // 2. Lưu vào Cabinet qua mutation — tự invalidate cache
+      await addFile.mutateAsync({
         fileName: selectedFile.name,
         fileUrl: mediaInfo.downloadUrl || mediaInfo.fileUrl || `/admin/media/download/${mediaInfo.id}`,
-        fileType: selectedFile.name.split('.').pop()?.toLowerCase() || 'unknown',
-        fileSize: selectedFile.size
+        fileType: selectedFile.name.split(".").pop()?.toLowerCase() || "unknown",
+        fileSize: selectedFile.size,
       });
 
       toast.success("Đã thêm vào tủ văn bản thành công!");
-      fetchCabinet(); // Cập nhật lại danh sách tủ
     } catch (error) {
       console.error(error);
       toast.error("Thêm vào tủ văn bản thất bại!");
     } finally {
-      // Xoá trắng giá trị input để có thể chọn lại file cũ nếu muốn
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
   const getFileIcon = (type: string) => {
     switch (type) {
-      case 'pdf': return <FileText className="h-8 w-8 text-rose-500" />;
-      case 'excel': return <File className="h-8 w-8 text-emerald-500" />;
-      case 'image': return <ImageIcon className="h-8 w-8 text-blue-500" />;
-      default: return <File className="h-8 w-8 text-slate-500" />;
+      case "pdf":   return <FileText className="h-8 w-8 text-rose-500" />;
+      case "excel": return <File className="h-8 w-8 text-emerald-500" />;
+      case "image": return <ImageIcon className="h-8 w-8 text-blue-500" />;
+      default:      return <File className="h-8 w-8 text-slate-500" />;
     }
   };
 
@@ -116,15 +76,16 @@ export function DocumentCabinetClient() {
           <h2 className="text-3xl font-bold tracking-tight text-slate-900">Tủ văn bản số</h2>
           <p className="text-slate-500 mt-2">Kho lưu trữ tài liệu dùng chung, tái sử dụng cho các thủ tục hành chính.</p>
         </div>
-        <input
-          type="file"
-          ref={fileInputRef}
-          className="hidden"
-          onChange={handleFileChange}
-        />
-        <Button onClick={handleUpload} disabled={isUploading} className="bg-indigo-600 hover:bg-indigo-700 min-w-[150px]">
-          {isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Upload className="mr-2 h-4 w-4" />}
-          {isUploading ? "Đang tải..." : "Tải tài liệu lên"}
+        <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+        <Button
+          onClick={handleUpload}
+          disabled={isUploading || addFile.isPending}
+          className="bg-indigo-600 hover:bg-indigo-700 min-w-[150px]"
+        >
+          {(isUploading || addFile.isPending)
+            ? <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            : <Upload className="mr-2 h-4 w-4" />}
+          {(isUploading || addFile.isPending) ? "Đang tải..." : "Tải tài liệu lên"}
         </Button>
       </div>
 
@@ -134,7 +95,9 @@ export function DocumentCabinetClient() {
           <Input placeholder="Tìm kiếm tài liệu trong tủ..." className="pl-10 bg-slate-50 border-none" />
         </div>
         <div className="flex gap-2 w-full sm:w-auto">
-          <Button variant="outline" size="sm" className="rounded-full"><Filter className="h-4 w-4 mr-2" /> Lọc theo nhãn</Button>
+          <Button variant="outline" size="sm" className="rounded-full">
+            <Filter className="h-4 w-4 mr-2" /> Lọc theo nhãn
+          </Button>
           <Button variant="secondary" size="sm" className="rounded-full bg-slate-100">Cá nhân</Button>
           <Button variant="ghost" size="sm" className="rounded-full">Cơ quan</Button>
         </div>
@@ -145,23 +108,25 @@ export function DocumentCabinetClient() {
         <div className="col-span-1 md:col-span-4 flex gap-4 overflow-x-auto pb-2 scrollbar-thin">
           <Card
             onClick={() => setActiveFolder(null)}
-            className={`min-w-[200px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === null ? 'bg-indigo-50 border-indigo-300' : ''}`}
+            className={`min-w-[200px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === null ? "bg-indigo-50 border-indigo-300" : ""}`}
           >
             <CardContent className="p-4 flex items-center gap-3">
-              <Folder className={`h-8 w-8 ${activeFolder === null ? 'text-indigo-600 fill-indigo-200' : 'text-amber-400 fill-amber-100'}`} />
-              <span className={`font-semibold ${activeFolder === null ? 'text-indigo-900' : 'text-slate-700'}`}>Tất cả tài liệu</span>
+              <Folder className={`h-8 w-8 ${activeFolder === null ? "text-indigo-600 fill-indigo-200" : "text-amber-400 fill-amber-100"}`} />
+              <span className={`font-semibold ${activeFolder === null ? "text-indigo-900" : "text-slate-700"}`}>Tất cả tài liệu</span>
             </CardContent>
           </Card>
-          {dossiers.map((dossier, idx) => (
+          {dossiers.map((dossier: any, idx: number) => (
             <Card
               key={idx}
               onClick={() => setActiveFolder(dossier.id)}
-              className={`min-w-[250px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === dossier.id ? 'bg-indigo-50 border-indigo-300' : ''}`}
+              className={`min-w-[250px] border-slate-200 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer ${activeFolder === dossier.id ? "bg-indigo-50 border-indigo-300" : ""}`}
             >
               <CardContent className="p-4 flex items-center gap-3">
-                <Folder className={`h-8 w-8 ${activeFolder === dossier.id ? 'text-indigo-600 fill-indigo-200' : 'text-amber-400 fill-amber-100'}`} />
+                <Folder className={`h-8 w-8 ${activeFolder === dossier.id ? "text-indigo-600 fill-indigo-200" : "text-amber-400 fill-amber-100"}`} />
                 <div className="flex flex-col">
-                  <span className={`font-semibold text-sm line-clamp-1 ${activeFolder === dossier.id ? 'text-indigo-900' : 'text-slate-700'}`}>{dossier.procedureName}</span>
+                  <span className={`font-semibold text-sm line-clamp-1 ${activeFolder === dossier.id ? "text-indigo-900" : "text-slate-700"}`}>
+                    {dossier.procedureName}
+                  </span>
                   <span className="text-xs text-slate-500">{dossier.id}</span>
                 </div>
               </CardContent>
@@ -170,34 +135,45 @@ export function DocumentCabinetClient() {
         </div>
 
         {/* Files */}
-        {files.filter(f => activeFolder ? f.tags?.includes(activeFolder) : true).map((file) => (
-          <Card key={file.id} className="group border-slate-200 shadow-sm hover:shadow-md transition-all">
-            <CardContent className="p-5 flex flex-col items-center text-center">
-              <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </div>
-              <div className="mb-4 mt-2 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
-                {getFileIcon(file.fileType || file.type || 'pdf')}
-              </div>
-              <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.fileName || file.name}>{file.fileName || file.name}</h4>
-              <p className="text-xs text-slate-500 mt-1">
-                {Math.round((file.fileSize || file.size || 0) / 1024 / 1024 * 10) / 10} MB • {new Date(file.createdAt || file.date).toLocaleDateString('vi-VN')}
-              </p>
-              <div className="flex gap-1 mt-4 justify-center flex-wrap">
-                {(() => {
-                  try {
-                    const parsedTags = typeof file.tags === 'string' ? JSON.parse(file.tags) : file.tags;
-                    return parsedTags?.map((tag: string) => (
-                      <Badge key={tag} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600">{tag}</Badge>
-                    ));
-                  } catch (e) { return null; }
-                })()}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {isLoading ? (
+          <div className="col-span-4 flex items-center justify-center py-16">
+            <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+          </div>
+        ) : (
+          files
+            .filter((f: any) => (activeFolder ? f.tags?.includes(activeFolder) : true))
+            .map((file: any) => (
+              <Card key={file.id} className="group border-slate-200 shadow-sm hover:shadow-md transition-all">
+                <CardContent className="p-5 flex flex-col items-center text-center">
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-700">
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="mb-4 mt-2 p-4 bg-slate-50 rounded-full group-hover:scale-110 transition-transform">
+                    {getFileIcon(file.fileType || file.type || "pdf")}
+                  </div>
+                  <h4 className="font-semibold text-slate-800 text-sm line-clamp-1 w-full truncate" title={file.fileName || file.name}>
+                    {file.fileName || file.name}
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {Math.round((file.fileSize || file.size || 0) / 1024 / 1024 * 10) / 10} MB •{" "}
+                    {new Date(file.createdAt || file.date).toLocaleDateString("vi-VN")}
+                  </p>
+                  <div className="flex gap-1 mt-4 justify-center flex-wrap">
+                    {(() => {
+                      try {
+                        const parsedTags = typeof file.tags === "string" ? JSON.parse(file.tags) : file.tags;
+                        return parsedTags?.map((tag: string) => (
+                          <Badge key={tag} variant="secondary" className="text-[10px] bg-slate-100 text-slate-600">{tag}</Badge>
+                        ));
+                      } catch (e) { return null; }
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+        )}
       </div>
     </div>
   );

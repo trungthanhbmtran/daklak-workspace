@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { MasterPlanProvider } from '@/features/hrm/components/work-plans/master-plans/master-plans-layout/MasterPlanContext';
 import { MasterPlanSidebar } from '@/features/hrm/components/work-plans/master-plans/master-plans-layout/MasterPlanSidebar';
 import { MasterPlanDetail } from '@/features/hrm/components/work-plans/master-plans/master-plans-layout/MasterPlanDetail';
-import { TaskListClient } from '@/features/hrm/components/work-plans/tasks/TaskListClient';
+import { TaskListClient } from '@/features/hrm/components/work-plans/tasks/list/TaskListClient';
 import { KpiCriteriaClient } from '@/features/hrm/components/performance/criteria/KpiCriteriaClient';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Briefcase, Layers, Settings2 } from 'lucide-react';
