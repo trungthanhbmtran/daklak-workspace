@@ -63,7 +63,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   // Backend đã filter + score + sort sẵn — client chỉ render, không tính lại
   const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
-    const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(' ');
+    const fullName = [emp.lastname, emp.firstname].filter(Boolean).join(' ');
     return {
       code: emp.employeeCode,
       name: fullName,
@@ -137,14 +137,19 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
               <div className="flex items-center justify-between">
                 <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Người thực hiện <span className="text-red-500">*</span></label>
                 <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-slate-600 hover:text-indigo-600 select-none">
+                  <label className={cn(
+                    "flex items-center gap-2 cursor-pointer select-none rounded-lg px-3 py-1.5 border transition-colors text-xs font-semibold",
+                    crossDepartment
+                      ? "bg-amber-50 border-amber-300 text-amber-700"
+                      : "border-slate-200 text-slate-500 hover:bg-amber-50 hover:border-amber-300"
+                  )}>
                     <input
                       type="checkbox"
                       checked={crossDepartment}
                       onChange={(e) => setCrossDepartment(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+                      className="w-3.5 h-3.5 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
                     />
-                    Giao liên phòng ban
+                    🤝 Phối hợp liên phòng ban
                   </label>
                   <Button
                     variant="secondary"
@@ -162,6 +167,12 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                   </Button>
                 </div>
               </div>
+              {crossDepartment && (
+                <div className="flex items-start gap-2 px-3 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
+                  <span className="text-base leading-none mt-0.5">💡</span>
+                  <span>Chế độ <strong>Phối hợp liên phòng</strong>: Danh sách sẽ chỉ hiển thị <strong>Lãnh đạo các phòng ban khác</strong>. Chọc “Chủ trì” là đƧu mối chính, các người khác chọn là “Phối hợp”.</span>
+                </div>
+              )}
 
               <Popover open={openPopover} onOpenChange={setOpenPopover}>
                 <PopoverTrigger asChild>

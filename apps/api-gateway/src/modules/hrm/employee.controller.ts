@@ -149,18 +149,32 @@ export class EmployeeController implements OnModuleInit {
     };
   }
 
+  /**
+   * Lấy tất cả unitId cấp dưới (bao gồm cả chính nó) từ một unitId cho trước.
+   * Duyệt theo mã đơn vị (code prefix) hoặc theo parentId.
+   */
+  private getDescendantUnitIds(unitMap: Record<number, any>, unitId: number): Set<number> {
+    const callerUnit = unitMap[unitId];
+    if (!callerUnit) return new Set();
+    const callerCode: string = callerUnit.code || '';
+    return new Set<number>(
+      Object.values(unitMap as Record<number, any>)
+        .filter((u: any) => u.code === callerCode || u.code.startsWith(callerCode + '.'))
+        .map((u: any) => u.id)
+        .filter(Boolean)
+    );
+  }
+
   @Get()
   async list(@Query() query: any, @Req() request: any) {
     const req = { ...query };
     if (req.page) req.page = parseInt(req.page);
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
-    // Nhận thêm params từ client
-    if (req.civilServantRankId)
-      req.civilServantRankId = parseInt(req.civilServantRankId);
+    if (req.civilServantRankId) req.civilServantRankId = parseInt(req.civilServantRankId);
     if (req.partyTitleId) req.partyTitleId = parseInt(req.partyTitleId);
 
-    // Truyền ngữ cảnh người dùng hiện tại (PBAC)
+    // Truyền ngữ cảnh người dùng hiện tại từ access token (PBAC)
     const user = request.user;
     if (user) {
       req.callerEmail = user.email;
@@ -170,12 +184,8 @@ export class EmployeeController implements OnModuleInit {
     }
 
     // Convert boolean flag
-    if (req.assignableOnly === 'true' || req.assignableOnly === true) {
-      req.assignableOnly = true;
-    }
-    if (req.crossDepartment === 'true' || req.crossDepartment === true) {
-      req.crossDepartment = true;
-    }
+    if (req.assignableOnly === 'true' || req.assignableOnly === true) req.assignableOnly = true;
+    if (req.crossDepartment === 'true' || req.crossDepartment === true) req.crossDepartment = true;
 
     const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.ListEmployees(req)),
@@ -187,46 +197,58 @@ export class EmployeeController implements OnModuleInit {
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
 
-      // NATIVE PBAC: Áp dụng lọc dữ liệu tự động theo JWT token để đảm bảo bảo mật
       const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
 
       if (!isAdmin && req.callerUnitId) {
         const callerUnitId = parseInt(req.callerUnitId, 10);
         const callerUnit = dicts.unitMap[callerUnitId];
-        const callerCode: string = callerUnit?.code || '';
 
         if (req.assignableOnly) {
-          // ── CHẾ ĐỘ GIAO VIỆC: theo đúng phân cấp tổ chức ──
+          // ── CHẾ ĐỘ GIAO VIỆC: Chỉ hiển thị nhân sự CẤP DƯỚI trực thuộc ──
+          // Logic:
+          // - Đơn vị là leaf node (phòng ban cơ sở): Trưởng phòng giao cho
+          //   nhân viên cùng phòng (trừ chính mình)
+          // - Đơn vị có cấp dưới (Ban, Sở, Giám đốc): Chỉ thấy Lãnh đạo
+          //   (EXECUTIVE/MANAGER) của các đơn vị con TRỰC TIẾP
+          //   → TUYỆT ĐỐI không thấy nhân viên ngang cấp hoặc cùng đơn vị
+          // - crossDepartment=true (Giao liên phòng - phối hợp):
+          //   Chỉ Lãnh đạo (EXECUTIVE/MANAGER) của CÁC ĐƠN VỊ KHÁC
+          //   (không bao gồm đơn vị của người đang đăng nhập)
           if (req.crossDepartment) {
-            // Giao việc liên phòng ban: thấy nhân sự phòng mình + Lãnh đạo các phòng khác
+            // Chế độ giao liên phòng ban:
+            // Chỉ hiển thị LÃNH ĐẠO của các đơn vị KHÁC (ngoại trừ đơn vị mình)
+            // Mục đích: lãnh đạo chọn phòng ban phối hợp thực hiện công việc khó
             const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
             res.data = res.data.filter((emp: any) => {
+              // Loại bỏ chính người dùng hiện tại
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
               const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-              if (empUnitId === callerUnitId) return true; // Cùng phòng ban
-
+              // Loại bỏ người cùng đơn vị (không phải phối hợp nội bộ)
+              if (empUnitId === callerUnitId) return false;
+              // Chỉ lấy Lãnh đạo của các đơn vị khác
               const jtCategory = dicts.jtMap[emp.jobTitleId]?.category || '';
-              return leaderCategories.has(jtCategory); // Khác phòng thì phải là Lãnh đạo
+              return leaderCategories.has(jtCategory);
             });
           } else if (callerUnit?.isLeaf) {
-            // Đơn vị là leaf (phòng ban lá): Trưởng phòng giao cho nhân viên trong phòng
+            // Leaf: giao trong nội bộ phòng (trừ chính người dùng)
             res.data = res.data.filter((emp: any) => {
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
               const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-              return empUnitId === callerUnitId; // cùng đơn vị, khác người
+              return empUnitId === callerUnitId;
             });
           } else {
-            // Đơn vị có cấp dưới: chỉ thấy LÃNH ĐẠO của các đơn vị con TRỰC TIẾP
-            // (Giám đốc IOC chỉ thấy Trưởng phòng, không thấy nhân viên phòng)
+            // Non-leaf: chỉ lấy LÃNH ĐẠO (Trưởng/Phó đơn vị) của đơn vị con TRỰC TIẾP
             const directChildIds = new Set<number>(
               (callerUnit?.directChildIds || []).map((id: any) => parseInt(id, 10)).filter(Boolean)
             );
             const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
             res.data = res.data.filter((emp: any) => {
+              // Loại bỏ chính người dùng hiện tại
               if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
               const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
+              // Chỉ nhận đơn vị con trực tiếp
               if (!directChildIds.has(empUnitId)) return false;
-              // Chỉ lấy lãnh đạo (Trưởng phòng / Giám đốc) của đơn vị con
+              // Trong đơn vị con đó, chỉ nhận người là Lãnh đạo (Trưởng/Phó phòng)
               const jtCategory = dicts.jtMap[emp.jobTitleId]?.category || '';
               return leaderCategories.has(jtCategory);
             });
@@ -243,7 +265,6 @@ export class EmployeeController implements OnModuleInit {
             const rankLimit = RANK_LIMITS[rankCode] || 100;
             const currentLoad = emp.currentTaskCount || 0;
             const availableCapacity = Math.max(0, rankLimit - currentLoad);
-            // priorityScore: ưu tiên người có nhiều capacity, penalize nếu gần đầy
             const priorityScore = availableCapacity * 10 + (rankLimit * 0.5);
             return {
               ...emp,
@@ -253,7 +274,6 @@ export class EmployeeController implements OnModuleInit {
               isOverloaded: currentLoad >= rankLimit,
             };
           });
-          // Sort: chưa quá tải trước, rồi theo priorityScore giảm dần
           res.data.sort((a: any, b: any) => {
             if (a.isOverloaded !== b.isOverloaded) return a.isOverloaded ? 1 : -1;
             return b.priorityScore - a.priorityScore;
@@ -261,22 +281,13 @@ export class EmployeeController implements OnModuleInit {
 
         } else {
           // ── CHẾ ĐỘ DANH SÁCH CÁN BỘ: tất cả nhân viên trực thuộc (mọi cấp) ──
-          const descendantUnitIds = new Set<number>(
-            Object.values(dicts.unitMap as Record<number, any>)
-              .filter((u: any) =>
-                u.code === callerCode ||
-                u.code.startsWith(callerCode + '.')
-              )
-              .map((u: any) => u.id)
-              .filter(Boolean)
-          );
+          const descendantUnitIds = this.getDescendantUnitIds(dicts.unitMap, callerUnitId);
           res.data = res.data.filter((emp: any) => {
-            const empUnitId = emp.department?.id || emp.departmentId;
+            const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
             return descendantUnitIds.has(empUnitId);
           });
         }
       }
-
     }
     return res;
   }
