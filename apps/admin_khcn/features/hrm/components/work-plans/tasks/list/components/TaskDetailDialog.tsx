@@ -40,12 +40,12 @@ export function TaskDetailDialog({
   onRefetch,
   onSmartAssign,
 }: TaskDetailDialogProps) {
-  const [chatMessage,               setChatMessage]               = useState('');
-  const [isRejectOpen,              setIsRejectOpen]              = useState(false);
-  const [rejectReason,              setRejectReason]              = useState('');
-  const [isCoordinationModalOpen,   setIsCoordinationModalOpen]   = useState(false);
-  const [isAssignCoordinationOpen,  setIsAssignCoordinationOpen]  = useState(false);
-  const [isSubTaskModalOpen,        setIsSubTaskModalOpen]        = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [isRejectOpen, setIsRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [isCoordinationModalOpen, setIsCoordinationModalOpen] = useState(false);
+  const [isAssignCoordinationOpen, setIsAssignCoordinationOpen] = useState(false);
+  const [isSubTaskModalOpen, setIsSubTaskModalOpen] = useState(false);
 
   const {
     taskComments, isLoadingComments, isSendingMessage,
@@ -72,14 +72,14 @@ export function TaskDetailDialog({
 
   if (!task) return null;
 
-  const dueInfo    = getDueDateDisplay(task.dueDate, task.status);
-  const isMyTask   = task.assigneeCode === currentUser?.employeeCode;
-  const isAssigner = task.assignerCode  === currentUser?.employeeCode;
+  const dueInfo = getDueDateDisplay(task.dueDate, task.status);
+  const isMyTask = task.assigneeCode === currentUser?.employeeCode;
+  const isAssigner = task.assignerCode === currentUser?.employeeCode;
 
   return (
     <>
       <Dialog open={!!task} onOpenChange={(open) => !open && onClose()}>
-        <DialogContent className="w-[100vw] sm:w-[98vw] xl:w-[95vw] max-w-[1600px] h-[100dvh] sm:h-[97vh] font-sans p-0 overflow-hidden rounded-none sm:rounded-[2rem] border-0 sm:border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
+        <DialogContent className="w-screen sm:w-[98vw] xl:w-[95vw] max-w-[1600px] h-dvh sm:h-[97vh] font-sans p-0 overflow-hidden rounded-none sm:rounded-[2rem] border-0 sm:border border-slate-200/50 dark:border-slate-700/50 shadow-2xl bg-slate-50 dark:bg-slate-900 flex flex-col">
           <div className="flex flex-col flex-1 min-h-0">
 
             {/* ── TOP HEADER ── */}
@@ -117,7 +117,7 @@ export function TaskDetailDialog({
                       <div className="w-4 h-[2px] bg-slate-300 rounded" /> Mô tả công việc
                     </h3>
                     <div className="relative">
-                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-400 to-indigo-200 rounded-full" />
+                      <div className="absolute left-0 top-0 bottom-0 w-0.5  bg-linear-to-br from-indigo-400 to-indigo-200 rounded-full" />
                       <div className="pl-5 text-slate-600 dark:text-slate-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
                         {task.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
                       </div>
@@ -153,14 +153,14 @@ export function TaskDetailDialog({
                           const isMine = msg.authorCode === currentUser?.username;
                           return (
                             <div key={idx} className={`flex gap-3 ${isMine ? 'flex-row-reverse' : ''}`}>
-                              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/50 dark:to-indigo-800/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 text-xs font-black shrink-0 ring-2 ring-white dark:ring-slate-800">
+                              <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/50 dark:to-indigo-800/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 text-xs font-black shrink-0 ring-2 ring-white dark:ring-slate-800">
                                 {msg.authorName?.charAt(0) || msg.authorCode?.charAt(0) || '🔔'}
                               </div>
                               <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 text-[13.5px] shadow-sm ${msg.isSystemMessage ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-800 border border-amber-100' : isMine ? 'bg-indigo-600 text-white rounded-tr-sm' : 'bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-100 rounded-tl-sm'}`}>
                                 {!msg.isSystemMessage && !isMine && (
                                   <p className="text-[10px] font-black mb-1 opacity-50">{msg.authorName || msg.authorCode}</p>
                                 )}
-                                <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.content}</p>
+                                <p className="leading-relaxed whitespace-pre-wrap wrap-break-word">{msg.content}</p>
                                 <p className={`text-[10px] mt-1.5 text-right ${isMine ? 'text-indigo-200' : 'opacity-30'}`}>
                                   {new Date(msg.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} · {new Date(msg.createdAt).toLocaleDateString('vi-VN')}
                                 </p>
@@ -353,10 +353,10 @@ export function TaskDetailDialog({
                           {delegationChain.map((node: any, idx: number) => {
                             const isCurrent = node.id === task?.id;
                             const sc: Record<string, { dot: string; badge: string; label: string }> = {
-                              DONE:        { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
-                              IN_PROGRESS: { dot: 'bg-amber-500',   badge: 'bg-amber-100 text-amber-700',     label: 'Đang xử lý' },
-                              TODO:        { dot: 'bg-blue-500',     badge: 'bg-blue-100 text-blue-700',       label: 'Chờ' },
-                              OVERDUE:     { dot: 'bg-rose-500',     badge: 'bg-rose-100 text-rose-700',       label: 'Trễ' },
+                              DONE: { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
+                              IN_PROGRESS: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
+                              TODO: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Chờ' },
+                              OVERDUE: { dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700', label: 'Trễ' },
                             };
                             const color = sc[node.status] || { dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', label: node.status };
                             return (

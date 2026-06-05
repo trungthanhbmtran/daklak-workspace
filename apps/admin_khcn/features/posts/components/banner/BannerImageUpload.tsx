@@ -12,7 +12,7 @@ interface BannerImageUploadProps {
 
 export function BannerImageUpload({ form }: BannerImageUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const { isUploading, previewUrl, handleImageUpload, removeImage } = useImageUpload({
     onSuccess: (id) => {
       form.setValue("imageUrl", id, { shouldValidate: true, shouldDirty: true });
@@ -33,22 +33,22 @@ export function BannerImageUpload({ form }: BannerImageUploadProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-5">
-        <input 
-          type="file" 
-          accept="image/*" 
-          className="hidden" 
-          ref={fileInputRef} 
-          onChange={handleImageUpload} 
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          ref={fileInputRef}
+          onChange={handleImageUpload}
         />
         {isUploading ? (
-          <div className="aspect-[21/9] border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20">
+          <div className="aspect-21/9 border-2 border-dashed rounded-xl flex items-center justify-center bg-muted/20">
             <Loader2 className="animate-spin text-blue-500" />
           </div>
         ) : (previewUrl || imageUrlValue) ? (
           <div className="relative group rounded-xl overflow-hidden border shadow-inner">
             <img
               src={previewUrl || (imageUrlValue?.startsWith('http') ? imageUrlValue : `/api/v1/admin/media/download/${imageUrlValue}`)}
-              className="w-full aspect-[21/9] object-cover"
+              className="w-full aspect-21/9 object-cover"
               alt="Banner"
             />
             <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 backdrop-blur-[2px]">
@@ -57,9 +57,9 @@ export function BannerImageUpload({ form }: BannerImageUploadProps) {
             </div>
           </div>
         ) : (
-          <div 
-            onClick={() => fileInputRef.current?.click()} 
-            className="aspect-[21/9] border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="aspect-21/9 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
           >
             <ImagePlus className="h-8 w-8 text-slate-400 mb-2 group-hover:scale-110 transition-transform" />
             <span className="text-[13px] font-semibold text-slate-500">Tải lên ảnh Banner</span>

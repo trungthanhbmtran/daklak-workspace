@@ -49,7 +49,7 @@ export function CoordinationModal({ task, open, onOpenChange, onSuccess }: Coord
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!requestMutation.isPending) { setMessage(''); onOpenChange(o); } }}>
       <DialogContent className="max-w-md rounded-3xl p-0 overflow-hidden border-0 shadow-2xl">
-        <DialogHeader className="px-6 pt-6 pb-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-100 dark:border-amber-800/30">
+        <DialogHeader className="px-6 pt-6 pb-4 bg-linear-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-b border-amber-100 dark:border-amber-800/30">
           <DialogTitle className="flex items-center gap-3 text-lg font-bold text-amber-900 dark:text-amber-100">
             <div className="w-9 h-9 rounded-xl bg-amber-500 flex items-center justify-center shadow-md">
               <Users className="w-5 h-5 text-white" />

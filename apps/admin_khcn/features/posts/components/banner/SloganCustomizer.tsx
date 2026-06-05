@@ -1,7 +1,7 @@
 import * as React from "react";
 import { UseFormReturn } from "react-hook-form";
-import { 
-  Palette, Type, Sparkles, Upload, Loader2, Layers, Info 
+import {
+  Palette, Type, Sparkles, Upload, Loader2, Layers, Info
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { 
-  PRESETS, 
-  getBannerBackgroundStyle, 
-  renderBannerWatermark 
+import {
+  PRESETS,
+  getBannerBackgroundStyle,
+  renderBannerWatermark
 } from "./banner-helpers";
 import { useImageUpload } from "../../hooks/useImageUpload";
 import { toast } from "sonner";
@@ -57,7 +57,7 @@ export function SloganCustomizer({
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6 space-y-6 bg-white dark:bg-slate-900">
-        
+
         {/* Presets Grid */}
         <div className="space-y-2">
           <Label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase">Mẫu giao diện nhanh (Style Presets)</Label>
@@ -69,9 +69,9 @@ export function SloganCustomizer({
                 onClick={() => setCustomStyles(preset)}
                 className="p-2 text-[11px] font-bold rounded-lg border text-center transition-all bg-white hover:bg-slate-50 border-slate-200 active:scale-95 shadow-xs flex flex-col items-center gap-1 cursor-pointer dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-700"
               >
-                <div 
+                <div
                   style={{ background: `linear-gradient(to right, ${preset.bgGradientStart}, ${preset.bgGradientMiddle || preset.bgGradientStart}, ${preset.bgGradientEnd})` }}
-                  className="w-full h-3 rounded border border-black/10" 
+                  className="w-full h-3 rounded border border-black/10"
                 />
                 <span>{preset.name}</span>
               </button>
@@ -100,11 +100,10 @@ export function SloganCustomizer({
                 <button
                   type="button"
                   onClick={() => updateStyle("bgType", "gradient")}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    customStyles.bgType !== "pattern" && customStyles.bgType !== "image"
-                      ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200" 
-                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                  }`}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${customStyles.bgType !== "pattern" && customStyles.bgType !== "image"
+                    ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200"
+                    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                    }`}
                 >
                   Dải màu dốc (Gradient)
                 </button>
@@ -116,11 +115,10 @@ export function SloganCustomizer({
                       updateStyle("bgImage", "pattern-drum");
                     }
                   }}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    customStyles.bgType === "pattern" 
-                      ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200" 
-                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                  }`}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${customStyles.bgType === "pattern"
+                    ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200"
+                    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                    }`}
                 >
                   Hình chìm nghệ thuật
                 </button>
@@ -132,11 +130,10 @@ export function SloganCustomizer({
                       updateStyle("bgImage", "custom");
                     }
                   }}
-                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${
-                    customStyles.bgType === "image" 
-                      ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200" 
-                      : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
-                  }`}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer ${customStyles.bgType === "image"
+                    ? "bg-white text-slate-800 shadow-xs dark:bg-slate-900 dark:text-slate-200"
+                    : "text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200"
+                    }`}
                 >
                   Ảnh nền toàn phần
                 </button>
@@ -155,11 +152,10 @@ export function SloganCustomizer({
                           key={pat.value}
                           type="button"
                           onClick={() => updateStyle("bgImage", pat.value)}
-                          className={`p-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer text-center ${
-                            customStyles.bgImage === pat.value
-                              ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:border-blue-400" 
-                              : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
-                          }`}
+                          className={`p-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer text-center ${customStyles.bgImage === pat.value
+                            ? "bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-900/30 dark:border-blue-400"
+                            : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
+                            }`}
                         >
                           {pat.name}
                         </button>
@@ -200,12 +196,12 @@ export function SloganCustomizer({
                 <div className="space-y-4 pt-2 animate-in fade-in duration-200">
                   <div className="space-y-2">
                     <Label className="text-[11px] font-bold uppercase text-slate-500">Tải ảnh nền tùy chọn</Label>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      id="bg-image-uploader" 
-                      className="hidden" 
-                      onChange={handleBgImageUpload} 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="bg-image-uploader"
+                      className="hidden"
+                      onChange={handleBgImageUpload}
                     />
                     {isUploadingBg ? (
                       <div className="h-24 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center bg-slate-50">
@@ -219,7 +215,7 @@ export function SloganCustomizer({
                         </div>
                       </div>
                     ) : (
-                      <div 
+                      <div
                         onClick={() => document.getElementById("bg-image-uploader")?.click()}
                         className="h-24 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all rounded-xl flex flex-col items-center justify-center cursor-pointer group"
                       >
@@ -236,8 +232,8 @@ export function SloganCustomizer({
                         <Label className="text-[11px] font-bold text-slate-600 uppercase">Độ tối lớp phủ nền (Overlay Dimmer)</Label>
                         <span className="text-xs font-mono font-bold text-blue-600">{Math.round((customStyles.bgOpacity !== undefined ? customStyles.bgOpacity : 0.45) * 100)}%</span>
                       </div>
-                      <input 
-                        type="range" min="0" max="0.90" step="0.05" 
+                      <input
+                        type="range" min="0" max="0.90" step="0.05"
                         value={customStyles.bgOpacity !== undefined ? customStyles.bgOpacity : 0.45}
                         onChange={(e) => updateStyle("bgOpacity", parseFloat(e.target.value))}
                         className="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer accent-blue-600"
@@ -303,11 +299,10 @@ export function SloganCustomizer({
                       key={align}
                       type="button"
                       onClick={() => updateStyle("alignment", align)}
-                      className={`p-1.5 text-xs font-bold rounded capitalize border transition-all cursor-pointer h-9 ${
-                        customStyles.alignment === align 
-                          ? "bg-blue-600 border-blue-600 text-white dark:bg-blue-500 dark:border-blue-500" 
-                          : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
-                      }`}
+                      className={`p-1.5 text-xs font-bold rounded capitalize border transition-all cursor-pointer h-9 ${customStyles.alignment === align
+                        ? "bg-blue-600 border-blue-600 text-white dark:bg-blue-500 dark:border-blue-500"
+                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                        }`}
                     >
                       {align === "left" ? "Trái" : align === "center" ? "Giữa" : "Phải"}
                     </button>
@@ -320,14 +315,14 @@ export function SloganCustomizer({
           {/* WATERMARK & BUTTON TAB */}
           <TabsContent value="watermark" className="space-y-4 pt-1">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               {/* Họa tiết chìm (Watermark) */}
               <div className="space-y-3 md:border-r md:pr-6 border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between p-2 rounded-lg border bg-slate-50/50 dark:bg-slate-800/50">
                   <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer">Hiện họa tiết chìm</Label>
-                  <Switch 
-                    checked={customStyles.showStar !== false} 
-                    onCheckedChange={(checked) => updateStyle("showStar", checked)} 
+                  <Switch
+                    checked={customStyles.showStar !== false}
+                    onCheckedChange={(checked) => updateStyle("showStar", checked)}
                   />
                 </div>
 
@@ -346,11 +341,10 @@ export function SloganCustomizer({
                             key={wType.value}
                             type="button"
                             onClick={() => updateStyle("watermarkType", wType.value)}
-                            className={`p-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer text-left ${
-                              customStyles.watermarkType === wType.value
-                                ? "bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-900/20 dark:border-amber-400" 
-                                : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
-                            }`}
+                            className={`p-2 text-[10px] font-bold rounded-lg border transition-all cursor-pointer text-left ${customStyles.watermarkType === wType.value
+                              ? "bg-amber-50 border-amber-500 text-amber-700 dark:bg-amber-900/20 dark:border-amber-400"
+                              : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-slate-800 dark:border-slate-700"
+                              }`}
                           >
                             {wType.name}
                           </button>
@@ -361,12 +355,12 @@ export function SloganCustomizer({
                     {customStyles.watermarkType === "custom" && (
                       <div className="space-y-2 mt-1">
                         <Label className="text-[11px] font-bold uppercase text-slate-500">Tải biểu tượng chìm riêng</Label>
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          id="watermark-uploader" 
-                          className="hidden" 
-                          onChange={handleWatermarkUpload} 
+                        <input
+                          type="file"
+                          accept="image/*"
+                          id="watermark-uploader"
+                          className="hidden"
+                          onChange={handleWatermarkUpload}
                         />
                         {isUploadingWatermark ? (
                           <div className="h-16 border-2 border-dashed border-slate-200 rounded-xl flex items-center justify-center bg-slate-50">
@@ -378,7 +372,7 @@ export function SloganCustomizer({
                             <Button type="button" variant="secondary" size="xs" onClick={() => document.getElementById("watermark-uploader")?.click()}>Thay đổi</Button>
                           </div>
                         ) : (
-                          <div 
+                          <div
                             onClick={() => document.getElementById("watermark-uploader")?.click()}
                             className="h-16 border-2 border-dashed border-slate-200 hover:border-blue-400 hover:bg-blue-50/30 transition-all rounded-xl flex items-center justify-center gap-1.5 cursor-pointer group"
                           >
@@ -399,11 +393,11 @@ export function SloganCustomizer({
                       </div>
                       <div>
                         <div className="flex justify-between items-center">
-                          <Label className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 font-bold">Độ đậm</Label>
+                          <Label className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 ">Độ đậm</Label>
                           <span className="text-[9px] font-mono font-bold text-slate-400">{Math.round((customStyles.starOpacity || 0.08) * 100)}%</span>
                         </div>
-                        <input 
-                          type="range" min="0" max="0.30" step="0.01" 
+                        <input
+                          type="range" min="0" max="0.30" step="0.01"
                           value={customStyles.starOpacity || 0.08}
                           onChange={(e) => updateStyle("starOpacity", parseFloat(e.target.value))}
                           className="w-full h-1 bg-slate-200 rounded appearance-none cursor-pointer accent-blue-600 mt-2"
@@ -421,9 +415,9 @@ export function SloganCustomizer({
                 </Label>
                 <div>
                   <Label className="text-[11px] font-semibold text-slate-600 dark:text-slate-300">Nhãn chữ trên nút</Label>
-                  <Input 
-                    type="text" 
-                    value={customStyles.buttonText || "Tìm hiểu thêm"} 
+                  <Input
+                    type="text"
+                    value={customStyles.buttonText || "Tìm hiểu thêm"}
                     onChange={(e) => updateStyle("buttonText", e.target.value)}
                     className="text-xs py-1 mt-1 h-9"
                     placeholder="Ví dụ: Tìm hiểu thêm, Xem chi tiết..."
@@ -438,7 +432,7 @@ export function SloganCustomizer({
                     </div>
                   </div>
                   <div>
-                    <Label className="text-[10px] font-semibold text-slate-600 dark:text-slate-300 font-bold">Màu chữ nút</Label>
+                    <Label className="text-[10px] font-semibold text-slate-600 dark:text-slate-300">Màu chữ nút</Label>
                     <div className="flex gap-1.5 mt-1">
                       <Input type="color" value={customStyles.buttonTextColor || "#0f172a"} onChange={(e) => updateStyle("buttonTextColor", e.target.value)} className="w-8 h-8 p-0 border-none rounded cursor-pointer shrink-0" />
                       <Input type="text" value={customStyles.buttonTextColor || "#0f172a"} onChange={(e) => updateStyle("buttonTextColor", e.target.value)} className="font-mono text-[10px] uppercase h-8 px-1" />
@@ -454,16 +448,15 @@ export function SloganCustomizer({
         {/* Live Slogan Preview */}
         <div className="space-y-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Mô phỏng hiển thị thực tế trên Cổng thông tin (Realtime Preview)</Label>
-          <div 
+          <div
             style={getBannerBackgroundStyle(customStyles)}
-            className={`w-full text-white py-6 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${
-              customStyles.alignment === "center" ? "text-center md:items-center" : 
+            className={`w-full text-white py-6 px-6 md:px-8 rounded-xl shadow border-y border-[#ffde59]/25 flex flex-col md:flex-row items-center justify-between gap-4 relative overflow-hidden transition-all duration-300 ${customStyles.alignment === "center" ? "text-center md:items-center" :
               customStyles.alignment === "right" ? "text-right md:flex-row-reverse" : "text-left"
-            }`}
+              }`}
           >
             {/* Intricate Gold Borders */}
-            <div className="absolute inset-x-0 top-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
-            <div className="absolute inset-x-0 bottom-0.5 h-[1px] bg-gradient-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+            <div className="absolute inset-x-0 top-0.5 h-px bg-linear-to-r from-transparent via-[#ffde59]/50 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0.5 h-px bg-linear-to-r from-transparent via-[#ffde59]/50 to-transparent" />
 
             {/* Custom / Traditional Watermark */}
             {customStyles.showStar !== false && (
@@ -473,16 +466,15 @@ export function SloganCustomizer({
             )}
 
             <div className="z-10 flex flex-col gap-1 flex-1">
-              <span 
+              <span
                 style={{ color: customStyles.titleColor || "#fbc02d" }}
-                className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${
-                  customStyles.alignment === "center" ? "justify-center" : 
+                className={`text-xs font-black tracking-widest uppercase flex items-center gap-1.5 drop-shadow-sm ${customStyles.alignment === "center" ? "justify-center" :
                   customStyles.alignment === "right" ? "justify-end" : "justify-start"
-                }`}
+                  }`}
               >
                 <span>⭐</span> {watchedName || "TIÊU ĐỀ KHẨU HIỆU TUYÊN TRUYỀN"}
               </span>
-              <h3 
+              <h3
                 style={{ color: customStyles.textColor || "#fff7ed" }}
                 className="text-sm md:text-base font-black tracking-wide leading-snug uppercase drop-shadow"
               >

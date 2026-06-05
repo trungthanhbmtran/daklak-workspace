@@ -80,7 +80,7 @@ export const TaskTable = memo(function TaskTable({
                   <td className="px-6 py-5">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center">
-                        <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-linear-to-br from-indigo-100 to-indigo-50 text-indigo-600 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
                           {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
                         </div>
                         <span className="font-medium text-sm truncate">
@@ -89,7 +89,7 @@ export const TaskTable = memo(function TaskTable({
                       </div>
                       {task.supervisorCode && (
                         <div className="flex items-center">
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-amber-100 to-amber-50 text-amber-600 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
+                          <div className="w-7 h-7 rounded-full bg-linear-to-br from-amber-100 to-amber-50 text-amber-600 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
                             {(task.supervisorName || task.supervisorCode)?.charAt(0) || '?'}
                           </div>
                           <span className="font-medium text-sm text-amber-700 dark:text-amber-500 truncate">

@@ -102,7 +102,7 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!assignMutation.isPending) { onOpenChange(o); } }}>
       <DialogContent className="max-w-lg rounded-3xl p-0 overflow-hidden border-0 shadow-2xl">
-        <DialogHeader className="px-6 pt-6 pb-4 bg-gradient-to-r from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border-b border-violet-100 dark:border-violet-800/30">
+        <DialogHeader className="px-6 pt-6 pb-4 bg-linear-to-br from-violet-50 to-indigo-50 dark:from-violet-900/20 dark:to-indigo-900/20 border-b border-violet-100 dark:border-violet-800/30">
           <DialogTitle className="flex items-center gap-3 text-lg font-bold text-violet-900 dark:text-violet-100">
             <div className="w-9 h-9 rounded-xl bg-violet-500 flex items-center justify-center shadow-md">
               <Users className="w-5 h-5 text-white" />

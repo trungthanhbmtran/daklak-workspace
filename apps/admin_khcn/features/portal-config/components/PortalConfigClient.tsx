@@ -142,7 +142,7 @@ export function PortalConfigClient() {
             <div className="p-2 bg-indigo-600 rounded-lg text-white shadow-md shadow-indigo-500/20">
               <Settings className="w-5 h-5 animate-spin-slow" />
             </div>
-            <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-indigo-950 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-extrabold tracking-tight bg-linear-to-br from-slate-900 to-indigo-950 bg-clip-text text-transparent">
               Cấu hình chung đơn vị & Portal
             </h1>
           </div>
@@ -234,8 +234,8 @@ export function PortalConfigClient() {
                   type="button"
                   onClick={() => setActiveConfigTab(tab.id)}
                   className={`flex items-center gap-2 px-4 py-2.5 text-xs font-black uppercase tracking-wider border-b-2 transition-all shrink-0 select-none ${isActive
-                      ? "border-indigo-600 text-indigo-600 font-extrabold"
-                      : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-350"
+                    ? "border-indigo-600 text-indigo-600 font-extrabold"
+                    : "border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-350"
                     }`}
                 >
                   <TabIcon className="w-4 h-4" />
@@ -391,7 +391,7 @@ export function PortalConfigClient() {
         {/* RIGHT COLUMN: SHORTCUTS & LIVE PORTAL PREVIEW */}
         <div className="space-y-8">
           {/* STYLE & LAYOUT SHORTCUTS CARD */}
-          <Card className="border border-indigo-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md bg-gradient-to-br from-indigo-50/10 to-slate-50/30">
+          <Card className="border border-indigo-150 shadow-sm rounded-xl overflow-hidden transition-all duration-300 hover:shadow-md bg-linear-to-br from-indigo-50/10 to-slate-50/30">
             <CardHeader className="bg-slate-50/50 border-b py-4 px-5">
               <div className="flex items-center gap-2.5">
                 <Sparkles className="w-4 h-4 text-indigo-600 animate-pulse" />
@@ -485,7 +485,7 @@ export function PortalConfigClient() {
               <div className="bg-amber-50/30 border border-amber-100 rounded-lg p-3 shadow-inner space-y-2">
                 <span className="text-[8px] font-black text-amber-800 uppercase tracking-widest leading-none block border-b pb-1 border-amber-100/50">Mô phỏng Đỉnh Trang (Header)</span>
                 <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 rounded-full bg-white border flex items-center justify-center p-1 shadow-sm flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-white border flex items-center justify-center p-1 shadow-sm shrink-0">
                     {activeLogo ? (
                       <img src={activeLogo} alt="Logo" className="w-full h-full object-contain" />
                     ) : (
@@ -510,7 +510,7 @@ export function PortalConfigClient() {
               <div className="bg-indigo-50/20 border border-indigo-100 rounded-lg p-3 shadow-inner space-y-2">
                 <span className="text-[8px] font-black text-indigo-800 uppercase tracking-widest leading-none block border-b pb-1 border-indigo-150">Lịch Tiếp Công Dân (Widget)</span>
                 <div className="flex items-center gap-2 text-[11px]">
-                  <div className="w-6 h-6 rounded bg-indigo-50 flex items-center justify-center text-indigo-600 flex-shrink-0">
+                  <div className="w-6 h-6 rounded bg-indigo-50 flex items-center justify-center text-indigo-600 shrink-0">
                     <Calendar className="w-3.5 h-3.5" />
                   </div>
                   <div className="flex flex-col min-w-0">

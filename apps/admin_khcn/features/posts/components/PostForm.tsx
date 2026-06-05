@@ -747,7 +747,7 @@ export function PostForm({ onBack, editId }: { onBack: () => void; editId?: stri
         </div>
 
         {showFullImage && (previewUrl || form.getValues("thumbnail")) && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
+          <div className="fixed inset-0 z-100 flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm" onClick={() => setShowFullImage(false)}>
             <div className="relative max-w-5xl w-full" onClick={e => e.stopPropagation()}>
               <img
                 src={previewUrl || (form.getValues("thumbnail") ? `/api/v1/admin/media/download/${form.getValues("thumbnail")}` : '')}

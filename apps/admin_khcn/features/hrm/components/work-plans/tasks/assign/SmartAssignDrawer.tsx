@@ -42,7 +42,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   const topDepartments = recommendations?.topDepartments || [];
 
   const assignMutation = useMutation({
-    mutationFn: (data: { departmentId?: number, employeeCode?: string }) => 
+    mutationFn: (data: { departmentId?: number, employeeCode?: string }) =>
       hrmTasksApi.assignTask(task.id.toString(), {
         assigneeCode: data.employeeCode || '',
         departmentId: data.departmentId,
@@ -176,7 +176,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                       <div key={rec.employeeCode} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold">
+                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold">
                               {rec.employeeName?.charAt(0) || '?'}
                             </div>
                             <div>

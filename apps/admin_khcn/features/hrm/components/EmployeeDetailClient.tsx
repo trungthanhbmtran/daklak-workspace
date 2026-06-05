@@ -124,7 +124,7 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-4">
             <Card className="rounded-2xl border-slate-200/60 shadow-sm overflow-hidden bg-white sticky top-6">
-              <div className="h-28 bg-gradient-to-r from-blue-500 to-indigo-600"></div>
+              <div className="h-28 bg-linear-to-br from-blue-500 to-indigo-600"></div>
               <CardContent className="px-6 pb-6 pt-0 flex flex-col items-center text-center relative">
                 <Avatar className="h-24 w-24 border-4 border-white shadow-sm -mt-12 bg-white">
                   <AvatarImage src={undefined} />

@@ -273,7 +273,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[850px] p-0 overflow-hidden shadow-2xl border-none">
-        <DialogHeader className="p-6 border-b bg-gradient-to-r from-primary/10 via-background to-background">
+        <DialogHeader className="p-6 border-b bg-linear-to-br from-primary/10 via-background to-background">
           <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <UploadCloud className="h-5 w-5" />
@@ -364,7 +364,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
               )}
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+            <Separator className="bg-linear-to-br from-transparent via-border to-transparent" />
 
             {/* Thông tin metadata */}
             <div className={`space-y-6 transition-all duration-700 ${isProcessing ? 'opacity-30 blur-[2px] pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}`}>
@@ -372,7 +372,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                 <h3 className="text-sm font-bold flex items-center gap-2 text-primary whitespace-nowrap">
                   <Building2 className="h-4 w-4" /> 2. THÔNG TIN VĂN BẢN (METADATA)
                 </h3>
-                <div className="h-px w-full bg-gradient-to-r from-border to-transparent" />
+                <div className="h-px w-full bg-linear-to-br from-border to-transparent" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -564,7 +564,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
               </div>
             </div>
 
-            <Separator className="bg-gradient-to-r from-transparent via-border to-transparent" />
+            <Separator className="bg-linear-to-br from-transparent via-border to-transparent" />
 
             {/* Phân loại và Cấu hình */}
             <div className={`space-y-6 transition-all duration-700 delay-100 ${isProcessing ? 'opacity-30 blur-[2px] pointer-events-none translate-y-4' : 'opacity-100 translate-y-0'}`}>
@@ -572,7 +572,7 @@ export function DocumentUploadModal({ isOpen, onClose, isIncoming = true }: { is
                 <h3 className="text-sm font-bold flex items-center gap-2 text-primary whitespace-nowrap">
                   <LinkIcon className="h-4 w-4" /> 3. PHÂN LOẠI & CẤU HÌNH HỆ THỐNG
                 </h3>
-                <div className="h-px w-full bg-gradient-to-r from-border to-transparent" />
+                <div className="h-px w-full bg-linear-to-br from-border to-transparent" />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
