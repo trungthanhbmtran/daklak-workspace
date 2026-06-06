@@ -146,7 +146,7 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
                 </Button>
               )}
 
-              {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
+              {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && canAssign && (
                 <Button
                   size="sm"
                   className="h-7 px-3 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md gap-1"

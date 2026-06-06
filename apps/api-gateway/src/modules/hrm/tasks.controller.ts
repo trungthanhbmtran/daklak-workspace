@@ -160,11 +160,6 @@ export class TasksController implements OnModuleInit {
       }),
     );
 
-    if (response && user) {
-      if (!response.meta) response.meta = {};
-      response.meta.currentUser = sanitizeUserForClient(user);
-    }
-
     return response;
   }
 
