@@ -176,8 +176,12 @@ export class AuthController implements OnModuleInit {
         const empRes: any = await firstValueFrom(
           this.employeeService.GetEmployeeByCode({ code: user.employeeCode })
         );
-        if (empRes?.data?.fullName) {
-          user.fullName = empRes.data.fullName;
+        const emp = empRes?.data;
+        if (emp) {
+          const fetchedFullName = emp.fullName || `${emp.lastname || ''} ${emp.firstname || ''}`.trim();
+          if (fetchedFullName) {
+            user.fullName = fetchedFullName;
+          }
         }
       } catch (err) {
         // Ignore error and use default fullName from token

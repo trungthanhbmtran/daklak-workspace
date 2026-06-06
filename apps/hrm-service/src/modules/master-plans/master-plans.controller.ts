@@ -12,8 +12,8 @@ export class MasterPlansController {
   }
 
   @GrpcMethod('MasterPlanService', 'FindById')
-  findById(data: { id: number }) {
-    return this.masterPlansService.findById(data.id);
+  findById(data: any) {
+    return this.masterPlansService.findById(data);
   }
 
   @GrpcMethod('MasterPlanService', 'Create')

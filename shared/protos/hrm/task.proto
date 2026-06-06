@@ -39,6 +39,7 @@ message AssigneeRecommendation {
   float performanceScore = 4;
   float matchScore = 5;
   int32 departmentId = 6;
+  int32 jobTitleId = 7;
 }
 
 message DepartmentRecommendation {
@@ -266,6 +267,10 @@ message AddCommentRequest {
 
 message GetCommentsRequest {
   int32 taskId = 1;
+  string currentUserCode = 2;
+  bool isAdmin = 3;
+  int32 currentUserDept = 4;
+  repeated int32 callerAncestorUnitIds = 5;
 }
 
 message GetCommentsResponse {
@@ -297,6 +302,10 @@ message DelegationNode {
 
 message GetSubTasksRequest {
   int32 taskId = 1;
+  string currentUserCode = 2;
+  bool isAdmin = 3;
+  int32 currentUserDept = 4;
+  repeated int32 callerAncestorUnitIds = 5;
 }
 
 message GetSubTasksResponse {
@@ -308,6 +317,10 @@ message GetSubTasksResponse {
 // ─── GetTask ───────────────────────────────────────────────────────────────
 message GetTaskRequest {
   int32 id = 1;
+  string currentUserCode = 2;
+  bool isAdmin = 3;
+  int32 currentUserDept = 4;
+  repeated int32 callerAncestorUnitIds = 5;
 }
 
 // ─── BreakdownTask ─────────────────────────────────────────────────────────

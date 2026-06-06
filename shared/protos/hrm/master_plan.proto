@@ -50,6 +50,10 @@ message FindAllMasterPlansRequest {
 
 message FindMasterPlanByIdRequest {
   int32 id = 1;
+  string currentUserCode = 2;
+  bool isAdmin = 3;
+  int32 currentUserDept = 4;
+  repeated int32 callerAncestorUnitIds = 5;
 }
 
 message CreateMasterPlanRequest {

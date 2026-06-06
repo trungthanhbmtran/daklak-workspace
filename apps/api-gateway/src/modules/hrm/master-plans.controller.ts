@@ -116,9 +116,24 @@ export class MasterPlansController implements OnModuleInit {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string) {
+  async findById(@Req() req: any, @Param('id') id: string) {
+    const user = req.user;
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    
+    let callerAncestorUnitIds: number[] = [];
+    if (!isAdmin && user?.unitId) {
+      const unitMap = await this.getUnitMap();
+      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+    }
+
     return firstValueFrom(
-      this.masterPlanService.FindById({ id: parseInt(id, 10) }),
+      this.masterPlanService.FindById({
+        id: parseInt(id, 10),
+        currentUserCode: user?.employeeCode || user?.username,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds,
+      }),
     );
   }
 

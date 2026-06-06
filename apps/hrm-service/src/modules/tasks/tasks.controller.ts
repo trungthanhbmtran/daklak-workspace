@@ -27,8 +27,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'GetTask')
-  getTask(data: { id: number }) {
-    return this.tasksService.getTask(data.id);
+  getTask(data: any) {
+    return this.tasksService.getTask(data);
   }
 
   @GrpcMethod('TaskService', 'BreakdownTask')
@@ -57,13 +57,13 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'GetComments')
-  getComments(data: { taskId: number }) {
-    return this.tasksService.getComments(data.taskId);
+  getComments(data: any) {
+    return this.tasksService.getComments(data);
   }
 
   @GrpcMethod('TaskService', 'GetSubTasks')
-  getSubTasks(data: { taskId: number }) {
-    return this.tasksService.getSubTasks(data.taskId);
+  getSubTasks(data: any) {
+    return this.tasksService.getSubTasks(data);
   }
 
   @GrpcMethod('TaskService', 'RequestCoordination')

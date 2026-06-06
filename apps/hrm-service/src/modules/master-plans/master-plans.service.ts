@@ -91,7 +91,8 @@ export class MasterPlansService {
     };
   }
 
-  async findById(id: number) {
+  async findById(query: any) {
+    const id = typeof query === 'object' ? query.id : query;
     const mp = await this.prisma.masterPlan.findUnique({
       where: { id },
       include: {
@@ -101,6 +102,27 @@ export class MasterPlansService {
       }
     });
     if (!mp) return null;
+
+    if (typeof query === 'object' && !query.isAdmin && query.currentUserCode) {
+      let hasAccess = false;
+      const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
+        ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
+        : (query.currentUserDept ? [query.currentUserDept] : []);
+
+      if (mp.departmentId !== null && ancestorIds.includes(mp.departmentId)) {
+        hasAccess = true;
+      } else {
+        const code = query.currentUserCode;
+        if (mp.tasks.some(t => t.assigneeCode === code || t.assignerCode === code)) {
+          hasAccess = true;
+        }
+      }
+      
+      if (!hasAccess) {
+        throw new Error('Bạn không có quyền xem kế hoạch này.');
+      }
+    }
+
     let completedTasks = 0;
     const tasks = mp.tasks.map((t: any) => {
       if (t.status === 'DONE') completedTasks++;

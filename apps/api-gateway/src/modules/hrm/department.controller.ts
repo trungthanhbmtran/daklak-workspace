@@ -127,11 +127,9 @@ export class DepartmentController implements OnModuleInit {
   }
 
   @Get(':id/employees')
-  @ApiOperation({ summary: 'Nhân viên thuộc đơn vị (hrm-service)' })
-  async listEmployees(@Param('id') id: string, @Query() query: any) {
-    const svc = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
-    const req = { ...query, departmentId: parseInt(id, 10) };
-    return firstValueFrom(svc.ListEmployees(req));
+  @ApiOperation({ summary: 'Nhân viên thuộc đơn vị (hrm-service) - DEPRECATED' })
+  async listEmployees(@Param('id') id: string) {
+    throw new Error('Vui lòng sử dụng API /admin/hrm/employees để lấy danh sách nhân viên nhằm đảm bảo PBAC.');
   }
 
   @Post()

@@ -119,6 +119,10 @@ message EvaluationResponse {
 
 message FindEvaluationsRequest {
   string employeeCode = 1;
+  string currentUserCode = 2;
+  bool isAdmin = 3;
+  bool isFetchingOwn = 4;
+  repeated int32 callerDescendantUnitIds = 5;
 }
 
 message EvaluationsResponse {

@@ -43,6 +43,6 @@ export class KpiEvaluationsController {
 
   @GrpcMethod('KpiService', 'FindEvaluations')
   findEvaluations(data: any) {
-    return this.kpiEvaluationsService.findEvaluations(data.employeeCode);
+    return this.kpiEvaluationsService.findEvaluations(data);
   }
 }

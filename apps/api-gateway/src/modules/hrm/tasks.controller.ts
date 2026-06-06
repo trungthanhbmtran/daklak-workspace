@@ -40,21 +40,48 @@ export class TasksController implements OnModuleInit {
     this.employeeService = this.empClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
   }
 
+  private jtMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
+
   private async getUnitMap(): Promise<Record<number, any>> {
     if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now()) return this.unitMapCache.data;
     try {
       const treeRes: any = await firstValueFrom(this.orgService.GetFullTree({}));
       const unitMap: Record<number, any> = {};
-      const flatten = (nodes: any[]) => {
+      const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
           const nId = parseInt(n.id, 10);
-          if (nId) unitMap[nId] = { id: nId, parentId: n.parentId ? parseInt(n.parentId, 10) : null };
-          if (n.children?.length) flatten(n.children);
+          if (nId) {
+            unitMap[nId] = {
+              id: nId,
+              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
+              isLeaf: n.isLeaf ?? (!(n.children?.length)),
+              directChildIds: (n.children || []).map((c: any) => parseInt(c.id, 10)).filter(Boolean)
+            };
+          }
+          if (n.children && n.children.length > 0) flattenNodes(n.children);
         }
       };
-      flatten(treeRes?.nodes || []);
+      flattenNodes(treeRes?.nodes || []);
       this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
       return unitMap;
+    } catch { return {}; }
+  }
+
+  private async getJobTitlesMap(): Promise<Record<number, any>> {
+    if (this.jtMapCache && this.jtMapCache.expiresAt > Date.now()) return this.jtMapCache.data;
+    try {
+      const jtRes: any = await firstValueFrom(this.orgService.ListJobTitles({}));
+      const jtMap: Record<number, any> = {};
+      (jtRes?.items || []).forEach((jt: any) => {
+        if (jt.id) {
+          jtMap[parseInt(jt.id, 10)] = {
+            id: parseInt(jt.id, 10),
+            category: jt.category || ''
+          };
+        }
+      });
+      this.jtMapCache = { data: jtMap, expiresAt: Date.now() + 5 * 60 * 1000 };
+      return jtMap;
     } catch { return {}; }
   }
 
@@ -177,15 +204,61 @@ export class TasksController implements OnModuleInit {
 
   @Get('recommend-assignees')
   async recommendAssignees(
+    @Req() req: any,
     @Query('rankCode') rankCode: string,
     @Query('strategy') strategy: string,
   ) {
-    return firstValueFrom(
+    const user = req.user;
+    const res: any = await firstValueFrom(
       this.taskService.RecommendAssignees({
         rankCode: rankCode || 'ALL',
         strategy: strategy || 'LOW_PERFORMANCE',
       }),
     );
+
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+
+    if (!isAdmin && user?.unitId) {
+      const [unitMap, jtMap] = await Promise.all([this.getUnitMap(), this.getJobTitlesMap()]);
+      const callerUnitId = parseInt(user.unitId, 10);
+      const callerUnit = unitMap[callerUnitId];
+
+      let topEmployees = Array.isArray(res.data) ? res.data : (res.data?.topEmployees || []);
+      let topDepartments = Array.isArray(res.data) ? [] : (res.data?.topDepartments || []);
+
+      if (callerUnit?.isLeaf) {
+        // Leaf: chỉ nhân sự CÙNG PHÒNG, ngoại trừ bản thân
+        topEmployees = topEmployees.filter((emp: any) => {
+          if (emp.employeeCode === user.employeeCode) return false;
+          return emp.departmentId === callerUnitId;
+        });
+        topDepartments = topDepartments.filter((d: any) => d.departmentId === callerUnitId);
+      } else {
+        // Non-leaf: lấy LÃNH ĐẠO của CÁC PHÒNG CON TRỰC TIẾP
+        const directChildIds = new Set<number>(callerUnit?.directChildIds || []);
+        const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
+        
+        topEmployees = topEmployees.filter((emp: any) => {
+          if (emp.employeeCode === user.employeeCode) return false;
+          if (!directChildIds.has(emp.departmentId)) return false;
+          const jt = jtMap[emp.jobTitleId];
+          return leaderCategories.has(jt?.category);
+        });
+        topDepartments = topDepartments.filter((d: any) => directChildIds.has(d.departmentId));
+      }
+
+      if (Array.isArray(res.data)) {
+        res.data = topEmployees;
+      } else {
+        res.data = {
+          ...res.data,
+          topEmployees,
+          topDepartments
+        };
+      }
+    }
+
+    return res;
   }
 
   @Put(':id/assign')
@@ -265,10 +338,22 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/comments')
-  async getComments(@Param('id') id: string) {
+  async getComments(@Req() req: any, @Param('id') id: string) {
+    const user = req.user;
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    let callerAncestorUnitIds: number[] = [];
+    if (!isAdmin && user?.unitId) {
+      const unitMap = await this.getUnitMap();
+      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+    }
+
     return firstValueFrom(
       this.taskService.GetComments({
         taskId: parseInt(id, 10),
+        currentUserCode: user?.employeeCode || user?.username,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds,
       }),
     );
   }
@@ -345,10 +430,22 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/subtasks')
-  async getSubTasks(@Param('id') id: string) {
+  async getSubTasks(@Req() req: any, @Param('id') id: string) {
+    const user = req.user;
+    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    let callerAncestorUnitIds: number[] = [];
+    if (!isAdmin && user?.unitId) {
+      const unitMap = await this.getUnitMap();
+      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+    }
+
     return firstValueFrom(
       this.taskService.GetSubTasks({
         taskId: parseInt(id, 10),
+        currentUserCode: user?.employeeCode || user?.username,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds,
       }),
     );
   }

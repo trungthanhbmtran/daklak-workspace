@@ -464,6 +464,7 @@ export class TasksService implements OnModuleInit {
         employeeCode: emp.employeeCode,
         employeeName: `${emp.lastname} ${emp.firstname}`.trim(),
         departmentId: emp.departmentId,
+        jobTitleId: emp.jobTitleId,
         currentLoad,
         performanceScore,
         matchScore
@@ -732,12 +733,40 @@ export class TasksService implements OnModuleInit {
     };
   }
 
-  async getTask(id: number) {
+  private checkTaskPermission(task: any, query: any) {
+    if (query.isAdmin) return;
+    if (!query.currentUserCode) return; // Bỏ qua nếu ko có thông tin auth
+
+    const code = query.currentUserCode;
+    if (task.assigneeCode === code || task.assignerCode === code || task.supervisorCode === code) return;
+    
+    // Nếu là task phối hợp
+    try {
+      const coAssignees = task.coAssigneeCodesJson ? JSON.parse(task.coAssigneeCodesJson) : [];
+      if (Array.isArray(coAssignees) && coAssignees.includes(code)) return;
+    } catch {}
+
+    const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
+      ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
+      : (query.currentUserDept ? [query.currentUserDept] : []);
+    
+    if (ancestorIds.includes(task.departmentId)) return;
+
+    throw new Error('Bạn không có quyền truy cập nhiệm vụ này.');
+  }
+
+  async getTask(query: any) {
+    const id = typeof query === 'object' ? query.id : query;
     const task = await this.prisma.task.findUnique({
       where: { id },
       include: { assignee: true, assigner: true, plan: true }
     });
     if (!task) throw new Error('Task not found');
+    
+    if (typeof query === 'object') {
+      this.checkTaskPermission(task, query);
+    }
+
     return {
       ...task,
       dueDate: task.dueDate?.toISOString() || '',
@@ -868,7 +897,16 @@ export class TasksService implements OnModuleInit {
     };
   }
 
-  async getComments(taskId: number) {
+  async getComments(query: any) {
+    const taskId = typeof query === 'object' ? query.taskId : query;
+
+    if (typeof query === 'object') {
+      const task = await this.prisma.task.findUnique({ where: { id: taskId } });
+      if (task) {
+        this.checkTaskPermission(task, query);
+      }
+    }
+
     const comments = await this.prisma.taskComment.findMany({
       where: { taskId },
       orderBy: { createdAt: 'asc' },
@@ -896,7 +934,9 @@ export class TasksService implements OnModuleInit {
    * Dùng BFS để duyệt toàn bộ cây: task cha → task hiện tại → con cấp 1 → con cấp 2 → ...
    * Mỗi node có field `level` để frontend xác định độ sâu và style phù hợp.
    */
-  async getSubTasks(taskId: number) {
+  async getSubTasks(query: any) {
+    const taskId = typeof query === 'object' ? query.taskId : query;
+
     const mapTask = (t: any, level: number, isParent = false, isCurrent = false) => ({
       id: t.id,
       title: t.title,
@@ -934,6 +974,10 @@ export class TasksService implements OnModuleInit {
 
     if (!rootTask) {
       return { success: false, message: 'Task không tồn tại', data: [] };
+    }
+
+    if (typeof query === 'object') {
+      this.checkTaskPermission(rootTask, query);
     }
 
     const result: any[] = [];

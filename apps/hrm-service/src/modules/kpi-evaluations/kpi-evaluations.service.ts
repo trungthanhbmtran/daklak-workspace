@@ -158,18 +158,40 @@ export class KpiEvaluationsService {
     return evalData;
   }
 
-  async findEvaluations(employeeCode?: string) {
+  async findEvaluations(query: any) {
     const where: any = {};
+    const employeeCode = typeof query === 'object' ? query.employeeCode : query;
+
     if (employeeCode) where.employeeCode = employeeCode;
+
+    if (typeof query === 'object' && !query.isAdmin) {
+      if (!query.isFetchingOwn) {
+        // Must belong to descendant unit
+        const descendantIds = Array.isArray(query.callerDescendantUnitIds)
+          ? query.callerDescendantUnitIds.map(Number).filter(Boolean)
+          : [];
+          
+        if (descendantIds.length > 0) {
+          where.employee = { departmentId: { in: descendantIds } };
+        } else {
+          // No descendants -> can't view others
+          where.employeeCode = query.currentUserCode;
+        }
+      }
+    }
 
     const evaluations = await this.prisma.kpiEvaluation.findMany({
       where,
       orderBy: { createdAt: 'desc' },
+      include: { employee: true }
     });
     return {
       success: true,
       message: 'Lấy danh sách đánh giá thành công',
-      data: evaluations,
+      data: evaluations.map(e => ({
+        ...e,
+        employeeName: e.employee ? `${e.employee.lastname} ${e.employee.firstname}`.trim() : e.employeeCode
+      })),
       meta: {
         pagination: {
           total: evaluations.length,

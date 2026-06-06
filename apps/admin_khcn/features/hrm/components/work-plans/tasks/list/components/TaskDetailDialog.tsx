@@ -109,7 +109,7 @@ export function TaskDetailDialog({
 
             {/* ── 3 COLUMNS ── */}
             <div className="flex-1 overflow-y-auto">
-              <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px_280px] gap-0 h-full divide-x divide-slate-200/60 dark:divide-slate-800">
+              <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px_400px] gap-0 h-full divide-x divide-slate-200/60 dark:divide-slate-800">
 
                 {/* ── COL 1: Mô tả + Chat ── */}
                 <div className="flex flex-col gap-0 overflow-y-auto">
@@ -350,7 +350,7 @@ export function TaskDetailDialog({
                       </div>
                     ) : (
                       <div className="py-2">
-                        {(() => {
+                        {(function RenderTree() {
                           // 1. Build Tree
                           const nodeMap: Record<number, any> = {};
                           const rootNodes: any[] = [];
@@ -390,21 +390,26 @@ export function TaskDetailDialog({
                               <div key={node.id} className="relative">
                                 {/* L-shape line for branching */}
                                 {depth > 0 && (
-                                  <div className="absolute top-0 -left-[22px] w-[22px] h-7 border-l-2 border-b-2 border-slate-200 dark:border-slate-700 rounded-bl-xl" />
+                                  <div className="absolute top-0 -left-[28px] w-[28px] h-7 border-l-2 border-b-2 border-slate-200 dark:border-slate-700 rounded-bl-xl" />
                                 )}
                                 {/* Continuous vertical line if not the last child */}
                                 {depth > 0 && !isLast && (
-                                  <div className="absolute top-7 bottom-[-16px] -left-[22px] w-0.5 bg-slate-200 dark:bg-slate-700" />
+                                  <div className="absolute top-7 bottom-[-16px] -left-[28px] w-0.5 bg-slate-200 dark:bg-slate-700" />
                                 )}
 
                                 <div
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
                                     if (!isCurrent) {
-                                      if (onSelectTask) onSelectTask(node);
-                                      else onClose();
+                                      if (onSelectTask) {
+                                        setTimeout(() => onSelectTask(node), 0);
+                                      } else {
+                                        setTimeout(() => onClose(), 0);
+                                      }
                                     }
                                   }}
-                                  className={`relative flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-white dark:hover:bg-slate-800 cursor-pointer'}`}
+                                  className={`relative flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shadow-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800'}`}
                                 >
                                   {/* Dot */}
                                   <div className={`mt-1 w-2.5 h-2.5 rounded-full ${color.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm shrink-0 z-10`} />
@@ -416,21 +421,21 @@ export function TaskDetailDialog({
                                       </span>
                                       <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${color.badge}`}>{color.label}</span>
                                     </div>
-                                    <p className={`font-bold text-[12.5px] line-clamp-2 leading-snug mb-1.5 ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                                    <p className={`font-bold text-[12.5px] line-clamp-3 leading-snug mb-1.5 ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
                                       {node.title}
                                     </p>
                                     <div className="flex items-center gap-1.5">
-                                      <div className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500 shrink-0">
+                                      <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[9px] font-bold text-slate-500 shrink-0">
                                         {(node.assigneeName || node.assigneeCode)?.charAt(0) || '?'}
                                       </div>
-                                      <span className="text-[11px] text-slate-500 truncate">{node.assigneeName || node.assigneeCode || 'Chưa phân công'}</span>
+                                      <span className="text-[11px] font-medium text-slate-500 truncate">{node.assigneeName || node.assigneeCode || 'Chưa phân công'}</span>
                                     </div>
                                   </div>
                                 </div>
 
                                 {/* Children */}
                                 {node.children && node.children.length > 0 && (
-                                  <div className="ml-6 mt-1 relative space-y-1">
+                                  <div className="ml-8 mt-2 relative space-y-2">
                                     {node.children.map((child: any, idx: number) => 
                                       renderNode(child, idx === node.children.length - 1, depth + 1)
                                     )}
