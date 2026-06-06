@@ -45,7 +45,7 @@ export class TasksService implements OnModuleInit {
     }
   }
 
-  private computeAllowedActions(t: any, query: any): string[] {
+  private async computeAllowedActions(t: any, query: any): Promise<string[]> {
     if (!query) return [];
     const isUserAdmin = query.isAdmin === true;
     const currentUserCode = query.currentUserCode;
@@ -72,7 +72,28 @@ export class TasksService implements OnModuleInit {
       allowedActions.push('COORDINATE');
     }
     
-    if (isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator) {
+    let canChat = isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator;
+    
+    if (!canChat && t.id) {
+       const rootId = t.rootTaskId || t.id;
+       const found = await this.prisma.task.findFirst({
+         where: {
+           AND: [
+             { OR: [{ id: rootId }, { rootTaskId: rootId }] },
+             { OR: [
+                 { assigneeCode: currentUserCode },
+                 { assignerCode: currentUserCode },
+                 { supervisorCode: currentUserCode },
+                 { coAssigneeCodesJson: { contains: currentUserCode } }
+               ]
+             }
+           ]
+         }
+       });
+       if (found) canChat = true;
+    }
+
+    if (canChat) {
       allowedActions.push('CHAT');
     }
 
@@ -258,8 +279,8 @@ export class TasksService implements OnModuleInit {
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: tasks.map((t: any) => {
-        const allowedActions = this.computeAllowedActions(t, query);
+      data: await Promise.all(tasks.map(async (t: any) => {
+        const allowedActions = await this.computeAllowedActions(t, query);
 
         return {
           ...t,
@@ -280,7 +301,7 @@ export class TasksService implements OnModuleInit {
           coAssigneeCodes: this.parseCoAssigneeCodes(t.coAssigneeCodesJson),
           allowedActions
         };
-      }),
+      })),
       meta: {
         pagination: {
           total: tasks.length,
@@ -309,10 +330,10 @@ export class TasksService implements OnModuleInit {
 
     const isUserAdmin = query.isAdmin;
     const currentUserCode = query.currentUserCode;
-    const mappedTasks = tasks.map((t: any) => {
+    const mappedTasks = await Promise.all(tasks.map(async (t: any) => {
       // Phân quyền cho từng task
       // Phân quyền cho từng task
-      const allowedActions = this.computeAllowedActions(t, query);
+      const allowedActions = await this.computeAllowedActions(t, query);
 
       return {
         ...t,
@@ -331,7 +352,7 @@ export class TasksService implements OnModuleInit {
         allowedActions,
         children: []
       };
-    });
+    }));
 
     // Build the tree
     const map = new Map<number, any>();
@@ -833,7 +854,7 @@ export class TasksService implements OnModuleInit {
     if (typeof query === 'object') {
       await this.checkTaskPermission(task, query);
 
-      allowedActions = this.computeAllowedActions(task, query);
+      allowedActions = await this.computeAllowedActions(task, query);
     }
 
     return {
@@ -995,7 +1016,7 @@ export class TasksService implements OnModuleInit {
         await this.checkTaskPermission(task, query);
 
         // Check if user is actually allowed to chat/view chat
-        const allowedActions = this.computeAllowedActions(task, query);
+        const allowedActions = await this.computeAllowedActions(task, query);
         if (!allowedActions.includes('CHAT')) {
           return {
             success: true,
@@ -1036,8 +1057,8 @@ export class TasksService implements OnModuleInit {
    */
   async getSubTasks(query: any) {
     const taskId = typeof query === 'object' ? query.taskId : query;
-    const mapTask = (t: any, level: number, isParent = false, isCurrent = false) => {
-      const allowedActions = this.computeAllowedActions(t, query);
+    const mapTask = async (t: any, level: number, isParent = false, isCurrent = false) => {
+      const allowedActions = await this.computeAllowedActions(t, query);
 
       return {
         id: t.id,
@@ -1082,9 +1103,9 @@ export class TasksService implements OnModuleInit {
 
     const result: any[] = [];
     if (rootTask.parent) {
-      result.push(mapTask(rootTask.parent, -1, true, false));
+      result.push(await mapTask(rootTask.parent, -1, true, false));
     }
-    result.push(mapTask(rootTask, 0, false, true));
+    result.push(await mapTask(rootTask, 0, false, true));
 
     // Query 2: lấy tất cả tasks cùng planId (nếu có) hoặc toàn bộ cây theo parentId
     // Build cây trên memory thay vì N+1 queries
@@ -1129,7 +1150,7 @@ export class TasksService implements OnModuleInit {
     }
 
     for (const { task, level } of ordered) {
-      result.push(mapTask(task, level, false, false));
+      result.push(await mapTask(task, level, false, false));
     }
 
     return {
