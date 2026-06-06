@@ -57,7 +57,7 @@ export function EditMenuModal({ isOpen, onClose, menu, languages, menus, onSave 
   const { data: dynamicUnitsRes } = useQuery({
     queryKey: ["organization-units-for-menu"],
     queryFn: async () => {
-      const res = await organizationApi.getTree();
+      const { items: res } = await organizationApi.getTree();
       // Hàm đệ quy làm phẳng danh sách các Đơn vị
       const flattenUnits = (nodes: any[]): any[] => {
         let result: any[] = [];

@@ -62,6 +62,7 @@ function UnitRow({
   onToggleExpand: (id: number) => void;
   onAddChild: (id: number) => void;
 }) {
+  const { meta } = useOrganizationContext();
   const id = `unit-${unit.id}`;
   const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id,
@@ -153,7 +154,7 @@ function UnitRow({
           </div>
         </div>
         <div className="flex items-start pl-2 shrink-0 mt-[2px]">
-          {!isSelected && (
+          {!isSelected && meta.allowedActions?.includes('CREATE_CHILD') && (
             <Button
               size="icon"
               variant="ghost"
@@ -252,7 +253,7 @@ function UnitTree({
 }
 
 export function OrganizationSidebar() {
-  const { state, actions } = useOrganizationContext();
+  const { state, actions, meta } = useOrganizationContext();
   const { flatUnits, mode, selectedId, parentId } = state;
   const activeId = mode === "create_child" ? parentId : selectedId;
 
@@ -317,14 +318,16 @@ export function OrganizationSidebar() {
               Cơ cấu tổ chức
             </h2>
           </div>
-          <Button
-            size="sm"
-            className="h-8 shrink-0 px-3 shadow-sm bg-primary hover:bg-primary/90"
-            onClick={actions.addRoot}
-          >
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
-            <span className="font-medium">Thêm gốc</span>
-          </Button>
+          {meta.allowedActions?.includes('CREATE_ROOT') && (
+            <Button
+              size="sm"
+              className="h-8 shrink-0 px-3 shadow-sm bg-primary hover:bg-primary/90"
+              onClick={actions.addRoot}
+            >
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              <span className="font-medium">Thêm gốc</span>
+            </Button>
+          )}
         </div>
 
         <Search placeholder="Tìm tên hoặc mã đơn vị..." className="w-full" />

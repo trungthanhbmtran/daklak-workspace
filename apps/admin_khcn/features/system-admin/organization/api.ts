@@ -47,12 +47,16 @@ function unwrapData<T>(res: any): T {
 }
 
 export const organizationApi = {
-  getTree: (): Promise<OrganizationUnitNode[]> =>
+  getTree: (): Promise<{ items: OrganizationUnitNode[]; meta: any }> =>
     apiClient
       .get("/organizations/tree")
       .then((r: any) => {
-        const list = Array.isArray(unwrapData<any[]>(r)) ? unwrapData<any[]>(r) : [];
-        return list.map(normalizeUnitNode);
+        const res = r?.data ?? r;
+        const list = Array.isArray(res?.data) ? res.data : [];
+        return {
+          items: list.map(normalizeUnitNode),
+          meta: res?.meta ?? { allowedActions: [] }
+        };
       }),
 
   getOne: (id: number) =>

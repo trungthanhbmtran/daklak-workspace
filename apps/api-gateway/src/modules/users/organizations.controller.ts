@@ -16,6 +16,7 @@ import {
   ConflictException,
   HttpException,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -104,9 +105,44 @@ export class OrganizationsController implements OnModuleInit {
     status: 200,
     description: 'Cây đơn vị (root nodes có children)',
   })
-  async getFullTree() {
+  async getFullTree(@Req() request: any) {
     const res = (await firstValueFrom(this.orgService.GetFullTree({}))) as any;
-    return { success: true, data: res.nodes || [] };
+    let nodes = res.nodes || [];
+
+    const user = request?.user;
+    const isAdmin = user?.permissionsFlatten?.includes('SYSTEM:MANAGE') || user?.permissionsFlatten?.includes('HRM_ORGANIZATION:MANAGE');
+
+    if (!isAdmin && user?.unitId) {
+      // Find the user's unit node and only return that node (and its descendants)
+      const userUnitId = parseInt(user.unitId, 10);
+      
+      const findNode = (treeNodes: any[]): any | null => {
+        for (const node of treeNodes) {
+          if (parseInt(node.id, 10) === userUnitId) return node;
+          if (node.children && node.children.length > 0) {
+            const found = findNode(node.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const userUnitNode = findNode(nodes);
+      nodes = userUnitNode ? [userUnitNode] : [];
+    }
+
+    const allowedActions: string[] = [];
+    if (isAdmin) {
+      allowedActions.push('CREATE_ROOT', 'CREATE_CHILD', 'EDIT', 'DELETE');
+    }
+
+    return { 
+      success: true, 
+      data: nodes,
+      meta: {
+        allowedActions
+      }
+    };
   }
 
   @Get('job-titles')

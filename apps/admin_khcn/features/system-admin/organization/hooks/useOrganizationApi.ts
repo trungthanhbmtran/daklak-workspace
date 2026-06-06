@@ -21,12 +21,15 @@ function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
 export function useOrganizationApi() {
   const queryClient = useQueryClient();
 
-  const { data: tree = [], isLoading: isLoadingTree } = useQuery({
+  const { data: treeResponse, isLoading: isLoadingTree } = useQuery({
     queryKey: organizationQueryKeys.tree(),
     queryFn: () => organizationApi.getTree(),
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
   });
+
+  const tree = treeResponse?.items || [];
+  const allowedActions = treeResponse?.meta?.allowedActions || [];
 
   const flatUnits = flattenTree(Array.isArray(tree) ? tree : []);
 
@@ -108,6 +111,8 @@ export function useOrganizationApi() {
 
   return {
     flatUnits,
+    tree,
+    allowedActions,
     unitTypes,
     domains,
     geoAreas,

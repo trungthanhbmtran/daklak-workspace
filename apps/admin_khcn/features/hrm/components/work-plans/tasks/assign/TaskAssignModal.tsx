@@ -57,9 +57,8 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
   }, [task, isOpen]);
 
   const [crossDepartment, setCrossDepartment] = useState(false);
-  const { data: employeesData } = useHrmEmployeesList({ pageSize: 200, assignableOnly: true, crossDepartment } as any);
+  const { data: employeesData } = useHrmEmployeesList({ pageSize: 200 } as any);
 
-  // Backend đã filter + score + sort sẵn — client chỉ render, không tính lại
   const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
     const fullName = emp.fullName || [emp.firstname, emp.lastname].filter(Boolean).join(' ');
     return {

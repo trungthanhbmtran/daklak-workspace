@@ -44,6 +44,7 @@ export function OrganizationClient() {
       deleteUnit: api.deleteUnit,
     },
     meta: {
+      allowedActions: api.allowedActions,
       unitTypes: api.unitTypes,
       domains: api.domains,
       geoAreas: api.geoAreas,

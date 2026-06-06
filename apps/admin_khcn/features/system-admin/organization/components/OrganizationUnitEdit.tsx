@@ -348,24 +348,28 @@ export function OrganizationUnitEdit() {
 
             {/* FOOTER ACTIONS */}
             <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100 mt-10">
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full sm:w-auto text-destructive hover:bg-red-50 hover:text-destructive font-semibold"
-                disabled={isDeleting}
-                onClick={() => setDeleteOpen(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Gỡ bỏ đơn vị
-              </Button>
+              {meta.allowedActions?.includes('DELETE') ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full sm:w-auto text-destructive hover:bg-red-50 hover:text-destructive font-semibold"
+                  disabled={isDeleting}
+                  onClick={() => setDeleteOpen(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Gỡ bỏ đơn vị
+                </Button>
+              ) : <div />}
 
               <div className="flex w-full sm:w-auto items-center gap-3">
                 <Button type="button" variant="outline" className="flex-1 sm:flex-none h-11 px-6 font-semibold" onClick={() => actions.cancel()}>
                   Hủy
                 </Button>
-                <Button type="submit" className="flex-1 sm:flex-none h-11 px-10 font-bold shadow-md shadow-primary/20" disabled={isUpdating}>
-                  {isUpdating ? "Đang xử lý..." : "Lưu dữ liệu"}
-                </Button>
+                {meta.allowedActions?.includes('EDIT') && (
+                  <Button type="submit" className="flex-1 sm:flex-none h-11 px-10 font-bold shadow-md shadow-primary/20" disabled={isUpdating}>
+                    {isUpdating ? "Đang xử lý..." : "Lưu dữ liệu"}
+                  </Button>
+                )}
               </div>
             </div>
           </form>

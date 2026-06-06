@@ -199,95 +199,44 @@ export class EmployeeController implements OnModuleInit {
 
       const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
 
-      if (!isAdmin && req.callerUnitId) {
+      // Luôn lọc theo thẩm quyền của user trong hệ thống tổ chức (trừ khi là Admin toàn quyền)
+      if (req.callerUnitId && !isAdmin) {
         const callerUnitId = parseInt(req.callerUnitId, 10);
-        const callerUnit = dicts.unitMap[callerUnitId];
-
-        if (req.assignableOnly) {
-          // ── CHẾ ĐỘ GIAO VIỆC: Chỉ hiển thị nhân sự CẤP DƯỚI trực thuộc ──
-          // Logic:
-          // - Đơn vị là leaf node (phòng ban cơ sở): Trưởng phòng giao cho
-          //   nhân viên cùng phòng (trừ chính mình)
-          // - Đơn vị có cấp dưới (Ban, Sở, Giám đốc): Chỉ thấy Lãnh đạo
-          //   (EXECUTIVE/MANAGER) của các đơn vị con TRỰC TIẾP
-          //   → TUYỆT ĐỐI không thấy nhân viên ngang cấp hoặc cùng đơn vị
-          // - crossDepartment=true (Giao liên phòng - phối hợp):
-          //   Chỉ Lãnh đạo (EXECUTIVE/MANAGER) của CÁC ĐƠN VỊ KHÁC
-          //   (không bao gồm đơn vị của người đang đăng nhập)
-          if (req.crossDepartment) {
-            // Chế độ giao liên phòng ban:
-            // Chỉ hiển thị LÃNH ĐẠO của các đơn vị KHÁC (ngoại trừ đơn vị mình)
-            // Mục đích: lãnh đạo chọn phòng ban phối hợp thực hiện công việc khó
-            const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
-            res.data = res.data.filter((emp: any) => {
-              // Loại bỏ chính người dùng hiện tại
-              if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
-              const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-              // Loại bỏ người cùng đơn vị (không phải phối hợp nội bộ)
-              if (empUnitId === callerUnitId) return false;
-              // Chỉ lấy Lãnh đạo của các đơn vị khác
-              const jtCategory = dicts.jtMap[emp.jobTitleId]?.category || '';
-              return leaderCategories.has(jtCategory);
-            });
-          } else if (callerUnit?.isLeaf) {
-            // Leaf: giao trong nội bộ phòng (trừ chính người dùng)
-            res.data = res.data.filter((emp: any) => {
-              if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
-              const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-              return empUnitId === callerUnitId;
-            });
-          } else {
-            // Non-leaf: chỉ lấy LÃNH ĐẠO (Trưởng/Phó đơn vị) của đơn vị con TRỰC TIẾP
-            const directChildIds = new Set<number>(
-              (callerUnit?.directChildIds || []).map((id: any) => parseInt(id, 10)).filter(Boolean)
-            );
-            const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
-            res.data = res.data.filter((emp: any) => {
-              // Loại bỏ chính người dùng hiện tại
-              if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
-              const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-              // Chỉ nhận đơn vị con trực tiếp
-              if (!directChildIds.has(empUnitId)) return false;
-              // Trong đơn vị con đó, chỉ nhận người là Lãnh đạo (Trưởng/Phó phòng)
-              const jtCategory = dicts.jtMap[emp.jobTitleId]?.category || '';
-              return leaderCategories.has(jtCategory);
-            });
-          }
-
-          // ── BACKEND SCORING: tính điểm ưu tiên & sort sẵn cho client render ──
-          const RANK_LIMITS: Record<string, number> = {
-            GRADE_1: 200, GRADE_2: 160, GRADE_3: 120, GRADE_4: 80,
-            SENIOR_SPECIALIST: 150, PRINCIPAL_SPECIALIST: 120, SPECIALIST: 100,
-            OFFICER: 80, VIEN_CHUC: 100, NHAN_VIEN: 80, BAO_VE: 60
-          };
-          res.data = res.data.map((emp: any) => {
-            const rankCode = emp.civilServantRank?.code || emp.civilServantRankCode || '';
-            const rankLimit = RANK_LIMITS[rankCode] || 100;
-            const currentLoad = emp.currentTaskCount || 0;
-            const availableCapacity = Math.max(0, rankLimit - currentLoad);
-            const priorityScore = availableCapacity * 10 + (rankLimit * 0.5);
-            return {
-              ...emp,
-              rankLimit,
-              availableCapacity,
-              priorityScore: Math.round(priorityScore),
-              isOverloaded: currentLoad >= rankLimit,
-            };
-          });
-          res.data.sort((a: any, b: any) => {
-            if (a.isOverloaded !== b.isOverloaded) return a.isOverloaded ? 1 : -1;
-            return b.priorityScore - a.priorityScore;
-          });
-
-        } else {
-          // ── CHẾ ĐỘ DANH SÁCH CÁN BỘ: tất cả nhân viên trực thuộc (mọi cấp) ──
-          const descendantUnitIds = this.getDescendantUnitIds(dicts.unitMap, callerUnitId);
-          res.data = res.data.filter((emp: any) => {
-            const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
-            return descendantUnitIds.has(empUnitId);
-          });
-        }
+        const descendantUnitIds = this.getDescendantUnitIds(dicts.unitMap, callerUnitId);
+        
+        res.data = res.data.filter((emp: any) => {
+          // Ngoại trừ chính mình
+          if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
+          
+          const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
+          return descendantUnitIds.has(empUnitId);
+        });
       }
+
+      // ── TÍNH TOÁN ĐIỀU PHỐI (WORKLOAD & SCORING) ──
+      const RANK_LIMITS: Record<string, number> = {
+        GRADE_1: 200, GRADE_2: 160, GRADE_3: 120, GRADE_4: 80,
+        SENIOR_SPECIALIST: 150, PRINCIPAL_SPECIALIST: 120, SPECIALIST: 100,
+        OFFICER: 80, VIEN_CHUC: 100, NHAN_VIEN: 80, BAO_VE: 60
+      };
+      res.data = res.data.map((emp: any) => {
+        const rankCode = emp.civilServantRank?.code || emp.civilServantRankCode || '';
+        const rankLimit = RANK_LIMITS[rankCode] || 100;
+        const currentLoad = emp.currentTaskCount || 0;
+        const availableCapacity = Math.max(0, rankLimit - currentLoad);
+        const priorityScore = availableCapacity * 10 + (rankLimit * 0.5);
+        return {
+          ...emp,
+          rankLimit,
+          availableCapacity,
+          priorityScore: Math.round(priorityScore),
+          isOverloaded: currentLoad >= rankLimit,
+        };
+      });
+      res.data.sort((a: any, b: any) => {
+        if (a.isOverloaded !== b.isOverloaded) return a.isOverloaded ? 1 : -1;
+        return b.priorityScore - a.priorityScore;
+      });
     }
 
     if (res) {

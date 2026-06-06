@@ -25,6 +25,7 @@ export interface OrganizationActions {
 }
 
 export interface OrganizationMeta {
+  allowedActions: string[];
   unitTypes: { id: number; code?: string; name: string }[];
   domains: { id: number; code?: string; name: string }[];
   geoAreas: { id: number; name: string }[];
