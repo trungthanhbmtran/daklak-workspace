@@ -72,7 +72,7 @@ export function useRoleLogic() {
     saveMutation.mutate(payload);
   };
   const handleDelete = () => {
-    if (selectedRole && confirm(`Xóa vai trò: ${selectedRole.name}?`)) {
+    if (selectedRole) {
       deleteMutation.mutate(selectedRole.id);
     }
   };

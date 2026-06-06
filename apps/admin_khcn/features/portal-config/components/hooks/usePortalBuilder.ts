@@ -129,7 +129,6 @@ export function usePortalBuilder(languages: any[]) {
             toast.error("Không thể xóa các trang mặc định của hệ thống.");
             return;
         }
-        if (!confirm("Bạn có chắc chắn muốn xóa trang này?")) return;
 
         try {
             const updatedList = pagesList.filter((p) => p.id !== pageId);

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,16 +7,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { hrmKpiCriteriaApi } from "@/features/hrm/api";
 import { toast } from "sonner";
 import { Plus, Settings2, Edit, Trash2, Library, Info, Activity, Calculator } from "lucide-react";
+import { useKpiCriteriaList, useCreateKpiCriterion, useUpdateKpiCriterion, useDeleteKpiCriterion } from "@/features/hrm/hooks/useKpis";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 export function KpiCriteriaClient() {
-  const [criteriaList, setCriteriaList] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { data: criteriaList = [], isLoading } = useKpiCriteriaList();
+  const createMutation = useCreateKpiCriterion();
+  const updateMutation = useUpdateKpiCriterion();
+  const deleteMutation = useDeleteKpiCriterion();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
-  const [allowedActions, setAllowedActions] = useState<string[]>([]);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -31,22 +37,7 @@ export function KpiCriteriaClient() {
     penaltyPerDay: 0,
   });
 
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
-      const res = await hrmKpiCriteriaApi.list();
-      setCriteriaList(res.data || []);
-      setAllowedActions(res.meta?.allowedActions || []);
-    } catch (err) {
-      toast.error("Không thể tải danh sách tiêu chí");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
+  // react-query automatically fetches data on mount
 
   const openModal = (item?: any) => {
     if (item) {
@@ -89,28 +80,33 @@ export function KpiCriteriaClient() {
 
     try {
       if (editingId) {
-        await hrmKpiCriteriaApi.update(editingId, formData);
+        await updateMutation.mutateAsync({ id: editingId, payload: formData });
         toast.success("Cập nhật tiêu chí thành công");
       } else {
-        await hrmKpiCriteriaApi.create(formData);
+        await createMutation.mutateAsync(formData);
         toast.success("Tạo tiêu chí mới thành công");
       }
       setIsModalOpen(false);
-      fetchData();
     } catch (err) {
       toast.error("Đã xảy ra lỗi khi lưu");
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa tiêu chí này?")) {
-      try {
-        await hrmKpiCriteriaApi.deleteOne(id);
-        toast.success("Đã xóa tiêu chí");
-        fetchData();
-      } catch (err) {
-        toast.error("Đã xảy ra lỗi khi xóa");
-      }
+  const handleDelete = (id: number) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteMutation.mutateAsync(itemToDelete);
+      toast.success("Đã xóa tiêu chí");
+    } catch (err) {
+      toast.error("Đã xảy ra lỗi khi xóa");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -126,34 +122,28 @@ export function KpiCriteriaClient() {
             Quản lý tập trung các bộ tiêu chí đánh giá KPI để áp dụng thống nhất cho toàn bộ hệ thống.
           </p>
         </div>
-        {allowedActions.includes('CREATE') && (
-          <Button onClick={() => openModal()} className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/20 px-6">
-            <Plus className="w-5 h-5 mr-2" /> Tạo Tiêu chí mới
-          </Button>
-        )}
+        <Button onClick={() => openModal()} className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/20 px-6">
+          <Plus className="w-5 h-5 mr-2" /> Tạo Tiêu chí mới
+        </Button>
       </div>
 
       {isLoading ? (
         <div className="flex justify-center p-12"><Activity className="animate-spin text-indigo-500" /></div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {criteriaList.map((item) => (
+          {criteriaList.map((item: any) => (
             <Card key={item.id} className="border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl overflow-hidden group hover:shadow-xl transition-all duration-300">
               <div className="h-1.5 w-full bg-gradient-to-r from-indigo-500 to-purple-500"></div>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-bold text-slate-800 line-clamp-2" title={item.name}>{item.name}</h3>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {allowedActions.includes('EDIT') && (
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 bg-indigo-50/0 hover:bg-indigo-50 rounded-lg" onClick={() => openModal(item)}>
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {allowedActions.includes('DELETE') && (
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 bg-rose-50/0 hover:bg-rose-50 rounded-lg" onClick={() => handleDelete(item.id)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 bg-indigo-50/0 hover:bg-indigo-50 rounded-lg" onClick={() => openModal(item)}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 bg-rose-50/0 hover:bg-rose-50 rounded-lg" onClick={() => handleDelete(item.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
 
@@ -318,6 +308,15 @@ export function KpiCriteriaClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa tiêu chí KPI"
+        description="Bạn có chắc chắn muốn xóa tiêu chí đánh giá này? Hành động này không thể hoàn tác."
+        isDeleting={deleteMutation.isPending}
+      />
     </div>
   );
 }

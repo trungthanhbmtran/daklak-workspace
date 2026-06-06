@@ -1,9 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import { SidebarHeader } from "./SidebarHeader";
 import { PageItem } from "./PageItem";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 interface PagesSidebarProps {
   pagesList: any[];
@@ -24,6 +25,24 @@ export default function PagesSidebar({
   onOpenAddPage,
   onOpenEditPage,
 }: PagesSidebarProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (id: string) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await handleDeletePage(itemToDelete);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
   return (
     <aside
       className={cn(
@@ -46,10 +65,18 @@ export default function PagesSidebar({
               setShowPagesSidebar(false); // Đóng sidebar trên responsive mobile
             }}
             onEdit={onOpenEditPage}
-            onDelete={handleDeletePage}
+            onDelete={handleDeleteClick}
           />
         ))}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa trang"
+        description="Bạn có chắc chắn muốn xóa trang này? Hành động này không thể hoàn tác."
+      />
     </aside>
   );
 }

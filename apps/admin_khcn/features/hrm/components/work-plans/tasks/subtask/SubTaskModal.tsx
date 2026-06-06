@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { PlusCircle, Calendar, Flag } from 'lucide-react';
 import { hrmTasksApi } from '@/features/hrm/api';
-import { useUser } from '@/hooks/useUser';
 
 interface SubTaskModalProps {
   isOpen: boolean;
@@ -19,7 +18,6 @@ interface SubTaskModalProps {
 }
 
 export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskModalProps) {
-  const { user } = useUser();
 
   const [form, setForm] = useState({
     title: '',
@@ -45,7 +43,6 @@ export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskMod
           description: form.description.trim() || undefined,
           priority: form.priority,
           dueDate: form.dueDate || undefined,
-          assignerCode: user?.employeeCode || user?.username || '',
           assigneeCode: 'UNASSIGNED',
           planId: planId || parentTask?.planId,
           status: 'TEMPLATE',
@@ -57,7 +54,6 @@ export function SubTaskModal({ isOpen, onClose, parentTask, planId }: SubTaskMod
           description: form.description.trim() || undefined,
           priority: form.priority,
           dueDate: form.dueDate || undefined,
-          assignerCode: user?.employeeCode || user?.username || '',
           planId: planId || parentTask?.planId,
         });
       }

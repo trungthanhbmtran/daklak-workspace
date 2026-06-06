@@ -967,6 +967,7 @@ export class TasksService implements OnModuleInit {
         authorAvatar: c.author?.avatar || '',
         content: c.content,
         isSystemMessage: c.isSystemMessage,
+        isMine: typeof query === 'object' && query.currentUserCode ? c.authorCode === query.currentUserCode : false,
         createdAt: c.createdAt.toISOString()
       }))
     };

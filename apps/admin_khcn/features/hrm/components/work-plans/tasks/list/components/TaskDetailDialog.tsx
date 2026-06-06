@@ -17,7 +17,6 @@ import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } 
 
 interface TaskDetailDialogProps {
   task: any | null;
-  currentUser: any;
   priorities: any[];
   onClose: () => void;
   onRefetch: () => void;
@@ -35,7 +34,6 @@ interface TaskDetailDialogProps {
  */
 export function TaskDetailDialog({
   task,
-  currentUser,
   priorities,
   onClose,
   onRefetch,
@@ -158,7 +156,7 @@ export function TaskDetailDialog({
                         </div>
                       ) : (
                         taskComments.map((msg: any, idx: number) => {
-                          const isMine = msg.authorCode === currentUser?.username;
+                          const isMine = msg.isMine;
                           return (
                             <div key={idx} className={`flex gap-3 ${isMine ? 'flex-row-reverse' : ''}`}>
                               <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-100 to-indigo-50 dark:from-indigo-900/50 dark:to-indigo-800/30 flex items-center justify-center text-indigo-700 dark:text-indigo-300 text-xs font-black shrink-0 ring-2 ring-white dark:ring-slate-800">

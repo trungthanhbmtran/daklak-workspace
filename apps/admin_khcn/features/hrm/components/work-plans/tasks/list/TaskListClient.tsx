@@ -64,7 +64,6 @@ export const TaskListClient = () => {
   });
 
   const tasks = (data?.data || []) as any[];
-  const currentUser = (data as any)?.meta?.currentUser;
 
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
   const priorities = prioritiesRes?.data || [];
@@ -198,7 +197,6 @@ export const TaskListClient = () => {
         <Suspense fallback={null}>
           <TaskDetailDialog
             task={selectedTask}
-            currentUser={currentUser}
             priorities={priorities}
             onClose={handleCloseDetail}
             onRefetch={refetch}

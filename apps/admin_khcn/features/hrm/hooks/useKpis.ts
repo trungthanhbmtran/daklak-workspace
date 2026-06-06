@@ -1,8 +1,45 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { hrmKpiPlansApi, hrmKpiEvaluationsApi } from "../api";
+import { hrmKpiPlansApi, hrmKpiEvaluationsApi, hrmKpiCriteriaApi } from "../api";
 import { hrmKeys } from "../keys";
+
+export function useKpiCriteriaList(params?: any) {
+  return useQuery({
+    queryKey: hrmKeys.kpis(),
+    queryFn: () => hrmKpiCriteriaApi.list(params).then(res => res.data || []),
+  });
+}
+
+export function useCreateKpiCriterion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: any) => hrmKpiCriteriaApi.create(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: hrmKeys.kpis() });
+    },
+  });
+}
+
+export function useUpdateKpiCriterion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: any }) => hrmKpiCriteriaApi.update(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: hrmKeys.kpis() });
+    },
+  });
+}
+
+export function useDeleteKpiCriterion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => hrmKpiCriteriaApi.deleteOne(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: hrmKeys.kpis() });
+    },
+  });
+}
 
 export function useCreateKpiPlan() {
   const queryClient = useQueryClient();

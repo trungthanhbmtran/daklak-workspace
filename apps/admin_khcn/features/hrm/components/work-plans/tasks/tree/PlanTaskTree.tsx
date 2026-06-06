@@ -27,8 +27,7 @@ const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls:
 interface TaskRowProps {
   task: any;
   depth: number;
-  currentUserCode: string;
-  currentUserUnit?: number;
+
   planId: number;
   onRefresh: () => void;
   isLastChild?: boolean;
@@ -36,7 +35,7 @@ interface TaskRowProps {
 
 import { CornerDownRight } from 'lucide-react';
 
-function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefresh, isLastChild }: TaskRowProps) {
+function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) {
   const [expanded, setExpanded] = useState(depth < 2); // Mở 2 cấp đầu mặc định
   const [subTaskModalOpen, setSubTaskModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
@@ -182,8 +181,7 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
               key={child.id}
               task={child}
               depth={depth + 1}
-              currentUserCode={currentUserCode}
-              currentUserUnit={currentUserUnit}
+
               planId={planId}
               onRefresh={onRefresh}
               isLastChild={index === task.children.length - 1}
@@ -219,10 +217,7 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
 interface PlanTaskTreeProps {
   tasks: any[];        // Flat list từ API
-  currentUserCode: string;
   planId: number;
-  planCreatorUnit?: number;  // departmentId của kế hoạch
-  currentUserUnit?: number;  // unitId của user hiện tại
   canAddRoot?: boolean;      // Quyền thêm đầu việc lớn
   onAddRootTask?: () => void;
   onRefresh: () => void;
@@ -231,10 +226,7 @@ interface PlanTaskTreeProps {
 
 export function PlanTaskTree({
   tasks,
-  currentUserCode,
   planId,
-  planCreatorUnit,
-  currentUserUnit,
   canAddRoot = false,
   onAddRootTask,
   onRefresh,
@@ -283,7 +275,6 @@ export function PlanTaskTree({
               key={task.id}
               task={task}
               depth={0}
-              currentUserCode={currentUserCode}
               planId={planId}
               onRefresh={onRefresh}
               isLastChild={index === tree.length - 1}

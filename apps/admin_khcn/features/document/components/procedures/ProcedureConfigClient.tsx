@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { toast } from "sonner";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useProcedureList, useProcedureMutations } from "../../hooks/useDocumentFormData";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 export function ProcedureConfigClient() {
   // React Query hooks — loại bỏ useEffect + apiClient trực tiếp
@@ -28,6 +29,9 @@ export function ProcedureConfigClient() {
   const { uploadFile, isUploading } = useFileUpload();
   const [uploadingCompId, setUploadingCompId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const handleAddComponent = () => {
     setComponents([...components, { id: Date.now().toString(), name: "", isRequired: true }]);
@@ -104,13 +108,21 @@ export function ProcedureConfigClient() {
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa mẫu hồ sơ này?")) return;
+  const handleDelete = (id: string) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
     try {
-      await deleteProcedure.mutateAsync(id);
+      await deleteProcedure.mutateAsync(itemToDelete);
       toast.success("Xóa thành công");
     } catch {
       toast.error("Xóa thất bại");
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -268,6 +280,15 @@ export function ProcedureConfigClient() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa mẫu hồ sơ"
+        description="Bạn có chắc chắn muốn xóa mẫu hồ sơ này? Tất cả các thành phần bên trong cũng sẽ bị xóa. Hành động này không thể hoàn tác."
+        isDeleting={deleteProcedure.isPending}
+      />
 
       <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
     </div>

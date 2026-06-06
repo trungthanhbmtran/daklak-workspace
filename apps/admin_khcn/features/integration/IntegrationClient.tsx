@@ -19,6 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIntegrationList, useDeleteIntegration, useToggleActiveIntegration, IntegrationConfig } from './api';
 import { IntegrationModal } from './';
 import { ApiMonitorDashboard } from './components/ApiMonitorDashboard';
+import { ConfirmDeleteModal } from '@/shared/ConfirmDeleteModal';
 
 export function IntegrationClient() {
   const [search, setSearch] = useState('');
@@ -28,6 +29,10 @@ export function IntegrationClient() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<IntegrationConfig | null>(null);
+  
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
+
   const [prefillData, setPrefillData] = useState<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -56,14 +61,21 @@ export function IntegrationClient() {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm('Bạn có chắc chắn muốn xóa mã liên thông này?')) {
-      try {
-        await deleteMutation.mutateAsync(id);
-        toast.success('Xóa thành công');
-      } catch (e: unknown) {
-        toast.error(e instanceof Error ? e.message : 'Lỗi khi xóa');
-      }
+  const handleDelete = (id: number) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteMutation.mutateAsync(itemToDelete);
+      toast.success('Xóa thành công');
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : 'Lỗi khi xóa');
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -184,6 +196,15 @@ export function IntegrationClient() {
         onClose={() => { setIsModalOpen(false); setPrefillData(null); }}
         initialData={editingItem}
         prefillData={prefillData}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa tích hợp"
+        description="Bạn có chắc chắn muốn xóa mã liên thông này? Hành động này không thể hoàn tác."
+        isDeleting={deleteMutation.isPending}
       />
     </Tabs>
   );

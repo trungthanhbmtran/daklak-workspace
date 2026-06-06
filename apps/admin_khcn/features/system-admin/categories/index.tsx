@@ -12,6 +12,8 @@ import { GROUP_LABELS } from "./constants";
 import { CategorySidebar } from "./components/CategorySidebar";
 import { CategoryTable } from "./components/CategoryTable";
 import { CreateCategoryModal, EditCategoryModal } from "./components/CategoryModals";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+import { useState } from "react";
 
 export function CategoryClient() {
   const { data: queryData, isLoading: isLoadingData, isError } = useGetCategories();
@@ -22,10 +24,22 @@ export function CategoryClient() {
   const deleteMutation = useDeleteCategory();
   const ui = useCategoryUI(queryData, groups);
 
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<any>(null);
+
   const isLoading = isLoadingData || isLoadingGroups;
   const handleDelete = (item: any) => {
-    if (confirm(`Bạn có chắc muốn xóa "${item.name}"?`)) {
-      deleteMutation.mutate(item.id);
+    setItemToDelete(item);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteMutation.mutateAsync(itemToDelete.id);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -74,6 +88,15 @@ export function CategoryClient() {
       <EditCategoryModal
         editingItem={ui.state.editingItem}
         onClose={() => ui.setters.setEditingItem(null)}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa danh mục"
+        description={`Bạn có chắc chắn muốn xóa "${itemToDelete?.name}"? Hành động này không thể hoàn tác.`}
+        isDeleting={deleteMutation.isPending}
       />
     </div>
   );

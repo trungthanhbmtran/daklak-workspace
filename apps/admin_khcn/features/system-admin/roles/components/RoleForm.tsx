@@ -15,6 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Role, Permission } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 interface RoleFormProps {
   selectedRole: Role | null;
@@ -34,6 +35,8 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
       name: "", code: "", description: "", active: 1, permissionIds: []
     }
   });
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     form.reset({
@@ -88,7 +91,7 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
           </div>
         </div>
         {!createMode && (
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" disabled={isDeleting} onClick={onDelete}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" disabled={isDeleting} onClick={() => setIsDeleteDialogOpen(true)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         )}
@@ -169,6 +172,18 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
           {isSaving ? "Đang xử lý..." : "Lưu Vai trò"}
         </Button>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={() => {
+          onDelete();
+          setIsDeleteDialogOpen(false);
+        }}
+        title="Xóa vai trò"
+        description={`Bạn có chắc chắn muốn xóa vai trò "${selectedRole?.name}"? Hành động này không thể hoàn tác.`}
+        isDeleting={isDeleting}
+      />
     </Card>
   );
 }

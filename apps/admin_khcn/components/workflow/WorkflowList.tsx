@@ -14,6 +14,11 @@ import {
   PauseCircle,
   PlayCircle
 } from "lucide-react";
+import { format } from "date-fns";
+import { vi } from "date-fns/locale";
+import { toast } from "sonner";
+import { workflowApi, Workflow } from "@/features/workflow/api";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
@@ -26,10 +31,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
-import { workflowApi, Workflow } from "@/features/workflow/api";
-import { toast } from "sonner";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
 
 interface WorkflowListProps {
   onEdit: (id: string) => void;
@@ -40,6 +41,9 @@ import { useSearchParams } from "next/navigation";
 const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
 
@@ -60,14 +64,24 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
     loadWorkflows();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa quy trình này?")) return;
+  const handleDelete = (id: string) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
     try {
-      await workflowApi.delete(id);
+      setIsDeleting(true);
+      await workflowApi.delete(itemToDelete);
       toast.success("Đã xóa quy trình");
       loadWorkflows();
     } catch (error) {
       toast.error("Lỗi khi xóa quy trình");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -190,6 +204,15 @@ const WorkflowList = ({ onEdit, onCreate }: WorkflowListProps) => {
           ))
         )}
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa quy trình"
+        description="Bạn có chắc chắn muốn xóa quy trình này? Hành động này không thể hoàn tác."
+        isDeleting={isDeleting}
+      />
     </div>
   );
 };

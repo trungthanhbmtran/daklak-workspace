@@ -12,12 +12,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useDocuments, useListDocuments } from "@/features/document/hooks/useDocuments";
 import { DocumentUploadModal } from "@/features/document/components/DocumentUploadModal";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 export function OutgoingDocumentsClient() {
   const [mounted, setMounted] = useState(false);
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
 
   const { deleteDocument } = useDocuments();
 
@@ -32,9 +36,18 @@ export function OutgoingDocumentsClient() {
 
   const documents = useMemo(() => response?.data ?? [], [response]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Bạn có chắc chắn muốn xóa văn bản này?")) {
-      await deleteDocument(id);
+  const handleDelete = (id: string) => {
+    setItemToDelete(id);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await deleteDocument(itemToDelete);
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setItemToDelete(null);
     }
   };
 
@@ -152,6 +165,14 @@ export function OutgoingDocumentsClient() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         isIncoming={false}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa văn bản đi"
+        description="Bạn có chắc chắn muốn xóa văn bản này? Hành động này không thể hoàn tác."
       />
     </div>
   );

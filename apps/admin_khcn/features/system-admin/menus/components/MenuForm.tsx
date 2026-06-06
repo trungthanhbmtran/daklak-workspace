@@ -27,6 +27,7 @@ import { MenuItem, Permission } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";
 import { renderIcon } from "../utils";
 import type { ViewState } from "..";
+import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
 /** Fallback khi danh mục MICROSERVICE/SERVICE chưa load – khớp seed (user-service prisma/seed) */
 const DEFAULT_SERVICE_LIST_FALLBACK: { code: string; name: string }[] = [
@@ -110,6 +111,8 @@ function MenuFormInner(props: any) {
 
   const { mode, selectedId, parentId: viewParentId } = viewState;
   const isCreate = mode.startsWith("create");
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const serviceList = serviceOptions?.length > 0 ? serviceOptions : DEFAULT_SERVICE_LIST_FALLBACK;
 
@@ -203,9 +206,16 @@ function MenuFormInner(props: any) {
     onSuccess();
   };
 
-  const handleDelete = async () => {
-    if (selectedId && confirm("Bạn có chắc chắn muốn xóa Menu này?")) {
+  const handleDelete = () => {
+    if (selectedId) {
+      setIsDeleteDialogOpen(true);
+    }
+  };
+
+  const executeDelete = async () => {
+    if (selectedId) {
       await deleteMenu(selectedId);
+      setIsDeleteDialogOpen(false);
       onSuccess();
     }
   };
@@ -428,6 +438,15 @@ function MenuFormInner(props: any) {
           {isSaving ? "Đang lưu..." : "Lưu cấu hình"}
         </Button>
       </div>
+
+      <ConfirmDeleteModal
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={executeDelete}
+        title="Xóa Menu"
+        description="Bạn có chắc chắn muốn xóa Menu này? Hành động này không thể hoàn tác."
+        isDeleting={isDeleting}
+      />
     </Card>
   );
 }

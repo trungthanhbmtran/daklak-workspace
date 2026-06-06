@@ -5,12 +5,10 @@ import { FileText, GitMerge, TrendingUp, LayoutList, Table2 } from "lucide-react
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MasterPlanForm } from "./MasterPlanForm";
-import { Button } from "@/components/ui/button";
 import { TaskAssignModal } from "../../tasks/assign/TaskAssignModal";
 import { PlanTaskTree } from "../../tasks/tree/PlanTaskTree";
 import { PlanExecutionMatrix } from "../../tasks/matrix/PlanExecutionMatrix";
 import { SubTaskModal } from "../../tasks/subtask/SubTaskModal";
-import { useUser } from "@/hooks/useUser";
 import { hrmTasksApi } from "@/features/hrm/api";
 import { useQuery } from "@tanstack/react-query";
 import { Target, AlertTriangle, Building2, PieChart as PieChartIcon } from "lucide-react";
@@ -22,16 +20,13 @@ const COLORS = ['#22c55e', '#3b82f6', '#eab308', '#ef4444', '#94a3b8'];
 
 export function MasterPlanDetail() {
   const { state, actions } = useMasterPlanContext();
-  const { user } = useUser();
 
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
   const [addRootTaskOpen, setAddRootTaskOpen] = useState(false);
 
   const selectedPlan = state.masterPlans.find(p => p.id === state.selectedId);
-  const currentUserCode = user?.employeeCode || user?.username || '';
-  const currentUserUnit = user?.unitId ? parseInt(user.unitId, 10) : undefined;
-  
+
   // Kiểm tra quyền: Sử dụng allowedActions trả về từ backend
   const allowedActions = selectedPlan?.allowedActions || [];
   const canAddRootTask = allowedActions.includes('ADD_ROOT_TASK');
@@ -305,10 +300,7 @@ export function MasterPlanDetail() {
         <TabsContent value="execution" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30">
           <PlanTaskTree
             tasks={taskTree}
-            currentUserCode={currentUserCode}
             planId={selectedPlan.id}
-            planCreatorUnit={selectedPlan.departmentId}
-            currentUserUnit={currentUserUnit}
             canAddRoot={canAddRootTask}
             onAddRootTask={() => setAddRootTaskOpen(true)}
             onRefresh={handleRefresh}
