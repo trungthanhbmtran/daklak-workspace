@@ -3,6 +3,7 @@ model Employee {
   id           Int      @id @default(autoincrement())
   firstname    String   @map("firstname")
   lastname     String   @map("lastname")
+  fullName     String   @map("full_name")
   employeeCode String   @unique @map("employee_code")
   email        String?
   phone        String?

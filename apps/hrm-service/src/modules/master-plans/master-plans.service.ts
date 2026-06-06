@@ -59,7 +59,7 @@ export class MasterPlansService {
           if (t.status === 'DONE') completedTasks++;
           return {
             ...t,
-            assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim() : t.assigneeCode,
+            assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
             dueDate: t.dueDate?.toISOString() || '',
             completionDate: t.completionDate?.toISOString() || '',
             createdAt: t.createdAt?.toISOString() || '',
@@ -128,7 +128,7 @@ export class MasterPlansService {
       if (t.status === 'DONE') completedTasks++;
       return {
         ...t,
-        assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim() : t.assigneeCode,
+        assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         completionDate: t.completionDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
@@ -171,7 +171,8 @@ export class MasterPlansService {
           data: {
             employeeCode: 'UNASSIGNED',
             firstname: 'Hệ',
-            lastname: 'Thống',
+            lastname: 'thống',
+            fullName: 'Hệ thống',
             email: 'unassigned@system.local',
             status: 'inactive',
             departmentId: 0,

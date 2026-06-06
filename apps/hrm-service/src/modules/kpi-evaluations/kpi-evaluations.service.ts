@@ -190,7 +190,7 @@ export class KpiEvaluationsService {
       message: 'Lấy danh sách đánh giá thành công',
       data: evaluations.map(e => ({
         ...e,
-        employeeName: e.employee ? `${e.employee.firstname} ${e.employee.lastname}`.trim() : e.employeeCode
+        employeeName: e.employee ? e.employee.fullName : e.employeeCode
       })),
       meta: {
         pagination: {

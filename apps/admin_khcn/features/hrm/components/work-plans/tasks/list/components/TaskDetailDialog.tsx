@@ -61,7 +61,7 @@ export function TaskDetailDialog({
     delegationChain, isLoadingChain,
     fetchComments, fetchDelegationChain,
     handleSendMessage, handleCompleteTask, handleRejectTask,
-  } = useTaskDetail(activeTask?.id, task?.id, onRefetch);
+  } = useTaskDetail(activeTask?.id, task?.rootTaskId || task?.id, onRefetch);
 
   const handleSend = useCallback(() => {
     handleSendMessage(chatMessage, () => setChatMessage(''));

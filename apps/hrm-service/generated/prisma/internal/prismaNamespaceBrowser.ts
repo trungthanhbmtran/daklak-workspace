@@ -83,6 +83,7 @@ export const EmployeeScalarFieldEnum = {
   id: 'id',
   firstname: 'firstname',
   lastname: 'lastname',
+  fullName: 'fullName',
   employeeCode: 'employeeCode',
   email: 'email',
   phone: 'phone',
@@ -285,6 +286,7 @@ export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 export const EmployeeOrderByRelevanceFieldEnum = {
   firstname: 'firstname',
   lastname: 'lastname',
+  fullName: 'fullName',
   employeeCode: 'employeeCode',
   email: 'email',
   phone: 'phone',

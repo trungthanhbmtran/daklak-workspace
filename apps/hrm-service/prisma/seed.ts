@@ -110,6 +110,7 @@ async function main() {
       update: {
         firstname: e.firstname,
         lastname: e.lastname,
+        fullName: e.fullName,
         email: e.email,
         phone: e.phone,
         identityCard: e.identityCard,
@@ -121,6 +122,7 @@ async function main() {
       create: {
         firstname: e.firstname,
         lastname: e.lastname,
+        fullName: e.fullName,
         employeeCode: e.employeeCode,
         email: e.email,
         phone: e.phone,

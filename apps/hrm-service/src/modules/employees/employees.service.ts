@@ -13,6 +13,7 @@ export class EmployeesService {
       id: number;
       firstname: string;
       lastname: string;
+      fullName: string;
       employeeCode: string;
       email: string | null;
       phone: string | null;
@@ -35,7 +36,7 @@ export class EmployeesService {
       id: row.id,
       firstname: row.firstname,
       lastname: row.lastname,
-      fullName: `${row.firstname} ${row.lastname}`.trim(),
+      fullName: row.fullName,
       employeeCode: row.employeeCode,
       email: row.email ?? '',
       phone: row.phone ?? '',
@@ -55,11 +56,23 @@ export class EmployeesService {
     };
   }
 
+  // ─── UTILS ───────────────────────────────────────────────────────────────────
+  private formatVietnameseName(name: string): string {
+    if (!name) return '';
+    return name
+      .trim()
+      .replace(/\s+/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  }
+
   // ─── CRUD ────────────────────────────────────────────────────────────────────
 
   async create(data: {
     firstname: string;
     lastname: string;
+    fullName?: string;
     employeeCode?: string;
     email?: string;
     phone?: string;
@@ -82,10 +95,15 @@ export class EmployeesService {
       const ex = await this.prisma.employee.findFirst({ where: { email: data.email } });
       if (ex) throw new RpcException({ message: `Email ${data.email} đã được sử dụng`, code: 6 });
     }
+    const formattedFirstname = this.formatVietnameseName(data.firstname);
+    const formattedLastname = this.formatVietnameseName(data.lastname);
+    const generatedFullName = `${formattedLastname} ${formattedFirstname}`.trim();
+
     const emp = await this.prisma.employee.create({
       data: {
-        firstname: data.firstname,
-        lastname: data.lastname,
+        firstname: formattedFirstname,
+        lastname: formattedLastname,
+        fullName: generatedFullName,
         employeeCode: code,
         email: data.email ?? null,
         phone: data.phone ?? null,
@@ -110,6 +128,7 @@ export class EmployeesService {
     data: Partial<{
       firstname: string;
       lastname: string;
+      fullName: string;
       employeeCode: string;
       startDate: string;
       email: string;
@@ -132,26 +151,37 @@ export class EmployeesService {
       const ex = await this.prisma.employee.findUnique({ where: { employeeCode: data.employeeCode } });
       if (ex) throw new RpcException({ message: `Mã nhân viên ${data.employeeCode} đã tồn tại`, code: 6 });
     }
-    const updated = await this.prisma.employee.update({
-      where: { id },
-      data: {
-        ...(data.firstname != null && { firstname: data.firstname }),
-        ...(data.lastname != null && { lastname: data.lastname }),
+    let updateData: any = {
         ...(data.employeeCode != null && { employeeCode: data.employeeCode }),
         ...(data.email != null && { email: data.email }),
         ...(data.phone != null && { phone: data.phone }),
         ...(data.gender != null && { gender: data.gender }),
-        ...(data.birthday !== undefined && { birthday: data.birthday ? new Date(data.birthday) : null }),
+        ...(data.birthday != null && { birthday: new Date(data.birthday) }),
         ...(data.identityCard != null && { identityCard: data.identityCard }),
+        ...(data.status != null && { status: data.status }),
+        ...(data.address != null && { address: data.address }),
+        ...(data.avatar != null && { avatar: data.avatar }),
         ...(data.departmentId != null && { departmentId: data.departmentId }),
         ...(data.jobTitleId != null && { jobTitleId: data.jobTitleId }),
         ...(data.civilServantRankId !== undefined && { civilServantRankId: data.civilServantRankId }),
         ...(data.partyTitleId !== undefined && { partyTitleId: data.partyTitleId }),
-        ...(data.status != null && { status: data.status }),
-        ...(data.address != null && { address: data.address }),
-        ...(data.avatar != null && { avatar: data.avatar }),
-        ...(data.startDate !== undefined && { startDate: data.startDate ? new Date(data.startDate) : undefined }),
-      },
+        ...(data.startDate != null && { startDate: new Date(data.startDate) })
+    };
+
+    if (data.firstname != null || data.lastname != null) {
+      const current = await this.prisma.employee.findUnique({ where: { id } });
+      const newFirstname = this.formatVietnameseName(data.firstname ?? current?.firstname ?? '');
+      const newLastname = this.formatVietnameseName(data.lastname ?? current?.lastname ?? '');
+      updateData.firstname = newFirstname;
+      updateData.lastname = newLastname;
+      updateData.fullName = `${newLastname} ${newFirstname}`.trim();
+    } else if (data.fullName != null) {
+      updateData.fullName = data.fullName;
+    }
+
+    const updated = await this.prisma.employee.update({
+      where: { id },
+      data: updateData,
     });
     return { success: true, message: 'Cập nhật hồ sơ thành công', data: this.toEmployee(updated) };
   }
@@ -195,6 +225,7 @@ export class EmployeesService {
       where.OR = [
         { firstname: { contains: kw } },
         { lastname: { contains: kw } },
+        { fullName: { contains: kw } },
         { email: { contains: kw } },
         { employeeCode: { contains: kw } },
         { identityCard: { contains: kw } },

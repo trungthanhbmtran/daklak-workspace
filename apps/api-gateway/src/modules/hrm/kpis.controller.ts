@@ -11,16 +11,17 @@ import {
   Put,
   Delete,
   Req,
-  ForbiddenException,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { RbacGuard } from '../../common/guards/rbac.guard';
+import { Role, Roles } from '../../common/decorators/roles.decorator';
 
 @ApiTags('HRM - KPIs')
 @Controller('admin/hrm/kpis')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RbacGuard)
 @ApiBearerAuth('JWT-auth')
 export class KpisController implements OnModuleInit {
   private kpiService: any;
@@ -90,23 +91,34 @@ export class KpisController implements OnModuleInit {
   }
 
   @Get('criteria')
-  async findCriteria() {
-    return firstValueFrom(this.kpiService.FindCriteria({}));
+  async findCriteria(@Req() req: any) {
+    const res: any = await firstValueFrom(this.kpiService.FindCriteria({}));
+    if (res && res.meta) {
+      const userRoles = req.user?.roles || [];
+      const isAdmin = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN);
+      res.meta.permissions = {
+        canCreate: isAdmin,
+        canEdit: isAdmin,
+        canDelete: isAdmin
+      };
+    }
+    return res;
   }
 
   @Post('criteria')
+  @Roles(Role.ADMIN)
   async createCriterion(@Body() body: any) {
     return firstValueFrom(this.kpiService.CreateCriterion(body));
   }
 
   @Put('criteria/:id')
+  @Roles(Role.ADMIN)
   async updateCriterion(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(
-      this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
-    );
+    return firstValueFrom(this.kpiService.UpdateCriterion({ id: Number(id), ...body }));
   }
 
   @Delete('criteria/:id')
+  @Roles(Role.ADMIN)
   async deleteCriterion(@Param('id') id: string) {
     return firstValueFrom(this.kpiService.DeleteCriterion({ id: Number(id) }));
   }

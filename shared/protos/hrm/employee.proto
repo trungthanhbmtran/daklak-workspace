@@ -10,6 +10,7 @@ message Employee {
   int32 id = 1;
   string firstname = 2;
   string lastname = 3;
+  string fullName = 22;
   string employeeCode = 4;   // Mã nhân viên (Unique)
   string email = 5;
   string phone = 6;
@@ -30,7 +31,6 @@ message Employee {
 
   int32 civilServantRankId = 20;
   int32 partyTitleId = 21;
-  string fullName = 22;
 }
 
 // ---------------- REQUESTS ----------------

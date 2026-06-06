@@ -54,7 +54,7 @@ model Task {
 
   // Tính năng Phối hợp: danh sách employeeCode của người tham gia phối hợp (không phải người chịu trách nhiệm chính)
   // Lưu dạng JSON string vì MySQL không hỗ trợ native array type
-  coAssigneeCodesJson String?  @default("[]") @map("co_assignee_codes") @db.Text
+  coAssigneeCodesJson String?  @map("co_assignee_codes") @db.Text
 
   comments       TaskComment[]
 

@@ -16,6 +16,7 @@ export function KpiCriteriaClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+  const [permissions, setPermissions] = useState({ canCreate: false, canEdit: false, canDelete: false });
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,6 +36,7 @@ export function KpiCriteriaClient() {
       setIsLoading(true);
       const res = await hrmKpiCriteriaApi.list();
       setCriteriaList(res.data || []);
+      setPermissions(res.meta?.permissions || { canCreate: false, canEdit: false, canDelete: false });
     } catch (err) {
       toast.error("Không thể tải danh sách tiêu chí");
     } finally {
@@ -124,9 +126,11 @@ export function KpiCriteriaClient() {
             Quản lý tập trung các bộ tiêu chí đánh giá KPI để áp dụng thống nhất cho toàn bộ hệ thống.
           </p>
         </div>
-        <Button onClick={() => openModal()} className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/20 px-6">
-          <Plus className="w-5 h-5 mr-2" /> Tạo Tiêu chí mới
-        </Button>
+        {permissions.canCreate && (
+          <Button onClick={() => openModal()} className="h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-600/20 px-6">
+            <Plus className="w-5 h-5 mr-2" /> Tạo Tiêu chí mới
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -140,12 +144,16 @@ export function KpiCriteriaClient() {
                 <div className="flex justify-between items-start mb-4">
                   <h3 className="text-lg font-bold text-slate-800 line-clamp-2" title={item.name}>{item.name}</h3>
                   <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 bg-indigo-50/0 hover:bg-indigo-50 rounded-lg" onClick={() => openModal(item)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 bg-rose-50/0 hover:bg-rose-50 rounded-lg" onClick={() => handleDelete(item.id)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    {permissions.canEdit && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 bg-indigo-50/0 hover:bg-indigo-50 rounded-lg" onClick={() => openModal(item)}>
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {permissions.canDelete && (
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-rose-600 bg-rose-50/0 hover:bg-rose-50 rounded-lg" onClick={() => handleDelete(item.id)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
                   </div>
                 </div>
 
