@@ -24,7 +24,7 @@ export class TaskTemplatesService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return {
+    const result = {
       success: true,
       message: 'Lấy danh sách nhiệm vụ mẫu thành công',
       data: templates.map(t => ({
@@ -43,7 +43,7 @@ export class TaskTemplatesService {
         }
       }
     };
-    
+
     this.cache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
     return result;
   }
@@ -88,7 +88,7 @@ export class TaskTemplatesService {
         });
       }
     });
-    
+
     return {
       success: true,
       message: 'Cập nhật thư viện định biên thành công',
