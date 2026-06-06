@@ -25,6 +25,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 interface MenuDto {
   id?: number;
@@ -121,7 +122,7 @@ export class MenusController implements OnModuleInit {
     // Bổ sung meta chứa currentUser để Frontend (HubClient) dùng
     if (response) {
       if (!response.meta) response.meta = {};
-      response.meta.currentUser = req.user;
+      response.meta.currentUser = sanitizeUserForClient(req.user);
     }
     
     return response;

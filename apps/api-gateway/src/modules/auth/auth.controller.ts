@@ -21,6 +21,7 @@ import type { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('Auth')
 @Controller('admin/auth')
@@ -85,7 +86,7 @@ export class AuthController implements OnModuleInit {
       res.cookie('accessToken', result.accessToken, cookieConfig);
       res.cookie('refreshToken', result.refreshToken, cookieConfig);
 
-      return result;
+      return sanitizeUserForClient(result);
     } catch (err: any) {
       const code = err?.code;
       const message = err?.details || err?.message || 'Đăng nhập thất bại';
@@ -130,7 +131,7 @@ export class AuthController implements OnModuleInit {
       res.cookie('accessToken', result.accessToken, cookieConfig);
       res.cookie('refreshToken', result.refreshToken, cookieConfig);
 
-      return result;
+      return sanitizeUserForClient(result);
     } catch (err: any) {
       const message =
         err?.details || err?.message || 'Refresh token không hợp lệ';
@@ -187,6 +188,6 @@ export class AuthController implements OnModuleInit {
         // Ignore error and use default fullName from token
       }
     }
-    return user;
+    return sanitizeUserForClient(user);
   }
 }

@@ -61,31 +61,45 @@ export class KpiEvaluationsService {
     };
   }
 
-  async findCriteria() {
+  async findCriteria(query: any = {}) {
+    const isAdmin = query?.isAdmin || false;
     const cached = this.cache.get('criteria');
+    let dataToReturn: any;
+
     if (cached && cached.expiresAt > Date.now()) {
-      return cached.data;
+      dataToReturn = cached.data;
+    } else {
+      const criteria = await this.prisma.kpiCriteria.findMany();
+      dataToReturn = {
+        success: true,
+        message: 'Lấy danh sách tiêu chí thành công',
+        data: criteria,
+        meta: {
+          pagination: {
+            total: criteria.length,
+            page: 1,
+            pageSize: criteria.length,
+            totalPages: 1,
+            hasNext: false,
+            hasPrev: false
+          }
+        }
+      };
+      this.cache.set('criteria', { data: dataToReturn, expiresAt: Date.now() + this.CACHE_TTL_MS });
     }
 
-    const criteria = await this.prisma.kpiCriteria.findMany();
-    const result = {
-      success: true,
-      message: 'Lấy danh sách tiêu chí thành công',
-      data: criteria,
+    const allowedActions: string[] = [];
+    if (isAdmin) {
+      allowedActions.push('CREATE', 'EDIT', 'DELETE');
+    }
+
+    return {
+      ...dataToReturn,
       meta: {
-        pagination: {
-          total: criteria.length,
-          page: 1,
-          pageSize: criteria.length,
-          totalPages: 1,
-          hasNext: false,
-          hasPrev: false
-        }
+        ...dataToReturn.meta,
+        allowedActions
       }
     };
-
-    this.cache.set('criteria', { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
-    return result;
   }
 
   async createCriterion(data: any) {

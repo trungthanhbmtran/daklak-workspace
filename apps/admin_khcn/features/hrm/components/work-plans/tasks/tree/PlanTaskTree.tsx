@@ -12,23 +12,7 @@ import { SubTaskModal } from '../subtask/SubTaskModal';
 import { TaskAssignModal } from '../assign/TaskAssignModal';
 
 // ─── Utils ──────────────────────────────────────────────────────────────────
-
-/** Build cây task từ flat list — không biết trước số cấp */
-export function buildTaskTree(flatTasks: any[]): any[] {
-  const map = new Map<string, any>();
-  for (const t of flatTasks) {
-    map.set(String(t.id), { ...t, children: [] });
-  }
-  const roots: any[] = [];
-  for (const t of map.values()) {
-    if (t.parentId && map.has(String(t.parentId))) {
-      map.get(String(t.parentId))!.children.push(t);
-    } else {
-      roots.push(t);
-    }
-  }
-  return roots;
-}
+// Tree is now built by backend, no need to build it here
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
   TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3 h-3" />, cls: 'bg-slate-100 text-slate-600 border-slate-200' },
@@ -59,10 +43,11 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
   const hasChildren = task.children?.length > 0;
 
-  const permissions = task.permissions || {};
-  const canEdit = permissions.canEdit ?? (currentUserCode === task.assignerCode || currentUserUnit === 1 || currentUserCode === task.assigneeCode);
-  const canAssign = permissions.canAssign ?? canEdit;
-  const canAddSubTask = permissions.canAddSubTask ?? canEdit;
+  const allowedActions = task.allowedActions || [];
+  // Sử dụng hoàn toàn phân quyền do backend trả về
+  const canEdit = allowedActions.includes('EDIT');
+  const canAssign = allowedActions.includes('ASSIGN');
+  const canAddSubTask = allowedActions.includes('ADD_SUBTASK');
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
 
@@ -82,11 +67,10 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
       >
         {/* Nét ngang nối từ nét dọc của cha */}
         {depth > 0 && (
-          <div className="absolute left-[-16px] top-[18px] flex items-center">
-            {/* L-shaped curve or straight line */}
+          <div className="absolute left-[-16px] top-[20px] flex items-center">
             <div className={cn(
-              "w-[12px] border-b border-slate-200/80",
-              isLastChild ? "h-[18px] border-l rounded-bl-lg absolute bottom-0 left-0" : "h-px absolute"
+              "w-[16px] border-b-[1.5px] border-slate-300",
+              isLastChild ? "h-[20px] border-l-[1.5px] rounded-bl-xl absolute bottom-0 left-0" : "h-px absolute"
             )}></div>
           </div>
         )}
@@ -190,15 +174,16 @@ function TaskRow({ task, depth, currentUserCode, currentUserUnit, planId, onRefr
 
       {/* Sub-task rows (đệ quy) */}
       {expanded && hasChildren && (
-        <div className={cn("ml-6 pl-4", depth === 0 && "ml-4 pl-4", "relative")}>
+        <div className={cn("ml-8 pl-4", depth === 0 && "ml-4 pl-4", "relative")}>
           {/* Nét dọc chính của block con - chạy xuyên suốt ngoại trừ phần của con cuối cùng */}
-          <div className="absolute left-[-4px] top-0 bottom-4 w-px bg-slate-200/80"></div>
+          <div className="absolute left-[-8px] top-0 bottom-4 w-[1.5px] bg-slate-300"></div>
           {task.children.map((child: any, index: number) => (
             <TaskRow
               key={child.id}
               task={child}
               depth={depth + 1}
               currentUserCode={currentUserCode}
+              currentUserUnit={currentUserUnit}
               planId={planId}
               onRefresh={onRefresh}
               isLastChild={index === task.children.length - 1}
@@ -238,6 +223,7 @@ interface PlanTaskTreeProps {
   planId: number;
   planCreatorUnit?: number;  // departmentId của kế hoạch
   currentUserUnit?: number;  // unitId của user hiện tại
+  canAddRoot?: boolean;      // Quyền thêm đầu việc lớn
   onAddRootTask?: () => void;
   onRefresh: () => void;
   isLoading?: boolean;
@@ -249,14 +235,12 @@ export function PlanTaskTree({
   planId,
   planCreatorUnit,
   currentUserUnit,
+  canAddRoot = false,
   onAddRootTask,
   onRefresh,
   isLoading,
 }: PlanTaskTreeProps) {
-  const tree = buildTaskTree(tasks);
-
-  // Bất kỳ ai truy cập được kế hoạch này đều có thể thêm đầu việc lớn (nếu có quyền tác vụ)
-  const canAddRoot = true;
+  const tree = tasks || [];
 
   if (isLoading) {
     return (

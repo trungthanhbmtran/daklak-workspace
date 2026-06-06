@@ -15,6 +15,7 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('HRM - Tasks')
 @Controller('admin/hrm/tasks')
@@ -161,7 +162,7 @@ export class TasksController implements OnModuleInit {
 
     if (response && user) {
       if (!response.meta) response.meta = {};
-      response.meta.currentUser = user;
+      response.meta.currentUser = sanitizeUserForClient(user);
     }
 
     return response;

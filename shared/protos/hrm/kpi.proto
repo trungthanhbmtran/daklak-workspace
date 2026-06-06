@@ -37,7 +37,9 @@ message CreatePeriodRequest {
   string endDate = 3;
 }
 
-message FindCriteriaRequest {}
+message FindCriteriaRequest {
+  bool isAdmin = 1;
+}
 
 message CriterionResponse {
   int32 id = 1;

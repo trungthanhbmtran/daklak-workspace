@@ -67,15 +67,22 @@ export class MasterPlansService {
           };
         });
 
+        const canEdit = query.isAdmin || mp.createdByCode === query.currentUserCode || query.isLeader;
+        const allowedActions: string[] = [];
+        if (canEdit) allowedActions.push('ADD_ROOT_TASK', 'EDIT', 'DELETE');
+
+        const totalTasks = mp.tasks.length;
+        
         return {
           ...mp,
           startDate: mp.startDate?.toISOString() || '',
           endDate: mp.endDate?.toISOString() || '',
           createdAt: mp.createdAt?.toISOString() || '',
           updatedAt: mp.updatedAt?.toISOString() || '',
-          totalTasks: mp.tasks.length,
-          completedTasks,
-          tasks
+          totalTasks: totalTasks,
+          completedTasks: completedTasks,
+          tasks,
+          allowedActions
         };
       }),
       meta: {
@@ -136,6 +143,8 @@ export class MasterPlansService {
       };
     });
 
+    const canEdit = query.isAdmin || mp.createdByCode === query.currentUserCode || query.isLeader;
+
     return {
       ...mp,
       startDate: mp.startDate?.toISOString() || '',
@@ -144,7 +153,12 @@ export class MasterPlansService {
       updatedAt: mp.updatedAt?.toISOString() || '',
       totalTasks: mp.tasks.length,
       completedTasks,
-      tasks
+      tasks,
+      permissions: {
+        canAddRootTask: canEdit,
+        canEdit,
+        canDelete: canEdit
+      }
     };
   }
 

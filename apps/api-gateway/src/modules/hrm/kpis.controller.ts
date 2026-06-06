@@ -92,16 +92,9 @@ export class KpisController implements OnModuleInit {
 
   @Get('criteria')
   async findCriteria(@Req() req: any) {
-    const res: any = await firstValueFrom(this.kpiService.FindCriteria({}));
-    if (res && res.meta) {
-      const userRoles = req.user?.roles || [];
-      const isAdmin = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN);
-      res.meta.permissions = {
-        canCreate: isAdmin,
-        canEdit: isAdmin,
-        canDelete: isAdmin
-      };
-    }
+    const userRoles = req.user?.roles || [];
+    const isAdmin = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN);
+    const res: any = await firstValueFrom(this.kpiService.FindCriteria({ isAdmin }));
     return res;
   }
 

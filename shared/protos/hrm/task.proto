@@ -102,16 +102,11 @@ message TaskResponse {
   string priority = 23;      // Mức độ ưu tiên
   string supervisorName = 24; // Tên người theo dõi chỉ đạo
   repeated string coAssigneeCodes = 25;
-  TaskPermissions permissions = 26;
+  repeated string allowedActions = 26;
   TaskPlan plan = 27;
   int32 rootTaskId = 28;
   float progress = 29;
-}
-
-message TaskPermissions {
-  bool canEdit = 1;
-  bool canAssign = 2;
-  bool canAddSubTask = 3;
+  repeated TaskResponse children = 30;
 }
 
 message TaskPlan {

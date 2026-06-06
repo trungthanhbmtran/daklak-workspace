@@ -218,26 +218,41 @@ export class TasksService implements OnModuleInit {
       this.getTaskStats(query)
     ]);
 
+    const isUserAdmin = query.isAdmin;
+    const currentUserCode = query.currentUserCode;
+
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: tasks.map((t: any) => ({
-        ...t,
-        assigneeName: t.assignee
-          ? t.assignee.fullName
-          : (t.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : t.assigneeCode),
-        assignerName: t.assigner
-          ? t.assigner.fullName
-          : (t.assignerCode || ''),
-        supervisorName: t.supervisor
-          ? t.supervisor.fullName
-          : (t.supervisorCode || ''),
-        dueDate: t.dueDate?.toISOString() || '',
-        createdAt: t.createdAt?.toISOString() || '',
-        updatedAt: t.updatedAt?.toISOString() || '',
-        plan: t.plan || null,
-        coAssigneeCodes: this.parseCoAssigneeCodes(t.coAssigneeCodesJson),
-      })),
+      data: tasks.map((t: any) => {
+        const isAssigner = t.assignerCode === currentUserCode;
+        const isAssignee = t.assigneeCode === currentUserCode;
+        const canEdit = isUserAdmin || isAssigner || isAssignee;
+
+        const allowedActions: string[] = [];
+        if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
+        if (isUserAdmin || isAssigner) allowedActions.push('DELETE');
+
+        return {
+          ...t,
+          assigneeName: t.assignee
+            ? t.assignee.fullName
+            : (t.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : t.assigneeCode),
+          assignerName: t.assigner
+            ? t.assigner.fullName
+            : (t.assignerCode || ''),
+          supervisorName: t.supervisor
+            ? t.supervisor.fullName
+            : (t.supervisorCode || ''),
+          dueDate: t.dueDate?.toISOString() || '',
+          startDate: t.startDate?.toISOString() || '',
+          createdAt: t.createdAt?.toISOString() || '',
+          updatedAt: t.updatedAt?.toISOString() || '',
+          plan: t.plan || null,
+          coAssigneeCodes: this.parseCoAssigneeCodes(t.coAssigneeCodesJson),
+          allowedActions
+        };
+      }),
       meta: {
         pagination: {
           total: tasks.length,
@@ -266,38 +281,54 @@ export class TasksService implements OnModuleInit {
 
     const isUserAdmin = query.isAdmin;
     const currentUserCode = query.currentUserCode;
-    const callerAncestorUnitIds = Array.isArray(query.callerAncestorUnitIds) ? query.callerAncestorUnitIds.map(Number) : [];
+    const mappedTasks = tasks.map((t: any) => {
+      // Phân quyền cho từng task
+      const isAssigner = t.assignerCode === currentUserCode;
+      const isAssignee = t.assigneeCode === currentUserCode;
+      const canEdit = isUserAdmin || isAssigner || isAssignee;
+
+      const allowedActions: string[] = [];
+      if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
+      if (isUserAdmin || isAssigner) allowedActions.push('DELETE');
+
+      return {
+        ...t,
+        assigneeName: t.assignee
+          ? t.assignee.fullName
+          : (t.assigneeCode === 'UNASSIGNED' || !t.assigneeCode ? 'Chưa phân công' : t.assigneeCode),
+        assignerName: t.assigner
+          ? t.assigner.fullName
+          : (t.assignerCode || ''),
+        dueDate: t.dueDate?.toISOString() || '',
+        startDate: t.startDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+        plan: t.plan || null,
+        coAssigneeCodes: this.parseCoAssigneeCodes(t.coAssigneeCodesJson),
+        allowedActions,
+        children: []
+      };
+    });
+
+    // Build the tree
+    const map = new Map<number, any>();
+    for (const t of mappedTasks) {
+      map.set(t.id, t);
+    }
+
+    const tree: any[] = [];
+    for (const t of map.values()) {
+      if (t.parentId && map.has(t.parentId)) {
+        map.get(t.parentId).children.push(t);
+      } else {
+        tree.push(t);
+      }
+    }
 
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ theo kế hoạch thành công',
-      data: tasks.map((t: any) => {
-        // Phân quyền cho từng task
-        const canEdit = isUserAdmin
-          || t.assignerCode === currentUserCode
-          || t.assigneeCode === currentUserCode
-          || (t.departmentId && callerAncestorUnitIds.includes(t.departmentId));
-
-        return {
-          ...t,
-          assigneeName: t.assignee
-            ? t.assignee.fullName
-            : (t.assigneeCode === 'UNASSIGNED' || !t.assigneeCode ? 'Chưa phân công' : t.assigneeCode),
-          assignerName: t.assigner
-            ? t.assigner.fullName
-            : (t.assignerCode || ''),
-          dueDate: t.dueDate?.toISOString() || '',
-          startDate: t.startDate?.toISOString() || '',
-          createdAt: t.createdAt?.toISOString() || '',
-          updatedAt: t.updatedAt?.toISOString() || '',
-          plan: t.plan || null,
-          permissions: {
-            canEdit,
-            canAssign: canEdit,
-            canAddSubTask: canEdit
-          }
-        };
-      }),
+      data: tree,
       meta: { pagination: { total: tasks.length, page: 1, pageSize: tasks.length, totalPages: 1 } }
     };
   }

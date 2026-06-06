@@ -18,7 +18,7 @@ export class KpiEvaluationsController {
 
   @GrpcMethod('KpiService', 'FindCriteria')
   findCriteria(data: any) {
-    return this.kpiEvaluationsService.findCriteria();
+    return this.kpiEvaluationsService.findCriteria(data);
   }
 
   @GrpcMethod('KpiService', 'CreateCriterion')

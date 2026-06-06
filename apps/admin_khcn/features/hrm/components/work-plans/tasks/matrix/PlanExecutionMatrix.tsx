@@ -4,7 +4,6 @@ import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { CheckCircle2, AlertTriangle, Clock, Circle, RotateCcw, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { buildTaskTree } from '../tree/PlanTaskTree';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -91,8 +90,7 @@ interface PlanExecutionMatrixProps {
 
 export function PlanExecutionMatrix({ tasks, planTitle, isLoading }: PlanExecutionMatrixProps) {
   const rows = useMemo(() => {
-    const tree = buildTaskTree(tasks);
-    return flattenTree(tree);
+    return flattenTree(tasks || []);
   }, [tasks]);
 
   // Thống kê nhanh

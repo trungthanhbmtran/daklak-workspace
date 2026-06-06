@@ -30,6 +30,7 @@ message MasterPlan {
   repeated task.TaskResponse tasks = 13;
   int32 departmentId = 14;
   string createdByCode = 15;
+  repeated string allowedActions = 16;
 }
 
 message MasterPlanList {
@@ -46,6 +47,8 @@ message FindAllMasterPlansRequest {
   string currentUserCode = 4;
   bool isAdmin = 5;
   int32 currentUserDept = 6;
+  repeated int32 callerAncestorUnitIds = 7;
+  bool isLeader = 8;
 }
 
 message FindMasterPlanByIdRequest {
@@ -54,6 +57,7 @@ message FindMasterPlanByIdRequest {
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
+  bool isLeader = 6;
 }
 
 message CreateMasterPlanRequest {

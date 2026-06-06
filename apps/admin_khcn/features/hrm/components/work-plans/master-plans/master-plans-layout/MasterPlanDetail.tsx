@@ -31,6 +31,10 @@ export function MasterPlanDetail() {
   const selectedPlan = state.masterPlans.find(p => p.id === state.selectedId);
   const currentUserCode = user?.employeeCode || user?.username || '';
   const currentUserUnit = user?.unitId ? parseInt(user.unitId, 10) : undefined;
+  
+  // Kiểm tra quyền: Sử dụng allowedActions trả về từ backend
+  const allowedActions = selectedPlan?.allowedActions || [];
+  const canAddRootTask = allowedActions.includes('ADD_ROOT_TASK');
 
   // Load tất cả task của plan (flat list) — bao gồm mọi cấp sub-task
   const {
@@ -66,7 +70,18 @@ export function MasterPlanDetail() {
     );
   }
 
-  const allPlanTasks: any[] = planTasksRes?.data || [];
+  const taskTree = planTasksRes?.data || [];
+  const flattenTasks = (nodes: any[]): any[] => {
+    let result: any[] = [];
+    for (const node of nodes) {
+      result.push(node);
+      if (node.children?.length) {
+        result = result.concat(flattenTasks(node.children));
+      }
+    }
+    return result;
+  };
+  const allPlanTasks: any[] = flattenTasks(taskTree);
 
   // Tiến độ & Thống kê
   const doneTasks = allPlanTasks.filter(t => t.status === 'DONE').length;
@@ -289,11 +304,12 @@ export function MasterPlanDetail() {
         {/* ── Tab: Triển khai — Cây nhiệm vụ phân cấp ── */}
         <TabsContent value="execution" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30">
           <PlanTaskTree
-            tasks={allPlanTasks}
+            tasks={taskTree}
             currentUserCode={currentUserCode}
             planId={selectedPlan.id}
             planCreatorUnit={selectedPlan.departmentId}
             currentUserUnit={currentUserUnit}
+            canAddRoot={canAddRootTask}
             onAddRootTask={() => setAddRootTaskOpen(true)}
             onRefresh={handleRefresh}
             isLoading={planTasksLoading}
@@ -303,7 +319,7 @@ export function MasterPlanDetail() {
         {/* ── Tab: Tổng hợp — Bảng Excel-like ── */}
         <TabsContent value="matrix" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30">
           <PlanExecutionMatrix
-            tasks={allPlanTasks}
+            tasks={taskTree}
             planTitle={selectedPlan.title}
             isLoading={planTasksLoading}
           />

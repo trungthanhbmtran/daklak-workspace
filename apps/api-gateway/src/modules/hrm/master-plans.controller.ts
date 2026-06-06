@@ -81,6 +81,10 @@ export class MasterPlansController implements OnModuleInit {
   ) {
     const user = req.user;
     const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    const isLeader = user?.roles?.some((r: any) => {
+      const code = typeof r === 'string' ? r : r.code;
+      return code?.includes('LEADER') || code?.includes('MANAGER');
+    }) || false;
     
     // Tính chuỗi đơn vị cha của user để kiểm tra kế hoạch được tạo bởi đơn vị cấp trên
     let callerAncestorUnitIds: number[] = [];
@@ -97,6 +101,7 @@ export class MasterPlansController implements OnModuleInit {
       isAdmin,
       currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
       callerAncestorUnitIds,  // Danh sách đơn vị cha để lọc kế hoạch cấp trên
+      isLeader,
     }));
   }
 
@@ -119,6 +124,10 @@ export class MasterPlansController implements OnModuleInit {
   async findById(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
     const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    const isLeader = user?.roles?.some((r: any) => {
+      const code = typeof r === 'string' ? r : r.code;
+      return code?.includes('LEADER') || code?.includes('MANAGER');
+    }) || false;
     
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
@@ -133,6 +142,7 @@ export class MasterPlansController implements OnModuleInit {
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
+        isLeader,
       }),
     );
   }
