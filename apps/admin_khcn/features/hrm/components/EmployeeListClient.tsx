@@ -124,7 +124,7 @@ export function EmployeeListClient() {
                 </TableRow>
               ) : (
                 employees.map((emp: HrmEmployee) => {
-                  const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(" ") || "—";
+                  const fullName = emp.fullName || [emp.firstname, emp.lastname].filter(Boolean).join(" ") || "—";
                   return (
                     <TableRow
                       key={emp.id}

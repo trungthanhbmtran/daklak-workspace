@@ -35,6 +35,7 @@ export class EmployeesService {
       id: row.id,
       firstname: row.firstname,
       lastname: row.lastname,
+      fullName: `${row.firstname} ${row.lastname}`.trim(),
       employeeCode: row.employeeCode,
       email: row.email ?? '',
       phone: row.phone ?? '',

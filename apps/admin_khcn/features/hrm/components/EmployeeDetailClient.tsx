@@ -77,7 +77,7 @@ export function EmployeeDetailClient({ params }: { params: Promise<{ id: string 
     return "Nhân sự";
   }, [govtTitleName, rankTitleName]);
 
-  const fullName = employee ? [employee.firstname, employee.lastname].filter(Boolean).join(" ") : "—";
+  const fullName = employee ? (employee.fullName || [employee.firstname, employee.lastname].filter(Boolean).join(" ")) : "—";
 
   if (Number.isNaN(id)) {
     return (

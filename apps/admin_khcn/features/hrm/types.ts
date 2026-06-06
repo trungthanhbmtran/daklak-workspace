@@ -8,6 +8,7 @@ export interface HrmEmployee {
   id: number;
   firstname: string;
   lastname: string;
+  fullName?: string;
   employeeCode: string;
   email: string;
   phone: string;

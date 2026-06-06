@@ -61,7 +61,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
   // Backend đã filter + score + sort sẵn — client chỉ render, không tính lại
   const assignableEmployees = (employeesData?.data || []).map((emp: any) => {
-    const fullName = [emp.firstname, emp.lastname].filter(Boolean).join(' ');
+    const fullName = emp.fullName || [emp.firstname, emp.lastname].filter(Boolean).join(' ');
     return {
       code: emp.employeeCode,
       name: fullName,
