@@ -80,7 +80,7 @@ export class MasterPlansController implements OnModuleInit {
     @Query('departmentId') reqDepartmentId?: string,
   ) {
     const user = req.user;
-    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    const isAdmin = user?.permissionsFlatten?.includes('PLAN:MANAGE');
     const isLeader = user?.roles?.some((r: any) => {
       const code = typeof r === 'string' ? r : r.code;
       return code?.includes('LEADER') || code?.includes('MANAGER');
@@ -123,7 +123,7 @@ export class MasterPlansController implements OnModuleInit {
   @Get(':id')
   async findById(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
-    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    const isAdmin = user?.permissionsFlatten?.includes('PLAN:MANAGE');
     const isLeader = user?.roles?.some((r: any) => {
       const code = typeof r === 'string' ? r : r.code;
       return code?.includes('LEADER') || code?.includes('MANAGER');

@@ -69,11 +69,13 @@ export function EmployeeListClient() {
             {total > 0 ? `Quản lý ${total} nhân sự trên toàn hệ thống.` : "Dữ liệu từ API HRM (gateway)."}
           </p>
         </div>
-        <Link href="/services/hrm/employees/create">
-          <Button className="rounded-full bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
-            <Plus className="mr-2 h-4 w-4" /> Thêm nhân sự
-          </Button>
-        </Link>
+        {allowedActions.includes('CREATE') && (
+          <Link href="/services/hrm/employees/create">
+            <Button className="rounded-full bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-500/20 px-6">
+              <Plus className="mr-2 h-4 w-4" /> Thêm nhân sự
+            </Button>
+          </Link>
+        )}
       </div>
 
       <div className="bg-white border border-slate-200/60 rounded-2xl shadow-sm overflow-hidden flex flex-col">
@@ -197,20 +199,24 @@ export function EmployeeListClient() {
                               <Eye className="h-4 w-4" />
                             </Button>
                           </Link>
-                          <Link href={`/services/hrm/employees/${emp.id}/edit`}>
-                            <Button variant="ghost" size="icon" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-full" title="Chỉnh sửa">
-                              <Edit className="h-4 w-4" />
+                          {allowedActions.includes('EDIT') && (
+                            <Link href={`/services/hrm/employees/${emp.id}/edit`}>
+                              <Button variant="ghost" size="icon" className="text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-full" title="Chỉnh sửa">
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </Link>
+                          )}
+                          {allowedActions.includes('DELETE') && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => setDeleteId(emp.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
+                              title="Xóa"
+                            >
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          </Link>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setDeleteId(emp.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 rounded-full"
-                            title="Xóa"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>

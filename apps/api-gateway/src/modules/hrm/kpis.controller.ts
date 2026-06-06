@@ -95,6 +95,18 @@ export class KpisController implements OnModuleInit {
     const userRoles = req.user?.roles || [];
     const isAdmin = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN);
     const res: any = await firstValueFrom(this.kpiService.FindCriteria({ isAdmin }));
+    
+    if (res) {
+      res.meta = res.meta || {};
+      const perms = req.user?.permissionsFlatten || [];
+      const allowedActions: string[] = [];
+      
+      if (perms.includes('KPI:CREATE') || isAdmin) allowedActions.push('CREATE');
+      if (perms.includes('KPI:UPDATE') || isAdmin) allowedActions.push('EDIT');
+      if (perms.includes('KPI:DELETE') || isAdmin) allowedActions.push('DELETE');
+      
+      res.meta.allowedActions = allowedActions;
+    }
     return res;
   }
 
@@ -133,7 +145,7 @@ export class KpisController implements OnModuleInit {
     const isFetchingOwn = !employeeCode || employeeCode === callerCode;
     const targetCode = employeeCode || callerCode;
 
-    const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+    const isAdmin = user?.permissionsFlatten?.includes('KPI:MANAGE');
 
     let callerDescendantUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {

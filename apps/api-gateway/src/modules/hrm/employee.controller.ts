@@ -197,7 +197,7 @@ export class EmployeeController implements OnModuleInit {
         this.enrichEmployee(e, dicts.jtMap, dicts.unitMap, dicts.catMap),
       );
 
-      const isAdmin = user?.roles?.includes('ADMIN') || user?.role === 'ADMIN' || user?.username === 'admin';
+      const isAdmin = user?.permissionsFlatten?.includes('HRM_EMPLOYEE:MANAGE');
 
       if (!isAdmin && req.callerUnitId) {
         const callerUnitId = parseInt(req.callerUnitId, 10);
@@ -289,6 +289,19 @@ export class EmployeeController implements OnModuleInit {
         }
       }
     }
+
+    if (res) {
+      res.meta = res.meta || {};
+      const perms = user?.permissionsFlatten || [];
+      const allowedActions: string[] = [];
+      
+      if (perms.includes('HRM_EMPLOYEE:CREATE')) allowedActions.push('CREATE');
+      if (perms.includes('HRM_EMPLOYEE:UPDATE')) allowedActions.push('EDIT');
+      if (perms.includes('HRM_EMPLOYEE:DELETE')) allowedActions.push('DELETE');
+      
+      res.meta.allowedActions = allowedActions;
+    }
+
     return res;
   }
 

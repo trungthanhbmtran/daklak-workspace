@@ -82,8 +82,7 @@ export function TaskDetailDialog({
   if (!activeTask) return null;
 
   const dueInfo = getDueDateDisplay(activeTask.dueDate, activeTask.status);
-  const isMyTask = activeTask.assigneeCode === currentUser?.employeeCode;
-  const isAssigner = activeTask.assignerCode === currentUser?.employeeCode;
+  const allowedActions = activeTask.allowedActions || [];
 
   return (
     <>
@@ -225,7 +224,7 @@ export function TaskDetailDialog({
                             {activeTask.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (activeTask.assigneeName || activeTask.assigneeCode || 'Chưa phân công')}
                           </p>
                         </div>
-                        {(!activeTask.assigneeCode || activeTask.assigneeCode === 'UNASSIGNED') && (
+                        {(!activeTask.assigneeCode || activeTask.assigneeCode === 'UNASSIGNED') && allowedActions.includes('ASSIGN_TASK') && (
                           <Button size="sm" variant="ghost" className="rounded-full text-xs font-bold text-violet-600 bg-violet-100 hover:bg-violet-200" onClick={() => onSmartAssign(activeTask)}>
                             Giao
                           </Button>
@@ -280,20 +279,22 @@ export function TaskDetailDialog({
                       </h3>
                       <div className="flex flex-col gap-2.5">
                         {/* Complete */}
-                        {isMyTask && (
+                        {allowedActions.includes('COMPLETE') && (
                           <Button className="w-full h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[13px] shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all" onClick={handleComplete}>
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Hoàn thành công việc
                           </Button>
                         )}
 
                         {/* Phân rã + Phân công */}
-                        {(isAssigner || isMyTask) && (
+                        {(allowedActions.includes('ADD_SUBTASK') || allowedActions.includes('ASSIGN_TASK')) && (
                           <div className="grid grid-cols-2 gap-2">
-                            <Button variant="outline" className="h-10 rounded-xl border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 font-bold text-[12px]" onClick={() => setIsSubTaskModalOpen(true)}>
-                              <Split className="w-3.5 h-3.5 mr-1.5" /> Phân rã
-                            </Button>
-                            {isAssigner && (
-                              <Button variant="outline" className="h-10 rounded-xl border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 font-bold text-[12px]" onClick={() => setIsAssignCoordinationOpen(true)}>
+                            {allowedActions.includes('ADD_SUBTASK') && (
+                              <Button variant="outline" className={`h-10 rounded-xl border-indigo-200 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 font-bold text-[12px] ${!allowedActions.includes('ASSIGN_TASK') ? 'col-span-2' : ''}`} onClick={() => setIsSubTaskModalOpen(true)}>
+                                <Split className="w-3.5 h-3.5 mr-1.5" /> Phân rã
+                              </Button>
+                            )}
+                            {allowedActions.includes('ASSIGN_TASK') && (
+                              <Button variant="outline" className={`h-10 rounded-xl border-violet-200 text-violet-700 bg-violet-50 hover:bg-violet-100 font-bold text-[12px] ${!allowedActions.includes('ADD_SUBTASK') ? 'col-span-2' : ''}`} onClick={() => setIsAssignCoordinationOpen(true)}>
                                 <User className="w-3.5 h-3.5 mr-1.5" /> Phân công
                               </Button>
                             )}
@@ -301,20 +302,24 @@ export function TaskDetailDialog({
                         )}
 
                         {/* Xin phối hợp + Trả lại */}
-                        <div className="grid grid-cols-2 gap-2">
-                          {isMyTask && (
-                            <Button variant="outline" className="h-10 rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 font-bold text-[12px]" onClick={() => setIsCoordinationModalOpen(true)}>
-                              <Users className="w-3.5 h-3.5 mr-1.5" /> Xin phối hợp
-                            </Button>
-                          )}
-                          <Button
-                            variant="outline"
-                            className={`h-10 rounded-xl border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold text-[12px] ${isMyTask ? '' : 'col-span-2'}`}
-                            onClick={() => setIsRejectOpen(true)}
-                          >
-                            <Reply className="w-3.5 h-3.5 mr-1.5" /> Trả lại
-                          </Button>
-                        </div>
+                        {(allowedActions.includes('ADD_COORDINATION') || allowedActions.includes('REJECT')) && (
+                          <div className="grid grid-cols-2 gap-2">
+                            {allowedActions.includes('ADD_COORDINATION') && (
+                              <Button variant="outline" className={`h-10 rounded-xl border-amber-200 text-amber-700 bg-amber-50 hover:bg-amber-100 font-bold text-[12px] ${!allowedActions.includes('REJECT') ? 'col-span-2' : ''}`} onClick={() => setIsCoordinationModalOpen(true)}>
+                                <Users className="w-3.5 h-3.5 mr-1.5" /> Xin phối hợp
+                              </Button>
+                            )}
+                            {allowedActions.includes('REJECT') && (
+                              <Button
+                                variant="outline"
+                                className={`h-10 rounded-xl border-rose-200 text-rose-700 bg-rose-50 hover:bg-rose-100 font-bold text-[12px] ${!allowedActions.includes('ADD_COORDINATION') ? 'col-span-2' : ''}`}
+                                onClick={() => setIsRejectOpen(true)}
+                              >
+                                <Reply className="w-3.5 h-3.5 mr-1.5" /> Trả lại
+                              </Button>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

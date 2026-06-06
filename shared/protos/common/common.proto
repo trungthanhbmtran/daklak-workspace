@@ -26,7 +26,8 @@ message Meta {
   PaginationMeta pagination = 1;
   SortMeta sort = 2;
   google.protobuf.Struct filters = 3;
-  google.protobuf.Struct extra = 10; 
+  google.protobuf.Struct extra = 10;
+  repeated string allowedActions = 11;
 }
 
 /* ================= REQUEST ================= */
