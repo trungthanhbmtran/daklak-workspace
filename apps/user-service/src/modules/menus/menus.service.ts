@@ -22,6 +22,9 @@ export type UpdateMenuDto = Partial<CreateMenuDto>;
 
 @Injectable()
 export class MenusService {
+  private menuCache = new Map<string, { data: any, expiresAt: number }>();
+  private readonly CACHE_TTL_MS = 300 * 1000; // 5 minutes
+
   constructor(private prisma: PrismaService) {}
 
   async getAll(application = 'ADMIN_PORTAL') {
@@ -88,6 +91,10 @@ export class MenusService {
       where: { id: menu.id },
       include: { requiredPermissions: { select: { permissionId: true } } },
     });
+    
+    // Invalidate cache
+    this.menuCache.clear();
+    
     return this.toFlat(withPerms ?? menu);
   }
 
@@ -156,6 +163,10 @@ export class MenusService {
       where: { id: updated.id },
       include: { requiredPermissions: { select: { permissionId: true } } },
     });
+    
+    // Invalidate cache
+    this.menuCache.clear();
+    
     return this.toFlat(withPerms ?? updated);
   }
 
@@ -171,6 +182,10 @@ export class MenusService {
       );
     }
     await this.prisma.menu.delete({ where: { id } });
+    
+    // Invalidate cache
+    this.menuCache.clear();
+    
     return true;
   }
 
@@ -211,6 +226,12 @@ export class MenusService {
   }
 
   async getMyMenus(userId: number, application = 'ADMIN_PORTAL') {
+    const cacheKey = `${userId}_${application}`;
+    const cached = this.menuCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     // 1. Lấy tất cả quyền của User
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -241,6 +262,9 @@ export class MenusService {
     const menuTree = buildTree(visibleMenus, null);
 
     // 4. Cắt tỉa menu cha rỗng (Quan trọng)
-    return pruneEmptyParents(menuTree);
+    const result = pruneEmptyParents(menuTree);
+    
+    this.menuCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    return result;
   }
 }

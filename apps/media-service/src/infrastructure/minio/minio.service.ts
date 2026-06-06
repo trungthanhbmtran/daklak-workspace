@@ -120,8 +120,10 @@ export class MinioService implements OnModuleInit {
 
   async generatePresignedUrlsForParts(key: string, uploadId: string, partsCount: number, expiresIn = 3600): Promise<string[]> {
     this.logger.debug(`Generating ${partsCount} presigned URLs for uploadId: ${uploadId}`);
-    const urls: string[] = [];
-    for (let i = 1; i <= partsCount; i++) {
+    
+    // Thuật toán xử lý song song (Concurrent Processing) với Promise.all
+    const promises = Array.from({ length: partsCount }, async (_, index) => {
+      const i = index + 1;
       const command = new UploadPartCommand({
         Bucket: this.bucket,
         Key: key,
@@ -130,8 +132,11 @@ export class MinioService implements OnModuleInit {
       });
       const url = await getSignedUrl(this.signingClient, command, { expiresIn });
       const prefix = this.configService.get<string>('MINIO_URL_PREFIX', '');
-      urls.push(prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url);
-    }
+      return prefix ? `${prefix}${new URL(url).pathname}${new URL(url).search}` : url;
+    });
+
+    const urls = await Promise.all(promises);
+    
     this.logger.debug(`Successfully generated ${urls.length} part URLs`);
     return urls;
   }

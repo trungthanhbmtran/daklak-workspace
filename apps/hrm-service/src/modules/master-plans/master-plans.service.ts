@@ -53,23 +53,31 @@ export class MasterPlansService {
     return {
       success: true,
       message: 'Lấy danh sách Kế hoạch thành công',
-      data: masterPlans.map(mp => ({
-        ...mp,
-        startDate: mp.startDate?.toISOString() || '',
-        endDate: mp.endDate?.toISOString() || '',
-        createdAt: mp.createdAt?.toISOString() || '',
-        updatedAt: mp.updatedAt?.toISOString() || '',
-        totalTasks: mp.tasks.length,
-        completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
-        tasks: mp.tasks.map((t: any) => ({
-          ...t,
-          assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim() : t.assigneeCode,
-          dueDate: t.dueDate?.toISOString() || '',
-          completionDate: t.completionDate?.toISOString() || '',
-          createdAt: t.createdAt?.toISOString() || '',
-          updatedAt: t.updatedAt?.toISOString() || '',
-        })),
-      })),
+      data: masterPlans.map(mp => {
+        let completedTasks = 0;
+        const tasks = mp.tasks.map((t: any) => {
+          if (t.status === 'DONE') completedTasks++;
+          return {
+            ...t,
+            assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim() : t.assigneeCode,
+            dueDate: t.dueDate?.toISOString() || '',
+            completionDate: t.completionDate?.toISOString() || '',
+            createdAt: t.createdAt?.toISOString() || '',
+            updatedAt: t.updatedAt?.toISOString() || '',
+          };
+        });
+
+        return {
+          ...mp,
+          startDate: mp.startDate?.toISOString() || '',
+          endDate: mp.endDate?.toISOString() || '',
+          createdAt: mp.createdAt?.toISOString() || '',
+          updatedAt: mp.updatedAt?.toISOString() || '',
+          totalTasks: mp.tasks.length,
+          completedTasks,
+          tasks
+        };
+      }),
       meta: {
         pagination: {
           total: masterPlans.length,
@@ -93,6 +101,19 @@ export class MasterPlansService {
       }
     });
     if (!mp) return null;
+    let completedTasks = 0;
+    const tasks = mp.tasks.map((t: any) => {
+      if (t.status === 'DONE') completedTasks++;
+      return {
+        ...t,
+        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim() : t.assigneeCode,
+        dueDate: t.dueDate?.toISOString() || '',
+        completionDate: t.completionDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+      };
+    });
+
     return {
       ...mp,
       startDate: mp.startDate?.toISOString() || '',
@@ -100,15 +121,8 @@ export class MasterPlansService {
       createdAt: mp.createdAt?.toISOString() || '',
       updatedAt: mp.updatedAt?.toISOString() || '',
       totalTasks: mp.tasks.length,
-      completedTasks: mp.tasks.filter(t => t.status === 'DONE').length,
-      tasks: mp.tasks.map((t: any) => ({
-        ...t,
-        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim() : t.assigneeCode,
-        dueDate: t.dueDate?.toISOString() || '',
-        completionDate: t.completionDate?.toISOString() || '',
-        createdAt: t.createdAt?.toISOString() || '',
-        updatedAt: t.updatedAt?.toISOString() || '',
-      })),
+      completedTasks,
+      tasks
     };
   }
 

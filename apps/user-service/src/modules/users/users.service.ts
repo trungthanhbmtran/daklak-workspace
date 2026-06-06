@@ -258,6 +258,7 @@ export class UsersService implements OnModuleInit {
       },
       include: {
         credential: true,
+        roles: true,
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -290,11 +291,7 @@ export class UsersService implements OnModuleInit {
       String(user.id),
       REFRESH_TTL_SECONDS,
     );
-    const userWithRoles = await this.prisma.user.findUnique({
-      where: { id: user.id },
-      include: { roles: true },
-    });
-    const roles = userWithRoles?.roles?.map((r) => r.code) ?? [];
+    const roles = user.roles?.map((r) => r.code) ?? [];
 
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
@@ -476,15 +473,20 @@ export class UsersService implements OnModuleInit {
   async listUsers(data: { skip?: number; take?: number } = {}) {
     const skip = data.skip ?? 0;
     const take = data.take && data.take > 0 ? Math.min(data.take, 500) : 500;
-    const users = await this.prisma.user.findMany({
-      skip,
-      take,
-      orderBy: { id: 'asc' },
-    });
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take,
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.user.count()
+    ]);
+
     return {
       data: users.map((u) => this.toUserResponse(u)),
       meta: {
-        total: await this.prisma.user.count(),
+        total,
         skip,
         take,
       },

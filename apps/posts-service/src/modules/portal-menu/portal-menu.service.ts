@@ -56,29 +56,41 @@ export class PortalMenuService {
   }
 
   async findAll(onlyActive = false, position?: string) {
-    const where: any = { parentId: null };
+    const where: any = {};
+    // Sửa lỗi Prisma cũ: áp dụng isActive cho toàn bộ cây thay vì chỉ Root
     if (onlyActive) where.isActive = true;
-    if (position && position !== 'ALL') where.position = position;
 
-    return this.prisma.portalMenu.findMany({
+    // Lấy toàn bộ mảng phẳng
+    const allMenus = await this.prisma.portalMenu.findMany({
       where,
       orderBy: { order: 'asc' },
-      include: {
-        children: {
-          orderBy: { order: 'asc' },
-          include: {
-            children: {
-              orderBy: { order: 'asc' },
-              include: {
-                children: {
-                  orderBy: { order: 'asc' }
-                }
-              }
-            }
-          }
-        }
-      },
     });
+
+    const menuMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    // Khởi tạo Node
+    for (const menu of allMenus) {
+      menuMap.set(menu.id, { ...menu, children: [] });
+    }
+
+    // Xây dựng Cây O(N)
+    for (const menu of allMenus) {
+      const node = menuMap.get(menu.id);
+      if (menu.parentId) {
+        const parent = menuMap.get(menu.parentId);
+        if (parent) {
+          parent.children.push(node);
+        }
+      } else {
+        // Lọc Position chỉ áp dụng cho Root Level
+        let match = true;
+        if (position && position !== 'ALL' && node.position !== position) match = false;
+        if (match) roots.push(node);
+      }
+    }
+
+    return roots;
   }
 
   async update(id: string, data: any) {

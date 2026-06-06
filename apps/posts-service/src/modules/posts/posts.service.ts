@@ -711,15 +711,29 @@ export class PostsService implements OnModuleInit {
     if (query.categoryId) base.categoryId = query.categoryId;
     if (query.authorId)   base.authorId   = query.authorId;
 
-    const [total, published, draft, pending, reviewing, rejected, viewsAgg] = await Promise.all([
-      this.prisma.post.count({ where: base }),
-      this.prisma.post.count({ where: { ...base, status: 'PUBLISHED' } }),
-      this.prisma.post.count({ where: { ...base, status: 'DRAFT' } }),
-      this.prisma.post.count({ where: { ...base, status: 'SUBMITTED' } }),
-      this.prisma.post.count({ where: { ...base, status: 'REVIEWING' } }),
-      this.prisma.post.count({ where: { ...base, status: 'REJECTED' } }),
-      this.prisma.post.aggregate({ where: base, _sum: { viewCount: true } }),
-    ]);
+    // Sử dụng thuật toán Single-Pass Bucketing thông qua Prisma groupBy
+    const stats = await this.prisma.post.groupBy({
+      by: ['status'],
+      where: base,
+      _count: { _all: true },
+      _sum: { viewCount: true },
+    });
+
+    let total = 0, published = 0, draft = 0, pending = 0, reviewing = 0, rejected = 0, totalViews = 0;
+
+    for (const group of stats) {
+      const count = group._count._all;
+      total += count;
+      totalViews += group._sum.viewCount ?? 0;
+
+      switch (group.status) {
+        case 'PUBLISHED': published += count; break;
+        case 'DRAFT': draft += count; break;
+        case 'SUBMITTED': pending += count; break;
+        case 'REVIEWING': reviewing += count; break;
+        case 'REJECTED': rejected += count; break;
+      }
+    }
 
     return {
       total,
@@ -728,7 +742,7 @@ export class PostsService implements OnModuleInit {
       pending,
       reviewing,
       rejected,
-      totalViews: viewsAgg._sum.viewCount ?? 0,
+      totalViews,
     };
   }
 }

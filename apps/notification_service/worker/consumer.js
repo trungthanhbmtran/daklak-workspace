@@ -80,7 +80,8 @@ async function startConsumer() {
   }
   channel = await connection.createChannel();
   await channel.assertQueue(queueName, { durable: false });
-  channel.prefetch(1);
+  // Thuật toán Concurrency: Mở rộng prefetch để xử lý song song 50 message cùng lúc
+  channel.prefetch(50);
   console.log(`[Notification] Consuming queue: ${queueName}`);
   channel.consume(queueName, async (msg) => {
     if (!msg) return;

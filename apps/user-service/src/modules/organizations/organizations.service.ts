@@ -7,6 +7,9 @@ const GRPC = { NOT_FOUND: 5 } as const;
 
 @Injectable()
 export class OrganizationsService {
+  private treeCache = new Map<string, { data: any, expiresAt: number }>();
+  private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
+
   constructor(private prisma: PrismaService) {}
 
   // --- 1. QUẢN LÝ ĐƠN VỊ (CRUD) ---
@@ -57,6 +60,10 @@ export class OrganizationsService {
         skipDuplicates: true,
       });
     }
+    
+    // Invalidate cache
+    this.treeCache.clear();
+
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
       include: {
@@ -234,6 +241,10 @@ export class OrganizationsService {
         });
       }
     }
+    
+    // Invalidate cache
+    this.treeCache.clear();
+
     return this.prisma.organizationUnit.findUniqueOrThrow({
       where: { id: unit.id },
       include: {
@@ -278,11 +289,21 @@ export class OrganizationsService {
       });
     }
     await this.prisma.organizationUnit.delete({ where: { id } });
+    
+    // Invalidate cache
+    this.treeCache.clear();
+
     return true;
   }
 
   // Lấy cây tổ chức (Full Tree)
   async getFullTree() {
+    const cacheKey = 'FULL_TREE';
+    const cached = this.treeCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const units = await this.prisma.organizationUnit.findMany({
       orderBy: { hierarchyPath: 'asc' },
       include: {
@@ -311,11 +332,20 @@ export class OrganizationsService {
         },
       },
     });
-    return { data: buildTree(units, null) };
+    
+    const result = { data: buildTree(units, null) };
+    this.treeCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    return result;
   }
 
   // Lấy cây con của 1 đơn vị (Dùng Materialized Path)
   async getSubTree(rootId: number) {
+    const cacheKey = `SUB_TREE_${rootId}`;
+    const cached = this.treeCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const root = await this.prisma.organizationUnit.findUnique({
       where: { id: rootId },
     });
@@ -363,7 +393,9 @@ export class OrganizationsService {
       },
     });
 
-    return { data: buildTree(units, root.parentId) };
+    const result = { data: buildTree(units, root.parentId) };
+    this.treeCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    return result;
   }
 
   // --- 2. QUẢN LÝ ĐỊNH BIÊN (STAFFING) ---

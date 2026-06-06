@@ -7,6 +7,8 @@ import { firstValueFrom } from 'rxjs';
 @Injectable()
 export class TasksService implements OnModuleInit {
   private integrationService: any;
+  private recommendationCache = new Map<string, { data: any, expiresAt: number }>();
+  private readonly RECOMMENDATION_CACHE_TTL_MS = 300000; // 5 minutes
 
   constructor(
     private prisma: PrismaService,
@@ -68,41 +70,31 @@ export class TasksService implements OnModuleInit {
     const in7Days = new Date(now);
     in7Days.setDate(in7Days.getDate() + 7);
 
-    const [overdueCount, dueIn3DaysCount, dueIn7DaysCount, dueOver7DaysCount] = await Promise.all([
-      this.prisma.task.count({
-        where: {
-          ...baseWhere,
-          OR: [
-            { status: 'OVERDUE' },
-            { dueDate: { lt: now } }
-          ]
+    // Fetch minimal data for single-pass bucketing
+    const tasks = await this.prisma.task.findMany({
+      where: baseWhere,
+      select: { status: true, dueDate: true }
+    });
+
+    let overdueCount = 0;
+    let dueIn3DaysCount = 0;
+    let dueIn7DaysCount = 0;
+    let dueOver7DaysCount = 0;
+
+    for (let i = 0; i < tasks.length; i++) {
+      const t = tasks[i];
+      if (t.status === 'OVERDUE' || (t.dueDate && t.dueDate < now)) {
+        overdueCount++;
+      } else if (t.status !== 'OVERDUE') {
+        if (t.dueDate && t.dueDate >= now && t.dueDate <= in3Days) {
+          dueIn3DaysCount++;
+        } else if (t.dueDate && t.dueDate > in3Days && t.dueDate <= in7Days) {
+          dueIn7DaysCount++;
+        } else if (!t.dueDate || t.dueDate > in7Days) {
+          dueOver7DaysCount++;
         }
-      }),
-      this.prisma.task.count({
-        where: {
-          ...baseWhere,
-          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] },
-          dueDate: { gte: now, lte: in3Days }
-        }
-      }),
-      this.prisma.task.count({
-        where: {
-          ...baseWhere,
-          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] },
-          dueDate: { gt: in3Days, lte: in7Days }
-        }
-      }),
-      this.prisma.task.count({
-        where: {
-          ...baseWhere,
-          status: { notIn: ['DONE', 'ARCHIVED', 'OVERDUE', 'TEMPLATE'] },
-          OR: [
-            { dueDate: { gt: in7Days } },
-            { dueDate: null }
-          ]
-        }
-      })
-    ]);
+      }
+    }
 
     return { overdueCount, dueIn3DaysCount, dueIn7DaysCount, dueOver7DaysCount };
   }
@@ -281,11 +273,11 @@ export class TasksService implements OnModuleInit {
       message: 'Lấy danh sách nhiệm vụ theo kế hoạch thành công',
       data: tasks.map((t: any) => {
         // Phân quyền cho từng task
-        const canEdit = isUserAdmin 
-          || t.assignerCode === currentUserCode 
-          || t.assigneeCode === currentUserCode 
+        const canEdit = isUserAdmin
+          || t.assignerCode === currentUserCode
+          || t.assigneeCode === currentUserCode
           || (t.departmentId && callerAncestorUnitIds.includes(t.departmentId));
-          
+
         return {
           ...t,
           assigneeName: t.assignee
@@ -406,6 +398,13 @@ export class TasksService implements OnModuleInit {
 
   async recommendAssignees(query: { rankCode: string, strategy: string }) {
     const { rankCode, strategy } = query;
+
+    const cacheKey = `${rankCode}_${strategy}`;
+    const cached = this.recommendationCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const where: any = {};
     if (rankCode && rankCode !== 'ALL') {
       where.rankCode = rankCode;
@@ -425,70 +424,67 @@ export class TasksService implements OnModuleInit {
       }
     });
 
-    const recommendations = employees.map((emp: any) => {
-      const currentLoad = emp.tasksReceived.reduce((sum: number, t: any) => sum + (t.weight || 10), 0);
+    const deptMap = new Map<number, any>();
+    const recommendations: any[] = [];
 
-      let performanceScore = 50; // default
+    // Single-pass reduction
+    for (let i = 0; i < employees.length; i++) {
+      const emp = employees[i];
+
+      let currentLoad = 0;
+      for (let j = 0; j < emp.tasksReceived.length; j++) {
+        currentLoad += emp.tasksReceived[j].weight || 10;
+      }
+
+      let performanceScore = 50;
       if (emp.kpiEvaluations && emp.kpiEvaluations.length > 0) {
-        const total = emp.kpiEvaluations.reduce((sum: number, e: any) => sum + (e.totalScore || 0), 0);
-        performanceScore = total / emp.kpiEvaluations.length;
+        let totalScore = 0;
+        for (let j = 0; j < emp.kpiEvaluations.length; j++) {
+          totalScore += emp.kpiEvaluations[j].totalScore || 0;
+        }
+        performanceScore = totalScore / emp.kpiEvaluations.length;
       } else {
         // Fallback mock if no evaluations yet
         performanceScore = 60 + Math.random() * 30;
       }
 
       // Match Score Calculation
-      // We want to prioritize LOW load. 
-      // If HIGH_PERFORMANCE -> prioritize HIGH performanceScore
-      // If LOW_PERFORMANCE -> prioritize LOW performanceScore (to give them a chance to improve)
-
       let loadFactor = Math.max(0, 100 - currentLoad); // Less load = higher factor
       let perfFactor = performanceScore;
       if (strategy === 'LOW_PERFORMANCE') {
         perfFactor = 100 - performanceScore;
       } else if (strategy === 'UNDER_QUOTA') {
         // Hạn mức quy định tạm tính là 40 điểm
-        if (currentLoad < 40) {
-          loadFactor = 100; // Tối đa điểm cho người chưa đủ hạn mức
-        } else {
-          loadFactor = 0; // Không ưu tiên người đã đủ hoặc vượt hạn mức
-        }
+        loadFactor = currentLoad < 40 ? 100 : 0;
       }
 
       const matchScore = (loadFactor * 0.6) + (perfFactor * 0.4);
 
-      return {
+      recommendations.push({
         employeeCode: emp.employeeCode,
         employeeName: `${emp.lastname} ${emp.firstname}`.trim(),
         departmentId: emp.departmentId,
         currentLoad,
         performanceScore,
         matchScore
-      };
-    });
+      });
+
+      // Group by department in the same pass
+      if (emp.departmentId) {
+        let d = deptMap.get(emp.departmentId);
+        if (!d) {
+          d = { departmentId: emp.departmentId, totalLoad: 0, totalPerf: 0, totalMatch: 0, count: 0 };
+          deptMap.set(emp.departmentId, d);
+        }
+        d.totalLoad += currentLoad;
+        d.totalPerf += performanceScore;
+        d.totalMatch += matchScore;
+        d.count += 1;
+      }
+    }
 
     // Sort by matchScore DESC
     recommendations.sort((a, b) => b.matchScore - a.matchScore);
-
-    // Group by department
-    const deptMap = new Map<number, any>();
-    recommendations.forEach(emp => {
-      if (!emp.departmentId) return;
-      if (!deptMap.has(emp.departmentId)) {
-        deptMap.set(emp.departmentId, {
-          departmentId: emp.departmentId,
-          totalLoad: 0,
-          totalPerf: 0,
-          totalMatch: 0,
-          count: 0
-        });
-      }
-      const d = deptMap.get(emp.departmentId);
-      d.totalLoad += emp.currentLoad;
-      d.totalPerf += emp.performanceScore;
-      d.totalMatch += emp.matchScore;
-      d.count += 1;
-    });
 
     const topDepartments = Array.from(deptMap.values()).map(d => ({
       departmentId: d.departmentId,
@@ -498,7 +494,7 @@ export class TasksService implements OnModuleInit {
       employeeCount: d.count
     })).sort((a, b) => b.matchScore - a.matchScore);
 
-    return {
+    const result = {
       success: true,
       message: 'Gợi ý nhân sự và phòng ban thành công',
       data: {
@@ -506,6 +502,9 @@ export class TasksService implements OnModuleInit {
         topDepartments: topDepartments.slice(0, 3)
       }
     };
+
+    this.recommendationCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.RECOMMENDATION_CACHE_TTL_MS });
+    return result;
   }
 
   async updateTask(id: number, data: any) {
@@ -753,7 +752,7 @@ export class TasksService implements OnModuleInit {
       where: { id: data.parentId }
     });
     if (!parent) throw new Error('Không tìm thấy nhiệm vụ cha');
-    
+
     const child = await this.prisma.task.create({
       data: {
         title: data.title,
@@ -961,22 +960,27 @@ export class TasksService implements OnModuleInit {
       });
     }
 
-    // Build level map từ taskId = level 0
-    const levelMap = new Map<number, number>();
-    levelMap.set(taskId, 0);
-    const remaining = [...allRelated];
-    const ordered: { task: any; level: number }[] = [];
-    let guard = allRelated.length + 1;
+    // Build adjacency list for O(N) traversal
+    const adjMap = new Map<number, any[]>();
+    for (let i = 0; i < allRelated.length; i++) {
+      const t = allRelated[i];
+      const pid = t.parentId ?? taskId;
+      if (!adjMap.has(pid)) adjMap.set(pid, []);
+      adjMap.get(pid)!.push(t);
+    }
 
-    while (remaining.length > 0 && guard-- > 0) {
-      for (let i = remaining.length - 1; i >= 0; i--) {
-        const t = remaining[i];
-        const parentLevel = levelMap.get(t.parentId ?? taskId);
-        if (parentLevel !== undefined) {
-          levelMap.set(t.id, parentLevel + 1);
-          ordered.push({ task: t, level: parentLevel + 1 });
-          remaining.splice(i, 1);
-        }
+    const ordered: { task: any; level: number }[] = [];
+    const queue = [{ id: taskId, level: 0 }];
+
+    // BFS queue processing
+    let qIdx = 0;
+    while (qIdx < queue.length) {
+      const current = queue[qIdx++];
+      const children = adjMap.get(current.id) || [];
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        ordered.push({ task: child, level: current.level + 1 });
+        queue.push({ id: child.id, level: current.level + 1 });
       }
     }
 

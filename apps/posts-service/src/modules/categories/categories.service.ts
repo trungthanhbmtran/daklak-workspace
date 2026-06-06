@@ -65,18 +65,35 @@ export class CategoriesService {
   }
 
   async getTree() {
-    // Basic tree retrieval
-    const categories = await this.prisma.category.findMany({
-      where: { parentId: null },
-      include: {
-        children: {
-          include: {
-            children: true, // Support up to 3 levels for now, or use recursive function
-          }
-        }
-      },
+    // Thuật toán O(N) Adjacency List cho cây danh mục không giới hạn độ sâu
+    const allCategories = await this.prisma.category.findMany({
       orderBy: { orderIndex: 'asc' },
     });
-    return categories;
+
+    const categoryMap = new Map<string, any>();
+    const roots: any[] = [];
+
+    // Khởi tạo map
+    for (const cat of allCategories) {
+      categoryMap.set(cat.id, { ...cat, children: [] });
+    }
+
+    // Xây dựng cây
+    for (const cat of allCategories) {
+      const node = categoryMap.get(cat.id);
+      if (cat.parentId) {
+        const parent = categoryMap.get(cat.parentId);
+        if (parent) {
+          parent.children.push(node);
+        } else {
+          // Fallback nếu parent bị lỗi/xóa nhưng child vẫn còn
+          roots.push(node);
+        }
+      } else {
+        roots.push(node);
+      }
+    }
+
+    return roots;
   }
 }

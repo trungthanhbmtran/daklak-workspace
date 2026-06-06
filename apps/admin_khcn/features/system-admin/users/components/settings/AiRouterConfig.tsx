@@ -84,7 +84,7 @@ export function AiRouterConfig() {
 
   return (
     <Card className="border-0 shadow-xl bg-white rounded-2xl overflow-hidden ring-1 ring-slate-100">
-      <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-blue-50 to-indigo-50/30 p-6 flex flex-row items-center justify-between">
+      <CardHeader className="border-b border-slate-100 bg-linear-to-r from-blue-50 to-indigo-50/30 p-6 flex flex-row items-center justify-between">
         <div>
           <CardTitle className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <Activity className="w-6 h-6 text-blue-600" />

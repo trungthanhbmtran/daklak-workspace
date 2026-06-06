@@ -171,35 +171,40 @@ export class DocumentService {
 
   async getStatistics() {
     const now = new Date();
-    const [
-      incomingTotal,
-      incomingPending,
-      incomingLate,
-      outgoingTotal,
-      urgentTotal
-    ] = await Promise.all([
-      // incomingTotal: Documents with isIncoming: true
-      this.prisma.document.count({ where: { isIncoming: true } }),
-      // incomingPending: Documents with isIncoming: true and status PROCESSING
-      this.prisma.document.count({ where: { isIncoming: true, status: 'PROCESSING' } }),
-      // incomingLate: Documents with isIncoming: true, status PROCESSING and deadline < now
-      this.prisma.document.count({
-        where: {
-          isIncoming: true,
-          status: 'PROCESSING',
-          processingDeadline: { lt: now, not: null }
+    
+    // Thuật toán Single-Pass Bucketing: Lấy các trường tối giản và duyệt 1 lần trên RAM
+    const documents = await this.prisma.document.findMany({
+      select: {
+        isIncoming: true,
+        status: true,
+        urgency: true,
+        processingDeadline: true,
+      }
+    });
+
+    let incomingTotal = 0;
+    let incomingPending = 0;
+    let incomingLate = 0;
+    let outgoingTotal = 0;
+    let urgentTotal = 0;
+
+    for (const doc of documents) {
+      if (doc.isIncoming) {
+        incomingTotal++;
+        if (doc.status === 'PROCESSING') {
+          incomingPending++;
+          if (doc.processingDeadline && doc.processingDeadline < now) {
+            incomingLate++;
+          }
         }
-      }),
-      // outgoingTotal: Documents with isIncoming: false
-      this.prisma.document.count({ where: { isIncoming: false } }),
-      // urgentTotal: Urgency is URGENT or FLASH
-      this.prisma.document.count({
-        where: {
-          urgency: { in: ['URGENT', 'FLASH'] },
-          status: 'PROCESSING'
-        }
-      }),
-    ]);
+      } else {
+        outgoingTotal++;
+      }
+
+      if (doc.status === 'PROCESSING' && (doc.urgency === 'URGENT' || doc.urgency === 'FLASH')) {
+        urgentTotal++;
+      }
+    }
 
     return {
       incomingTotal,
@@ -324,9 +329,12 @@ export class DocumentService {
       }
     ];
 
-    for (const doc of mockExternalDocs) {
-      await this.create({ ...doc, userId: 'SYSTEM', userName: 'Hệ thống tự động (VDX)' });
-    }
+    // Thuật toán Concurrent Promise.all để lưu song song
+    await Promise.all(
+      mockExternalDocs.map(doc => 
+        this.create({ ...doc, userId: 'SYSTEM', userName: 'Hệ thống tự động (VDX)' })
+      )
+    );
 
     return { success: true, count: mockExternalDocs.length };
   }

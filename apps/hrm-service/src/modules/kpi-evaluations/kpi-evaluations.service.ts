@@ -3,13 +3,22 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class KpiEvaluationsService {
+  private cache = new Map<string, { data: any, expiresAt: number }>();
+  private readonly CACHE_TTL_MS = 3600 * 1000; // 1 hour
+
   constructor(private prisma: PrismaService) { }
 
   async findPeriods() {
+    const cached = this.cache.get('periods');
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const periods = await this.prisma.kpiPeriod.findMany({
       orderBy: { startDate: 'desc' },
     });
-    return {
+    
+    const result = {
       success: true,
       message: 'Lấy danh sách kỳ đánh giá thành công',
       data: periods.map(p => ({
@@ -28,6 +37,9 @@ export class KpiEvaluationsService {
         }
       }
     };
+
+    this.cache.set('periods', { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    return result;
   }
 
   async createPeriod(data: any) {
@@ -38,6 +50,10 @@ export class KpiEvaluationsService {
         endDate: new Date(data.endDate),
       }
     });
+
+    // Invalidate cache when data changes
+    this.cache.delete('periods');
+
     return {
       ...p,
       startDate: p.startDate?.toISOString() || '',
@@ -46,8 +62,13 @@ export class KpiEvaluationsService {
   }
 
   async findCriteria() {
+    const cached = this.cache.get('criteria');
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.data;
+    }
+
     const criteria = await this.prisma.kpiCriteria.findMany();
-    return {
+    const result = {
       success: true,
       message: 'Lấy danh sách tiêu chí thành công',
       data: criteria,
@@ -62,6 +83,9 @@ export class KpiEvaluationsService {
         }
       }
     };
+
+    this.cache.set('criteria', { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
+    return result;
   }
 
   async createCriterion(data: any) {
@@ -80,6 +104,9 @@ export class KpiEvaluationsService {
         categoryId: data.categoryId,
       }
     });
+
+    // Invalidate cache
+    this.cache.delete('criteria');
     return c;
   }
 
@@ -101,11 +128,15 @@ export class KpiEvaluationsService {
       where: { id },
       data: updateData,
     });
+
+    // Invalidate cache
+    this.cache.delete('criteria');
     return c;
   }
 
   async deleteCriterion(id: number) {
     await this.prisma.kpiCriteria.delete({ where: { id } });
+    this.cache.delete('criteria'); // Invalidate cache
     return { success: true };
   }
 
