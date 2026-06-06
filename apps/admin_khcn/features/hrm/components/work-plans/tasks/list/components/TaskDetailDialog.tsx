@@ -349,10 +349,34 @@ export function TaskDetailDialog({
                         <p className="text-[11px] text-slate-300 mt-1">Sử dụng &quot;Phân rã&quot; để tạo task con</p>
                       </div>
                     ) : (
-                      <div className="relative">
-                        <div className="absolute left-[18px] top-6 bottom-6 w-0.5 bg-slate-200 dark:bg-slate-700" />
-                        <div className="space-y-2">
-                          {delegationChain.map((node: any, idx: number) => {
+                      <div className="py-2">
+                        {(() => {
+                          // 1. Build Tree
+                          const nodeMap: Record<number, any> = {};
+                          const rootNodes: any[] = [];
+                          
+                          delegationChain.forEach((n: any) => {
+                            nodeMap[n.id] = { ...n, children: [] };
+                          });
+
+                          delegationChain.forEach((n: any) => {
+                            const parent = nodeMap[n.parentId];
+                            // Nếu có parent trong map VÀ không phải là root node giả (level -1) đang xét
+                            if (parent && n.level !== -1) {
+                              parent.children.push(nodeMap[n.id]);
+                            } else if (n.level === -1) {
+                              rootNodes.push(nodeMap[n.id]);
+                            } else if (n.level === 0 && !delegationChain.find((x: any) => x.level === -1)) {
+                              // Không có parent (-1), task hiện tại là root
+                              rootNodes.push(nodeMap[n.id]);
+                            } else if (!parent) {
+                              // Fallback an toàn
+                              rootNodes.push(nodeMap[n.id]);
+                            }
+                          });
+
+                          // 2. Recursive Renderer
+                          const renderNode = (node: any, isLast: boolean, depth: number) => {
                             const isCurrent = node.id === task?.id;
                             const sc: Record<string, { dot: string; badge: string; label: string }> = {
                               DONE: { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
@@ -361,42 +385,67 @@ export function TaskDetailDialog({
                               OVERDUE: { dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700', label: 'Trễ' },
                             };
                             const color = sc[node.status] || { dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', label: node.status };
+
                             return (
-                              <div
-                                key={node.id}
-                                onClick={() => {
-                                  if (!isCurrent) {
-                                    if (onSelectTask) {
-                                      onSelectTask(node);
-                                    } else {
-                                      onClose();
+                              <div key={node.id} className="relative">
+                                {/* L-shape line for branching */}
+                                {depth > 0 && (
+                                  <div className="absolute top-0 -left-[22px] w-[22px] h-7 border-l-2 border-b-2 border-slate-200 dark:border-slate-700 rounded-bl-xl" />
+                                )}
+                                {/* Continuous vertical line if not the last child */}
+                                {depth > 0 && !isLast && (
+                                  <div className="absolute top-7 bottom-[-16px] -left-[22px] w-0.5 bg-slate-200 dark:bg-slate-700" />
+                                )}
+
+                                <div
+                                  onClick={() => {
+                                    if (!isCurrent) {
+                                      if (onSelectTask) onSelectTask(node);
+                                      else onClose();
                                     }
-                                  }
-                                }}
-                                className={`relative flex items-start gap-3 pl-9 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-white dark:hover:bg-slate-800 cursor-pointer'}`}
-                              >
-                                <div className={`absolute left-[13px] top-[18px] w-[11px] h-[11px] rounded-full ${color.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm z-10`} />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center justify-between gap-1 mb-1">
-                                    <span className={`text-[9.5px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600' : 'text-slate-400'}`}>
-                                      {node.isParent ? '🌳 Gốc' : isCurrent ? '▶ Đang xem' : idx === delegationChain.length - 1 ? '🌿 Lá' : '🪵 Nhánh'}
-                                    </span>
-                                    <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${color.badge}`}>{color.label}</span>
-                                  </div>
-                                  <p className={`font-bold text-[12.5px] line-clamp-2 leading-snug mb-1.5 ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
-                                    {node.title}
-                                  </p>
-                                  <div className="flex items-center gap-1.5">
-                                    <div className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500">
-                                      {(node.assigneeName || node.assigneeCode)?.charAt(0) || '?'}
+                                  }}
+                                  className={`relative flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-white dark:hover:bg-slate-800 cursor-pointer'}`}
+                                >
+                                  {/* Dot */}
+                                  <div className={`mt-1 w-2.5 h-2.5 rounded-full ${color.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm shrink-0 z-10`} />
+                                  
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-1 mb-1">
+                                      <span className={`text-[9.5px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                        {node.level === -1 ? '🌳 Gốc' : isCurrent ? '▶ Đang xem' : node.children.length > 0 ? '🪵 Nhánh' : '🌿 Lá'}
+                                      </span>
+                                      <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full ${color.badge}`}>{color.label}</span>
                                     </div>
-                                    <span className="text-[11px] text-slate-500 truncate">{node.assigneeName || node.assigneeCode || 'Chưa phân công'}</span>
+                                    <p className={`font-bold text-[12.5px] line-clamp-2 leading-snug mb-1.5 ${isCurrent ? 'text-indigo-900 dark:text-indigo-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                                      {node.title}
+                                    </p>
+                                    <div className="flex items-center gap-1.5">
+                                      <div className="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold text-slate-500 shrink-0">
+                                        {(node.assigneeName || node.assigneeCode)?.charAt(0) || '?'}
+                                      </div>
+                                      <span className="text-[11px] text-slate-500 truncate">{node.assigneeName || node.assigneeCode || 'Chưa phân công'}</span>
+                                    </div>
                                   </div>
                                 </div>
+
+                                {/* Children */}
+                                {node.children && node.children.length > 0 && (
+                                  <div className="ml-6 mt-1 relative space-y-1">
+                                    {node.children.map((child: any, idx: number) => 
+                                      renderNode(child, idx === node.children.length - 1, depth + 1)
+                                    )}
+                                  </div>
+                                )}
                               </div>
                             );
-                          })}
-                        </div>
+                          };
+
+                          return (
+                            <div className="space-y-3">
+                              {rootNodes.map((root, idx) => renderNode(root, idx === rootNodes.length - 1, 0))}
+                            </div>
+                          );
+                        })()}
                       </div>
                     )}
                   </div>
