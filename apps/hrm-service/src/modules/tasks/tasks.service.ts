@@ -273,9 +273,6 @@ export class TasksService implements OnModuleInit {
       this.getTaskStats(query)
     ]);
 
-    const isUserAdmin = query.isAdmin;
-    const currentUserCode = query.currentUserCode;
-
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
@@ -328,11 +325,7 @@ export class TasksService implements OnModuleInit {
       }
     });
 
-    const isUserAdmin = query.isAdmin;
-    const currentUserCode = query.currentUserCode;
     const mappedTasks = await Promise.all(tasks.map(async (t: any) => {
-      // Phân quyền cho từng task
-      // Phân quyền cho từng task
       const allowedActions = await this.computeAllowedActions(t, query);
 
       return {
@@ -380,12 +373,14 @@ export class TasksService implements OnModuleInit {
   async createTask(data: any) {
     // Propagate planId từ task cha nếu không có — đảm bảo toàn bộ cây task thuộc cùng kế hoạch
     let planId = data.planId || null;
-    if (data.parentId && !planId) {
+    let rootTaskId: number | null = null;
+    if (data.parentId) {
       const parent = await this.prisma.task.findUnique({
         where: { id: parseInt(data.parentId, 10) },
-        select: { planId: true }
+        select: { planId: true, rootTaskId: true, id: true }
       });
       planId = parent?.planId || null;
+      rootTaskId = parent?.rootTaskId || parent?.id || null;
     }
 
     // Sub-task tạo bởi người được giao → status TEMPLATE (chưa giao), gốc → TODO
@@ -410,8 +405,18 @@ export class TasksService implements OnModuleInit {
         supervisorCode: data.supervisorCode || null,
         planId,
         parentId: data.parentId ? parseInt(data.parentId, 10) : null,
+        rootTaskId
       }
     });
+
+    // Cập nhật lại rootTaskId nếu đây là tác vụ gốc (không có parentId)
+    if (!data.parentId) {
+      await this.prisma.task.update({
+        where: { id: t.id },
+        data: { rootTaskId: t.id }
+      });
+      t.rootTaskId = t.id;
+    }
 
     return {
       ...t,
