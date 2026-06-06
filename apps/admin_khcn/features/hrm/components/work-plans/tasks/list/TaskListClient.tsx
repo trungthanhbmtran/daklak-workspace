@@ -203,6 +203,7 @@ export const TaskListClient = () => {
             onClose={handleCloseDetail}
             onRefetch={refetch}
             onSmartAssign={handleSmartAssign}
+            onSelectTask={handleSelectTask}
           />
         </Suspense>
       )}

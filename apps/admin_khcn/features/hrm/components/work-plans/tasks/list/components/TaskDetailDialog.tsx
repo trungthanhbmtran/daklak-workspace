@@ -22,6 +22,7 @@ interface TaskDetailDialogProps {
   onClose: () => void;
   onRefetch: () => void;
   onSmartAssign: (task: any) => void;
+  onSelectTask?: (task: any) => void;
 }
 
 /**
@@ -39,6 +40,7 @@ export function TaskDetailDialog({
   onClose,
   onRefetch,
   onSmartAssign,
+  onSelectTask,
 }: TaskDetailDialogProps) {
   const [chatMessage, setChatMessage] = useState('');
   const [isRejectOpen, setIsRejectOpen] = useState(false);
@@ -362,7 +364,15 @@ export function TaskDetailDialog({
                             return (
                               <div
                                 key={node.id}
-                                onClick={() => !isCurrent && onClose()}
+                                onClick={() => {
+                                  if (!isCurrent) {
+                                    if (onSelectTask) {
+                                      onSelectTask(node);
+                                    } else {
+                                      onClose();
+                                    }
+                                  }
+                                }}
                                 className={`relative flex items-start gap-3 pl-9 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-white dark:hover:bg-slate-800 cursor-pointer'}`}
                               >
                                 <div className={`absolute left-[13px] top-[18px] w-[11px] h-[11px] rounded-full ${color.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm z-10`} />
