@@ -41,6 +41,7 @@ export function EmployeeListClient() {
 
   const employees = listRes?.data;
   const pagination = listRes?.meta?.pagination;
+  const allowedActions: string[] = listRes?.meta?.allowedActions || [];
   const total = pagination?.total ?? 0;
   const totalPages = Math.max(1, pagination?.totalPages ?? 1);
 

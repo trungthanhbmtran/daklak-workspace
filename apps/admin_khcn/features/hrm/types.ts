@@ -54,6 +54,7 @@ export interface HrmEmployeesListResponse {
   data: HrmEmployee[];
   meta?: {
     pagination?: HrmPaginationMeta;
+    allowedActions?: string[];
   };
 }
 
