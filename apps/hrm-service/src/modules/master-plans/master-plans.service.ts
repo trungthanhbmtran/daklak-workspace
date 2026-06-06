@@ -59,7 +59,7 @@ export class MasterPlansService {
           if (t.status === 'DONE') completedTasks++;
           return {
             ...t,
-            assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim() : t.assigneeCode,
+            assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim() : t.assigneeCode,
             dueDate: t.dueDate?.toISOString() || '',
             completionDate: t.completionDate?.toISOString() || '',
             createdAt: t.createdAt?.toISOString() || '',
@@ -128,7 +128,7 @@ export class MasterPlansService {
       if (t.status === 'DONE') completedTasks++;
       return {
         ...t,
-        assigneeName: t.assignee ? `${t.assignee.lastname} ${t.assignee.firstname}`.trim() : t.assigneeCode,
+        assigneeName: t.assignee ? `${t.assignee.firstname} ${t.assignee.lastname}`.trim() : t.assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         completionDate: t.completionDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',

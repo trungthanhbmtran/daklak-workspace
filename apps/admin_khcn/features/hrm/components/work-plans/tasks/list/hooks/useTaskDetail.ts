@@ -18,27 +18,27 @@ import { toast } from 'sonner';
  *  - Optimistic update khi gửi comment
  *  - Tự dedup nếu nhiều nơi cùng query cùng taskId
  */
-export function useTaskDetail(taskId: number | undefined, onRefetch: () => void) {
+export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: number | undefined, onRefetch: () => void) {
   const qc = useQueryClient();
 
   // ── Queries ──────────────────────────────────────────────────────────────
   const {
     data: commentsRes,
     isLoading: isLoadingComments,
-  } = useTaskComments(taskId);
+  } = useTaskComments(activeTaskId);
 
   const {
     data: subtasksRes,
     isLoading: isLoadingChain,
     refetch: refetchChain,
-  } = useTaskSubtasks(taskId);
+  } = useTaskSubtasks(rootTaskId);
 
   const taskComments   = commentsRes?.data  || [];
   const delegationChain = subtasksRes?.data || [];
 
   // ── Mutations ─────────────────────────────────────────────────────────────
-  const addComment   = useAddComment(taskId);
-  const updateStatus = useUpdateStatus(taskId);
+  const addComment   = useAddComment(activeTaskId);
+  const updateStatus = useUpdateStatus(activeTaskId);
 
   // ── Stable action handlers ────────────────────────────────────────────────
 
@@ -46,14 +46,14 @@ export function useTaskDetail(taskId: number | undefined, onRefetch: () => void)
     message: string,
     onClearInput: () => void,
   ) => {
-    if (!message.trim() || !taskId || addComment.isPending) return;
+    if (!message.trim() || !activeTaskId || addComment.isPending) return;
     addComment.mutate(message.trim(), {
       onSuccess: () => onClearInput(),
     });
-  }, [taskId, addComment]);
+  }, [activeTaskId, addComment]);
 
   const handleCompleteTask = useCallback(async (onClose: () => void) => {
-    if (!taskId) return;
+    if (!activeTaskId) return;
     updateStatus.mutate(
       { status: 'DONE' },
       {
@@ -65,13 +65,13 @@ export function useTaskDetail(taskId: number | undefined, onRefetch: () => void)
         onError: () => toast.error('Lỗi khi hoàn thành công việc'),
       },
     );
-  }, [taskId, updateStatus, onRefetch]);
+  }, [activeTaskId, updateStatus, onRefetch]);
 
   const handleRejectTask = useCallback(async (
     reason: string,
     onClose: () => void,
   ) => {
-    if (!reason.trim() || !taskId) return;
+    if (!reason.trim() || !activeTaskId) return;
     updateStatus.mutate(
       { status: 'RETURNED', rejectReason: reason },
       {
@@ -83,13 +83,13 @@ export function useTaskDetail(taskId: number | undefined, onRefetch: () => void)
         onError: () => toast.error('Lỗi khi trả lại công việc'),
       },
     );
-  }, [taskId, updateStatus, onRefetch]);
+  }, [activeTaskId, updateStatus, onRefetch]);
 
   /** Refresh comments thủ công (dùng sau khi CoordinationModal thành công) */
   const fetchComments = useCallback((silent = false) => {
-    if (!taskId) return;
-    qc.invalidateQueries({ queryKey: hrmKeys.taskComments(taskId) });
-  }, [taskId, qc]);
+    if (!activeTaskId) return;
+    qc.invalidateQueries({ queryKey: hrmKeys.taskComments(activeTaskId) });
+  }, [activeTaskId, qc]);
 
   /** Refresh cây công việc (dùng sau khi tạo SubTask) */
   const fetchDelegationChain = useCallback(() => {

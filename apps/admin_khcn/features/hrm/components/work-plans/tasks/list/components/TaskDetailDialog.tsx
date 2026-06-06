@@ -42,6 +42,13 @@ export function TaskDetailDialog({
   onSmartAssign,
   onSelectTask,
 }: TaskDetailDialogProps) {
+  const [activeTask, setActiveTask] = React.useState(task);
+
+  // Sync activeTask when root task changes
+  React.useEffect(() => {
+    setActiveTask(task);
+  }, [task]);
+
   const [chatMessage, setChatMessage] = useState('');
   const [isRejectOpen, setIsRejectOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
@@ -54,7 +61,7 @@ export function TaskDetailDialog({
     delegationChain, isLoadingChain,
     fetchComments, fetchDelegationChain,
     handleSendMessage, handleCompleteTask, handleRejectTask,
-  } = useTaskDetail(task?.id, onRefetch);
+  } = useTaskDetail(activeTask?.id, task?.id, onRefetch);
 
   const handleSend = useCallback(() => {
     handleSendMessage(chatMessage, () => setChatMessage(''));
@@ -72,11 +79,11 @@ export function TaskDetailDialog({
     });
   }, [handleRejectTask, rejectReason, onClose]);
 
-  if (!task) return null;
+  if (!activeTask) return null;
 
-  const dueInfo = getDueDateDisplay(task.dueDate, task.status);
-  const isMyTask = task.assigneeCode === currentUser?.employeeCode;
-  const isAssigner = task.assignerCode === currentUser?.employeeCode;
+  const dueInfo = getDueDateDisplay(activeTask.dueDate, activeTask.status);
+  const isMyTask = activeTask.assigneeCode === currentUser?.employeeCode;
+  const isAssigner = activeTask.assignerCode === currentUser?.employeeCode;
 
   return (
     <>
@@ -87,22 +94,22 @@ export function TaskDetailDialog({
             {/* ── TOP HEADER ── */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="scale-90 origin-left shrink-0">{getStatusBadge(task.status || 'TODO')}</div>
-                <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border border-current ${getPriorityColor(task.priority)} bg-white dark:bg-slate-800`}>
+                <div className="scale-90 origin-left shrink-0">{getStatusBadge(activeTask.status || 'TODO')}</div>
+                <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border border-current ${getPriorityColor(activeTask.priority)} bg-white dark:bg-slate-800`}>
                   <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
-                  {getPriorityName(task.priority, priorities)}
+                  {getPriorityName(activeTask.priority, priorities)}
                 </span>
-                {task.plan && (
+                {activeTask.plan && (
                   <Badge variant="outline" className="hidden md:flex bg-indigo-50 text-indigo-700 border-indigo-200 px-2.5 py-1 rounded-lg font-bold items-center gap-1.5 shrink-0">
-                    <Target className="w-3.5 h-3.5" /> {task.plan.title}
+                    <Target className="w-3.5 h-3.5" /> {activeTask.plan.title}
                   </Badge>
                 )}
-                <h2 className="font-black text-slate-700 dark:text-slate-200 text-[15px] truncate">{task.title}</h2>
+                <h2 className="font-black text-slate-700 dark:text-slate-200 text-[15px] truncate">{activeTask.title}</h2>
               </div>
-              {task.dueDate && (
+              {activeTask.dueDate && (
                 <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl text-sm font-bold shrink-0 ${dueInfo.color} ${dueInfo.bg} border ${dueInfo.border}`}>
                   <Calendar className="w-4 h-4" />
-                  {new Date(task.dueDate).toLocaleDateString('vi-VN')}
+                  {new Date(activeTask.dueDate).toLocaleDateString('vi-VN')}
                 </div>
               )}
             </div>
@@ -121,7 +128,7 @@ export function TaskDetailDialog({
                     <div className="relative">
                       <div className="absolute left-0 top-0 bottom-0 w-0.5  bg-linear-to-br from-indigo-400 to-indigo-200 rounded-full" />
                       <div className="pl-5 text-slate-600 dark:text-slate-300 leading-relaxed text-[14.5px] whitespace-pre-wrap">
-                        {task.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
+                        {activeTask.description || <span className="italic opacity-50">Chưa có mô tả chi tiết...</span>}
                       </div>
                     </div>
                   </div>
@@ -178,15 +185,15 @@ export function TaskDetailDialog({
                       <div className="flex items-center gap-2 bg-slate-50 dark:bg-slate-900 rounded-2xl px-4 py-2 border border-slate-200 dark:border-slate-700 focus-within:ring-2 focus-within:ring-indigo-400/50 transition-all">
                         <input
                           type="text"
-                          disabled={task.status === 'DONE' || isSendingMessage}
+                          disabled={activeTask.status === 'DONE' || isSendingMessage}
                           value={chatMessage}
                           onChange={(e) => setChatMessage(e.target.value)}
                           onKeyDown={(e) => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) handleSend(); }}
-                          placeholder={task.status === 'DONE' ? 'Công việc đã đóng' : 'Nhập nội dung trao đổi...'}
+                          placeholder={activeTask.status === 'DONE' ? 'Công việc đã đóng' : 'Nhập nội dung trao đổi...'}
                           className="flex-1 bg-transparent border-none text-[13.5px] focus:ring-0 outline-none disabled:opacity-40 text-slate-800 dark:text-white"
                         />
                         <Button
-                          disabled={task.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
+                          disabled={activeTask.status === 'DONE' || !chatMessage.trim() || isSendingMessage}
                           onClick={handleSend}
                           className="rounded-full w-9 h-9 p-0 bg-indigo-600 hover:bg-indigo-700 shadow-md disabled:opacity-40"
                         >
@@ -210,27 +217,27 @@ export function TaskDetailDialog({
                       {/* Chủ trì */}
                       <div className="flex items-center gap-3 p-3 rounded-2xl bg-violet-50 dark:bg-violet-900/20 border border-violet-100 dark:border-violet-800/40">
                         <div className="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center text-white font-black text-base shrink-0">
-                          {task.assigneeCode === 'UNASSIGNED' ? '?' : ((task.assigneeName || task.assigneeCode)?.charAt(0) || '?')}
+                          {activeTask.assigneeCode === 'UNASSIGNED' ? '?' : ((activeTask.assigneeName || activeTask.assigneeCode)?.charAt(0) || '?')}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] font-black text-violet-500 uppercase tracking-widest">👑 Chủ trì</p>
                           <p className="font-bold text-[14px] text-slate-800 dark:text-slate-100 truncate">
-                            {task.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (task.assigneeName || task.assigneeCode || 'Chưa phân công')}
+                            {activeTask.assigneeCode === 'UNASSIGNED' ? 'Chưa phân công' : (activeTask.assigneeName || activeTask.assigneeCode || 'Chưa phân công')}
                           </p>
                         </div>
-                        {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && (
-                          <Button size="sm" variant="ghost" className="rounded-full text-xs font-bold text-violet-600 bg-violet-100 hover:bg-violet-200" onClick={() => onSmartAssign(task)}>
+                        {(!activeTask.assigneeCode || activeTask.assigneeCode === 'UNASSIGNED') && (
+                          <Button size="sm" variant="ghost" className="rounded-full text-xs font-bold text-violet-600 bg-violet-100 hover:bg-violet-200" onClick={() => onSmartAssign(activeTask)}>
                             Giao
                           </Button>
                         )}
                       </div>
 
                       {/* Co-assignees */}
-                      {(task.coAssigneeCodes || []).length > 0 && (
+                      {(activeTask.coAssigneeCodes || []).length > 0 && (
                         <div className="p-3 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/40">
-                          <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">🤝 Phối hợp ({(task.coAssigneeCodes || []).length})</p>
+                          <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">🤝 Phối hợp ({(activeTask.coAssigneeCodes || []).length})</p>
                           <div className="flex flex-wrap gap-1.5">
-                            {(task.coAssigneeCodes || []).map((code: string) => (
+                            {(activeTask.coAssigneeCodes || []).map((code: string) => (
                               <span key={code} className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-800 px-2 py-1 rounded-full border border-amber-200">{code}</span>
                             ))}
                           </div>
@@ -238,27 +245,27 @@ export function TaskDetailDialog({
                       )}
 
                       {/* Supervisor */}
-                      {task.supervisorCode && (
+                      {activeTask.supervisorCode && (
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/60">
                           <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 font-black text-sm shrink-0">
-                            {(task.supervisorName || task.supervisorCode)?.charAt(0)}
+                            {(activeTask.supervisorName || activeTask.supervisorCode)?.charAt(0)}
                           </div>
                           <div className="min-w-0">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">⚡ Lãnh đạo chỉ đạo</p>
-                            <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">{task.supervisorName || task.supervisorCode}</p>
+                            <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">{activeTask.supervisorName || activeTask.supervisorCode}</p>
                           </div>
                         </div>
                       )}
 
                       {/* Assigner */}
-                      {task.assignerCode && (
+                      {activeTask.assignerCode && (
                         <div className="flex items-center gap-3 p-3 rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/60 dark:border-indigo-800/30">
                           <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-500 font-black text-sm shrink-0">
-                            {(task.assignerName || task.assignerCode)?.charAt(0) || '?'}
+                            {(activeTask.assignerName || activeTask.assignerCode)?.charAt(0) || '?'}
                           </div>
                           <div className="min-w-0">
                             <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">📋 Người giao</p>
-                            <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">{task.assignerName || task.assignerCode}</p>
+                            <p className="font-bold text-[13px] text-slate-700 dark:text-slate-300 truncate">{activeTask.assignerName || activeTask.assignerCode}</p>
                           </div>
                         </div>
                       )}
@@ -266,7 +273,7 @@ export function TaskDetailDialog({
                   </div>
 
                   {/* Actions */}
-                  {task.status !== 'DONE' && (
+                  {activeTask.status !== 'DONE' && (
                     <div className="p-5 border-b border-slate-100 dark:border-slate-800">
                       <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                         <div className="w-4 h-[2px] bg-slate-300 rounded" /> Thao tác
@@ -354,7 +361,7 @@ export function TaskDetailDialog({
                           // 1. Build Tree
                           const nodeMap: Record<number, any> = {};
                           const rootNodes: any[] = [];
-                          
+
                           delegationChain.forEach((n: any) => {
                             nodeMap[n.id] = { ...n, children: [] };
                           });
@@ -377,7 +384,7 @@ export function TaskDetailDialog({
 
                           // 2. Recursive Renderer
                           const renderNode = (node: any, isLast: boolean, depth: number) => {
-                            const isCurrent = node.id === task?.id;
+                            const isCurrent = node.id === activeTask?.id;
                             const sc: Record<string, { dot: string; badge: string; label: string }> = {
                               DONE: { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
                               IN_PROGRESS: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
@@ -402,18 +409,14 @@ export function TaskDetailDialog({
                                     e.preventDefault();
                                     e.stopPropagation();
                                     if (!isCurrent) {
-                                      if (onSelectTask) {
-                                        setTimeout(() => onSelectTask(node), 0);
-                                      } else {
-                                        setTimeout(() => onClose(), 0);
-                                      }
+                                      setActiveTask(node);
                                     }
                                   }}
                                   className={`relative flex items-start gap-3 pl-4 pr-3 py-3 rounded-2xl transition-all duration-200 ${isCurrent ? 'bg-indigo-50 dark:bg-indigo-900/20 ring-1 ring-indigo-200 dark:ring-indigo-800' : 'hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer shadow-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800'}`}
                                 >
                                   {/* Dot */}
                                   <div className={`mt-1 w-2.5 h-2.5 rounded-full ${color.dot} ring-[3px] ring-white dark:ring-slate-900 shadow-sm shrink-0 z-10`} />
-                                  
+
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-1 mb-1">
                                       <span className={`text-[9.5px] font-black uppercase tracking-wider ${isCurrent ? 'text-indigo-600' : 'text-slate-400'}`}>
@@ -436,7 +439,7 @@ export function TaskDetailDialog({
                                 {/* Children */}
                                 {node.children && node.children.length > 0 && (
                                   <div className="ml-8 mt-2 relative space-y-2">
-                                    {node.children.map((child: any, idx: number) => 
+                                    {node.children.map((child: any, idx: number) =>
                                       renderNode(child, idx === node.children.length - 1, depth + 1)
                                     )}
                                   </div>
@@ -496,19 +499,19 @@ export function TaskDetailDialog({
             fetchDelegationChain();
           }
         }}
-        parentTask={task}
-        planId={task?.planId}
+        parentTask={activeTask}
+        planId={activeTask?.planId}
       />
 
       <CoordinationModal
-        task={task}
+        task={activeTask}
         open={isCoordinationModalOpen}
         onOpenChange={setIsCoordinationModalOpen}
         onSuccess={() => fetchComments(true)}
       />
 
       <AssignCoordinationModal
-        task={task}
+        task={activeTask}
         open={isAssignCoordinationOpen}
         onOpenChange={setIsAssignCoordinationOpen}
         onSuccess={() => {

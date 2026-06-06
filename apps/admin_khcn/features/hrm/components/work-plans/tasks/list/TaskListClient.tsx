@@ -10,10 +10,10 @@ import { hrmKeys } from '@/features/hrm/keys';
 import { useGetCategoryByGroup } from '@/features/system-admin/categories/hooks/useCategoryApi';
 
 // Sub-components (eager: luôn cần ngay khi render)
-import { TaskStatsBar }  from './components/TaskStatsBar';
-import { TaskToolbar }   from './components/TaskToolbar';
-import { TaskGrid }      from './components/TaskGrid';
-import { TaskTable }     from './components/TaskTable';
+import { TaskStatsBar } from './components/TaskStatsBar';
+import { TaskToolbar } from './components/TaskToolbar';
+import { TaskGrid } from './components/TaskGrid';
+import { TaskTable } from './components/TaskTable';
 import { SmartAssignDrawer } from '../assign/SmartAssignDrawer';
 
 // Lazy load: chỉ download khi user mở detail dialog lần đầu
@@ -38,32 +38,32 @@ type Tab = 'ALL' | 'MY_TASKS' | 'ASSIGNED_BY_ME' | 'DEPT_TASKS';
  */
 export const TaskListClient = () => {
   const searchParams = useSearchParams();
-  const searchQuery  = searchParams.get('search') || '';
+  const searchQuery = searchParams.get('search') || '';
   const qc = useQueryClient();
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [viewMode,       setViewMode]       = useState<'grid' | 'list'>('grid');
-  const [activeFilter,   setActiveFilter]   = useState<string | null>(null);
-  const [activeTab,      setActiveTab]      = useState<Tab>('ALL');
-  const [statusFilter,   setStatusFilter]   = useState('ALL');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>('ALL');
+  const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
-  const [selectedTask,   setSelectedTask]   = useState<any>(null);
-  const [taskToAssign,   setTaskToAssign]   = useState<any>(null);
+  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [taskToAssign, setTaskToAssign] = useState<any>(null);
 
   // Debounce: chỉ gọi API khi user dừng thay đổi filter > 300ms
-  const debouncedStatus   = useDebounce(statusFilter,   300);
+  const debouncedStatus = useDebounce(statusFilter, 300);
   const debouncedPriority = useDebounce(priorityFilter, 300);
 
   // ── Data fetch ─────────────────────────────────────────────────────────────
   // queryKey phụ thuộc vào debounced values → ít network request hơn
   const { data, isLoading, isFetching, refetch } = useTasksList({
-    search:   searchQuery,
-    tab:      activeTab,
-    status:   debouncedStatus   === 'ALL' ? undefined : debouncedStatus,
+    search: searchQuery,
+    tab: activeTab,
+    status: debouncedStatus === 'ALL' ? undefined : debouncedStatus,
     priority: debouncedPriority === 'ALL' ? undefined : debouncedPriority,
   });
 
-  const tasks       = (data?.data || []) as any[];
+  const tasks = (data?.data || []) as any[];
   const currentUser = (data as any)?.meta?.currentUser;
 
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
@@ -89,9 +89,9 @@ export const TaskListClient = () => {
       if (task.status === 'DONE') return false;
       if (!due) return activeFilter === 'inTime';
       const diff = Math.ceil((due.getTime() - now.getTime()) / 86_400_000);
-      if (activeFilter === 'overdue')  return diff < 0;
-      if (activeFilter === 'warning')  return diff >= 0 && diff <= 3;
-      if (activeFilter === 'inTime')   return diff > 3;
+      if (activeFilter === 'overdue') return diff < 0;
+      if (activeFilter === 'warning') return diff >= 0 && diff <= 3;
+      if (activeFilter === 'inTime') return diff > 3;
       return true;
     });
   }, [tasks, activeFilter]);
@@ -102,22 +102,22 @@ export const TaskListClient = () => {
     // Prefetch comments
     qc.prefetchQuery({
       queryKey: hrmKeys.taskComments(task.id),
-      queryFn:  () => hrmTasksApi.getComments(String(task.id)),
+      queryFn: () => hrmTasksApi.getComments(String(task.id)),
       staleTime: 20_000,
     });
     // Prefetch subtasks
     qc.prefetchQuery({
       queryKey: hrmKeys.taskSubtasks(task.id),
-      queryFn:  () => hrmTasksApi.getSubTasks(String(task.id)),
+      queryFn: () => hrmTasksApi.getSubTasks(String(task.id)),
       staleTime: 20_000,
     });
   }, [qc]);
 
   // ── Stable handlers ───────────────────────────────────────────────────────
-  const handleSelectTask   = useCallback((task: any) => setSelectedTask(task), []);
-  const handleSmartAssign  = useCallback((task: any) => setTaskToAssign(task),  []);
+  const handleSelectTask = useCallback((task: any) => setSelectedTask(task), []);
+  const handleSmartAssign = useCallback((task: any) => setTaskToAssign(task), []);
   const handleFilterChange = useCallback((id: string | null) => setActiveFilter(id), []);
-  const handleCloseDetail  = useCallback(() => setSelectedTask(null), []);
+  const handleCloseDetail = useCallback(() => setSelectedTask(null), []);
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
@@ -164,8 +164,8 @@ export const TaskListClient = () => {
             {activeFilter
               ? 'Không có công việc nào phù hợp với bộ lọc'
               : activeTab === 'ASSIGNED_BY_ME' ? 'Bạn chưa giao công việc nào'
-              : activeTab === 'MY_TASKS'       ? 'Bạn chưa có công việc nào được giao'
-              : 'Hoan hô! Không có công việc nào'}
+                : activeTab === 'MY_TASKS' ? 'Bạn chưa có công việc nào được giao'
+                  : 'Hoan hô! Không có công việc nào'}
           </h3>
           <p className="text-slate-500 mt-2">
             {activeFilter
