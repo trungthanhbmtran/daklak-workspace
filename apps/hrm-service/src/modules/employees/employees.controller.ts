@@ -43,6 +43,11 @@ export class EmployeesController {
     return this.employees.getOne(data.id);
   }
 
+  @GrpcMethod('EmployeeHandlers', 'GetEmployeeByCode')
+  getByCode(data: { code: string }) {
+    return this.employees.getByCode(data.code);
+  }
+
   @GrpcMethod('EmployeeHandlers', 'ListEmployees')
   list(data: { page?: number; pageSize?: number; keyword?: string; departmentId?: number; jobTitleId?: number; status?: string; includeChildren?: boolean }) {
     return this.employees.list(data);

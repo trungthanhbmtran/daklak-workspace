@@ -7,6 +7,7 @@ import { AuthController } from './auth.controller';
   imports: [
     registerGrpcService(MICROSERVICES.AUTH),
     registerGrpcService(MICROSERVICES.USER),
+    registerGrpcService(MICROSERVICES.EMPLOYEE),
   ],
   controllers: [AuthController],
 })

@@ -30,6 +30,7 @@ message Employee {
 
   int32 civilServantRankId = 20;
   int32 partyTitleId = 21;
+  string fullName = 22;
 }
 
 // ---------------- REQUESTS ----------------
@@ -80,6 +81,10 @@ message DeleteEmployeeRequest {
 
 message GetEmployeeRequest {
   int32 id = 1;
+}
+
+message GetEmployeeByCodeRequest {
+  string code = 1;
 }
 
 // Filter nâng cao cho nhân sự
@@ -135,5 +140,6 @@ service EmployeeHandlers {
   rpc UpdateEmployee(UpdateEmployeeRequest) returns (EmployeeResponse);
   rpc DeleteEmployee(DeleteEmployeeRequest) returns (BaseResponse);
   rpc GetEmployee(GetEmployeeRequest) returns (EmployeeResponse);
+  rpc GetEmployeeByCode(GetEmployeeByCodeRequest) returns (EmployeeResponse);
   rpc ListEmployees(ListEmployeesRequest) returns (ListEmployeesResponse);
 }

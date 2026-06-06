@@ -169,6 +169,12 @@ export class EmployeesService {
     return { success: true, message: 'OK', data: this.toEmployee(emp) };
   }
 
+  async getByCode(code: string) {
+    const emp = await this.prisma.employee.findUnique({ where: { employeeCode: code } });
+    if (!emp) throw new RpcException({ message: 'Không tìm thấy nhân viên', code: 5 });
+    return { success: true, message: 'OK', data: this.toEmployee(emp) };
+  }
+
   async list(params: {
     page?: number;
     pageSize?: number;

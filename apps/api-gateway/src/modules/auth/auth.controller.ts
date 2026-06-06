@@ -27,15 +27,18 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 export class AuthController implements OnModuleInit {
   private authService: any;
   private userService: any;
+  private employeeService: any;
 
   constructor(
     @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) {}
+    @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
+  ) { }
 
   onModuleInit() {
     this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
+    this.employeeService = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
   }
 
   @Post('login')
@@ -167,6 +170,19 @@ export class AuthController implements OnModuleInit {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Thông tin user đăng nhập' })
   async me(@Req() req: any) {
-    return req.user || null;
+    const user = req.user || null;
+    if (user && user.employeeCode) {
+      try {
+        const empRes: any = await firstValueFrom(
+          this.employeeService.GetEmployeeByCode({ code: user.employeeCode })
+        );
+        if (empRes?.data?.fullName) {
+          user.fullName = empRes.data.fullName;
+        }
+      } catch (err) {
+        // Ignore error and use default fullName from token
+      }
+    }
+    return user;
   }
 }
