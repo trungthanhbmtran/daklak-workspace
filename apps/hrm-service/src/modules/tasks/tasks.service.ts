@@ -45,7 +45,7 @@ export class TasksService implements OnModuleInit {
     }
   }
 
-  private async computeAllowedActions(t: any, query: any): Promise<string[]> {
+  private async computeAllowedActions(t: any, query: any, isUserInTree: boolean = false): Promise<string[]> {
     if (!query) return [];
     const isUserAdmin = query.isAdmin === true;
     const currentUserCode = query.currentUserCode;
@@ -72,7 +72,7 @@ export class TasksService implements OnModuleInit {
       allowedActions.push('COORDINATE');
     }
     
-    let canChat = isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator;
+    let canChat = isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator || isUserInTree;
     
     if (!canChat && t.id) {
        const rootId = t.rootTaskId || t.id;
@@ -1057,31 +1057,7 @@ export class TasksService implements OnModuleInit {
    */
   async getSubTasks(query: any) {
     const taskId = typeof query === 'object' ? query.taskId : query;
-    const mapTask = async (t: any, level: number, isParent = false, isCurrent = false) => {
-      const allowedActions = await this.computeAllowedActions(t, query);
-
-      return {
-        id: t.id,
-        title: t.title,
-        status: t.status,
-        priority: t.priority,
-        assigneeCode: t.assigneeCode,
-        assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
-        assignerCode: t.assignerCode,
-        assignerName: t.assigner ? t.assigner.fullName : (t.assignerCode || ''),
-        departmentId: t.departmentId || 0,
-        parentId: t.parentId || 0,
-        dueDate: t.dueDate?.toISOString() || '',
-        createdAt: t.createdAt?.toISOString() || '',
-        updatedAt: t.updatedAt?.toISOString() || '',
-        level,
-        isParent,
-        isCurrent,
-        isChild: !isParent && !isCurrent,
-        isGrandChild: false,
-        allowedActions
-      };
-    };
+    const currentUserCode = typeof query === 'object' ? query.currentUserCode : null;
 
     // Query 1: lấy task hiện tại + task cha
     const rootTask = await this.prisma.task.findUnique({
@@ -1100,12 +1076,6 @@ export class TasksService implements OnModuleInit {
     if (typeof query === 'object') {
       await this.checkTaskPermission(rootTask, query);
     }
-
-    const result: any[] = [];
-    if (rootTask.parent) {
-      result.push(await mapTask(rootTask.parent, -1, true, false));
-    }
-    result.push(await mapTask(rootTask, 0, false, true));
 
     // Query 2: lấy tất cả tasks cùng planId (nếu có) hoặc toàn bộ cây theo parentId
     // Build cây trên memory thay vì N+1 queries
@@ -1144,10 +1114,64 @@ export class TasksService implements OnModuleInit {
       const children = adjMap.get(current.id) || [];
       for (let i = 0; i < children.length; i++) {
         const child = children[i];
-        ordered.push({ task: child, level: current.level + 1 });
         queue.push({ id: child.id, level: current.level + 1 });
+        ordered.push({ task: child, level: current.level + 1 });
       }
     }
+
+    const allTasksInTree: any[] = [rootTask];
+    if (rootTask.parent) allTasksInTree.push(rootTask.parent);
+    for (const o of ordered) allTasksInTree.push(o.task);
+
+    let isUserInTree = false;
+    for (const t of allTasksInTree) {
+      let isCoordinator = false;
+      try {
+        const coAssignees = typeof t.coAssigneeCodesJson === 'string' ? JSON.parse(t.coAssigneeCodesJson) : (t.coAssigneeCodesJson || []);
+        if (Array.isArray(coAssignees) && coAssignees.includes(currentUserCode)) isCoordinator = true;
+      } catch {}
+
+      if (
+        t.assigneeCode === currentUserCode ||
+        t.assignerCode === currentUserCode ||
+        t.supervisorCode === currentUserCode ||
+        isCoordinator
+      ) {
+        isUserInTree = true;
+        break;
+      }
+    }
+
+    const mapTask = async (t: any, level: number, isParent = false, isCurrent = false) => {
+      const allowedActions = await this.computeAllowedActions(t, query, isUserInTree);
+      return {
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        assigneeCode: t.assigneeCode,
+        assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
+        assignerCode: t.assignerCode,
+        assignerName: t.assigner ? t.assigner.fullName : (t.assignerCode || ''),
+        departmentId: t.departmentId || 0,
+        parentId: t.parentId || 0,
+        dueDate: t.dueDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+        level,
+        isParent,
+        isCurrent,
+        isChild: !isParent && !isCurrent,
+        isGrandChild: false,
+        allowedActions
+      };
+    };
+
+    const result: any[] = [];
+    if (rootTask.parent) {
+      result.push(await mapTask(rootTask.parent, -1, true, false));
+    }
+    result.push(await mapTask(rootTask, 0, false, true));
 
     for (const { task, level } of ordered) {
       result.push(await mapTask(task, level, false, false));
@@ -1155,8 +1179,8 @@ export class TasksService implements OnModuleInit {
 
     return {
       success: true,
-      message: 'Lấy chuỗi giao việc thành công',
-      data: result,
+      message: 'Lấy cây công việc thành công',
+      data: result
     };
   }
 }
