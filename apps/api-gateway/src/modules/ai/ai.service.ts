@@ -11,10 +11,20 @@ interface AiProviderConfig {
   enabled: boolean;
 }
 
+interface CircuitBreakerState {
+  failures: number;
+  nextRetry: number;
+}
+
 @Injectable()
 export class AiService implements OnModuleInit {
   private configService: any;
   private readonly logger = new Logger(AiService.name);
+
+  // Circuit Breaker Config
+  private circuitBreakers = new Map<string, CircuitBreakerState>();
+  private readonly MAX_FAILURES = 2;
+  private readonly COOLDOWN_MS = 60000;
 
   constructor(
     @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any,
@@ -60,12 +70,30 @@ export class AiService implements OnModuleInit {
     let lastError: any = null;
 
     for (const provider of providers) {
+      const breaker = this.circuitBreakers.get(provider.id);
+      
+      // Circuit Breaker Check
+      if (breaker && breaker.failures >= this.MAX_FAILURES) {
+        if (Date.now() < breaker.nextRetry) {
+          this.logger.warn(`Skipping ${provider.provider} (Priority: ${provider.priority}) due to Circuit Breaker (cooling down).`);
+          continue;
+        } else {
+          // Half-open
+          this.logger.log(`Circuit Breaker half-open for ${provider.provider}. Retrying...`);
+        }
+      }
+
       try {
         this.logger.log(
           `Attempting to use AI Provider: ${provider.provider} (Priority: ${provider.priority}, Model: ${provider.model})`,
         );
 
         const result = await this.callProvider(provider, prompt);
+
+        // Success: Reset circuit breaker
+        if (breaker) {
+          this.circuitBreakers.delete(provider.id);
+        }
 
         this.logger.log(
           `Successfully generated response using ${provider.provider}`,
@@ -76,6 +104,14 @@ export class AiService implements OnModuleInit {
           `Failed using ${provider.provider} (Priority: ${provider.priority}). Error: ${err.message}`,
         );
         lastError = err;
+        
+        // Record failure
+        const currentFails = breaker ? breaker.failures + 1 : 1;
+        this.circuitBreakers.set(provider.id, {
+          failures: currentFails,
+          nextRetry: Date.now() + this.COOLDOWN_MS,
+        });
+        
         // Continue to the next provider in the sorted list
       }
     }
@@ -103,11 +139,22 @@ export class AiService implements OnModuleInit {
     }
   }
 
+  private async fetchWithTimeout(url: string, options: any, timeoutMs: number = 15000): Promise<Response> {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal });
+      return response;
+    } finally {
+      clearTimeout(id);
+    }
+  }
+
   private async callOpenAI(
     config: AiProviderConfig,
     prompt: string,
   ): Promise<string> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await this.fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -133,7 +180,7 @@ export class AiService implements OnModuleInit {
     prompt: string,
   ): Promise<string> {
     const model = config.model || 'gemini-1.5-pro';
-    const response = await fetch(
+    const response = await this.fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${config.apiKey}`,
       {
         method: 'POST',
@@ -159,7 +206,7 @@ export class AiService implements OnModuleInit {
     config: AiProviderConfig,
     prompt: string,
   ): Promise<string> {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await this.fetchWithTimeout('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -182,7 +229,7 @@ export class AiService implements OnModuleInit {
     return data.content?.[0]?.text || '';
   }
 
-  async listModels(provider: string, apiKey: string): Promise<string[]> {
+  async listModels(provider: string, apiKey: string): Promise<{id: string, name: string, contextWindow?: number}[]> {
     if (!apiKey) {
       throw new Error('API Key is required to fetch models');
     }
@@ -198,9 +245,16 @@ export class AiService implements OnModuleInit {
         const data = await res.json();
         return (
           data.data
-            ?.map((m: any) => m.id)
-            .filter((id: string) => id.includes('gpt') || id.includes('o1')) ||
-          []
+            ?.filter((m: any) => m.id.includes('gpt') || m.id.includes('o1'))
+            .map((m: any) => {
+              let ctx = undefined;
+              if (m.id.includes('gpt-4o')) ctx = 128000;
+              else if (m.id.includes('gpt-4-turbo')) ctx = 128000;
+              else if (m.id.includes('gpt-4')) ctx = 8192;
+              else if (m.id.includes('gpt-3.5')) ctx = 16385;
+              else if (m.id.includes('o1-mini') || m.id.includes('o1-preview')) ctx = 128000;
+              return { id: m.id, name: m.id, contextWindow: ctx };
+            }) || []
         );
       }
       case 'GEMINI': {
@@ -210,7 +264,12 @@ export class AiService implements OnModuleInit {
         if (!res.ok) throw new Error('Gemini API Error: ' + (await res.text()));
         const data = await res.json();
         return (
-          data.models?.map((m: any) => m.name.replace('models/', '')) || []
+          data.models
+            ?.filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+            .map((m: any) => {
+              const id = m.name.replace('models/', '');
+              return { id: id, name: id, contextWindow: m.inputTokenLimit };
+            }) || []
         );
       }
       case 'CLAUDE': {
@@ -222,7 +281,13 @@ export class AiService implements OnModuleInit {
         });
         if (!res.ok) throw new Error('Claude API Error: ' + (await res.text()));
         const data = await res.json();
-        return data.data?.map((m: any) => m.id) || [];
+        return (
+          data.data?.map((m: any) => {
+            let ctx = undefined;
+            if (m.id.includes('claude-3-5') || m.id.includes('claude-3-opus') || m.id.includes('claude-3-sonnet') || m.id.includes('claude-3-haiku')) ctx = 200000;
+            return { id: m.id, name: m.id, contextWindow: ctx };
+          }) || []
+        );
       }
       default:
         throw new Error(`Unsupported AI provider: ${provider}`);

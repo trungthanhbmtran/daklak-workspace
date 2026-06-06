@@ -18,7 +18,7 @@ import { AiProviderConfig } from '../SystemSettingsClient';
 export function AiRouterConfig() {
   const { data: configs = {} } = useGetSystemConfigs();
   const updateConfig = useUpdateSystemConfig();
-  
+
   const [aiProviders, setAiProviders] = useState<AiProviderConfig[]>([]);
 
   // Hook tách biệt cho fetch AI models — loại bỏ apiClient trực tiếp
@@ -96,7 +96,7 @@ export function AiRouterConfig() {
           {updateConfig.isPending ? 'Đang lưu...' : <><Save className="w-4 h-4 mr-2" /> Lưu cấu hình AI</>}
         </Button>
       </CardHeader>
-      
+
       <CardContent className="p-6 bg-slate-50/50">
         {aiProviders.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-slate-200 rounded-2xl bg-white">
@@ -124,11 +124,11 @@ export function AiRouterConfig() {
                     </Button>
                   </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Nhà Cung cấp</label>
-                    <select 
+                    <select
                       className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium text-slate-700"
                       value={provider.provider}
                       onChange={(e) => handleProviderChange(provider.id, 'provider', e.target.value)}
@@ -156,7 +156,7 @@ export function AiRouterConfig() {
                       value={provider.model}
                       onValueChange={(val) => handleProviderChange(provider.id, 'model', val || '')}
                     >
-                      <ComboboxInput 
+                      <ComboboxInput
                         placeholder="Chọn hoặc nhập model..."
                         className="h-11 border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 rounded-xl"
                         onChange={(e: any) => handleProviderChange(provider.id, 'model', e.target.value)}
@@ -164,19 +164,29 @@ export function AiRouterConfig() {
                       <ComboboxContent>
                         <ComboboxList>
                           {(fetchedModels[provider.id] || (
-                            provider.provider === 'OPENAI' ? ['gpt-4o', 'gpt-4o-mini', 'gpt-4-turbo', 'o1-mini', 'o1-preview'] :
-                            provider.provider === 'GEMINI' ? ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.0-pro'] :
-                            provider.provider === 'CLAUDE' ? ['claude-3-5-sonnet-20241022', 'claude-3-5-haiku-20241022', 'claude-3-opus-20240229'] : []
-                          )).map((m: string) => (
-                            <ComboboxItem key={m} value={m}>{m}</ComboboxItem>
-                          ))}
+                            provider.provider === 'OPENAI' ? [{ id: 'gpt-4o', name: 'gpt-4o', contextWindow: 128000 }, { id: 'gpt-4o-mini', name: 'gpt-4o-mini', contextWindow: 128000 }, { id: 'gpt-4-turbo', name: 'gpt-4-turbo', contextWindow: 128000 }, { id: 'o1-mini', name: 'o1-mini', contextWindow: 128000 }, { id: 'o1-preview', name: 'o1-preview', contextWindow: 128000 }] :
+                              provider.provider === 'GEMINI' ? [{ id: 'gemini-1.5-pro', name: 'gemini-1.5-pro', contextWindow: 2097152 }, { id: 'gemini-1.5-flash', name: 'gemini-1.5-flash', contextWindow: 1048576 }, { id: 'gemini-2.0-flash', name: 'gemini-2.0-flash', contextWindow: 1048576 }, { id: 'gemini-1.0-pro', name: 'gemini-1.0-pro', contextWindow: 32768 }] :
+                                provider.provider === 'CLAUDE' ? [{ id: 'claude-3-5-sonnet-20241022', name: 'claude-3-5-sonnet-20241022', contextWindow: 200000 }, { id: 'claude-3-5-haiku-20241022', name: 'claude-3-5-haiku-20241022', contextWindow: 200000 }, { id: 'claude-3-opus-20240229', name: 'claude-3-opus-20240229', contextWindow: 200000 }] : []
+                          )).map((m: any) => {
+                            const mId = typeof m === 'string' ? m : m.id;
+                            const mName = typeof m === 'string' ? m : m.name;
+                            const mCtx = typeof m === 'string' ? undefined : m.contextWindow;
+                            return (
+                              <ComboboxItem key={mId} value={mId}>
+                                <div className="flex justify-between w-full items-center gap-2">
+                                  <span>{mName}</span>
+                                  {mCtx && <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">{(mCtx / 1000).toFixed(0)}k</span>}
+                                </div>
+                              </ComboboxItem>
+                            );
+                          })}
                         </ComboboxList>
                       </ComboboxContent>
                     </Combobox>
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">Mức ưu tiên</label>
-                    <input 
+                    <input
                       type="number"
                       className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
                       value={provider.priority}
@@ -186,7 +196,7 @@ export function AiRouterConfig() {
                   </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-600 uppercase tracking-wider">API Key (Token)</label>
-                    <input 
+                    <input
                       type="password"
                       className="w-full h-11 px-3 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium"
                       value={provider.apiKey}
@@ -199,7 +209,7 @@ export function AiRouterConfig() {
             ))}
           </div>
         )}
-        
+
         <Button onClick={handleAddAiProvider} variant="outline" className="w-full mt-4 h-12 border-dashed border-2 border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:border-blue-300 hover:text-blue-700 rounded-xl transition-colors">
           <Plus className="w-5 h-5 mr-2" /> Thêm Cấu hình AI Dự phòng
         </Button>

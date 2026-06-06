@@ -9,34 +9,49 @@ import { toast } from "sonner";
  * Đây là action call (POST), không phải data query
  * nên dùng useState + useCallback thay vì useMutation.
  */
+import { useMutation } from "@tanstack/react-query";
+
+export interface AiModelInfo {
+  id: string;
+  name: string;
+  contextWindow?: number;
+}
+
 export function useAiFetchModels() {
-  const [fetchedModels, setFetchedModels] = useState<Record<string, string[]>>({});
-  const [isFetching, setIsFetching] = useState<Record<string, boolean>>({});
+  const [fetchedModels, setFetchedModels] = useState<Record<string, AiModelInfo[]>>({});
+  const [isFetchingMap, setIsFetchingMap] = useState<Record<string, boolean>>({});
+
+  const mutation = useMutation({
+    mutationFn: async ({ providerType, apiKey }: { providerId: string; providerType: string; apiKey: string }) => {
+      const res = await apiClient.post("/ai/models", { provider: providerType, apiKey }) as any;
+      if (!res.success) throw new Error(res.message || "Lỗi tải danh sách Model");
+      return res.data;
+    },
+    onMutate: (variables) => {
+      setIsFetchingMap(prev => ({ ...prev, [variables.providerId]: true }));
+    },
+    onSuccess: (data, variables) => {
+      setFetchedModels(prev => ({ ...prev, [variables.providerId]: data }));
+      toast.success(`Đã tải ${data.length} model từ ${variables.providerType}!`);
+    },
+    onError: (err: any, variables) => {
+      toast.error(err.message || "Lỗi kết nối đến Backend");
+    },
+    onSettled: (_, __, variables) => {
+      setIsFetchingMap(prev => ({ ...prev, [variables.providerId]: false }));
+    }
+  });
 
   const fetchModels = useCallback(
-    async (providerId: string, providerType: string, apiKey: string) => {
+    (providerId: string, providerType: string, apiKey: string) => {
       if (!apiKey) {
         toast.error("Vui lòng nhập API Key trước khi tải danh sách Model!");
         return;
       }
-
-      setIsFetching(prev => ({ ...prev, [providerId]: true }));
-      try {
-        const res = await apiClient.post("/ai/models", { provider: providerType, apiKey }) as any;
-        if (res.success) {
-          setFetchedModels(prev => ({ ...prev, [providerId]: res.data }));
-          toast.success(`Đã tải ${res.data.length} model từ ${providerType}!`);
-        } else {
-          toast.error(res.message || "Lỗi tải danh sách Model");
-        }
-      } catch (err: any) {
-        toast.error(err.message || "Lỗi kết nối đến Backend");
-      } finally {
-        setIsFetching(prev => ({ ...prev, [providerId]: false }));
-      }
+      mutation.mutate({ providerId, providerType, apiKey });
     },
-    []
+    [mutation]
   );
 
-  return { fetchedModels, isFetching, fetchModels };
+  return { fetchedModels, isFetching: isFetchingMap, fetchModels };
 }

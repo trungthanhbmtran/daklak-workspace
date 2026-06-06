@@ -83,7 +83,7 @@ export function CreateUserModal({
     queryFn: () => organizationApi.getTree(),
     enabled: isOpen,
   });
-  
+
   const { data: jobTitlesRes } = useQuery({
     queryKey: ["organizations", "job-titles"],
     queryFn: () => organizationApi.getJobTitles(),
@@ -107,7 +107,7 @@ export function CreateUserModal({
     emp.department?.name || (emp.departmentId != null ? unitNameMap.get(emp.departmentId) : null) || "";
   const getJobTitleName = (emp: HrmEmployee) => {
     const parts: string[] = [];
-    
+
     // Government title (or any primary job title if type is GOVERNMENT or undefined)
     const govt = emp.jobTitle?.name || (emp.jobTitleId != null ? jobTitleNameMap.get(emp.jobTitleId) : null);
     if (govt) parts.push(govt);
@@ -163,12 +163,12 @@ export function CreateUserModal({
     form.setValue("email", emp.email || form.getValues("email"));
     form.setValue("cccd", emp.identityCard ?? "");
     form.setValue("employeeCode", emp.employeeCode ?? "");
-    
+
     // Gợi ý username từ mã nhân viên nếu chưa có
     if (!form.getValues("username") && emp.employeeCode) {
       form.setValue("username", emp.employeeCode);
     }
-    
+
     // Lưu lại nhân sự đã chọn để đổi giao diện
     setSelectedHrmEmp(emp);
   };
@@ -220,7 +220,7 @@ export function CreateUserModal({
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col max-h-[75vh]">
             <ScrollArea className="px-6 py-4 flex-1 bg-background">
               <div className="space-y-8 pb-4">
-                
+
                 {/* 1. Tra cứu từ HRM */}
                 <section className="space-y-4">
                   <div className="flex items-center justify-between border-b pb-2">
@@ -248,10 +248,10 @@ export function CreateUserModal({
                           {getUnitName(selectedHrmEmp)} {getJobTitleName(selectedHrmEmp) && `- ${getJobTitleName(selectedHrmEmp)}`}
                         </div>
                       </div>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
                         onClick={handleClearHrmSelection}
                         className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0 h-8 px-2"
                         title="Hủy chọn nhân sự này"
@@ -277,7 +277,7 @@ export function CreateUserModal({
                           <span className="hidden sm:inline">Tìm kiếm</span>
                         </Button>
                       </div>
-                      
+
                       {/* Kết quả tìm kiếm HRM */}
                       {hrmKeyword.trim().length >= 2 && hrmEmployees.length > 0 && (
                         <div className="rounded-md border bg-card max-h-[220px] overflow-y-auto shadow-md">
@@ -359,11 +359,11 @@ export function CreateUserModal({
                     <ShieldCheck className="h-4 w-4 text-primary" />
                     <h3 className="text-sm font-semibold text-foreground">3. Cấu hình vai trò & Chính sách (PBAC)</h3>
                   </div>
-                  
+
                   <div className="bg-primary/5 text-primary-foreground border border-primary/20 rounded-md p-3 flex items-start gap-3">
                     <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                     <p className="text-xs text-muted-foreground leading-relaxed">
-                      Trong hệ thống PBAC, quyền hạn được quyết định bởi <strong>Chính sách (Policies)</strong>. 
+                      Trong hệ thống PBAC, quyền hạn được quyết định bởi <strong>Chính sách (Policies)</strong>.
                       Việc gán Vai trò (Role) dưới đây sẽ tự động kế thừa các tập chính sách đã được liên kết với Vai trò đó.
                     </p>
                   </div>
@@ -375,7 +375,7 @@ export function CreateUserModal({
                       <FormItem>
                         {rolesLoading ? (
                           <div className="flex items-center justify-center p-6 border rounded-md border-dashed">
-                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" /> 
+                            <Loader2 className="h-5 w-5 animate-spin text-muted-foreground mr-2" />
                             <span className="text-sm text-muted-foreground">Đang tải cấu hình Roles...</span>
                           </div>
                         ) : roles.length === 0 ? (
@@ -391,8 +391,8 @@ export function CreateUserModal({
                                   key={role.id}
                                   className={cn(
                                     "relative flex items-start gap-3 cursor-pointer p-3 rounded-lg border-2 transition-all duration-200",
-                                    isSelected 
-                                      ? "bg-primary/5 border-primary shadow-sm" 
+                                    isSelected
+                                      ? "bg-primary/5 border-primary shadow-sm"
                                       : "bg-card border-border hover:border-primary/40 hover:bg-muted/50"
                                   )}
                                 >
