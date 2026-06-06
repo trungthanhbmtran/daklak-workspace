@@ -733,7 +733,7 @@ export class TasksService implements OnModuleInit {
     };
   }
 
-  private checkTaskPermission(task: any, query: any) {
+  private async checkTaskPermission(task: any, query: any) {
     if (query.isAdmin) return;
     if (!query.currentUserCode) return; // Bỏ qua nếu ko có thông tin auth
 
@@ -750,7 +750,19 @@ export class TasksService implements OnModuleInit {
       ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
       : (query.currentUserDept ? [query.currentUserDept] : []);
     
-    if (ancestorIds.includes(task.departmentId)) return;
+    if (task.departmentId !== null && ancestorIds.includes(task.departmentId)) return;
+
+    // Check plan bypass
+    if (task.planId) {
+      const plan = await this.prisma.masterPlan.findUnique({
+        where: { id: task.planId },
+        include: { tasks: { select: { assigneeCode: true, assignerCode: true } } }
+      });
+      if (plan) {
+         if (plan.departmentId !== null && ancestorIds.includes(plan.departmentId)) return;
+         if (plan.tasks.some(t => t.assigneeCode === code || t.assignerCode === code)) return;
+      }
+    }
 
     throw new Error('Bạn không có quyền truy cập nhiệm vụ này.');
   }
@@ -764,7 +776,7 @@ export class TasksService implements OnModuleInit {
     if (!task) throw new Error('Task not found');
     
     if (typeof query === 'object') {
-      this.checkTaskPermission(task, query);
+      await this.checkTaskPermission(task, query);
     }
 
     return {
@@ -903,7 +915,7 @@ export class TasksService implements OnModuleInit {
     if (typeof query === 'object') {
       const task = await this.prisma.task.findUnique({ where: { id: taskId } });
       if (task) {
-        this.checkTaskPermission(task, query);
+        await this.checkTaskPermission(task, query);
       }
     }
 
@@ -977,7 +989,7 @@ export class TasksService implements OnModuleInit {
     }
 
     if (typeof query === 'object') {
-      this.checkTaskPermission(rootTask, query);
+      await this.checkTaskPermission(rootTask, query);
     }
 
     const result: any[] = [];

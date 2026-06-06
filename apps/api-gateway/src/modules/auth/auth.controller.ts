@@ -178,7 +178,7 @@ export class AuthController implements OnModuleInit {
         );
         const emp = empRes?.data;
         if (emp) {
-          const fetchedFullName = emp.fullName || `${emp.lastname || ''} ${emp.firstname || ''}`.trim();
+          const fetchedFullName = emp.fullName || `${emp.firstname || ''} ${emp.lastname || ''}`.trim();
           if (fetchedFullName) {
             user.fullName = fetchedFullName;
           }
