@@ -2666,6 +2666,24 @@ async function main() {
       res: 'PLAN',
       action: 'VIEW',
     },
+    {
+      code: 'HRM_MENU_TASKS',
+      name: 'Bảng việc cá nhân',
+      route: 'work-plans/tasks',
+      icon: 'briefcase-outline',
+      order: 3,
+      res: 'TASK',
+      action: 'READ',
+    },
+    {
+      code: 'HRM_MENU_CRITERIA',
+      name: 'Khung tiêu chí KPI',
+      route: 'work-plans/criteria',
+      icon: 'settings-2-outline',
+      order: 4,
+      res: 'KPI',
+      action: 'READ',
+    },
 
     {
       code: 'HRM_MENU_RANK_TEMPLATES',
