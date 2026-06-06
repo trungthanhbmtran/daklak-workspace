@@ -45,6 +45,40 @@ export class TasksService implements OnModuleInit {
     }
   }
 
+  private computeAllowedActions(t: any, query: any): string[] {
+    if (!query) return [];
+    const isUserAdmin = query.isAdmin === true;
+    const currentUserCode = query.currentUserCode;
+    if (!currentUserCode) return [];
+
+    const isAssigner = t.assignerCode === currentUserCode;
+    const isAssignee = t.assigneeCode === currentUserCode;
+    const isSupervisor = t.supervisorCode === currentUserCode;
+    
+    let isCoordinator = false;
+    try {
+      const coAssignees = typeof t.coAssigneeCodesJson === 'string' ? JSON.parse(t.coAssigneeCodesJson) : (t.coAssigneeCodesJson || []);
+      if (Array.isArray(coAssignees) && coAssignees.includes(currentUserCode)) isCoordinator = true;
+    } catch {}
+
+    const canEdit = isUserAdmin || isAssigner || isAssignee;
+
+    const allowedActions: string[] = [];
+    if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
+    if (isUserAdmin || isAssigner) allowedActions.push('DELETE');
+    if (isAssignee && t.status !== 'DONE') {
+      allowedActions.push('COMPLETE');
+      if (t.status !== 'RETURNED') allowedActions.push('RETURN');
+      allowedActions.push('COORDINATE');
+    }
+    
+    if (isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator) {
+      allowedActions.push('CHAT');
+    }
+
+    return allowedActions;
+  }
+
   private async getTaskStats(query: any) {
     const statsWhere: any = query.assigneeCode ? { assigneeCode: query.assigneeCode } : {};
 
@@ -225,13 +259,7 @@ export class TasksService implements OnModuleInit {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
       data: tasks.map((t: any) => {
-        const isAssigner = t.assignerCode === currentUserCode;
-        const isAssignee = t.assigneeCode === currentUserCode;
-        const canEdit = isUserAdmin || isAssigner || isAssignee;
-
-        const allowedActions: string[] = [];
-        if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
-        if (isUserAdmin || isAssigner) allowedActions.push('DELETE');
+        const allowedActions = this.computeAllowedActions(t, query);
 
         return {
           ...t,
@@ -283,13 +311,8 @@ export class TasksService implements OnModuleInit {
     const currentUserCode = query.currentUserCode;
     const mappedTasks = tasks.map((t: any) => {
       // Phân quyền cho từng task
-      const isAssigner = t.assignerCode === currentUserCode;
-      const isAssignee = t.assigneeCode === currentUserCode;
-      const canEdit = isUserAdmin || isAssigner || isAssignee;
-
-      const allowedActions: string[] = [];
-      if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
-      if (isUserAdmin || isAssigner) allowedActions.push('DELETE');
+      // Phân quyền cho từng task
+      const allowedActions = this.computeAllowedActions(t, query);
 
       return {
         ...t,
@@ -806,8 +829,11 @@ export class TasksService implements OnModuleInit {
     });
     if (!task) throw new Error('Task not found');
     
+    let allowedActions: string[] = [];
     if (typeof query === 'object') {
       await this.checkTaskPermission(task, query);
+
+      allowedActions = this.computeAllowedActions(task, query);
     }
 
     return {
@@ -815,7 +841,8 @@ export class TasksService implements OnModuleInit {
       dueDate: task.dueDate?.toISOString() || '',
       startDate: task.startDate?.toISOString() || '',
       createdAt: task.createdAt?.toISOString() || '',
-      updatedAt: task.updatedAt?.toISOString() || ''
+      updatedAt: task.updatedAt?.toISOString() || '',
+      allowedActions
     };
   }
 
@@ -919,6 +946,25 @@ export class TasksService implements OnModuleInit {
       }
     }
 
+    if (finalAuthorCode && !data.isSystemMessage) {
+      const task = await this.prisma.task.findUnique({ where: { id: data.taskId } });
+      if (task) {
+        let isCoordinator = false;
+        try {
+          const coAssignees = typeof task.coAssigneeCodesJson === 'string' ? JSON.parse(task.coAssigneeCodesJson) : (task.coAssigneeCodesJson || []);
+          if (Array.isArray(coAssignees) && coAssignees.includes(finalAuthorCode)) isCoordinator = true;
+        } catch {}
+        
+        const isAssigner = task.assignerCode === finalAuthorCode;
+        const isAssignee = task.assigneeCode === finalAuthorCode;
+        const isSupervisor = task.supervisorCode === finalAuthorCode;
+        
+        if (!isAssigner && !isAssignee && !isSupervisor && !isCoordinator) {
+          throw new Error('Bạn không được phân công nên không thể trao đổi ở nhiệm vụ này.');
+        }
+      }
+    }
+
     const c = await this.prisma.taskComment.create({
       data: {
         taskId: data.taskId,
@@ -947,6 +993,16 @@ export class TasksService implements OnModuleInit {
       const task = await this.prisma.task.findUnique({ where: { id: taskId } });
       if (task) {
         await this.checkTaskPermission(task, query);
+
+        // Check if user is actually allowed to chat/view chat
+        const allowedActions = this.computeAllowedActions(task, query);
+        if (!allowedActions.includes('CHAT')) {
+          return {
+            success: true,
+            message: 'Không có quyền xem trao đổi',
+            data: []
+          };
+        }
       }
     }
 
@@ -980,31 +1036,31 @@ export class TasksService implements OnModuleInit {
    */
   async getSubTasks(query: any) {
     const taskId = typeof query === 'object' ? query.taskId : query;
+    const mapTask = (t: any, level: number, isParent = false, isCurrent = false) => {
+      const allowedActions = this.computeAllowedActions(t, query);
 
-    const mapTask = (t: any, level: number, isParent = false, isCurrent = false) => ({
-      id: t.id,
-      title: t.title,
-      status: t.status,
-      priority: t.priority,
-      assigneeCode: t.assigneeCode,
-      assigneeName: t.assignee
-        ? t.assignee.fullName
-        : t.assigneeCode,
-      assignerCode: t.assignerCode,
-      assignerName: t.assigner
-        ? t.assigner.fullName
-        : (t.assignerCode || ''),
-      departmentId: t.departmentId || 0,
-      parentId: t.parentId || 0,
-      dueDate: t.dueDate?.toISOString() || '',
-      createdAt: t.createdAt?.toISOString() || '',
-      updatedAt: t.updatedAt?.toISOString() || '',
-      level,
-      isParent,
-      isCurrent,
-      isChild: !isParent && !isCurrent,
-      isGrandChild: false,
-    });
+      return {
+        id: t.id,
+        title: t.title,
+        status: t.status,
+        priority: t.priority,
+        assigneeCode: t.assigneeCode,
+        assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
+        assignerCode: t.assignerCode,
+        assignerName: t.assigner ? t.assigner.fullName : (t.assignerCode || ''),
+        departmentId: t.departmentId || 0,
+        parentId: t.parentId || 0,
+        dueDate: t.dueDate?.toISOString() || '',
+        createdAt: t.createdAt?.toISOString() || '',
+        updatedAt: t.updatedAt?.toISOString() || '',
+        level,
+        isParent,
+        isCurrent,
+        isChild: !isParent && !isCurrent,
+        isGrandChild: false,
+        allowedActions
+      };
+    };
 
     // Query 1: lấy task hiện tại + task cha
     const rootTask = await this.prisma.task.findUnique({
