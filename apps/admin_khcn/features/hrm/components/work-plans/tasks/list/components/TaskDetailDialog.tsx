@@ -65,6 +65,10 @@ export function TaskDetailDialog({
     handleSendMessage(chatMessage, () => setChatMessage(''));
   }, [chatMessage, handleSendMessage]);
 
+  const hasSubtasks = (delegationChain || []).some(
+    (n: any) => n.parentId === activeTask?.id
+  );
+
   const handleComplete = useCallback(() => {
     handleCompleteTask(onClose);
   }, [handleCompleteTask, onClose]);
@@ -277,7 +281,7 @@ export function TaskDetailDialog({
                       </h3>
                       <div className="flex flex-col gap-2.5">
                         {/* Complete */}
-                        {allowedActions.includes('COMPLETE') && (
+                        {allowedActions.includes('COMPLETE') && !hasSubtasks && (
                           <Button className="w-full h-11 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[13px] shadow-lg shadow-emerald-500/20 hover:-translate-y-0.5 transition-all" onClick={handleComplete}>
                             <CheckCircle2 className="w-4 h-4 mr-2" /> Hoàn thành công việc
                           </Button>
