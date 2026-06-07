@@ -2426,22 +2426,13 @@ async function main() {
     },
     {
       code: 'WORKFLOW_SERVICE_ROOT',
-      name: 'Quy trình Nghiệp vụ',
+      name: 'Trung tâm Tích hợp & Quy trình',
       icon: 'layers-outline',
       service: 'WORKFLOW_SERVICE',
       color: '#8b5cf6',
       order: 5,
       res: 'WORKFLOW',
-    },
-    {
-      code: 'INTEGRATION_SERVICE_ROOT',
-      name: 'Trung tâm Liên thông',
-      icon: 'swap-horizontal-outline',
-      service: 'INTEGRATION_SERVICE',
-      color: '#0ea5e9',
-      order: 6,
-      res: 'INTEGRATION',
-    },
+    }
   ];
 
   const serviceNodes: Record<string, any> = {};
@@ -2937,40 +2928,32 @@ async function main() {
     }
   }
 
-  // 5. Integration Module
-  const integrationMenus = [
+  // 5. Workflow & Integration Module
+  const workflowMenus = [
     {
-      code: 'INTEGRATION_MENU_CONFIG',
-      name: 'Cấu hình kết nối',
-      route: '',
-      icon: 'options-outline',
+      code: 'WORKFLOW_MENU_BUILDER',
+      name: 'Trình kéo thả nghiệp vụ',
+      route: 'workflow-builder',
+      icon: 'git-network-outline',
       order: 1,
-      res: 'INTEGRATION',
-    },
-    {
-      code: 'INTEGRATION_MENU_LOGS',
-      name: 'Nhật ký đồng bộ',
-      route: 'logs',
-      icon: 'list-outline',
-      order: 2,
-      res: 'INTEGRATION',
-    },
+      res: 'WORKFLOW',
+    }
   ];
 
-  for (const { res, ...m } of integrationMenus) {
+  for (const { res, ...m } of workflowMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: {
-        parentId: serviceNodes['INTEGRATION_SERVICE'].id,
+        parentId: serviceNodes['WORKFLOW_SERVICE'].id,
         order: m.order,
         route: m.route,
         icon: m.icon,
       },
       create: {
         ...m,
-        parentId: serviceNodes['INTEGRATION_SERVICE'].id,
+        parentId: serviceNodes['WORKFLOW_SERVICE'].id,
         application: 'ADMIN_PORTAL',
-        service: 'INTEGRATION_SERVICE',
+        service: 'WORKFLOW_SERVICE',
       },
     });
     await linkMenuPBAC(node.id, res, 'READ');
@@ -5354,8 +5337,54 @@ async function main() {
   }
 
   console.log(`✅ [IOC] Hoàn tất phân quyền Quản lý Công việc cho ${iocUpdated} users Trung tâm IOC.`);
+
+  // ==========================================================
+  // SỞ KHOA HỌC CÔNG NGHỆ - PHÂN QUYỀN ĐẶC THÙ
+  // Chỉ dùng chức năng vai trò và các quyền của dịch vụ task trong HRM
+  // ==========================================================
+  console.log('🔹 Phân quyền đặc thù cho Sở Khoa học và Công nghệ...');
+
+  const skhcnPerms = await getPerms([
+    'ROLE.*',
+    'TASK.*',
+    'HRM_EMPLOYEE.READ', // Để có thể chọn người giao việc
+    'HRM_EMPLOYEE.VIEW',
+  ]);
+
+  const skhcnRole = await prisma.role.upsert({
+    where: { code: 'SKHCN_USER' },
+    update: { name: 'Người dùng Sở KHCN (Vai trò & Công việc)', permissions: { set: skhcnPerms } },
+    create: {
+      code: 'SKHCN_USER',
+      name: 'Người dùng Sở KHCN (Vai trò & Công việc)',
+      permissions: { connect: skhcnPerms },
+    },
+  });
+
+  const skhcnDeptIds = Object.keys(unitMap).filter(k => k.startsWith('H15.07')).map(k => unitMap[k]);
+  const skhcnUsers = EMPLOYEES.filter(emp => skhcnDeptIds.includes(emp.departmentId || -1));
+  let skhcnUpdated = 0;
+
+  for (const emp of skhcnUsers) {
+    const user = await prisma.user.findUnique({ where: { email: emp.email } });
+    if (!user) continue;
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        roles: {
+          set: [],
+          connect: [{ id: skhcnRole.id }],
+        },
+      },
+    });
+    skhcnUpdated++;
+  }
+  console.log(`✅ Hoàn tất phân quyền cho ${skhcnUpdated} users Sở KHCN.`);
+
   console.log('🚀 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
 }
+
 
 
 main()

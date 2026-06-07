@@ -17,6 +17,12 @@ const NODE_TYPES = [
   { type: "end", label: "End", icon: CircleStop, color: "text-rose-500", bgColor: "bg-rose-50" },
 ];
 
+const INFRA_NODE_TYPES = [
+  { type: "nginx_proxy", label: "NGINX Proxy (WAF)", icon: Zap, color: "text-emerald-500", bgColor: "bg-emerald-50" },
+  { type: "api_gateway", label: "API Gateway", icon: Zap, color: "text-violet-500", bgColor: "bg-violet-50" },
+  { type: "external_system", label: "Hệ thống đối tác", icon: Zap, color: "text-amber-500", bgColor: "bg-amber-50" },
+];
+
 export const NodePalette = () => {
   const onDragStart = (event: React.DragEvent, nodeType: string) => {
     event.dataTransfer.setData("application/reactflow", nodeType);
@@ -31,6 +37,32 @@ export const NodePalette = () => {
         </h3>
         <div className="flex flex-col gap-2">
           {NODE_TYPES.map((node) => (
+            <div
+              key={node.type}
+              className={cn(
+                "group flex items-center justify-between p-3 rounded-xl border border-border/60 bg-background hover:border-primary/40 hover:shadow-md transition-all cursor-grab active:cursor-grabbing"
+              )}
+              onDragStart={(event) => onDragStart(event, node.type)}
+              draggable
+            >
+              <div className="flex items-center gap-3">
+                <div className={cn("p-2 rounded-lg", node.bgColor)}>
+                   <node.icon className={cn("h-4 w-4", node.color)} />
+                </div>
+                <span className="text-sm font-medium">{node.label}</span>
+              </div>
+              <GripVertical className="h-4 w-4 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4 mt-2">
+          Hạ tầng & API
+        </h3>
+        <div className="flex flex-col gap-2">
+          {INFRA_NODE_TYPES.map((node) => (
             <div
               key={node.type}
               className={cn(

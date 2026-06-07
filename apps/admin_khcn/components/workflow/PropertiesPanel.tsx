@@ -55,7 +55,7 @@ export const PropertiesPanel = ({
       return (
         <div className="space-y-6">
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5  flex items-center gap-2">
               <Activity className="h-3.5 w-3.5" /> Kích hoạt tự động (Trigger)
             </label>
             <select
@@ -82,7 +82,7 @@ export const PropertiesPanel = ({
             </p>
           </div>
           <div>
-            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5 block flex items-center gap-2">
+            <label className="text-xs font-semibold text-muted-foreground uppercase mb-2.5  flex items-center gap-2">
               <FileText className="h-3.5 w-3.5" /> Mô tả quy trình
             </label>
             <Textarea
@@ -258,6 +258,188 @@ export const PropertiesPanel = ({
                 )}
                 <option value="notify">Gửi thông báo hệ thống</option>
               </select>
+            </div>
+          </div>
+        );
+      case "nginx_proxy":
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Server Name (Domain)
+              </label>
+              <input
+                name="domain"
+                value={data.domain || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="vd: api.daklak.gov.vn"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Listen Port
+              </label>
+              <input
+                name="port"
+                value={data.port || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="443"
+              />
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-muted-foreground uppercase">
+                Bật WAF (Web Application Firewall)
+              </label>
+              <input
+                type="checkbox"
+                name="wafEnabled"
+                checked={data.wafEnabled || false}
+                onChange={(e) => handleChange({ target: { name: 'wafEnabled', value: e.target.checked } } as any)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Cấu hình NGINX Tuỳ chỉnh (Advanced)
+              </label>
+              <textarea
+                name="customConfig"
+                value={data.customConfig || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                placeholder="location / { ... }"
+              />
+            </div>
+          </div>
+        );
+      case "api_gateway":
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Đường dẫn Endpoint (Path)
+              </label>
+              <input
+                name="endpoint"
+                value={data.endpoint || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="/api/v1/posts"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                HTTP Method
+              </label>
+              <select
+                name="method"
+                value={data.method || "ALL"}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <option value="ALL">ALL</option>
+                <option value="GET">GET</option>
+                <option value="POST">POST</option>
+                <option value="PUT">PUT</option>
+                <option value="DELETE">DELETE</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Map To Microservice
+              </label>
+              <select
+                name="targetService"
+                value={data.targetService || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              >
+                <option value="">Chọn microservice đích...</option>
+                <option value="user-service">User Service</option>
+                <option value="hrm-service">HRM Service</option>
+                <option value="posts-service">Posts Service</option>
+                <option value="document-service">Document Service</option>
+              </select>
+            </div>
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-semibold text-muted-foreground uppercase">
+                Yêu cầu Xác thực (JWT Auth)
+              </label>
+              <input
+                type="checkbox"
+                name="requiresAuth"
+                checked={data.requiresAuth || false}
+                onChange={(e) => handleChange({ target: { name: 'requiresAuth', value: e.target.checked } } as any)}
+                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+              />
+            </div>
+          </div>
+        );
+      case "external_system":
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Tên hệ thống đối tác
+              </label>
+              <input
+                name="systemName"
+                value={data.systemName || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="Trục LGSP Quốc gia"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Mã liên thông (Code)
+              </label>
+              <input
+                name="integrationCode"
+                value={data.integrationCode || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="LGSP_HQ"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                API URL (Outbound)
+              </label>
+              <input
+                name="apiUrl"
+                value={data.apiUrl || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="https://api.partner.com/v1"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                API Token / Secret
+              </label>
+              <input
+                type="password"
+                name="apiToken"
+                value={data.apiToken || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="****************"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Nhập JSON Postman (tuỳ chọn)
+              </label>
+              <textarea
+                name="postmanJson"
+                value={data.postmanJson || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[100px] font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                placeholder="{ ... }"
+              />
             </div>
           </div>
         );
