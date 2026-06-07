@@ -2480,6 +2480,7 @@ async function main() {
       icon: 'person-outline',
       order: 1,
       res: 'USER',
+      action: 'UPDATE',
     },
     {
       code: 'ADMIN_ROLES',
@@ -2529,9 +2530,17 @@ async function main() {
       order: 7,
       res: 'SYSTEM',
     },
+    {
+      code: 'ADMIN_MICROSERVICES',
+      name: 'Cấu hình luồng (API Gateway)',
+      route: 'microservices',
+      icon: 'git-network-outline',
+      order: 8,
+      res: 'SYSTEM',
+    },
   ];
 
-  for (const { res, ...m } of adminMenus) {
+  for (const { res, action, ...m } of adminMenus) {
     const node = await prisma.menu.upsert({
       where: { code: m.code },
       update: {
@@ -2548,7 +2557,7 @@ async function main() {
         service: 'USER_SERVICE',
       },
     });
-    await linkMenuPBAC(node.id, res, 'READ');
+    await linkMenuPBAC(node.id, res, action || 'READ');
   }
 
   // Admin Sub-menus for Settings
@@ -5356,6 +5365,8 @@ async function main() {
     'TASK.*',
     'HRM_EMPLOYEE.READ', // Để có thể chọn người giao việc
     'HRM_EMPLOYEE.VIEW',
+    'USER.READ',         // Để thấy menu Quản trị Hệ thống (Root)
+    'USER.VIEW',
   ]);
 
   const skhcnRole = await prisma.role.upsert({
