@@ -57,7 +57,7 @@ const integrationModules = [
 export default function InteractionsDashboard() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-10">
-      
+
       <div>
         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">Tương tác công dân & Hệ thống</h1>
         <p className="text-gray-500 text-lg max-w-3xl">
@@ -71,7 +71,7 @@ export default function InteractionsDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {interactionModules.map((module) => (
               <Link key={module.href} href={module.href} className="group block h-full">
-                <div className={`h-full rounded-2xl border bg-gradient-to-br ${module.gradient} p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
+                <div className={`h-full rounded-2xl border bg-linear-to-br ${module.gradient} p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
                   <div className={`w-14 h-14 rounded-xl ${module.bgColor} flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
                     <module.icon className={`w-7 h-7 ${module.color}`} />
                   </div>
@@ -93,7 +93,7 @@ export default function InteractionsDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {integrationModules.map((module) => (
               <Link key={module.href} href={module.href} className="group block h-full">
-                <div className={`h-full rounded-2xl border bg-gradient-to-br ${module.gradient} p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
+                <div className={`h-full rounded-2xl border bg-linear-to-br ${module.gradient} p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
                   <div className={`w-14 h-14 rounded-xl ${module.bgColor} flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
                     <module.icon className={`w-7 h-7 ${module.color}`} />
                   </div>
