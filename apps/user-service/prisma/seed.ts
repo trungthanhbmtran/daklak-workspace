@@ -2941,7 +2941,7 @@ async function main() {
     {
       code: 'WORKFLOW_MENU_BUILDER',
       name: 'Trung tâm Liên thông',
-      route: '',
+      route: '/services/integration',
       icon: 'git-network-outline',
       order: 1,
       res: 'WORKFLOW',
@@ -5347,51 +5347,114 @@ async function main() {
   console.log(`✅ [IOC] Hoàn tất phân quyền Quản lý Công việc cho ${iocUpdated} users Trung tâm IOC.`);
 
   // ==========================================================
-  // SỞ KHOA HỌC CÔNG NGHỆ - PHÂN QUYỀN ĐẶC THÙ
-  // Chỉ dùng chức năng vai trò và các quyền của dịch vụ task trong HRM
+  // PHÂN QUYỀN ĐẠI TRÀ THEO CHỨC DANH (TOÀN HỆ THỐNG)
   // ==========================================================
-  console.log('🔹 Phân quyền đặc thù cho Sở Khoa học và Công nghệ...');
+  console.log('🔹 Phân quyền hệ thống theo nhóm chức danh chung...');
 
-  const skhcnPerms = await getPerms([
-    'ORGANIZATION.READ',
-    'ORGANIZATION.VIEW',
-    'SYSTEM.READ',
-    'SYSTEM.VIEW',
-    'TASK.*',
-    'HRM_EMPLOYEE.READ', // Để có thể chọn người giao việc
-    'HRM_EMPLOYEE.VIEW',
+  // Dọn dẹp các role cũ không còn dùng (SKHCN)
+  const legacyRoles = ['SKHCN_USER', 'SKHCN_LANH_DAO', 'SKHCN_QUAN_LY', 'SKHCN_NHAN_VIEN'];
+  await prisma.role.deleteMany({
+    where: { code: { in: legacyRoles } }
+  });
+  console.log('🗑️ Đã xoá các role phân quyền SKHCN cũ khỏi hệ thống.');
+
+  const lanhDaoTinhPerms = await getPerms([
+    'ORGANIZATION.READ', 'ORGANIZATION.VIEW', 'SYSTEM.READ', 'SYSTEM.VIEW',
+    'TASK.*', 'PLAN.*', 'KPI.*', 'HRM_EMPLOYEE.*', 'DOC_INCOMING.*', 'DOC_OUTGOING.*'
+  ]);
+  const lanhDaoSoPerms = await getPerms([
+    'ORGANIZATION.READ', 'ORGANIZATION.VIEW', 'SYSTEM.READ', 'SYSTEM.VIEW',
+    'TASK.*', 'PLAN.*', 'KPI.*', 'HRM_EMPLOYEE.*'
+  ]);
+  const quanLyPhongSoPerms = await getPerms([
+    'ORGANIZATION.READ', 'ORGANIZATION.VIEW', 'SYSTEM.READ', 'SYSTEM.VIEW',
+    'TASK.*', 'PLAN.*', 'KPI.*', 'HRM_EMPLOYEE.READ', 'HRM_EMPLOYEE.VIEW'
+  ]);
+  const quanLyPhongTrungTamPerms = await getPerms([
+    'ORGANIZATION.READ', 'ORGANIZATION.VIEW', 'SYSTEM.READ', 'SYSTEM.VIEW',
+    'TASK.*', 'PLAN.*', 'KPI.*', 'HRM_EMPLOYEE.READ', 'HRM_EMPLOYEE.VIEW'
+  ]);
+  const nhanVienPerms = await getPerms([
+    'ORGANIZATION.READ', 'ORGANIZATION.VIEW', 'SYSTEM.READ', 'SYSTEM.VIEW',
+    'TASK.READ', 'TASK.PROCESS', 'TASK.UPDATE', 'TASK.VIEW',
+    'PLAN.READ', 'PLAN.VIEW',
+    'KPI.READ', 'KPI.VIEW',
+    'HRM_EMPLOYEE.READ', 'HRM_EMPLOYEE.VIEW'
   ]);
 
-  const skhcnRole = await prisma.role.upsert({
-    where: { code: 'SKHCN_USER' },
-    update: { name: 'Người dùng Sở KHCN (Vai trò & Công việc)', permissions: { set: skhcnPerms } },
-    create: {
-      code: 'SKHCN_USER',
-      name: 'Người dùng Sở KHCN (Vai trò & Công việc)',
-      permissions: { connect: skhcnPerms },
-    },
+  const roleLanhDaoTinh = await prisma.role.upsert({
+    where: { code: 'ROLE_LANH_DAO_TINH' },
+    update: { name: 'Lãnh đạo Tỉnh', permissions: { set: lanhDaoTinhPerms } },
+    create: { code: 'ROLE_LANH_DAO_TINH', name: 'Lãnh đạo Tỉnh', permissions: { connect: lanhDaoTinhPerms } },
   });
 
-  const skhcnDeptIds = Object.keys(unitMap).filter(k => k.startsWith('H15.07')).map(k => unitMap[k]);
-  const skhcnUsers = EMPLOYEES.filter(emp => skhcnDeptIds.includes(emp.departmentId || -1));
-  let skhcnUpdated = 0;
+  const roleLanhDaoSo = await prisma.role.upsert({
+    where: { code: 'ROLE_LANH_DAO_SO' },
+    update: { name: 'Lãnh đạo Sở / Ngành', permissions: { set: lanhDaoSoPerms } },
+    create: { code: 'ROLE_LANH_DAO_SO', name: 'Lãnh đạo Sở / Ngành', permissions: { connect: lanhDaoSoPerms } },
+  });
 
-  for (const emp of skhcnUsers) {
-    const user = await prisma.user.findUnique({ where: { email: emp.email } });
+  const roleQuanLyPhongSo = await prisma.role.upsert({
+    where: { code: 'ROLE_QUAN_LY_PHONG_SO' },
+    update: { name: 'Quản lý cấp phòng Sở / GĐ Trung tâm', permissions: { set: quanLyPhongSoPerms } },
+    create: { code: 'ROLE_QUAN_LY_PHONG_SO', name: 'Quản lý cấp phòng Sở / GĐ Trung tâm', permissions: { connect: quanLyPhongSoPerms } },
+  });
+
+  const roleQuanLyPhongTrungTam = await prisma.role.upsert({
+    where: { code: 'ROLE_QUAN_LY_PHONG_TRUNG_TAM' },
+    update: { name: 'Quản lý cấp phòng Trung tâm', permissions: { set: quanLyPhongTrungTamPerms } },
+    create: { code: 'ROLE_QUAN_LY_PHONG_TRUNG_TAM', name: 'Quản lý cấp phòng Trung tâm', permissions: { connect: quanLyPhongTrungTamPerms } },
+  });
+
+  const roleNhanVien = await prisma.role.upsert({
+    where: { code: 'ROLE_CHUYEN_VIEN' },
+    update: { name: 'Chuyên viên / Nhân viên', permissions: { set: nhanVienPerms } },
+    create: { code: 'ROLE_CHUYEN_VIEN', name: 'Chuyên viên / Nhân viên', permissions: { connect: nhanVienPerms } },
+  });
+
+  let usersUpdated = 0;
+
+  for (const emp of EMPLOYEES) {
+    const user = await prisma.user.findUnique({ where: { email: emp.email }, include: { roles: true } });
     if (!user) continue;
+
+    const unitCode = Object.keys(unitMap).find(k => unitMap[k] === emp.departmentId) || '';
+    const isTinhDept = unitCode.split('.').length === 1 && unitCode.startsWith('H15');
+    const isSoDept = unitCode.split('.').length === 2 && unitCode.startsWith('H15');
+
+    let roleToAssign = roleNhanVien.id;
+
+    if ([jobMap['CHU_TICH'], jobMap['PHO_CHU_TICH']].includes(emp.jobTitleId as number)) {
+      roleToAssign = roleLanhDaoTinh.id;
+    } else if (isSoDept && [jobMap['GIAM_DOC'], jobMap['PHO_GIAM_DOC']].includes(emp.jobTitleId as number)) {
+      roleToAssign = roleLanhDaoSo.id;
+    } else if (
+      (isSoDept && [jobMap['CHANH_VAN_PHONG'], jobMap['PHO_CHANH_VAN_PHONG'], jobMap['TRUONG_PHONG'], jobMap['PHO_PHONG'], jobMap['PHO_TRUONG_PHONG']].includes(emp.jobTitleId as number)) ||
+      (!isSoDept && !isTinhDept && [jobMap['GIAM_DOC'], jobMap['PHO_GIAM_DOC']].includes(emp.jobTitleId as number))
+    ) {
+      roleToAssign = roleQuanLyPhongSo.id;
+    } else if (
+      !isSoDept && !isTinhDept && [jobMap['CHANH_VAN_PHONG'], jobMap['PHO_CHANH_VAN_PHONG'], jobMap['TRUONG_PHONG'], jobMap['PHO_PHONG'], jobMap['PHO_TRUONG_PHONG']].includes(emp.jobTitleId as number)
+    ) {
+      roleToAssign = roleQuanLyPhongTrungTam.id;
+    }
+
+    const hasSuperAdmin = user.roles.some(r => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN');
+    const assignedRoles = hasSuperAdmin ? [{ id: roleToAssign }, ...user.roles.filter(r => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN').map(r => ({ id: r.id }))] : [{ id: roleToAssign }];
 
     await prisma.user.update({
       where: { id: user.id },
       data: {
         roles: {
           set: [],
-          connect: [{ id: skhcnRole.id }],
+          connect: assignedRoles,
         },
       },
     });
-    skhcnUpdated++;
+    
+    usersUpdated++;
   }
-  console.log(`✅ Hoàn tất phân quyền cho ${skhcnUpdated} users Sở KHCN.`);
+  console.log(`✅ Hoàn tất phân quyền cho ${usersUpdated} users toàn hệ thống.`);
 
   console.log('🚀 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
 }

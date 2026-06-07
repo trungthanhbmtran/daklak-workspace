@@ -112,8 +112,15 @@ export class OrganizationsController implements OnModuleInit {
 
     const user = request?.user;
     const isAdmin =
+      user?.roles?.includes('SUPER_ADMIN') ||
+      user?.roles?.includes('ADMIN') ||
+      user?.roles?.includes('ROLE_LANH_DAO_TINH') ||
+      user?.roles?.includes('ROLE_LANH_DAO_SO') ||
+      user?.roles?.includes('ROLE_QUAN_LY_PHONG_SO') ||
+      user?.roles?.includes('ROLE_QUAN_LY_PHONG_TRUNG_TAM') ||
+      user?.roles?.includes('ROLE_CHUYEN_VIEN') ||
       user?.permissionsFlatten?.includes('SYSTEM:MANAGE') ||
-      user?.permissionsFlatten?.includes('HRM_ORGANIZATION:MANAGE');
+      user?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
 
     if (!isAdmin && user?.unitId) {
       // Find the user's unit node and only return that node (and its descendants)
