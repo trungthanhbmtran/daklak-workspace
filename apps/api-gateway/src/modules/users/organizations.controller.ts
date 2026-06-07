@@ -125,9 +125,18 @@ export class OrganizationsController implements OnModuleInit {
       const path = '/api/v1/admin/organizations/tree';
       for (const rule of rules) {
         // Find if this path matches our endpoint
-        if ((rule.path === path || rule.path === '/api/v1/admin/organizations/*') && (rule.method === 'ALL' || rule.method === 'GET')) {
+        if (
+          (rule.path === path ||
+            rule.path === '/api/v1/admin/organizations/*') &&
+          (rule.method === 'ALL' || rule.method === 'GET')
+        ) {
           const requiredPermissions = rule.permissions || [];
-          if (requiredPermissions.length > 0 && requiredPermissions.some((p: string) => user?.permissionsFlatten?.includes(p))) {
+          if (
+            requiredPermissions.length > 0 &&
+            requiredPermissions.some((p: string) =>
+              user?.permissionsFlatten?.includes(p),
+            )
+          ) {
             isAdmin = true;
             break;
           }

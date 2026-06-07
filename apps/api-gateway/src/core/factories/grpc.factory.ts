@@ -3,7 +3,7 @@ import { join } from 'path';
 
 // PROTO_PATH env cho K8s/Docker; fallback: relative to libs/proto
 const PROTO_ROOT =
-  process.env.PROTO_PATH || join(__dirname, '../../../../../shared/protos');
+  process.env.PROTO_PATH || join(__dirname, '../../../../../../shared/protos');
 
 export function registerGrpcService(serviceConfig: any) {
   return ClientsModule.register([

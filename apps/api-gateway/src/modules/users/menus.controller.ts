@@ -74,7 +74,11 @@ const joinPath = (base: string, path: string) => {
 };
 
 const getRealBranches = (nodes: any[]): any[] => {
-  if (nodes.length === 1 && !nodes[0].route && Array.isArray(nodes[0].children)) {
+  if (
+    nodes.length === 1 &&
+    !nodes[0].route &&
+    Array.isArray(nodes[0].children)
+  ) {
     return nodes[0].children;
   }
   return nodes;

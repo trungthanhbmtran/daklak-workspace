@@ -12,6 +12,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
 import { AiModule } from './modules/ai/ai.module';
 import { RedisModule } from './core/redis/redis.module';
+import { PrismaModule } from './core/prisma/prisma.module';
 import { IntegrationModule } from './modules/integration/integration.module';
 
 @Module({
@@ -31,6 +32,7 @@ import { IntegrationModule } from './modules/integration/integration.module';
     TranslateModule,
     AiModule,
     RedisModule,
+    PrismaModule,
     IntegrationModule,
   ],
   controllers: [AppController],
