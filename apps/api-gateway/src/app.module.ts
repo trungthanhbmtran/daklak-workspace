@@ -12,6 +12,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
 import { AiModule } from './modules/ai/ai.module';
 import { RedisModule } from './core/redis/redis.module';
+import { IntegrationModule } from './modules/integration/integration.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { RedisModule } from './core/redis/redis.module';
     TranslateModule,
     AiModule,
     RedisModule,
+    IntegrationModule,
   ],
   controllers: [AppController],
   providers: [],

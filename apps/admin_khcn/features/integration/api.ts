@@ -91,6 +91,21 @@ export const integrationApi = {
     const res = await apiClient.put(`/integrations/${id}/active`, { isActive }) as any;
     if (res.success) return res.data;
     throw new Error(res.message || 'Lỗi khi cập nhật trạng thái');
+  },
+  
+  // Gateway APIs
+  getGatewayEndpoints: async () => {
+    const res = await apiClient.get('/integration/endpoints') as any;
+    // For direct controller responses that might not have standard wrapper
+    return res.data || res;
+  },
+  getNginxConfig: async () => {
+    const res = await apiClient.get('/integration/nginx') as any;
+    return res.data || res;
+  },
+  updateNginxConfig: async (content: string) => {
+    const res = await apiClient.put('/integration/nginx', { content }) as any;
+    return res.data || res;
   }
 };
 
@@ -130,5 +145,27 @@ export const useToggleActiveIntegration = () => {
   return useMutation({
     mutationFn: integrationApi.toggleActive,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: integrationKeys.lists() })
+  });
+};
+
+export const useGatewayEndpoints = () => {
+  return useQuery({
+    queryKey: ['integration', 'endpoints'],
+    queryFn: integrationApi.getGatewayEndpoints
+  });
+};
+
+export const useNginxConfig = () => {
+  return useQuery({
+    queryKey: ['integration', 'nginx'],
+    queryFn: integrationApi.getNginxConfig
+  });
+};
+
+export const useUpdateNginxConfig = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: integrationApi.updateNginxConfig,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integration', 'nginx'] })
   });
 };
