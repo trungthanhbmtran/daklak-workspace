@@ -18,6 +18,7 @@ interface PropertiesPanelProps {
   selectedNode: Node | null;
   availableServices?: any[];
   availableTriggers?: any[];
+  taskRoles?: any[];
   onUpdate: (id: string, data: any) => void;
   onDelete: (id: string) => void;
   onClose: () => void;
@@ -31,6 +32,7 @@ export const PropertiesPanel = ({
   selectedNode,
   availableServices = [],
   availableTriggers = [],
+  taskRoles = [],
   onUpdate,
   onDelete,
   onClose,
@@ -120,11 +122,35 @@ export const PropertiesPanel = ({
                 className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               >
                 <option value="">Chọn vai trò...</option>
-                <option value="ADMIN">Administrator</option>
-                <option value="MANAGER">Quản lý phòng ban</option>
-                <option value="STAFF">Nhân viên nghiệp vụ</option>
-                <option value="EXPERT">Chuyên gia phản biện</option>
+                {taskRoles && taskRoles.length > 0 ? (
+                  taskRoles.map((role: any) => (
+                    <option key={role.code} value={role.code}>{role.name || role.code}</option>
+                  ))
+                ) : (
+                  <>
+                    <option value="ADMIN">Administrator</option>
+                    <option value="MANAGER">Quản lý phòng ban</option>
+                    <option value="STAFF">Nhân viên nghiệp vụ</option>
+                    <option value="EXPERT">Chuyên gia phản biện</option>
+                  </>
+                )}
               </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Hoặc chỉ định Mã nhân sự cụ thể
+              </label>
+              <input
+                type="text"
+                name="employeeCode"
+                value={data.employeeCode || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="VD: NV001"
+              />
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                Nếu điền mã nhân sự, hệ thống sẽ ưu tiên giao việc trực tiếp thay vì giao theo vai trò PBAC.
+              </p>
             </div>
             <div>
               <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">

@@ -60,9 +60,9 @@ export class MasterPlansController implements OnModuleInit {
 
       if (plan.tasks) {
         plan.tasks.forEach((t: any) => {
-          if (t.assigneeId && t.assigneeId !== 'UNASSIGNED')
-            userIds.add(parseInt(t.assigneeId, 10));
-          if (t.assignerId) userIds.add(parseInt(t.assignerId, 10));
+          if (t.assigneeCode && t.assigneeCode !== 'UNASSIGNED')
+            userIds.add(parseInt(t.assigneeCode, 10));
+          if (t.assignerCode) userIds.add(parseInt(t.assignerCode, 10));
         });
       }
     };
@@ -90,8 +90,8 @@ export class MasterPlansController implements OnModuleInit {
 
         if (plan.tasks) {
           plan.tasks.forEach((t: any) => {
-            if (t.assigneeId && t.assigneeId !== 'UNASSIGNED') {
-              const u = usersMap.get(String(t.assigneeId));
+            if (t.assigneeCode && t.assigneeCode !== 'UNASSIGNED') {
+              const u = usersMap.get(String(t.assigneeCode));
               if (u) {
                 t.assigneeName = u.fullName || u.username;
                 t.assigneeAvatar = u.avatarUrl;
@@ -99,8 +99,8 @@ export class MasterPlansController implements OnModuleInit {
                 t.assigneeUnitName = u.unitName;
               }
             }
-            if (t.assignerId) {
-              const u = usersMap.get(String(t.assignerId));
+            if (t.assignerCode) {
+              const u = usersMap.get(String(t.assignerCode));
               if (u) t.assignerName = u.fullName || u.username;
             }
           });
@@ -195,7 +195,7 @@ export class MasterPlansController implements OnModuleInit {
         departmentId: reqDepartmentId
           ? parseInt(reqDepartmentId, 10)
           : undefined,
-        currentUserId: user?.id?.toString(),
+        currentUserCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds, // Danh sách đơn vị cha để lọc kế hoạch cấp trên
@@ -252,7 +252,7 @@ export class MasterPlansController implements OnModuleInit {
     const res: any = await firstValueFrom(
       this.masterPlanService.FindById({
         id: parseInt(id, 10),
-        currentUserId: user?.id?.toString(),
+        currentUserCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
@@ -313,7 +313,7 @@ export class MasterPlansController implements OnModuleInit {
 
   @Post()
   async create(@Req() req: any, @Body() body: any) {
-    body.createdByCode = req.user?.id?.toString() || 'system';
+    body.createdByCode = req.user?.employeeCode || 'system';
     if (req.user?.unitId) {
       body.departmentId = parseInt(req.user.unitId, 10);
     }
@@ -322,7 +322,7 @@ export class MasterPlansController implements OnModuleInit {
 
   @Put(':id')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    body.updatedByCode = req.user?.id?.toString() || 'system';
+    body.updatedByCode = req.user?.employeeCode || 'system';
     return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
     );

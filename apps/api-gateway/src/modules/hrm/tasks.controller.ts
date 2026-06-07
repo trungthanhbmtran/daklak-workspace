@@ -55,12 +55,12 @@ export class TasksController implements OnModuleInit {
 
     const userIds = new Set<number>();
     const collectIds = (task: any) => {
-      if (task.assigneeId && task.assigneeId !== 'UNASSIGNED')
-        userIds.add(parseInt(task.assigneeId, 10));
-      if (task.assignerId) userIds.add(parseInt(task.assignerId, 10));
-      if (task.supervisorId) userIds.add(parseInt(task.supervisorId, 10));
-      if (task.coAssigneeIds)
-        task.coAssigneeIds.forEach((id: string) =>
+      if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED')
+        userIds.add(parseInt(task.assigneeCode, 10));
+      if (task.assignerCode) userIds.add(parseInt(task.assignerCode, 10));
+      if (task.supervisorCode) userIds.add(parseInt(task.supervisorCode, 10));
+      if (task.coassigneeCodes)
+        task.coassigneeCodes.forEach((id: string) =>
           userIds.add(parseInt(id, 10)),
         );
       if (task.children) task.children.forEach(collectIds);
@@ -78,8 +78,8 @@ export class TasksController implements OnModuleInit {
       (userRes?.data || []).forEach((u: any) => usersMap.set(String(u.id), u));
 
       const mapUsers = (task: any) => {
-        if (task.assigneeId && task.assigneeId !== 'UNASSIGNED') {
-          const u = usersMap.get(String(task.assigneeId));
+        if (task.assigneeCode && task.assigneeCode !== 'UNASSIGNED') {
+          const u = usersMap.get(String(task.assigneeCode));
           if (u) {
             task.assigneeName = u.fullName || u.username;
             task.assigneeAvatar = u.avatarUrl;
@@ -87,12 +87,12 @@ export class TasksController implements OnModuleInit {
             task.assigneeUnitName = u.unitName;
           }
         }
-        if (task.assignerId) {
-          const u = usersMap.get(String(task.assignerId));
+        if (task.assignerCode) {
+          const u = usersMap.get(String(task.assignerCode));
           if (u) task.assignerName = u.fullName || u.username;
         }
-        if (task.supervisorId) {
-          const u = usersMap.get(String(task.supervisorId));
+        if (task.supervisorCode) {
+          const u = usersMap.get(String(task.supervisorCode));
           if (u) task.supervisorName = u.fullName || u.username;
         }
         if (task.children) task.children.forEach(mapUsers);
@@ -182,7 +182,7 @@ export class TasksController implements OnModuleInit {
   @Post()
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
-      body.assignerId = req.user.employeeCode || req.user.username;
+      body.assignerCode = req.user.employeeCode || req.user.username;
     }
     return firstValueFrom(this.taskService.CreateTask(body));
   }
@@ -191,7 +191,7 @@ export class TasksController implements OnModuleInit {
   async list(
     @Req() req: any,
     @Query('tab') tab: string,
-    @Query('assigneeId') assigneeId: string,
+    @Query('assigneeCode') assigneeCode: string,
     @Query('filter') filter: string,
     @Query('search') search: string,
     @Query('departmentId') departmentId: string,
@@ -201,7 +201,7 @@ export class TasksController implements OnModuleInit {
     @Query('priority') priority: string,
   ) {
     const user = req.user;
-    let finalAssigneeCode = assigneeId;
+    let finalAssigneeCode = assigneeCode;
     let finalAssignerCode: string | undefined = undefined;
     let finalDepartmentId = departmentId
       ? parseInt(departmentId, 10)
@@ -209,10 +209,10 @@ export class TasksController implements OnModuleInit {
 
     if (tab === 'MY_TASKS' && user) {
       // Công việc được giao CHO tôi (tôi là người thực hiện)
-      finalAssigneeCode = user.id.toString();
+      finalAssigneeCode = user.employeeCode;
     } else if (tab === 'ASSIGNED_BY_ME' && user) {
       // Công việc TÔI đã giao cho người khác (tôi là người giao việc)
-      finalAssignerCode = user.id.toString();
+      finalAssignerCode = user.employeeCode;
     } else if (tab === 'DEPT_TASKS' && user) {
       finalDepartmentId = user.unitId;
     }
@@ -231,8 +231,8 @@ export class TasksController implements OnModuleInit {
 
     const response: any = await firstValueFrom(
       this.taskService.ListTasks({
-        assigneeId: finalAssigneeCode,
-        assignerId: finalAssignerCode,
+        assigneeCode: finalAssigneeCode,
+        assignerCode: finalAssignerCode,
         filter,
         search,
         status,
@@ -240,7 +240,7 @@ export class TasksController implements OnModuleInit {
         departmentId: finalDepartmentId,
         planId: planId ? parseInt(planId, 10) : undefined, // Pass planId cho plan tree
         isSupervisor: isSupervisor === 'true',
-        currentUserId: user?.id?.toString(),
+        currentUserCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds, // Danh sách đơn vị cha để lọc task cấp trên
@@ -286,7 +286,7 @@ export class TasksController implements OnModuleInit {
         status,
         rejectReason,
         // Inject người thực hiện từ JWT token
-        actorId: req.user?.id?.toString() || '',
+        actorCode: req.user?.employeeCode || '',
       }),
     );
   }
@@ -367,12 +367,12 @@ export class TasksController implements OnModuleInit {
   async assignTask(
     @Req() req: any,
     @Param('id') id: string,
-    @Body('assigneeId') assigneeId: string,
-    @Body('coAssigneeIds') coAssigneeIds?: string[],
+    @Body('assigneeCode') assigneeCode: string,
+    @Body('coassigneeCodes') coassigneeCodes?: string[],
     @Body('departmentId') departmentId?: number,
   ) {
     const user = req.user;
-    const assignerId = user?.id?.toString();
+    const assignerCode = user?.employeeCode;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     const taskId = parseInt(id, 10);
@@ -383,17 +383,17 @@ export class TasksController implements OnModuleInit {
     // Task UNASSIGNED/TEMPLATE: bất kỳ ai đã đăng nhập đều có thể giao
     // Task đã có người xử lý: chỉ chính người đó hoặc admin mới được giao lại
     const isUnassigned =
-      taskData.assigneeId === 'UNASSIGNED' || taskData.status === 'TEMPLATE';
-    if (!isAdmin && !isUnassigned && taskData.assigneeId !== assignerId) {
+      taskData.assigneeCode === 'UNASSIGNED' || taskData.status === 'TEMPLATE';
+    if (!isAdmin && !isUnassigned && taskData.assigneeCode !== assignerCode) {
       throw new Error(
         'Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).',
       );
     }
 
     // Nếu không phải admin và có chỉ định người nhận (khác UNASSIGNED), kiểm tra phạm vi quản lý
-    if (!isAdmin && assigneeId && assigneeId !== 'UNASSIGNED') {
+    if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED') {
       const empListRes: any = await firstValueFrom(
-        this.employeeService.ListEmployees({ keyword: assigneeId }),
+        this.employeeService.ListEmployees({ keyword: assigneeCode }),
       );
       const targetEmp = { data: empListRes?.data?.[0] };
       if (targetEmp?.data?.departmentId) {
@@ -418,11 +418,11 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.AssignTask({
         id: taskId,
-        assigneeId,
-        coAssigneeIds: coAssigneeIds || [],
+        assigneeCode,
+        coassigneeCodes: coassigneeCodes || [],
         departmentId,
-        // Inject người giao việc từ JWT token (ghi đè lên assignerId)
-        assignerId,
+        // Inject người giao việc từ JWT token (ghi đè lên assignerCode)
+        assignerCode,
       }),
     );
   }
@@ -434,7 +434,7 @@ export class TasksController implements OnModuleInit {
     @Body() body: any,
   ) {
     const user = req.user;
-    const assignerId = user?.id?.toString();
+    const assignerCode = user?.employeeCode;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     const taskId = parseInt(id, 10);
@@ -443,7 +443,7 @@ export class TasksController implements OnModuleInit {
     );
 
     // Chỉ owner (người được giao hiện tại) hoặc admin mới được tạo task con
-    if (!isAdmin && taskData.assigneeId !== assignerId) {
+    if (!isAdmin && taskData.assigneeCode !== assignerCode) {
       throw new Error(
         'Bạn không có quyền phân rã nhiệm vụ này (Không phải người đang xử lý).',
       );
@@ -453,7 +453,7 @@ export class TasksController implements OnModuleInit {
       this.taskService.BreakdownTask({
         ...body,
         parentId: taskId,
-        assignerId,
+        assignerCode,
       }),
     );
   }
@@ -474,7 +474,7 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.GetComments({
         taskId: parseInt(id, 10),
-        currentUserId: user?.id?.toString(),
+        currentUserCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
@@ -491,7 +491,7 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.AddComment({
         taskId: parseInt(id, 10),
-        authorCode: req.user?.id?.toString() || '',
+        authorCode: req.user?.employeeCode || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
       }),
@@ -503,11 +503,11 @@ export class TasksController implements OnModuleInit {
     @Req() req: any,
     @Param('id') id: string,
     @Body('message') message?: string,
-    @Body('leadId') leadId?: string,
-    @Body('coordinatorIds') coordinatorIds?: string[],
+    @Body('leadCode') leadCode?: string,
+    @Body('coordinatorCodes') coordinatorCodes?: string[],
   ) {
     const user = req.user;
-    const requesterId = user?.id?.toString();
+    const requesterCode = user?.employeeCode;
     const taskId = parseInt(id, 10);
 
     const taskData: any = await firstValueFrom(
@@ -516,18 +516,18 @@ export class TasksController implements OnModuleInit {
     if (!taskData) throw new Error('Task not found.');
 
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE');
-    const isOwner = taskData.assigneeId === requesterId;
-    const isAssigner = taskData.assignerId === requesterId;
+    const isOwner = taskData.assigneeCode === requesterCode;
+    const isAssigner = taskData.assignerCode === requesterCode;
 
     // Supervisor assigns roles: must be assigner or admin
-    if (leadId && !isAdmin && !isAssigner) {
+    if (leadCode && !isAdmin && !isAssigner) {
       throw new Error(
         'Only the task assigner can assign Lead and Coordinators.',
       );
     }
 
     // Request coordination: must be current assignee
-    if (!leadId && !isAdmin && !isOwner) {
+    if (!leadCode && !isAdmin && !isOwner) {
       throw new Error(
         'You do not have permission to send a coordination request (not the current assignee).',
       );
@@ -536,10 +536,10 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.RequestCoordination({
         taskId,
-        requesterId,
+        requesterCode,
         message: message || '',
-        leadId: leadId || '',
-        coordinatorIds: coordinatorIds || [],
+        leadCode: leadCode || '',
+        coordinatorCodes: coordinatorCodes || [],
       }),
     );
   }
@@ -554,7 +554,7 @@ export class TasksController implements OnModuleInit {
       this.taskService.UpdateTaskProgress({
         id: parseInt(id, 10),
         progress,
-        actorId: req.user?.id?.toString() || '',
+        actorCode: req.user?.employeeCode || '',
       }),
     );
   }
@@ -575,7 +575,7 @@ export class TasksController implements OnModuleInit {
     return firstValueFrom(
       this.taskService.GetSubTasks({
         taskId: parseInt(id, 10),
-        currentUserId: user?.id?.toString(),
+        currentUserCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,

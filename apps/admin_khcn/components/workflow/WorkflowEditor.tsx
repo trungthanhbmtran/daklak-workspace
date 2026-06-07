@@ -60,16 +60,19 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   
   const [dynamicServices, setDynamicServices] = useState<any[]>([]);
   const [dynamicTriggers, setDynamicTriggers] = useState<any[]>([]);
+  const [taskRoles, setTaskRoles] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchDynamics = async () => {
       try {
-        const [svcs, trigs] = await Promise.all([
+        const [svcs, trigs, roles] = await Promise.all([
           workflowApi.getServices(),
           workflowApi.getTriggers(),
+          workflowApi.getTaskRoles().catch(() => []),
         ]);
         setDynamicServices(svcs);
         setDynamicTriggers(trigs);
+        setTaskRoles(roles);
       } catch (e) {
         console.error("Failed to fetch dynamic workflow data", e);
       }
@@ -333,6 +336,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
           selectedNode={selectedNode}
           availableServices={dynamicServices.length > 0 ? dynamicServices : availableServices}
           availableTriggers={dynamicTriggers}
+          taskRoles={taskRoles}
           onUpdate={onUpdateNodeData}
           onDelete={onDeleteNode}
           onClose={() => setSelectedNodeId(null)}

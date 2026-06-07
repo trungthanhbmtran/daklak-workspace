@@ -21,10 +21,10 @@ service TaskService {
 
 message AssignTaskRequest {
   int32 id = 1;
-  string assigneeId = 2;
+  string assigneeCode = 2;
   int32 departmentId = 3;
-  string assignerId = 4;
-  repeated string coAssigneeIds = 5;
+  string assignerCode = 4;
+  repeated string coassigneeCodes = 5;
 }
 
 message RecommendAssigneesRequest {
@@ -79,8 +79,8 @@ message TaskResponse {
   int32 id = 1;
   string title = 2;
   string description = 3;
-  string assigneeId = 4;
-  string assignerId = 5;
+  string assigneeCode = 4;
+  string assignerCode = 5;
   string status = 6;
   string dueDate = 7;
   string createdAt = 8;
@@ -91,7 +91,7 @@ message TaskResponse {
   string scoringMethod = 12;
   float bonusPerDay = 13;
   float penaltyPerDay = 14;
-  string supervisorId = 15;
+  string supervisorCode = 15;
   int32 planId = 16;
   string assigneeName = 17;
   int32 departmentId = 18;
@@ -101,7 +101,7 @@ message TaskResponse {
   string assignerName = 22;  // Tên người giao việc
   string priority = 23;      // Mức độ ưu tiên
   string supervisorName = 24; // Tên người theo dõi chỉ đạo
-  repeated string coAssigneeIds = 25;
+  repeated string coassigneeCodes = 25;
   repeated string allowedActions = 26;
   TaskPlan plan = 27;
   int32 rootTaskId = 28;
@@ -117,8 +117,8 @@ message TaskPlan {
 message CreateTaskRequest {
   string title = 1;
   string description = 2;
-  string assigneeId = 3;
-  string assignerId = 4;
+  string assigneeCode = 3;
+  string assignerCode = 4;
   string dueDate = 5;
   
   float baseScore = 6;
@@ -126,7 +126,7 @@ message CreateTaskRequest {
   string scoringMethod = 8;
   float bonusPerDay = 9;
   float penaltyPerDay = 10;
-  optional string supervisorId = 11;
+  optional string supervisorCode = 11;
   int32 planId = 12;
   int32 departmentId = 13;
   string startDate = 14;
@@ -136,15 +136,15 @@ message CreateTaskRequest {
 }
 
 message ListTasksRequest {
-  string assigneeId = 1; // optional
+  string assigneeCode = 1; // optional
   string filter = 2; // optional (overdue, dueIn3Days, dueIn7Days, dueOver7Days)
   string search = 3; // optional
   int32 departmentId = 4; // optional
   bool isSupervisor = 5; // optional
-  string currentUserId = 6; // optional
+  string currentUserCode = 6; // optional
   bool isAdmin = 7; // optional
   int32 currentUserDept = 8; // optional
-  string assignerId = 9; // optional - lọc theo người giao việc (tab Đã giao)
+  string assignerCode = 9; // optional - lọc theo người giao việc (tab Đã giao)
   string status = 10; // optional - lọc theo trạng thái
   string priority = 11; // optional - lọc theo mức độ ưu tiên
   int32 planId = 12; // optional - id kế hoạch
@@ -170,7 +170,7 @@ message UpdateTaskStatusRequest {
   int32 id = 1;
   string status = 2;
   string rejectReason = 3; // optional
-  string actorId = 4;    // người thực hiện (từ JWT)
+  string actorCode = 4;    // người thực hiện (từ JWT)
 }
 
 message UpdateTaskRequest {
@@ -245,7 +245,7 @@ message BulkUpdateTemplatesResponse {
 message TaskCommentResponse {
   int32 id = 1;
   int32 taskId = 2;
-  string authorId = 3;
+  string authorCode = 3;
   string authorName = 4;
   string authorAvatar = 5;
   string content = 6;
@@ -255,14 +255,14 @@ message TaskCommentResponse {
 
 message AddCommentRequest {
   int32 taskId = 1;
-  string authorId = 2;
+  string authorCode = 2;
   string content = 3;
   bool isSystemMessage = 4;
 }
 
 message GetCommentsRequest {
   int32 taskId = 1;
-  string currentUserId = 2;
+  string currentUserCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
@@ -280,9 +280,9 @@ message DelegationNode {
   string title = 2;
   string status = 3;
   string priority = 4;
-  string assigneeId = 5;
+  string assigneeCode = 5;
   string assigneeName = 6;
-  string assignerId = 7;
+  string assignerCode = 7;
   string assignerName = 8;
   int32 departmentId = 9;
   int32 parentId = 10;
@@ -297,7 +297,7 @@ message DelegationNode {
 
 message GetSubTasksRequest {
   int32 taskId = 1;
-  string currentUserId = 2;
+  string currentUserCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
@@ -312,7 +312,7 @@ message GetSubTasksResponse {
 // ─── GetTask ───────────────────────────────────────────────────────────────
 message GetTaskRequest {
   int32 id = 1;
-  string currentUserId = 2;
+  string currentUserCode = 2;
   bool isAdmin = 3;
   int32 currentUserDept = 4;
   repeated int32 callerAncestorUnitIds = 5;
@@ -323,8 +323,8 @@ message BreakdownTaskRequest {
   int32 parentId = 1;
   string title = 2;
   string description = 3;
-  string assigneeId = 4;
-  string assignerId = 5;
+  string assigneeCode = 4;
+  string assignerCode = 5;
   string dueDate = 6;
   string startDate = 7;
   float baseScore = 8;
@@ -336,13 +336,13 @@ message BreakdownTaskRequest {
 message UpdateTaskProgressRequest {
   int32 id = 1;
   float progress = 2;
-  string actorId = 3;
+  string actorCode = 3;
 }
 
 // ─── RequestCoordination ───────────────────────────────────────────────────
 message RequestCoordinationRequest {
   int32 taskId = 1;
-  string requesterId = 2;
+  string requesterCode = 2;
   string message = 3;
   string leadId = 4;             // if set → supervisor assigns lead role
   repeated string coordinatorIds = 5;
