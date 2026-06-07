@@ -14,6 +14,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { RedisModule } from './core/redis/redis.module';
 import { PrismaModule } from './core/prisma/prisma.module';
 import { IntegrationModule } from './modules/integration/integration.module';
+import { GatewayModule } from './modules/gateway/gateway.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { IntegrationModule } from './modules/integration/integration.module';
     RedisModule,
     PrismaModule,
     IntegrationModule,
+    GatewayModule,
   ],
   controllers: [AppController],
   providers: [],
