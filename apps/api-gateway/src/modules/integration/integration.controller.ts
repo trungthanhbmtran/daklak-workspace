@@ -6,7 +6,7 @@ import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 @ApiTags('Integration')
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard)
-@Controller('integration')
+@Controller('admin/integration')
 export class IntegrationController {
   constructor(private readonly integrationService: IntegrationService) {}
 
