@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../core/prisma/prisma.service';
-import { Prisma } from '@generated/client';
 
 @Injectable()
 export class GatewayService {
@@ -33,13 +32,13 @@ export class GatewayService {
     return config;
   }
 
-  async createGatewayConfig(data: Prisma.GatewayConfigCreateInput) {
+  async createGatewayConfig(data: any) {
     return this.prisma.gatewayConfig.create({
       data,
     });
   }
 
-  async updateGatewayConfig(id: string, data: Prisma.GatewayConfigUpdateInput) {
+  async updateGatewayConfig(id: string, data: any) {
     return this.prisma.gatewayConfig.update({
       where: { id },
       data,
@@ -56,7 +55,7 @@ export class GatewayService {
   // GATEWAY ROUTES
   // ==========================================
 
-  async addRoute(gatewayId: string, data: Prisma.GatewayRouteCreateWithoutGatewayInput) {
+  async addRoute(gatewayId: string, data: any) {
     return this.prisma.gatewayRoute.create({
       data: {
         ...data,
@@ -67,7 +66,7 @@ export class GatewayService {
     });
   }
 
-  async updateRoute(routeId: string, data: Prisma.GatewayRouteUpdateInput) {
+  async updateRoute(routeId: string, data: any) {
     return this.prisma.gatewayRoute.update({
       where: { id: routeId },
       data,

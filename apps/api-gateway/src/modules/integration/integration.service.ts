@@ -1,7 +1,6 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-import { Prisma } from '@generated/client';
 import { PrismaService } from '../../core/prisma/prisma.service';
 
 @Injectable()
