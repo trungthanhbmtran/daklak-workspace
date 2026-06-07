@@ -106,6 +106,14 @@ export const integrationApi = {
   updateNginxConfig: async (content: string) => {
     const res = await apiClient.put('/integration/nginx', { content }) as any;
     return res.data || res;
+  },
+  getApiPermissions: async () => {
+    const res = await apiClient.get('/integration/api-permissions') as any;
+    return res.data?.rules || [];
+  },
+  updateApiPermissions: async (rules: any[]) => {
+    const res = await apiClient.put('/integration/api-permissions', { rules }) as any;
+    return res.data || res;
   }
 };
 
@@ -167,5 +175,20 @@ export const useUpdateNginxConfig = () => {
   return useMutation({
     mutationFn: integrationApi.updateNginxConfig,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integration', 'nginx'] })
+  });
+};
+
+export const useApiPermissions = () => {
+  return useQuery({
+    queryKey: ['integration', 'api-permissions'],
+    queryFn: integrationApi.getApiPermissions
+  });
+};
+
+export const useUpdateApiPermissions = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: integrationApi.updateApiPermissions,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['integration', 'api-permissions'] })
   });
 };

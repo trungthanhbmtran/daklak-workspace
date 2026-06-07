@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useResourceLogic } from "../hooks/useResourceLogic";
 import type { Resource } from "../types";
+import { ApiEndpointsConfig } from "./ApiEndpointsConfig";
 
 const COMMON_ACTIONS = ["READ", "CREATE", "UPDATE", "DELETE", "VIEW", "EXPORT", "IMPORT", "APPROVE"];
 
@@ -311,6 +312,7 @@ export function ResourceClient() {
                       <p className="text-[10px] text-muted-foreground font-mono bg-muted inline-block px-2 py-1 rounded w-fit">
                         {selectedResource.code}:{perm.action}
                       </p>
+                      <ApiEndpointsConfig permissionCode={`${selectedResource.code}:${perm.action}`} />
                     </div>
                   ))}
                 </div>

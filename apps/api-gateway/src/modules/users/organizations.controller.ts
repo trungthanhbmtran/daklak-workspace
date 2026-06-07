@@ -25,6 +25,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { IntegrationService } from '../integration/integration.service';
 
 @ApiTags('Đơn vị tổ chức')
 @Controller('admin/organizations')
@@ -35,6 +36,7 @@ export class OrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
+    private readonly integrationService: IntegrationService,
   ) {}
 
   onModuleInit() {
@@ -111,16 +113,27 @@ export class OrganizationsController implements OnModuleInit {
     let nodes = res.nodes || [];
 
     const user = request?.user;
-    const isAdmin =
+    let isAdmin =
       user?.roles?.includes('SUPER_ADMIN') ||
       user?.roles?.includes('ADMIN') ||
-      user?.roles?.includes('ROLE_LANH_DAO_TINH') ||
-      user?.roles?.includes('ROLE_LANH_DAO_SO') ||
-      user?.roles?.includes('ROLE_QUAN_LY_PHONG_SO') ||
-      user?.roles?.includes('ROLE_QUAN_LY_PHONG_TRUNG_TAM') ||
-      user?.roles?.includes('ROLE_CHUYEN_VIEN') ||
       user?.permissionsFlatten?.includes('SYSTEM:MANAGE') ||
       user?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
+
+    // Dynamic config check
+    if (!isAdmin) {
+      const rules = await this.integrationService.getApiPermissions();
+      const path = '/api/v1/admin/organizations/tree';
+      for (const rule of rules) {
+        // Find if this path matches our endpoint
+        if ((rule.path === path || rule.path === '/api/v1/admin/organizations/*') && (rule.method === 'ALL' || rule.method === 'GET')) {
+          const requiredPermissions = rule.permissions || [];
+          if (requiredPermissions.length > 0 && requiredPermissions.some((p: string) => user?.permissionsFlatten?.includes(p))) {
+            isAdmin = true;
+            break;
+          }
+        }
+      }
+    }
 
     if (!isAdmin && user?.unitId) {
       // Find the user's unit node and only return that node (and its descendants)

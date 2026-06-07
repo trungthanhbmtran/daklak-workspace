@@ -32,4 +32,20 @@ export class IntegrationController {
     const success = await this.integrationService.updateNginxConfig(content);
     return { success, message: 'Đã cập nhật cấu hình NGINX thành công' };
   }
+  @Get('api-permissions')
+  @ApiOperation({ summary: 'Lấy cấu hình phân quyền API động' })
+  async getApiPermissions() {
+    const rules = await this.integrationService.getApiPermissions();
+    return { rules };
+  }
+
+  @Put('api-permissions')
+  @ApiOperation({ summary: 'Cập nhật cấu hình phân quyền API động' })
+  async updateApiPermissions(@Body('rules') rules: any[]) {
+    if (!rules || !Array.isArray(rules)) {
+      return { success: false, message: 'Nội dung cấu hình không hợp lệ' };
+    }
+    const success = await this.integrationService.updateApiPermissions(rules);
+    return { success, message: 'Đã cập nhật cấu hình phân quyền API thành công' };
+  }
 }

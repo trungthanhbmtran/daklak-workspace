@@ -1,0 +1,39 @@
+[
+  {
+    "path": "/api/v1/admin/organizations/*",
+    "method": "ALL",
+    "permissions": [
+      "ORGANIZATION:MANAGE",
+      "ORGANIZATION:READ"
+    ]
+  },
+  {
+    "path": "/api/v1/admin/users/*",
+    "method": "ALL",
+    "permissions": [
+      "USER:MANAGE",
+      "USER:READ"
+    ]
+  },
+  {
+    "path": "/api/v1/admin/roles/*",
+    "method": "ALL",
+    "permissions": [
+      "ROLE:MANAGE"
+    ]
+  },
+  {
+    "path": "/api/v1/admin/resources/*",
+    "method": "ALL",
+    "permissions": [
+      "RESOURCE:MANAGE"
+    ]
+  },
+  {
+    "path": "/api/v1/admin/menus/*",
+    "method": "ALL",
+    "permissions": [
+      "MENU:MANAGE"
+    ]
+  }
+]

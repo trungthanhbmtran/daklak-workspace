@@ -258,7 +258,15 @@ export class UsersService implements OnModuleInit {
       },
       include: {
         credential: true,
-        roles: true,
+        roles: {
+          include: {
+            permissions: {
+              include: {
+                resource: true,
+              },
+            },
+          },
+        },
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -292,6 +300,21 @@ export class UsersService implements OnModuleInit {
       REFRESH_TTL_SECONDS,
     );
     const roles = user.roles?.map((r) => r.code) ?? [];
+    
+    // Extract permissions (e.g. ORGANIZATION:READ)
+    const permissionsSet = new Set<string>();
+    if (user.roles) {
+      for (const role of user.roles) {
+        if (role.permissions) {
+          for (const perm of role.permissions) {
+            if (perm.resource?.code && perm.action) {
+              permissionsSet.add(`${perm.resource.code}:${perm.action}`);
+            }
+          }
+        }
+      }
+    }
+    const permissionsFlatten = Array.from(permissionsSet);
 
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
@@ -299,7 +322,17 @@ export class UsersService implements OnModuleInit {
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email, username: user.username, fullName: user.fullName, roles, unitId, jobTitleCode, employeeCode: user.employeeCode },
+      { 
+        sub: user.id, 
+        email: user.email, 
+        username: user.username, 
+        fullName: user.fullName, 
+        roles, 
+        permissionsFlatten,
+        unitId, 
+        jobTitleCode, 
+        employeeCode: user.employeeCode 
+      },
       { expiresIn: jwtExpiresIn },
     );
     const unitName = firstPosition?.unit?.name ?? null;
@@ -344,7 +377,15 @@ export class UsersService implements OnModuleInit {
     const user = await this.prisma.user.findFirst({
       where: { id: userId, isActive: true },
       include: {
-        roles: true,
+        roles: {
+          include: {
+            permissions: {
+              include: {
+                resource: true,
+              },
+            },
+          },
+        },
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -365,13 +406,38 @@ export class UsersService implements OnModuleInit {
     );
     const roles = user.roles?.map((r) => r.code) ?? [];
 
+    // Extract permissions (e.g. ORGANIZATION:READ)
+    const permissionsSet = new Set<string>();
+    if (user.roles) {
+      for (const role of user.roles) {
+        if (role.permissions) {
+          for (const perm of role.permissions) {
+            if (perm.resource?.code && perm.action) {
+              permissionsSet.add(`${perm.resource.code}:${perm.action}`);
+            }
+          }
+        }
+      }
+    }
+    const permissionsFlatten = Array.from(permissionsSet);
+
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
-      { sub: user.id, email: user.email, username: user.username, fullName: user.fullName, roles, unitId, jobTitleCode, employeeCode: user.employeeCode },
+      { 
+        sub: user.id, 
+        email: user.email, 
+        username: user.username, 
+        fullName: user.fullName, 
+        roles, 
+        permissionsFlatten,
+        unitId, 
+        jobTitleCode, 
+        employeeCode: user.employeeCode 
+      },
       { expiresIn: jwtExpiresIn },
     );
     const unitName = firstPosition?.unit?.name ?? null;

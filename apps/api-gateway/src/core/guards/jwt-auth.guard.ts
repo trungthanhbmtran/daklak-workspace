@@ -54,6 +54,7 @@ export class JwtAuthGuard implements CanActivate {
         identitycard: decoded.identitycard,
         employeeCode: decoded.employeeCode,
         roles: decoded.roles || [],
+        permissionsFlatten: decoded.permissionsFlatten || [],
         unitId: decoded.unitId,
         jobTitleCode: decoded.jobTitleCode,
       };

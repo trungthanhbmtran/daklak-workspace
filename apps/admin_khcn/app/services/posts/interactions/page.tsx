@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare, HelpCircle, FileEdit, ArrowRight } from "lucide-react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { MessageSquare, HelpCircle, FileEdit, ArrowRight, ShieldCheck, Network } from "lucide-react";
 
 const interactionModules = [
   {
@@ -12,6 +11,7 @@ const interactionModules = [
     icon: MessageSquare,
     color: "text-blue-600",
     bgColor: "bg-blue-100",
+    gradient: "from-blue-50 to-white",
   },
   {
     title: "Hỏi đáp công dân",
@@ -20,6 +20,7 @@ const interactionModules = [
     icon: HelpCircle,
     color: "text-purple-600",
     bgColor: "bg-purple-100",
+    gradient: "from-purple-50 to-white",
   },
   {
     title: "Góp ý dự thảo / dịch vụ",
@@ -28,44 +29,88 @@ const interactionModules = [
     icon: FileEdit,
     color: "text-green-600",
     bgColor: "bg-green-100",
+    gradient: "from-green-50 to-white",
   },
+];
+
+const integrationModules = [
   {
-    title: "Quản lý văn bản (LGSP)",
-    description: "Nhận và gửi văn bản thông qua trục liên thông quốc gia (LGSP).",
+    title: "Trục liên thông (LGSP)",
+    description: "Nhận và gửi văn bản, hồ sơ thông qua trục liên thông quốc gia (LGSP).",
     href: "/services/posts/interactions/lgsp",
-    icon: FileEdit, // Using FileEdit since we don't import a specific Document icon yet
+    icon: Network,
     color: "text-orange-600",
     bgColor: "bg-orange-100",
+    gradient: "from-orange-50 to-white",
+  },
+  {
+    title: "Phân quyền API Gateway",
+    description: "Cấu hình động quyền truy cập (Roles/Permissions) cho các API Endpoint tại Gateway.",
+    href: "/services/posts/interactions/api-permissions",
+    icon: ShieldCheck,
+    color: "text-red-600",
+    bgColor: "bg-red-100",
+    gradient: "from-red-50 to-white",
   },
 ];
 
 export default function InteractionsDashboard() {
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-2">Tương tác công dân</h1>
-      <p className="text-gray-500 mb-8">Quản lý các kênh giao tiếp và phản hồi từ người dân theo Nghị định 42 & 147.</p>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {interactionModules.map((module) => (
-          <Card key={module.href} className="hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className={`w-12 h-12 rounded-lg ${module.bgColor} flex items-center justify-center mb-4`}>
-                <module.icon className={`w-6 h-6 ${module.color}`} />
-              </div>
-              <CardTitle>{module.title}</CardTitle>
-              <CardDescription>{module.description}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Link 
-                href={module.href}
-                className="inline-flex items-center text-sm font-medium text-primary hover:underline"
-              >
-                Truy cập quản lý <ArrowRight className="ml-1 w-4 h-4" />
-              </Link>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="p-8 max-w-7xl mx-auto space-y-10">
+      
+      <div>
+        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">Tương tác công dân & Hệ thống</h1>
+        <p className="text-gray-500 text-lg max-w-3xl">
+          Khu vực quản lý các kênh giao tiếp từ người dân (Nghị định 42 & 147) cũng như cấu hình bảo mật kết nối API và Trục liên thông quốc gia.
+        </p>
       </div>
+
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-xl font-bold border-b pb-2 mb-4 text-gray-800">1. Tương tác với Công dân</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {interactionModules.map((module) => (
+              <Link key={module.href} href={module.href} className="group block h-full">
+                <div className={`h-full rounded-2xl border bg-gradient-to-br ${module.gradient} p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
+                  <div className={`w-14 h-14 rounded-xl ${module.bgColor} flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                    <module.icon className={`w-7 h-7 ${module.color}`} />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{module.title}</h3>
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                    {module.description}
+                  </p>
+                  <div className="flex items-center text-sm font-semibold text-primary mt-auto">
+                    Truy cập quản lý <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="pt-4">
+          <h2 className="text-xl font-bold border-b pb-2 mb-4 text-gray-800">2. Kết nối & Bảo mật Hệ thống (API)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {integrationModules.map((module) => (
+              <Link key={module.href} href={module.href} className="group block h-full">
+                <div className={`h-full rounded-2xl border bg-gradient-to-br ${module.gradient} p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1`}>
+                  <div className={`w-14 h-14 rounded-xl ${module.bgColor} flex items-center justify-center mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
+                    <module.icon className={`w-7 h-7 ${module.color}`} />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">{module.title}</h3>
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                    {module.description}
+                  </p>
+                  <div className="flex items-center text-sm font-semibold text-primary mt-auto">
+                    Thiết lập ngay <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

@@ -66,4 +66,56 @@ export class IntegrationService {
       { id: 'ai', name: 'AI Service', path: '/api/v1/ai', status: 'Active' },
     ];
   }
+
+  private getApiPermissionsConfigPath(): string {
+    const cwd = process.cwd();
+    return path.join(cwd, 'configs', 'api-permissions.json');
+  }
+
+  private apiPermissionsCache: any[] | null = null;
+  private apiPermissionsCacheTime: number = 0;
+  private readonly CACHE_TTL = 30000; // 30 seconds
+
+  async getApiPermissions(): Promise<any[]> {
+    try {
+      const now = Date.now();
+      if (this.apiPermissionsCache && now - this.apiPermissionsCacheTime < this.CACHE_TTL) {
+        return this.apiPermissionsCache;
+      }
+
+      const confPath = this.getApiPermissionsConfigPath();
+      if (!fs.existsSync(confPath)) {
+        return [];
+      }
+      const data = await fs.promises.readFile(confPath, 'utf8');
+      const rules = JSON.parse(data);
+      this.apiPermissionsCache = rules;
+      this.apiPermissionsCacheTime = now;
+      return rules;
+    } catch (error) {
+      this.logger.error(`Error reading API permissions config: ${error.message}`);
+      return []; // fallback to empty array on error
+    }
+  }
+
+  async updateApiPermissions(rules: any[]): Promise<boolean> {
+    try {
+      const confPath = this.getApiPermissionsConfigPath();
+      const dir = path.dirname(confPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      await fs.promises.writeFile(confPath, JSON.stringify(rules, null, 2), 'utf8');
+      this.logger.log(`Updated API permissions config at: ${confPath}`);
+      
+      // Update cache immediately
+      this.apiPermissionsCache = rules;
+      this.apiPermissionsCacheTime = Date.now();
+      
+      return true;
+    } catch (error) {
+      this.logger.error(`Error writing API permissions config: ${error.message}`);
+      throw new HttpException('Không thể ghi file cấu hình phân quyền API', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
