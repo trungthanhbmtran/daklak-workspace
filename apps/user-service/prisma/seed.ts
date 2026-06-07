@@ -5357,6 +5357,9 @@ async function main() {
     'ORGANIZATION.VIEW',
     'SYSTEM.READ',
     'SYSTEM.VIEW',
+    'TASK.*',
+    'HRM_EMPLOYEE.READ', // Để có thể chọn người giao việc
+    'HRM_EMPLOYEE.VIEW',
   ]);
 
   const skhcnRole = await prisma.role.upsert({
