@@ -13,7 +13,7 @@ import { NotificationsService } from './notifications.service';
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class NotificationsController {
-  constructor(private readonly notificationsService: NotificationsService) { }
+  constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get()
   @ApiOperation({ summary: 'Danh sách thông báo in-app cho user đăng nhập' })
@@ -21,10 +21,13 @@ export class NotificationsController {
     status: 200,
     description: 'Mảng thông báo (id, title, body, createdAt, read)',
   })
-  list(@Req() req: { user?: { id?: string | number, employeeCode?: string } }) {
+  list(@Req() req: { user?: { id?: string | number; employeeCode?: string } }) {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;
-    return this.notificationsService.listByUserOrEmployeeCode(userId, employeeCode);
+    return this.notificationsService.listByUserOrEmployeeCode(
+      userId,
+      employeeCode,
+    );
   }
 
   @Patch(':id/read')
@@ -32,7 +35,7 @@ export class NotificationsController {
   @ApiResponse({ status: 200, description: 'success' })
   markRead(
     @Param('id') id: string,
-    @Req() req: { user?: { id?: string | number, employeeCode?: string } },
+    @Req() req: { user?: { id?: string | number; employeeCode?: string } },
   ) {
     const userId = req.user?.id ?? 0;
     const employeeCode = req.user?.employeeCode;

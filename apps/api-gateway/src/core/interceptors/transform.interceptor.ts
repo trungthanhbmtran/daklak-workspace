@@ -32,9 +32,9 @@ export class TransformInterceptor implements NestInterceptor {
     const req = context.switchToHttp().getRequest<Request>();
     const isListRequest = this.detectListRequest(req);
 
-    return next.handle().pipe(
-      map((response) => this.transform(response, isListRequest)),
-    );
+    return next
+      .handle()
+      .pipe(map((response) => this.transform(response, isListRequest)));
   }
 
   /**
@@ -47,10 +47,16 @@ export class TransformInterceptor implements NestInterceptor {
     if (!req || req.method !== 'GET') return false;
     const path = req.path ?? '';
     // Nếu path kết thúc bằng UUID hoặc số nguyên → single entity
-    const endsWithId = /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(path)
-      || /\/\d+$/.test(path);
+    const endsWithId =
+      /\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        path,
+      ) || /\/\d+$/.test(path);
     // Nếu có query params phân trang → là list
-    const hasPaginationQuery = !!(req.query?.page || req.query?.limit || req.query?.pageSize);
+    const hasPaginationQuery = !!(
+      req.query?.page ||
+      req.query?.limit ||
+      req.query?.pageSize
+    );
     return !endsWithId || hasPaginationQuery;
   }
 
@@ -60,7 +66,12 @@ export class TransformInterceptor implements NestInterceptor {
     // null / undefined
     if (response === null || response === undefined) {
       // Nếu là list request mà service trả null → trả []
-      return { success: true, data: isListRequest ? [] : null, meta: null, timestamp };
+      return {
+        success: true,
+        data: isListRequest ? [] : null,
+        meta: null,
+        timestamp,
+      };
     }
 
     // Primitive (string, number, boolean)
@@ -73,7 +84,14 @@ export class TransformInterceptor implements NestInterceptor {
       return {
         success: true,
         data: response,
-        meta: { pagination: { total: response.length, page: 1, pageSize: response.length || 20, totalPages: 1 } },
+        meta: {
+          pagination: {
+            total: response.length,
+            page: 1,
+            pageSize: response.length || 20,
+            totalPages: 1,
+          },
+        },
         timestamp,
       };
     }
@@ -108,7 +126,8 @@ export class TransformInterceptor implements NestInterceptor {
     // gRPC list: { items, total }
     if ('items' in response && 'total' in response) {
       const page = response.page ?? response.meta?.page ?? 1;
-      const pageSize = response.pageSize ?? response.meta?.pageSize ?? response.limit ?? 20;
+      const pageSize =
+        response.pageSize ?? response.meta?.pageSize ?? response.limit ?? 20;
       const total = Number(response.total) || 0;
       const meta = {
         pagination: {
@@ -117,7 +136,9 @@ export class TransformInterceptor implements NestInterceptor {
           pageSize: Number(pageSize),
           totalPages: pageSize > 0 ? Math.ceil(total / Number(pageSize)) : 1,
         },
-        ...(response.meta && typeof response.meta === 'object' ? response.meta : {}),
+        ...(response.meta && typeof response.meta === 'object'
+          ? response.meta
+          : {}),
       };
       return {
         success: true,
@@ -195,7 +216,13 @@ export class TransformInterceptor implements NestInterceptor {
       const total = Number(meta.total ?? 0);
       const page = Number(meta.page ?? 1);
       const pageSize = Number(meta.pageSize ?? 20);
-      const { total: _t, page: _p, pageSize: _ps, totalPages: _tp, ...rest } = meta;
+      const {
+        total: _t,
+        page: _p,
+        pageSize: _ps,
+        totalPages: _tp,
+        ...rest
+      } = meta;
       return {
         pagination: {
           total,

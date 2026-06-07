@@ -40,18 +40,29 @@ export class NotificationsService {
       .slice(0, 50);
   }
 
-  listByUserOrEmployeeCode(userId: string | number, employeeCode?: string): InAppNotification[] {
+  listByUserOrEmployeeCode(
+    userId: string | number,
+    employeeCode?: string,
+  ): InAppNotification[] {
     const uid = String(userId);
     return this.store
-      .filter((n) => n.userId === uid || (employeeCode && n.userId === employeeCode))
+      .filter(
+        (n) => n.userId === uid || (employeeCode && n.userId === employeeCode),
+      )
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, 50);
   }
 
-  markRead(id: string, userId: string | number, employeeCode?: string): boolean {
+  markRead(
+    id: string,
+    userId: string | number,
+    employeeCode?: string,
+  ): boolean {
     const uid = String(userId);
     const n = this.store.find(
-      (x) => x.id === id && (x.userId === uid || (employeeCode && x.userId === employeeCode)),
+      (x) =>
+        x.id === id &&
+        (x.userId === uid || (employeeCode && x.userId === employeeCode)),
     );
     if (n) {
       n.read = true;

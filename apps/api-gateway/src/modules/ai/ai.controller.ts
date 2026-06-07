@@ -47,7 +47,11 @@ export class AiController {
       return { success: true, data: { jobId, jobStatus: 'PROCESSING' } };
     } catch (err: any) {
       this.logger.error('Error queuing AI task', err);
-      return { success: false, data: null, message: 'Không thể tạo tác vụ xử lý AI' };
+      return {
+        success: false,
+        data: null,
+        message: 'Không thể tạo tác vụ xử lý AI',
+      };
     }
   }
 
@@ -56,7 +60,11 @@ export class AiController {
     try {
       const jobData = await this.redisService.get(`ai_job_${jobId}`);
       if (!jobData) {
-        return { success: false, data: null, message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)' };
+        return {
+          success: false,
+          data: null,
+          message: 'Không tìm thấy tác vụ (hoặc đã hết hạn)',
+        };
       }
       return { success: true, data: JSON.parse(jobData) };
     } catch (err: any) {

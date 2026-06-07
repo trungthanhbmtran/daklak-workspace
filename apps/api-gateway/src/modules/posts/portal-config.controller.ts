@@ -80,7 +80,10 @@ export class PortalConfigController {
   @Post('batch-upsert')
   @Roles(Role.ADMIN)
   async batchUpsert(
-    @Body() dto: { items: { code: string; name: string; description?: string }[] },
+    @Body()
+    dto: {
+      items: { code: string; name: string; description?: string }[];
+    },
   ) {
     const res: any = await firstValueFrom(
       this.configService.batchUpsert({ items: dto.items }),

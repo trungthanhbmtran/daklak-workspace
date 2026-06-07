@@ -27,12 +27,12 @@ export class AiService implements OnModuleInit {
   private readonly COOLDOWN_MS = 60000;
 
   // Model Cache Config
-  private modelCache = new Map<string, { data: any[], expiresAt: number }>();
+  private modelCache = new Map<string, { data: any[]; expiresAt: number }>();
   private readonly MODEL_CACHE_TTL_MS = 3600 * 1000; // 1 hour
 
   constructor(
     @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.configService = this.client.getService('SystemConfigService');
@@ -79,11 +79,15 @@ export class AiService implements OnModuleInit {
       // Circuit Breaker Check
       if (breaker && breaker.failures >= this.MAX_FAILURES) {
         if (Date.now() < breaker.nextRetry) {
-          this.logger.warn(`Skipping ${provider.provider} (Priority: ${provider.priority}) due to Circuit Breaker (cooling down).`);
+          this.logger.warn(
+            `Skipping ${provider.provider} (Priority: ${provider.priority}) due to Circuit Breaker (cooling down).`,
+          );
           continue;
         } else {
           // Half-open
-          this.logger.log(`Circuit Breaker half-open for ${provider.provider}. Retrying...`);
+          this.logger.log(
+            `Circuit Breaker half-open for ${provider.provider}. Retrying...`,
+          );
         }
       }
 
@@ -123,7 +127,7 @@ export class AiService implements OnModuleInit {
     this.logger.error('All AI providers failed. Out of tokens or bad configs.');
     throw new Error(
       'Tất cả các dịch vụ AI đều đang bận hoặc lỗi. Chi tiết lỗi cuối cùng: ' +
-      lastError?.message,
+        lastError?.message,
     );
   }
 
@@ -143,11 +147,18 @@ export class AiService implements OnModuleInit {
     }
   }
 
-  private async fetchWithTimeout(url: string, options: any, timeoutMs: number = 15000): Promise<Response> {
+  private async fetchWithTimeout(
+    url: string,
+    options: any,
+    timeoutMs: number = 15000,
+  ): Promise<Response> {
     const controller = new AbortController();
     const id = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(url, { ...options, signal: controller.signal });
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+      });
       return response;
     } finally {
       clearTimeout(id);
@@ -158,17 +169,20 @@ export class AiService implements OnModuleInit {
     config: AiProviderConfig,
     prompt: string,
   ): Promise<string> {
-    const response = await this.fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.apiKey}`,
+    const response = await this.fetchWithTimeout(
+      'https://api.openai.com/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${config.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: config.model || 'gpt-4o-mini',
+          messages: [{ role: 'user', content: prompt }],
+        }),
       },
-      body: JSON.stringify({
-        model: config.model || 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const err = await response.text();
@@ -210,19 +224,22 @@ export class AiService implements OnModuleInit {
     config: AiProviderConfig,
     prompt: string,
   ): Promise<string> {
-    const response = await this.fetchWithTimeout('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': config.apiKey,
-        'anthropic-version': '2023-06-01',
+    const response = await this.fetchWithTimeout(
+      'https://api.anthropic.com/v1/messages',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': config.apiKey,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: config.model || 'claude-3-opus-20240229',
+          max_tokens: 1024,
+          messages: [{ role: 'user', content: prompt }],
+        }),
       },
-      body: JSON.stringify({
-        model: config.model || 'claude-3-opus-20240229',
-        max_tokens: 1024,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
+    );
 
     if (!response.ok) {
       const err = await response.text();
@@ -233,7 +250,10 @@ export class AiService implements OnModuleInit {
     return data.content?.[0]?.text || '';
   }
 
-  async listModels(provider: string, apiKey: string): Promise<{ id: string, name: string, contextWindow?: number }[]> {
+  async listModels(
+    provider: string,
+    apiKey: string,
+  ): Promise<{ id: string; name: string; contextWindow?: number }[]> {
     if (!apiKey) {
       throw new Error('API Key is required to fetch models');
     }
@@ -244,15 +264,18 @@ export class AiService implements OnModuleInit {
       return cached.data;
     }
 
-    let result: { id: string, name: string, contextWindow?: number }[] = [];
+    let result: { id: string; name: string; contextWindow?: number }[] = [];
 
     switch (provider) {
       case 'OPENAI': {
-        const res = await this.fetchWithTimeout('https://api.openai.com/v1/models', {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
+        const res = await this.fetchWithTimeout(
+          'https://api.openai.com/v1/models',
+          {
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+            },
           },
-        });
+        );
         if (!res.ok) throw new Error('OpenAI API Error: ' + (await res.text()));
         const data = await res.json();
 
@@ -263,7 +286,8 @@ export class AiService implements OnModuleInit {
             else if (m.id.includes('gpt-4-turbo')) ctx = 128000;
             else if (m.id.includes('gpt-4')) ctx = 8192;
             else if (m.id.includes('gpt-3.5')) ctx = 16385;
-            else if (m.id.includes('o1-mini') || m.id.includes('o1-preview')) ctx = 128000;
+            else if (m.id.includes('o1-mini') || m.id.includes('o1-preview'))
+              ctx = 128000;
             acc.push({ id: m.id, name: m.id, contextWindow: ctx });
           }
           return acc;
@@ -273,7 +297,7 @@ export class AiService implements OnModuleInit {
       case 'GEMINI': {
         const res = await this.fetchWithTimeout(
           `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-          {}
+          {},
         );
         if (!res.ok) throw new Error('Gemini API Error: ' + (await res.text()));
         const data = await res.json();
@@ -288,18 +312,27 @@ export class AiService implements OnModuleInit {
         break;
       }
       case 'CLAUDE': {
-        const res = await this.fetchWithTimeout('https://api.anthropic.com/v1/models', {
-          headers: {
-            'x-api-key': apiKey,
-            'anthropic-version': '2023-06-01',
+        const res = await this.fetchWithTimeout(
+          'https://api.anthropic.com/v1/models',
+          {
+            headers: {
+              'x-api-key': apiKey,
+              'anthropic-version': '2023-06-01',
+            },
           },
-        });
+        );
         if (!res.ok) throw new Error('Claude API Error: ' + (await res.text()));
         const data = await res.json();
 
         result = (data.data || []).reduce((acc: any[], m: any) => {
           let ctx: number | undefined = undefined;
-          if (m.id.includes('claude-3-5') || m.id.includes('claude-3-opus') || m.id.includes('claude-3-sonnet') || m.id.includes('claude-3-haiku')) ctx = 200000;
+          if (
+            m.id.includes('claude-3-5') ||
+            m.id.includes('claude-3-opus') ||
+            m.id.includes('claude-3-sonnet') ||
+            m.id.includes('claude-3-haiku')
+          )
+            ctx = 200000;
           acc.push({ id: m.id, name: m.id, contextWindow: ctx });
           return acc;
         }, []);
@@ -309,7 +342,10 @@ export class AiService implements OnModuleInit {
         throw new Error(`Unsupported AI provider: ${provider}`);
     }
 
-    this.modelCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.MODEL_CACHE_TTL_MS });
+    this.modelCache.set(cacheKey, {
+      data: result,
+      expiresAt: Date.now() + this.MODEL_CACHE_TTL_MS,
+    });
     return result;
   }
 }

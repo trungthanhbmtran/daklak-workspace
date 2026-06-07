@@ -36,7 +36,7 @@ export class RpcExceptionFilter implements ExceptionFilter {
       const message =
         typeof httpRes === 'string'
           ? httpRes
-          : httpRes?.message ?? exception.message;
+          : (httpRes?.message ?? exception.message);
       return response.status(exception.getStatus()).json({
         success: false,
         data: null,
@@ -101,4 +101,3 @@ export class RpcExceptionFilter implements ExceptionFilter {
     });
   }
 }
-

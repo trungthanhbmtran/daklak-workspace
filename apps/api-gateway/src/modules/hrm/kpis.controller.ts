@@ -28,7 +28,10 @@ export class KpisController implements OnModuleInit {
   private orgService: any;
   private employeeService: any;
 
-  private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
+  private unitMapCache: {
+    data: Record<number, any>;
+    expiresAt: number;
+  } | null = null;
 
   constructor(
     @Inject(MICROSERVICES.KPI.SYMBOL) private readonly client: any,
@@ -38,14 +41,21 @@ export class KpisController implements OnModuleInit {
 
   onModuleInit() {
     this.kpiService = this.client.getService(MICROSERVICES.KPI.SERVICE);
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
-    this.employeeService = this.empClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
+    this.employeeService = this.empClient.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   private async getUnitMap(): Promise<Record<number, any>> {
-    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now()) return this.unitMapCache.data;
+    if (this.unitMapCache && this.unitMapCache.expiresAt > Date.now())
+      return this.unitMapCache.data;
     try {
-      const treeRes: any = await firstValueFrom(this.orgService.GetFullTree({}));
+      const treeRes: any = await firstValueFrom(
+        this.orgService.GetFullTree({}),
+      );
       const unitMap: Record<number, any> = {};
       const flattenNodes = (nodes: any[]) => {
         for (const n of nodes) {
@@ -54,20 +64,30 @@ export class KpisController implements OnModuleInit {
             unitMap[nId] = {
               id: nId,
               parentId: n.parentId ? parseInt(n.parentId, 10) : null,
-              isLeaf: n.isLeaf ?? (!(n.children?.length)),
-              directChildIds: (n.children || []).map((c: any) => parseInt(c.id, 10)).filter(Boolean)
+              isLeaf: n.isLeaf ?? !n.children?.length,
+              directChildIds: (n.children || [])
+                .map((c: any) => parseInt(c.id, 10))
+                .filter(Boolean),
             };
           }
           if (n.children && n.children.length > 0) flattenNodes(n.children);
         }
       };
       flattenNodes(treeRes?.nodes || []);
-      this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
+      this.unitMapCache = {
+        data: unitMap,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      };
       return unitMap;
-    } catch { return {}; }
+    } catch {
+      return {};
+    }
   }
 
-  private getDescendantUnitIds(unitMap: Record<number, any>, unitId: number): Set<number> {
+  private getDescendantUnitIds(
+    unitMap: Record<number, any>,
+    unitId: number,
+  ): Set<number> {
     const ids = new Set<number>();
     const dfs = (id: number) => {
       ids.add(id);
@@ -93,18 +113,23 @@ export class KpisController implements OnModuleInit {
   @Get('criteria')
   async findCriteria(@Req() req: any) {
     const userRoles = req.user?.roles || [];
-    const isAdmin = userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN);
-    const res: any = await firstValueFrom(this.kpiService.FindCriteria({ isAdmin }));
-    
+    const isAdmin =
+      userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN);
+    const res: any = await firstValueFrom(
+      this.kpiService.FindCriteria({ isAdmin }),
+    );
+
     if (res) {
       res.meta = res.meta || {};
       const perms = req.user?.permissionsFlatten || [];
       const allowedActions: string[] = [];
-      
-      if (perms.includes('KPI:CREATE') || isAdmin) allowedActions.push('CREATE');
+
+      if (perms.includes('KPI:CREATE') || isAdmin)
+        allowedActions.push('CREATE');
       if (perms.includes('KPI:UPDATE') || isAdmin) allowedActions.push('EDIT');
-      if (perms.includes('KPI:DELETE') || isAdmin) allowedActions.push('DELETE');
-      
+      if (perms.includes('KPI:DELETE') || isAdmin)
+        allowedActions.push('DELETE');
+
       res.meta.allowedActions = allowedActions;
     }
     return res;
@@ -119,7 +144,9 @@ export class KpisController implements OnModuleInit {
   @Put('criteria/:id')
   @Roles(Role.ADMIN)
   async updateCriterion(@Param('id') id: string, @Body() body: any) {
-    return firstValueFrom(this.kpiService.UpdateCriterion({ id: Number(id), ...body }));
+    return firstValueFrom(
+      this.kpiService.UpdateCriterion({ id: Number(id), ...body }),
+    );
   }
 
   @Delete('criteria/:id')
@@ -137,10 +164,13 @@ export class KpisController implements OnModuleInit {
   }
 
   @Get('evaluations')
-  async findEvaluations(@Req() req: any, @Query('employeeCode') employeeCode: string) {
+  async findEvaluations(
+    @Req() req: any,
+    @Query('employeeCode') employeeCode: string,
+  ) {
     const user = req.user;
     const callerCode = user?.employeeCode || user?.username;
-    
+
     // Nếu employeeCode không được truyền, lấy của chính mình
     const isFetchingOwn = !employeeCode || employeeCode === callerCode;
     const targetCode = employeeCode || callerCode;
@@ -151,7 +181,9 @@ export class KpisController implements OnModuleInit {
     if (!isAdmin && user?.unitId) {
       const callerUnitId = parseInt(user.unitId, 10);
       const unitMap = await this.getUnitMap();
-      callerDescendantUnitIds = Array.from(this.getDescendantUnitIds(unitMap, callerUnitId));
+      callerDescendantUnitIds = Array.from(
+        this.getDescendantUnitIds(unitMap, callerUnitId),
+      );
     }
 
     return firstValueFrom(

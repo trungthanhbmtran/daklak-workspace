@@ -27,7 +27,10 @@ export class MasterPlansController implements OnModuleInit {
   private orgService: any;
 
   // Cache org tree to avoid repeated gRPC calls
-  private unitMapCache: { data: Record<number, any>; expiresAt: number } | null = null;
+  private unitMapCache: {
+    data: Record<number, any>;
+    expiresAt: number;
+  } | null = null;
 
   constructor(
     @Inject('MASTER_PLAN_PACKAGE') private client: any,
@@ -36,7 +39,9 @@ export class MasterPlansController implements OnModuleInit {
 
   onModuleInit() {
     this.masterPlanService = this.client.getService('MasterPlanService');
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
   }
 
   /** Lấy unitMap từ org tree, có cache 5 phút */
@@ -45,23 +50,37 @@ export class MasterPlansController implements OnModuleInit {
       return this.unitMapCache.data;
     }
     try {
-      const treeRes: any = await firstValueFrom(this.orgService.GetFullTree({}));
+      const treeRes: any = await firstValueFrom(
+        this.orgService.GetFullTree({}),
+      );
       const unitMap: Record<number, any> = {};
       const flatten = (nodes: any[]) => {
         for (const n of nodes) {
           const nId = parseInt(n.id, 10);
-          if (nId) unitMap[nId] = { id: nId, parentId: n.parentId ? parseInt(n.parentId, 10) : null };
+          if (nId)
+            unitMap[nId] = {
+              id: nId,
+              parentId: n.parentId ? parseInt(n.parentId, 10) : null,
+            };
           if (n.children?.length) flatten(n.children);
         }
       };
       flatten(treeRes?.nodes || []);
-      this.unitMapCache = { data: unitMap, expiresAt: Date.now() + 5 * 60 * 1000 };
+      this.unitMapCache = {
+        data: unitMap,
+        expiresAt: Date.now() + 5 * 60 * 1000,
+      };
       return unitMap;
-    } catch { return {}; }
+    } catch {
+      return {};
+    }
   }
 
   /** Trả về danh sách unitId từ đơn vị hiện tại lên đến root (bao gồm chính nó) */
-  private getAncestorUnitIds(unitMap: Record<number, any>, unitId: number): number[] {
+  private getAncestorUnitIds(
+    unitMap: Record<number, any>,
+    unitId: number,
+  ): number[] {
     const ids: number[] = [];
     let current = unitMap[unitId];
     if (current) ids.push(unitId);
@@ -81,28 +100,36 @@ export class MasterPlansController implements OnModuleInit {
   ) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('PLAN:MANAGE');
-    const isLeader = user?.roles?.some((r: any) => {
-      const code = typeof r === 'string' ? r : r.code;
-      return code?.includes('LEADER') || code?.includes('MANAGER');
-    }) || false;
-    
+    const isLeader =
+      user?.roles?.some((r: any) => {
+        const code = typeof r === 'string' ? r : r.code;
+        return code?.includes('LEADER') || code?.includes('MANAGER');
+      }) || false;
+
     // Tính chuỗi đơn vị cha của user để kiểm tra kế hoạch được tạo bởi đơn vị cấp trên
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
-      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+      callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
     }
 
-    return firstValueFrom(this.masterPlanService.FindAll({ 
-      type, 
-      status, 
-      departmentId: reqDepartmentId ? parseInt(reqDepartmentId, 10) : undefined,
-      currentUserCode: user?.employeeCode || user?.username,
-      isAdmin,
-      currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-      callerAncestorUnitIds,  // Danh sách đơn vị cha để lọc kế hoạch cấp trên
-      isLeader,
-    }));
+    return firstValueFrom(
+      this.masterPlanService.FindAll({
+        type,
+        status,
+        departmentId: reqDepartmentId
+          ? parseInt(reqDepartmentId, 10)
+          : undefined,
+        currentUserCode: user?.employeeCode || user?.username,
+        isAdmin,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds, // Danh sách đơn vị cha để lọc kế hoạch cấp trên
+        isLeader,
+      }),
+    );
   }
 
   @Get('advanced/historical-feasibility')
@@ -124,15 +151,19 @@ export class MasterPlansController implements OnModuleInit {
   async findById(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('PLAN:MANAGE');
-    const isLeader = user?.roles?.some((r: any) => {
-      const code = typeof r === 'string' ? r : r.code;
-      return code?.includes('LEADER') || code?.includes('MANAGER');
-    }) || false;
-    
+    const isLeader =
+      user?.roles?.some((r: any) => {
+        const code = typeof r === 'string' ? r : r.code;
+        return code?.includes('LEADER') || code?.includes('MANAGER');
+      }) || false;
+
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
-      callerAncestorUnitIds = this.getAncestorUnitIds(unitMap, parseInt(user.unitId, 10));
+      callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
     }
 
     return firstValueFrom(
@@ -195,7 +226,8 @@ export class MasterPlansController implements OnModuleInit {
 
   @Post()
   async create(@Req() req: any, @Body() body: any) {
-    body.createdByCode = req.user?.employeeCode || req.user?.username || 'system';
+    body.createdByCode =
+      req.user?.employeeCode || req.user?.username || 'system';
     if (req.user?.unitId) {
       body.departmentId = parseInt(req.user.unitId, 10);
     }
@@ -204,7 +236,8 @@ export class MasterPlansController implements OnModuleInit {
 
   @Put(':id')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    body.updatedByCode = req.user?.employeeCode || req.user?.username || 'system';
+    body.updatedByCode =
+      req.user?.employeeCode || req.user?.username || 'system';
     return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
     );
@@ -217,4 +250,3 @@ export class MasterPlansController implements OnModuleInit {
     );
   }
 }
-

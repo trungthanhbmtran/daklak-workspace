@@ -34,7 +34,7 @@ export class EmployeeController implements OnModuleInit {
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.SYS_CATEGORY.SYMBOL) private readonly catClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.employeeService = this.client.getService(
@@ -76,7 +76,7 @@ export class EmployeeController implements OnModuleInit {
           code: jt.code,
           monitoredUnitIds: jt.monitoredUnitIds || [],
           domainId: jt.domainId || null,
-          category: jt.category || ''
+          category: jt.category || '',
         };
       });
 
@@ -92,14 +92,16 @@ export class EmployeeController implements OnModuleInit {
           const nId = parseInt(n.id, 10);
           if (nId) {
             unitMap[nId] = {
-              id: nId,  // BUG FIX: cần field id để filter descendantUnitIds
+              id: nId, // BUG FIX: cần field id để filter descendantUnitIds
               name: n.name,
               code: n.code,
               parentId: n.parentId ? parseInt(n.parentId, 10) : null,
               domainIds: n.domainIds || [],
-              isLeaf: n.isLeaf ?? (!(n.children?.length)),
+              isLeaf: n.isLeaf ?? !n.children?.length,
               depth: n.depth ?? 0,
-              directChildIds: (n.children || []).map((c: any) => parseInt(c.id, 10)).filter(Boolean),
+              directChildIds: (n.children || [])
+                .map((c: any) => parseInt(c.id, 10))
+                .filter(Boolean),
             };
           }
           if (n.children?.length) flattenNodes(n.children);
@@ -153,15 +155,21 @@ export class EmployeeController implements OnModuleInit {
    * Lấy tất cả unitId cấp dưới (bao gồm cả chính nó) từ một unitId cho trước.
    * Duyệt theo mã đơn vị (code prefix) hoặc theo parentId.
    */
-  private getDescendantUnitIds(unitMap: Record<number, any>, unitId: number): Set<number> {
+  private getDescendantUnitIds(
+    unitMap: Record<number, any>,
+    unitId: number,
+  ): Set<number> {
     const callerUnit = unitMap[unitId];
     if (!callerUnit) return new Set();
     const callerCode: string = callerUnit.code || '';
     return new Set<number>(
-      Object.values(unitMap as Record<number, any>)
-        .filter((u: any) => u.code === callerCode || u.code.startsWith(callerCode + '.'))
+      Object.values(unitMap)
+        .filter(
+          (u: any) =>
+            u.code === callerCode || u.code.startsWith(callerCode + '.'),
+        )
         .map((u: any) => u.id)
-        .filter(Boolean)
+        .filter(Boolean),
     );
   }
 
@@ -171,7 +179,8 @@ export class EmployeeController implements OnModuleInit {
     if (req.page) req.page = parseInt(req.page);
     if (req.pageSize) req.pageSize = parseInt(req.pageSize);
     if (req.departmentId) req.departmentId = parseInt(req.departmentId);
-    if (req.civilServantRankId) req.civilServantRankId = parseInt(req.civilServantRankId);
+    if (req.civilServantRankId)
+      req.civilServantRankId = parseInt(req.civilServantRankId);
     if (req.partyTitleId) req.partyTitleId = parseInt(req.partyTitleId);
 
     // Truyền ngữ cảnh người dùng hiện tại từ access token (PBAC)
@@ -184,8 +193,10 @@ export class EmployeeController implements OnModuleInit {
     }
 
     // Convert boolean flag
-    if (req.assignableOnly === 'true' || req.assignableOnly === true) req.assignableOnly = true;
-    if (req.crossDepartment === 'true' || req.crossDepartment === true) req.crossDepartment = true;
+    if (req.assignableOnly === 'true' || req.assignableOnly === true)
+      req.assignableOnly = true;
+    if (req.crossDepartment === 'true' || req.crossDepartment === true)
+      req.crossDepartment = true;
 
     const [res, dicts]: [any, any] = await Promise.all([
       firstValueFrom(this.employeeService.ListEmployees(req)),
@@ -202,29 +213,48 @@ export class EmployeeController implements OnModuleInit {
       // Luôn lọc theo thẩm quyền của user trong hệ thống tổ chức (trừ khi là Admin toàn quyền)
       if (req.callerUnitId && !isAdmin) {
         const callerUnitId = parseInt(req.callerUnitId, 10);
-        const descendantUnitIds = this.getDescendantUnitIds(dicts.unitMap, callerUnitId);
-        
+        const descendantUnitIds = this.getDescendantUnitIds(
+          dicts.unitMap,
+          callerUnitId,
+        );
+
         res.data = res.data.filter((emp: any) => {
           // Ngoại trừ chính mình
-          if (emp.employeeCode === req.callerEmployeeCode || emp.email === req.callerEmail) return false;
-          
-          const empUnitId = parseInt(emp.department?.id || emp.departmentId, 10);
+          if (
+            emp.employeeCode === req.callerEmployeeCode ||
+            emp.email === req.callerEmail
+          )
+            return false;
+
+          const empUnitId = parseInt(
+            emp.department?.id || emp.departmentId,
+            10,
+          );
           return descendantUnitIds.has(empUnitId);
         });
       }
 
       // ── TÍNH TOÁN ĐIỀU PHỐI (WORKLOAD & SCORING) ──
       const RANK_LIMITS: Record<string, number> = {
-        GRADE_1: 200, GRADE_2: 160, GRADE_3: 120, GRADE_4: 80,
-        SENIOR_SPECIALIST: 150, PRINCIPAL_SPECIALIST: 120, SPECIALIST: 100,
-        OFFICER: 80, VIEN_CHUC: 100, NHAN_VIEN: 80, BAO_VE: 60
+        GRADE_1: 200,
+        GRADE_2: 160,
+        GRADE_3: 120,
+        GRADE_4: 80,
+        SENIOR_SPECIALIST: 150,
+        PRINCIPAL_SPECIALIST: 120,
+        SPECIALIST: 100,
+        OFFICER: 80,
+        VIEN_CHUC: 100,
+        NHAN_VIEN: 80,
+        BAO_VE: 60,
       };
       res.data = res.data.map((emp: any) => {
-        const rankCode = emp.civilServantRank?.code || emp.civilServantRankCode || '';
+        const rankCode =
+          emp.civilServantRank?.code || emp.civilServantRankCode || '';
         const rankLimit = RANK_LIMITS[rankCode] || 100;
         const currentLoad = emp.currentTaskCount || 0;
         const availableCapacity = Math.max(0, rankLimit - currentLoad);
-        const priorityScore = availableCapacity * 10 + (rankLimit * 0.5);
+        const priorityScore = availableCapacity * 10 + rankLimit * 0.5;
         return {
           ...emp,
           rankLimit,
@@ -243,11 +273,11 @@ export class EmployeeController implements OnModuleInit {
       res.meta = res.meta || {};
       const perms = user?.permissionsFlatten || [];
       const allowedActions: string[] = [];
-      
+
       if (perms.includes('HRM_EMPLOYEE:CREATE')) allowedActions.push('CREATE');
       if (perms.includes('HRM_EMPLOYEE:UPDATE')) allowedActions.push('EDIT');
       if (perms.includes('HRM_EMPLOYEE:DELETE')) allowedActions.push('DELETE');
-      
+
       res.meta.allowedActions = allowedActions;
     }
 

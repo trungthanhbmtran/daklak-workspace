@@ -145,7 +145,7 @@ export class DocumentsController implements OnModuleInit {
     @Query('orgId') orgId: string,
   ) {
     // Ưu tiên userId từ JWT token, không để client tự truyền userId
-    const finalUserId = req.user?.id ? String(req.user.id) : (userId || '');
+    const finalUserId = req.user?.id ? String(req.user.id) : userId || '';
     return firstValueFrom(
       this.cabinetService.ListFiles({
         userId: finalUserId,
@@ -216,7 +216,11 @@ export class DocumentsController implements OnModuleInit {
   }
 
   @Put(':id')
-  async updateDocument(@Req() req: any, @Param('id') id: string, @Body() body: any) {
+  async updateDocument(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: any,
+  ) {
     // Inject thông tin người cập nhật từ JWT token
     const payload = {
       id,

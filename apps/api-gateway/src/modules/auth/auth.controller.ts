@@ -34,12 +34,14 @@ export class AuthController implements OnModuleInit {
     @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    this.employeeService = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.employeeService = this.employeeClient.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   @Post('login')
@@ -175,7 +177,7 @@ export class AuthController implements OnModuleInit {
     if (user && user.employeeCode) {
       try {
         const empRes: any = await firstValueFrom(
-          this.employeeService.GetEmployeeByCode({ code: user.employeeCode })
+          this.employeeService.GetEmployeeByCode({ code: user.employeeCode }),
         );
         const emp = empRes?.data;
         if (emp) {

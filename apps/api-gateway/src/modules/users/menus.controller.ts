@@ -78,7 +78,7 @@ export class MenusController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.MENU.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.menuService = this.client.getService(MICROSERVICES.MENU.SERVICE);
@@ -118,13 +118,13 @@ export class MenusController implements OnModuleInit {
         app: app || 'ADMIN_PORTAL',
       }),
     );
-    
+
     // Bổ sung meta chứa currentUser để Frontend (HubClient) dùng
     if (response) {
       if (!response.meta) response.meta = {};
       response.meta.currentUser = sanitizeUserForClient(req.user);
     }
-    
+
     return response;
   }
 

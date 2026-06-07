@@ -127,9 +127,13 @@ export class DepartmentController implements OnModuleInit {
   }
 
   @Get(':id/employees')
-  @ApiOperation({ summary: 'Nhân viên thuộc đơn vị (hrm-service) - DEPRECATED' })
+  @ApiOperation({
+    summary: 'Nhân viên thuộc đơn vị (hrm-service) - DEPRECATED',
+  })
   async listEmployees(@Param('id') id: string) {
-    throw new Error('Vui lòng sử dụng API /admin/hrm/employees để lấy danh sách nhân viên nhằm đảm bảo PBAC.');
+    throw new Error(
+      'Vui lòng sử dụng API /admin/hrm/employees để lấy danh sách nhân viên nhằm đảm bảo PBAC.',
+    );
   }
 
   @Post()

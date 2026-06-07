@@ -37,7 +37,7 @@ export class OrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.client.getService(
@@ -65,7 +65,10 @@ export class OrganizationsController implements OnModuleInit {
       if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
         throw new BadRequestException('domainIds phải là một mảng');
       }
-      if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+      if (
+        body.geographicAreaIds !== undefined &&
+        !Array.isArray(body.geographicAreaIds)
+      ) {
         throw new BadRequestException('geographicAreaIds phải là một mảng');
       }
       const result = await firstValueFrom(
@@ -110,12 +113,14 @@ export class OrganizationsController implements OnModuleInit {
     let nodes = res.nodes || [];
 
     const user = request?.user;
-    const isAdmin = user?.permissionsFlatten?.includes('SYSTEM:MANAGE') || user?.permissionsFlatten?.includes('HRM_ORGANIZATION:MANAGE');
+    const isAdmin =
+      user?.permissionsFlatten?.includes('SYSTEM:MANAGE') ||
+      user?.permissionsFlatten?.includes('HRM_ORGANIZATION:MANAGE');
 
     if (!isAdmin && user?.unitId) {
       // Find the user's unit node and only return that node (and its descendants)
       const userUnitId = parseInt(user.unitId, 10);
-      
+
       const findNode = (treeNodes: any[]): any | null => {
         for (const node of treeNodes) {
           if (parseInt(node.id, 10) === userUnitId) return node;
@@ -136,12 +141,12 @@ export class OrganizationsController implements OnModuleInit {
       allowedActions.push('CREATE_ROOT', 'CREATE_CHILD', 'EDIT', 'DELETE');
     }
 
-    return { 
-      success: true, 
+    return {
+      success: true,
       data: nodes,
       meta: {
-        allowedActions
-      }
+        allowedActions,
+      },
     };
   }
 
@@ -180,7 +185,10 @@ export class OrganizationsController implements OnModuleInit {
       monitoredUnitIds?: number[];
     },
   ) {
-    if (body.monitoredUnitIds !== undefined && !Array.isArray(body.monitoredUnitIds)) {
+    if (
+      body.monitoredUnitIds !== undefined &&
+      !Array.isArray(body.monitoredUnitIds)
+    ) {
       throw new BadRequestException('monitoredUnitIds phải là một mảng');
     }
     const result = await firstValueFrom(
@@ -229,7 +237,10 @@ export class OrganizationsController implements OnModuleInit {
       if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
         throw new BadRequestException('domainIds phải là một mảng');
       }
-      if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+      if (
+        body.geographicAreaIds !== undefined &&
+        !Array.isArray(body.geographicAreaIds)
+      ) {
         throw new BadRequestException('geographicAreaIds phải là một mảng');
       }
       const payload: Record<string, unknown> = {
@@ -338,7 +349,10 @@ export class OrganizationsController implements OnModuleInit {
       monitoredUnitIds?: number[];
     },
   ) {
-    if (body.monitoredUnitIds !== undefined && !Array.isArray(body.monitoredUnitIds)) {
+    if (
+      body.monitoredUnitIds !== undefined &&
+      !Array.isArray(body.monitoredUnitIds)
+    ) {
       throw new BadRequestException('monitoredUnitIds phải là một mảng');
     }
     const result = await firstValueFrom(
@@ -363,7 +377,7 @@ export class PublicOrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.client.getService(

@@ -15,7 +15,7 @@ export class RedisService implements OnModuleDestroy {
       db: parseInt(process.env.REDIS_DB || '0', 10),
       retryStrategy: (times) => {
         // Chỉ retry tối đa 3 lần nếu không có Redis, tránh spam log console
-        if (times > 3) return null; 
+        if (times > 3) return null;
         return Math.min(times * 500, 2000);
       },
     });
