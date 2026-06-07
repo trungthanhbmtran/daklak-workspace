@@ -38,7 +38,7 @@ export class DepartmentController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly orgClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.orgClient.getService(
@@ -130,7 +130,7 @@ export class DepartmentController implements OnModuleInit {
   @ApiOperation({
     summary: 'Nhân viên thuộc đơn vị (hrm-service) - DEPRECATED',
   })
-  async listEmployees(@Param('id') _id: string) {
+  async listEmployees(@Param('id') id: string) {
     throw new Error(
       'Vui lòng sử dụng API /admin/hrm/employees để lấy danh sách nhân viên nhằm đảm bảo PBAC.',
     );
