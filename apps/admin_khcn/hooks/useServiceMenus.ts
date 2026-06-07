@@ -1,5 +1,7 @@
 "use client";
 
+import { usePathname } from "next/navigation";
+
 import { useQuery } from "@tanstack/react-query";
 import {
   LayoutDashboard,
@@ -16,22 +18,8 @@ import {
 import { menuApi, type MenuNode } from "@/features/system-admin/menus/api";
 
 // ----------------------------------------------------------------------
-// 1. CONFIGURATION (CẤU HÌNH TẬP TRUNG)
+// 1. HELPER FUNCTIONS (XỬ LÝ DATA)
 // ----------------------------------------------------------------------
-
-const SERVICE_CONFIG: Record<string, { serviceCode: string; basePath: string }> = {
-  admin: { serviceCode: "USER_SERVICE", basePath: "/services/admin" },
-  hrm: { serviceCode: "HRM_SERVICE", basePath: "/services/hrm" },
-  documents: { serviceCode: "DOCUMENT_SERVICE", basePath: "/services/documents" },
-  posts: { serviceCode: "CONTENT_SERVICE", basePath: "/services/posts" },
-  integration: { serviceCode: "INTEGRATION_SERVICE", basePath: "/services/integration" },
-};
-
-// Map ngược lại để dùng cho Hub
-const SERVICE_TO_KEY: Record<string, string> = Object.entries(SERVICE_CONFIG).reduce(
-  (acc, [key, conf]) => ({ ...acc, [conf.serviceCode]: key }),
-  {}
-);
 
 const ICON_MAP: Record<string, LucideIcon> = {
   "grid-outline": LayoutDashboard,
@@ -61,9 +49,11 @@ const getIcon = (iconName?: string | null): LucideIcon => {
   return ICON_MAP[iconName.trim()] ?? LayoutDashboard;
 };
 
-// Tiện ích nối path an toàn (tránh lỗi sinh ra dấu // dư thừa)
-const joinPath = (base: string, path: string) => {
-  return `${base}/${path}`.replace(/\/+/g, "/"); // Thay thế nhiều dấu / thành 1 dấu /
+/** Lấy danh sách menu chuẩn từ API và lấy luôn metadata */
+const fetchAndNormalizeMenus = async (): Promise<any> => {
+  const res: any = await menuApi.getMyMenus("ADMIN_PORTAL");
+  const data = res?.data ?? res;
+  return data;
 };
 
 export interface SidebarItem {
@@ -73,97 +63,42 @@ export interface SidebarItem {
   order: number;
 }
 
-// ----------------------------------------------------------------------
-// 2. HELPER FUNCTIONS (XỬ LÝ DATA)
-// ----------------------------------------------------------------------
-
-/** Lấy danh sách menu chuẩn từ API và lấy luôn metadata */
-const fetchAndNormalizeMenus = async (): Promise<{ items: MenuNode[], meta?: any }> => {
-  const res: any = await menuApi.getMyMenus("ADMIN_PORTAL");
-  const raw = res?.data?.items ?? res?.data ?? res?.items ?? res;
-  const items = Array.isArray(raw) ? raw : [];
-  return { items, meta: res?.meta || res?.data?.meta };
-};
-
-/** Bỏ qua node Gốc ảo (SYS_ROOT) nếu có */
-const getRealBranches = (nodes: MenuNode[]): MenuNode[] => {
-  if (nodes.length === 1 && !nodes[0].route && Array.isArray(nodes[0].children)) {
-    return nodes[0].children;
-  }
-  return nodes;
-};
-
-/** Đệ quy làm phẳng menu tree thành 1 list duy nhất cho Sidebar */
-const flattenMenus = (nodes: MenuNode[], basePath: string): SidebarItem[] => {
-  return nodes.reduce<SidebarItem[]>((acc, node) => {
-    const route = (node.route ?? "").trim();
-
-    // Nếu node có route (kể cả chuỗi rỗng - đại diện cho trang chủ của phân hệ), thêm vào list
-    if (route !== undefined && route !== null) {
-      acc.push({
-        name: (node.name ?? "").trim(),
-        href: joinPath(basePath, route),
-        icon: getIcon(node.icon),
-        order: node.order ?? 0,
-      });
-    }
-
-    // Đệ quy chui vào children
-    if (Array.isArray(node.children) && node.children.length > 0) {
-      acc.push(...flattenMenus(node.children, basePath));
-    }
-
-    return acc;
-  }, []);
-};
-
-// ----------------------------------------------------------------------
-// 3. REACT HOOKS
-// ----------------------------------------------------------------------
-
 /**
- * Hook cho Sidebar: Lấy menu của một phân hệ cụ thể (vd: "documents")
+ * Hook cho Sidebar: Tự động nhận diện phân hệ hiện tại dựa vào đường dẫn (pathname)
  */
-export function useServiceMenus(serviceKey: keyof typeof SERVICE_CONFIG) {
-  const config = SERVICE_CONFIG[serviceKey];
-
+export function useServiceMenus() {
+  const pathname = usePathname() || "";
   const { data, isLoading, isError } = useQuery({
     queryKey: ["menus", "me", "ADMIN_PORTAL"],
     queryFn: fetchAndNormalizeMenus,
-    enabled: !!config,
   });
 
-  const branches = getRealBranches(data?.items ?? []);
-
-  // Tìm nhánh gốc của Service này
-  const targetRoot = branches.find((b) => (b.service ?? "").trim() === config?.serviceCode);
+  // Tìm sidebar tương ứng với pathname
+  let sidebar = data?.sidebarMenus?.find((s: any) => s.basePath && (pathname === s.basePath || pathname.startsWith(`${s.basePath}/`)));
+  if (!sidebar) {
+    sidebar = data?.sidebarMenus?.find((s: any) => s.items?.some((item: any) => pathname === item.href || pathname.startsWith(`${item.href}/`)));
+  }
 
   let menuItems: SidebarItem[] = [];
-  let serviceName = serviceKey;
-  let serviceIcon = getIcon("");
-
-  if (targetRoot) {
-    serviceName = (targetRoot.name ?? "").trim() || serviceKey;
-    serviceIcon = getIcon(targetRoot.icon);
-
-    // Làm phẳng và sắp xếp theo order
-    menuItems = flattenMenus(targetRoot.children ?? [], config.basePath).sort(
-      (a, b) => a.order - b.order
-    );
-
+  if (sidebar?.items) {
+    menuItems = sidebar.items.map((item: any) => ({
+      ...item,
+      icon: getIcon(item.icon),
+    }));
   }
 
   return {
     menuItems,
-    serviceName,
-    serviceIcon,
+    serviceName: sidebar?.serviceName ?? "Phân hệ",
+    serviceIcon: getIcon(sidebar?.serviceIcon),
+    serviceCode: sidebar?.serviceCode ?? "",
     isLoading,
     isError,
   };
 }
 
 /**
- * Hook cho Hub: Hiển thị danh sách các phân hệ (Service Cards)
+ * Hook cho Hub: Hiển thị danh sách các phân hệ (Service Cards) tự động từ DB
  */
 export function useHubServices() {
   const { data, isLoading, isError } = useQuery({
@@ -171,28 +106,12 @@ export function useHubServices() {
     queryFn: fetchAndNormalizeMenus,
   });
 
-  const branches = getRealBranches(data?.items ?? []);
   const currentUser = data?.meta?.currentUser;
 
-  const apps = branches
-    .filter((b) => {
-      const svcCode = (b.service ?? "").trim();
-      return svcCode && SERVICE_TO_KEY[svcCode]; // Chỉ lấy các service có định nghĩa
-    })
-    .map((b) => {
-      const svcCode = (b.service ?? "").trim();
-      const serviceKey = SERVICE_TO_KEY[svcCode];
-
-      return {
-        id: serviceKey,
-        title: (b.name ?? "").trim() || serviceKey,
-        desc: (b.description ?? "").trim() || "Phân hệ nghiệp vụ",
-        href: SERVICE_CONFIG[serviceKey]?.basePath ?? `/services/${serviceKey}`,
-        icon: getIcon(b.icon),
-        iconColor: (b.iconColor ?? "").trim() || null,
-        disabled: false,
-      };
-    });
+  const apps = (data?.hubApps ?? []).map((app: any) => ({
+    ...app,
+    icon: getIcon(app.icon),
+  }));
 
   return { apps, currentUser, isLoading, isError };
 }

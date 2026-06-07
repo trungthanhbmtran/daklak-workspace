@@ -21,16 +21,13 @@ import {
 import { useServiceMenus } from "@/hooks/useServiceMenus";
 
 export function AppSidebar({
-  serviceKey,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { serviceKey: string }) {
+}: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
-  const { menuItems, serviceName, serviceIcon: ServiceIcon, isLoading } = useServiceMenus(serviceKey);
-
-  if (!serviceKey) return null;
+  const { menuItems, serviceName, serviceIcon: ServiceIcon, isLoading } = useServiceMenus();
 
   const items = menuItems ?? [];
-  const firstHref = items[0]?.href ?? (serviceKey === "admin" ? "/services/admin" : serviceKey === "hrm" ? "/services/hrm" : `/services/${serviceKey}`);
+  const firstHref = items[0]?.href ?? "/hub";
 
   return (
     <Sidebar collapsible="icon" {...props}>

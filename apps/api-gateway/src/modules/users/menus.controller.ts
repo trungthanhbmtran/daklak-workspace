@@ -69,6 +69,35 @@ function toFrontendItem(m: MenuDto): MenuDto {
   };
 }
 
+const joinPath = (base: string, path: string) => {
+  return `${base}/${path}`.replace(/\/+/g, '/');
+};
+
+const getRealBranches = (nodes: any[]): any[] => {
+  if (nodes.length === 1 && !nodes[0].route && Array.isArray(nodes[0].children)) {
+    return nodes[0].children;
+  }
+  return nodes;
+};
+
+const flattenMenus = (nodes: any[], basePath: string): any[] => {
+  return nodes.reduce<any[]>((acc, node) => {
+    const route = (node.route ?? '').trim();
+    if (route !== undefined && route !== null) {
+      acc.push({
+        name: (node.name ?? '').trim(),
+        href: joinPath(basePath, route),
+        icon: node.icon ?? '',
+        order: node.order ?? 0,
+      });
+    }
+    if (Array.isArray(node.children) && node.children.length > 0) {
+      acc.push(...flattenMenus(node.children, basePath));
+    }
+    return acc;
+  }, []);
+};
+
 @ApiTags('Menu')
 @Controller('admin/menus')
 @UseGuards(JwtAuthGuard)
@@ -123,6 +152,57 @@ export class MenusController implements OnModuleInit {
     if (response) {
       if (!response.meta) response.meta = {};
       response.meta.currentUser = sanitizeUserForClient(req.user);
+
+      // --- BFF Logic: Tính toán cấu trúc hiển thị cho Frontend ---
+      const branches = getRealBranches(response.items ?? []);
+
+      response.hubApps = branches
+        .filter((b: any) => (b.service ?? '').trim() !== '')
+        .map((b: any) => {
+          const svcCode = (b.service ?? '').trim();
+          const basePath =
+            (b.route ?? '').trim() ||
+            `/services/${svcCode.toLowerCase().replace('_service', '')}`;
+
+          let href = basePath;
+          if (b.children && b.children.length > 0) {
+            const firstChild = [...b.children].sort(
+              (x, y) => (x.order || 0) - (y.order || 0),
+            )[0];
+            if (firstChild.route) {
+              href = firstChild.route.startsWith('/')
+                ? firstChild.route
+                : `${basePath}/${firstChild.route}`;
+            }
+          }
+          href = href.replace(/([^:])\/\//g, '$1/');
+
+          return {
+            id: svcCode,
+            title: (b.name ?? '').trim() || svcCode,
+            desc: (b.description ?? '').trim() || 'Phân hệ nghiệp vụ',
+            href,
+            icon: b.icon ?? '',
+            iconColor: (b.iconColor ?? '').trim() || null,
+            disabled: false,
+          };
+        });
+
+      response.sidebarMenus = branches.map((b: any) => {
+        const svcCode = (b.service ?? '').trim();
+        const basePath = (b.route ?? '').trim();
+        const items = flattenMenus(b.children ?? [], basePath).sort(
+          (a: any, b: any) => a.order - b.order,
+        );
+
+        return {
+          serviceCode: svcCode,
+          serviceName: (b.name ?? '').trim() || svcCode,
+          serviceIcon: b.icon ?? '',
+          basePath,
+          items,
+        };
+      });
     }
 
     return response;

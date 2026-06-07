@@ -8,11 +8,11 @@ import { useServiceMenus } from "@/hooks/useServiceMenus";
 import { NotificationBell } from "@/features/notifications/NotificationBell";
 import { HeaderUserProfile } from "./header-user-profile";
 
-export function ServiceHeader({ serviceKey }: { serviceKey: string }) {
+export function ServiceHeader() {
   const pathname = usePathname();
-  const { menuItems, serviceName } = useServiceMenus(serviceKey);
+  const { menuItems, serviceName, serviceCode } = useServiceMenus();
 
-  const activePageName = (menuItems ?? []).find(m => pathname === m.href || pathname.startsWith(`${m.href}/`))?.name || serviceName || serviceKey;
+  const activePageName = (menuItems ?? []).find(m => pathname === m.href || pathname.startsWith(`${m.href}/`))?.name || serviceName || serviceCode;
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-background sticky top-0 z-10 shadow-sm transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">

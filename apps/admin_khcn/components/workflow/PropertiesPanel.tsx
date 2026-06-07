@@ -228,19 +228,19 @@ export const PropertiesPanel = ({
                 className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               >
                 <option value="">Chọn hành động...</option>
-                {data.service === 'user-service' && (
+                {(data.service === 'user-service' || data.service === 'USER_SERVICE') && (
                   <>
                     <option value="findOne">Tìm kiếm người dùng</option>
                     <option value="setUserActive">Kích hoạt tài khoản</option>
                   </>
                 )}
-                {data.service === 'hrm-service' && (
+                {(data.service === 'hrm-service' || data.service === 'HRM_SERVICE') && (
                   <>
                     <option value="getEmployee">Lấy thông tin nhân sự</option>
                     <option value="updateContract">Cập nhật hợp đồng</option>
                   </>
                 )}
-                {data.service === 'posts-service' && (
+                {(data.service === 'posts-service' || data.service === 'POST_SERVICE') && (
                   <>
                     <option value="submitPost">Gửi duyệt bài viết</option>
                     <option value="reviewPost">Đang duyệt bài viết</option>
@@ -249,7 +249,7 @@ export const PropertiesPanel = ({
                     <option value="publishPost">Xuất bản bài viết</option>
                   </>
                 )}
-                {data.service === 'document-service' && (
+                {(data.service === 'document-service' || data.service === 'DOCUMENT_SERVICE') && (
                   <>
                     <option value="receiveDocument">Tiếp nhận văn bản</option>
                     <option value="processDocument">Xử lý văn bản</option>
@@ -357,10 +357,11 @@ export const PropertiesPanel = ({
                 className="w-full bg-background border border-border rounded-lg p-2 text-sm focus:ring-2 focus:ring-primary/20 outline-none transition-all"
               >
                 <option value="">Chọn microservice đích...</option>
-                <option value="user-service">User Service</option>
-                <option value="hrm-service">HRM Service</option>
-                <option value="posts-service">Posts Service</option>
-                <option value="document-service">Document Service</option>
+                {availableServices.map((svc: any) => (
+                  <option key={svc.code || svc.id} value={svc.code || svc.id}>
+                    {svc.name || svc.title}
+                  </option>
+                ))}
               </select>
             </div>
             <div className="flex items-center justify-between">

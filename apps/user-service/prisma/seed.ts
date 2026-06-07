@@ -2391,11 +2391,12 @@ async function main() {
     {
       code: 'USER_SERVICE_ROOT',
       name: 'Quản trị Hệ thống',
-      icon: 'shield-checkmark-outline',
+      icon: 'settings-outline',
       service: 'USER_SERVICE',
       color: '#3b82f6',
       order: 1,
       res: 'USER',
+      route: '/services/admin',
     },
     {
       code: 'HRM_SERVICE_ROOT',
@@ -2405,6 +2406,7 @@ async function main() {
       color: '#10b981',
       order: 2,
       res: 'HRM_EMPLOYEE',
+      route: '/services/hrm',
     },
     {
       code: 'DOCUMENT_SERVICE_ROOT',
@@ -2414,6 +2416,7 @@ async function main() {
       color: '#f59e0b',
       order: 3,
       res: 'DOC_INCOMING',
+      route: '/services/documents',
     },
     {
       code: 'CONTENT_SERVICE_ROOT',
@@ -2423,6 +2426,7 @@ async function main() {
       color: '#ec4899',
       order: 4,
       res: 'POST',
+      route: '/services/posts',
     },
     {
       code: 'WORKFLOW_SERVICE_ROOT',
@@ -2432,6 +2436,7 @@ async function main() {
       color: '#8b5cf6',
       order: 5,
       res: 'WORKFLOW',
+      route: '/hub',
     }
   ];
 
@@ -2446,6 +2451,7 @@ async function main() {
         iconColor: sys.color,
         order: sys.order,
         service: sys.service,
+        route: sys.route,
       },
       create: {
         code: sys.code,
@@ -2454,6 +2460,7 @@ async function main() {
         iconColor: sys.color,
         order: sys.order,
         service: sys.service,
+        route: sys.route,
         parentId: rootMenu.id,
         application: 'ADMIN_PORTAL',
       },
