@@ -70,6 +70,7 @@ services:
     env_file:
       - .env.production
     environment:
+      DATABASE_URL: mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-admin}:${RABBITMQ_PASS:-admin123}@rabbitmq:5672
@@ -263,6 +264,15 @@ services:
       - .env.production
     environment:
       - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/admin_document
+
+  api-gateway-migrate:
+    image: ${DOCKER_USERNAME}/daklak-api-gateway:${IMAGE_TAG:-latest}
+    profiles: [ "migrate" ]
+    command: npx prisma migrate deploy
+    env_file:
+      - .env.production
+    environment:
+      - DATABASE_URL=mysql://root:${MYSQL_ROOT_PASSWORD}@mysql:3306/daklak_db
 
   # =============================
   # Nginx
