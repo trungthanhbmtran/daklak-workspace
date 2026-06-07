@@ -36,21 +36,21 @@ export type TaskParticipantSumAggregateOutputType = {
 
 export type TaskParticipantMinAggregateOutputType = {
   taskId: number | null
-  userId: string | null
+  employeeCode: string | null
   participantRole: $Enums.TaskRole | null
   assignedAt: Date | null
 }
 
 export type TaskParticipantMaxAggregateOutputType = {
   taskId: number | null
-  userId: string | null
+  employeeCode: string | null
   participantRole: $Enums.TaskRole | null
   assignedAt: Date | null
 }
 
 export type TaskParticipantCountAggregateOutputType = {
   taskId: number
-  userId: number
+  employeeCode: number
   participantRole: number
   assignedAt: number
   _all: number
@@ -67,21 +67,21 @@ export type TaskParticipantSumAggregateInputType = {
 
 export type TaskParticipantMinAggregateInputType = {
   taskId?: true
-  userId?: true
+  employeeCode?: true
   participantRole?: true
   assignedAt?: true
 }
 
 export type TaskParticipantMaxAggregateInputType = {
   taskId?: true
-  userId?: true
+  employeeCode?: true
   participantRole?: true
   assignedAt?: true
 }
 
 export type TaskParticipantCountAggregateInputType = {
   taskId?: true
-  userId?: true
+  employeeCode?: true
   participantRole?: true
   assignedAt?: true
   _all?: true
@@ -175,7 +175,7 @@ export type TaskParticipantGroupByArgs<ExtArgs extends runtime.Types.Extensions.
 
 export type TaskParticipantGroupByOutputType = {
   taskId: number
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt: Date
   _count: TaskParticipantCountAggregateOutputType | null
@@ -205,7 +205,7 @@ export type TaskParticipantWhereInput = {
   OR?: Prisma.TaskParticipantWhereInput[]
   NOT?: Prisma.TaskParticipantWhereInput | Prisma.TaskParticipantWhereInput[]
   taskId?: Prisma.IntFilter<"TaskParticipant"> | number
-  userId?: Prisma.StringFilter<"TaskParticipant"> | string
+  employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
@@ -213,7 +213,7 @@ export type TaskParticipantWhereInput = {
 
 export type TaskParticipantOrderByWithRelationInput = {
   taskId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
@@ -221,20 +221,20 @@ export type TaskParticipantOrderByWithRelationInput = {
 }
 
 export type TaskParticipantWhereUniqueInput = Prisma.AtLeast<{
-  taskId_userId_participantRole?: Prisma.TaskParticipantTaskIdUserIdParticipantRoleCompoundUniqueInput
+  taskId_employeeCode_participantRole?: Prisma.TaskParticipantTaskIdEmployeeCodeParticipantRoleCompoundUniqueInput
   AND?: Prisma.TaskParticipantWhereInput | Prisma.TaskParticipantWhereInput[]
   OR?: Prisma.TaskParticipantWhereInput[]
   NOT?: Prisma.TaskParticipantWhereInput | Prisma.TaskParticipantWhereInput[]
   taskId?: Prisma.IntFilter<"TaskParticipant"> | number
-  userId?: Prisma.StringFilter<"TaskParticipant"> | string
+  employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
-}, "taskId_userId_participantRole">
+}, "taskId_employeeCode_participantRole">
 
 export type TaskParticipantOrderByWithAggregationInput = {
   taskId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
   _count?: Prisma.TaskParticipantCountOrderByAggregateInput
@@ -249,13 +249,13 @@ export type TaskParticipantScalarWhereWithAggregatesInput = {
   OR?: Prisma.TaskParticipantScalarWhereWithAggregatesInput[]
   NOT?: Prisma.TaskParticipantScalarWhereWithAggregatesInput | Prisma.TaskParticipantScalarWhereWithAggregatesInput[]
   taskId?: Prisma.IntWithAggregatesFilter<"TaskParticipant"> | number
-  userId?: Prisma.StringWithAggregatesFilter<"TaskParticipant"> | string
+  employeeCode?: Prisma.StringWithAggregatesFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleWithAggregatesFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeWithAggregatesFilter<"TaskParticipant"> | Date | string
 }
 
 export type TaskParticipantCreateInput = {
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
   task: Prisma.TaskCreateNestedOneWithoutParticipantsInput
@@ -263,13 +263,13 @@ export type TaskParticipantCreateInput = {
 
 export type TaskParticipantUncheckedCreateInput = {
   taskId: number
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
 }
 
 export type TaskParticipantUpdateInput = {
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   task?: Prisma.TaskUpdateOneRequiredWithoutParticipantsNestedInput
@@ -277,27 +277,27 @@ export type TaskParticipantUpdateInput = {
 
 export type TaskParticipantUncheckedUpdateInput = {
   taskId?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TaskParticipantCreateManyInput = {
   taskId: number
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
 }
 
 export type TaskParticipantUpdateManyMutationInput = {
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TaskParticipantUncheckedUpdateManyInput = {
   taskId?: Prisma.IntFieldUpdateOperationsInput | number
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -318,15 +318,15 @@ export type TaskParticipantOrderByRelevanceInput = {
   search: string
 }
 
-export type TaskParticipantTaskIdUserIdParticipantRoleCompoundUniqueInput = {
+export type TaskParticipantTaskIdEmployeeCodeParticipantRoleCompoundUniqueInput = {
   taskId: number
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
 }
 
 export type TaskParticipantCountOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
 }
@@ -337,14 +337,14 @@ export type TaskParticipantAvgOrderByAggregateInput = {
 
 export type TaskParticipantMaxOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
 }
 
 export type TaskParticipantMinOrderByAggregateInput = {
   taskId?: Prisma.SortOrder
-  userId?: Prisma.SortOrder
+  employeeCode?: Prisma.SortOrder
   participantRole?: Prisma.SortOrder
   assignedAt?: Prisma.SortOrder
 }
@@ -400,13 +400,13 @@ export type EnumTaskRoleFieldUpdateOperationsInput = {
 }
 
 export type TaskParticipantCreateWithoutTaskInput = {
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
 }
 
 export type TaskParticipantUncheckedCreateWithoutTaskInput = {
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
 }
@@ -442,31 +442,31 @@ export type TaskParticipantScalarWhereInput = {
   OR?: Prisma.TaskParticipantScalarWhereInput[]
   NOT?: Prisma.TaskParticipantScalarWhereInput | Prisma.TaskParticipantScalarWhereInput[]
   taskId?: Prisma.IntFilter<"TaskParticipant"> | number
-  userId?: Prisma.StringFilter<"TaskParticipant"> | string
+  employeeCode?: Prisma.StringFilter<"TaskParticipant"> | string
   participantRole?: Prisma.EnumTaskRoleFilter<"TaskParticipant"> | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFilter<"TaskParticipant"> | Date | string
 }
 
 export type TaskParticipantCreateManyTaskInput = {
-  userId: string
+  employeeCode: string
   participantRole: $Enums.TaskRole
   assignedAt?: Date | string
 }
 
 export type TaskParticipantUpdateWithoutTaskInput = {
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TaskParticipantUncheckedUpdateWithoutTaskInput = {
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type TaskParticipantUncheckedUpdateManyWithoutTaskInput = {
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  employeeCode?: Prisma.StringFieldUpdateOperationsInput | string
   participantRole?: Prisma.EnumTaskRoleFieldUpdateOperationsInput | $Enums.TaskRole
   assignedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -475,7 +475,7 @@ export type TaskParticipantUncheckedUpdateManyWithoutTaskInput = {
 
 export type TaskParticipantSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   taskId?: boolean
-  userId?: boolean
+  employeeCode?: boolean
   participantRole?: boolean
   assignedAt?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
@@ -485,12 +485,12 @@ export type TaskParticipantSelect<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type TaskParticipantSelectScalar = {
   taskId?: boolean
-  userId?: boolean
+  employeeCode?: boolean
   participantRole?: boolean
   assignedAt?: boolean
 }
 
-export type TaskParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "userId" | "participantRole" | "assignedAt", ExtArgs["result"]["taskParticipant"]>
+export type TaskParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"taskId" | "employeeCode" | "participantRole" | "assignedAt", ExtArgs["result"]["taskParticipant"]>
 export type TaskParticipantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
 }
@@ -502,7 +502,7 @@ export type $TaskParticipantPayload<ExtArgs extends runtime.Types.Extensions.Int
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     taskId: number
-    userId: string
+    employeeCode: string
     participantRole: $Enums.TaskRole
     assignedAt: Date
   }, ExtArgs["result"]["taskParticipant"]>
@@ -876,7 +876,7 @@ export interface Prisma__TaskParticipantClient<T, Null = never, ExtArgs extends 
  */
 export interface TaskParticipantFieldRefs {
   readonly taskId: Prisma.FieldRef<"TaskParticipant", 'Int'>
-  readonly userId: Prisma.FieldRef<"TaskParticipant", 'String'>
+  readonly employeeCode: Prisma.FieldRef<"TaskParticipant", 'String'>
   readonly participantRole: Prisma.FieldRef<"TaskParticipant", 'TaskRole'>
   readonly assignedAt: Prisma.FieldRef<"TaskParticipant", 'DateTime'>
 }

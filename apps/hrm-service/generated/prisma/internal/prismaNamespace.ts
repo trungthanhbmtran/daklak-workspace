@@ -1282,8 +1282,7 @@ export const TaskScalarFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
-  creatorUserId: 'creatorUserId',
-  createdByEmployeeId: 'createdByEmployeeId',
+  creatorEmployeeCode: 'creatorEmployeeCode',
   baseScore: 'baseScore',
   weight: 'weight',
   scoringMethod: 'scoringMethod',
@@ -1307,7 +1306,7 @@ export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof Task
 
 export const TaskParticipantScalarFieldEnum = {
   taskId: 'taskId',
-  userId: 'userId',
+  employeeCode: 'employeeCode',
   participantRole: 'participantRole',
   assignedAt: 'assignedAt'
 } as const
@@ -1327,7 +1326,7 @@ export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[key
 export const TaskCommentScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
-  userId: 'userId',
+  employeeCode: 'employeeCode',
   content: 'content',
   isSystemMessage: 'isSystemMessage',
   createdAt: 'createdAt',
@@ -1510,8 +1509,7 @@ export const TaskOrderByRelevanceFieldEnum = {
   description: 'description',
   status: 'status',
   priority: 'priority',
-  creatorUserId: 'creatorUserId',
-  createdByEmployeeId: 'createdByEmployeeId',
+  creatorEmployeeCode: 'creatorEmployeeCode',
   scoringMethod: 'scoringMethod',
   workflowInstId: 'workflowInstId',
   rejectReason: 'rejectReason'
@@ -1521,14 +1519,14 @@ export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnu
 
 
 export const TaskParticipantOrderByRelevanceFieldEnum = {
-  userId: 'userId'
+  employeeCode: 'employeeCode'
 } as const
 
 export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
 
 
 export const TaskCommentOrderByRelevanceFieldEnum = {
-  userId: 'userId',
+  employeeCode: 'employeeCode',
   content: 'content'
 } as const
 

@@ -32,7 +32,7 @@ export class MasterPlansService {
           some: {
             participants: {
               some: {
-                userId: query.currentUserCode,
+                employeeCode: query.currentUserCode,
                 participantRole: { in: ['ASSIGNEE', 'OWNER'] }
               }
             }
@@ -60,10 +60,10 @@ export class MasterPlansService {
         let completedTasks = 0;
         const tasks = mp.tasks.map((t: any) => {
           if (t.status === 'DONE') completedTasks++;
-          const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId || 'UNASSIGNED';
+          const assigneeCode = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || 'UNASSIGNED';
           return {
             ...t,
-            assigneeId: assigneeId,
+            assigneeCode: assigneeCode,
             dueDate: t.dueDate?.toISOString() || '',
             completionDate: t.completionDate?.toISOString() || '',
             createdAt: t.createdAt?.toISOString() || '',
@@ -124,7 +124,7 @@ export class MasterPlansService {
         hasAccess = true;
       } else {
         const code = query.currentUserCode;
-        if (mp.tasks.some((t: any) => t.participants?.some((p: any) => p.userId === code))) {
+        if (mp.tasks.some((t: any) => t.participants?.some((p: any) => p.employeeCode === code))) {
           hasAccess = true;
         }
       }
@@ -137,10 +137,10 @@ export class MasterPlansService {
     let completedTasks = 0;
     const tasks = mp.tasks.map((t: any) => {
       if (t.status === 'DONE') completedTasks++;
-      const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId || 'UNASSIGNED';
+      const assigneeCode = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || 'UNASSIGNED';
       return {
         ...t,
-        assigneeId: assigneeId,
+        assigneeCode: assigneeCode,
         dueDate: t.dueDate?.toISOString() || '',
         completionDate: t.completionDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
@@ -213,8 +213,8 @@ export class MasterPlansService {
             planId: mp.id,
             participants: {
               create: [
-                { userId: 'UNASSIGNED', participantRole: 'ASSIGNEE' },
-                { userId: data.createdByCode || 'UNASSIGNED', participantRole: 'OWNER' }
+                { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' },
+                { employeeCode: data.createdByCode || 'UNASSIGNED', participantRole: 'OWNER' }
               ]
             }
           }
