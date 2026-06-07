@@ -30,10 +30,12 @@ export class MasterPlansService {
       authConditions.push({
         tasks: {
           some: {
-            OR: [
-              { assigneeId: query.currentUserCode },
-              { assignerCode: query.currentUserCode },
-            ]
+            participants: {
+              some: {
+                userId: query.currentUserCode,
+                participantRole: { in: ['ASSIGNEE', 'OWNER'] }
+              }
+            }
           }
         }
       });
@@ -200,22 +202,23 @@ export class MasterPlansService {
       }
 
       for (const task of data.tasks) {
-        taskData.push({
-          title: task.title,
-          description: task.description,
-          assigneeId: 'UNASSIGNED',
-          // Người tạo kế hoạch = người giao việc mặc định (sẽ được cập nhật khi assign thực tế)
-          assignerCode: data.createdByCode || 'UNASSIGNED',
-          status: 'TEMPLATE',
-          priority: 'MEDIUM',
-          weight: task.weight,
-          baseScore: task.targetValue,
-          planId: mp.id,
+        await this.prisma.task.create({
+          data: {
+            title: task.title,
+            description: task.description,
+            status: 'TEMPLATE',
+            priority: 'MEDIUM',
+            weight: task.weight,
+            baseScore: task.targetValue,
+            planId: mp.id,
+            participants: {
+              create: [
+                { userId: 'UNASSIGNED', participantRole: 'ASSIGNEE' },
+                { userId: data.createdByCode || 'UNASSIGNED', participantRole: 'OWNER' }
+              ]
+            }
+          }
         });
-      }
-
-      if (taskData.length > 0) {
-        await this.prisma.task.createMany({ data: taskData });
       }
     }
 
