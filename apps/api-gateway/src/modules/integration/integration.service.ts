@@ -1,6 +1,7 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Prisma } from '@generated/client';
 import { PrismaService } from '../../core/prisma/prisma.service';
 
 @Injectable()
@@ -26,7 +27,7 @@ export class IntegrationService {
     return path.join(cwd, '..', '..', 'nginx', 'conf.d', 'default.conf');
   }
 
-  async applyGatewayConfig(id: string): Promise<boolean> {
+  async applyGatewayConfig(id: string) {
     const config = await this.prisma.gatewayConfig.findUnique({
       where: { id },
       include: { routes: true },

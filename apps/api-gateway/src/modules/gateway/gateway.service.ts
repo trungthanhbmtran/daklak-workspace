@@ -4,7 +4,7 @@ import { Prisma } from '@generated/client';
 
 @Injectable()
 export class GatewayService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // ==========================================
   // GATEWAY CONFIG
