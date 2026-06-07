@@ -5,11 +5,11 @@ import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 @Injectable()
 export class PrismaService
   extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy
-{
+  implements OnModuleInit, OnModuleDestroy {
   constructor() {
     const url = process.env.DATABASE_URL as string;
-    const adapter = new PrismaMariaDb(url);
+    // In production, ensure DATABASE_URL is set in docker-compose
+    const adapter = new PrismaMariaDb(url || 'mysql://root:root@localhost:3306/daklak_db');
     super({ adapter });
   }
 

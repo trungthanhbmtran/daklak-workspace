@@ -33,7 +33,7 @@ COPY --chown=app:app apps/api-gateway/package*.json ./
 RUN npm ci --omit=dev
 
 COPY --chown=app:app --from=builder /app/dist ./dist
-COPY --chown=app:app --from=builder /app/generated/client ./generated/client
+COPY --chown=app:app --from=builder /app/generated/client ./dist/generated/client
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 ENV PROTO_PATH=/app/protos

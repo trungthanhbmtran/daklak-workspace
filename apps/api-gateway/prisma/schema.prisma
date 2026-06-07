@@ -5,6 +5,7 @@ generator client {
   provider      = "prisma-client-js"
   output        = "../generated/client"
   binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+  engineType    = "library"
 }
 
 datasource db {
