@@ -2436,7 +2436,7 @@ async function main() {
       color: '#8b5cf6',
       order: 5,
       res: 'WORKFLOW',
-      route: '/hub',
+      route: '/services/integration',
     }
   ];
 
