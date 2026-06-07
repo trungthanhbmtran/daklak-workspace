@@ -493,6 +493,50 @@ export class UsersService implements OnModuleInit {
     };
   }
 
+  /**
+   * Truy vấn thông tin của nhiều user cùng lúc dựa vào mảng ID (dùng cho API Gateway aggregate data).
+   */
+  async getUsersByIds(data: { ids: number[] }) {
+    if (!data.ids || data.ids.length === 0) {
+      return { data: [] };
+    }
+    const validIds = data.ids.filter((id) => id > 0);
+    if (validIds.length === 0) {
+      return { data: [] };
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: { id: { in: validIds } },
+      include: {
+        roles: true,
+        jobPositions: {
+          include: { unit: true, jobTitle: true },
+          orderBy: [{ isPrimary: 'desc' }],
+        },
+      },
+    });
+
+    const results = users.map((u) => {
+      const base = this.toUserResponse(u);
+      const firstPos = u.jobPositions?.[0];
+      const roles = u.roles ?? [];
+      const roleNames = roles.map(
+        (r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
+      );
+      return {
+        ...base,
+        roleNames,
+        role_names: roleNames,
+        unitName: firstPos?.unit?.name ?? '',
+        unit_name: firstPos?.unit?.name ?? '',
+        jobTitleName: firstPos?.jobTitle?.name ?? '',
+        job_title_name: firstPos?.jobTitle?.name ?? '',
+      };
+    });
+
+    return { data: results };
+  }
+
   /** Khóa/mở tài khoản (isActive = false/true) */
   async setUserActive(data: { userId: number; isActive: boolean }) {
     const user = await this.prisma.user.findUnique({

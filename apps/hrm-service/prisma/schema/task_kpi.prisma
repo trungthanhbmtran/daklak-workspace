@@ -1,70 +1,84 @@
 model Task {
   id             Int       @id @default(autoincrement())
+  parentId       Int?      @map("parent_id")
   title          String    @map("title")
   description    String?   @db.Text
   
-  // Decoupled Identity: Dùng employee_code (String) làm Integration Key thay vì khóa ngoại cứng (Int)
-  assigneeCode   String    @map("assignee_code") 
-  assignerCode   String    @map("assigner_code")
+  status         String    @default("TODO")
+  priority       String    @default("MEDIUM")
   
-  departmentId   Int?      @map("department_id") // ID Phòng xử lý (Integration Key from user-service)
+  // Auditing
+  creatorUserId  String    @default("SYSTEM") @map("creator_user_id")
+  createdByEmployeeId String @default("SYSTEM") @map("created_by_employee_id")
   
-  status         String    @default("TODO") // DRAFT, TODO, IN_PROGRESS, REVIEWING, DONE, OVERDUE, CANCELLED
-  priority       String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
-  
-  // KPI Scoring Parameters
+  // Scoring
   baseScore      Float?    @map("base_score")
   weight         Float?    @map("weight")
-  scoringMethod  String    @default("MANUAL") @map("scoring_method") // MANUAL, AUTO_DEADLINE, AUTO_RESULT
+  scoringMethod  String    @default("MANUAL") @map("scoring_method")
   bonusPerDay    Float?    @map("bonus_per_day")
   penaltyPerDay  Float?    @map("penalty_per_day")
-  supervisorCode String?   @map("supervisor_code")
-
-  // Document-driven Workflow: Lưu danh sách ID văn bản liên quan (Evidence/Source)
-  documentIds    Json?     @map("document_ids") // Lưu array of strings/UUIDs
+  
+  documentIds    Json?     @map("document_ids")
   workflowInstId String?   @map("workflow_instance_id")
-
+  metadata       Json?     @map("metadata")
+  
   startDate      DateTime? @map("start_date") @db.Date
   dueDate        DateTime? @map("due_date") @db.Date
-  completionDate DateTime? @map("completion_date")
+  completedAt    DateTime? @map("completed_at")
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
   planId         Int?      @map("plan_id")
   plan           MasterPlan? @relation(fields: [planId], references: [id])
 
-  // Tính năng quản lý theo nhóm (Sub-task)
-  parentId       Int?      @map("parent_id")
-  parent         Task?     @relation("SubTasks", fields: [parentId], references: [id])
-  subTasks       Task[]    @relation("SubTasks")
-
-  rootTaskId     Int?      @map("root_task_id")
-  rootTask       Task?     @relation("RootTask", fields: [rootTaskId], references: [id])
-  descendants    Task[]    @relation("RootTask")
-
   progress       Float     @default(0) @map("progress")
-
-  // Tính năng Trả lại việc
   rejectReason   String?   @db.Text @map("reject_reason")
 
-  // Quan hệ tới bảng Employee được thực hiện lỏng lẻo qua employeeCode
-  assignee       Employee? @relation("TaskAssignee", fields: [assigneeCode], references: [employeeCode])
-  assigner       Employee? @relation("TaskAssigner", fields: [assignerCode], references: [employeeCode])
-  supervisor     Employee? @relation("TaskSupervisor", fields: [supervisorCode], references: [employeeCode])
-
-  // Tính năng Phối hợp: danh sách employeeCode của người tham gia phối hợp (không phải người chịu trách nhiệm chính)
-  // Lưu dạng JSON string vì MySQL không hỗ trợ native array type
-  coAssigneeCodesJson String?  @map("co_assignee_codes") @db.Text
-
+  // Quan hệ DDD mới
+  participants   TaskParticipant[]
+  ancestors      TaskClosure[] @relation("TaskClosureDescendant")
+  descendants    TaskClosure[] @relation("TaskClosureAncestor")
   comments       TaskComment[]
 
   @@map("tasks")
 }
 
+enum TaskRole {
+  OWNER
+  ASSIGNEE
+  APPROVER
+  COORDINATOR
+  FOLLOWER
+}
+
+model TaskParticipant {
+  taskId          Int      @map("task_id")
+  userId          String   @map("user_id")
+  participantRole TaskRole @map("participant_role")
+  assignedAt      DateTime @default(now()) @map("assigned_at")
+
+  task            Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId, participantRole])
+  @@map("task_participants")
+}
+
+model TaskClosure {
+  ancestorId    Int      @map("ancestor_id")
+  descendantId  Int      @map("descendant_id")
+  depth         Int      @map("depth")
+
+  ancestor      Task     @relation("TaskClosureAncestor", fields: [ancestorId], references: [id], onDelete: Cascade)
+  descendant    Task     @relation("TaskClosureDescendant", fields: [descendantId], references: [id], onDelete: Cascade)
+
+  @@id([ancestorId, descendantId])
+  @@map("task_closure")
+}
+
 model TaskComment {
   id              Int       @id @default(autoincrement())
   taskId          Int       @map("task_id")
-  authorCode      String?   @map("author_code")
+  userId          String?   @map("user_id")
   content         String    @db.Text
   isSystemMessage Boolean   @default(false) @map("is_system_message")
   
@@ -72,7 +86,6 @@ model TaskComment {
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
   task            Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  author          Employee? @relation("CommentAuthor", fields: [authorCode], references: [employeeCode])
 
   @@map("task_comments")
 }

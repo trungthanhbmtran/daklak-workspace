@@ -163,6 +163,95 @@ async function main() {
       nameEn: 'Locked',
     },
 
+    // --- TASK ROLES ---
+    {
+      group: 'TASK_ROLE',
+      code: 'ASSIGNEE',
+      order: 1,
+      nameVi: 'Người xử lý chính',
+      nameEn: 'Assignee',
+    },
+    {
+      group: 'TASK_ROLE',
+      code: 'OWNER',
+      order: 2,
+      nameVi: 'Người giao việc',
+      nameEn: 'Owner',
+    },
+    {
+      group: 'TASK_ROLE',
+      code: 'APPROVER',
+      order: 3,
+      nameVi: 'Người theo dõi/Chỉ đạo',
+      nameEn: 'Approver',
+    },
+    {
+      group: 'TASK_ROLE',
+      code: 'COORDINATOR',
+      order: 4,
+      nameVi: 'Người phối hợp',
+      nameEn: 'Coordinator',
+    },
+
+    // --- TASK STATUS ---
+    {
+      group: 'TASK_STATUS',
+      code: 'UNASSIGNED',
+      order: 1,
+      nameVi: 'Chưa giao',
+      nameEn: 'Unassigned',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'PENDING',
+      order: 2,
+      nameVi: 'Chờ xử lý',
+      nameEn: 'Pending',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'PROCESSING',
+      order: 3,
+      nameVi: 'Đang xử lý',
+      nameEn: 'Processing',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'DONE',
+      order: 4,
+      nameVi: 'Hoàn thành',
+      nameEn: 'Done',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'REJECTED',
+      order: 5,
+      nameVi: 'Từ chối',
+      nameEn: 'Rejected',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'RETURNED',
+      order: 6,
+      nameVi: 'Trả lại (Yêu cầu làm lại)',
+      nameEn: 'Returned',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'CANCELED',
+      order: 7,
+      nameVi: 'Hủy bỏ',
+      nameEn: 'Canceled',
+    },
+    {
+      group: 'TASK_STATUS',
+      code: 'OVERDUE',
+      order: 8,
+      nameVi: 'Quá hạn',
+      nameEn: 'Overdue',
+    },
+
+
     {
       group: 'ACTION_LOG',
       code: 'LOGIN',

@@ -22,6 +22,8 @@ interface TaskDetailDialogProps {
   onRefetch: () => void;
   onSmartAssign: (task: any) => void;
   onSelectTask?: (task: any) => void;
+  taskStatusCategories?: any[];
+  taskRoleCategories?: any[];
 }
 
 /**
@@ -39,6 +41,8 @@ export function TaskDetailDialog({
   onRefetch,
   onSmartAssign,
   onSelectTask,
+  taskStatusCategories = [],
+  taskRoleCategories = [],
 }: TaskDetailDialogProps) {
   const [activeTask, setActiveTask] = React.useState(task);
 
@@ -95,7 +99,7 @@ export function TaskDetailDialog({
             {/* ── TOP HEADER ── */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20 gap-4">
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="scale-90 origin-left shrink-0">{getStatusBadge(activeTask.status || 'TODO')}</div>
+                <div className="scale-90 origin-left shrink-0">{getStatusBadge(activeTask.status || 'TODO', taskStatusCategories)}</div>
                 <span className={`hidden sm:flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-widest border border-current ${getPriorityColor(activeTask.priority)} bg-white dark:bg-slate-800`}>
                   <div className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" />
                   {getPriorityName(activeTask.priority, priorities)}
@@ -407,8 +411,14 @@ export function TaskDetailDialog({
                             const sc: Record<string, { dot: string; badge: string; label: string }> = {
                               DONE: { dot: 'bg-emerald-500', badge: 'bg-emerald-100 text-emerald-700', label: 'Xong' },
                               IN_PROGRESS: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
+                              PROCESSING: { dot: 'bg-amber-500', badge: 'bg-amber-100 text-amber-700', label: 'Đang xử lý' },
                               TODO: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Chờ' },
+                              PENDING: { dot: 'bg-blue-500', badge: 'bg-blue-100 text-blue-700', label: 'Chờ' },
                               OVERDUE: { dot: 'bg-rose-500', badge: 'bg-rose-100 text-rose-700', label: 'Trễ' },
+                              RETURNED: { dot: 'bg-orange-500', badge: 'bg-orange-100 text-orange-700', label: 'Trả lại' },
+                              REJECTED: { dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700', label: 'Từ chối' },
+                              CANCELED: { dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700', label: 'Hủy bỏ' },
+                              UNASSIGNED: { dot: 'bg-slate-500', badge: 'bg-slate-100 text-slate-700', label: 'Chưa giao' },
                             };
                             const color = sc[node.status] || { dot: 'bg-slate-400', badge: 'bg-slate-100 text-slate-600', label: node.status };
 

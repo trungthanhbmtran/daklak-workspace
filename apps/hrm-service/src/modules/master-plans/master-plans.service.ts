@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { TaskRole } from '@generated/prisma/client';
 import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
@@ -30,7 +31,7 @@ export class MasterPlansService {
         tasks: {
           some: {
             OR: [
-              { assigneeCode: query.currentUserCode },
+              { assigneeId: query.currentUserCode },
               { assignerCode: query.currentUserCode },
             ]
           }
@@ -45,7 +46,7 @@ export class MasterPlansService {
       orderBy: { createdAt: 'desc' },
       include: {
         tasks: {
-          include: { assignee: true }
+          include: { participants: true }
         },
       }
     });
@@ -57,9 +58,10 @@ export class MasterPlansService {
         let completedTasks = 0;
         const tasks = mp.tasks.map((t: any) => {
           if (t.status === 'DONE') completedTasks++;
+          const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId || 'UNASSIGNED';
           return {
             ...t,
-            assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
+            assigneeId: assigneeId,
             dueDate: t.dueDate?.toISOString() || '',
             completionDate: t.completionDate?.toISOString() || '',
             createdAt: t.createdAt?.toISOString() || '',
@@ -104,7 +106,7 @@ export class MasterPlansService {
       where: { id },
       include: {
         tasks: {
-          include: { assignee: true }
+          include: { participants: true }
         }
       }
     });
@@ -120,7 +122,7 @@ export class MasterPlansService {
         hasAccess = true;
       } else {
         const code = query.currentUserCode;
-        if (mp.tasks.some(t => t.assigneeCode === code || t.assignerCode === code)) {
+        if (mp.tasks.some((t: any) => t.participants?.some((p: any) => p.userId === code))) {
           hasAccess = true;
         }
       }
@@ -133,9 +135,10 @@ export class MasterPlansService {
     let completedTasks = 0;
     const tasks = mp.tasks.map((t: any) => {
       if (t.status === 'DONE') completedTasks++;
+      const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId || 'UNASSIGNED';
       return {
         ...t,
-        assigneeName: t.assignee ? t.assignee.fullName : t.assigneeCode,
+        assigneeId: assigneeId,
         dueDate: t.dueDate?.toISOString() || '',
         completionDate: t.completionDate?.toISOString() || '',
         createdAt: t.createdAt?.toISOString() || '',
@@ -188,7 +191,7 @@ export class MasterPlansService {
             lastname: 'thống',
             fullName: 'Hệ thống',
             email: 'unassigned@system.local',
-            status: 'inactive',
+            employmentStatus: 'inactive',
             departmentId: 0,
             jobTitleId: 0,
             startDate: new Date()
@@ -200,7 +203,7 @@ export class MasterPlansService {
         taskData.push({
           title: task.title,
           description: task.description,
-          assigneeCode: 'UNASSIGNED',
+          assigneeId: 'UNASSIGNED',
           // Người tạo kế hoạch = người giao việc mặc định (sẽ được cập nhật khi assign thực tế)
           assignerCode: data.createdByCode || 'UNASSIGNED',
           status: 'TEMPLATE',

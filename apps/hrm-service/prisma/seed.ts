@@ -132,7 +132,6 @@ async function main() {
         civilServantRankId: (e as any).civilServantRankId || null,
         partyTitleId: (e as any).partyTitleId || null,
         startDate,
-        status: 'active',
       },
     });
   }

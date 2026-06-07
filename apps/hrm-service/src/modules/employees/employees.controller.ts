@@ -23,7 +23,7 @@ export class EmployeesController {
       civilServantRankId: data.civilServantRankId ?? 0,
       partyTitleId: data.partyTitleId ?? 0,
       startDate: data.startDate,
-      status: data.status,
+      employmentStatus: data.status,
       address: data.address,
       avatar: data.avatar,
     });

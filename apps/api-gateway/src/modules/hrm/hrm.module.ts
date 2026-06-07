@@ -15,6 +15,7 @@ import { RankQuotasController } from './rank-quotas.controller';
 
 @Module({
   imports: [
+    registerGrpcService(MICROSERVICES.USER),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.EMPLOYEE),
     registerGrpcService(MICROSERVICES.TASK),

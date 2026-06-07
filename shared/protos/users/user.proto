@@ -5,6 +5,7 @@ package user;
 service UserService {
   rpc CreateUser (CreateUserRequest) returns (UserResponse);
   rpc FindOne (FindOneRequest) returns (UserResponse);
+  rpc GetUsersByIds (GetUsersByIdsRequest) returns (ListUsersResponse);
   rpc ListUsers (ListUsersRequest) returns (ListUsersResponse);
   rpc AssignPosition (AssignPositionRequest) returns (AssignPositionResponse);
   // Khóa/mở tài khoản (is_active = false/true)
@@ -38,6 +39,10 @@ message FindOneRequest {
   int32 id = 1;
 }
 
+message GetUsersByIdsRequest {
+  repeated int32 ids = 1;
+}
+
 message ListUsersRequest {
   // optional: phân trang sau này
   int32 skip = 1;
@@ -66,6 +71,8 @@ message UserResponse {
   string employee_code = 9;  // Mã số điện tử từ HRM
   repeated string role_names = 10;  // Tên vai trò được gán (hiển thị chi tiết user)
   repeated UserPolicy policies = 11;  // Chính sách hiệu lực (từ Permission của các Role)
+  string unit_name = 12;
+  string job_title_name = 13;
 }
 
 message SetUserActiveRequest {

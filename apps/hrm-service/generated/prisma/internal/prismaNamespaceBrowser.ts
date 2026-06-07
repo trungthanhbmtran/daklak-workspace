@@ -53,6 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  TaskParticipant: 'TaskParticipant',
+  TaskClosure: 'TaskClosure',
   TaskComment: 'TaskComment',
   MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
@@ -81,6 +83,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const EmployeeScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   firstname: 'firstname',
   lastname: 'lastname',
   fullName: 'fullName',
@@ -90,7 +93,9 @@ export const EmployeeScalarFieldEnum = {
   gender: 'gender',
   birthday: 'birthday',
   identityCard: 'identityCard',
-  status: 'status',
+  employmentType: 'employmentType',
+  employmentStatus: 'employmentStatus',
+  contractInfo: 'contractInfo',
   address: 'address',
   avatar: 'avatar',
   departmentId: 'departmentId',
@@ -107,41 +112,57 @@ export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typ
 
 export const TaskScalarFieldEnum = {
   id: 'id',
+  parentId: 'parentId',
   title: 'title',
   description: 'description',
-  assigneeCode: 'assigneeCode',
-  assignerCode: 'assignerCode',
-  departmentId: 'departmentId',
   status: 'status',
   priority: 'priority',
+  creatorUserId: 'creatorUserId',
+  createdByEmployeeId: 'createdByEmployeeId',
   baseScore: 'baseScore',
   weight: 'weight',
   scoringMethod: 'scoringMethod',
   bonusPerDay: 'bonusPerDay',
   penaltyPerDay: 'penaltyPerDay',
-  supervisorCode: 'supervisorCode',
   documentIds: 'documentIds',
   workflowInstId: 'workflowInstId',
+  metadata: 'metadata',
   startDate: 'startDate',
   dueDate: 'dueDate',
-  completionDate: 'completionDate',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   planId: 'planId',
-  parentId: 'parentId',
-  rootTaskId: 'rootTaskId',
   progress: 'progress',
-  rejectReason: 'rejectReason',
-  coAssigneeCodesJson: 'coAssigneeCodesJson'
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
+export const TaskParticipantScalarFieldEnum = {
+  taskId: 'taskId',
+  userId: 'userId',
+  participantRole: 'participantRole',
+  assignedAt: 'assignedAt'
+} as const
+
+export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]
+
+
+export const TaskClosureScalarFieldEnum = {
+  ancestorId: 'ancestorId',
+  descendantId: 'descendantId',
+  depth: 'depth'
+} as const
+
+export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[keyof typeof TaskClosureScalarFieldEnum]
+
+
 export const TaskCommentScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
-  authorCode: 'authorCode',
+  userId: 'userId',
   content: 'content',
   isSystemMessage: 'isSystemMessage',
   createdAt: 'createdAt',
@@ -275,31 +296,6 @@ export const NullableJsonNullValueInput = {
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
-export const EmployeeOrderByRelevanceFieldEnum = {
-  firstname: 'firstname',
-  lastname: 'lastname',
-  fullName: 'fullName',
-  employeeCode: 'employeeCode',
-  email: 'email',
-  phone: 'phone',
-  gender: 'gender',
-  identityCard: 'identityCard',
-  status: 'status',
-  address: 'address',
-  avatar: 'avatar'
-} as const
-
-export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -317,25 +313,57 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const EmployeeOrderByRelevanceFieldEnum = {
+  userId: 'userId',
+  firstname: 'firstname',
+  lastname: 'lastname',
+  fullName: 'fullName',
+  employeeCode: 'employeeCode',
+  email: 'email',
+  phone: 'phone',
+  gender: 'gender',
+  identityCard: 'identityCard',
+  employmentType: 'employmentType',
+  employmentStatus: 'employmentStatus',
+  address: 'address',
+  avatar: 'avatar'
+} as const
+
+export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
+
+
 export const TaskOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
-  assigneeCode: 'assigneeCode',
-  assignerCode: 'assignerCode',
   status: 'status',
   priority: 'priority',
+  creatorUserId: 'creatorUserId',
+  createdByEmployeeId: 'createdByEmployeeId',
   scoringMethod: 'scoringMethod',
-  supervisorCode: 'supervisorCode',
   workflowInstId: 'workflowInstId',
-  rejectReason: 'rejectReason',
-  coAssigneeCodesJson: 'coAssigneeCodesJson'
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
 
 
+export const TaskParticipantOrderByRelevanceFieldEnum = {
+  userId: 'userId'
+} as const
+
+export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
+
+
 export const TaskCommentOrderByRelevanceFieldEnum = {
-  authorCode: 'authorCode',
+  userId: 'userId',
   content: 'content'
 } as const
 

@@ -10,6 +10,7 @@ import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } 
 interface TaskGridProps {
   tasks: any[];
   priorities: any[];
+  taskStatusCategories?: any[];
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
   /** Prefetch task detail khi hover card → dialog mở tức thì */
@@ -23,6 +24,7 @@ interface TaskGridProps {
 export const TaskGrid = memo(function TaskGrid({
   tasks,
   priorities,
+  taskStatusCategories,
   onSelectTask,
   onSmartAssign,
   onHoverTask,
@@ -54,7 +56,7 @@ export const TaskGrid = memo(function TaskGrid({
                 {/* Header row */}
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex flex-wrap gap-2 items-center max-w-[70%]">
-                    {getStatusBadge(task.status || 'TODO')}
+                    {getStatusBadge(task.status || 'TODO', taskStatusCategories)}
                     {task.plan && (
                       <Badge variant="outline" className="bg-indigo-50 text-indigo-700 border-indigo-200 text-[10px] px-1.5 font-bold flex items-center gap-1 max-w-full">
                         <Target className="w-3 h-3 shrink-0" />

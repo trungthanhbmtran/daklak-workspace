@@ -1,6 +1,9 @@
 // Nhân viên HRM – departmentId, jobTitleId tham chiếu sang user-service (OrganizationUnit, JobTitle)
 model Employee {
   id           Int      @id @default(autoincrement())
+  // Thêm user_id theo chuẩn DDD (Tham chiếu sang user-service)
+  userId       String?  @map("user_id")
+
   firstname    String   @map("firstname")
   lastname     String   @map("lastname")
   fullName     String   @map("full_name")
@@ -10,24 +13,29 @@ model Employee {
   gender       String?  @default("male")
   birthday     DateTime? @db.Date
   identityCard String?  @map("identity_card")
-  status       String   @default("active")
+  
+  // Employment information
+  employmentType   String? @map("employment_type")
+  employmentStatus String  @default("active") @map("employment_status")
+  contractInfo     Json?   @map("contract_information")
+  
   address      String?  @db.LongText
   avatar       String?  @db.Text
-  departmentId Int      @map("department_id")  // ID đơn vị trong user-service (OrganizationUnit)
-  jobTitleId   Int      @map("job_title_id")   // ID chức danh trong user-service (JobTitle)
+  
+  // Lưu dưới dạng Projection (Read Model) ID, không lấy tên từ đây
+  departmentId Int?     @map("department_id") 
+  jobTitleId   Int?     @map("job_title_id")   
   civilServantRankId Int? @map("civil_servant_rank_id")
   partyTitleId       Int? @map("party_title_id")
   startDate    DateTime @db.Date @map("start_date")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  // Relations
-  tasksAssigned     Task[] @relation("TaskAssigner")
-  tasksReceived     Task[] @relation("TaskAssignee")
-  tasksSupervised   Task[] @relation("TaskSupervisor")
+  // Relations (Đã gỡ bỏ các relation trực tiếp với Task cũ)
   kpiEvaluations    KpiEvaluation[] @relation("KpiEmployee")
   kpiReviews        KpiEvaluation[] @relation("KpiReviewer")
-  taskComments      TaskComment[]   @relation("CommentAuthor")
+  // Task Comments relation updated/removed
+  // taskComments      TaskComment[]   @relation("CommentAuthor")
 
   @@map("employees")
 }

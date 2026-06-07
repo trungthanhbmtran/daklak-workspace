@@ -18,6 +18,7 @@ interface TaskToolbarProps {
   onStatusChange: (v: string) => void;
   onPriorityChange: (v: string) => void;
   onViewChange: (v: 'grid' | 'list') => void;
+  taskStatusCategories?: any[];
 }
 
 /**
@@ -33,6 +34,7 @@ export const TaskToolbar = memo(function TaskToolbar({
   onStatusChange,
   onPriorityChange,
   onViewChange,
+  taskStatusCategories = [],
 }: TaskToolbarProps) {
   return (
     <div className="relative flex flex-col xl:flex-row justify-between items-center gap-4 mb-2">
@@ -77,11 +79,20 @@ export const TaskToolbar = memo(function TaskToolbar({
               </div>
             </SelectTrigger>
             <SelectContent className="rounded-xl border-slate-200 shadow-lg p-1">
-              <SelectItem value="ALL"         className="rounded-lg font-semibold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
-              <SelectItem value="TODO"        className="rounded-lg font-semibold py-2.5 cursor-pointer text-blue-600 focus:bg-blue-50">Cần làm</SelectItem>
-              <SelectItem value="IN_PROGRESS" className="rounded-lg font-semibold py-2.5 cursor-pointer text-amber-600 focus:bg-amber-50">Đang xử lý</SelectItem>
-              <SelectItem value="DONE"        className="rounded-lg font-semibold py-2.5 cursor-pointer text-emerald-600 focus:bg-emerald-50">Hoàn thành</SelectItem>
-              <SelectItem value="OVERDUE"     className="rounded-lg font-semibold py-2.5 cursor-pointer text-rose-600 focus:bg-rose-50">Quá hạn</SelectItem>
+              <SelectItem value="ALL" className="rounded-lg font-semibold py-2.5 cursor-pointer">Tất cả trạng thái</SelectItem>
+              {taskStatusCategories.map((c: any) => {
+                let colorClass = "text-slate-600 focus:bg-slate-50 dark:text-slate-300 dark:focus:bg-slate-800";
+                if (c.code === 'DONE') colorClass = "text-emerald-600 focus:bg-emerald-50 dark:text-emerald-400 dark:focus:bg-emerald-900/20";
+                else if (c.code === 'PROCESSING' || c.code === 'IN_PROGRESS') colorClass = "text-amber-600 focus:bg-amber-50 dark:text-amber-400 dark:focus:bg-amber-900/20";
+                else if (c.code === 'PENDING' || c.code === 'TODO' || c.code === 'UNASSIGNED') colorClass = "text-blue-600 focus:bg-blue-50 dark:text-blue-400 dark:focus:bg-blue-900/20";
+                else if (c.code === 'OVERDUE') colorClass = "text-rose-600 focus:bg-rose-50 dark:text-rose-400 dark:focus:bg-rose-900/20";
+
+                return (
+                  <SelectItem key={c.code} value={c.code} className={`rounded-lg font-semibold py-2.5 cursor-pointer ${colorClass}`}>
+                    {c.nameVi || c.name || c.code}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>

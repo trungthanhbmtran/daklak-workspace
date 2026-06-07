@@ -17,8 +17,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string }) {
-    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode);
+  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorId?: string }) {
+    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorId);
   }
 
   @GrpcMethod('TaskService', 'UpdateTask')
@@ -28,17 +28,17 @@ export class TasksController {
 
   @GrpcMethod('TaskService', 'GetTask')
   getTask(data: any) {
-    return this.tasksService.getTask(data);
+    return this.tasksService.getTask(data.id, data);
   }
 
   @GrpcMethod('TaskService', 'BreakdownTask')
   breakdownTask(data: any) {
-    return this.tasksService.breakdownTask(data);
+    return this.tasksService.breakdownTask(data.id, data);
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskProgress')
-  updateTaskProgress(data: { id: number; progress: number; actorCode?: string }) {
-    return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorCode);
+  updateTaskProgress(data: { id: number; progress: number; actorId?: string }) {
+    return this.tasksService.updateTaskProgress(data.id, data.progress, data.actorId);
   }
 
   @GrpcMethod('TaskService', 'RecommendAssignees')
@@ -47,27 +47,27 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: { id: number; assigneeCode: string; coAssigneeCodes?: string[]; departmentId?: number; assignerCode?: string }) {
-    return this.tasksService.assignTask(data.id, data.assigneeCode, data.coAssigneeCodes, data.departmentId, data.assignerCode);
+  assignTask(data: { id: number; assigneeId: string; coAssigneeIds?: string[]; departmentId?: number; assignerId?: string }) {
+    return this.tasksService.assignTask(data.id, data.assigneeId, data.coAssigneeIds, data.departmentId, data.assignerId);
   }
 
   @GrpcMethod('TaskService', 'AddComment')
   addComment(data: any) {
-    return this.tasksService.addComment(data);
+    return this.tasksService.addComment(data.taskId || data.id, data);
   }
 
   @GrpcMethod('TaskService', 'GetComments')
   getComments(data: any) {
-    return this.tasksService.getComments(data);
+    return this.tasksService.getComments(data.taskId || data.id, data);
   }
 
   @GrpcMethod('TaskService', 'GetSubTasks')
   getSubTasks(data: any) {
-    return this.tasksService.getSubTasks(data);
+    return this.tasksService.getSubTasks(data.id, data);
   }
 
   @GrpcMethod('TaskService', 'RequestCoordination')
-  requestCoordination(data: { taskId: number; requesterCode: string; message?: string; leadCode?: string; coordinatorCodes?: string[] }) {
-    return this.tasksService.requestCoordination(data);
+  requestCoordination(data: { taskId: number; requesterId: string; message?: string; leadId?: string; coordinatorIds?: string[] }) {
+    return this.tasksService.requestCoordination(data.taskId, data);
   }
 }

@@ -29,12 +29,17 @@ function flattenTree(nodes: any[], prefix = '', depth = 0): MatrixRow[] {
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
   TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3.5 h-3.5" />, cls: 'text-slate-500' },
+  UNASSIGNED: { label: 'Chưa phân công', icon: <Circle className="w-3.5 h-3.5" />, cls: 'text-slate-500' },
   TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-blue-600' },
+  PENDING: { label: 'Chờ thực hiện', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-blue-600' },
   IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-amber-600' },
+  PROCESSING: { label: 'Đang xử lý', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-amber-600' },
   REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3.5 h-3.5" />, cls: 'text-violet-600' },
   DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3.5 h-3.5" />, cls: 'text-emerald-600' },
   OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-red-600' },
   RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3.5 h-3.5" />, cls: 'text-orange-600' },
+  REJECTED: { label: 'Từ chối', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-slate-600' },
+  CANCELED: { label: 'Hủy bỏ', icon: <AlertTriangle className="w-3.5 h-3.5" />, cls: 'text-slate-600' },
 };
 
 // Row background theo depth
@@ -98,7 +103,7 @@ export function PlanExecutionMatrix({ tasks, planTitle, isLoading }: PlanExecuti
     const total = rows.length;
     const done = rows.filter(r => r.task.status === 'DONE').length;
     const overdue = rows.filter(r => r.task.status === 'OVERDUE').length;
-    const inProgress = rows.filter(r => r.task.status === 'IN_PROGRESS').length;
+    const inProgress = rows.filter(r => r.task.status === 'IN_PROGRESS' || r.task.status === 'PROCESSING').length;
     return { total, done, overdue, inProgress, pct: total > 0 ? Math.round((done / total) * 100) : 0 };
   }, [rows]);
 

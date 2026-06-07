@@ -20,11 +20,11 @@ export class EmployeesService {
       gender: string | null;
       birthday: Date | null;
       identityCard: string | null;
-      status: string;
+      employmentStatus: string;
       address: string | null;
       avatar: string | null;
-      departmentId: number;
-      jobTitleId: number;
+      departmentId: number | null;
+      jobTitleId: number | null;
       civilServantRankId?: number | null;
       partyTitleId?: number | null;
       startDate: Date;
@@ -43,11 +43,10 @@ export class EmployeesService {
       gender: row.gender ?? '',
       birthday: row.birthday ? row.birthday.toISOString().slice(0, 10) : '',
       identityCard: row.identityCard ?? '',
-      status: row.status,
       address: row.address ?? '',
       avatar: row.avatar ?? '',
-      departmentId: row.departmentId,
-      jobTitleId: row.jobTitleId,
+      departmentId: row.departmentId ?? 0,
+      jobTitleId: row.jobTitleId ?? 0,
       civilServantRankId: row.civilServantRankId ?? 0,
       partyTitleId: row.partyTitleId ?? 0,
       startDate: row.startDate.toISOString().slice(0, 10),
@@ -84,7 +83,7 @@ export class EmployeesService {
     civilServantRankId?: number;
     partyTitleId?: number;
     startDate?: string;
-    status?: string;
+    employmentStatus?: string;
     address?: string;
     avatar?: string;
   }) {
@@ -110,7 +109,6 @@ export class EmployeesService {
         gender: data.gender ?? 'male',
         birthday: data.birthday ? new Date(data.birthday) : null,
         identityCard: data.identityCard ?? null,
-        status: data.status ?? 'active',
         address: data.address ?? null,
         departmentId: data.departmentId,
         jobTitleId: data.jobTitleId,
@@ -140,7 +138,7 @@ export class EmployeesService {
       jobTitleId: number;
       civilServantRankId: number;
       partyTitleId: number;
-      status: string;
+      employmentStatus: string;
       address: string;
       avatar: string;
     }>,
@@ -158,7 +156,7 @@ export class EmployeesService {
         ...(data.gender != null && { gender: data.gender }),
         ...(data.birthday != null && { birthday: new Date(data.birthday) }),
         ...(data.identityCard != null && { identityCard: data.identityCard }),
-        ...(data.status != null && { status: data.status }),
+        ...(data.employmentStatus != null && { employmentStatus: data.employmentStatus }),
         ...(data.address != null && { address: data.address }),
         ...(data.avatar != null && { avatar: data.avatar }),
         ...(data.departmentId != null && { departmentId: data.departmentId }),
@@ -213,7 +211,7 @@ export class EmployeesService {
     jobTitleId?: number;
     civilServantRankId?: number;
     partyTitleId?: number;
-    status?: string;
+    employmentStatus?: string;
     includeChildren?: boolean;
   }) {
     const page = Math.max(1, Number(params.page) || 1);
@@ -235,7 +233,7 @@ export class EmployeesService {
     if (params.jobTitleId != null && params.jobTitleId > 0) where.jobTitleId = params.jobTitleId;
     if (params.civilServantRankId != null && params.civilServantRankId > 0) where.civilServantRankId = params.civilServantRankId;
     if (params.partyTitleId != null && params.partyTitleId > 0) where.partyTitleId = params.partyTitleId;
-    if (params.status) where.status = params.status;
+    if (params.employmentStatus) where.employmentStatus = params.employmentStatus;
     if (params.departmentId != null && params.departmentId > 0) where.departmentId = params.departmentId;
 
     // Query DB

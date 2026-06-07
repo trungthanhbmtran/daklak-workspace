@@ -1,13 +1,22 @@
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
-export const getStatusBadge = (status: string) => {
+export const getStatusBadge = (status: string, categories?: any[]) => {
+  const matched = categories?.find(c => c.code === status);
+  const label = matched?.name || status;
+
   switch (status) {
-    case 'DONE':        return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200">Hoàn thành</Badge>;
-    case 'IN_PROGRESS': return <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200">Đang xử lý</Badge>;
-    case 'TODO':        return <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200">Cần làm</Badge>;
-    case 'OVERDUE':     return <Badge className="bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-200">Quá hạn</Badge>;
-    default:            return <Badge variant="outline">{status}</Badge>;
+    case 'DONE':        return <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border-emerald-200">{label}</Badge>;
+    case 'IN_PROGRESS': 
+    case 'PROCESSING':  return <Badge className="bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-200">{label}</Badge>;
+    case 'TODO':        
+    case 'PENDING':     return <Badge className="bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 border-blue-200">{label}</Badge>;
+    case 'OVERDUE':     return <Badge className="bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 border-rose-200">{label}</Badge>;
+    case 'RETURNED':    return <Badge className="bg-orange-500/10 text-orange-600 hover:bg-orange-500/20 border-orange-200">{label}</Badge>;
+    case 'REJECTED':
+    case 'CANCELED':    return <Badge className="bg-slate-500/10 text-slate-600 hover:bg-slate-500/20 border-slate-200">{label}</Badge>;
+    case 'UNASSIGNED':  return <Badge className="bg-slate-100 text-slate-500 border-slate-200 border-dashed">{label}</Badge>;
+    default:            return <Badge variant="outline">{label}</Badge>;
   }
 };
 

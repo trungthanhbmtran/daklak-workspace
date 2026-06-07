@@ -28,6 +28,16 @@ export type Employee = Prisma.EmployeeModel
  */
 export type Task = Prisma.TaskModel
 /**
+ * Model TaskParticipant
+ * 
+ */
+export type TaskParticipant = Prisma.TaskParticipantModel
+/**
+ * Model TaskClosure
+ * 
+ */
+export type TaskClosure = Prisma.TaskClosureModel
+/**
  * Model TaskComment
  * 
  */

@@ -10,6 +10,8 @@
  */
 export type * from './models/Employee'
 export type * from './models/Task'
+export type * from './models/TaskParticipant'
+export type * from './models/TaskClosure'
 export type * from './models/TaskComment'
 export type * from './models/MasterPlan'
 export type * from './models/KpiPeriod'

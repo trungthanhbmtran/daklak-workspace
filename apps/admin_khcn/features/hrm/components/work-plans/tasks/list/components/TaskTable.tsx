@@ -10,6 +10,7 @@ import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } 
 interface TaskTableProps {
   tasks: any[];
   priorities: any[];
+  taskStatusCategories?: any[];
   onSelectTask: (task: any) => void;
   onSmartAssign: (task: any) => void;
   /** Prefetch task detail khi hover row */
@@ -23,6 +24,7 @@ interface TaskTableProps {
 export const TaskTable = memo(function TaskTable({
   tasks,
   priorities,
+  taskStatusCategories,
   onSelectTask,
   onSmartAssign,
   onHoverTask,
@@ -66,7 +68,7 @@ export const TaskTable = memo(function TaskTable({
                   </td>
 
                   {/* Status */}
-                  <td className="px-6 py-5">{getStatusBadge(task.status || 'TODO')}</td>
+                  <td className="px-6 py-5">{getStatusBadge(task.status || 'TODO', taskStatusCategories)}</td>
 
                   {/* Priority */}
                   <td className="px-6 py-5">

@@ -68,6 +68,12 @@ export const TaskListClient = () => {
   const { data: prioritiesRes }: any = useGetCategoryByGroup('TASK_PRIORITY');
   const priorities = prioritiesRes?.data || [];
 
+  const { data: statusRes }: any = useGetCategoryByGroup('TASK_STATUS');
+  const taskStatusCategories = statusRes?.data || [];
+
+  const { data: roleRes }: any = useGetCategoryByGroup('TASK_ROLE');
+  const taskRoleCategories = roleRes?.data || [];
+
   // ── Derived tasks (filter stats cards) ───────────────────────────────────
   const displayedTasks = useMemo(() => {
     if (!activeFilter) return tasks;
@@ -147,6 +153,7 @@ export const TaskListClient = () => {
         onStatusChange={setStatusFilter}
         onPriorityChange={setPriorityFilter}
         onViewChange={setViewMode}
+        taskStatusCategories={taskStatusCategories}
       />
 
       {/* Content */}
@@ -178,6 +185,7 @@ export const TaskListClient = () => {
         <TaskGrid
           tasks={displayedTasks}
           priorities={priorities}
+          taskStatusCategories={taskStatusCategories}
           onSelectTask={handleSelectTask}
           onSmartAssign={handleSmartAssign}
           onHoverTask={handlePrefetchTask}
@@ -186,6 +194,7 @@ export const TaskListClient = () => {
         <TaskTable
           tasks={displayedTasks}
           priorities={priorities}
+          taskStatusCategories={taskStatusCategories}
           onSelectTask={handleSelectTask}
           onSmartAssign={handleSmartAssign}
           onHoverTask={handlePrefetchTask}
@@ -198,6 +207,8 @@ export const TaskListClient = () => {
           <TaskDetailDialog
             task={selectedTask}
             priorities={priorities}
+            taskStatusCategories={taskStatusCategories}
+            taskRoleCategories={taskRoleCategories}
             onClose={handleCloseDetail}
             onRefetch={refetch}
             onSmartAssign={handleSmartAssign}

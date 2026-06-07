@@ -108,6 +108,13 @@ export class UsersController {
     });
   }
 
+  @GrpcMethod('UserService', 'GetUsersByIds')
+  async getUsersByIds(data: { ids?: number[] }) {
+    return this.usersService.getUsersByIds({
+      ids: data.ids ?? [],
+    });
+  }
+
   @GrpcMethod('UserService', 'SetUserActive')
   async setUserActive(data: {
     userId?: number;

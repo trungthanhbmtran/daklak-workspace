@@ -386,6 +386,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   Employee: 'Employee',
   Task: 'Task',
+  TaskParticipant: 'TaskParticipant',
+  TaskClosure: 'TaskClosure',
   TaskComment: 'TaskComment',
   MasterPlan: 'MasterPlan',
   KpiPeriod: 'KpiPeriod',
@@ -409,7 +411,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "employee" | "task" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
+    modelProps: "employee" | "task" | "taskParticipant" | "taskClosure" | "taskComment" | "masterPlan" | "kpiPeriod" | "kpiCriteria" | "kpiEvaluation" | "kpiEvaluationDetail" | "taskRankTemplate" | "rankQuota"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -542,6 +544,138 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.TaskCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.TaskCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskParticipant: {
+      payload: Prisma.$TaskParticipantPayload<ExtArgs>
+      fields: Prisma.TaskParticipantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskParticipantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskParticipantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>
+        }
+        findFirst: {
+          args: Prisma.TaskParticipantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskParticipantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>
+        }
+        findMany: {
+          args: Prisma.TaskParticipantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>[]
+        }
+        create: {
+          args: Prisma.TaskParticipantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>
+        }
+        createMany: {
+          args: Prisma.TaskParticipantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.TaskParticipantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>
+        }
+        update: {
+          args: Prisma.TaskParticipantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskParticipantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskParticipantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.TaskParticipantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskParticipantPayload>
+        }
+        aggregate: {
+          args: Prisma.TaskParticipantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskParticipant>
+        }
+        groupBy: {
+          args: Prisma.TaskParticipantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskParticipantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskParticipantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskParticipantCountAggregateOutputType> | number
+        }
+      }
+    }
+    TaskClosure: {
+      payload: Prisma.$TaskClosurePayload<ExtArgs>
+      fields: Prisma.TaskClosureFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TaskClosureFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TaskClosureFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>
+        }
+        findFirst: {
+          args: Prisma.TaskClosureFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TaskClosureFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>
+        }
+        findMany: {
+          args: Prisma.TaskClosureFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>[]
+        }
+        create: {
+          args: Prisma.TaskClosureCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>
+        }
+        createMany: {
+          args: Prisma.TaskClosureCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        delete: {
+          args: Prisma.TaskClosureDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>
+        }
+        update: {
+          args: Prisma.TaskClosureUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>
+        }
+        deleteMany: {
+          args: Prisma.TaskClosureDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TaskClosureUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        upsert: {
+          args: Prisma.TaskClosureUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TaskClosurePayload>
+        }
+        aggregate: {
+          args: Prisma.TaskClosureAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTaskClosure>
+        }
+        groupBy: {
+          args: Prisma.TaskClosureGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskClosureGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TaskClosureCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TaskClosureCountAggregateOutputType> | number
         }
       }
     }
@@ -1114,6 +1248,7 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const EmployeeScalarFieldEnum = {
   id: 'id',
+  userId: 'userId',
   firstname: 'firstname',
   lastname: 'lastname',
   fullName: 'fullName',
@@ -1123,7 +1258,9 @@ export const EmployeeScalarFieldEnum = {
   gender: 'gender',
   birthday: 'birthday',
   identityCard: 'identityCard',
-  status: 'status',
+  employmentType: 'employmentType',
+  employmentStatus: 'employmentStatus',
+  contractInfo: 'contractInfo',
   address: 'address',
   avatar: 'avatar',
   departmentId: 'departmentId',
@@ -1140,41 +1277,57 @@ export type EmployeeScalarFieldEnum = (typeof EmployeeScalarFieldEnum)[keyof typ
 
 export const TaskScalarFieldEnum = {
   id: 'id',
+  parentId: 'parentId',
   title: 'title',
   description: 'description',
-  assigneeCode: 'assigneeCode',
-  assignerCode: 'assignerCode',
-  departmentId: 'departmentId',
   status: 'status',
   priority: 'priority',
+  creatorUserId: 'creatorUserId',
+  createdByEmployeeId: 'createdByEmployeeId',
   baseScore: 'baseScore',
   weight: 'weight',
   scoringMethod: 'scoringMethod',
   bonusPerDay: 'bonusPerDay',
   penaltyPerDay: 'penaltyPerDay',
-  supervisorCode: 'supervisorCode',
   documentIds: 'documentIds',
   workflowInstId: 'workflowInstId',
+  metadata: 'metadata',
   startDate: 'startDate',
   dueDate: 'dueDate',
-  completionDate: 'completionDate',
+  completedAt: 'completedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   planId: 'planId',
-  parentId: 'parentId',
-  rootTaskId: 'rootTaskId',
   progress: 'progress',
-  rejectReason: 'rejectReason',
-  coAssigneeCodesJson: 'coAssigneeCodesJson'
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
 
 
+export const TaskParticipantScalarFieldEnum = {
+  taskId: 'taskId',
+  userId: 'userId',
+  participantRole: 'participantRole',
+  assignedAt: 'assignedAt'
+} as const
+
+export type TaskParticipantScalarFieldEnum = (typeof TaskParticipantScalarFieldEnum)[keyof typeof TaskParticipantScalarFieldEnum]
+
+
+export const TaskClosureScalarFieldEnum = {
+  ancestorId: 'ancestorId',
+  descendantId: 'descendantId',
+  depth: 'depth'
+} as const
+
+export type TaskClosureScalarFieldEnum = (typeof TaskClosureScalarFieldEnum)[keyof typeof TaskClosureScalarFieldEnum]
+
+
 export const TaskCommentScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
-  authorCode: 'authorCode',
+  userId: 'userId',
   content: 'content',
   isSystemMessage: 'isSystemMessage',
   createdAt: 'createdAt',
@@ -1308,31 +1461,6 @@ export const NullableJsonNullValueInput = {
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
-export const EmployeeOrderByRelevanceFieldEnum = {
-  firstname: 'firstname',
-  lastname: 'lastname',
-  fullName: 'fullName',
-  employeeCode: 'employeeCode',
-  email: 'email',
-  phone: 'phone',
-  gender: 'gender',
-  identityCard: 'identityCard',
-  status: 'status',
-  address: 'address',
-  avatar: 'avatar'
-} as const
-
-export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -1350,25 +1478,57 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const EmployeeOrderByRelevanceFieldEnum = {
+  userId: 'userId',
+  firstname: 'firstname',
+  lastname: 'lastname',
+  fullName: 'fullName',
+  employeeCode: 'employeeCode',
+  email: 'email',
+  phone: 'phone',
+  gender: 'gender',
+  identityCard: 'identityCard',
+  employmentType: 'employmentType',
+  employmentStatus: 'employmentStatus',
+  address: 'address',
+  avatar: 'avatar'
+} as const
+
+export type EmployeeOrderByRelevanceFieldEnum = (typeof EmployeeOrderByRelevanceFieldEnum)[keyof typeof EmployeeOrderByRelevanceFieldEnum]
+
+
 export const TaskOrderByRelevanceFieldEnum = {
   title: 'title',
   description: 'description',
-  assigneeCode: 'assigneeCode',
-  assignerCode: 'assignerCode',
   status: 'status',
   priority: 'priority',
+  creatorUserId: 'creatorUserId',
+  createdByEmployeeId: 'createdByEmployeeId',
   scoringMethod: 'scoringMethod',
-  supervisorCode: 'supervisorCode',
   workflowInstId: 'workflowInstId',
-  rejectReason: 'rejectReason',
-  coAssigneeCodesJson: 'coAssigneeCodesJson'
+  rejectReason: 'rejectReason'
 } as const
 
 export type TaskOrderByRelevanceFieldEnum = (typeof TaskOrderByRelevanceFieldEnum)[keyof typeof TaskOrderByRelevanceFieldEnum]
 
 
+export const TaskParticipantOrderByRelevanceFieldEnum = {
+  userId: 'userId'
+} as const
+
+export type TaskParticipantOrderByRelevanceFieldEnum = (typeof TaskParticipantOrderByRelevanceFieldEnum)[keyof typeof TaskParticipantOrderByRelevanceFieldEnum]
+
+
 export const TaskCommentOrderByRelevanceFieldEnum = {
-  authorCode: 'authorCode',
+  userId: 'userId',
   content: 'content'
 } as const
 
@@ -1469,13 +1629,6 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
 
 
 /**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
  * Reference to a field of type 'Json'
  */
 export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
@@ -1486,6 +1639,20 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'Float'
+ */
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'TaskRole'
+ */
+export type EnumTaskRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TaskRole'>
     
 
 
@@ -1592,6 +1759,8 @@ export type PrismaClientOptions = ({
 export type GlobalOmitConfig = {
   employee?: Prisma.EmployeeOmit
   task?: Prisma.TaskOmit
+  taskParticipant?: Prisma.TaskParticipantOmit
+  taskClosure?: Prisma.TaskClosureOmit
   taskComment?: Prisma.TaskCommentOmit
   masterPlan?: Prisma.MasterPlanOmit
   kpiPeriod?: Prisma.KpiPeriodOmit
