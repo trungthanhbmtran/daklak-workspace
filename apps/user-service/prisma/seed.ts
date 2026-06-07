@@ -2530,14 +2530,6 @@ async function main() {
       order: 7,
       res: 'SYSTEM',
     },
-    {
-      code: 'ADMIN_MICROSERVICES',
-      name: 'Cấu hình luồng (API Gateway)',
-      route: 'microservices',
-      icon: 'git-network-outline',
-      order: 8,
-      res: 'SYSTEM',
-    },
   ];
 
   for (const { res, action, ...m } of adminMenus) {
@@ -5361,12 +5353,10 @@ async function main() {
   console.log('🔹 Phân quyền đặc thù cho Sở Khoa học và Công nghệ...');
 
   const skhcnPerms = await getPerms([
-    'ROLE.*',
-    'TASK.*',
-    'HRM_EMPLOYEE.READ', // Để có thể chọn người giao việc
-    'HRM_EMPLOYEE.VIEW',
-    'USER.READ',         // Để thấy menu Quản trị Hệ thống (Root)
-    'USER.VIEW',
+    'ORGANIZATION.READ',
+    'ORGANIZATION.VIEW',
+    'SYSTEM.READ',
+    'SYSTEM.VIEW',
   ]);
 
   const skhcnRole = await prisma.role.upsert({
