@@ -130,7 +130,7 @@ export class DepartmentController implements OnModuleInit {
   @ApiOperation({
     summary: 'Nhân viên thuộc đơn vị (hrm-service) - DEPRECATED',
   })
-  async listEmployees(@Param('id') id: string) {
+  async listEmployees(@Param('id') _id: string) {
     throw new Error(
       'Vui lòng sử dụng API /admin/hrm/employees để lấy danh sách nhân viên nhằm đảm bảo PBAC.',
     );

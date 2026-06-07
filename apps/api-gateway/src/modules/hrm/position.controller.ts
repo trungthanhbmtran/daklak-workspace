@@ -58,7 +58,7 @@ export class PositionController implements OnModuleInit {
   @ApiOperation({
     summary: 'Chi tiết một định biên (tìm trong báo cáo đơn vị)',
   })
-  async getDetail(@Param('id', ParseIntPipe) id: number) {
+  async getDetail(@Param('id', ParseIntPipe) _id: number) {
     // GetStaffingReport trả theo unitId; không có GetPosition(id). Trả 404 hoặc cần gọi report cho mọi unit.
     throw new NotFoundException(
       'Lấy định biên theo id không được hỗ trợ; dùng GET /admin/hrm/positions?departmentId=<unitId>',

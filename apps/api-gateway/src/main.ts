@@ -95,4 +95,4 @@ async function bootstrap() {
   // logger.log(`📡 Kết nối tới HRM Service (project_stc/hrm-service): ${process.env.HRM_SERVICE_ADDR || '127.0.0.1:50052'}`);
 }
 
-bootstrap();
+void bootstrap();

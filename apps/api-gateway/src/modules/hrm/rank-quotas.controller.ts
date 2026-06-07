@@ -1,5 +1,4 @@
 import { Controller, Post, Get, Body, Param, Inject } from '@nestjs/common';
-import { ClientGrpc } from '@nestjs/microservices';
 import { MICROSERVICES } from '../../core/constants/services';
 import { firstValueFrom } from 'rxjs';
 

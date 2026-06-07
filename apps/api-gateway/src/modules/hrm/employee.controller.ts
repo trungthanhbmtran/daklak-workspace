@@ -116,7 +116,7 @@ export class EmployeeController implements OnModuleInit {
       };
 
       return data;
-    } catch (error) {
+    } catch (_error) {
       return { jtMap: {}, unitMap: {}, catMap: {} };
     }
   }

@@ -76,7 +76,7 @@ export class WorkflowController implements OnModuleInit {
     if (result && typeof result.definition === 'string') {
       try {
         result.definition = JSON.parse(result.definition);
-      } catch (e) {}
+      } catch (_e) {}
     }
     return { data: result };
   }
@@ -97,7 +97,7 @@ export class WorkflowController implements OnModuleInit {
     if (result && typeof result.definition === 'string') {
       try {
         result.definition = JSON.parse(result.definition);
-      } catch (e) {}
+      } catch (_e) {}
     }
     return { data: result };
   }
@@ -114,7 +114,7 @@ export class WorkflowController implements OnModuleInit {
       if (typeof item.definition === 'string') {
         try {
           item.definition = JSON.parse(item.definition);
-        } catch (e) {}
+        } catch (_e) {}
       }
       return item;
     });
@@ -133,7 +133,7 @@ export class WorkflowController implements OnModuleInit {
     if (result && typeof result.definition === 'string') {
       try {
         result.definition = JSON.parse(result.definition);
-      } catch (e) {}
+      } catch (_e) {}
     }
     return { data: result };
   }

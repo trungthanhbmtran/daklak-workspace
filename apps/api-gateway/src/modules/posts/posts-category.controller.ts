@@ -15,7 +15,6 @@ import { MICROSERVICES } from '../../core/constants/services';
 
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { RbacGuard } from '../../common/guards/rbac.guard';
-import { Roles, Role } from '../../common/decorators/roles.decorator';
 import { UseGuards } from '@nestjs/common';
 
 @Controller('admin/posts/categories')

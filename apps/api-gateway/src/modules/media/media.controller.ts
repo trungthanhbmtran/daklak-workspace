@@ -70,7 +70,7 @@ export class MediaGatewayController implements OnModuleInit {
         return res.redirect(data.downloadUrl);
       }
       return res.status(404).json({ message: 'Media link not found' });
-    } catch (e) {
+    } catch (_e) {
       return res.status(404).json({ message: 'Media not found' });
     }
   }

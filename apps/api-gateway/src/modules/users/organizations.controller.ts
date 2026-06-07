@@ -14,8 +14,6 @@ import {
   BadRequestException,
   NotFoundException,
   ConflictException,
-  HttpException,
-  HttpStatus,
   Req,
 } from '@nestjs/common';
 import {

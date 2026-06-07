@@ -12,7 +12,6 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
-import type { ClientGrpc } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
@@ -41,34 +40,41 @@ export class MasterPlansController implements OnModuleInit {
 
   onModuleInit() {
     this.masterPlanService = this.client.getService('MasterPlanService');
-    this.orgService = this.orgClient.getService(MICROSERVICES.ORGANIZATION.SERVICE);
+    this.orgService = this.orgClient.getService(
+      MICROSERVICES.ORGANIZATION.SERVICE,
+    );
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
   /** Lấy unitMap từ org tree, có cache 5 phút */
-  
+
   private async populateUsers(plans: any[]) {
     if (!plans || plans.length === 0) return plans;
 
     const userIds = new Set<number>();
     const collectIds = (plan: any) => {
-      if (plan.createdByCode && plan.createdByCode !== 'system') userIds.add(parseInt(plan.createdByCode, 10));
-      if (plan.updatedByCode && plan.updatedByCode !== 'system') userIds.add(parseInt(plan.updatedByCode, 10));
-      
+      if (plan.createdByCode && plan.createdByCode !== 'system')
+        userIds.add(parseInt(plan.createdByCode, 10));
+      if (plan.updatedByCode && plan.updatedByCode !== 'system')
+        userIds.add(parseInt(plan.updatedByCode, 10));
+
       if (plan.tasks) {
         plan.tasks.forEach((t: any) => {
-          if (t.assigneeId && t.assigneeId !== 'UNASSIGNED') userIds.add(parseInt(t.assigneeId, 10));
+          if (t.assigneeId && t.assigneeId !== 'UNASSIGNED')
+            userIds.add(parseInt(t.assigneeId, 10));
           if (t.assignerId) userIds.add(parseInt(t.assignerId, 10));
         });
       }
     };
     plans.forEach(collectIds);
 
-    const idsToFetch = Array.from(userIds).filter(id => !isNaN(id) && id > 0);
+    const idsToFetch = Array.from(userIds).filter((id) => !isNaN(id) && id > 0);
     if (idsToFetch.length === 0) return plans;
 
     try {
-      const userRes: any = await firstValueFrom(this.userService.GetUsersByIds({ ids: idsToFetch }));
+      const userRes: any = await firstValueFrom(
+        this.userService.GetUsersByIds({ ids: idsToFetch }),
+      );
       const usersMap = new Map();
       (userRes?.data || []).forEach((u: any) => usersMap.set(String(u.id), u));
 
@@ -81,7 +87,7 @@ export class MasterPlansController implements OnModuleInit {
           const u = usersMap.get(String(plan.updatedByCode));
           if (u) plan.updatedByName = u.fullName || u.username;
         }
-        
+
         if (plan.tasks) {
           plan.tasks.forEach((t: any) => {
             if (t.assigneeId && t.assigneeId !== 'UNASSIGNED') {
@@ -101,7 +107,7 @@ export class MasterPlansController implements OnModuleInit {
         }
       };
       plans.forEach(mapUsers);
-    } catch(e) {
+    } catch (e) {
       console.error('Failed to populate users for master plans:', e);
     }
     return plans;
@@ -162,7 +168,10 @@ export class MasterPlansController implements OnModuleInit {
     @Query('departmentId') reqDepartmentId?: string,
   ) {
     const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('PLAN:MANAGE') || user?.username === 'admin' || user?.username === 'system';
+    const isAdmin =
+      user?.permissionsFlatten?.includes('PLAN:MANAGE') ||
+      user?.username === 'admin' ||
+      user?.username === 'system';
     const isLeader =
       user?.roles?.some((r: any) => {
         const code = typeof r === 'string' ? r : r.code;
@@ -221,7 +230,10 @@ export class MasterPlansController implements OnModuleInit {
   @Get(':id')
   async findById(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
-    const isAdmin = user?.permissionsFlatten?.includes('PLAN:MANAGE') || user?.username === 'admin' || user?.username === 'system';
+    const isAdmin =
+      user?.permissionsFlatten?.includes('PLAN:MANAGE') ||
+      user?.username === 'admin' ||
+      user?.username === 'system';
     const isLeader =
       user?.roles?.some((r: any) => {
         const code = typeof r === 'string' ? r : r.code;
@@ -254,7 +266,7 @@ export class MasterPlansController implements OnModuleInit {
   }
 
   @Post('ai-generate')
-  async generateFromAi(@Body('text') text: string) {
+  async generateFromAi(@Body('text') _text: string) {
     // Giả lập độ trễ AI
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -301,8 +313,7 @@ export class MasterPlansController implements OnModuleInit {
 
   @Post()
   async create(@Req() req: any, @Body() body: any) {
-    body.createdByCode =
-      req.user?.id?.toString() || 'system';
+    body.createdByCode = req.user?.id?.toString() || 'system';
     if (req.user?.unitId) {
       body.departmentId = parseInt(req.user.unitId, 10);
     }
@@ -311,8 +322,7 @@ export class MasterPlansController implements OnModuleInit {
 
   @Put(':id')
   async update(@Req() req: any, @Param('id') id: string, @Body() body: any) {
-    body.updatedByCode =
-      req.user?.id?.toString() || 'system';
+    body.updatedByCode = req.user?.id?.toString() || 'system';
     return firstValueFrom(
       this.masterPlanService.Update({ id: parseInt(id, 10), ...body }),
     );

@@ -15,7 +15,6 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('HRM - Tasks')
 @Controller('admin/hrm/tasks')
@@ -48,9 +47,7 @@ export class TasksController implements OnModuleInit {
     this.employeeService = this.empClient.getService(
       MICROSERVICES.EMPLOYEE.SERVICE,
     );
-    this.userService = this.userClient.getService(
-      MICROSERVICES.USER.SERVICE,
-    );
+    this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
   private async populateUsers(tasks: any[]) {
@@ -58,19 +55,25 @@ export class TasksController implements OnModuleInit {
 
     const userIds = new Set<number>();
     const collectIds = (task: any) => {
-      if (task.assigneeId && task.assigneeId !== 'UNASSIGNED') userIds.add(parseInt(task.assigneeId, 10));
+      if (task.assigneeId && task.assigneeId !== 'UNASSIGNED')
+        userIds.add(parseInt(task.assigneeId, 10));
       if (task.assignerId) userIds.add(parseInt(task.assignerId, 10));
       if (task.supervisorId) userIds.add(parseInt(task.supervisorId, 10));
-      if (task.coAssigneeIds) task.coAssigneeIds.forEach((id: string) => userIds.add(parseInt(id, 10)));
+      if (task.coAssigneeIds)
+        task.coAssigneeIds.forEach((id: string) =>
+          userIds.add(parseInt(id, 10)),
+        );
       if (task.children) task.children.forEach(collectIds);
     };
     tasks.forEach(collectIds);
 
-    const idsToFetch = Array.from(userIds).filter(id => !isNaN(id) && id > 0);
+    const idsToFetch = Array.from(userIds).filter((id) => !isNaN(id) && id > 0);
     if (idsToFetch.length === 0) return tasks;
 
     try {
-      const userRes: any = await firstValueFrom(this.userService.GetUsersByIds({ ids: idsToFetch }));
+      const userRes: any = await firstValueFrom(
+        this.userService.GetUsersByIds({ ids: idsToFetch }),
+      );
       const usersMap = new Map();
       (userRes?.data || []).forEach((u: any) => usersMap.set(String(u.id), u));
 
@@ -95,7 +98,7 @@ export class TasksController implements OnModuleInit {
         if (task.children) task.children.forEach(mapUsers);
       };
       tasks.forEach(mapUsers);
-    } catch(e) {
+    } catch (e) {
       console.error('Failed to populate users:', e);
     }
     return tasks;
@@ -244,7 +247,6 @@ export class TasksController implements OnModuleInit {
       }),
     );
 
-    
     if (response?.data) {
       if (Array.isArray(response.data)) {
         await this.populateUsers(response.data);
@@ -253,7 +255,6 @@ export class TasksController implements OnModuleInit {
       }
     }
     return response;
-
   }
 
   @Put(':id')

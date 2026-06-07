@@ -186,7 +186,7 @@ export class AuthController implements OnModuleInit {
             user.fullName = fetchedFullName;
           }
         }
-      } catch (err) {
+      } catch (_err) {
         // Ignore error and use default fullName from token
       }
     }
