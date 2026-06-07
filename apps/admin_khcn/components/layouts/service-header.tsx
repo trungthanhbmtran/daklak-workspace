@@ -15,7 +15,7 @@ export function ServiceHeader() {
   const activePageName = (menuItems ?? []).find(m => pathname === m.href || pathname.startsWith(`${m.href}/`))?.name || serviceName || serviceCode;
 
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-background sticky top-0 z-10 shadow-sm transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+    <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4 bg-background sticky top-0 z-10 shadow-sm transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
 
       {/* TRÁI: Toggle Sidebar & Tiêu đề */}
       <div className="flex items-center gap-2">
