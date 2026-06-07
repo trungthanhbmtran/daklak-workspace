@@ -2948,8 +2948,8 @@ async function main() {
   const workflowMenus = [
     {
       code: 'WORKFLOW_MENU_BUILDER',
-      name: 'Trình kéo thả nghiệp vụ',
-      route: 'workflow-builder',
+      name: 'Trung tâm Liên thông',
+      route: '',
       icon: 'git-network-outline',
       order: 1,
       res: 'WORKFLOW',
