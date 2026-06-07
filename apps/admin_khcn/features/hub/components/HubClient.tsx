@@ -110,19 +110,7 @@ export function HubClient() {
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {/* Workflow Builder Card */}
-            <AppCard
-              app={{
-                id: "workflow-builder",
-                title: "Trình kéo thả Quy trình",
-                desc: "Thiết kế và quản lý các quy trình nghiệp vụ tự động hóa giữa các phân hệ.",
-                href: "/hub/workflow-builder",
-                icon: Layers,
-                iconColor: "#8b5cf6",
-                disabled: false,
-              }}
-            />
-            {apps.map((app) => (
+            {apps.map((app: any) => (
               <AppCard key={app.id} app={app} />
             ))}
           </div>
