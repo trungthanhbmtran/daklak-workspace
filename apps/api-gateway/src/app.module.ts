@@ -12,6 +12,7 @@ import { WorkflowModule } from './modules/workflow/workflow.module';
 import { TranslateModule } from './modules/translate/translate.module';
 import { AiModule } from './modules/ai/ai.module';
 import { RedisModule } from './core/redis/redis.module';
+import { GlobalClientModule } from './core/global-client.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RedisModule } from './core/redis/redis.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    GlobalClientModule,
     AuthModule,
     HrmModule,
     UsersModule,
