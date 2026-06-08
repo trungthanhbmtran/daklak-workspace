@@ -1,4 +1,4 @@
-﻿import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 import type { PrismaClient as PrismaClientType } from '@generated/prisma/client';
 let PrismaClient: typeof PrismaClientType;
 try {
@@ -2171,7 +2171,6 @@ async function main() {
     { code: 'CONTENT_TYPE', name: 'Loại nội dung' },
     { code: 'DEPARTMENT', name: 'Phòng ban' },
     { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
-    ,
     { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
     { code: 'font_family', name: 'Phông chữ giao diện (Portal)' },
     { code: 'border_radius', name: 'Độ bo góc khối (Portal)' },

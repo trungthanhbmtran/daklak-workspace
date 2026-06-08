@@ -25,7 +25,7 @@ export class MenusService {
   private menuCache = new Map<string, { data: any, expiresAt: number }>();
   private readonly CACHE_TTL_MS = 300 * 1000; // 5 minutes
 
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async getAll(application = 'ADMIN_PORTAL') {
     const list = await this.prisma.menu.findMany({
@@ -91,10 +91,10 @@ export class MenusService {
       where: { id: menu.id },
       include: { requiredPermissions: { select: { permissionId: true } } },
     });
-    
+
     // Invalidate cache
     this.menuCache.clear();
-    
+
     return this.toFlat(withPerms ?? menu);
   }
 
@@ -163,10 +163,10 @@ export class MenusService {
       where: { id: updated.id },
       include: { requiredPermissions: { select: { permissionId: true } } },
     });
-    
+
     // Invalidate cache
     this.menuCache.clear();
-    
+
     return this.toFlat(withPerms ?? updated);
   }
 
@@ -182,10 +182,10 @@ export class MenusService {
       );
     }
     await this.prisma.menu.delete({ where: { id } });
-    
+
     // Invalidate cache
     this.menuCache.clear();
-    
+
     return true;
   }
 
@@ -257,7 +257,7 @@ export class MenusService {
 
     // 4. Cắt tỉa menu cha rỗng (Quan trọng)
     const result = pruneEmptyParents(menuTree);
-    
+
     return result;
   }
 }
