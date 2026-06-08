@@ -4,7 +4,7 @@ import { Prisma } from '@generated/client';
 
 @Controller('gateway')
 export class GatewayController {
-  constructor(private readonly gatewayService: GatewayService) {}
+  constructor(private readonly gatewayService: GatewayService) { }
 
   @Get()
   getGatewayConfigs() {
