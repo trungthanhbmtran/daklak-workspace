@@ -300,7 +300,7 @@ export class UsersService implements OnModuleInit {
       REFRESH_TTL_SECONDS,
     );
     const roles = user.roles?.map((r) => r.code) ?? [];
-    
+
     // Extract permissions (e.g. ORGANIZATION:READ)
     const permissionsSet = new Set<string>();
     if (user.roles) {
@@ -314,7 +314,8 @@ export class UsersService implements OnModuleInit {
         }
       }
     }
-    const permissionsFlatten = Array.from(permissionsSet);
+    const isSuperAdmin = roles.includes('SUPER_ADMIN');
+    const permissionsFlatten = isSuperAdmin ? [] : Array.from(permissionsSet);
 
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
@@ -322,16 +323,16 @@ export class UsersService implements OnModuleInit {
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
-      { 
-        sub: user.id, 
-        email: user.email, 
-        username: user.username, 
-        fullName: user.fullName, 
-        roles, 
+      {
+        sub: user.id,
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        roles,
         permissionsFlatten,
-        unitId, 
-        jobTitleCode, 
-        employeeCode: user.employeeCode 
+        unitId,
+        jobTitleCode,
+        employeeCode: user.employeeCode
       },
       { expiresIn: jwtExpiresIn },
     );
@@ -419,7 +420,8 @@ export class UsersService implements OnModuleInit {
         }
       }
     }
-    const permissionsFlatten = Array.from(permissionsSet);
+    const isSuperAdmin = roles.includes('SUPER_ADMIN');
+    const permissionsFlatten = isSuperAdmin ? [] : Array.from(permissionsSet);
 
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
@@ -427,16 +429,16 @@ export class UsersService implements OnModuleInit {
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
-      { 
-        sub: user.id, 
-        email: user.email, 
-        username: user.username, 
-        fullName: user.fullName, 
-        roles, 
+      {
+        sub: user.id,
+        email: user.email,
+        username: user.username,
+        fullName: user.fullName,
+        roles,
         permissionsFlatten,
-        unitId, 
-        jobTitleCode, 
-        employeeCode: user.employeeCode 
+        unitId,
+        jobTitleCode,
+        employeeCode: user.employeeCode
       },
       { expiresIn: jwtExpiresIn },
     );
