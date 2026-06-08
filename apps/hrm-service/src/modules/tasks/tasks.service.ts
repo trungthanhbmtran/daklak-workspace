@@ -132,11 +132,28 @@ export class TasksService implements OnModuleInit {
 
     // Áp dụng bộ lọc PBAC nếu không phải admin
     if (!query.isAdmin && query.currentUserCode) {
+      // Tìm tất cả taskId mà user đang tham gia trực tiếp (assignee, owner, approver, coordinator)
+      const userTaskIds = await this.prisma.taskParticipant.findMany({
+        where: { employeeCode: query.currentUserCode },
+        select: { taskId: true }
+      });
+      const ids = userTaskIds.map(ut => ut.taskId);
+
+      // Từ các taskId đó, tìm tất cả các descendantId (việc con/cháu). Depth = 0 chính là bản thân nó.
+      const visibleClosure = await this.prisma.taskClosure.findMany({
+        where: { ancestorId: { in: ids } },
+        select: { descendantId: true }
+      });
+      const visibleTaskIds = visibleClosure.map(vc => vc.descendantId);
+      const ancestorUnitIds = Array.isArray(query.callerAncestorUnitIds) ? query.callerAncestorUnitIds : [];
+
       where.OR = [
-        // Quy?n owner: việc mình t?o ho?c giao
+        // Quy?n owner gốc (người tạo ra task)
         { creatorEmployeeCode: query.currentUserCode },
-        // Quy?n assignee/coordinator: việc mình ???c giao/ph?i h?p
-        { participants: { some: { employeeCode: query.currentUserCode } } },
+        // Quyền giám sát cây công việc: Mọi việc con/cháu của việc mình đang tham gia
+        { id: { in: visibleTaskIds } },
+        // Quyền quản lý đơn vị: Mọi việc nằm trong Kế hoạch thuộc phòng ban mình quản lý
+        { plan: { organizationUnitId: { in: ancestorUnitIds } } }
       ];
     }
 
@@ -253,7 +270,23 @@ export class TasksService implements OnModuleInit {
     return t;
   }
 
-  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string) {
+  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, query?: any) {
+    const currentTask = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true, plan: true }
+    });
+    if (!currentTask) throw new RpcException({ code: 5, message: 'Nhiệm vụ không tồn tại' });
+
+    if (query) {
+      const allowedActions = await this.computeAllowedActions(currentTask, query);
+      if (status === 'DONE' && !allowedActions.includes('COMPLETE')) {
+        throw new RpcException({ code: 7, message: 'Bạn không có quyền hoàn thành nhiệm vụ này' });
+      }
+      if (status === 'RETURNED' && !allowedActions.includes('RETURN')) {
+        throw new RpcException({ code: 7, message: 'Bạn không có quyền trả lại nhiệm vụ này' });
+      }
+    }
+
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
     if (status === 'DONE') dataToUpdate.completedAt = new Date();
@@ -280,13 +313,20 @@ export class TasksService implements OnModuleInit {
     return t;
   }
 
-  async assignTask(id: number, assigneeCode: string, coassigneeCodes?: string[], departmentId?: number, assignerCode?: string) {
+  async assignTask(id: number, assigneeCode: string, coassigneeCodes?: string[], departmentId?: number, assignerCode?: string, query?: any) {
     return this.prisma.$transaction(async (tx) => {
       const currentTask = await tx.task.findUnique({
         where: { id },
-        include: { participants: true }
+        include: { participants: true, plan: true }
       });
       if (!currentTask) throw new RpcException('Nhiệm vụ không tồn tại');
+
+      if (query) {
+        const allowedActions = await this.computeAllowedActions(currentTask, query);
+        if (!allowedActions.includes('ASSIGN')) {
+          throw new RpcException({ code: 7, message: 'Bạn không có quyền giao nhiệm vụ này' });
+        }
+      }
 
       // Update assignee
       if (assigneeCode) {
@@ -494,8 +534,25 @@ export class TasksService implements OnModuleInit {
     if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentUserCode);
   }
   async updateTask(id: number, data: any) {
+    const currentTask = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true, plan: true }
+    });
+    if (!currentTask) throw new RpcException({ code: 5, message: 'Nhiệm vụ không tồn tại' });
+    
+    if (data.currentUserCode) {
+      const allowedActions = await this.computeAllowedActions(currentTask, data);
+      if (!allowedActions.includes('EDIT')) {
+        throw new RpcException({ code: 7, message: 'Bạn không có quyền sửa đổi nhiệm vụ này' });
+      }
+    }
+
     const updateData = { ...data };
     delete updateData.id; // Don't update the ID
+    delete updateData.currentUserCode;
+    delete updateData.isAdmin;
+    delete updateData.callerAncestorUnitIds;
+
     if (updateData.startDate) {
       updateData.startDate = new Date(updateData.startDate);
     }
