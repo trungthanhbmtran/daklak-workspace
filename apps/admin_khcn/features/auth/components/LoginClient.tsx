@@ -61,8 +61,8 @@ export function LoginClient() {
 
         toast.success("Đăng nhập thành công! Đang chuyển hướng...");
 
-        // Chuyển hướng sau khi thành công
-        router.push('/hub');
+        // Chuyển hướng sau khi thành công (Sử dụng window.location.href để force reload và nhận cookies mới)
+        window.location.href = '/admin/hub';
       } catch (error: any) {
         const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
         toast.error(message);
