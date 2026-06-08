@@ -89,13 +89,7 @@ export const MICROSERVICES = {
     URL: getUserUrl(),
     SERVICE: 'OrganizationService',
   },
-  INTEGRATION: {
-    PACKAGE: 'integration',
-    SYMBOL: 'INTEGRATION_PACKAGE',
-    PROTO: 'users/integration.proto',
-    URL: getUserUrl(),
-    SERVICE: 'IntegrationService',
-  },
+
   // HRM: chỉ nhân viên (employee) qua project_stc/hrm-service; đơn vị/chức danh/định biên qua user-service (ORGANIZATION)
   EMPLOYEE: {
     PACKAGE: 'employee',

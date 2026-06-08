@@ -15,7 +15,6 @@ import {
   PublicOrganizationsController,
 } from './organizations.controller';
 import { ConfigsController } from './configs.controller';
-import { IntegrationModule } from '../integration/integration.module';
 
 @Module({
   imports: [
@@ -26,7 +25,6 @@ import { IntegrationModule } from '../integration/integration.module';
     registerGrpcService(MICROSERVICES.MENU),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
-    IntegrationModule,
   ],
   controllers: [
     UserController,

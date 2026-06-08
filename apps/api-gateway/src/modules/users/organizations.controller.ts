@@ -25,7 +25,6 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { IntegrationService } from '../integration/integration.service';
 
 @ApiTags('Đơn vị tổ chức')
 @Controller('admin/organizations')
@@ -36,8 +35,7 @@ export class OrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-    private readonly integrationService: IntegrationService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(
@@ -119,30 +117,7 @@ export class OrganizationsController implements OnModuleInit {
       user?.permissionsFlatten?.includes('SYSTEM:MANAGE') ||
       user?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
 
-    // Dynamic config check
-    if (!isAdmin) {
-      const rules = await this.integrationService.getApiPermissions();
-      const path = '/api/v1/admin/organizations/tree';
-      for (const rule of rules) {
-        // Find if this path matches our endpoint
-        if (
-          (rule.path === path ||
-            rule.path === '/api/v1/admin/organizations/*') &&
-          (rule.method === 'ALL' || rule.method === 'GET')
-        ) {
-          const requiredPermissions = rule.permissions || [];
-          if (
-            requiredPermissions.length > 0 &&
-            requiredPermissions.some((p: string) =>
-              user?.permissionsFlatten?.includes(p),
-            )
-          ) {
-            isAdmin = true;
-            break;
-          }
-        }
-      }
-    }
+    // Dynamic config check is handled by DynamicApiGuard now.
 
     if (!isAdmin && user?.unitId) {
       // Find the user's unit node and only return that node (and its descendants)
@@ -404,7 +379,7 @@ export class PublicOrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(
