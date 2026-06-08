@@ -4,13 +4,12 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { WorkflowEditor, WorkflowList, WorkflowInstanceList } from "@/features/workflow";
 import { IntegrationConfig } from "./IntegrationConfig";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network } from "lucide-react";
+import { Layers, Activity, ChevronLeft, Sparkles, Workflow, Network, Server, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function CardContainer({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-8 shadow-2xl shadow-blue-900/5">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
       {children}
     </div>
   );
@@ -20,8 +19,9 @@ export function IntegrationClient() {
   const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [activeTab, setActiveTab] = useState("definitions");
+  const [activeView, setActiveView] = useState<'dashboard' | 'definitions' | 'instances' | 'gateway'>('dashboard');
 
+  // Handle Workflow Editor View
   if (editingId || isCreating) {
     return (
       <main className="h-screen w-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
@@ -36,93 +36,123 @@ export function IntegrationClient() {
     );
   }
 
-  return (
-    <main className="min-h-screen relative bg-slate-50 dark:bg-slate-950 overflow-hidden font-sans">
-      {/* Premium Background Blobs */}
-      <div className="absolute top-[-15%] left-[-10%] w-[50%] h-[50%] rounded-full bg-violet-400/20 dark:bg-violet-600/10 blur-[120px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-fuchsia-400/20 dark:bg-fuchsia-600/10 blur-[150px] pointer-events-none mix-blend-multiply dark:mix-blend-screen" />
-
-      {/* Header Area */}
-      <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-background/40 backdrop-blur-xl supports-backdrop-filter:bg-background/20 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl h-20 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Button
-              variant="outline"
-              size="icon"
-              className="rounded-2xl border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-300"
-              onClick={() => router.push('/hub')}
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-violet-600 to-fuchsia-600 text-white shadow-lg shadow-violet-500/30">
-                <Workflow className="h-6 w-6" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-extrabold bg-clip-text text-transparent bg-linear-to-r from-violet-700 to-fuchsia-600 dark:from-violet-400 dark:to-fuchsia-400 tracking-tight">
-                  Trung tâm Tích hợp & Quy trình
-                </h1>
-                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                  Thiết kế, quản lý và tự động hóa các luồng nghiệp vụ
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="hidden md:flex items-center px-4 py-2 rounded-full bg-violet-50/50 dark:bg-violet-950/30 border border-violet-100 dark:border-violet-900/50">
-            <Sparkles className="w-4 h-4 text-violet-500 mr-2" />
-            <span className="text-xs font-bold text-violet-700 dark:text-violet-300 uppercase tracking-wider">Hệ thống BPMN 2.0</span>
-          </div>
+  // Render sub-views with a unified back button header
+  if (activeView !== 'dashboard') {
+    return (
+      <div className="w-full h-full flex flex-col space-y-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActiveView('dashboard')}
+            className="rounded-xl border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" /> Trở về
+          </Button>
+          <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">
+            {activeView === 'definitions' && "Định nghĩa Quy trình (BPMN)"}
+            {activeView === 'instances' && "Theo dõi Quy trình Đang chạy"}
+            {activeView === 'gateway' && "Cấu hình API Gateway"}
+          </h2>
         </div>
-      </header>
 
-      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <div className="flex justify-center mb-8">
-            <TabsList className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md border border-slate-200/50 dark:border-slate-800/50 p-1.5 rounded-2xl shadow-sm inline-flex h-14">
-              <TabsTrigger
-                value="definitions"
-                className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
-              >
-                <Layers className="h-4 w-4" />
-                Định nghĩa Quy trình
-              </TabsTrigger>
-              <TabsTrigger
-                value="instances"
-                className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
-              >
-                <Activity className="h-4 w-4" />
-                Quy trình Đang chạy
-              </TabsTrigger>
-              <TabsTrigger
-                value="gateway"
-                className="rounded-xl data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400 data-[state=active]:shadow-md px-8 py-2.5 gap-2 text-sm font-semibold transition-all duration-300"
-              >
-                <Network className="h-4 w-4" />
-                Cấu hình Gateway
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="definitions" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl border border-white/20 dark:border-white/10 rounded-3xl p-2 sm:p-8 shadow-2xl shadow-violet-900/5">
+        <div className="flex-1">
+          {activeView === 'definitions' && (
+            <CardContainer>
               <WorkflowList
                 onEdit={(id) => setEditingId(id)}
                 onCreate={() => setIsCreating(true)}
               />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="instances" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+            </CardContainer>
+          )}
+          {activeView === 'instances' && (
             <CardContainer>
               <WorkflowInstanceList />
             </CardContainer>
-          </TabsContent>
-
-          <TabsContent value="gateway" className="mt-0 outline-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+          )}
+          {activeView === 'gateway' && (
             <IntegrationConfig />
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
       </div>
-    </main>
+    );
+  }
+
+  // Main Dashboard View
+  const modules = [
+    {
+      id: 'definitions',
+      title: "Định nghĩa Quy trình",
+      description: "Thiết kế và số hóa luồng nghiệp vụ bằng biểu đồ BPMN 2.0 kéo thả trực quan.",
+      icon: Layers,
+      theme: { light: "bg-blue-50", dark: "dark:bg-blue-900/20", border: "border-blue-200 dark:border-blue-800", icon: "text-blue-600 dark:text-blue-400" },
+    },
+    {
+      id: 'instances',
+      title: "Quy trình Đang chạy",
+      description: "Giám sát thời gian thực các luồng công việc đang được thực thi trên toàn hệ thống.",
+      icon: Activity,
+      theme: { light: "bg-emerald-50", dark: "dark:bg-emerald-900/20", border: "border-emerald-200 dark:border-emerald-800", icon: "text-emerald-600 dark:text-emerald-400" },
+    },
+    {
+      id: 'gateway',
+      title: "Cấu hình API Gateway",
+      description: "Quản trị định tuyến (Routing), bảo mật và cấu hình NGINX cho các Microservices.",
+      icon: Network,
+      theme: { light: "bg-violet-50", dark: "dark:bg-violet-900/20", border: "border-violet-200 dark:border-violet-800", icon: "text-violet-600 dark:text-violet-400" },
+    }
+  ];
+
+  return (
+    <div className="w-full h-full flex flex-col space-y-10">
+      
+      {/* Header Section */}
+      <div className="flex flex-col space-y-4">
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-400 border border-violet-200 dark:border-violet-500/20 w-fit text-sm font-medium shadow-sm">
+          <Sparkles className="w-4 h-4" />
+          <span>Hệ thống quản trị BPMN & Microservices</span>
+        </div>
+        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+          Trung tâm <span className="text-violet-600 dark:text-violet-400">Tích hợp & Quy trình</span>
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 text-base md:text-lg max-w-3xl leading-relaxed">
+          Nơi hợp nhất sức mạnh của việc thiết kế luồng tự động hóa (Workflow) và quản trị giao tiếp dữ liệu (Gateway) giữa các phân hệ cốt lõi.
+        </p>
+      </div>
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+        {modules.map((module) => {
+          const style = module.theme;
+          return (
+            <button
+              key={module.id}
+              onClick={() => setActiveView(module.id as any)}
+              className="text-left group block outline-none w-full"
+            >
+              <div className={`h-full rounded-2xl bg-white dark:bg-slate-900 border ${style.border} p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl shadow-sm flex flex-col`}>
+                <div className={`w-14 h-14 rounded-xl ${style.light} ${style.dark} border ${style.border} flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300`}>
+                  <module.icon className={`w-7 h-7 ${style.icon}`} />
+                </div>
+                
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                  {module.title}
+                </h3>
+                
+                <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6 flex-1">
+                  {module.description}
+                </p>
+                
+                <div className="flex items-center text-sm font-bold text-slate-400 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors mt-auto uppercase tracking-wide">
+                  Truy cập phân hệ
+                  <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
+                </div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+    </div>
   );
 }
