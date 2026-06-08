@@ -4,7 +4,7 @@ import { PbacService } from './pbac.service';
 
 @Controller()
 export class PbacController {
-  constructor(private readonly pbacService: PbacService) {}
+  constructor(private readonly pbacService: PbacService) { }
 
   private toRoleResponse(role: {
     id: number;

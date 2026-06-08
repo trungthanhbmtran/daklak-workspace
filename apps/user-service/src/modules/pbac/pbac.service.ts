@@ -11,7 +11,7 @@ export class PbacService {
   constructor(
     private prisma: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  ) { }
 
   async createRole(data: {
     code: string;
@@ -68,8 +68,8 @@ export class PbacService {
         description: data.description,
         permissions: data.permissionIds
           ? {
-              set: data.permissionIds.map((pid) => ({ id: pid })),
-            }
+            set: data.permissionIds.map((pid) => ({ id: pid })),
+          }
           : undefined,
       },
     });
