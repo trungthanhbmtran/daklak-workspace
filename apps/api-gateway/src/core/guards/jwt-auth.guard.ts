@@ -3,19 +3,35 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Inject,
 } from '@nestjs/common';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
+import { ClientGrpc } from '@nestjs/microservices';
+import { MICROSERVICES } from '../constants/services';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const request = context.switchToHttp().getRequest<Request>();
+  private userService: any;
 
+  constructor(
+    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: ClientGrpc,
+  ) {}
+
+  onModuleInit() {
+    this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
+  }
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    if (!this.userService) {
+      this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
+    }
+    
+    const request = context.switchToHttp().getRequest<Request>();
     let token: string | undefined;
 
     // 1. ƯU TIÊN ĐỌC TỪ COOKIE (Do Frontend Next.js gửi lên bằng HttpOnly)
-    // Chú ý: Tên cookie phải khớp với tên bạn đã set lúc Login (ví dụ: 'accessToken')
     if (request.cookies && request.cookies.accessToken) {
       token = request.cookies.accessToken;
     }
@@ -27,9 +43,6 @@ export class JwtAuthGuard implements CanActivate {
       token = request.headers.authorization.split(' ')[1];
     }
 
-    // console.log(token);
-
-    // Nếu tìm cả 2 nơi đều không thấy token
     if (!token) {
       throw new UnauthorizedException(
         'Không tìm thấy token xác thực trong Cookie hoặc Header',
@@ -37,7 +50,6 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     try {
-      // Cùng secret với user-service
       const secret =
         process.env.JWT_SECRET ||
         process.env.ACCESS_TOKEN_SECRET ||
@@ -45,23 +57,36 @@ export class JwtAuthGuard implements CanActivate {
 
       const decoded = jwt.verify(token, secret) as any;
 
-      // Gắn thông tin user vào request để các Controller có thể lấy dùng (@Req() req)
+      // Call User Service to fetch permissions dynamically
+      let userRes: any = null;
+      const userId = parseInt(decoded.sub, 10);
+      try {
+        userRes = await firstValueFrom(
+          this.userService.FindOne({ id: userId })
+        );
+      } catch (err) {
+        console.error('Failed to fetch user permissions from user-service:', err.message);
+      }
+
+      const roles = userRes?.roles || [];
+      const permissionsFlatten = userRes?.permissionsFlatten || [];
+
+      // Gắn thông tin user vào request
       (request as any).user = {
-        id: decoded.sub,
-        email: decoded.email,
-        username: decoded.username,
-        fullName: decoded.fullName,
-        identitycard: decoded.identitycard,
-        employeeCode: decoded.employeeCode,
-        roles: decoded.roles || [],
-        permissionsFlatten: decoded.permissionsFlatten || [],
-        unitId: decoded.unitId,
-        jobTitleCode: decoded.jobTitleCode,
+        id: userId,
+        email: userRes?.email,
+        username: userRes?.username,
+        fullName: userRes?.fullName,
+        identitycard: userRes?.identitycard,
+        employeeCode: userRes?.employeeCode,
+        roles,
+        permissionsFlatten,
+        unitId: userRes?.unitId,
+        jobTitleCode: userRes?.jobTitleCode,
       };
 
       return true;
     } catch (error) {
-      // Bắt lỗi cụ thể để dễ debug hơn
       console.error('JWT Verification Error:', error.message);
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
     }

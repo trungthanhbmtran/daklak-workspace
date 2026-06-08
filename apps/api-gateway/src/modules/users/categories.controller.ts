@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -23,6 +23,8 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
 function toFrontendItem(c: any) {
   return {
@@ -36,9 +38,9 @@ function toFrontendItem(c: any) {
   };
 }
 
-@ApiTags('Danh mục hệ thống')
+@ApiTags('Danh má»¥c há»‡ thá»‘ng')
 @Controller('admin/categories')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class CategoriesController implements OnModuleInit {
   private categoryService: any;
@@ -54,8 +56,9 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Get('groups')
-  @ApiOperation({ summary: 'Lấy danh sách tất cả các nhóm danh mục' })
-  @ApiResponse({ status: 200, description: 'Danh sách các nhóm' })
+  @RequirePermissions('CATEGORY:READ')
+  @ApiOperation({ summary: 'Láº¥y danh sÃ¡ch táº¥t cáº£ cÃ¡c nhÃ³m danh má»¥c' })
+  @ApiResponse({ status: 200, description: 'Danh sÃ¡ch cÃ¡c nhÃ³m' })
   async getGroups() {
     console.log(
       '[CategoriesController] Requesting GetAllGroups from user-service...',
@@ -75,21 +78,22 @@ export class CategoriesController implements OnModuleInit {
         success: false,
         data: [],
         message:
-          'Chưa thể kết nối tới dịch vụ danh mục hoặc phương thức chưa được hỗ trợ',
+          'ChÆ°a thá»ƒ káº¿t ná»‘i tá»›i dá»‹ch vá»¥ danh má»¥c hoáº·c phÆ°Æ¡ng thá»©c chÆ°a Ä‘Æ°á»£c há»— trá»£',
       };
     }
   }
 
   @Get()
+  @RequirePermissions('')
   @ApiOperation({
-    summary: 'Lấy danh mục theo nhóm hoặc tất cả nếu không truyền group',
+    summary: 'Láº¥y danh má»¥c theo nhÃ³m hoáº·c táº¥t cáº£ náº¿u khÃ´ng truyá»n group',
   })
   @ApiQuery({
     name: 'group',
     required: false,
-    description: 'Mã nhóm danh mục (để trống để lấy tất cả)',
+    description: 'MÃ£ nhÃ³m danh má»¥c (Ä‘á»ƒ trá»‘ng Ä‘á»ƒ láº¥y táº¥t cáº£)',
   })
-  @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
+  @ApiResponse({ status: 200, description: 'Danh sÃ¡ch danh má»¥c thuá»™c nhÃ³m' })
   async getByGroup(@Query('group') group?: string) {
     if (!group) {
       const result = await firstValueFrom(
@@ -104,9 +108,10 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo danh mục mới (Admin)' })
+  @RequirePermissions('')
+  @ApiOperation({ summary: 'Táº¡o danh má»¥c má»›i (Admin)' })
   @ApiBody({ description: 'group, code, name, description?, order?' })
-  @ApiResponse({ status: 201, description: 'Danh mục vừa tạo' })
+  @ApiResponse({ status: 201, description: 'Danh má»¥c vá»«a táº¡o' })
   async create(
     @Body()
     body: {
@@ -130,8 +135,9 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật danh mục' })
-  @ApiResponse({ status: 200, description: 'Danh mục đã cập nhật' })
+  @RequirePermissions('CATEGORY:MANAGE')
+  @ApiOperation({ summary: 'Cáº­p nháº­t danh má»¥c' })
+  @ApiResponse({ status: 200, description: 'Danh má»¥c Ä‘Ã£ cáº­p nháº­t' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body()
@@ -157,20 +163,21 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa danh mục (không xóa được danh mục hệ thống)' })
-  @ApiResponse({ status: 200, description: 'Đã xóa' })
+  @RequirePermissions('CATEGORY:MANAGE')
+  @ApiOperation({ summary: 'XÃ³a danh má»¥c (khÃ´ng xÃ³a Ä‘Æ°á»£c danh má»¥c há»‡ thá»‘ng)' })
+  @ApiResponse({ status: 200, description: 'ÄÃ£ xÃ³a' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(
       this.categoryService.Delete({ id }),
     )) as any;
     return {
       success: res?.success ?? true,
-      message: res?.message ?? 'Đã xóa danh mục',
+      message: res?.message ?? 'ÄÃ£ xÃ³a danh má»¥c',
     };
   }
 }
 
-@ApiTags('Danh mục hệ thống công khai')
+@ApiTags('Danh má»¥c há»‡ thá»‘ng cÃ´ng khai')
 @Controller('public/categories')
 export class PublicCategoriesController implements OnModuleInit {
   private categoryService: any;
@@ -186,17 +193,18 @@ export class PublicCategoriesController implements OnModuleInit {
   }
 
   @Get()
+  @RequirePermissions('')
   @ApiOperation({
     summary:
-      'Lấy danh mục theo nhóm hoặc tất cả nếu không truyền group (Công khai)',
+      'Láº¥y danh má»¥c theo nhÃ³m hoáº·c táº¥t cáº£ náº¿u khÃ´ng truyá»n group (CÃ´ng khai)',
   })
   @ApiQuery({
     name: 'group',
     required: false,
-    description: 'Mã nhóm danh mục (để trống để lấy tất cả)',
+    description: 'MÃ£ nhÃ³m danh má»¥c (Ä‘á»ƒ trá»‘ng Ä‘á»ƒ láº¥y táº¥t cáº£)',
   })
-  @ApiQuery({ name: 'lang', required: false, description: 'Mã ngôn ngữ' })
-  @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
+  @ApiQuery({ name: 'lang', required: false, description: 'MÃ£ ngÃ´n ngá»¯' })
+  @ApiResponse({ status: 200, description: 'Danh sÃ¡ch danh má»¥c thuá»™c nhÃ³m' })
   async getByGroup(@Query() query: any) {
     const group = query.group;
     const lang = query.lang || 'vi';
@@ -212,3 +220,4 @@ export class PublicCategoriesController implements OnModuleInit {
     return { success: true, data: (result as any)?.data || [] };
   }
 }
+

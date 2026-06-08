@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -24,11 +24,14 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 import { NotificationsService } from '../notifications/notifications.service';
+import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('Users')
 @Controller('admin/users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class UserController implements OnModuleInit {
   private userService: any;
@@ -43,11 +46,12 @@ export class UserController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách user' })
+  @RequirePermissions('USER:READ')
+  @ApiOperation({ summary: 'Danh sÃ¡ch user' })
   @ApiResponse({
     status: 200,
     description:
-      'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
+      'Máº£ng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
   })
   async list() {
     const response = (await firstValueFrom(
@@ -61,7 +65,8 @@ export class UserController implements OnModuleInit {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Chi tiết user theo ID' })
+  @RequirePermissions('USER:READ')
+  @ApiOperation({ summary: 'Chi tiáº¿t user theo ID' })
   @ApiResponse({
     status: 200,
     description:
@@ -71,14 +76,15 @@ export class UserController implements OnModuleInit {
     const data = await firstValueFrom(this.userService.FindOne({ id }));
     return {
       success: true,
-      data: data,
+      data: sanitizeUserForClient(data),
     };
   }
 
   @Post()
+  @RequirePermissions('USER:CREATE')
   @ApiOperation({
     summary:
-      'Tạo user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode từ HRM)',
+      'Táº¡o user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode tá»« HRM)',
   })
   @ApiResponse({
     status: 201,
@@ -118,7 +124,7 @@ export class UserController implements OnModuleInit {
         }),
       );
     } catch (err: any) {
-      const message = err?.details ?? err?.message ?? 'Lỗi tạo tài khoản';
+      const message = err?.details ?? err?.message ?? 'Lá»—i táº¡o tÃ i khoáº£n';
       throw new BadRequestException(
         typeof message === 'string' ? message : String(message),
       );
@@ -129,16 +135,17 @@ export class UserController implements OnModuleInit {
         (created as { fullName?: string }).fullName ?? body.fullName ?? '';
       this.notificationsService.push(
         String(createdByUserId),
-        'Đã tạo tài khoản mới',
-        `Tài khoản đã được tạo: ${fullName || email} (${email}). Thông báo đăng nhập đã gửi tới email người dùng.`,
+        'ÄÃ£ táº¡o tÃ i khoáº£n má»›i',
+        `TÃ i khoáº£n Ä‘Ã£ Ä‘Æ°á»£c táº¡o: ${fullName || email} (${email}). ThÃ´ng bÃ¡o Ä‘Äƒng nháº­p Ä‘Ã£ gá»­i tá»›i email ngÆ°á»i dÃ¹ng.`,
       );
     }
     return created;
   }
 
   @Post(':id/assign-position')
-  @ApiOperation({ summary: 'Bổ nhiệm chức vụ cho user (đơn vị + chức danh)' })
-  @ApiResponse({ status: 200, description: 'Thông tin bổ nhiệm (camelCase)' })
+  @RequirePermissions('USER:MANAGE')
+  @ApiOperation({ summary: 'Bá»• nhiá»‡m chá»©c vá»¥ cho user (Ä‘Æ¡n vá»‹ + chá»©c danh)' })
+  @ApiResponse({ status: 200, description: 'ThÃ´ng tin bá»• nhiá»‡m (camelCase)' })
   async assignPosition(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { unitId: number; jobTitleId: number; isPrimary?: boolean },
@@ -154,7 +161,8 @@ export class UserController implements OnModuleInit {
   }
 
   @Patch(':id/active')
-  @ApiOperation({ summary: 'Khóa hoặc mở tài khoản (isActive: true/false)' })
+  @RequirePermissions('USER:MANAGE')
+  @ApiOperation({ summary: 'KhÃ³a hoáº·c má»Ÿ tÃ i khoáº£n (isActive: true/false)' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async setActive(
     @Param('id', ParseIntPipe) id: number,
@@ -169,7 +177,8 @@ export class UserController implements OnModuleInit {
   }
 
   @Post(':id/assign-roles')
-  @ApiOperation({ summary: 'Gán lại vai trò cho user (roleIds: number[])' })
+  @RequirePermissions('USER:MANAGE')
+  @ApiOperation({ summary: 'GÃ¡n láº¡i vai trÃ² cho user (roleIds: number[])' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async assignRoles(
     @Param('id', ParseIntPipe) id: number,
@@ -182,16 +191,19 @@ export class UserController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật user (chưa hỗ trợ)' })
+  @RequirePermissions('USER:UPDATE')
+  @ApiOperation({ summary: 'Cáº­p nháº­t user (chÆ°a há»— trá»£)' })
   @ApiResponse({ status: 406 })
   async update(@Param('id') _id: string) {
-    throw new NotAcceptableException('UserService mới chưa hỗ trợ UpdateUser.');
+    throw new NotAcceptableException('UserService má»›i chÆ°a há»— trá»£ UpdateUser.');
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa user (chưa hỗ trợ)' })
+  @RequirePermissions('USER:DELETE')
+  @ApiOperation({ summary: 'XÃ³a user (chÆ°a há»— trá»£)' })
   @ApiResponse({ status: 406 })
   async delete(@Param('id') _id: string) {
-    throw new NotAcceptableException('UserService mới chưa hỗ trợ DeleteUser.');
+    throw new NotAcceptableException('UserService má»›i chÆ°a há»— trá»£ DeleteUser.');
   }
 }
+

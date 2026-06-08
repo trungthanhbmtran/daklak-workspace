@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -25,6 +25,8 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 interface MenuDto {
@@ -49,7 +51,7 @@ interface MenuDto {
   [key: string]: unknown;
 }
 
-/** Map flat menu từ gRPC sang frontend. */
+/** Map flat menu tá»« gRPC sang frontend. */
 function toFrontendItem(m: MenuDto): MenuDto {
   return {
     id: m.id,
@@ -104,7 +106,7 @@ const flattenMenus = (nodes: any[], basePath: string): any[] => {
 
 @ApiTags('Menu')
 @Controller('admin/menus')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class MenusController implements OnModuleInit {
   private menuService: any;
@@ -118,8 +120,9 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách menu (flat) cho trang quản lý menu' })
-  @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
+  @RequirePermissions('')
+  @ApiOperation({ summary: 'Danh sÃ¡ch menu (flat) cho trang quáº£n lÃ½ menu' })
+  @ApiResponse({ status: 200, description: 'Máº£ng menu pháº³ng' })
   async getAll(@Query('app') app?: string) {
     const res = (await firstValueFrom(
       this.menuService.GetAll({ app: app || 'ADMIN_PORTAL' }),
@@ -129,14 +132,14 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get('me')
-  @ApiOperation({ summary: 'Menu sidebar theo user đăng nhập và ứng dụng' })
+  @ApiOperation({ summary: 'Menu sidebar theo user Ä‘Äƒng nháº­p vÃ  á»©ng dá»¥ng' })
   @ApiQuery({
     name: 'app',
     required: false,
     description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
     example: 'ADMIN_PORTAL',
   })
-  @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
+  @ApiResponse({ status: 200, description: 'CÃ¢y menu (chá»‰ má»¥c user cÃ³ quyá»n)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
@@ -152,12 +155,12 @@ export class MenusController implements OnModuleInit {
       }),
     );
 
-    // Bổ sung meta chứa currentUser để Frontend (HubClient) dùng
+    // Bá»• sung meta chá»©a currentUser Ä‘á»ƒ Frontend (HubClient) dÃ¹ng
     if (response) {
       if (!response.meta) response.meta = {};
       response.meta.currentUser = sanitizeUserForClient(req.user);
 
-      // --- BFF Logic: Tính toán cấu trúc hiển thị cho Frontend ---
+      // --- BFF Logic: TÃ­nh toÃ¡n cáº¥u trÃºc hiá»ƒn thá»‹ cho Frontend ---
       const branches = getRealBranches(response.items ?? []);
 
       response.hubApps = branches
@@ -184,7 +187,7 @@ export class MenusController implements OnModuleInit {
           return {
             id: svcCode,
             title: (b.name ?? '').trim() || svcCode,
-            desc: (b.description ?? '').trim() || 'Phân hệ nghiệp vụ',
+            desc: (b.description ?? '').trim() || 'PhÃ¢n há»‡ nghiá»‡p vá»¥',
             href,
             icon: b.icon ?? '',
             iconColor: (b.iconColor ?? '').trim() || null,
@@ -212,7 +215,7 @@ export class MenusController implements OnModuleInit {
     return response;
   }
 
-  /** Chuẩn hóa body từ frontend sang payload gRPC */
+  /** Chuáº©n hÃ³a body tá»« frontend sang payload gRPC */
   private toCreatePayload(body: MenuDto) {
     return {
       code: body.code,
@@ -234,9 +237,10 @@ export class MenusController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo menu mới (PBAC: quyền gắn với Permission)' })
-  @ApiBody({ description: 'Thông tin menu' })
-  @ApiResponse({ status: 201, description: 'Menu đã tạo' })
+  @RequirePermissions('')
+  @ApiOperation({ summary: 'Táº¡o menu má»›i (PBAC: quyá»n gáº¯n vá»›i Permission)' })
+  @ApiBody({ description: 'ThÃ´ng tin menu' })
+  @ApiResponse({ status: 201, description: 'Menu Ä‘Ã£ táº¡o' })
   async create(@Body() body: MenuDto) {
     try {
       const payload = this.toCreatePayload(body);
@@ -245,14 +249,14 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi tạo menu';
+      const message = err?.message ?? err?.details ?? 'Lá»—i táº¡o menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
     }
   }
 
-  /** Chuẩn hóa body cập nhật sang gRPC */
+  /** Chuáº©n hÃ³a body cáº­p nháº­t sang gRPC */
   private toUpdatePayload(id: number, body: MenuDto) {
     const payload: any = {
       id,
@@ -279,8 +283,9 @@ export class MenusController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật menu (PBAC: quyền gắn với Permission)' })
-  @ApiResponse({ status: 200, description: 'Menu đã cập nhật' })
+  @RequirePermissions('MENU:MANAGE')
+  @ApiOperation({ summary: 'Cáº­p nháº­t menu (PBAC: quyá»n gáº¯n vá»›i Permission)' })
+  @ApiResponse({ status: 200, description: 'Menu Ä‘Ã£ cáº­p nháº­t' })
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: MenuDto) {
     try {
       const payload = this.toUpdatePayload(id, body);
@@ -289,7 +294,7 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật menu';
+      const message = err?.message ?? err?.details ?? 'Lá»—i cáº­p nháº­t menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
@@ -297,13 +302,15 @@ export class MenusController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa menu' })
-  @ApiResponse({ status: 200, description: 'Đã xóa' })
+  @RequirePermissions('MENU:MANAGE')
+  @ApiOperation({ summary: 'XÃ³a menu' })
+  @ApiResponse({ status: 200, description: 'ÄÃ£ xÃ³a' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
     return {
       success: res?.success ?? true,
-      message: res?.message ?? 'Đã xóa menu',
+      message: res?.message ?? 'ÄÃ£ xÃ³a menu',
     };
   }
 }
+

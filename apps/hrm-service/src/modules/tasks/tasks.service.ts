@@ -51,7 +51,7 @@ export class TasksService implements OnModuleInit {
 
   private async computeAllowedActions(t: any, query: any, isUserInTree: boolean = false): Promise<string[]> {
     if (!query || !query.currentUserCode) return [];
-    const isUserAdmin = true; // query.isAdmin === true;
+    const isUserAdmin = query.isAdmin === true;
     const currentUserCode = query.currentUserCode;
 
     const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
@@ -128,12 +128,16 @@ export class TasksService implements OnModuleInit {
     if (query.planId) {
       where.planId = parseInt(query.planId, 10);
       delete where.status;
-    } else if (false /*!query.assignerCode && !query.isAdmin && query.currentUserCode*/) {
-      where.participants = {
-        some: {
-          employeeCode: query.currentUserCode
-        }
-      };
+    } 
+
+    // Áp dụng bộ lọc PBAC nếu không phải admin
+    if (!query.isAdmin && query.currentUserCode) {
+      where.OR = [
+        // Quy?n owner: việc mình t?o ho?c giao
+        { creatorEmployeeCode: query.currentUserCode },
+        // Quy?n assignee/coordinator: việc mình ???c giao/ph?i h?p
+        { participants: { some: { employeeCode: query.currentUserCode } } },
+      ];
     }
 
     const tasks = await this.prisma.task.findMany({

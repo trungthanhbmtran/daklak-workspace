@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Post,
   Put,
@@ -19,10 +19,12 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
-@ApiTags('PBAC – Tài nguyên')
+@ApiTags('PBAC â€“ TÃ i nguyÃªn')
 @Controller('admin/resources')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class ResourcesController implements OnModuleInit {
   private pbacService: any;
@@ -36,8 +38,9 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'Tạo tài nguyên mới' })
-  @ApiResponse({ status: 201, description: 'Tài nguyên vừa tạo' })
+  @RequirePermissions('')
+  @ApiOperation({ summary: 'Táº¡o tÃ i nguyÃªn má»›i' })
+  @ApiResponse({ status: 201, description: 'TÃ i nguyÃªn vá»«a táº¡o' })
   async createResource(@Body() body: { code: string; name: string }) {
     return firstValueFrom(
       this.pbacService.CreateResource({ code: body.code, name: body.name }),
@@ -45,8 +48,9 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật tài nguyên' })
-  @ApiResponse({ status: 200, description: 'Tài nguyên sau khi cập nhật' })
+  @RequirePermissions('RESOURCE:MANAGE')
+  @ApiOperation({ summary: 'Cáº­p nháº­t tÃ i nguyÃªn' })
+  @ApiResponse({ status: 200, description: 'TÃ i nguyÃªn sau khi cáº­p nháº­t' })
   async updateResource(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { code?: string; name?: string },
@@ -57,24 +61,27 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Delete('permissions/:id')
-  @ApiOperation({ summary: 'Xóa một quyền theo id' })
-  @ApiResponse({ status: 200, description: 'Kết quả xóa' })
+  @RequirePermissions('RESOURCE:MANAGE')
+  @ApiOperation({ summary: 'XÃ³a má»™t quyá»n theo id' })
+  @ApiResponse({ status: 200, description: 'Káº¿t quáº£ xÃ³a' })
   async deletePermission(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.DeletePermission({ id }));
   }
 
   @Delete(':id')
+  @RequirePermissions('RESOURCE:MANAGE')
   @ApiOperation({
-    summary: 'Xóa tài nguyên (chỉ khi không còn permission nào)',
+    summary: 'XÃ³a tÃ i nguyÃªn (chá»‰ khi khÃ´ng cÃ²n permission nÃ o)',
   })
-  @ApiResponse({ status: 200, description: 'Kết quả xóa' })
+  @ApiResponse({ status: 200, description: 'Káº¿t quáº£ xÃ³a' })
   async deleteResource(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.DeleteResource({ id }));
   }
 
   @Post(':id/permissions')
-  @ApiOperation({ summary: 'Thêm quyền (action) cho tài nguyên' })
-  @ApiResponse({ status: 201, description: 'Permission vừa tạo' })
+  @RequirePermissions('RESOURCE:MANAGE')
+  @ApiOperation({ summary: 'ThÃªm quyá»n (action) cho tÃ i nguyÃªn' })
+  @ApiResponse({ status: 201, description: 'Permission vá»«a táº¡o' })
   async createPermission(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { action: string },
@@ -87,3 +94,4 @@ export class ResourcesController implements OnModuleInit {
     );
   }
 }
+

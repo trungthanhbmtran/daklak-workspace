@@ -217,7 +217,7 @@ export class TasksController implements OnModuleInit {
       finalDepartmentId = user.unitId;
     }
 
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     // Tính ancestor unit IDs cho visibility và phân quyền theo cây tổ chức
     let callerAncestorUnitIds: number[] = [];
@@ -305,7 +305,7 @@ export class TasksController implements OnModuleInit {
       }),
     );
 
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     if (!isAdmin && user?.unitId) {
       const [unitMap, jtMap] = await Promise.all([
@@ -373,7 +373,7 @@ export class TasksController implements OnModuleInit {
   ) {
     const user = req.user;
     const assignerCode = user?.employeeCode;
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     const taskId = parseInt(id, 10);
     const taskData: any = await firstValueFrom(
@@ -435,7 +435,7 @@ export class TasksController implements OnModuleInit {
   ) {
     const user = req.user;
     const assignerCode = user?.employeeCode;
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     const taskId = parseInt(id, 10);
     const taskData: any = await firstValueFrom(
@@ -461,7 +461,7 @@ export class TasksController implements OnModuleInit {
   @Get(':id/comments')
   async getComments(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
@@ -515,7 +515,7 @@ export class TasksController implements OnModuleInit {
     );
     if (!taskData) throw new Error('Task not found.');
 
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
     const isOwner = taskData.assigneeCode === requesterCode;
     const isAssigner = taskData.assignerCode === requesterCode;
 
@@ -562,7 +562,7 @@ export class TasksController implements OnModuleInit {
   @Get(':id/subtasks')
   async getSubTasks(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
-    const isAdmin = true; // user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();

@@ -5,7 +5,7 @@ import { RpcException, ClientGrpc } from '@nestjs/microservices';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import * as bcrypt from 'bcrypt';
-import { randomBytes } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '@/database/prisma.service';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
@@ -299,40 +299,15 @@ export class UsersService implements OnModuleInit {
       String(user.id),
       REFRESH_TTL_SECONDS,
     );
-    const roles = user.roles?.map((r) => r.code) ?? [];
-
-    // Extract permissions (e.g. ORGANIZATION:READ)
-    const permissionsSet = new Set<string>();
-    if (user.roles) {
-      for (const role of user.roles) {
-        if (role.permissions) {
-          for (const perm of role.permissions) {
-            if (perm.resource?.code && perm.action) {
-              permissionsSet.add(`${perm.resource.code}:${perm.action}`);
-            }
-          }
-        }
-      }
-    }
-    const isSuperAdmin = roles.includes('SUPER_ADMIN');
-    const permissionsFlatten = isSuperAdmin ? [] : Array.from(permissionsSet);
-
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
-    const unitId = firstPosition?.unit?.id ?? null;
-    const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
       {
-        sub: user.id,
-        email: user.email,
-        username: user.username,
-        fullName: user.fullName,
-        roles,
-        permissionsFlatten,
-        unitId,
-        jobTitleCode,
-        employeeCode: user.employeeCode
+        iss: 'daklak-user-service',
+        sub: String(user.id),
+        aud: 'daklak-api-gateway',
+        jti: randomUUID()
       },
       { expiresIn: jwtExpiresIn },
     );
@@ -405,40 +380,15 @@ export class UsersService implements OnModuleInit {
       String(user.id),
       REFRESH_TTL_SECONDS,
     );
-    const roles = user.roles?.map((r) => r.code) ?? [];
-
-    // Extract permissions (e.g. ORGANIZATION:READ)
-    const permissionsSet = new Set<string>();
-    if (user.roles) {
-      for (const role of user.roles) {
-        if (role.permissions) {
-          for (const perm of role.permissions) {
-            if (perm.resource?.code && perm.action) {
-              permissionsSet.add(`${perm.resource.code}:${perm.action}`);
-            }
-          }
-        }
-      }
-    }
-    const isSuperAdmin = roles.includes('SUPER_ADMIN');
-    const permissionsFlatten = isSuperAdmin ? [] : Array.from(permissionsSet);
-
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
     const firstPosition = user.jobPositions?.[0];
-    const unitId = firstPosition?.unit?.id ?? null;
-    const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     const accessToken = this.jwt.sign(
       {
-        sub: user.id,
-        email: user.email,
-        username: user.username,
-        fullName: user.fullName,
-        roles,
-        permissionsFlatten,
-        unitId,
-        jobTitleCode,
-        employeeCode: user.employeeCode
+        iss: 'daklak-user-service',
+        sub: String(user.id),
+        aud: 'daklak-api-gateway',
+        jti: randomUUID()
       },
       { expiresIn: jwtExpiresIn },
     );
@@ -493,7 +443,13 @@ export class UsersService implements OnModuleInit {
   async findOne(data: { id: number }) {
     const user = await this.prisma.user.findUnique({
       where: { id: data.id },
-      include: { roles: true },
+      include: { 
+        roles: true,
+        jobPositions: {
+          include: { unit: true, jobTitle: true },
+          orderBy: [{ isPrimary: 'desc' }],
+        }
+      },
     });
     if (!user) {
       throw new RpcException({
@@ -514,6 +470,7 @@ export class UsersService implements OnModuleInit {
 
     const roleIds = roles.map((r) => r.id);
     const policies: Array<{ description: string; resource: string }> = [];
+    const permissionsFlattenSet = new Set<string>();
     if (roleIds.length > 0) {
       const permissions = await this.prisma.permission.findMany({
         where: { roles: { some: { id: { in: roleIds } } } },
@@ -526,14 +483,27 @@ export class UsersService implements OnModuleInit {
         const resourceName = res?.name ?? resourceCode;
         const description = `${perm.action} - ${resourceName}`.trim();
         policies.push({ description, resource: resourceCode });
+        if (resourceCode && perm.action) {
+          permissionsFlattenSet.add(`${resourceCode}:${perm.action}`);
+        }
       }
     }
+    
+    const permissionsFlatten = roleNames.includes('SUPER_ADMIN') ? [] : Array.from(permissionsFlattenSet);
+
+    const firstPosition = (user as any).jobPositions?.[0];
+    const unitId = firstPosition?.unit?.id ?? null;
+    const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     return {
       ...base,
       roleNames,
       role_names: roleNames,
+      roles,
       policies,
+      permissionsFlatten,
+      unitId,
+      jobTitleCode,
     };
   }
 
