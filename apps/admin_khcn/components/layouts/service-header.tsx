@@ -29,7 +29,7 @@ export function ServiceHeader() {
       {/* PHẢI: Công cụ & User Profile */}
       <div className="flex items-center gap-2 md:gap-4">
         <NotificationBell />
-        <HeaderUserProfile />
+        <HeaderUserProfile showName={true} />
       </div>
     </header>
   );
