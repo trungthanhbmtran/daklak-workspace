@@ -40,6 +40,12 @@ export const resourceApi = {
     return parseMatrixResponse(res);
   },
 
+  getActionCategories: async (): Promise<string[]> => {
+    const res = await apiClient.get("/categories", { params: { group: "SYSTEM_ACTION" } });
+    const actions = (res as any)?.data ?? [];
+    return actions.map((c: any) => c.code);
+  },
+
   createResource: (payload: { code: string; name: string }) =>
     apiClient.post<{ id: number; code: string; name: string }>("/resources", payload),
 

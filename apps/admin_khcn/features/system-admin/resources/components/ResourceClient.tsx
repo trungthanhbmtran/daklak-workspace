@@ -13,9 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useResourceLogic } from "../hooks/useResourceLogic";
 import type { Resource } from "../types";
-import { ApiEndpointsConfig } from "./ApiEndpointsConfig";
-
-const COMMON_ACTIONS = ["READ", "CREATE", "UPDATE", "DELETE", "VIEW", "EXPORT", "IMPORT", "APPROVE"];
 
 export function ResourceClient() {
   const [newCode, setNewCode] = useState("");
@@ -36,6 +33,7 @@ export function ResourceClient() {
     deleteResourceMutation,
     createPermissionMutation,
     deletePermissionMutation,
+    commonActions,
   } = useResourceLogic();
 
   const currentActionNames = currentPermissions.map((p) => p.action);
@@ -239,19 +237,19 @@ export function ResourceClient() {
               
               <div className="p-4 bg-accent/30 rounded-lg border border-border space-y-4">
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gợi ý — bấm để thêm quyền</p>
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gợi ý - bấm để thêm quyền</p>
                   <div className="flex flex-wrap gap-2">
-                    {COMMON_ACTIONS.map((action) => {
-                      const isExist = currentActionNames.includes(action);
+                    {commonActions.map((actionCode: string) => {
+                      const isAdded = currentActionNames.includes(actionCode);
                       return (
                         <Badge
-                          key={action}
-                          variant={isExist ? "secondary" : "outline"}
-                          className={`font-mono text-xs py-1 px-3 cursor-pointer ${isExist ? "" : "hover:bg-primary hover:text-primary-foreground"}`}
-                          onClick={() => !isExist && handleAddPermission(action)}
+                          key={actionCode}
+                          variant={isAdded ? "secondary" : "outline"}
+                          className={`font-mono text-xs py-1 px-3 cursor-pointer ${isAdded ? "" : "hover:bg-primary hover:text-primary-foreground"}`}
+                          onClick={() => !isAdded && handleAddPermission(actionCode)}
                         >
-                          {isExist && <Check className="h-3 w-3 mr-1" />}
-                          {action}
+                          {isAdded && <Check className="h-3 w-3 mr-1" />}
+                          {actionCode}
                         </Badge>
                       );
                     })}
@@ -312,7 +310,6 @@ export function ResourceClient() {
                       <p className="text-[10px] text-muted-foreground font-mono bg-muted inline-block px-2 py-1 rounded w-fit">
                         {selectedResource.code}:{perm.action}
                       </p>
-                      <ApiEndpointsConfig permissionCode={`${selectedResource.code}:${perm.action}`} />
                     </div>
                   ))}
                 </div>

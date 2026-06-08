@@ -7,10 +7,19 @@ import type { Resource, Permission, ResourceWithPermissions } from "../types";
 
 export function useResourceLogic() {
   const queryClient = useQueryClient();
-  const { data: matrix = [], isLoading, isError } = useQuery({
+  const { data: matrix = [], isLoading: isLoadingMatrix, isError: isErrorMatrix } = useQuery({
     queryKey: resourceKeys.matrix(),
     queryFn: () => resourceApi.getMatrix(),
   });
+
+  const { data: commonActions = [], isLoading: isLoadingActions } = useQuery({
+    queryKey: ["resource-action-categories"],
+    queryFn: () => resourceApi.getActionCategories(),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const isLoading = isLoadingMatrix || isLoadingActions;
+  const isError = isErrorMatrix;
 
   const resources = matrixToResources(matrix);
   const permissions = matrixToPermissions(matrix);
@@ -66,6 +75,7 @@ export function useResourceLogic() {
     allResources: resources,
     permissions,
     matrix: matrix as ResourceWithPermissions[],
+    commonActions,
     isLoading,
     isError,
     searchTerm,

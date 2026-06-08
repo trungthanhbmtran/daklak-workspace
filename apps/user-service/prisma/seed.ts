@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+﻿import * as bcrypt from 'bcrypt';
 import type { PrismaClient as PrismaClientType } from '@generated/prisma/client';
 let PrismaClient: typeof PrismaClientType;
 try {
@@ -43,12 +43,16 @@ async function main() {
     { code: 'NOTIFICATION', name: 'Thông báo hệ thống' },
 
     // Document Management
+    { code: 'DOCUMENT', name: 'Quản lý Văn bản' },
     { code: 'DOC_INCOMING', name: 'Văn bản đến' },
     { code: 'DOC_OUTGOING', name: 'Văn bản đi' },
-    { code: 'DOC_PROCESSING', name: 'Xử lý văn bản' },
+    { code: 'DOC_INTERNAL', name: 'Văn bản nội bộ' },
+    { code: 'DOC_DRAFT', name: 'Dự thảo văn bản' },
+    { code: 'DOC_TEMPLATE', name: 'Biểu mẫu văn bản' },
     { code: 'DOC_PUBLISH', name: 'Phát hành văn bản' },
+    { code: 'DOC_PROCESSING', name: 'Xử lý văn bản' },
     { code: 'DOC_TRANSPARENCY', name: 'Công khai văn bản' },
-    { code: 'DOC_CONSULTATION', name: 'Xin ý kiến văn bản' },
+    { code: 'DOC_CONSULTATION', name: 'Lấy ý kiến văn bản' },
     { code: 'DOC_MINUTES', name: 'Biên bản cuộc họp' },
     { code: 'DOC_CATEGORIES', name: 'Danh mục văn bản' },
 
@@ -62,17 +66,18 @@ async function main() {
     { code: 'PORTAL_MENU', name: 'Quản lý Portal Menu' },
     { code: 'CITIZEN_INTERACTION', name: 'Tương tác công dân' },
 
-    // Workflow
-    { code: 'WORKFLOW', name: 'Quy trình nghiệp vụ' },
-
     // Integration
     { code: 'INTEGRATION', name: 'Liên thông hệ thống' },
 
     // PBAC
-    { code: 'DOCUMENT', name: 'Văn bản' },
-    { code: 'PLAN', name: 'Kế hoạch' },
-    { code: 'OBJECTIVE', name: 'Mục tiêu' },
+    // Task & Project Management
     { code: 'TASK', name: 'Công việc' },
+    { code: 'PROJECT', name: 'Dự án' },
+    { code: 'PLAN', name: 'Kế hoạch công tác' },
+    { code: 'WORKFLOW', name: 'Quy trình công việc' },
+
+    // CMS & Portal
+    { code: 'OBJECTIVE', name: 'Mục tiêu' },
     { code: 'KPI', name: 'KPI' },
     { code: 'REPORT', name: 'Báo cáo' },
   ];
@@ -100,7 +105,9 @@ async function main() {
     'APPROVE',
     'MANAGE',
     'ASSIGN',
-    'PROCESS'
+    'PROCESS',
+    'REJECT',
+    'PUBLISH'
   ];
   const allPermissions: { id: number }[] = [];
 
@@ -241,37 +248,36 @@ async function main() {
       nameEn: 'Overdue',
     },
 
-
     {
-      group: 'ACTION_LOG',
+      group: 'SYSTEM_ACTION',
       code: 'LOGIN',
       order: 1,
       nameVi: 'Đăng nhập',
       nameEn: 'Login',
     },
     {
-      group: 'ACTION_LOG',
+      group: 'SYSTEM_ACTION',
       code: 'LOGOUT',
       order: 2,
       nameVi: 'Đăng xuất',
       nameEn: 'Logout',
     },
     {
-      group: 'ACTION_LOG',
+      group: 'SYSTEM_ACTION',
       code: 'CREATE',
       order: 3,
       nameVi: 'Tạo mới',
       nameEn: 'Create',
     },
     {
-      group: 'ACTION_LOG',
+      group: 'SYSTEM_ACTION',
       code: 'UPDATE',
       order: 4,
       nameVi: 'Cập nhật',
       nameEn: 'Update',
     },
     {
-      group: 'ACTION_LOG',
+      group: 'SYSTEM_ACTION',
       code: 'DELETE',
       order: 5,
       nameVi: 'Xóa',
@@ -1182,6 +1188,35 @@ async function main() {
       nameEn: 'English',
     },
 
+    {
+      group: 'SYSTEM_ACTION',
+      code: 'APPROVE',
+      order: 6,
+      nameVi: 'Phê duyệt',
+      nameEn: 'Approve',
+    },
+    {
+      group: 'SYSTEM_ACTION',
+      code: 'REJECT',
+      order: 7,
+      nameVi: 'Từ chối',
+      nameEn: 'Reject',
+    },
+    {
+      group: 'SYSTEM_ACTION',
+      code: 'PUBLISH',
+      order: 8,
+      nameVi: 'Xuất bản',
+      nameEn: 'Publish',
+    },
+    {
+      group: 'SYSTEM_ACTION',
+      code: 'REQUEST_INFO',
+      order: 9,
+      nameVi: 'Yêu cầu bổ sung',
+      nameEn: 'Request Info',
+    },
+
     // --- OTHER ---
     {
       group: 'DOMAIN',
@@ -1931,35 +1966,6 @@ async function main() {
       nameEn: 'On User Account Created',
     },
 
-    {
-      group: 'WORKFLOW_ACTION',
-      code: 'APPROVE',
-      order: 1,
-      nameVi: 'Phê duyệt',
-      nameEn: 'Approve',
-    },
-    {
-      group: 'WORKFLOW_ACTION',
-      code: 'REJECT',
-      order: 2,
-      nameVi: 'Từ chối',
-      nameEn: 'Reject',
-    },
-    {
-      group: 'WORKFLOW_ACTION',
-      code: 'PUBLISH',
-      order: 3,
-      nameVi: 'Xuất bản',
-      nameEn: 'Publish',
-    },
-    {
-      group: 'WORKFLOW_ACTION',
-      code: 'REQUEST_INFO',
-      order: 4,
-      nameVi: 'Yêu cầu bổ sung',
-      nameEn: 'Request More Info',
-    },
-
     // --- BANNER POSITIONS ---
     {
       group: 'BANNER_POSITION',
@@ -2137,7 +2143,7 @@ async function main() {
   // ==========================================================
   const groupLabels = [
     { code: 'STATUS', name: 'Trạng thái hệ thống' },
-    { code: 'ACTION_LOG', name: 'Nhật ký hoạt động' },
+    { code: 'SYSTEM_ACTION', name: 'Hành động hệ thống' },
     { code: 'MICROSERVICE', name: 'Dịch vụ hệ thống' },
     { code: 'PROVINCE', name: 'Danh mục Tỉnh/Thành' },
     { code: 'DISTRICT', name: 'Danh mục Quận/Huyện' },
@@ -2165,7 +2171,7 @@ async function main() {
     { code: 'CONTENT_TYPE', name: 'Loại nội dung' },
     { code: 'DEPARTMENT', name: 'Phòng ban' },
     { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
-    { code: 'WORKFLOW_ACTION', name: 'Hành động quy trình' },
+    ,
     { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
     { code: 'font_family', name: 'Phông chữ giao diện (Portal)' },
     { code: 'border_radius', name: 'Độ bo góc khối (Portal)' },
@@ -2395,7 +2401,7 @@ async function main() {
       service: 'HRM_SERVICE',
       color: '#10b981',
       order: 2,
-      res: 'HRM_EMPLOYEE',
+      res: 'EMPLOYEE',
       route: '/services/hrm',
     },
     {
@@ -2732,7 +2738,7 @@ async function main() {
       route: 'employees',
       icon: 'people-outline',
       order: 1,
-      res: 'HRM_EMPLOYEE',
+      res: 'EMPLOYEE',
       action: 'VIEW',
     },
     {
@@ -2759,7 +2765,7 @@ async function main() {
       route: 'work-plans/criteria',
       icon: 'settings-2-outline',
       order: 4,
-      res: 'KPI',
+      res: 'EVALUATION',
       action: 'READ',
     },
 
@@ -2769,7 +2775,7 @@ async function main() {
       route: 'work-plans/rank-templates',
       icon: 'settings-outline',
       order: 6,
-      res: 'HRM_EMPLOYEE',
+      res: 'EMPLOYEE',
       action: 'MANAGE',
     },
     {
@@ -2778,7 +2784,7 @@ async function main() {
       route: 'work-plans/manual-selector',
       icon: 'list-outline',
       order: 7,
-      res: 'HRM_EMPLOYEE',
+      res: 'EMPLOYEE',
       action: 'MANAGE',
     },
 
@@ -4791,6 +4797,7 @@ async function main() {
   };
 
   const roleDefinitions = [
+    { code: 'SUPER_ADMIN', name: 'Quản trị viên cấp cao', scope: 'GLOBAL', perms: ['ALL'] },
     { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
     {
       code: 'LEADER',

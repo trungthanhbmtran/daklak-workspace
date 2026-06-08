@@ -59,6 +59,12 @@ message UserPolicy {
   string resource = 2;     // Mã tài nguyên: USER_MGMT
 }
 
+message RoleMessage {
+  int32 id = 1;
+  string code = 2;
+  string name = 3;
+}
+
 message UserResponse {
   int32 id = 1;
   string email = 2;
@@ -73,6 +79,10 @@ message UserResponse {
   repeated UserPolicy policies = 11;  // Chính sách hiệu lực (từ Permission của các Role)
   string unit_name = 12;
   string job_title_name = 13;
+  repeated RoleMessage roles = 14;
+  repeated string permissions_flatten = 15;
+  optional int32 unit_id = 16;
+  optional string job_title_code = 17;
 }
 
 message SetUserActiveRequest {
