@@ -15,10 +15,12 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
+import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
 @ApiTags('HRM - Tasks')
 @Controller('admin/hrm/tasks')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class TasksController implements OnModuleInit {
   private taskService: any;
@@ -180,6 +182,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Post()
+  @RequirePermissions('TASK:CREATE', 'TASK:MANAGE')
   async create(@Req() req: any, @Body() body: any) {
     if (req.user) {
       body.assignerCode = req.user.employeeCode || req.user.username;
@@ -188,6 +191,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get()
+  @RequirePermissions('TASK:READ', 'TASK:MANAGE')
   async list(
     @Req() req: any,
     @Query('tab') tab: string,
@@ -258,6 +262,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id')
+  @RequirePermissions('TASK:UPDATE', 'TASK:MANAGE')
   async update(@Param('id') id: string, @Body() body: any) {
     return firstValueFrom(
       this.taskService.UpdateTask({
@@ -274,6 +279,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id/status')
+  @RequirePermissions('TASK:UPDATE', 'TASK:MANAGE')
   async updateStatus(
     @Req() req: any,
     @Param('id') id: string,
@@ -292,6 +298,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get('recommend-assignees')
+  @RequirePermissions('TASK:READ', 'TASK:MANAGE')
   async recommendAssignees(
     @Req() req: any,
     @Query('rankCode') rankCode: string,
@@ -364,6 +371,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id/assign')
+  @RequirePermissions('TASK:UPDATE', 'TASK:MANAGE')
   async assignTask(
     @Req() req: any,
     @Param('id') id: string,
@@ -428,6 +436,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Post(':id/breakdown')
+  @RequirePermissions('TASK:UPDATE', 'TASK:MANAGE')
   async breakdownTask(
     @Req() req: any,
     @Param('id') id: string,
@@ -459,6 +468,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/comments')
+  @RequirePermissions('TASK:READ', 'TASK:MANAGE')
   async getComments(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE');
@@ -483,6 +493,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Post(':id/comments')
+  @RequirePermissions('TASK:READ', 'TASK:UPDATE', 'TASK:MANAGE')
   async addComment(
     @Req() req: any,
     @Param('id') id: string,
@@ -499,6 +510,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Post(':id/coordinate')
+  @RequirePermissions('TASK:UPDATE', 'TASK:MANAGE')
   async requestCoordination(
     @Req() req: any,
     @Param('id') id: string,
@@ -545,6 +557,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Put(':id/progress')
+  @RequirePermissions('TASK:UPDATE', 'TASK:MANAGE')
   async updateProgress(
     @Req() req: any,
     @Param('id') id: string,
@@ -560,6 +573,7 @@ export class TasksController implements OnModuleInit {
   }
 
   @Get(':id/subtasks')
+  @RequirePermissions('TASK:READ', 'TASK:MANAGE')
   async getSubTasks(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
     const isAdmin = user?.permissionsFlatten?.includes('TASK:MANAGE');

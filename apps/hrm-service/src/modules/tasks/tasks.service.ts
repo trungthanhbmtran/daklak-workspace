@@ -490,7 +490,15 @@ export class TasksService implements OnModuleInit {
     if (action === 'RETURN') return this.updateTaskStatus(id, 'RETURNED', body?.rejectReason, body?.currentUserCode);
   }
   async updateTask(id: number, data: any) {
-    const t = await this.prisma.task.update({ where: { id }, data });
+    const updateData = { ...data };
+    delete updateData.id; // Don't update the ID
+    if (updateData.startDate) {
+      updateData.startDate = new Date(updateData.startDate);
+    }
+    if (updateData.dueDate) {
+      updateData.dueDate = new Date(updateData.dueDate);
+    }
+    const t = await this.prisma.task.update({ where: { id }, data: updateData });
     return { success: true, data: t };
   }
   async breakdownTask(id: number, data: any) {
