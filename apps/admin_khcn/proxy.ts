@@ -22,9 +22,9 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
-    // ✅ Đã login mà vào login → đẩy về hub
+    // ✅ Đã login mà vào login → đẩy về trang chủ (hub cũ)
     if (token && pathname === "/login") {
-        return NextResponse.redirect(new URL("/admin/hub", request.url));
+        return NextResponse.redirect(new URL("/admin/", request.url));
     }
 
     return NextResponse.next();

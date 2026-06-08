@@ -4,7 +4,7 @@ import { TasksService } from './tasks.service';
 
 @Controller()
 export class TasksController {
-  constructor(private readonly tasksService: TasksService) {}
+  constructor(private readonly tasksService: TasksService) { }
 
   @GrpcMethod('TaskService', 'CreateTask')
   createTask(data: any) {
@@ -17,12 +17,12 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: any) {
-    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode, data);
+  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string }) {
+    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode);
   }
 
   @GrpcMethod('TaskService', 'UpdateTask')
-  updateTask(data: any) {
+  updateTask(data: { id: number; weight?: number; startDate?: string; dueDate?: string; priority?: string; baseScore?: number; title?: string; description?: string }) {
     return this.tasksService.updateTask(data.id, data);
   }
 
@@ -47,8 +47,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'AssignTask')
-  assignTask(data: any) {
-    return this.tasksService.assignTask(data.id, data.assigneeCode, data.coassigneeCodes, data.departmentId, data.assignerCode, data);
+  assignTask(data: { id: number; assigneeCode: string; coassigneeCodes?: string[]; departmentId?: number; assignerCode?: string }) {
+    return this.tasksService.assignTask(data.id, data.assigneeCode, data.coassigneeCodes, data.departmentId, data.assignerCode);
   }
 
   @GrpcMethod('TaskService', 'AddComment')

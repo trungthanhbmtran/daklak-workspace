@@ -27,7 +27,7 @@ export function AppSidebar({
   const { menuItems, serviceName, serviceIcon: ServiceIcon, isLoading } = useServiceMenus();
 
   const items = menuItems ?? [];
-  const firstHref = items[0]?.href ?? "/hub";
+  const firstHref = items[0]?.href ?? "/";
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -57,7 +57,7 @@ export function AppSidebar({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Đổi ứng dụng">
-                <Link href="/hub">
+                <Link href="/">
                   <Grid className="size-4" />
                   <span>Về trang Portal (Hub)</span>
                 </Link>

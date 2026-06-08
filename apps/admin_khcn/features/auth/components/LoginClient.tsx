@@ -7,7 +7,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import axios from "axios";
 import { Loader2, Eye, EyeOff, ShieldCheck } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,6 +37,8 @@ const formSchema = z.object({
 
 export function LoginClient() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl");
   const [isPending, startTransition] = useTransition();
   const [showPassword, setShowPassword] = useState(false);
 
@@ -61,8 +63,11 @@ export function LoginClient() {
 
         toast.success("Đăng nhập thành công! Đang chuyển hướng...");
 
-        // Chuyển hướng sau khi thành công (Sử dụng window.location.href để force reload và nhận cookies mới)
-        window.location.href = '/admin/hub';
+        if (callbackUrl) {
+          window.location.href = callbackUrl;
+        } else {
+          window.location.href = '/admin/';
+        }
       } catch (error: any) {
         const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
         toast.error(message);
