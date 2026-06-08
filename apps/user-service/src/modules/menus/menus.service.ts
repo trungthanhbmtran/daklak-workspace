@@ -226,12 +226,6 @@ export class MenusService {
   }
 
   async getMyMenus(userId: number, application = 'ADMIN_PORTAL') {
-    const cacheKey = `${userId}_${application}`;
-    const cached = this.menuCache.get(cacheKey);
-    if (cached && cached.expiresAt > Date.now()) {
-      return cached.data;
-    }
-
     // 1. Lấy tất cả quyền của User
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -264,7 +258,6 @@ export class MenusService {
     // 4. Cắt tỉa menu cha rỗng (Quan trọng)
     const result = pruneEmptyParents(menuTree);
     
-    this.menuCache.set(cacheKey, { data: result, expiresAt: Date.now() + this.CACHE_TTL_MS });
     return result;
   }
 }
