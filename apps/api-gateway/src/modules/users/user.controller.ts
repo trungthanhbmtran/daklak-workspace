@@ -39,7 +39,7 @@ export class UserController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
     private readonly notificationsService: NotificationsService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.userService = this.client.getService(MICROSERVICES.USER.SERVICE);
@@ -47,7 +47,7 @@ export class UserController implements OnModuleInit {
 
   @Get()
   @RequirePermissions('USER:READ')
-  @ApiOperation({ summary: 'Danh sÃ¡ch user' })
+  @ApiOperation({ summary: 'Danh sách user' })
   @ApiResponse({
     status: 200,
     description:
@@ -56,7 +56,7 @@ export class UserController implements OnModuleInit {
   async list(@Req() req: any) {
     const user = req?.user;
     const isAdmin = Array.isArray(user?.roles) && user.roles.some((r: any) => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN');
-    
+
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
       if (!user?.unitCode) {
@@ -77,7 +77,7 @@ export class UserController implements OnModuleInit {
 
   @Get(':id')
   @RequirePermissions('USER:READ')
-  @ApiOperation({ summary: 'Chi tiáº¿t user theo ID' })
+  @ApiOperation({ summary: 'Chi tiết user theo ID' })
   @ApiResponse({
     status: 200,
     description:
