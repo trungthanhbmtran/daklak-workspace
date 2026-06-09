@@ -24,14 +24,12 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 import { NotificationsService } from '../notifications/notifications.service';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('Users')
 @Controller('admin/users')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class UserController implements OnModuleInit {
   private userService: any;
@@ -49,7 +47,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Get()
-  @RequirePermissions('USER:READ')
   @ApiOperation({ summary: 'Danh sách user' })
   @ApiResponse({
     status: 200,
@@ -79,7 +76,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Get(':id')
-  @RequirePermissions('USER:READ')
   @ApiOperation({ summary: 'Chi tiết user theo ID' })
   @ApiResponse({
     status: 200,
@@ -95,7 +91,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Post()
-  @RequirePermissions('USER:CREATE')
   @ApiOperation({
     summary:
       'Tạo user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode từ HRM)',
@@ -157,7 +152,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Post(':id/assign-position')
-  @RequirePermissions('USER:MANAGE')
   @ApiOperation({ summary: 'Bổ nhiệm chức vụ cho user (đơn vị + chức danh)' })
   @ApiResponse({ status: 200, description: 'Thông tin bổ nhiệm (camelCase)' })
   async assignPosition(
@@ -175,7 +169,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Patch(':id/active')
-  @RequirePermissions('USER:MANAGE')
   @ApiOperation({ summary: 'Khóa hoặc mở tài khoản (isActive: true/false)' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async setActive(
@@ -191,7 +184,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Post(':id/assign-roles')
-  @RequirePermissions('USER:MANAGE')
   @ApiOperation({ summary: 'Gán lại vai trò cho user (roleIds: number[])' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async assignRoles(
@@ -205,7 +197,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Put(':id')
-  @RequirePermissions('USER:UPDATE')
   @ApiOperation({ summary: 'Cập nhật user (chưa hỗ trợ)' })
   @ApiResponse({ status: 406 })
   async update(@Param('id') _id: string) {
@@ -213,7 +204,6 @@ export class UserController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @RequirePermissions('USER:DELETE')
   @ApiOperation({ summary: 'Xóa user (chưa hỗ trợ)' })
   @ApiResponse({ status: 406 })
   async delete(@Param('id') _id: string) {

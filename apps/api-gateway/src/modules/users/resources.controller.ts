@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Post,
   Put,
@@ -19,12 +19,10 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
-@ApiTags('PBAC – Tài nguyên')
+@ApiTags('PBAC � T�i nguy�n')
 @Controller('admin/resources')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class ResourcesController implements OnModuleInit {
   private pbacService: any;
@@ -41,11 +39,10 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Post()
-  @RequirePermissions('')
-  @ApiOperation({ summary: 'Tạo tài nguyên mới' })
+  @ApiOperation({ summary: 'T?o t�i nguy�n m?i' })
   @ApiResponse({
     status: 201,
-    description: 'Tài nguyên vừa được tạo',
+    description: 'T�i nguy�n v?a du?c t?o',
   })
   async createResource(
     @Body() body: { code: string; name: string },
@@ -59,11 +56,10 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Put(':id')
-  @RequirePermissions('RESOURCE:MANAGE')
-  @ApiOperation({ summary: 'Cập nhật tài nguyên' })
+  @ApiOperation({ summary: 'C?p nh?t t�i nguy�n' })
   @ApiResponse({
     status: 200,
-    description: 'Tài nguyên sau khi cập nhật',
+    description: 'T�i nguy�n sau khi c?p nh?t',
   })
   async updateResource(
     @Param('id', ParseIntPipe) id: number,
@@ -79,11 +75,10 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Delete('permissions/:id')
-  @RequirePermissions('RESOURCE:MANAGE')
-  @ApiOperation({ summary: 'Xóa một quyền theo ID' })
+  @ApiOperation({ summary: 'X�a m?t quy?n theo ID' })
   @ApiResponse({
     status: 200,
-    description: 'Kết quả xóa',
+    description: 'K?t qu? x�a',
   })
   async deletePermission(
     @Param('id', ParseIntPipe) id: number,
@@ -94,14 +89,13 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @RequirePermissions('RESOURCE:MANAGE')
   @ApiOperation({
     summary:
-      'Xóa tài nguyên (chỉ khi không còn quyền nào thuộc tài nguyên này)',
+      'X�a t�i nguy�n (ch? khi kh�ng c�n quy?n n�o thu?c t�i nguy�n n�y)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Kết quả xóa',
+    description: 'K?t qu? x�a',
   })
   async deleteResource(
     @Param('id', ParseIntPipe) id: number,
@@ -112,13 +106,12 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Post(':id/permissions')
-  @RequirePermissions('RESOURCE:MANAGE')
   @ApiOperation({
-    summary: 'Thêm quyền (action) cho tài nguyên',
+    summary: 'Th�m quy?n (action) cho t�i nguy�n',
   })
   @ApiResponse({
     status: 201,
-    description: 'Quyền vừa được tạo',
+    description: 'Quy?n v?a du?c t?o',
   })
   async createPermission(
     @Param('id', ParseIntPipe) id: number,

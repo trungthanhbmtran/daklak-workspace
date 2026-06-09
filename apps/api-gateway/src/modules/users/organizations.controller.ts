@@ -25,12 +25,10 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
 @ApiTags('Đơn vị tổ chức')
 @Controller('admin/organizations')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class OrganizationsController implements OnModuleInit {
   private orgService: any;
@@ -46,7 +44,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Post()
-  @RequirePermissions('')
   @ApiOperation({ summary: 'Tạo đơn vị tổ chức' })
   @ApiResponse({ status: 201, description: 'Đơn vị vừa tạo (camelCase)' })
   async create(
@@ -94,7 +91,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get('unit-types')
-  @RequirePermissions('ORGANIZATION:READ')
   @ApiOperation({ summary: 'Lấy danh sách loại đơn vị (UBND, Sở, Phòng...)' })
   @ApiResponse({ status: 200, description: 'Danh sách loại đơn vị' })
   async getUnitTypes() {
@@ -105,7 +101,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get('tree')
-  @RequirePermissions('ORGANIZATION:READ')
   @ApiOperation({ summary: 'Cây tổ chức toàn bộ' })
   @ApiResponse({
     status: 200,
@@ -160,7 +155,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get('job-titles')
-  @RequirePermissions('ORGANIZATION:READ')
   @ApiOperation({
     summary:
       'Danh sách chức danh (theo đơn vị: chỉ chức danh áp dụng cho loại đơn vị đó)',
@@ -178,7 +172,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Put('job-titles/:id')
-  @RequirePermissions('ORGANIZATION:MANAGE')
   @ApiOperation({
     summary:
       'Cập nhật chức danh (lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý)',
@@ -214,7 +207,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get(':id')
-  @RequirePermissions('ORGANIZATION:READ')
   @ApiOperation({ summary: 'Chi tiết một đơn vị' })
   @ApiResponse({ status: 200, description: 'Đơn vị (camelCase)' })
   async getOne(@Param('id', ParseIntPipe) id: number) {
@@ -229,7 +221,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Put(':id')
-  @RequirePermissions('ORGANIZATION:MANAGE')
   @ApiOperation({ summary: 'Cập nhật đơn vị tổ chức' })
   @ApiResponse({ status: 200, description: 'Đơn vị đã cập nhật (camelCase)' })
   async update(
@@ -280,7 +271,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @RequirePermissions('ORGANIZATION:MANAGE')
   @ApiOperation({ summary: 'Xóa đơn vị (chỉ khi không có đơn vị con)' })
   @ApiResponse({ status: 200, description: 'success, message' })
   async delete(@Param('id', ParseIntPipe) id: number) {
@@ -301,7 +291,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get(':id/subtree')
-  @RequirePermissions('ORGANIZATION:READ')
   @ApiOperation({ summary: 'Cây con của một đơn vị' })
   @ApiResponse({ status: 200, description: 'Cây con từ đơn vị id' })
   async getSubTree(@Param('id', ParseIntPipe) id: number) {
@@ -312,7 +301,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Post('staffing')
-  @RequirePermissions('ORGANIZATION:MANAGE')
   @ApiOperation({
     summary: 'Thiết lập định biên (số lượng chức danh cho đơn vị)',
   })
@@ -331,7 +319,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Get(':id/staffing-report')
-  @RequirePermissions('ORGANIZATION:READ')
   @ApiOperation({
     summary:
       'Báo cáo định biên của đơn vị (thừa/thiếu nhân sự, kèm phân công từng vị trí)',
@@ -349,7 +336,6 @@ export class OrganizationsController implements OnModuleInit {
   }
 
   @Post('staffing-slots')
-  @RequirePermissions('ORGANIZATION:MANAGE')
   @ApiOperation({
     summary:
       'Phân công từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực riêng cho slot',
@@ -404,7 +390,6 @@ export class PublicOrganizationsController implements OnModuleInit {
   }
 
   @Get()
-  @RequirePermissions('')
   @ApiOperation({
     summary: 'Lấy danh sách phẳng tất cả đơn vị tổ chức công khai',
   })

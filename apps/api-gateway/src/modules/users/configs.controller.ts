@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Body,
@@ -11,12 +11,10 @@ import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { PermissionsGuard } from '../../core/guards/permissions.guard';
-import { RequirePermissions } from '../../core/decorators/permissions.decorator';
 
 @ApiTags('System Configs')
 @Controller('admin/system-configs')
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard)
 export class ConfigsController implements OnModuleInit {
   private configService: any;
 
@@ -29,7 +27,6 @@ export class ConfigsController implements OnModuleInit {
   }
 
   @Get()
-  @RequirePermissions('SYSTEM:READ')
   async getConfigs() {
     const response = (await firstValueFrom(
       this.configService.GetConfigs({}),
@@ -38,7 +35,6 @@ export class ConfigsController implements OnModuleInit {
   }
 
   @Put()
-  @RequirePermissions('SYSTEM:MANAGE')
   async updateConfig(
     @Body() body: { key: string; value: string; description?: string },
   ) {
