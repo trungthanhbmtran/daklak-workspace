@@ -3,8 +3,8 @@ syntax = "proto3";
 package post;
 
 import "common/common.proto";
-import "tag.proto";
-import "category.proto";
+import "posts/tag.proto";
+import "posts/category.proto";
 
 service PostService {
   rpc CreatePost(CreatePostRequest) returns (PostResponse) {}

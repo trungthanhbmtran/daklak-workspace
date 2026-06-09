@@ -158,6 +158,48 @@ export class PbacController {
     const ok = await this.pbacService.deletePermission(data.id);
     return { success: ok, message: ok ? 'Đã xóa quyền' : 'Không tìm thấy' };
   }
-}
+  @GrpcMethod('PbacService', 'SyncEndpoints')
+  async syncEndpoints(data: { endpoints: { method: string; path: string }[] }) {
+    const count = await this.pbacService.syncEndpoints(data.endpoints);
+    return { success: true, count };
+  }
 
+  @GrpcMethod('PbacService', 'GetEndpoints')
+  async getEndpoints() {
+    const list = await this.pbacService.getEndpoints();
+    return {
+      endpoints: list.map((ep: any) => ({
+        id: ep.id,
+        method: ep.method,
+        path: ep.path,
+        description: ep.description || '',
+        permission_id: ep.permissionId || 0,
+        permission: ep.permission ? {
+          id: ep.permission.id,
+          action: ep.permission.action,
+          resource_id: ep.permission.resourceId,
+          resource_code: ep.permission.resource?.code || '',
+        } : null,
+      }))
+    };
+  }
+
+  @GrpcMethod('PbacService', 'AssignEndpointPermission')
+  async assignEndpointPermission(data: { id: number; permission_id: number }) {
+    const ep = await this.pbacService.assignEndpointPermission(data.id, data.permission_id);
+    return {
+      id: ep.id,
+      method: ep.method,
+      path: ep.path,
+      description: ep.description || '',
+      permission_id: ep.permissionId || 0,
+      permission: ep.permission ? {
+        id: ep.permission.id,
+        action: ep.permission.action,
+        resource_id: ep.permission.resourceId,
+        resource_code: ep.permission.resource?.code || '',
+      } : null,
+    };
+  }
+}
 

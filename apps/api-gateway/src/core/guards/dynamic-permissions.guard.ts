@@ -76,7 +76,9 @@ export class DynamicPermissionsGuard implements CanActivate {
 
           // The required action code from db is usually "RESOURCE:ACTION"
           // Let's assume the action string is already in full format, e.g., "USER:CREATE"
-          const requiredAction = ep.permission.action;
+          const requiredAction = ep.permission.resource_code 
+            ? `${ep.permission.resource_code}:${ep.permission.action}`
+            : ep.permission.action;
           const hasPerm = userPermissions.includes(requiredAction);
           if (!hasPerm) {
             throw new ForbiddenException('Bạn không có quyền truy cập API này.');

@@ -1,18 +1,18 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package pbac;
 
-// PBAC: Chính sách phân quyền (Policy-Based) – Vai trò + Ma trận quyền
+// PBAC: ChÃ­nh sÃ¡ch phÃ¢n quyá»n (Policy-Based) â€“ Vai trÃ² + Ma tráº­n quyá»n
 service PbacService {
-  // --- Vai trò (Roles) ---
+  // --- Vai trÃ² (Roles) ---
   rpc CreateRole (CreateRoleRequest) returns (RoleResponse);
   rpc FindAllRoles (Empty) returns (FindAllRolesResponse);
   rpc FindOneRole (FindOneRoleRequest) returns (RoleDetailResponse);
   rpc UpdateRole (UpdateRoleRequest) returns (RoleResponse);
   rpc DeleteRole (DeleteRoleRequest) returns (RoleResponse);
-  // --- Ma trận quyền (Permissions) ---
+  // --- Ma tráº­n quyá»n (Permissions) ---
   rpc GetPermissionMatrix (Empty) returns (PermissionMatrixResponse);
-  // --- Tài nguyên & Quyền CRUD ---
+  // --- TÃ i nguyÃªn & Quyá»n CRUD ---
   rpc CreateResource (CreateResourceRequest) returns (ResourceResponse);
   rpc UpdateResource (UpdateResourceRequest) returns (ResourceResponse);
   rpc DeleteResource (DeleteResourceRequest) returns (ResourceResponse);
@@ -103,6 +103,7 @@ message PermissionItem {
   int32 id = 1;
   string action = 2;
   int32 resource_id = 3;
+  string resource_code = 4;
 }
 
 message RoleDetailResponse {
@@ -170,3 +171,4 @@ message AssignEndpointPermissionRequest {
   int32 id = 1;
   int32 permission_id = 2;
 }
+
