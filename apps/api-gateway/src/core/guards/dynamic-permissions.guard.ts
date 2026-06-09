@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext, Inject, ForbiddenException } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { Reflector, ModuleRef } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import { pathToRegexp } from 'path-to-regexp';
 import { MICROSERVICES } from '../constants/services';
@@ -9,9 +9,11 @@ import { RedisService } from '../redis/redis.service';
 export class DynamicPermissionsGuard implements CanActivate {
   private pbacService: any;
 
+  private client: any;
+
   constructor(
     private reflector: Reflector,
-    @Inject(MICROSERVICES.PBAC.SYMBOL) private readonly client: any,
+    private moduleRef: ModuleRef,
     private redisService: RedisService,
   ) { }
 
@@ -23,6 +25,7 @@ export class DynamicPermissionsGuard implements CanActivate {
     if (isPublic) return true;
 
     if (!this.pbacService) {
+      this.client = this.moduleRef.get(MICROSERVICES.PBAC.SYMBOL, { strict: false });
       this.pbacService = this.client.getService(MICROSERVICES.PBAC.SERVICE);
     }
 
