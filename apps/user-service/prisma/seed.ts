@@ -2364,9 +2364,10 @@ async function main() {
   // Helper to link menu to resource permission
   const linkMenuPBAC = async (
     menuId: number,
-    resCode: string,
+    resCode?: string,
     action: string = 'READ',
   ) => {
+    if (!resCode) return;
     const resId = resources[resCode]?.id;
     if (!resId) return;
     const perm = await prisma.permission.findUnique({
@@ -2507,7 +2508,7 @@ async function main() {
       route: 'organization',
       icon: 'apartment',
       order: 5,
-      res: 'ORGANIZATION',
+      // res: 'ORGANIZATION',
     },
     {
       code: 'ADMIN_CATEGORIES',
@@ -5052,3 +5053,4 @@ main()
     prisma.$disconnect();
     process.exit(1);
   });
+
