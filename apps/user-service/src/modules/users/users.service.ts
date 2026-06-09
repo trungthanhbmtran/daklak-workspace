@@ -495,6 +495,7 @@ export class UsersService implements OnModuleInit {
 
     const firstPosition = (user as any).jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;
+    const unitCode = firstPosition?.unit?.code ?? null;
     const jobTitleCode = firstPosition?.jobTitle?.code ?? null;
 
     return {
@@ -504,23 +505,46 @@ export class UsersService implements OnModuleInit {
       roles,
       policies,
       permissionsFlatten,
+      permissions_flatten: permissionsFlatten,
+      unitName: firstPosition?.unit?.name ?? '',
+      unit_name: firstPosition?.unit?.name ?? '',
+      jobTitleName: firstPosition?.jobTitle?.name ?? '',
+      job_title_name: firstPosition?.jobTitle?.name ?? '',
       unitId,
+      unit_id: unitId,
       jobTitleCode,
+      job_title_code: jobTitleCode,
+      unitCode,
+      unit_code: unitCode,
     };
   }
 
   /** Danh sách user (trả về id, email, username, fullName, phoneNumber, avatarUrl, isActive) */
-  async listUsers(data: { skip?: number; take?: number } = {}) {
+  async listUsers(data: { skip?: number; take?: number; unitCodeStartsWith?: string } = {}) {
     const skip = data.skip ?? 0;
     const take = data.take && data.take > 0 ? Math.min(data.take, 500) : 500;
 
+    const whereCondition: any = {};
+    if (data.unitCodeStartsWith) {
+      whereCondition.jobPositions = {
+        some: {
+          unit: {
+            code: {
+              startsWith: data.unitCodeStartsWith
+            }
+          }
+        }
+      };
+    }
+
     const [users, total] = await Promise.all([
       this.prisma.user.findMany({
+        where: whereCondition,
         skip,
         take,
         orderBy: { id: 'asc' },
       }),
-      this.prisma.user.count()
+      this.prisma.user.count({ where: whereCondition })
     ]);
 
     return {
@@ -571,6 +595,8 @@ export class UsersService implements OnModuleInit {
         unit_name: firstPos?.unit?.name ?? '',
         jobTitleName: firstPos?.jobTitle?.name ?? '',
         job_title_name: firstPos?.jobTitle?.name ?? '',
+        unitCode: firstPos?.unit?.code ?? null,
+        unit_code: firstPos?.unit?.code ?? null,
       };
     });
 

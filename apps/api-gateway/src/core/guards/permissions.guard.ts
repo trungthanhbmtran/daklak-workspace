@@ -28,9 +28,9 @@ export class PermissionsGuard implements CanActivate {
       throw new ForbiddenException('Không tìm thấy thông tin xác thực người dùng');
     }
 
-    // SUPER_ADMIN có toàn quyền
+    // SUPER_ADMIN và ADMIN có toàn quyền
     const isSuperAdmin = user.roles?.some(
-      (role: any) => role === 'SUPER_ADMIN' || role?.code === 'SUPER_ADMIN',
+      (role: any) => role === 'SUPER_ADMIN' || role?.code === 'SUPER_ADMIN' || role === 'ADMIN' || role?.code === 'ADMIN',
     );
     if (isSuperAdmin) {
       return true;

@@ -121,6 +121,7 @@ export class TasksController implements OnModuleInit {
           if (nId) {
             unitMap[nId] = {
               id: nId,
+              code: n.code,
               parentId: n.parentId ? parseInt(n.parentId, 10) : null,
               isLeaf: n.isLeaf ?? !n.children?.length,
               directChildIds: (n.children || [])
@@ -332,10 +333,24 @@ export class TasksController implements OnModuleInit {
           (d: any) => d.departmentId === callerUnitId,
         );
       } else {
-        // Non-leaf: lấy LÃNH ĐẠO của CÁC PHÒNG CON TRỰC TIẾP
-        const directChildIds = new Set<number>(
-          callerUnit?.directChildIds || [],
-        );
+        // Non-leaf: lấy LÃNH ĐẠO của CÁC PHÒNG CON TRỰC TIẾP (theo mã unitCode)
+        const callerUnitCode = callerUnit?.code || '';
+        const isDirectChildByCode = (childCode: string, parentCode: string) => {
+          if (!childCode || !parentCode || childCode.length <= parentCode.length) return false;
+          if (!childCode.startsWith(parentCode)) return false;
+          const remainder = childCode.substring(parentCode.length);
+          if (remainder[0] !== '.') return false;
+          const rest = remainder.substring(1);
+          return !rest.includes('.');
+        };
+
+        const directChildIds = new Set<number>();
+        Object.values(unitMap).forEach((u: any) => {
+          if (isDirectChildByCode(u.code, callerUnitCode)) {
+            directChildIds.add(u.id);
+          }
+        });
+
         const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
 
         topEmployees = topEmployees.filter((emp: any) => {
@@ -390,27 +405,53 @@ export class TasksController implements OnModuleInit {
       );
     }
 
-    // Nếu không phải admin và có chỉ định người nhận (khác UNASSIGNED), kiểm tra phạm vi quản lý
-    if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED') {
-      const empListRes: any = await firstValueFrom(
-        this.employeeService.ListEmployees({ keyword: assigneeCode }),
-      );
-      const targetEmp = { data: empListRes?.data?.[0] };
-      if (targetEmp?.data?.departmentId) {
-        const unitMap = await this.getUnitMap();
-        const assignerAncestorIds = this.getAncestorUnitIds(
-          unitMap,
-          parseInt(targetEmp.data.departmentId, 10),
-        );
+    // Nếu không phải admin, kiểm tra phạm vi quản lý
+    if (!isAdmin) {
+      const unitMap = await this.getUnitMap();
+      const callerUnitCode = user.unitCode;
+      
+      const isDirectChildByCode = (childCode: string, parentCode: string) => {
+        if (!childCode || !parentCode || childCode.length <= parentCode.length) return false;
+        if (!childCode.startsWith(parentCode)) return false;
+        const remainder = childCode.substring(parentCode.length);
+        if (remainder[0] !== '.') return false;
+        const rest = remainder.substring(1);
+        return !rest.includes('.');
+      };
 
-        // Người giao phải thuộc cây đơn vị của người nhận (tức là người giao là sếp của người nhận)
-        if (
-          user.unitId &&
-          !assignerAncestorIds.includes(parseInt(user.unitId, 10))
-        ) {
-          throw new Error(
-            'Bạn chỉ được phép giao việc cho nhân sự thuộc phạm vi quản lý của mình.',
-          );
+      let targetUnitId: number | undefined;
+      let targetJobTitleId: number | undefined;
+
+      if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
+        const empListRes: any = await firstValueFrom(
+          this.employeeService.ListEmployees({ keyword: assigneeCode }),
+        );
+        const targetEmp = empListRes?.data?.[0];
+        if (targetEmp) {
+          targetUnitId = parseInt(targetEmp.departmentId, 10);
+          targetJobTitleId = parseInt(targetEmp.jobTitleId, 10);
+        }
+      } else if (departmentId) {
+        targetUnitId = parseInt(departmentId as any, 10);
+      }
+
+      if (targetUnitId) {
+        const targetUnit = unitMap[targetUnitId];
+        if (targetUnitId !== parseInt(user.unitId, 10)) {
+          // Giao việc xuống phòng ban khác -> Phải là phòng con trực tiếp
+          if (!targetUnit || !callerUnitCode || !isDirectChildByCode(targetUnit.code, callerUnitCode)) {
+            throw new Error('Bạn chỉ được phép giao việc cho phòng ban nội bộ hoặc phòng trực tiếp (theo mã đơn vị).');
+          }
+          
+          // Nếu giao cho cá nhân ở phòng con, cá nhân đó phải là lãnh đạo
+          if (targetJobTitleId) {
+            const jtMap = await this.getJobTitlesMap();
+            const jt = jtMap[targetJobTitleId];
+            const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
+            if (!jt || !leaderCategories.has(jt.category)) {
+              throw new Error('Khi giao việc xuống phòng trực tiếp, chỉ được giao cho chức danh lãnh đạo của phòng đó.');
+            }
+          }
         }
       }
     }

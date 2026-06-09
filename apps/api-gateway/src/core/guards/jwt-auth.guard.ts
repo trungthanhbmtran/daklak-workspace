@@ -82,6 +82,7 @@ export class JwtAuthGuard implements CanActivate {
         roles,
         permissionsFlatten,
         unitId: userRes?.unitId,
+        unitCode: userRes?.unitCode,
         jobTitleCode: userRes?.jobTitleCode,
       };
 

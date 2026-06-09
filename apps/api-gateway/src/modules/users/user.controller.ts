@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -53,9 +53,20 @@ export class UserController implements OnModuleInit {
     description:
       'Máº£ng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
   })
-  async list() {
+  async list(@Req() req: any) {
+    const user = req?.user;
+    const isAdmin = Array.isArray(user?.roles) && user.roles.some((r: any) => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN');
+    
+    let unitCodeStartsWith: string | undefined;
+    if (!isAdmin) {
+      if (!user?.unitCode) {
+        return { success: true, data: [], meta: { total: 0 } };
+      }
+      unitCodeStartsWith = user.unitCode;
+    }
+
     const response = (await firstValueFrom(
-      this.userService.ListUsers({}),
+      this.userService.ListUsers({ unitCodeStartsWith }),
     )) as any;
     return {
       success: true,

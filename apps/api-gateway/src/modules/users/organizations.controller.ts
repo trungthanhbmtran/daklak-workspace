@@ -123,31 +123,26 @@ export class OrganizationsController implements OnModuleInit {
       return false;
     };
 
-    let isAdmin =
-      checkRole('SUPER_ADMIN') ||
-      checkRole('ADMIN') ||
-      user?.permissionsFlatten?.includes('SYSTEM:MANAGE') ||
-      user?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
+    const isAdmin = checkRole('SUPER_ADMIN') || checkRole('ADMIN');
 
-    // Dynamic config check is handled by DynamicApiGuard now.
-
-    if (!isAdmin && user?.unitId) {
-      // Find the user's unit node and only return that node (and its descendants)
-      const userUnitId = parseInt(user.unitId, 10);
-
-      const findNode = (treeNodes: any[]): any | null => {
-        for (const node of treeNodes) {
-          if (parseInt(node.id, 10) === userUnitId) return node;
-          if (node.children && node.children.length > 0) {
-            const found = findNode(node.children);
-            if (found) return found;
+    if (!isAdmin) {
+      if (!user?.unitCode) {
+        nodes = [];
+      } else {
+        const findNodeByCodePrefix = (treeNodes: any[], prefix: string): any | null => {
+          for (const node of treeNodes) {
+            if (node.code && node.code.startsWith(prefix)) return node;
+            if (node.children && node.children.length > 0) {
+              const found = findNodeByCodePrefix(node.children, prefix);
+              if (found) return found;
+            }
           }
-        }
-        return null;
-      };
+          return null;
+        };
 
-      const userUnitNode = findNode(nodes);
-      nodes = userUnitNode ? [userUnitNode] : [];
+        const userUnitNode = findNodeByCodePrefix(nodes, user.unitCode);
+        nodes = userUnitNode ? [userUnitNode] : [];
+      }
     }
 
     const allowedActions: string[] = [];

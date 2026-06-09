@@ -47,6 +47,7 @@ message ListUsersRequest {
   // optional: phân trang sau này
   int32 skip = 1;
   int32 take = 2;
+  optional string unit_code_starts_with = 3;
 }
 
 message ListUsersResponse {
@@ -83,6 +84,7 @@ message UserResponse {
   repeated string permissions_flatten = 15;
   optional int32 unit_id = 16;
   optional string job_title_code = 17;
+  optional string unit_code = 18;
 }
 
 message SetUserActiveRequest {
