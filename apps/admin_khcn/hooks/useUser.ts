@@ -11,6 +11,7 @@ export function useUser() {
     queryFn: async () => {
       try {
         const result: any = await apiClient.get(`${API_BASE}/me`);
+        console.log("result", result)
         return result; // axiosInstance already unwraps response.data and result.data
       } catch (error: any) {
         if (error.response?.status === 401) return null;
