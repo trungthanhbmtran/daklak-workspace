@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -24,12 +24,13 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import { NotificationsService } from '../notifications/notifications.service';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('Users')
 @Controller('admin/users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class UserController implements OnModuleInit {
   private userService: any;
@@ -210,4 +211,9 @@ export class UserController implements OnModuleInit {
     throw new NotAcceptableException('UserService mới chưa hỗ trợ DeleteUser.');
   }
 }
+
+
+
+
+
 

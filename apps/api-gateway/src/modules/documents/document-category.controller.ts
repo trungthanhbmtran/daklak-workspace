@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -15,10 +15,11 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 @ApiTags('Documents')
 @Controller('admin/documents/categories')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class DocumentCategoryController implements OnModuleInit {
   private categoryService: any;
@@ -67,3 +68,4 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.DeleteCategory({ id }));
   }
 }
+

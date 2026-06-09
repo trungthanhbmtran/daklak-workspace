@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+﻿import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { PbacService } from './pbac.service';
 
@@ -159,3 +159,5 @@ export class PbacController {
     return { success: ok, message: ok ? 'Đã xóa quyền' : 'Không tìm thấy' };
   }
 }
+
+

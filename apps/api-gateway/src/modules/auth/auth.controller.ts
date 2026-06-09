@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Post,
   Get,
@@ -21,6 +21,7 @@ import type { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 @ApiTags('Auth')
@@ -169,7 +170,7 @@ export class AuthController implements OnModuleInit {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Thông tin user đăng nhập' })
   async me(@Req() req: any) {
@@ -198,3 +199,4 @@ export class AuthController implements OnModuleInit {
     });
   }
 }
+

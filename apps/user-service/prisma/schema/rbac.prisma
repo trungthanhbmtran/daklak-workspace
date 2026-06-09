@@ -12,7 +12,8 @@ model Role {
 model Permission {
   id         Int      @id @default(autoincrement())
   action     String   
-  resourceId Int      @map("resource_id")
+  resourceId Int          @map("resource_id")
+  apiEndpoints ApiEndpoint[]
   resource   Resource @relation(fields: [resourceId], references: [id])
   roles      Role[]
   menuRequirements MenuRequiredPermission[]
@@ -24,6 +25,20 @@ model Resource {
   id          Int          @id @default(autoincrement())
   code        String       @unique 
   name        String
+  serviceCode String?      @map("service_code")
   permissions Permission[]
   @@map("resources")
 }
+model ApiEndpoint {
+  id           Int         @id @default(autoincrement())
+  method       String
+  path         String
+  description  String?
+  permissionId Int?
+  permission   Permission? @relation(fields: [permissionId], references: [id], onDelete: SetNull)
+
+  @@unique([method, path])
+  @@map("api_endpoints")
+}
+
+

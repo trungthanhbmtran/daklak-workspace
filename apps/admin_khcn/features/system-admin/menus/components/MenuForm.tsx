@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -546,3 +546,4 @@ function PermissionCardDialog({ resourceName, perms, form }: { resourceName: str
     </Dialog>
   );
 }
+

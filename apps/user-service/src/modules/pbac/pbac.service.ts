@@ -1,4 +1,4 @@
-import { Injectable, Inject } from '@nestjs/common';
+﻿import { Injectable, Inject } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -98,7 +98,7 @@ export class PbacService {
     });
   }
 
-  async createResource(data: { code: string; name: string }) {
+  async createResource(data: { code: string; name: string; serviceCode?: string }) {
     const existing = await this.prisma.resource.findUnique({
       where: { code: data.code },
     });
@@ -109,11 +109,11 @@ export class PbacService {
       });
     }
     return this.prisma.resource.create({
-      data: { code: data.code, name: data.name },
+      data: { code: data.code, name: data.name, serviceCode: data.serviceCode },
     });
   }
 
-  async updateResource(id: number, data: { code?: string; name?: string }) {
+  async updateResource(id: number, data: { code?: string; name?: string; serviceCode?: string }) {
     const resource = await this.prisma.resource.findUnique({ where: { id } });
     if (!resource) return null;
     if (data.code !== undefined) {
@@ -131,7 +131,7 @@ export class PbacService {
       where: { id },
       data: {
         ...(data.code !== undefined && { code: data.code }),
-        ...(data.name !== undefined && { name: data.name }),
+        ...(data.name !== undefined && { name: data.name }),...(data.serviceCode !== undefined && { serviceCode: data.serviceCode }),
       },
     });
   }
@@ -193,3 +193,25 @@ export class PbacService {
     return true;
   }
 }
+
+
+  async syncEndpoints(endpoints: { method: string; path: string }[]) {
+    let count = 0;
+    for (const ep of endpoints) {
+      const existing = await this.prisma.apiEndpoint.findFirst({ where: { method: ep.method, path: ep.path } });
+      if (!existing) {
+        await this.prisma.apiEndpoint.create({ data: { method: ep.method, path: ep.path } });
+        count++;
+      }
+    }
+    return count;
+  }
+
+  async getEndpoints() {
+    return this.prisma.apiEndpoint.findMany({ include: { permission: { include: { resource: true } } }, orderBy: { path: 'asc' } });
+  }
+
+  async assignEndpointPermission(id: number, permissionId: number) {
+    return this.prisma.apiEndpoint.update({ where: { id }, data: { permissionId }, include: { permission: { include: { resource: true } } } });
+  }
+

@@ -1,4 +1,4 @@
-import {
+ï»¿import {
   Controller,
   Get,
   Post,
@@ -20,10 +20,11 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 @ApiTags('PBAC â€“ ChÃ­nh sÃ¡ch phÃ¢n quyá»n')
 @Controller('admin/roles')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class PbacController implements OnModuleInit {
   private pbacService: any;
@@ -37,10 +38,10 @@ export class PbacController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'L?y danh sách vai trò' })
+  @ApiOperation({ summary: 'L?y danh sï¿½ch vai trï¿½' })
   @ApiResponse({
     status: 200,
-    description: 'Danh sách vai trò (có s? ngu?i dùng, s? quy?n)',
+    description: 'Danh sï¿½ch vai trï¿½ (cï¿½ s? ngu?i dï¿½ng, s? quy?n)',
   })
   async findAll() {
     return firstValueFrom(this.pbacService.FindAllRoles({}));
@@ -48,11 +49,11 @@ export class PbacController implements OnModuleInit {
 
   @Get('permissions/matrix')
   @ApiOperation({
-    summary: 'Ma tr?n quy?n (Tài nguyên ? Quy?n) ph?c v? giao di?n c?p quy?n',
+    summary: 'Ma tr?n quy?n (Tï¿½i nguyï¿½n ? Quy?n) ph?c v? giao di?n c?p quy?n',
   })
   @ApiResponse({
     status: 200,
-    description: 'Danh sách tài nguyên, m?i tài nguyên ch?a danh sách quy?n tuong ?ng',
+    description: 'Danh sï¿½ch tï¿½i nguyï¿½n, m?i tï¿½i nguyï¿½n ch?a danh sï¿½ch quy?n tuong ?ng',
   })
   getPermissionMatrix() {
     return firstValueFrom(this.pbacService.GetPermissionMatrix({}));
@@ -60,19 +61,19 @@ export class PbacController implements OnModuleInit {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Chi ti?t m?t vai trò (kèm danh sách quy?n)',
+    summary: 'Chi ti?t m?t vai trï¿½ (kï¿½m danh sï¿½ch quy?n)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Vai trò và danh sách quy?n',
+    description: 'Vai trï¿½ vï¿½ danh sï¿½ch quy?n',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.FindOneRole({ id }));
   }
 
   @Post()
-  @ApiOperation({ summary: 'T?o vai trò m?i' })
-  @ApiResponse({ status: 201, description: 'Vai trò v?a du?c t?o (camelCase)' })
+  @ApiOperation({ summary: 'T?o vai trï¿½ m?i' })
+  @ApiResponse({ status: 201, description: 'Vai trï¿½ v?a du?c t?o (camelCase)' })
   async create(
     @Body()
     body: {
@@ -93,10 +94,10 @@ export class PbacController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t vai trò' })
+  @ApiOperation({ summary: 'C?p nh?t vai trï¿½' })
   @ApiResponse({
     status: 200,
-    description: 'Vai trò sau khi c?p nh?t (camelCase)',
+    description: 'Vai trï¿½ sau khi c?p nh?t (camelCase)',
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -119,11 +120,13 @@ export class PbacController implements OnModuleInit {
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'xoá vai trò (không xoá du?c khi có user du?c gán)',
+    summary: 'xoï¿½ vai trï¿½ (khï¿½ng xoï¿½ du?c khi cï¿½ user du?c gï¿½n)',
   })
-  @ApiResponse({ status: 200, description: 'Ğã xoá' })
+  @ApiResponse({ status: 200, description: 'ï¿½ï¿½ xoï¿½' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.DeleteRole({ id }));
   }
 }
+
+
 

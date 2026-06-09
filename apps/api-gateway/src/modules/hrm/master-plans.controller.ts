@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -15,12 +15,13 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @ApiTags('HRM - Master Plans')
 @ApiBearerAuth('JWT-auth')
 @Controller('admin/hrm/master-plans')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 export class MasterPlansController implements OnModuleInit {
   private masterPlanService: any;
   private orgService: any;
@@ -335,3 +336,4 @@ export class MasterPlansController implements OnModuleInit {
     );
   }
 }
+

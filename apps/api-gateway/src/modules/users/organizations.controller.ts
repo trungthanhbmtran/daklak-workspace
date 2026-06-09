@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -25,10 +25,11 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 @ApiTags('Đơn vị tổ chức')
 @Controller('admin/organizations')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class OrganizationsController implements OnModuleInit {
   private orgService: any;

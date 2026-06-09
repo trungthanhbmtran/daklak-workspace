@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -15,10 +15,11 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 @ApiTags('Consultations')
 @Controller('admin/documents/consultations')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class ConsultationsController implements OnModuleInit {
   private consultationService: any;
@@ -92,3 +93,4 @@ export class ConsultationsController implements OnModuleInit {
     return firstValueFrom(this.consultationService.ModerateComment(payload));
   }
 }
+

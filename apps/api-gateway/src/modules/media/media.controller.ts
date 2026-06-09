@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -21,6 +21,7 @@ import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import {
   RequestUploadDto,
   ConfirmUploadDto,
@@ -76,7 +77,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('request-upload')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiOperation({
     summary: 'Request a presigned URL for direct upload to storage',
   })
@@ -88,7 +89,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('confirm-upload')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiOperation({ summary: 'Confirm file upload completion' })
   @ApiResponse({
     status: 200,
@@ -99,7 +100,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('init-multipart-upload')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiOperation({ summary: 'Initialize multipart upload for large files' })
   async initMultipartUpload(
     @Req() req: any,
@@ -111,7 +112,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('get-multipart-urls')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
   async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
     return await firstValueFrom(
@@ -120,7 +121,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('complete-multipart-upload')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiOperation({
     summary: 'Complete multipart upload after all parts are uploaded',
   })
@@ -131,10 +132,11 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
   @ApiOperation({ summary: 'Get media metadata and download link' })
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {
     return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
   }
 }
+

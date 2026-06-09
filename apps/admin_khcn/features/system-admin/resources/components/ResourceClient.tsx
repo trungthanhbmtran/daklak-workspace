@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import {
@@ -9,13 +9,27 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useResourceLogic } from "../hooks/useResourceLogic";
 import type { Resource } from "../types";
 
+const DEFAULT_SERVICE_LIST_FALLBACK = [
+  { code: "CORE_SERVICE", name: "Core Service (Tổng quan, Cấu hình)" },
+  { code: "USER_SERVICE", name: "User Service (Xác thực, PBAC, Menu)" },
+  { code: "CONTENT_SERVICE", name: "Content Service (Nội dung Cổng)" },
+  { code: "HRM_SERVICE", name: "HRM Service (Nhân sự)" },
+  { code: "NOTIFICATION_SERVICE", name: "Notification Service (Thông báo)" },
+  { code: "DOCUMENT_SERVICE", name: "Document Service (Văn bản)" },
+  { code: "POSTS_SERVICE", name: "Posts Service (Bài viết, Tin tức)" },
+  { code: "WORKFLOW_SERVICE", name: "Workflow Service (Quy trình, Công việc)" },
+  { code: "API_GATEWAY", name: "API Gateway" },
+];
+
 export function ResourceClient() {
   const [newCode, setNewCode] = useState("");
+  const [newServiceCode, setNewServiceCode] = useState("USER_SERVICE");
   const [newName, setNewName] = useState("");
   const [newAction, setNewAction] = useState("");
 
@@ -43,7 +57,7 @@ export function ResourceClient() {
     const name = newName.trim();
     if (!code || !name) return;
     createResourceMutation.mutate(
-      { code, name },
+      { code, name, serviceCode: newServiceCode },
       {
         onSuccess: () => {
           setNewCode("");
@@ -99,6 +113,16 @@ export function ResourceClient() {
         {/* Form thêm tài nguyên */}
         <div className="p-3 border-b bg-muted/20 shrink-0 space-y-2">
           <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">Thêm tài nguyên</p>
+          <Select value={newServiceCode} onValueChange={setNewServiceCode}>
+            <SelectTrigger className="h-8 text-sm">
+              <SelectValue placeholder="Chọn Dịch vụ" />
+            </SelectTrigger>
+            <SelectContent>
+              {DEFAULT_SERVICE_LIST_FALLBACK.map((s) => (
+                <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Input placeholder="Mã (code)" className="h-8 text-sm font-mono" value={newCode} onChange={(e) => setNewCode(e.target.value)} />
           <Input placeholder="Tên hiển thị" className="h-8 text-sm" value={newName} onChange={(e) => setNewName(e.target.value)} />
           <Button size="sm" className="w-full h-8" onClick={handleCreateResource} disabled={createResourceMutation.isPending || !newCode.trim() || !newName.trim()}>
@@ -113,7 +137,7 @@ export function ResourceClient() {
           {filteredResources.length === 0 ? (
             <div className="text-center p-4 text-sm text-muted-foreground italic">Không tìm thấy tài nguyên nào.</div>
           ) : (
-            <div className="space-y-1">
+            <div className="space-y-4">`n              {Object.entries(filteredResources.reduce((acc, res) => {`n                const svc = res.serviceCode || "OTHER";`n                if (!acc[svc]) acc[svc] = [];`n                acc[svc].push(res);`n                return acc;`n              }, {} as Record<string, Resource[]>)).map(([svc, group]) => (`n                <div key={svc} className="space-y-1">`n                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1 bg-muted/30 rounded">{DEFAULT_SERVICE_LIST_FALLBACK.find(s => s.code === svc)?.name || svc}</div>
               {filteredResources.map((res) => {
                 const isSelected = selectedResource?.id === res.id;
                 return (
@@ -146,10 +170,7 @@ export function ResourceClient() {
                     </div>
                   </div>
                 );
-              })}
-            </div>
-          )}
-        </div>
+              })}`n                </div>`n              ))}`n            </div>`n          )}`n        </div>
       </Card>
 
       {/* ========================================== */}
@@ -322,3 +343,7 @@ export function ResourceClient() {
     </div>
   );
 }
+
+
+
+

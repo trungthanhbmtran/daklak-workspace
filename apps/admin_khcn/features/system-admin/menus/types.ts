@@ -1,4 +1,4 @@
-export interface MenuItem {
+﻿export interface MenuItem {
   id: number;
   code: string;
   name: string;
@@ -24,4 +24,6 @@ export interface Permission {
   module: string;
   action: string;
   code?: string;
+  serviceCode?: string;
 }
+

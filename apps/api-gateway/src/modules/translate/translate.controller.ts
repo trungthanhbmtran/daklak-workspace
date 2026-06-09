@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Post,
   Body,
@@ -17,6 +17,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import { RedisService } from '../../core/redis/redis.service';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -28,7 +29,7 @@ interface TranslationService {
 }
 
 @Controller('admin/translate')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 export class TranslateController implements OnModuleInit {
   private translateService: TranslationService;
   private readonly logger = new Logger(TranslateController.name);
@@ -141,3 +142,4 @@ export class TranslateController implements OnModuleInit {
     }
   }
 }
+

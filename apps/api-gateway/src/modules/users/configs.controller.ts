@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Body,
@@ -11,10 +11,11 @@ import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 @ApiTags('System Configs')
 @Controller('admin/system-configs')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 export class ConfigsController implements OnModuleInit {
   private configService: any;
 
@@ -41,4 +42,5 @@ export class ConfigsController implements OnModuleInit {
     return firstValueFrom(this.configService.UpdateConfig(body));
   }
 }
+
 

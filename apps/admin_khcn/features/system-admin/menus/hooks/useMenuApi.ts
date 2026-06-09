@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { menuApi } from "../api";
@@ -31,13 +31,13 @@ async function fetchPermissions(): Promise<Permission[]> {
   const raw = body?.data?.resources ?? body?.resources ?? [];
   const list = Array.isArray(raw) ? raw : [];
   const out: Permission[] = [];
-  for (const r of list as { id: number; code: string; name: string; permissions?: { id: number; action: string }[] }[]) {
+  for (const r of list as { id: number; code: string; name: string; serviceCode?: string; permissions?: { id: number; action: string }[] }[]) {
     for (const p of r.permissions ?? []) {
       out.push({
         id: p.id,
         module: r.name ?? r.code ?? "",
         action: p.action ?? "",
-        code: `${r.code}:${p.action}`,
+        code: `${r.code}:${p.action}`, serviceCode: r.serviceCode,
       });
     }
   }
@@ -117,3 +117,4 @@ export function useMenuApi() {
     isDeleting: deleteMutation.isPending
   };
 }
+

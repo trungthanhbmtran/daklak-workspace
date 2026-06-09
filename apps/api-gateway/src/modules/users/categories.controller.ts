@@ -1,4 +1,4 @@
-import {
+ï»¿import {
   Controller,
   Get,
   Post,
@@ -24,6 +24,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 function toFrontendItem(c: any) {
   return {
@@ -39,7 +40,7 @@ function toFrontendItem(c: any) {
 
 @ApiTags('Danh má»¥c há»‡ thá»‘ng')
 @Controller('admin/categories')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class CategoriesController implements OnModuleInit {
   private categoryService: any;
@@ -55,10 +56,10 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Get('groups')
-  @ApiOperation({ summary: 'L?y danh sách t?t c? các nhóm danh m?c' })
-  @ApiResponse({ status: 200, description: 'Danh sách t?t c? các nhóm danh m?c' })
-  @ApiResponse({ status: 201, description: 'Nhóm danh m?c v?a t?o' })
-  @ApiResponse({ status: 400, description: 'D? li?u không h?p l?' })
+  @ApiOperation({ summary: 'L?y danh sï¿½ch t?t c? cï¿½c nhï¿½m danh m?c' })
+  @ApiResponse({ status: 200, description: 'Danh sï¿½ch t?t c? cï¿½c nhï¿½m danh m?c' })
+  @ApiResponse({ status: 201, description: 'Nhï¿½m danh m?c v?a t?o' })
+  @ApiResponse({ status: 400, description: 'D? li?u khï¿½ng h?p l?' })
   @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
   async getGroups() {
     console.log(
@@ -86,14 +87,14 @@ export class CategoriesController implements OnModuleInit {
 
   @Get()
   @ApiOperation({
-    summary: 'L?y danh m?c theo nhóm ho?c t?t c? n?u không truy?n group',
+    summary: 'L?y danh m?c theo nhï¿½m ho?c t?t c? n?u khï¿½ng truy?n group',
   })
   @ApiQuery({
     name: 'group',
     required: false,
-    description: 'Mã nhóm danh m?c (d? tr?ng d? l?y t?t c?)',
+    description: 'Mï¿½ nhï¿½m danh m?c (d? tr?ng d? l?y t?t c?)',
   })
-  @ApiResponse({ status: 200, description: 'Danh sách danh m?c thu?c nhóm' })
+  @ApiResponse({ status: 200, description: 'Danh sï¿½ch danh m?c thu?c nhï¿½m' })
   async getByGroup(@Query('group') group?: string) {
     if (!group) {
       const result = await firstValueFrom(
@@ -111,7 +112,7 @@ export class CategoriesController implements OnModuleInit {
   @ApiOperation({ summary: 'T?o danh m?c m?i (Admin)' })
   @ApiBody({ description: 'group, code, name, description?, order?' })
   @ApiResponse({ status: 201, description: 'Danh m?c v?a t?o' })
-  @ApiResponse({ status: 400, description: 'D? li?u không h?p l?' })
+  @ApiResponse({ status: 400, description: 'D? li?u khï¿½ng h?p l?' })
   @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
   async create(
     @Body()
@@ -138,8 +139,8 @@ export class CategoriesController implements OnModuleInit {
   @Put(':id')
   @ApiOperation({ summary: 'C?p nh?t danh m?c' })
   @ApiBody({ description: 'group, code, name, description?, order?' })
-  @ApiResponse({ status: 200, description: 'Danh m?c dã c?p nh?t' })
-  @ApiResponse({ status: 400, description: 'D? li?u không h?p l?' })
+  @ApiResponse({ status: 200, description: 'Danh m?c dï¿½ c?p nh?t' })
+  @ApiResponse({ status: 400, description: 'D? li?u khï¿½ng h?p l?' })
   @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -166,10 +167,10 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa danh m?c (không xóa du?c danh m?c h? th?ng)' })
-  @ApiResponse({ status: 200, description: 'Ðã xóa danh m?c' })
-  @ApiResponse({ status: 404, description: 'Danh m?c không t?n t?i' })
-  @ApiResponse({ status: 403, description: 'Không có quy?n xóa danh m?c' })
+  @ApiOperation({ summary: 'Xï¿½a danh m?c (khï¿½ng xï¿½a du?c danh m?c h? th?ng)' })
+  @ApiResponse({ status: 200, description: 'ï¿½ï¿½ xï¿½a danh m?c' })
+  @ApiResponse({ status: 404, description: 'Danh m?c khï¿½ng t?n t?i' })
+  @ApiResponse({ status: 403, description: 'Khï¿½ng cï¿½ quy?n xï¿½a danh m?c' })
   @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(
@@ -182,7 +183,7 @@ export class CategoriesController implements OnModuleInit {
   }
 }
 
-@ApiTags('Danh m?c h? th?ng công khai')
+@ApiTags('Danh m?c h? th?ng cï¿½ng khai')
 @Controller('public/categories')
 export class PublicCategoriesController implements OnModuleInit {
   private categoryService: any;
@@ -200,15 +201,15 @@ export class PublicCategoriesController implements OnModuleInit {
   @Get()
   @ApiOperation({
     summary:
-      'L?y danh m?c theo nhóm ho?c t?t c? n?u không truy?n group (Công khai)',
+      'L?y danh m?c theo nhï¿½m ho?c t?t c? n?u khï¿½ng truy?n group (Cï¿½ng khai)',
   })
   @ApiQuery({
     name: 'group',
     required: false,
-    description: 'Mã nhóm danh m?c (d? tr?ng d? l?y t?t c?)',
+    description: 'Mï¿½ nhï¿½m danh m?c (d? tr?ng d? l?y t?t c?)',
   })
-  @ApiQuery({ name: 'lang', required: false, description: 'Mã ngôn ng?' })
-  @ApiResponse({ status: 200, description: 'Danh sách danh m?c thu?c nhóm' })
+  @ApiQuery({ name: 'lang', required: false, description: 'Mï¿½ ngï¿½n ng?' })
+  @ApiResponse({ status: 200, description: 'Danh sï¿½ch danh m?c thu?c nhï¿½m' })
   async getByGroup(@Query() query: any) {
     const group = query.group;
     const lang = query.lang || 'vi';
@@ -224,4 +225,5 @@ export class PublicCategoriesController implements OnModuleInit {
     return { success: true, data: (result as any)?.data || [] };
   }
 }
+
 

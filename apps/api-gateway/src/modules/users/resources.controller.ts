@@ -1,4 +1,4 @@
-import {
+ï»¿import {
   Controller,
   Post,
   Put,
@@ -19,10 +19,11 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
-@ApiTags('PBAC – Tài nguyên')
+@ApiTags('PBAC ï¿½ Tï¿½i nguyï¿½n')
 @Controller('admin/resources')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class ResourcesController implements OnModuleInit {
   private pbacService: any;
@@ -39,46 +40,44 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'T?o tài nguyên m?i' })
+  @ApiOperation({ summary: 'T?o tï¿½i nguyï¿½n m?i' })
   @ApiResponse({
     status: 201,
-    description: 'Tài nguyên v?a du?c t?o',
+    description: 'Tï¿½i nguyï¿½n v?a du?c t?o',
   })
   async createResource(
-    @Body() body: { code: string; name: string },
+    @Body() body: { code: string; name: string; serviceCode?: string },
   ) {
     return firstValueFrom(
       this.pbacService.CreateResource({
-        code: body.code,
-        name: body.name,
+        code: body.code, name: body.name, serviceCode: body.serviceCode,
       }),
     );
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t tài nguyên' })
+  @ApiOperation({ summary: 'C?p nh?t tï¿½i nguyï¿½n' })
   @ApiResponse({
     status: 200,
-    description: 'Tài nguyên sau khi c?p nh?t',
+    description: 'Tï¿½i nguyï¿½n sau khi c?p nh?t',
   })
   async updateResource(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { code?: string; name?: string },
+    @Body() body: { code?: string; name?: string; serviceCode?: string },
   ) {
     return firstValueFrom(
       this.pbacService.UpdateResource({
         id,
-        code: body.code,
-        name: body.name,
+        code: body.code, name: body.name, serviceCode: body.serviceCode,
       }),
     );
   }
 
   @Delete('permissions/:id')
-  @ApiOperation({ summary: 'Xóa m?t quy?n theo ID' })
+  @ApiOperation({ summary: 'Xï¿½a m?t quy?n theo ID' })
   @ApiResponse({
     status: 200,
-    description: 'K?t qu? xóa',
+    description: 'K?t qu? xï¿½a',
   })
   async deletePermission(
     @Param('id', ParseIntPipe) id: number,
@@ -91,11 +90,11 @@ export class ResourcesController implements OnModuleInit {
   @Delete(':id')
   @ApiOperation({
     summary:
-      'Xóa tài nguyên (ch? khi không còn quy?n nào thu?c tài nguyên này)',
+      'Xï¿½a tï¿½i nguyï¿½n (ch? khi khï¿½ng cï¿½n quy?n nï¿½o thu?c tï¿½i nguyï¿½n nï¿½y)',
   })
   @ApiResponse({
     status: 200,
-    description: 'K?t qu? xóa',
+    description: 'K?t qu? xï¿½a',
   })
   async deleteResource(
     @Param('id', ParseIntPipe) id: number,
@@ -107,7 +106,7 @@ export class ResourcesController implements OnModuleInit {
 
   @Post(':id/permissions')
   @ApiOperation({
-    summary: 'Thêm quy?n (action) cho tài nguyên',
+    summary: 'Thï¿½m quy?n (action) cho tï¿½i nguyï¿½n',
   })
   @ApiResponse({
     status: 201,
@@ -125,3 +124,4 @@ export class ResourcesController implements OnModuleInit {
     );
   }
 }
+

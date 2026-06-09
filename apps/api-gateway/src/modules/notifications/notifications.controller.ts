@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
+﻿import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiBearerAuth,
@@ -6,11 +6,12 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import { NotificationsService } from './notifications.service';
 
 @ApiTags('Notifications')
 @Controller('admin/notifications')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
@@ -43,3 +44,4 @@ export class NotificationsController {
     return { success: ok };
   }
 }
+

@@ -1,4 +1,4 @@
-import {
+﻿import {
   Controller,
   Get,
   Post,
@@ -16,6 +16,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
 /** Flatten tree to list (id, code, name, ...) */
 function flattenUnits(nodes: any[]): any[] {
@@ -30,7 +31,7 @@ function flattenUnits(nodes: any[]): any[] {
 
 @ApiTags('HRM')
 @Controller('admin/hrm/departments')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class DepartmentController implements OnModuleInit {
   private orgService: any;
@@ -174,3 +175,4 @@ export class DepartmentController implements OnModuleInit {
     return res ?? { success: true, message: 'Đã xóa đơn vị' };
   }
 }
+

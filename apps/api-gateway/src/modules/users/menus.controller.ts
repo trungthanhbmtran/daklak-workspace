@@ -1,4 +1,4 @@
-import {
+ï»¿import {
   Controller,
   Get,
   Post,
@@ -25,6 +25,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
+import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 interface MenuDto {
@@ -104,7 +105,7 @@ const flattenMenus = (nodes: any[], basePath: string): any[] => {
 
 @ApiTags('Menu')
 @Controller('admin/menus')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class MenusController implements OnModuleInit {
   private menuService: any;
@@ -118,7 +119,7 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh sách menu (flat) cho trang qu?n lý menu' })
+  @ApiOperation({ summary: 'Danh sï¿½ch menu (flat) cho trang qu?n lï¿½ menu' })
   @ApiResponse({ status: 200, description: 'M?ng menu ph?ng' })
   async getAll(@Query('app') app?: string) {
     const res = (await firstValueFrom(
@@ -129,14 +130,14 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get('me')
-  @ApiOperation({ summary: 'Menu sidebar theo user dang nh?p và ?ng d?ng' })
+  @ApiOperation({ summary: 'Menu sidebar theo user dang nh?p vï¿½ ?ng d?ng' })
   @ApiQuery({
     name: 'app',
     required: false,
     description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
     example: 'ADMIN_PORTAL',
   })
-  @ApiResponse({ status: 200, description: 'Cây menu (ch? m?c user có quy?n)' })
+  @ApiResponse({ status: 200, description: 'Cï¿½y menu (ch? m?c user cï¿½ quy?n)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
@@ -184,7 +185,7 @@ export class MenusController implements OnModuleInit {
           return {
             id: svcCode,
             title: (b.name ?? '').trim() || svcCode,
-            desc: (b.description ?? '').trim() || 'Phân h? nghi?p v?',
+            desc: (b.description ?? '').trim() || 'Phï¿½n h? nghi?p v?',
             href,
             icon: b.icon ?? '',
             iconColor: (b.iconColor ?? '').trim() || null,
@@ -234,9 +235,9 @@ export class MenusController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'T?o menu m?i (PBAC: quy?n gán v?i Permission)' })
-  @ApiBody({ description: 'Thông tin menu' })
-  @ApiResponse({ status: 201, description: 'Menu dã t?o' })
+  @ApiOperation({ summary: 'T?o menu m?i (PBAC: quy?n gï¿½n v?i Permission)' })
+  @ApiBody({ description: 'Thï¿½ng tin menu' })
+  @ApiResponse({ status: 201, description: 'Menu dï¿½ t?o' })
   async create(@Body() body: MenuDto) {
     try {
       const payload = this.toCreatePayload(body);
@@ -279,8 +280,8 @@ export class MenusController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t menu (PBAC: quy?n gán v?i Permission)' })
-  @ApiResponse({ status: 200, description: 'Menu dã c?p nh?t' })
+  @ApiOperation({ summary: 'C?p nh?t menu (PBAC: quy?n gï¿½n v?i Permission)' })
+  @ApiResponse({ status: 200, description: 'Menu dï¿½ c?p nh?t' })
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: MenuDto) {
     try {
       const payload = this.toUpdatePayload(id, body);
@@ -297,13 +298,14 @@ export class MenusController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Xóa menu' })
-  @ApiResponse({ status: 200, description: 'Ðã xóa' })
+  @ApiOperation({ summary: 'Xï¿½a menu' })
+  @ApiResponse({ status: 200, description: 'ï¿½ï¿½ xï¿½a' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
     return {
       success: res?.success ?? true,
-      message: res?.message ?? 'Ðã xóa menu',
+      message: res?.message ?? 'ï¿½ï¿½ xï¿½a menu',
     };
   }
 }
+
