@@ -113,7 +113,7 @@ export class MenusController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.MENU.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.menuService = this.client.getService(MICROSERVICES.MENU.SERVICE);
@@ -121,8 +121,8 @@ export class MenusController implements OnModuleInit {
 
   @Get()
   @RequirePermissions('')
-  @ApiOperation({ summary: 'Danh sÃ¡ch menu (flat) cho trang quáº£n lÃ½ menu' })
-  @ApiResponse({ status: 200, description: 'Máº£ng menu pháº³ng' })
+  @ApiOperation({ summary: 'Danh sách menu (flat) cho trang quản lý menu' })
+  @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
   async getAll(@Query('app') app?: string) {
     const res = (await firstValueFrom(
       this.menuService.GetAll({ app: app || 'ADMIN_PORTAL' }),
@@ -132,14 +132,14 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get('me')
-  @ApiOperation({ summary: 'Menu sidebar theo user Ä‘Äƒng nháº­p vÃ  á»©ng dá»¥ng' })
+  @ApiOperation({ summary: 'Menu sidebar theo user đăng nhập và ứng dụng' })
   @ApiQuery({
     name: 'app',
     required: false,
     description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
     example: 'ADMIN_PORTAL',
   })
-  @ApiResponse({ status: 200, description: 'CÃ¢y menu (chá»‰ má»¥c user cÃ³ quyá»n)' })
+  @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
@@ -187,7 +187,7 @@ export class MenusController implements OnModuleInit {
           return {
             id: svcCode,
             title: (b.name ?? '').trim() || svcCode,
-            desc: (b.description ?? '').trim() || 'PhÃ¢n há»‡ nghiá»‡p vá»¥',
+            desc: (b.description ?? '').trim() || 'Phân hệ nghiệp vụ',
             href,
             icon: b.icon ?? '',
             iconColor: (b.iconColor ?? '').trim() || null,
@@ -238,9 +238,9 @@ export class MenusController implements OnModuleInit {
 
   @Post()
   @RequirePermissions('')
-  @ApiOperation({ summary: 'Táº¡o menu má»›i (PBAC: quyá»n gáº¯n vá»›i Permission)' })
-  @ApiBody({ description: 'ThÃ´ng tin menu' })
-  @ApiResponse({ status: 201, description: 'Menu Ä‘Ã£ táº¡o' })
+  @ApiOperation({ summary: 'Tạo menu mới (PBAC: quyền gán với Permission)' })
+  @ApiBody({ description: 'Thông tin menu' })
+  @ApiResponse({ status: 201, description: 'Menu đã tạo' })
   async create(@Body() body: MenuDto) {
     try {
       const payload = this.toCreatePayload(body);
@@ -249,7 +249,7 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lá»—i táº¡o menu';
+      const message = err?.message ?? err?.details ?? 'Lỗi tạo menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
@@ -284,8 +284,8 @@ export class MenusController implements OnModuleInit {
 
   @Put(':id')
   @RequirePermissions('MENU:MANAGE')
-  @ApiOperation({ summary: 'Cáº­p nháº­t menu (PBAC: quyá»n gáº¯n vá»›i Permission)' })
-  @ApiResponse({ status: 200, description: 'Menu Ä‘Ã£ cáº­p nháº­t' })
+  @ApiOperation({ summary: 'Cập nhật menu (PBAC: quyền gán với Permission)' })
+  @ApiResponse({ status: 200, description: 'Menu đã cập nhật' })
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: MenuDto) {
     try {
       const payload = this.toUpdatePayload(id, body);
@@ -294,7 +294,7 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lá»—i cáº­p nháº­t menu';
+      const message = err?.message ?? err?.details ?? 'Lá»—i cáº­p nhá  º­t menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
@@ -303,14 +303,13 @@ export class MenusController implements OnModuleInit {
 
   @Delete(':id')
   @RequirePermissions('MENU:MANAGE')
-  @ApiOperation({ summary: 'XÃ³a menu' })
-  @ApiResponse({ status: 200, description: 'ÄÃ£ xÃ³a' })
+  @ApiOperation({ summary: 'Xóa menu' })
+  @ApiResponse({ status: 200, description: 'Đã xóa' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
     return {
       success: res?.success ?? true,
-      message: res?.message ?? 'ÄÃ£ xÃ³a menu',
+      message: res?.message ?? 'Đã xóa menu',
     };
   }
 }
-
