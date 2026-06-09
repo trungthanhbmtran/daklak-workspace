@@ -174,46 +174,6 @@ export class UserController implements OnModuleInit {
     );
   }
 
-  @Get('me')
-  @ApiOperation({ summary: 'Lấy thông tin user đăng nhập' })
-  @ApiResponse({
-    status: 200,
-    description: 'Chi tiết thông tin user hiện tại',
-  })
-  async getMe(@Req() req: any) {
-    const employeeId = req.user?.employeeId;
-    const userId = req.user?.id;
-    if (!userId) {
-      throw new BadRequestException('Không tìm thấy thông tin user trong token');
-    }
-
-    const user: any = await firstValueFrom(this.userService.FindOne({ id: Number(userId) }));
-    let hrm: any = null;
-
-    if (employeeId) {
-      try {
-        const empRes: any = await firstValueFrom(this.employeeService.GetEmployee({ id: Number(employeeId) }));
-        hrm = empRes?.data;
-      } catch (e) {
-        // Ignore error
-      }
-    }
-
-    return {
-      success: true,
-      data: sanitizeUserForClient({
-        id: userId,
-        email: user?.email,
-        username: user?.username,
-        fullName: hrm?.fullName || user?.fullName,
-        phoneNumber: user?.phoneNumber,
-        avatarUrl: hrm?.avatar || user?.avatarUrl,
-        unitName: user?.unitName,
-        jobTitleName: user?.jobTitleName,
-      }),
-    };
-  }
-
   @Patch(':id/active')
   @RequirePermissions('USER:MANAGE')
   @ApiOperation({ summary: 'Khóa hoặc mở tài khoản (isActive: true/false)' })

@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Post,
   Get,
@@ -173,23 +173,28 @@ export class AuthController implements OnModuleInit {
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Thông tin user đăng nhập' })
   async me(@Req() req: any) {
-    const user = req.user || null;
-    if (user && user.employeeCode) {
+    const employeeId = req.user?.employeeId;
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new UnauthorizedException('Không tìm thấy thông tin user trong token');
+    }
+
+    const user: any = await firstValueFrom(this.userService.FindOne({ id: Number(userId) }));
+    let hrm: any = null;
+
+    if (employeeId) {
       try {
-        const empRes: any = await firstValueFrom(
-          this.employeeService.GetEmployeeByCode({ code: user.employeeCode }),
-        );
-        const emp = empRes?.data;
-        if (emp) {
-          const fetchedFullName = emp.fullName;
-          if (fetchedFullName) {
-            user.fullName = fetchedFullName;
-          }
-        }
-      } catch (_err) {
-        // Ignore error and use default fullName from token
+        const empRes: any = await firstValueFrom(this.employeeService.GetEmployee({ id: Number(employeeId) }));
+        hrm = empRes?.data;
+      } catch (e) {
+        // Ignore error
       }
     }
-    return sanitizeUserForClient(user);
+
+    return sanitizeUserForClient({
+      ...user,
+      fullName: hrm?.fullName || user?.fullName,
+      avatarUrl: hrm?.avatar || user?.avatarUrl,
+    });
   }
 }
