@@ -59,13 +59,20 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 border-border" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none text-foreground">{fullName}</p>
-            <p className="text-xs text-muted-foreground">
-              {user?.jobTitleName && user?.unitName
-                ? `${user.jobTitleName} - ${user.unitName}`
-                : email}
-            </p>
+          <div className="flex flex-col space-y-1.5 pb-1">
+            <p className="text-sm font-semibold leading-none text-foreground">{fullName}</p>
+            <p className="text-xs text-muted-foreground leading-none">{email}</p>
+            
+            {(user?.jobTitleName || user?.unitName) && (
+              <div className="mt-2 flex flex-col space-y-1 border-t border-border/50 pt-2">
+                {user?.jobTitleName && (
+                  <span className="text-xs font-medium text-foreground/80">{user.jobTitleName}</span>
+                )}
+                {user?.unitName && (
+                  <span className="text-[11px] text-muted-foreground leading-snug">{user.unitName}</span>
+                )}
+              </div>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border" />
