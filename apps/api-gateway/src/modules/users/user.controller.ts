@@ -205,6 +205,7 @@ export class UserController implements OnModuleInit {
         id: userId,
         email: user?.email,
         username: user?.username,
+        fullName: hrm?.fullName || user?.fullName,
         phoneNumber: user?.phoneNumber,
         avatarUrl: hrm?.avatar || user?.avatarUrl,
         unitName: user?.unitName,
