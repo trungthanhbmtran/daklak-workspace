@@ -131,7 +131,8 @@ export class PbacService {
       where: { id },
       data: {
         ...(data.code !== undefined && { code: data.code }),
-        ...(data.name !== undefined && { name: data.name }),...(data.serviceCode !== undefined && { serviceCode: data.serviceCode }),
+        ...(data.name !== undefined && { name: data.name }),
+        ...(data.serviceCode !== undefined && { serviceCode: data.serviceCode }),
       },
     });
   }
@@ -192,8 +193,6 @@ export class PbacService {
     await this.prisma.permission.delete({ where: { id } });
     return true;
   }
-}
-
 
   async syncEndpoints(endpoints: { method: string; path: string }[]) {
     let count = 0;
@@ -214,4 +213,4 @@ export class PbacService {
   async assignEndpointPermission(id: number, permissionId: number) {
     return this.prisma.apiEndpoint.update({ where: { id }, data: { permissionId }, include: { permission: { include: { resource: true } } } });
   }
-
+}
