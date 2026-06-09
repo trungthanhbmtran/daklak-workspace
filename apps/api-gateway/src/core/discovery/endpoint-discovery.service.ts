@@ -1,7 +1,8 @@
-import { Injectable, OnApplicationBootstrap, Inject } from '@nestjs/common';
+﻿import { Injectable, OnApplicationBootstrap, Inject } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../constants/services';
+import * as http from 'http';
 
 @Injectable()
 export class EndpointDiscoveryService implements OnApplicationBootstrap {
@@ -15,33 +16,36 @@ export class EndpointDiscoveryService implements OnApplicationBootstrap {
   async onApplicationBootstrap() {
     this.pbacService = this.client.getService(MICROSERVICES.PBAC.SERVICE);
     
-    // KhO*i dOng chO- 2 giAy dO? pbac service sn sAng
-    setTimeout(async () => {
+    // Khởi động chờ 2 giây để Swagger tạo xong
+    setTimeout(() => {
       try {
-        const adapter = this.httpAdapterHost.httpAdapter;
-        const instance = adapter.getInstance();
-        const routes: { method: string; path: string }[] = [];
-        
-        instance._router.stack.forEach((layer: any) => {
-          if (layer.route) {
-            const path = layer.route?.path;
-            const method = Object.keys(layer.route.methods)[0]?.toUpperCase();
-            if (path && method) {
-              routes.push({ method, path });
+        http.get('http://localhost:8080/api/v1/docs-json', (res) => {
+          let data = '';
+          res.on('data', (chunk) => { data += chunk; });
+          res.on('end', async () => {
+            try {
+              const swagger = JSON.parse(data);
+              const routes: { method: string; path: string }[] = [];
+              for (const [path, methods] of Object.entries(swagger.paths || {})) {
+                for (const method of Object.keys(methods as object)) {
+                  routes.push({ method: method.toUpperCase(), path });
+                }
+              }
+              const filteredRoutes = routes.filter(r => r.path.startsWith('/api') || r.path.startsWith('/admin'));
+              if (filteredRoutes.length > 0) {
+                 await firstValueFrom(this.pbacService.SyncEndpoints({ endpoints: filteredRoutes }));
+                 console.log("[Auto-Discovery] Synced " + filteredRoutes.length + " endpoints from Swagger to Database");
+              }
+            } catch (err) {
+               console.error('[Auto-Discovery] Failed to parse swagger or sync endpoints:', err);
             }
-          }
+          });
+        }).on('error', (err) => {
+          console.error('[Auto-Discovery] Could not reach Swagger JSON:', err);
         });
-
-        // LOai bO? cAc route khOng cAAn thiOt (swagger, etc)
-        const filteredRoutes = routes.filter(r => r.path.startsWith('/admin') || r.path.startsWith('/api'));
-        
-        if (filteredRoutes.length > 0) {
-           await firstValueFrom(this.pbacService.SyncEndpoints({ endpoints: filteredRoutes }));
-           console.log("[Auto-Discovery] Synced " + filteredRoutes.length + " endpoints to Database");
-        }
       } catch (err) {
-        console.error('[Auto-Discovery] Failed to sync endpoints:', err);
+        console.error('[Auto-Discovery] Failed to fetch swagger endpoints:', err);
       }
-    }, 2000);
+    }, 3000);
   }
 }
