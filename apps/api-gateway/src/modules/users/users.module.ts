@@ -25,6 +25,7 @@ import { ConfigsController } from './configs.controller';
     registerGrpcService(MICROSERVICES.MENU),
     registerGrpcService(MICROSERVICES.ORGANIZATION),
     registerGrpcService(MICROSERVICES.SYS_CONFIG),
+    registerGrpcService(MICROSERVICES.EMPLOYEE),
   ],
   controllers: [
     UserController,
@@ -38,4 +39,4 @@ import { ConfigsController } from './configs.controller';
     ConfigsController,
   ],
 })
-export class UsersModule {}
+export class UsersModule { }

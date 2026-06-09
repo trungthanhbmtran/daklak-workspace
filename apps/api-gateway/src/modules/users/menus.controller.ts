@@ -294,7 +294,7 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lá»—i cáº­p nhá  º­t menu';
+      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );

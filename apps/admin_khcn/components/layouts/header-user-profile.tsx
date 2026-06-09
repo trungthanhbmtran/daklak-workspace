@@ -26,7 +26,7 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
   const fullName = user?.fullName?.trim() || "Người dùng";
   const initial = fullName.charAt(0).toUpperCase() || "U";
   const email = user?.email || "user@daklak.gov.vn";
-  
+
   // Extract role
   const roles = user?.roles || [];
   const primaryRole = roles.length > 0 ? roles[0].name : (user?.role || "Chưa cấp quyền");
@@ -53,7 +53,11 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
             <div className="hidden md:flex flex-col items-start">
               <span className="text-sm font-semibold leading-none">{fullName}</span>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[10px] text-muted-foreground font-normal">{email}</span>
+                <span className="text-[10px] text-muted-foreground font-normal truncate max-w-[200px]">
+                  {user?.jobTitleName && user?.unitName
+                    ? `${user.jobTitleName} - ${user.unitName}`
+                    : email}
+                </span>
                 <span className="text-[9px] font-semibold text-primary border border-primary/20 bg-primary/5 rounded px-1 py-0">{primaryRole}</span>
               </div>
             </div>
@@ -64,8 +68,11 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none text-foreground">{fullName}</p>
-            <p className="text-xs text-muted-foreground">{email}</p>
-            <p className="text-[10px] font-semibold text-primary mt-1 border border-primary/20 bg-primary/5 rounded px-1.5 py-0.5 inline-block w-fit">{primaryRole}</p>
+            <p className="text-xs text-muted-foreground">
+              {user?.jobTitleName && user?.unitName
+                ? `${user.jobTitleName} - ${user.unitName}`
+                : email}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator className="bg-border" />

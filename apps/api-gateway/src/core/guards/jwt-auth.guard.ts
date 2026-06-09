@@ -17,7 +17,7 @@ export class JwtAuthGuard implements CanActivate {
 
   constructor(
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
@@ -27,7 +27,7 @@ export class JwtAuthGuard implements CanActivate {
     if (!this.userService) {
       this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
     }
-    
+
     const request = context.switchToHttp().getRequest<Request>();
     let token: string | undefined;
 
@@ -68,22 +68,11 @@ export class JwtAuthGuard implements CanActivate {
         console.error('Failed to fetch user permissions from user-service:', err.message);
       }
 
-      const roles = userRes?.roles || [];
-      const permissionsFlatten = userRes?.permissionsFlatten || [];
 
       // Gắn thông tin user vào request
       (request as any).user = {
         id: userId,
-        email: userRes?.email,
-        username: userRes?.username,
-        fullName: userRes?.fullName,
-        identitycard: userRes?.identitycard,
-        employeeCode: userRes?.employeeCode,
-        roles,
-        permissionsFlatten,
-        unitId: userRes?.unitId,
-        unitCode: userRes?.unitCode,
-        jobTitleCode: userRes?.jobTitleCode,
+        employeeId: userRes?.employeeId,
       };
 
       return true;

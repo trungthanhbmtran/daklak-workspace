@@ -35,14 +35,17 @@ import { sanitizeUserForClient } from '../../common/utils/user.util';
 @ApiBearerAuth('JWT-auth')
 export class UserController implements OnModuleInit {
   private userService: any;
+  private employeeService: any;
 
   constructor(
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
     private readonly notificationsService: NotificationsService,
   ) { }
 
   onModuleInit() {
     this.userService = this.client.getService(MICROSERVICES.USER.SERVICE);
+    this.employeeService = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
   }
 
   @Get()
@@ -95,7 +98,7 @@ export class UserController implements OnModuleInit {
   @RequirePermissions('USER:CREATE')
   @ApiOperation({
     summary:
-      'Táº¡o user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode tá»« HRM)',
+      'Tạo user (email, username, password, fullName, phoneNumber, roleIds, cccd, employeeCode từ HRM)',
   })
   @ApiResponse({
     status: 201,
@@ -169,6 +172,45 @@ export class UserController implements OnModuleInit {
         isPrimary: body.isPrimary ?? false,
       }),
     );
+  }
+
+  @Get('me')
+  @ApiOperation({ summary: 'Lấy thông tin user đăng nhập' })
+  @ApiResponse({
+    status: 200,
+    description: 'Chi tiết thông tin user hiện tại',
+  })
+  async getMe(@Req() req: any) {
+    const employeeId = req.user?.employeeId;
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new BadRequestException('Không tìm thấy thông tin user trong token');
+    }
+
+    const user: any = await firstValueFrom(this.userService.FindOne({ id: Number(userId) }));
+    let hrm: any = null;
+
+    if (employeeId) {
+      try {
+        const empRes: any = await firstValueFrom(this.employeeService.GetEmployee({ id: Number(employeeId) }));
+        hrm = empRes?.data;
+      } catch (e) {
+        // Ignore error
+      }
+    }
+
+    return {
+      success: true,
+      data: sanitizeUserForClient({
+        id: userId,
+        email: user?.email,
+        username: user?.username,
+        phoneNumber: user?.phoneNumber,
+        avatarUrl: hrm?.avatar || user?.avatarUrl,
+        unitName: user?.unitName,
+        jobTitleName: user?.jobTitleName,
+      }),
+    };
   }
 
   @Patch(':id/active')
