@@ -11,6 +11,7 @@ export function useUser() {
     queryFn: async () => {
       try {
         const result: any = await apiClient.get(`${API_BASE}/me`);
+        console.log("resultuse", result);
         return result;
       } catch (error: any) {
         if (error.response?.status === 401) return null;
