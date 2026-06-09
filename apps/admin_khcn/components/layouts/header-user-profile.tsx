@@ -27,10 +27,6 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
   const initial = fullName.charAt(0).toUpperCase() || "U";
   const email = user?.email || "user@daklak.gov.vn";
 
-  // Extract role
-  const roles = user?.roles || [];
-  const primaryRole = roles.length > 0 ? roles[0].name : (user?.role || "Chưa cấp quyền");
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -39,27 +35,24 @@ export function HeaderUserProfile({ showName = false }: HeaderUserProfileProps) 
           className={cn(
             "relative rounded-full focus-visible:ring-1 focus-visible:ring-ring",
             showName
-              ? "h-11 flex items-center gap-3 pl-2 pr-4 hover:bg-muted/60 transition-colors"
+              ? "h-11 flex items-center gap-2 pl-2 pr-4 hover:bg-muted/60 transition-colors"
               : "h-9 w-9"
           )}
         >
           <Avatar className={cn("border border-border", showName ? "h-8 w-8" : "h-9 w-9")}>
-            <AvatarImage src="" alt="Avatar" />
+            <AvatarImage src={user?.avatarUrl || ""} alt={fullName} />
             <AvatarFallback className="bg-primary/10 text-primary font-medium text-xs">
               {initial}
             </AvatarFallback>
           </Avatar>
           {showName && (
-            <div className="hidden md:flex flex-col items-start">
-              <span className="text-sm font-semibold leading-none">{fullName}</span>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[10px] text-muted-foreground font-normal truncate max-w-[200px]">
-                  {user?.jobTitleName && user?.unitName
-                    ? `${user.jobTitleName} - ${user.unitName}`
-                    : email}
-                </span>
-                <span className="text-[9px] font-semibold text-primary border border-primary/20 bg-primary/5 rounded px-1 py-0">{primaryRole}</span>
-              </div>
+            <div className="hidden md:flex flex-col items-start text-left">
+              <span className="text-xs text-muted-foreground font-medium mb-1 leading-none">
+                Xin chào,
+              </span>
+              <span className="text-sm font-semibold leading-none truncate max-w-[200px]">
+                {fullName}
+              </span>
             </div>
           )}
         </Button>
