@@ -1,4 +1,4 @@
-﻿import { Injectable, OnApplicationBootstrap, Inject } from '@nestjs/common';
+import { Injectable, OnApplicationBootstrap, Inject } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../constants/services';
@@ -37,7 +37,7 @@ export class EndpointDiscoveryService implements OnApplicationBootstrap {
         
         if (filteredRoutes.length > 0) {
            await firstValueFrom(this.pbacService.SyncEndpoints({ endpoints: filteredRoutes }));
-           console.log([Auto-Discovery] Synced  + filteredRoutes.length +  endpoints to Database);
+           console.log("[Auto-Discovery] Synced " + filteredRoutes.length + " endpoints to Database");
         }
       } catch (err) {
         console.error('[Auto-Discovery] Failed to sync endpoints:', err);
