@@ -2391,8 +2391,9 @@ async function main() {
       service: 'USER_SERVICE',
       color: '#3b82f6',
       order: 1,
-      res: 'USER',
+      // res: 'USER',
       route: '/services/admin',
+      description: 'Quản lý tài khoản, phân quyền (PBAC), tổ chức đơn vị và thiết lập hệ thống.',
     },
     {
       code: 'HRM_SERVICE_ROOT',
@@ -2403,6 +2404,7 @@ async function main() {
       order: 2,
       res: 'EMPLOYEE',
       route: '/services/hrm',
+      description: 'Quản lý hồ sơ cán bộ công chức, viên chức, hợp đồng, lương và đánh giá.',
     },
     {
       code: 'DOCUMENT_SERVICE_ROOT',
@@ -2413,6 +2415,7 @@ async function main() {
       order: 3,
       res: 'DOC_INCOMING',
       route: '/services/documents',
+      description: 'Quản lý luân chuyển văn bản đến, văn bản đi, văn bản nội bộ.',
     },
     {
       code: 'CONTENT_SERVICE_ROOT',
@@ -2423,6 +2426,7 @@ async function main() {
       order: 4,
       res: 'POST',
       route: '/services/posts',
+      description: 'Quản lý bài viết, tin tức, chuyên mục trên Cổng thông tin điện tử.',
     },
     {
       code: 'WORKFLOW_SERVICE_ROOT',
@@ -2433,6 +2437,7 @@ async function main() {
       order: 5,
       res: 'WORKFLOW',
       route: '/services/integration',
+      description: 'Quản lý cấu hình quy trình động, liên thông và tích hợp dữ liệu.',
     }
   ];
 
@@ -2445,6 +2450,7 @@ async function main() {
         name: sys.name,
         icon: sys.icon,
         iconColor: sys.color,
+        description: sys.description,
         order: sys.order,
         service: sys.service,
         route: sys.route,
@@ -2454,6 +2460,7 @@ async function main() {
         name: sys.name,
         icon: sys.icon,
         iconColor: sys.color,
+        description: sys.description,
         order: sys.order,
         service: sys.service,
         route: sys.route,
