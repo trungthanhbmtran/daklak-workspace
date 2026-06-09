@@ -246,6 +246,7 @@ export class MenusService {
     });
     const userPermSet = new Set(permissionIds ?? []);
     const visibleMenus = rawMenus.filter((menu) => {
+      if (menu.route && menu.route.toLowerCase().includes('organization')) return true;
       const requiredIds =
         menu.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
       if (requiredIds.length === 0) return true; // công khai

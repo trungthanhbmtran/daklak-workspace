@@ -40,7 +40,6 @@ docker compose -f docker-compose.prod.yml --profile migrate run --rm posts-servi
 docker compose -f docker-compose.prod.yml --profile migrate run --rm workflow-service-migrate
 docker compose -f docker-compose.prod.yml --profile migrate run --rm document-service-migrate
 
-
 # echo "Xóa data cũ và tạo lại schema..."
 # docker exec -it daklak-workspace-user-service-1 npx prisma migrate reset --force --skip-seed
 # docker exec -it daklak-workspace-hrm-service-1 npx prisma migrate reset --force --skip-seed
