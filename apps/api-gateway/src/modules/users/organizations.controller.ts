@@ -116,9 +116,16 @@ export class OrganizationsController implements OnModuleInit {
     let nodes = res.nodes || [];
 
     const user = request?.user;
+    const checkRole = (roleCode: string) => {
+      if (Array.isArray(user?.roles)) {
+        return user.roles.some((r: any) => r === roleCode || r?.code === roleCode);
+      }
+      return false;
+    };
+
     let isAdmin =
-      user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') ||
-      user?.roles?.some((r: any) => r.code === 'ADMIN') ||
+      checkRole('SUPER_ADMIN') ||
+      checkRole('ADMIN') ||
       user?.permissionsFlatten?.includes('SYSTEM:MANAGE') ||
       user?.permissionsFlatten?.includes('ORGANIZATION:MANAGE');
 

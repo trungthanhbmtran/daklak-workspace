@@ -217,7 +217,7 @@ export class TasksController implements OnModuleInit {
       finalDepartmentId = user.unitId;
     }
 
-    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isAdmin = user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     // Tính ancestor unit IDs cho visibility và phân quyền theo cây tổ chức
     let callerAncestorUnitIds: number[] = [];

@@ -489,7 +489,9 @@ export class UsersService implements OnModuleInit {
       }
     }
     
-    const permissionsFlatten = roleNames.includes('SUPER_ADMIN') ? [] : Array.from(permissionsFlattenSet);
+    const permissionsFlatten = roles.some((r) => r.code === 'SUPER_ADMIN')
+      ? []
+      : Array.from(permissionsFlattenSet);
 
     const firstPosition = (user as any).jobPositions?.[0];
     const unitId = firstPosition?.unit?.id ?? null;

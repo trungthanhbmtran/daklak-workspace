@@ -17,10 +17,14 @@ export class RbacGuard implements CanActivate {
     const { user } = context.switchToHttp().getRequest();
     const userRoles = Array.isArray(user.roles) ? user.roles : [];
 
+    // Check if role matches either the string itself or the code property
+    const hasRole = (roleCode: string) => 
+      userRoles.some((r: any) => r === roleCode || r?.code === roleCode);
+
     // ADMIN and SUPER_ADMIN have all permissions
-    if (userRoles.includes(Role.ADMIN) || userRoles.includes(Role.SUPER_ADMIN))
+    if (hasRole(Role.ADMIN) || hasRole(Role.SUPER_ADMIN))
       return true;
 
-    return requiredRoles.some((role) => userRoles.includes(role));
+    return requiredRoles.some((role) => hasRole(role));
   }
 }
