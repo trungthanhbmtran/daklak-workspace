@@ -2273,15 +2273,23 @@ async function main() {
 
   const cmsResources = ['POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION'];
   for (const r of cmsRoles) {
-    const rolePoliciesData: { resourceId: number; action: string; effect: string }[] = [];
+    const rolePoliciesData: { resourceId: number; action: string; effect: string; conditions?: any }[] = [];
     for (const resCode of cmsResources) {
       const resId = resources[resCode]?.id;
       if (!resId) continue;
       for (const action of r.permissions) {
+        let conditionString = '';
+        if (r.code === 'AUTHOR' && ['UPDATE', 'DELETE'].includes(action)) {
+          conditionString = 'resource.createdBy == currentUserId'; // Người tạo
+        } else if (r.code === 'REVIEWER' && ['UPDATE', 'APPROVE', 'REJECT'].includes(action)) {
+          conditionString = 'user.positionLevel >= 3'; // Chức vụ / Phòng ban
+        }
+
         rolePoliciesData.push({
           resourceId: resId,
           action: action === 'REJECT' ? 'UPDATE' : action,
           effect: 'ALLOW',
+          conditions: conditionString ? { expression: conditionString } : {}
         });
       }
     }
@@ -2318,11 +2326,25 @@ async function main() {
   ];
 
   for (const r of taskRoles) {
-    const rolePoliciesData: { resourceId: number; action: string; effect: string }[] = [];
+    const rolePoliciesData: { resourceId: number; action: string; effect: string; conditions?: any }[] = [];
     const resId = resources['TASK']?.id;
     if (resId) {
       for (const action of r.permissions) {
-        rolePoliciesData.push({ resourceId: resId, action, effect: 'ALLOW' });
+        let conditionString = '';
+        if (r.code === 'LEADER' && ['ASSIGN', 'COMPLETE', 'EVALUATE', 'APPROVE'].includes(action)) {
+          conditionString = 'user.isLeader == true'; // Cơ cấu tổ chức / Đơn vị trực thuộc
+        } else if (r.code === 'MANAGER' && ['ASSIGN', 'COMPLETE'].includes(action)) {
+          conditionString = 'user.isLeader == true'; // Cơ cấu tổ chức / Phòng ban
+        } else if (r.code === 'STAFF' && ['UPDATE', 'COMMENT', 'COMPLETE'].includes(action)) {
+          conditionString = 'currentUserId IN resource.assigneeIds'; // Người được giao / Cây nhiệm vụ
+        }
+
+        rolePoliciesData.push({ 
+          resourceId: resId, 
+          action, 
+          effect: 'ALLOW',
+          conditions: conditionString ? { expression: conditionString } : {}
+        });
       }
     }
 
