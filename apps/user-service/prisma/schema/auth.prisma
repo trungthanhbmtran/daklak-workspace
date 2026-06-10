@@ -14,8 +14,8 @@ model Credential {
 model Account {
   id                String  @id @default(uuid())
   userId            Int     @map("user_id")
-  type              String  // "oauth", "oidc"
-  provider          String  // "vneid", "keycloak", "google"
+  type              String // "oauth", "oidc"
+  provider          String // "vneid", "keycloak", "google"
   providerAccountId String  @map("provider_account_id")
   refresh_token     String? @db.Text
   access_token      String? @db.Text
@@ -32,19 +32,19 @@ model Account {
 }
 
 model RefreshToken {
-  id              String   @id @default(uuid())
-  token           String   @unique @db.VarChar(512)
-  userId          Int      @map("user_id")
-  
-  deviceInfo      String?  @map("device_info") 
-  ipAddress       String?  @map("ip_address")
-  
+  id     String @id @default(uuid())
+  token  String @unique @db.VarChar(512)
+  userId Int    @map("user_id")
+
+  deviceInfo String? @map("device_info")
+  ipAddress  String? @map("ip_address")
+
   isRevoked       Boolean  @default(false) @map("is_revoked")
   expiresAt       DateTime @map("expires_at")
   createdAt       DateTime @default(now()) @map("created_at")
   replacedByToken String?  @map("replaced_by_token")
 
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("auth_refresh_tokens")

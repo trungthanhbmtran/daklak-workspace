@@ -1,35 +1,35 @@
 model Category {
-  id          Int      @id @default(autoincrement())
-  group       String   @map("group_code") 
-  code        String   
-  order       Int      @default(0) 
-  
-  isSystem    Boolean  @default(false) @map("is_system") 
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now()) @map("created_at")
+  id    Int    @id @default(autoincrement())
+  group String @map("group_code")
+  code  String
+  order Int    @default(0)
 
-  unitDomains             UnitDomain[]      
-  unitGeographicAreas     UnitGeographicArea[]
-  jobTitlesDomain         JobTitle[]         @relation("JobTitleDomain") 
-  jobTitlesGeographicArea JobTitle[]         @relation("JobTitleGeographicArea") 
-  staffingSlotsGeographicArea StaffingSlot[]  @relation("StaffingSlotGeographicArea") 
+  isSystem  Boolean  @default(false) @map("is_system")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  unitDomains                 UnitDomain[]
+  unitGeographicAreas         UnitGeographicArea[]
+  jobTitlesDomain             JobTitle[]                   @relation("JobTitleDomain")
+  jobTitlesGeographicArea     JobTitle[]                   @relation("JobTitleGeographicArea")
+  staffingSlotsGeographicArea StaffingSlot[]               @relation("StaffingSlotGeographicArea")
   staffingSlotGeographicAreas StaffingSlotGeographicArea[] @relation("StaffingSlotGeographicAreas")
-  staffingSlotDomains         StaffingSlotDomain[]  
-  translations            CategoryTranslation[]
+  staffingSlotDomains         StaffingSlotDomain[]
+  translations                CategoryTranslation[]
 
-  @@unique([group, code]) 
-  @@index([group])        
+  @@unique([group, code])
+  @@index([group])
   @@map("sys_categories")
 }
 
 model CategoryTranslation {
-  id          Int      @id @default(autoincrement())
-  categoryId  Int      @map("category_id")
-  langCode    String   @map("lang_code")
-  name        String   @db.Text
-  description String?  @db.Text
+  id          Int     @id @default(autoincrement())
+  categoryId  Int     @map("category_id")
+  langCode    String  @map("lang_code")
+  name        String  @db.Text
+  description String? @db.Text
 
-  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, langCode])
   @@index([langCode])
@@ -41,8 +41,8 @@ model CategoryGroup {
   name        String
   description String?
   order       Int      @default(0)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   @@map("sys_category_groups")
 }

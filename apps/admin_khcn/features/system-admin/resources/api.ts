@@ -46,8 +46,8 @@ export const resourceApi = {
     return actions.map((c: any) => c.code);
   },
 
-  createResource: (payload: { code: string; name: string }) =>
-    apiClient.post<{ id: number; code: string; name: string }>("/resources", payload),
+  createResource: (payload: { code: string; name: string; serviceCode?: string }) =>
+    apiClient.post<{ id: number; code: string; name: string; serviceCode?: string }>("/resources", payload),
 
   updateResource: (id: number, payload: { code?: string; name?: string }) =>
     apiClient.put<{ id: number; code: string; name: string }>(`/resources/${id}`, payload),

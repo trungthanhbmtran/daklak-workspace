@@ -1,18 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
-import { Plus, Edit, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, ChevronRight } from "lucide-react";
-import { Resolver, useForm } from "react-hook-form";
+import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, ChevronRight, Settings2 } from "lucide-react";
+import { Resolver, useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-import { Role, Permission } from "../types";
+import { Role, Permission, Policy } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
@@ -20,7 +20,7 @@ import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 interface RoleFormProps {
   selectedRole: Role | null;
   createMode: boolean;
-  permissions: Permission[]; // Danh sách phẳng chứa { id, action, resourceName, resourceCode }
+  permissions: Permission[]; // Danh sách phẳng chứa { id, action, module, code: "RESOURCE_CODE:ACTION" }
   onSave: (data: Partial<Role>) => void;
   onDelete: () => void;
   onCancel: () => void;
@@ -32,7 +32,7 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
   const form = useForm<RoleFormValues>({
     resolver: zodResolver(roleFormSchema) as unknown as Resolver<RoleFormValues>,
     defaultValues: {
-      name: "", code: "", description: "", active: 1, permissionIds: []
+      name: "", code: "", description: "", active: 1, policies: []
     }
   });
 
@@ -44,11 +44,11 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
       code: selectedRole?.code || "",
       description: selectedRole?.description || "",
       active: selectedRole?.active ?? 1,
-      permissionIds: selectedRole?.permissionIds || [],
+      policies: selectedRole?.policies || [],
     });
   }, [selectedRole, createMode, form]);
 
-  // Gom nhóm permissions theo Resource Name (Logic quan trọng nhất)
+  // Gom nhóm available actions (permissions) theo Resource Name (module)
   const groupedPermissions = useMemo(() => {
     return permissions.reduce((acc, perm) => {
       const groupKey = perm.module || "Hệ thống";
@@ -74,7 +74,7 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
 
   return (
     <Card className="flex-1 w-full h-full shadow-sm border-border overflow-hidden flex flex-col rounded-xl bg-background">
-      {/* HEADER SÁT MÉP */}
+      {/* HEADER */}
       <div className="bg-muted/40 border-b py-4 px-6 shrink-0 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-lg ${createMode ? "bg-primary text-primary-foreground shadow-sm" : "bg-accent text-accent-foreground border"}`}>
@@ -85,8 +85,8 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
               {createMode ? "Khởi tạo Vai trò" : `Thiết lập: ${selectedRole?.name}`}
             </CardTitle>
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Security Level:</span>
-              <Badge variant="outline" className="text-[9px] h-4 font-mono uppercase bg-background">PBAC</Badge>
+              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-tight">Mô hình phân quyền:</span>
+              <Badge variant="outline" className="text-[9px] h-4 font-mono uppercase bg-background border-primary/50 text-primary">PBAC</Badge>
             </div>
           </div>
         </div>
@@ -144,20 +144,20 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
 
             <Separator className="bg-border/60" />
 
-            {/* 2. MA TRẬN QUYỀN TRÊN TÀI NGUYÊN */}
+            {/* 2. CHÍNH SÁCH TRUY CẬP (POLICIES) */}
             <div className="p-6 space-y-6 bg-muted/5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
-                  <Lock className="h-3.5 w-3.5 text-primary" /> 2. Quyền hạn trên tài nguyên
+                  <Lock className="h-3.5 w-3.5 text-primary" /> 2. Chính sách truy cập tài nguyên (Policies)
                 </div>
                 <Badge variant="outline" className="text-[10px] font-mono bg-background">
-                  Tổng: {permissions.length} hành động
+                  Đã cấu hình: {form.watch("policies").length} chính sách
                 </Badge>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {Object.entries(groupedPermissions).map(([resourceName, perms]) => (
-                  <PermissionCardDialog key={resourceName} resourceName={resourceName} perms={perms} form={form} />
+                  <PolicyCardDialog key={resourceName} resourceName={resourceName} perms={perms} form={form} />
                 ))}
               </div>
             </div>
@@ -165,7 +165,7 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
         </Form>
       </CardContent>
 
-      {/* FOOTER SÁT MÉP */}
+      {/* FOOTER */}
       <div className="p-4 border-t bg-muted/20 shrink-0 flex justify-end gap-3 items-center">
         <Button variant="ghost" onClick={onCancel} className="text-xs font-semibold h-9 px-6">Hủy</Button>
         <Button type="submit" form="role-form" className="px-10 text-xs font-bold h-9 shadow-sm" disabled={isSaving}>
@@ -189,98 +189,141 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
 }
 
 // ============================================================================
-// COMPONENT CON: NHÓM QUYỀN (PERMISSION CARD DIALOG)
+// COMPONENT CON: THIẾT LẬP CHÍNH SÁCH CHO MỘT TÀI NGUYÊN (POLICY CARD DIALOG)
 // ============================================================================
-function PermissionCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
+function PolicyCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedIds = form.watch("permissionIds") || [];
-
-  const groupPermIds = perms.map((p: Permission) => p.id);
-  const selectedInGroup = selectedIds.filter((id: number) => groupPermIds.includes(id));
-  const hasSelected = selectedInGroup.length > 0;
+  const policies: Policy[] = form.watch("policies") || [];
+  
+  // Lọc ra các chính sách thuộc resource này
+  const resourceCode = perms[0]?.code.split(":")[0] || "";
+  const configuredPolicies = policies.filter(p => p.resourceCode === resourceCode);
+  const hasPolicies = configuredPolicies.length > 0;
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <div
-          className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group min-h-[100px]"
-        >
+        <div className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group min-h-[100px]">
           <div className="flex items-start justify-between gap-2">
             <span className="font-bold text-[13px] flex items-center gap-2 leading-tight">
-              <CheckCircle2 className={`h-4 w-4 shrink-0 ${hasSelected ? 'text-primary' : 'text-muted-foreground opacity-40'}`} />
+              <CheckCircle2 className={`h-4 w-4 shrink-0 ${hasPolicies ? 'text-primary' : 'text-muted-foreground opacity-40'}`} />
               <span className="line-clamp-2">{resourceName}</span>
             </span>
             <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60 shrink-0 bg-muted/50 px-1.5 py-0.5 rounded">
-              {perms[0]?.module || 'N/A'}
+              {resourceCode}
             </code>
           </div>
 
           <div className="flex flex-wrap gap-1.5 items-center pr-8 mt-auto">
-            {hasSelected ? (
-              selectedInGroup.map((id: number) => {
-                const p = perms.find((x: Permission) => x.id === id);
-                return (
-                  <Badge key={id} variant="secondary" className="text-[9px] px-1.5 py-0 bg-primary/10 text-primary border-primary/20 shadow-none font-medium truncate max-w-[120px]">
-                    {p?.action || 'Quyền'}
-                  </Badge>
-                );
-              })
+            {hasPolicies ? (
+              configuredPolicies.map((p, idx) => (
+                <Badge key={idx} variant="secondary" className={`text-[9px] px-1.5 py-0 border-primary/20 shadow-none font-medium truncate max-w-[120px] ${p.effect === 'DENY' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
+                  {p.action} {p.conditions?.expression ? '*' : ''}
+                </Badge>
+              ))
             ) : (
-              <span className="text-[11px] text-muted-foreground/60 italic">Chưa cấu hình...</span>
+              <span className="text-[11px] text-muted-foreground/60 italic">Chưa cấu hình chính sách...</span>
             )}
           </div>
 
           <div className="absolute right-4 bottom-4 h-6 w-6 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-            <ChevronRight className="h-3.5 w-3.5" />
+            <Settings2 className="h-3.5 w-3.5" />
           </div>
         </div>
       </DialogTrigger>
 
       {isOpen && (
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-background">
+        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-background">
           <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background z-10 shadow-sm">
             <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-              <Lock className="h-5 w-5 text-primary" /> Phân quyền: {resourceName}
+              <Lock className="h-5 w-5 text-primary" /> Cấu hình Chính sách: {resourceName}
             </DialogTitle>
             <DialogDescription className="text-xs mt-2">
-              Tích chọn các quyền thuộc nhóm <strong className="text-foreground">{resourceName}</strong> mà vai trò này được phép truy cập.
-              Bạn đang chọn: <strong className="text-primary">{selectedInGroup.length}/{perms.length}</strong> quyền.
+              Bật các hành động mà vai trò này có thể thao tác, và tuỳ chọn nhập điều kiện phân quyền động (PBAC expression). 
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {perms.map((perm: Permission) => (
-                <FormField key={perm.id} control={form.control} name="permissionIds" render={({ field }) => {
-                  const isChecked = field.value?.includes(perm.id);
-                  return (
-                    <FormItem
-                      className="flex flex-row items-center space-x-2.5 space-y-0 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 data-[state=checked]:bg-primary/5 data-[state=checked]:border-primary/30 shadow-sm"
-                      data-state={isChecked ? "checked" : "unchecked"}
-                    >
-                      <FormControl>
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={(checked) => {
-                            const current = field.value || [];
-                            const next = checked
-                              ? [...current, perm.id]
-                              : current.filter((val: number) => val !== perm.id);
-                            field.onChange(next);
-                          }}
-                        />
-                      </FormControl>
-                      <div className="space-y-0.5 leading-none overflow-hidden">
-                        <FormLabel className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none truncate ${isChecked ? "text-primary" : "text-foreground/80"}`}>
-                          {perm.action}
-                        </FormLabel>
-                        <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase truncate">
-                          {perm.code ? perm.code.split('_').pop() : 'ACTION'}
-                        </p>
+            <div className="space-y-4">
+              {perms.map((perm) => {
+                const actionCode = perm.code.split(":")[1] || perm.action;
+                const existingPolicyIndex = policies.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
+                const isEnabled = existingPolicyIndex !== -1;
+                const currentPolicy = isEnabled ? policies[existingPolicyIndex] : null;
+
+                return (
+                  <div key={perm.id} className="p-4 rounded-lg border bg-background flex flex-col gap-4 shadow-sm">
+                    <div className="flex items-center justify-between">
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold">{perm.action}</span>
+                        <code className="text-[10px] text-muted-foreground mt-0.5">{perm.code}</code>
                       </div>
-                    </FormItem>
-                  );
-                }} />
-              ))}
+                      <Switch 
+                        checked={isEnabled} 
+                        onCheckedChange={(checked) => {
+                          const currentPolicies = [...policies];
+                          if (checked) {
+                            currentPolicies.push({
+                              resourceCode,
+                              action: actionCode,
+                              effect: 'ALLOW',
+                              conditions: { expression: '' }
+                            });
+                          } else {
+                            const idx = currentPolicies.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
+                            if (idx > -1) currentPolicies.splice(idx, 1);
+                          }
+                          form.setValue("policies", currentPolicies, { shouldDirty: true });
+                        }} 
+                      />
+                    </div>
+                    
+                    {isEnabled && (
+                      <div className="pl-4 border-l-2 border-primary/20 space-y-3 pt-2">
+                        <div className="flex gap-4">
+                          <div className="space-y-1">
+                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Effect (Tác dụng)</FormLabel>
+                            <Select 
+                              value={currentPolicy?.effect} 
+                              onValueChange={(val) => {
+                                const currentPolicies = [...policies];
+                                currentPolicies[existingPolicyIndex].effect = val as 'ALLOW' | 'DENY';
+                                form.setValue("policies", currentPolicies, { shouldDirty: true });
+                              }}
+                            >
+                              <SelectTrigger className="h-8 text-xs w-[120px]">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="ALLOW">ALLOW</SelectItem>
+                                <SelectItem value="DENY">DENY</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          
+                          <div className="flex-1 space-y-1">
+                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Điều kiện động (Expression)</FormLabel>
+                            <Input 
+                              placeholder="VD: ALLOW IF resource.ownerId == currentUserId (Bỏ trống = Luôn cho phép)" 
+                              className="h-8 text-xs font-mono placeholder:font-sans" 
+                              value={currentPolicy?.conditions?.expression || ''}
+                              onChange={(e) => {
+                                const currentPolicies = [...policies];
+                                currentPolicies[existingPolicyIndex].conditions = { expression: e.target.value };
+                                form.setValue("policies", currentPolicies, { shouldDirty: true });
+                              }}
+                            />
+                          </div>
+                        </div>
+                        {currentPolicy?.conditions?.expression && (
+                          <p className="text-[10px] text-primary/80 italic">
+                            * Chính sách này áp dụng điều kiện động.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </DialogContent>

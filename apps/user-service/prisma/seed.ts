@@ -4791,20 +4791,48 @@ async function main() {
     create: { key: 'PBAC_POLICIES', value: JSON.stringify(pbacPolicies), description: 'PBAC Policies' }
   });
 
-  console.log('🔹 Seeding PBAC Roles & RolePermissions...');
-  const getPerms = async (specs: string[]) => {
-    const all = await prisma.permission.findMany({ include: { resource: true } });
-    if (specs.includes('ALL')) return all.map(p => ({ id: p.id }));
+  console.log('🔹 Seeding PBAC Roles & Policies...');
+  await prisma.policy.deleteMany({}); // Clear existing policies to avoid duplicates on re-run
+  
+  const getPolicies = async (specs: string[]) => {
+    const allResources = await prisma.resource.findMany();
     const result: { id: number }[] = [];
+    
     for (const spec of specs) {
+      if (spec === 'ALL') {
+         for (const res of allResources) {
+            const pol = await prisma.policy.create({
+               data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
+            });
+            result.push({ id: pol.id });
+         }
+         return result;
+      }
+
       if (spec.endsWith('.*')) {
         const resCode = spec.split('.')[0];
-        const matched = all.filter(p => p.resource.code === resCode);
-        result.push(...matched.map(p => ({ id: p.id })));
+        const res = allResources.find(r => r.code === resCode);
+        if (res) {
+          const pol = await prisma.policy.create({
+             data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
+          });
+          result.push({ id: pol.id });
+        }
       } else {
         const [resCode, actCode] = spec.split('.');
-        const matched = all.find(p => p.resource.code === resCode && p.action === actCode);
-        if (matched) result.push({ id: matched.id });
+        const res = allResources.find(r => r.code === resCode);
+        if (res) {
+          const conditionString = (extendedPbacPolicies as any)[spec] || (pbacPolicies as any)[spec];
+          const pol = await prisma.policy.create({
+             data: { 
+                 resourceId: res.id, 
+                 action: actCode, 
+                 effect: 'ALLOW', 
+                 conditions: conditionString ? { expression: conditionString } : {} 
+             }
+          });
+          result.push({ id: pol.id });
+        }
       }
     }
     return result;
@@ -4982,7 +5010,7 @@ async function main() {
   ];
 
   for (const rd of roleDefinitions) {
-    const permConnect = await getPerms(rd.perms);
+    const policyConnect = await getPolicies(rd.perms);
     await prisma.systemConfig.upsert({
       where: { key: `ROLE_SCOPE_${rd.code}` },
       update: { value: rd.scope },
@@ -4993,12 +5021,12 @@ async function main() {
       where: { code: rd.code },
       update: {
         name: rd.name,
-        permissions: { set: [], connect: permConnect }
+        policies: { set: [], connect: policyConnect }
       },
       create: {
         code: rd.code,
         name: rd.name,
-        permissions: { connect: permConnect }
+        policies: { connect: policyConnect }
       }
     });
   }

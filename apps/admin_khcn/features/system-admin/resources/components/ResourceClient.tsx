@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import {
@@ -129,7 +129,7 @@ export function ResourceClient() {
             {createResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Plus className="h-4 w-4 mr-1" /> Thêm mới</>}
           </Button>
           {createResourceMutation.isError && (
-            <p className="text-xs text-destructive">{(createResourceMutation.error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Lỗi tạo tài nguyên"}</p>
+            <p className="text-xs text-destructive">{String((createResourceMutation.error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Lỗi tạo tài nguyên")}</p>
           )}
         </div>
 
@@ -137,40 +137,52 @@ export function ResourceClient() {
           {filteredResources.length === 0 ? (
             <div className="text-center p-4 text-sm text-muted-foreground italic">Không tìm thấy tài nguyên nào.</div>
           ) : (
-            <div className="space-y-4">`n              {Object.entries(filteredResources.reduce((acc, res) => {`n                const svc = res.serviceCode || "OTHER";`n                if (!acc[svc]) acc[svc] = [];`n                acc[svc].push(res);`n                return acc;`n              }, {} as Record<string, Resource[]>)).map(([svc, group]) => (`n                <div key={svc} className="space-y-1">`n                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1 bg-muted/30 rounded">{DEFAULT_SERVICE_LIST_FALLBACK.find(s => s.code === svc)?.name || svc}</div>
-              {filteredResources.map((res) => {
-                const isSelected = selectedResource?.id === res.id;
-                return (
-                  <div
-                    key={res.id}
-                    className={`group flex items-center justify-between p-3 rounded-md transition-colors border border-transparent ${
-                      isSelected
-                        ? "bg-primary text-primary-foreground shadow-sm cursor-default"
-                        : "hover:bg-accent hover:text-accent-foreground text-foreground cursor-pointer"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0 flex-1" onClick={() => setSelectedResource(res)}>
-                      <Component className={`h-4 w-4 shrink-0 ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">{res.name}</p>
-                        <p className={`text-[11px] font-mono truncate ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{res.code}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      {isSelected && <ArrowRight className="h-4 w-4 text-primary-foreground" />}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className={`h-8 w-8 ${isSelected ? "text-primary-foreground hover:bg-primary-foreground/20" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"}`}
-                        onClick={(e) => { e.stopPropagation(); deleteResourceMutation.mutate(res.id); }}
-                        disabled={deleteResourceMutation.isPending}
+            <div className="space-y-4">
+              {Object.entries(filteredResources.reduce((acc, res) => {
+                const svc = res.serviceCode || "OTHER";
+                if (!acc[svc]) acc[svc] = [];
+                acc[svc].push(res);
+                return acc;
+              }, {} as Record<string, Resource[]>)).map(([svc, group]) => (
+                <div key={svc} className="space-y-1">
+                  <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider px-2 py-1 bg-muted/30 rounded">{DEFAULT_SERVICE_LIST_FALLBACK.find(s => s.code === svc)?.name || svc}</div>
+                  {group.map((res) => {
+                    const isSelected = selectedResource?.id === res.id;
+                    return (
+                      <div
+                        key={res.id}
+                        className={`group flex items-center justify-between p-3 rounded-md transition-colors border border-transparent ${isSelected
+                          ? "bg-primary text-primary-foreground shadow-sm cursor-default"
+                          : "hover:bg-accent hover:text-accent-foreground text-foreground cursor-pointer"
+                          }`}
                       >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })}`n                </div>`n              ))}`n            </div>`n          )}`n        </div>
+                        <div className="flex items-center gap-3 min-w-0 flex-1" onClick={() => setSelectedResource(res)}>
+                          <Component className={`h-4 w-4 shrink-0 ${isSelected ? "text-primary-foreground/80" : "text-muted-foreground"}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{res.name}</p>
+                            <p className={`text-[11px] font-mono truncate ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground"}`}>{res.code}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 shrink-0">
+                          {isSelected && <ArrowRight className="h-4 w-4 text-primary-foreground" />}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className={`h-8 w-8 ${isSelected ? "text-primary-foreground hover:bg-primary-foreground/20" : "opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"}`}
+                            onClick={(e) => { e.stopPropagation(); deleteResourceMutation.mutate(res.id); }}
+                            disabled={deleteResourceMutation.isPending}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </Card>
 
       {/* ========================================== */}
@@ -208,7 +220,7 @@ export function ResourceClient() {
           </CardHeader>
 
           <CardContent className="flex-1 overflow-y-auto p-8 scrollbar-thin space-y-10">
-            
+
             {/* Sửa tài nguyên (code / name) */}
             <div className="space-y-2 p-4 rounded-lg border bg-muted/20">
               <h3 className="text-sm font-semibold text-foreground">Cập nhật tài nguyên</h3>
@@ -255,7 +267,7 @@ export function ResourceClient() {
               <h3 className="text-sm font-semibold text-foreground border-b pb-2 flex items-center gap-2">
                 1. Khai báo hành động (Action)
               </h3>
-              
+
               <div className="p-4 bg-accent/30 rounded-lg border border-border space-y-4">
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gợi ý - bấm để thêm quyền</p>
@@ -302,7 +314,7 @@ export function ResourceClient() {
                 </h3>
                 <Badge variant="secondary">{currentPermissions.length} Quyền</Badge>
               </div>
-              
+
               {currentPermissions.length === 0 ? (
                 <div className="p-8 border border-dashed rounded-lg bg-muted/20 text-center">
                   <p className="text-sm text-muted-foreground italic">Tài nguyên này chưa có hành động nào được định nghĩa.</p>
@@ -343,7 +355,3 @@ export function ResourceClient() {
     </div>
   );
 }
-
-
-
-

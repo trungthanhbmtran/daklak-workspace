@@ -2,6 +2,7 @@ export interface Resource {
   id: number;
   code: string;
   name: string;
+  serviceCode?: string;
 }
 
 export interface Permission {

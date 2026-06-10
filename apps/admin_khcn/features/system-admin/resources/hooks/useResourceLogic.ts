@@ -31,7 +31,7 @@ export function useResourceLogic() {
   const invalidateMatrix = () => queryClient.invalidateQueries({ queryKey: resourceKeys.matrix() });
 
   const createResourceMutation = useMutation({
-    mutationFn: (payload: { code: string; name: string }) => resourceApi.createResource(payload),
+    mutationFn: (payload: { code: string; name: string; serviceCode?: string }) => resourceApi.createResource(payload),
     onSuccess: () => invalidateMatrix(),
   });
 

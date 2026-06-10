@@ -1,34 +1,51 @@
 model Role {
-  id          Int          @id @default(autoincrement())
-  code        String       @unique 
-  name        String?      
+  id          Int         @id @default(autoincrement())
+  code        String      @unique
+  name        String?
   description String?
   users       User[]
   groups      UserGroup[]
-  permissions Permission[]
+  policies    Policy[]
+
   @@map("roles")
 }
 
+model Policy {
+  id         Int    @id @default(autoincrement())
+  resourceId Int    @map("resource_id")
+  action     String
+  effect     String @default("ALLOW")
+  conditions Json?
+
+  roles    Role[]
+  resource Resource @relation(fields: [resourceId], references: [id])
+
+  @@map("policies")
+}
+
 model Permission {
-  id         Int      @id @default(autoincrement())
-  action     String   
-  resourceId Int          @map("resource_id")
-  apiEndpoints ApiEndpoint[]
-  resource   Resource @relation(fields: [resourceId], references: [id])
-  roles      Role[]
+  id               Int                      @id @default(autoincrement())
+  action           String
+  resourceId       Int                      @map("resource_id")
+  apiEndpoints     ApiEndpoint[]
+  resource         Resource                 @relation(fields: [resourceId], references: [id])
   menuRequirements MenuRequiredPermission[]
+
   @@unique([action, resourceId])
   @@map("permissions")
 }
 
 model Resource {
   id          Int          @id @default(autoincrement())
-  code        String       @unique 
+  code        String       @unique
   name        String
   serviceCode String?      @map("service_code")
   permissions Permission[]
+  policies    Policy[]
+
   @@map("resources")
 }
+
 model ApiEndpoint {
   id           Int         @id @default(autoincrement())
   method       String
@@ -40,5 +57,3 @@ model ApiEndpoint {
   @@unique([method, path])
   @@map("api_endpoints")
 }
-
-

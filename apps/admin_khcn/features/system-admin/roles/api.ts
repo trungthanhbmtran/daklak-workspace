@@ -1,5 +1,5 @@
 import apiClient from "@/lib/axiosInstance";
-import { Role, Permission } from "./types";
+import { Role, Permission, Policy } from "./types";
 
 /** Response từ GET /roles — gateway trả về { data: { roles } } hoặc { data: [...] } */
 const rolesListRes = (res: unknown): Role[] => {
@@ -13,7 +13,7 @@ const rolesListRes = (res: unknown): Role[] => {
     name: String(row.name ?? ""),
     description: String(row.description ?? ""),
     active: 1,
-    permissionIds: [],
+    policies: (row.policies as Policy[]) || [],
   };
   });
 };
@@ -41,14 +41,14 @@ const roleDetailRes = (res: unknown): Role | null => {
   const raw = (res as { data?: Record<string, unknown> })?.data ?? res;
   const r = raw as Record<string, unknown>;
   if (!r || r.id === 0) return null;
-  const perms = (r.permissions as Array<{ id: number }>) ?? [];
+  const policies = (r.policies as Policy[]) ?? [];
   return {
     id: Number(r.id),
     code: String(r.code ?? ""),
     name: String(r.name ?? ""),
     description: String(r.description ?? ""),
     active: 1,
-    permissionIds: perms.map((p) => p.id),
+    policies: policies,
   };
 };
 
@@ -73,10 +73,10 @@ export const roleApi = {
       code: data.code,
       name: data.name,
       description: data.description,
-      permissionIds: data.permissionIds ?? [],
+      policies: data.policies ?? [],
     };
     if (data.id) {
-      return apiClient.put(`/roles/${data.id}`, { name: payload.name, description: payload.description, permissionIds: payload.permissionIds });
+      return apiClient.put(`/roles/${data.id}`, { name: payload.name, description: payload.description, policies: payload.policies });
     }
     return apiClient.post("/roles", payload);
   },
