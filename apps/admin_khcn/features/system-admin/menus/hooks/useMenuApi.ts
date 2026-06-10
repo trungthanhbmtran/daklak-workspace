@@ -1,4 +1,4 @@
-﻿import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { menuApi } from "../api";
@@ -44,10 +44,10 @@ async function fetchPermissions(): Promise<Permission[]> {
   return out;
 }
 
-export function useMenuApi() {
+export function useMenuApi(needPermissions = false, needServiceOptions = false) {
   const queryClient = useQueryClient();
 
-  // 1. Fetch Danh sách Menu
+  // 1. Fetch Danh sách Menu — luôn fetch (cần để render tree sidebar)
   const { data: menus = [], isLoading: isLoadingMenus } = useQuery({
     queryKey: menuKeys.lists(),
     queryFn: async () => {
@@ -57,7 +57,7 @@ export function useMenuApi() {
     },
   });
 
-  // 2. Fetch Service options từ danh mục chung: MICROSERVICE + SERVICE (khớp seed)
+  // 2. Fetch Service options — lazy: chỉ fetch khi mở form tạo/sửa
   const { data: serviceOptions = [] } = useQuery({
     queryKey: ["categories", CATEGORY_GROUP_MICROSERVICE, CATEGORY_GROUP_SERVICE],
     queryFn: async (): Promise<ServiceOption[]> => {
@@ -71,12 +71,18 @@ export function useMenuApi() {
       });
       return Array.from(byCode.values()).sort((a, b) => a.code.localeCompare(b.code));
     },
+    enabled: needServiceOptions,
+    staleTime: 10 * 60 * 1000,  // 10 phút — danh mục ít đổi
+    gcTime: 20 * 60 * 1000,
   });
 
-  // 3. Fetch Permissions
-  const { data: permissions = [] } = useQuery({
+  // 3. Fetch Permissions matrix — lazy: chỉ fetch khi mở form phân quyền
+  const { data: permissions = [], isLoading: isLoadingPermissions } = useQuery({
     queryKey: ["roles", "permissions", "matrix"],
     queryFn: fetchPermissions,
+    enabled: needPermissions,
+    staleTime: 5 * 60 * 1000,   // 5 phút — quyền ít thay đổi
+    gcTime: 15 * 60 * 1000,
   });
 
   const getErrorMessage = (err: unknown): string => {
@@ -111,6 +117,7 @@ export function useMenuApi() {
     isLoadingMenus,
     serviceOptions,
     permissions,
+    isLoadingPermissions: isLoadingPermissions && needPermissions,
     saveMenu: saveMutation.mutateAsync,
     isSaving: saveMutation.isPending,
     deleteMenu: deleteMutation.mutateAsync,

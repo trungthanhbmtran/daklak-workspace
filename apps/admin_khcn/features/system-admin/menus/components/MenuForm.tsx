@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useWatch } from "react-hook-form";
 import {
   Plus, Edit, Trash2, LayoutDashboard, CornerDownRight,
-  ExternalLink, Lock, CheckCircle2, ChevronDown, ChevronRight
+  ExternalLink, Lock, CheckCircle2, ChevronDown, ChevronRight, Loader2
 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -58,8 +59,9 @@ interface MenuFormProps {
 }
 
 export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProps) {
-  // Lấy API Mutations và Options từ Hook
-  const { serviceOptions, permissions, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi();
+  // Chỉ fetch permissions và serviceOptions khi user đang tạo/sửa menu (không phải idle)
+  const needData = viewState.mode !== "idle";
+  const { serviceOptions, permissions, isLoadingPermissions, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(needData, needData);
   const { getParentPathPrefix } = useFormLogic(menus);
 
   const { mode, selectedId, parentId } = viewState;
@@ -89,6 +91,7 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
       viewState={viewState}
       serviceOptions={serviceOptions}
       availablePermissions={permissions}
+      isLoadingPermissions={isLoadingPermissions}
       getParentPathPrefix={getParentPathPrefix}
       saveMenu={saveMenu}
       isSaving={isSaving}
@@ -105,8 +108,8 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
 // ============================================================================
 function MenuFormInner(props: any) {
   const {
-    menus, viewState, serviceOptions, availablePermissions, getParentPathPrefix,
-    saveMenu, isSaving, deleteMenu, isDeleting, onSuccess, onCancel
+    menus, viewState, serviceOptions, availablePermissions, isLoadingPermissions,
+    getParentPathPrefix, saveMenu, isSaving, deleteMenu, isDeleting, onSuccess, onCancel
   } = props;
 
   const { mode, selectedId, parentId: viewParentId } = viewState;
@@ -420,9 +423,16 @@ function MenuFormInner(props: any) {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-                {Object.entries(groupedPermissions).map(([resourceName, perms]: [string, unknown]) => (
-                  <PermissionCardDialog key={resourceName} resourceName={resourceName} perms={perms as Permission[]} form={form} />
-                ))}
+                {isLoadingPermissions ? (
+                  <div className="col-span-full flex items-center justify-center py-8 text-muted-foreground gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="text-sm">Đang tải ma trận phân quyền...</span>
+                  </div>
+                ) : (
+                  Object.entries(groupedPermissions).map(([resourceName, perms]: [string, unknown]) => (
+                    <PermissionCardDialog key={resourceName} resourceName={resourceName} perms={perms as Permission[]} form={form} />
+                  ))
+                )}
               </div>
             </div>
 
@@ -456,11 +466,22 @@ function MenuFormInner(props: any) {
 // ============================================================================
 function PermissionCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
   const [isOpen, setIsOpen] = useState(false);
-  const selectedIds = form.watch("requiredPermissionIds") || [];
+
+  // useWatch đảm bảo luôn nhận giá trị mới nhất, tránh stale closure
+  const selectedIds: number[] = useWatch({ control: form.control, name: "requiredPermissionIds" }) || [];
 
   const groupPermIds = perms.map((p: Permission) => p.id);
   const selectedInGroup = selectedIds.filter((id: number) => groupPermIds.includes(id));
   const hasSelected = selectedInGroup.length > 0;
+
+  const handleToggle = (permId: number, checked: boolean) => {
+    // form.getValues lấy giá trị hiện tại tại thời điểm gọi (không bị stale closure)
+    const current: number[] = form.getValues("requiredPermissionIds") || [];
+    const next = checked
+      ? current.includes(permId) ? current : [...current, permId]
+      : current.filter((val: number) => val !== permId);
+    form.setValue("requiredPermissionIds", next, { shouldDirty: true });
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -507,38 +528,32 @@ function PermissionCardDialog({ resourceName, perms, form }: { resourceName: str
           </DialogHeader>
           <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {perms.map((perm: Permission) => (
-                <FormField key={perm.id} control={form.control} name="requiredPermissionIds" render={({ field }) => {
-                  const isChecked = field.value?.includes(perm.id);
-                  return (
-                    <FormItem
-                      className="flex flex-row items-center space-x-2.5 space-y-0 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 data-[state=checked]:bg-primary/5 data-[state=checked]:border-primary/30 shadow-sm"
-                      data-state={isChecked ? "checked" : "unchecked"}
-                    >
-                      <FormControl>
-                        <Checkbox
-                          checked={isChecked}
-                          onCheckedChange={(checked) => {
-                            const current = field.value || [];
-                            const next = checked
-                              ? [...current, perm.id]
-                              : current.filter((val: number) => val !== perm.id);
-                            field.onChange(next);
-                          }}
-                        />
-                      </FormControl>
-                      <div className="space-y-0.5 leading-none overflow-hidden">
-                        <FormLabel className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none truncate ${isChecked ? "text-primary" : "text-foreground/80"}`}>
-                          {perm.action}
-                        </FormLabel>
-                        <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase truncate">
-                          {perm.code ? perm.code.split('_').pop() : 'ACTION'}
-                        </p>
-                      </div>
-                    </FormItem>
-                  );
-                }} />
-              ))}
+              {perms.map((perm: Permission) => {
+                const isChecked = selectedIds.includes(perm.id);
+                return (
+                  <div
+                    key={perm.id}
+                    className={`flex flex-row items-center space-x-2.5 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 shadow-sm ${
+                      isChecked ? "bg-primary/5 border-primary/30" : ""
+                    }`}
+                    onClick={() => handleToggle(perm.id, !isChecked)}
+                  >
+                    <Checkbox
+                      checked={isChecked}
+                      onCheckedChange={(checked) => handleToggle(perm.id, !!checked)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="space-y-0.5 leading-none overflow-hidden">
+                      <p className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none truncate ${isChecked ? "text-primary" : "text-foreground/80"}`}>
+                        {perm.action}
+                      </p>
+                      <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase truncate">
+                        {perm.code ? perm.code.split('_').pop() : 'ACTION'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </DialogContent>
@@ -546,4 +561,3 @@ function PermissionCardDialog({ resourceName, perms, form }: { resourceName: str
     </Dialog>
   );
 }
-
