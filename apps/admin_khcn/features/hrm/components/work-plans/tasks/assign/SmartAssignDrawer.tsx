@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
-import { PlayCircle } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { PlayCircle, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { hrmTasksApi } from "@/features/hrm/api";
 
@@ -38,8 +39,23 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
     staleTime: 60_000,
   });
 
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
   const topEmployees = recommendations?.topEmployees || [];
   const topDepartments = recommendations?.topDepartments || [];
+
+  const filteredEmployees = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) {
+      // Show top 10 recommended by default
+      return topEmployees.slice(0, 10);
+    }
+    return topEmployees.filter((rec: any) => 
+      rec.employeeName?.toLowerCase().includes(query) ||
+      rec.employeeCode?.toLowerCase().includes(query) ||
+      (rec.departmentId && String(rec.departmentId).includes(query))
+    );
+  }, [topEmployees, searchQuery]);
 
   const assignMutation = useMutation({
     mutationFn: (data: { departmentId?: number, employeeCode?: string }) =>
@@ -163,16 +179,28 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
 
               {/* Cột Đề xuất Cá nhân */}
               <div>
-                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
-                  <span className="w-1.5 h-5 bg-indigo-500 rounded mr-2"></span> Top Đề xuất Cá nhân
+                <h4 className="text-sm font-bold text-slate-700 mb-2 flex items-center">
+                  <span className="w-1.5 h-5 bg-indigo-500 rounded mr-2"></span> Đề xuất Cá nhân
                 </h4>
+                
+                {/* Search input to look for any employee */}
+                <div className="relative mb-4">
+                  <Input
+                    placeholder="Tìm tên, mã cán bộ, phòng..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="h-10 rounded-xl pl-9 bg-slate-50/50 border-slate-200 dark:border-slate-700 focus:bg-white transition-all text-xs font-medium"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                </div>
+
                 {isLoadingRecs ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
-                    {topEmployees.map((rec: any, idx: number) => (
+                  <div className="space-y-4 max-h-[450px] overflow-y-auto pr-1">
+                    {filteredEmployees.map((rec: any, idx: number) => (
                       <div key={rec.employeeCode} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex items-center gap-3">
@@ -184,7 +212,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                               <p className="text-xs text-slate-500">Phòng {rec.departmentId || '?'}</p>
                             </div>
                           </div>
-                          {idx === 0 && <Badge className="bg-indigo-500 text-[9px] uppercase">Phù hợp nhất</Badge>}
+                          {idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase">Phù hợp nhất</Badge>}
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-4 p-2 bg-slate-50 rounded-lg">
                           <div>Tải việc: <b className="text-slate-700 block text-sm mt-0.5">{Math.round(rec.currentLoad)}</b></div>
@@ -200,9 +228,9 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                         </Button>
                       </div>
                     ))}
-                    {topEmployees.length === 0 && !isLoadingRecs && (
+                    {filteredEmployees.length === 0 && (
                       <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
-                        <p className="text-xs text-slate-400 font-medium">Không có gợi ý cá nhân phù hợp</p>
+                        <p className="text-xs text-slate-400 font-medium">Không tìm thấy nhân sự phù hợp</p>
                       </div>
                     )}
                   </div>

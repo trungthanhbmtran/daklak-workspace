@@ -485,7 +485,100 @@ export class TasksService implements OnModuleInit {
     return { success: true };
   }
 
-  async recommendAssignees(query: any) { return { success: true, data: [] }; }
+  async recommendAssignees(query: any) {
+    try {
+      const employees = await this.prisma.employee.findMany({
+        where: { employmentStatus: 'active' },
+      });
+
+      const activeTasksCount = await this.prisma.taskParticipant.groupBy({
+        by: ['employeeCode'],
+        where: {
+          participantRole: 'ASSIGNEE',
+          task: {
+            status: { not: 'DONE' },
+          },
+        },
+        _count: {
+          taskId: true,
+        },
+      });
+      const taskCountMap = new Map(activeTasksCount.map(item => [item.employeeCode, item._count.taskId]));
+
+      const evaluations = await this.prisma.kpiEvaluation.findMany({
+        orderBy: { createdAt: 'desc' },
+        select: { employeeCode: true, totalScore: true },
+      });
+      const kpiMap = new Map(evaluations.map(item => [item.employeeCode, item.totalScore || 75]));
+
+      const employeeList = employees.map(emp => {
+        const taskCount = taskCountMap.get(emp.employeeCode) || 0;
+        const kpiScore = kpiMap.get(emp.employeeCode) || 75;
+        return {
+          id: emp.id,
+          employeeCode: emp.employeeCode,
+          fullName: emp.fullName,
+          departmentId: emp.departmentId,
+          jobTitleId: emp.jobTitleId,
+          taskCount,
+          kpiScore,
+        };
+      });
+
+      const strategy = query?.strategy || 'LOW_PERFORMANCE';
+      if (strategy === 'HIGH_PERFORMANCE') {
+        employeeList.sort((a, b) => b.kpiScore - a.kpiScore || a.taskCount - b.taskCount);
+      } else if (strategy === 'UNDER_QUOTA') {
+        employeeList.sort((a, b) => a.taskCount - b.taskCount || b.kpiScore - a.kpiScore);
+      } else { // 'LOW_PERFORMANCE'
+        employeeList.sort((a, b) => a.kpiScore - b.kpiScore || a.taskCount - b.taskCount);
+      }
+
+      // Group by department for topDepartments
+      const deptMap = new Map<number, { departmentId: number; employeeCount: number; currentLoad: number; performanceScore: number }>();
+      employeeList.forEach(emp => {
+        if (!emp.departmentId) return;
+        const deptId = emp.departmentId;
+        if (!deptMap.has(deptId)) {
+          deptMap.set(deptId, {
+            departmentId: deptId,
+            employeeCount: 0,
+            currentLoad: 0,
+            performanceScore: 0,
+          });
+        }
+        const dept = deptMap.get(deptId)!;
+        dept.employeeCount += 1;
+        dept.currentLoad += emp.taskCount;
+        dept.performanceScore += emp.kpiScore;
+      });
+
+      const topDepartments = Array.from(deptMap.values()).map(dept => ({
+        ...dept,
+        currentLoad: dept.currentLoad / dept.employeeCount,
+        performanceScore: dept.performanceScore / dept.employeeCount,
+      }));
+
+      if (strategy === 'HIGH_PERFORMANCE') {
+        topDepartments.sort((a, b) => b.performanceScore - a.performanceScore);
+      } else if (strategy === 'UNDER_QUOTA') {
+        topDepartments.sort((a, b) => a.currentLoad - b.currentLoad);
+      } else {
+        topDepartments.sort((a, b) => a.performanceScore - b.performanceScore);
+      }
+
+      return {
+        success: true,
+        data: {
+          topEmployees: employeeList,
+          topDepartments,
+        },
+      };
+    } catch (error: any) {
+      console.error('recommendAssignees error:', error);
+      return { success: false, message: error.message || 'Lỗi gợi ý cán bộ' };
+    }
+  }
   async getTasks(query: any) { return this.listTasks(query); }
   async importTasks(data: any[]) { return { success: true }; }
   async exportTasks(query: any) { return { success: true }; }
