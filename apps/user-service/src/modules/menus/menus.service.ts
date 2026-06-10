@@ -230,27 +230,38 @@ export class MenusService {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
-        roles: { include: { permissions: true } },
+        roles: { include: { policies: { include: { resource: true } } } },
       },
     });
 
-    const permissionIds = (user?.roles ?? [])
-      .flatMap((r) => r.permissions ?? [])
-      .map((p) => p.id);
+    const allowedSet = new Set<string>();
+    const isSuperAdmin = user?.roles?.some(r => r.code === 'SUPER_ADMIN') ?? false;
+
+    for (const role of user?.roles ?? []) {
+      for (const p of role.policies ?? []) {
+        if (p.resource?.code) {
+          allowedSet.add(`${p.resource.code}:${p.action}`);
+        }
+      }
+    }
 
     // 2. Query Menu: hiển thị nếu công khai (không yêu cầu quyền) HOẶC user có ít nhất 1 quyền trong danh sách yêu cầu
     const rawMenus = await this.prisma.menu.findMany({
       where: { application, isActive: true },
       orderBy: { order: 'asc' },
-      include: { requiredPermissions: { select: { permissionId: true } } },
+      include: { requiredPermissions: { include: { permission: { include: { resource: true } } } } },
     });
-    const userPermSet = new Set(permissionIds ?? []);
+
     const visibleMenus = rawMenus.filter((menu) => {
+      if (isSuperAdmin) return true;
       if (menu.route && menu.route.toLowerCase().includes('organization')) return true;
-      const requiredIds =
-        menu.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
-      if (requiredIds.length === 0) return true; // công khai
-      return requiredIds.some((pid) => userPermSet.has(pid));
+      const reqPerms = menu.requiredPermissions ?? [];
+      if (reqPerms.length === 0) return true; // công khai
+      return reqPerms.some((rp) => {
+        const resCode = rp.permission?.resource?.code;
+        const action = rp.permission?.action;
+        return resCode && action && allowedSet.has(`${resCode}:${action}`);
+      });
     });
 
     // 3. Dựng cây (dùng danh sách đã lọc theo quyền)

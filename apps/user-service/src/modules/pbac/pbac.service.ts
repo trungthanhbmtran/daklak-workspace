@@ -1,4 +1,4 @@
-﻿import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaService } from '@/database/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -17,7 +17,7 @@ export class PbacService {
     code: string;
     name: string;
     description?: string;
-    permissionIds?: number[];
+    policies?: { resourceId: number; action: string; effect: string; conditions?: any }[];
   }) {
     const existing = await this.prisma.role.findUnique({
       where: { code: data.code },
@@ -34,8 +34,13 @@ export class PbacService {
         code: data.code,
         name: data.name,
         description: data.description,
-        permissions: {
-          connect: data.permissionIds?.map((id) => ({ id })) || [],
+        policies: {
+          create: data.policies?.map(p => ({
+            resourceId: p.resourceId,
+            action: p.action,
+            effect: p.effect || 'ALLOW',
+            conditions: p.conditions || {},
+          })) || [],
         },
       },
     });
@@ -44,7 +49,7 @@ export class PbacService {
   async findAllRoles() {
     return this.prisma.role.findMany({
       include: {
-        _count: { select: { users: true, permissions: true } },
+        _count: { select: { users: true, policies: true } },
       },
       orderBy: { id: 'asc' },
     });
@@ -53,24 +58,28 @@ export class PbacService {
   async findOneRole(id: number) {
     return this.prisma.role.findUnique({
       where: { id },
-      include: { permissions: true },
+      include: { policies: { include: { resource: true } } },
     });
   }
 
   async updateRole(
     id: number,
-    data: { name?: string; description?: string; permissionIds?: number[] },
+    data: { name?: string; description?: string; policies?: { resourceId: number; action: string; effect: string; conditions?: any }[] },
   ) {
     return this.prisma.role.update({
       where: { id },
       data: {
         name: data.name,
         description: data.description,
-        permissions: data.permissionIds
-          ? {
-            set: data.permissionIds.map((pid) => ({ id: pid })),
-          }
-          : undefined,
+        policies: data.policies ? {
+          deleteMany: {},
+          create: data.policies.map(p => ({
+            resourceId: p.resourceId,
+            action: p.action,
+            effect: p.effect || 'ALLOW',
+            conditions: p.conditions || {},
+          }))
+        } : undefined,
       },
     });
   }

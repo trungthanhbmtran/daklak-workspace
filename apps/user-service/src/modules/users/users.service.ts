@@ -260,7 +260,7 @@ export class UsersService implements OnModuleInit {
         credential: true,
         roles: {
           include: {
-            permissions: {
+            policies: {
               include: {
                 resource: true,
               },
@@ -300,7 +300,6 @@ export class UsersService implements OnModuleInit {
       REFRESH_TTL_SECONDS,
     );
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
-    const firstPosition = user.jobPositions?.[0];
 
     const accessToken = this.jwt.sign(
       {
@@ -311,17 +310,11 @@ export class UsersService implements OnModuleInit {
       },
       { expiresIn: jwtExpiresIn },
     );
-    const unitName = firstPosition?.unit?.name ?? null;
     const expiresIn = this.getAccessTokenExpiresInSeconds();
 
     return {
       accessToken,
       refreshToken,
-      userId: user.id,
-      email: user.email,
-      username: user.username ?? '',
-      fullName: user.fullName ?? '',
-      unitName: unitName ?? '',
       expiresIn,
       refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
     };
@@ -355,7 +348,7 @@ export class UsersService implements OnModuleInit {
       include: {
         roles: {
           include: {
-            permissions: {
+            policies: {
               include: {
                 resource: true,
               },
@@ -381,7 +374,6 @@ export class UsersService implements OnModuleInit {
       REFRESH_TTL_SECONDS,
     );
     const jwtExpiresIn = this.config.get('JWT_EXPIRES_IN', '24h');
-    const firstPosition = user.jobPositions?.[0];
 
     const accessToken = this.jwt.sign(
       {
@@ -392,17 +384,11 @@ export class UsersService implements OnModuleInit {
       },
       { expiresIn: jwtExpiresIn },
     );
-    const unitName = firstPosition?.unit?.name ?? null;
     const expiresIn = this.getAccessTokenExpiresInSeconds();
 
     return {
       accessToken,
       refreshToken: newRefreshToken,
-      userId: user.id,
-      email: user.email,
-      username: user.username ?? '',
-      fullName: user.fullName ?? '',
-      unitName: unitName ?? '',
       expiresIn,
       refreshTokenExpiresIn: REFRESH_TTL_SECONDS,
     };
@@ -443,7 +429,7 @@ export class UsersService implements OnModuleInit {
   async findOne(data: { id: number }) {
     const user = await this.prisma.user.findUnique({
       where: { id: data.id },
-      include: { 
+      include: {
         roles: true,
         jobPositions: {
           include: { unit: true, jobTitle: true },
@@ -472,12 +458,12 @@ export class UsersService implements OnModuleInit {
     const policies: Array<{ description: string; resource: string }> = [];
     const permissionsFlattenSet = new Set<string>();
     if (roleIds.length > 0) {
-      const permissions = await this.prisma.permission.findMany({
+      const policiesData = await this.prisma.policy.findMany({
         where: { roles: { some: { id: { in: roleIds } } } },
         include: { resource: true },
         distinct: ['id'],
       });
-      for (const perm of permissions) {
+      for (const perm of policiesData) {
         const res = perm.resource;
         const resourceCode = res?.code ?? '';
         const resourceName = res?.name ?? resourceCode;
@@ -488,7 +474,7 @@ export class UsersService implements OnModuleInit {
         }
       }
     }
-    
+
     const permissionsFlatten = roles.some((r) => r.code === 'SUPER_ADMIN')
       ? []
       : Array.from(permissionsFlattenSet);
@@ -506,10 +492,6 @@ export class UsersService implements OnModuleInit {
       policies,
       permissionsFlatten,
       permissions_flatten: permissionsFlatten,
-      unitName: firstPosition?.unit?.name ?? '',
-      unit_name: firstPosition?.unit?.name ?? '',
-      jobTitleName: firstPosition?.jobTitle?.name ?? '',
-      job_title_name: firstPosition?.jobTitle?.name ?? '',
       unitId,
       unit_id: unitId,
       jobTitleCode,

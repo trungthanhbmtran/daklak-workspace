@@ -12,7 +12,7 @@ export const GRPC_USER_KEY = 'user';
 function flattenPermissions(roles: UserWithPbac['roles']): string[] {
   const set = new Set<string>();
   for (const role of roles) {
-    for (const p of role.permissions ?? []) {
+    for (const p of role.policies ?? []) {
       const resourceCode = p.resource?.code ?? '';
       if (resourceCode) set.add(`${resourceCode}:${p.action}`);
     }
@@ -60,7 +60,7 @@ export class GrpcAuthGuard implements CanActivate {
       include: {
         roles: {
           include: {
-            permissions: { include: { resource: true } },
+            policies: { include: { resource: true } },
           },
         },
       },

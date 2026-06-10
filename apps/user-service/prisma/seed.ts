@@ -109,6 +109,7 @@ async function main() {
     'PUBLISH'
   ];
   const allPermissions: { id: number }[] = [];
+  const allPoliciesData: { resourceId: number; action: string; effect: string }[] = [];
 
   for (const res of Object.values(resources)) {
     for (const action of actions) {
@@ -122,6 +123,7 @@ async function main() {
         create: { action, resourceId: res.id },
       });
       allPermissions.push({ id: perm.id });
+      allPoliciesData.push({ resourceId: res.id, action, effect: 'ALLOW' });
     }
   }
 
@@ -2225,12 +2227,11 @@ async function main() {
     where: { code: 'SUPER_ADMIN' },
     update: {
       name: 'Super Administrator',
-      permissions: { set: allPermissions },
     },
     create: {
       code: 'SUPER_ADMIN',
       name: 'Super Administrator',
-      permissions: { connect: allPermissions },
+      policies: { create: allPoliciesData },
     },
   });
 
@@ -2238,12 +2239,11 @@ async function main() {
     where: { code: 'ADMIN' },
     update: {
       name: 'Quản trị viên hệ thống',
-      permissions: { set: allPermissions },
     },
     create: {
       code: 'ADMIN',
       name: 'Quản trị viên hệ thống',
-      permissions: { connect: allPermissions },
+      policies: { create: allPoliciesData },
     },
   });
 
@@ -2273,30 +2273,26 @@ async function main() {
 
   const cmsResources = ['POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION'];
   for (const r of cmsRoles) {
-    const rolePerms: { id: number }[] = [];
+    const rolePoliciesData: { resourceId: number; action: string; effect: string }[] = [];
     for (const resCode of cmsResources) {
       const resId = resources[resCode]?.id;
       if (!resId) continue;
       for (const action of r.permissions) {
-        const perm = await prisma.permission.findUnique({
-          where: {
-            action_resourceId: {
-              action: action === 'REJECT' ? 'UPDATE' : action,
-              resourceId: resId,
-            },
-          },
+        rolePoliciesData.push({
+          resourceId: resId,
+          action: action === 'REJECT' ? 'UPDATE' : action,
+          effect: 'ALLOW',
         });
-        if (perm) rolePerms.push({ id: perm.id });
       }
     }
 
     const createdRole = await prisma.role.upsert({
       where: { code: r.code },
-      update: { name: r.name, permissions: { set: rolePerms } },
+      update: { name: r.name },
       create: {
         code: r.code,
         name: r.name,
-        permissions: { connect: rolePerms },
+        policies: { create: rolePoliciesData },
       },
     });
     roleMap[r.code] = createdRole;
@@ -2322,24 +2318,21 @@ async function main() {
   ];
 
   for (const r of taskRoles) {
-    const rolePerms: { id: number }[] = [];
+    const rolePoliciesData: { resourceId: number; action: string; effect: string }[] = [];
     const resId = resources['TASK']?.id;
     if (resId) {
       for (const action of r.permissions) {
-        const perm = await prisma.permission.findUnique({
-          where: { action_resourceId: { action, resourceId: resId } },
-        });
-        if (perm) rolePerms.push({ id: perm.id });
+        rolePoliciesData.push({ resourceId: resId, action, effect: 'ALLOW' });
       }
     }
 
     const createdRole = await prisma.role.upsert({
       where: { code: r.code },
-      update: { name: r.name, permissions: { set: rolePerms } },
+      update: { name: r.name },
       create: {
         code: r.code,
         name: r.name,
-        permissions: { connect: rolePerms },
+        policies: { create: rolePoliciesData },
       },
     });
     roleMap[r.code] = createdRole;

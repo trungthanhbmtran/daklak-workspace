@@ -1,7 +1,7 @@
 import type {
   User,
   Role,
-  Permission,
+  Policy,
   Resource,
 } from '@generated/prisma/client';
 
@@ -11,7 +11,7 @@ import type {
  */
 export type UserWithPbac = User & {
   roles: (Role & {
-    permissions: (Permission & { resource: Resource })[];
+    policies: (Policy & { resource: Resource })[];
   })[];
   /** Đã flatten để check nhanh: resourceCode:action */
   permissionsFlatten?: string[];

@@ -1,4 +1,4 @@
-﻿import { Controller } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { GrpcMethod, RpcException } from '@nestjs/microservices';
 import { PbacService } from './pbac.service';
 
@@ -25,13 +25,13 @@ export class PbacController {
     code: string;
     name: string;
     description?: string;
-    permissionIds?: number[];
+    policies?: any[];
   }) {
     const role = await this.pbacService.createRole({
       code: data.code,
       name: data.name,
       description: data.description,
-      permissionIds: data.permissionIds,
+      policies: data.policies,
     });
     return this.toRoleResponse(role);
   }
@@ -46,7 +46,7 @@ export class PbacController {
         name: r.name ?? '',
         description: r.description ?? '',
         usersCount: r._count?.users ?? 0,
-        permissionsCount: r._count?.permissions ?? 0,
+        permissionsCount: r._count?.policies ?? 0,
       })),
     };
   }
@@ -55,16 +55,18 @@ export class PbacController {
   async findOneRole(data: { id: number }) {
     const role = await this.pbacService.findOneRole(data.id);
     if (!role)
-      return { id: 0, code: '', name: '', description: '', permissions: [] };
+      return { id: 0, code: '', name: '', description: '', policies: [] };
     return {
       id: role.id,
       code: role.code,
       name: role.name ?? '',
       description: role.description ?? '',
-      permissions: (role.permissions ?? []).map((p: any) => ({
+      policies: (role.policies ?? []).map((p: any) => ({
         id: p.id,
         action: p.action,
         resourceId: p.resourceId,
+        effect: p.effect,
+        conditions: p.conditions,
       })),
     };
   }
@@ -74,12 +76,12 @@ export class PbacController {
     id: number;
     name?: string;
     description?: string;
-    permissionIds?: number[];
+    policies?: any[];
   }) {
     const role = await this.pbacService.updateRole(data.id, {
       name: data.name,
       description: data.description,
-      permissionIds: data.permissionIds,
+      policies: data.policies,
     });
     return this.toRoleResponse(role);
   }
@@ -108,16 +110,17 @@ export class PbacController {
   }
 
   @GrpcMethod('PbacService', 'CreateResource')
-  async createResource(data: { code: string; name: string }) {
+  async createResource(data: { code: string; name: string; serviceCode?: string }) {
     const resource = await this.pbacService.createResource(data);
     return { id: resource.id, code: resource.code, name: resource.name };
   }
 
   @GrpcMethod('PbacService', 'UpdateResource')
-  async updateResource(data: { id: number; code?: string; name?: string }) {
+  async updateResource(data: { id: number; code?: string; name?: string; serviceCode?: string }) {
     const resource = await this.pbacService.updateResource(data.id, {
       code: data.code,
       name: data.name,
+      serviceCode: data.serviceCode,
     });
     if (!resource)
       throw new RpcException({ message: 'Resource not found', code: 5 });
@@ -202,4 +205,3 @@ export class PbacController {
     };
   }
 }
-
