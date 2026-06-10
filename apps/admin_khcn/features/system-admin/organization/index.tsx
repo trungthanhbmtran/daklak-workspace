@@ -22,9 +22,12 @@ export const Organization = {
 export type { ViewState } from "./hooks/useOrganizationView";
 
 export function OrganizationClient() {
-  const api = useOrganizationApi();
   const view = useOrganizationView();
   const { viewState, activeTab, setActiveTab } = view;
+
+  // Chỉ fetch danh mục khi user đang tạo/sửa đơn vị (không phải xem cây)
+  const needCategories = viewState.mode !== "idle";
+  const api = useOrganizationApi(needCategories);
 
   const contextValue = {
     state: {

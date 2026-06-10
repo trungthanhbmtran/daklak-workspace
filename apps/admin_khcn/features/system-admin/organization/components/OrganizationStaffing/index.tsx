@@ -33,6 +33,9 @@ export function OrganizationStaffing() {
   const [configDomainId, setConfigDomainId] = useState("__none__");
   const [configGeoId, setConfigGeoId] = useState("__none__");
   const [configUnitIds, setConfigUnitIds] = useState<number[]>([]);
+  const [govPage, setGovPage] = useState(1);
+  const [partyPage, setPartyPage] = useState(1);
+  const STAFFING_PAGE_SIZE = 8;
 
   const unit =
     selectedId != null ? flatUnits.find((u) => u.id === selectedId) : null;
@@ -40,11 +43,13 @@ export function OrganizationStaffing() {
   const {
     report,
     jobTitles,
-    geoAreas,
     isLoadingReport,
     isLoadingJobTitles,
     isError,
   } = useStaffingReport(selectedId ?? null);
+
+  // geoAreas lấy từ context (tránh fetch lại)
+  const geoAreas = meta.geoAreas ?? [];
 
   const { setStaffing, setStaffingSlot, updateJobTitle } =
     useStaffingMutations(selectedId ?? null);
@@ -162,28 +167,27 @@ export function OrganizationStaffing() {
   const renderTabContent = (
     titleList: JobTitleItem[],
     reportList: StaffingReportItem[],
-    label: string
+    label: string,
+    page: number,
+    setPage: (p: number) => void
   ) => {
+    const PAGE_SIZE = STAFFING_PAGE_SIZE;
+    const totalPages = Math.max(1, Math.ceil(reportList.length / PAGE_SIZE));
+    const safeP = page > totalPages ? 1 : page;
+    const pagedReport = reportList.slice((safeP - 1) * PAGE_SIZE, safeP * PAGE_SIZE);
     return (
       <div className="space-y-6 mt-4">
         <section className="rounded-lg border bg-muted/30 p-4">
           <h3 className="text-sm font-medium mb-3">Thêm định biên {label.toLowerCase()}</h3>
-          <form
-            onSubmit={handleSubmitStaffing}
-            className="flex flex-wrap items-end gap-4"
-          >
+          <form onSubmit={handleSubmitStaffing} className="flex flex-wrap items-end gap-4">
             <div className="space-y-1.5 min-w-[220px]">
               <label className="text-sm font-medium text-foreground">Chức danh</label>
               <Select
                 value={selectedJobTitleId || "__none__"}
-                onValueChange={(v) =>
-                  setSelectedJobTitleId(v === "__none__" ? "" : v)
-                }
+                onValueChange={(v) => setSelectedJobTitleId(v === "__none__" ? "" : v)}
                 disabled={isLoadingJobTitles}
               >
-                <SelectTrigger className="h-9">
-                  <SelectValue placeholder="Chọn chức danh" />
-                </SelectTrigger>
+                <SelectTrigger className="h-9"><SelectValue placeholder="Chọn chức danh" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Chọn chức danh</SelectItem>
                   {titleList.map((j) => (
@@ -203,28 +207,23 @@ export function OrganizationStaffing() {
             </div>
             <div className="space-y-1.5 w-24">
               <label className="text-sm font-medium text-foreground">Số lượng</label>
-              <Input
-                type="number"
-                min={1}
-                className="h-9"
-                value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
-                disabled={setStaffing.isPending}
-              />
+              <Input type="number" min={1} className="h-9" value={quantity}
+                onChange={(e) => setQuantity(e.target.value)} disabled={setStaffing.isPending} />
             </div>
-            <Button
-              type="submit"
-              size="default"
-              className="h-9"
-              disabled={setStaffing.isPending || !selectedJobTitleId}
-            >
+            <Button type="submit" size="default" className="h-9"
+              disabled={setStaffing.isPending || !selectedJobTitleId}>
               {setStaffing.isPending ? "Đang lưu..." : "Lưu định biên"}
             </Button>
           </form>
         </section>
 
         <section>
-          <h3 className="text-sm font-medium mb-3">Danh sách {label.toLowerCase()}</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium">Danh sách {label.toLowerCase()}</h3>
+            {reportList.length > 0 && (
+              <span className="text-xs text-muted-foreground">{reportList.length} chức danh</span>
+            )}
+          </div>
           {isLoadingReport ? (
             <Skeleton className="h-40 w-full rounded-lg" />
           ) : reportList.length === 0 ? (
@@ -232,16 +231,32 @@ export function OrganizationStaffing() {
               Chưa có định biên. Thêm chức danh và số lượng ở form trên.
             </div>
           ) : (
-            <div className="rounded-lg border overflow-hidden">
-              <StaffingTable
-                report={reportList}
-                domainsForUnit={domainsForUnit}
-                geoAreas={geoAreas}
-                subordinateUnits={subordinateUnits}
-                onSaveSlot={(payload) => setStaffingSlot.mutate(payload)}
-                isSavingSlot={setStaffingSlot.isPending}
-              />
-            </div>
+            <>
+              <div className="rounded-lg border overflow-hidden">
+                <StaffingTable
+                  report={pagedReport}
+                  domainsForUnit={domainsForUnit}
+                  geoAreas={geoAreas}
+                  subordinateUnits={subordinateUnits}
+                  onSaveSlot={(payload) => setStaffingSlot.mutate(payload)}
+                  isSavingSlot={setStaffingSlot.isPending}
+                />
+              </div>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-2 px-1">
+                  <span className="text-xs text-muted-foreground">
+                    {(safeP - 1) * PAGE_SIZE + 1}–{Math.min(safeP * PAGE_SIZE, reportList.length)} / {reportList.length}
+                  </span>
+                  <div className="flex gap-1">
+                    <Button variant="outline" size="sm" className="h-7 px-2 text-xs"
+                      disabled={safeP <= 1} onClick={() => setPage(safeP - 1)}>Trước</Button>
+                    <span className="text-xs font-medium px-2 self-center">{safeP}/{totalPages}</span>
+                    <Button variant="outline" size="sm" className="h-7 px-2 text-xs"
+                      disabled={safeP >= totalPages} onClick={() => setPage(safeP + 1)}>Sau</Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
 
@@ -253,20 +268,11 @@ export function OrganizationStaffing() {
             </p>
             <div className="flex flex-wrap gap-2">
               {titleList.map((j) => (
-                <Button
-                  key={j.id}
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="h-8"
-                  onClick={() => openConfig(j)}
-                >
+                <Button key={j.id} type="button" variant="outline" size="sm" className="h-8" onClick={() => openConfig(j)}>
                   {j.name}
-                  {(j.domainName ||
-                    j.geographicAreaName ||
-                    (j.monitoredUnitNames?.length ?? 0) > 0) && (
-                      <span className="ml-1.5 text-muted-foreground">•</span>
-                    )}
+                  {(j.domainName || j.geographicAreaName || (j.monitoredUnitNames?.length ?? 0) > 0) && (
+                    <span className="ml-1.5 text-muted-foreground">•</span>
+                  )}
                 </Button>
               ))}
             </div>
@@ -309,11 +315,11 @@ export function OrganizationStaffing() {
         </TabsList>
 
         <TabsContent value="CHINH_QUYEN">
-          {renderTabContent(govTitles, govReport, "chức danh chính quyền")}
+          {renderTabContent(govTitles, govReport, "chức danh chính quyền", govPage, setGovPage)}
         </TabsContent>
 
         <TabsContent value="DANG">
-          {renderTabContent(partyTitles, partyReport, "chức danh Đảng")}
+          {renderTabContent(partyTitles, partyReport, "chức danh Đảng", partyPage, setPartyPage)}
         </TabsContent>
       </Tabs>
 

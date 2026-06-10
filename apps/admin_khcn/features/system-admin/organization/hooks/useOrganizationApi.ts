@@ -7,8 +7,9 @@ import { organizationQueryKeys, categoryQueryKeys } from "../constants/queryKeys
 import type { CreateUnitPayload, OrganizationUnitNode } from "../types";
 import type { UpdateUnitPayload } from "../api";
 
-const STALE_TIME = 2 * 60 * 1000; // 2 phút — cây tổ chức, danh mục ít đổi
-const GC_TIME = 10 * 60 * 1000; // 10 phút
+const STALE_TIME = 2 * 60 * 1000;   // 2 phút — cây tổ chức ít đổi
+const GC_TIME = 10 * 60 * 1000;     // 10 phút
+const CAT_STALE = 10 * 60 * 1000;   // 10 phút — danh mục rất ít đổi
 
 function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
   if (!Array.isArray(nodes) || nodes.length === 0) return [];
@@ -18,9 +19,14 @@ function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
   ]);
 }
 
-export function useOrganizationApi() {
+/**
+ * needCategories: true khi user đang mở form tạo/sửa đơn vị.
+ * Tránh fetch unitTypes/domains/geoAreas khi chỉ xem cây tổ chức.
+ */
+export function useOrganizationApi(needCategories = false) {
   const queryClient = useQueryClient();
 
+  // Tree luôn fetch (cần để render sidebar)
   const { data: treeResponse, isLoading: isLoadingTree } = useQuery({
     queryKey: organizationQueryKeys.tree(),
     queryFn: () => organizationApi.getTree(),
@@ -30,27 +36,30 @@ export function useOrganizationApi() {
 
   const tree = treeResponse?.items || [];
   const allowedActions = treeResponse?.meta?.allowedActions || [];
-
   const flatUnits = flattenTree(Array.isArray(tree) ? tree : []);
 
+  // Danh mục — lazy: chỉ fetch khi cần (form tạo/sửa)
   const { data: unitTypes = [], isLoading: isLoadingTypes } = useQuery({
     queryKey: categoryQueryKeys.unitTypes(),
     queryFn: () => organizationApi.getUnitTypes(),
-    staleTime: STALE_TIME,
+    enabled: needCategories,
+    staleTime: CAT_STALE,
     gcTime: GC_TIME,
   });
 
   const { data: domains = [], isLoading: isLoadingDomains } = useQuery({
     queryKey: categoryQueryKeys.domains(),
     queryFn: () => organizationApi.getDomains(),
-    staleTime: STALE_TIME,
+    enabled: needCategories,
+    staleTime: CAT_STALE,
     gcTime: GC_TIME,
   });
 
   const { data: geoAreas = [], isLoading: isLoadingGeoAreas } = useQuery({
     queryKey: categoryQueryKeys.geoAreas(),
     queryFn: () => organizationApi.getGeoAreas(),
-    staleTime: STALE_TIME,
+    enabled: needCategories,
+    staleTime: CAT_STALE,
     gcTime: GC_TIME,
   });
 
@@ -117,9 +126,9 @@ export function useOrganizationApi() {
     domains,
     geoAreas,
     isLoadingTree,
-    isLoadingTypes,
-    isLoadingDomains,
-    isLoadingGeoAreas,
+    isLoadingTypes: isLoadingTypes && needCategories,
+    isLoadingDomains: isLoadingDomains && needCategories,
+    isLoadingGeoAreas: isLoadingGeoAreas && needCategories,
     createUnit: createUnit.mutateAsync,
     updateUnit: (id: number, payload: UpdateUnitPayload) =>
       updateUnit.mutateAsync({ id, payload }),
