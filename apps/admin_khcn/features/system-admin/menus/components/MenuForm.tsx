@@ -126,6 +126,18 @@ function MenuFormInner(props: any) {
     ? (parentId != null ? menus.find((m: MenuItem) => m.id === parentId) : null)
     : (selectedMenu ? menus.find((m: MenuItem) => m.id === selectedMenu.parentId) : null);
 
+  // Node gốc: không có menu cha. Node con: kế thừa service/portal từ cha
+  const isRootMenu = parentMenu == null && parentId == null;
+
+  // Tính số thứ tự tự động: số côn hiện có của node cha + 1
+  const autoSort = useMemo(() => {
+    if (!isCreate) return null;
+    const siblingCount = menus.filter((m: MenuItem) =>
+      isRootMenu ? !m.parentId : m.parentId === (parentId ?? null)
+    ).length;
+    return siblingCount + 1;
+  }, [menus, isCreate, isRootMenu, parentId]);
+
   const parentPathPrefix = getParentPathPrefix(parentMenu?.id ?? parentId ?? null);
 
   // Khởi tạo Form với Default Values (create: dùng parentMenu cho service/portal khi có)
@@ -142,12 +154,13 @@ function MenuFormInner(props: any) {
         name: "",
         code: "",
         path: "",
-        icon: "FileText",
+        icon: isRootMenu ? "LayoutDashboard" : "FileText",
         description: "",
         iconColor: "",
-        service: parentMenu?.service ?? serviceList[0]?.code ?? "CORE_SERVICE",
+        // Node con: tự kế thừa service/portal từ cha, không cần user chọn
+        service: parentMenu?.service ?? (isRootMenu ? (serviceList[0]?.code ?? "CORE_SERVICE") : ""),
         portal: parentMenu?.portal ?? "ADMIN_PORTAL",
-        sort: 1,
+        sort: autoSort ?? 1,
         active: 1,
         requiredPermissionIds: EMPTY_PERMISSION_IDS,
       }
@@ -158,7 +171,7 @@ function MenuFormInner(props: any) {
         icon: selectedMenu?.icon ?? "Circle",
         description: selectedMenu?.description ?? "",
         iconColor: selectedMenu?.iconColor ?? "",
-        service: selectedMenu?.service ?? serviceList[0]?.code ?? "CORE_SERVICE",
+        service: selectedMenu?.service ?? (isRootMenu ? (serviceList[0]?.code ?? "CORE_SERVICE") : ""),
         portal: selectedMenu?.portal ?? "ADMIN_PORTAL",
         sort: selectedMenu?.sort ?? 1,
         active: selectedMenu?.active ?? 1,
@@ -166,7 +179,7 @@ function MenuFormInner(props: any) {
       };
 
     return base;
-  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, serviceList]);
+  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, serviceList, isRootMenu, autoSort]);
 
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(menuFormSchema) as unknown as Resolver<MenuFormValues>,
@@ -191,8 +204,16 @@ function MenuFormInner(props: any) {
     const suffix = (values.path ?? "").replace(/^\/+/, "").trim();
     const fullPath = suffix ? `${parentPathPrefix.replace(/\/+$/, "")}/${suffix}` : parentPathPrefix.replace(/\/+$/, "") || "/";
 
+    // Node con: tự kế thừa service/portal từ menu cha (không để form rỗng ghi đè)
+    const resolvedService = isRootMenu
+      ? (values.service || "")
+      : (parentMenu?.service || values.service || "");
+    const resolvedPortal = values.portal || "ADMIN_PORTAL";
+
     const payload: Partial<MenuItem> = {
       ...values,
+      service: resolvedService,
+      portal: resolvedPortal,
       path: fullPath,
       target: "SELF",
     };
@@ -312,40 +333,19 @@ function MenuFormInner(props: any) {
 
             <Separator className="bg-border/50" />
 
-            {/* 2. ĐỊNH TUYẾN & HIỂN THỊ */}
+            {/* 2. CÀI ĐẶT HỆ THỐNG */}
             <div className="p-6 space-y-4 bg-muted/5 border-b border-border/50">
               <h3 className="text-[13px] font-bold text-foreground border-b pb-2 flex items-center gap-2">
-                <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 2. Cài đặt hệ thống
+                <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 2. Cài đặt hiển thị
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 pt-2">
-                <FormField control={form.control} name="portal" render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
-                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Cổng truy cập</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="h-10 bg-background"><SelectValue /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="ADMIN_PORTAL">Cổng Quản trị</SelectItem>
-                        <SelectItem value="PUBLIC_PORTAL">Cổng Thông tin</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="service" render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
-                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Dịch vụ (Service)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger className="h-10 bg-background"><SelectValue /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        {serviceList.map((s: { code: string, name: string }) => <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
+
+                {/* ICON + MÀU — luôn hiển */}
                 <FormField control={form.control} name="icon" render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
+                  <FormItem>
                     <div className="flex justify-between items-center pb-1">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide pb-0">Biểu tượng</FormLabel>
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide pb-0">Biểu tượng (Icon)</FormLabel>
                       <a href="https://lucide.dev/icons/" target="_blank" className="text-[10px] text-primary hover:underline flex items-center gap-1 font-bold">Tìm icon <ExternalLink className="h-2.5 w-2.5" /></a>
                     </div>
                     <FormControl>
@@ -356,21 +356,13 @@ function MenuFormInner(props: any) {
                     </FormControl>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="description" render={({ field }) => (
-                  <FormItem className="md:col-span-2 lg:col-span-4">
-                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Mô tả (card Hub)</FormLabel>
-                    <FormControl>
-                      <Textarea className="min-h-[80px] resize-y bg-background text-sm" placeholder="Mô tả hiển thị trên thẻ phân hệ tại trang Hub. Để trống nếu không dùng." {...field} />
-                    </FormControl>
-                  </FormItem>
-                )} />
+
                 <FormField control={form.control} name="iconColor" render={({ field }) => (
-                  <FormItem className="lg:col-span-2">
+                  <FormItem>
                     <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Màu icon (hex)</FormLabel>
                     <FormControl>
                       <div className="flex gap-2 items-center">
-                        <input
-                          type="color"
+                        <input type="color"
                           className="h-10 w-14 rounded border border-border cursor-pointer bg-background"
                           value={field.value && /^#[0-9A-Fa-f]{6}$/.test(String(field.value)) ? String(field.value) : "#3b82f6"}
                           onChange={(e) => field.onChange(e.target.value)}
@@ -381,28 +373,71 @@ function MenuFormInner(props: any) {
                     <p className="text-[10px] text-muted-foreground">Để trống = giữ màu gốc</p>
                   </FormItem>
                 )} />
-                <FormField control={form.control} name="sort" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Thứ tự ưu tiên</FormLabel>
-                    <FormControl><Input type="number" className="h-10 bg-background" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
-                  </FormItem>
-                )} />
-                <FormField control={form.control} name="active" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
-                    <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString()}>
+
+                <div className="flex gap-4">
+                  <FormField control={form.control} name="sort" render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Thứ tự</FormLabel>
+                      <FormControl><Input type="number" className="h-10 bg-background" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="active" render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
+                      <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className={`h-10 font-bold ${field.value === 1 ? "text-primary bg-primary/5 border-primary/30" : "text-destructive bg-destructive/5"}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1">Hiển thị</SelectItem>
+                          <SelectItem value="0">Tạm khóa</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )} />
+                </div>
+
+                {/* DỊCH VỤ — chỉ hiện với node gốc; node con tự kế thừa */}
+                {isRootMenu ? (
+                  <FormField control={form.control} name="service" render={({ field }) => (
+                    <FormItem className="md:col-span-2">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Dịch vụ (Service) *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl><SelectTrigger className="h-10 bg-background"><SelectValue placeholder="Chọn dịch vụ..." /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          {serviceList.map((s: { code: string, name: string }) => <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-[10px] text-muted-foreground">Xác định menu này thuộc phân hệ nào (dùng bởi sidebar và Hub).</p>
+                    </FormItem>
+                  )} />
+                ) : (
+                  // Node con: hiển thị service kế thừa dưới dạng readonly badge
+                  parentMenu?.service && (
+                    <div className="md:col-span-2 flex flex-col gap-1">
+                      <span className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Dịch vụ (kế thừa)</span>
+                      <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-dashed border-border bg-muted/30">
+                        <span className="text-xs text-muted-foreground">↳ Kế thừa từ</span>
+                        <Badge variant="secondary" className="text-[10px] font-mono font-bold">{parentMenu.service}</Badge>
+                        <span className="text-[11px] text-muted-foreground">{serviceList.find((s: any) => s.code === parentMenu.service)?.name ?? ""}</span>
+                      </div>
+                    </div>
+                  )
+                )}
+
+                {/* MÔ TẢ Hub Card — chỉ hiện với node gốc (hiển trên Hub) */}
+                {isRootMenu && (
+                  <FormField control={form.control} name="description" render={({ field }) => (
+                    <FormItem className="lg:col-span-3">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Mô tả (Hiển trên thẻ Hub)</FormLabel>
                       <FormControl>
-                        <SelectTrigger className={`h-10 font-bold ${field.value === 1 ? "text-primary bg-primary/5 border-primary/30" : "text-destructive bg-destructive/5"}`}>
-                          <SelectValue />
-                        </SelectTrigger>
+                        <Textarea className="min-h-[70px] resize-y bg-background text-sm" placeholder="Mô tả hiển thị trên thẻ phân hệ tại trang Hub. Để trống nếu không dùng." {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem value="1">Hiển thị</SelectItem>
-                        <SelectItem value="0">Tạm khóa</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormItem>
-                )} />
+                    </FormItem>
+                  )} />
+                )}
               </div>
             </div>
 
