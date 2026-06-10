@@ -430,7 +430,9 @@ export class UsersService implements OnModuleInit {
     const user = await this.prisma.user.findUnique({
       where: { id: data.id },
       include: {
-        roles: true,
+        roles: {
+          include: { policies: { include: { resource: true } } }
+        },
         jobPositions: {
           include: { unit: true, jobTitle: true },
           orderBy: [{ isPrimary: 'desc' }],
@@ -444,38 +446,25 @@ export class UsersService implements OnModuleInit {
       });
     }
     const base = this.toUserResponse(user);
-    const roles =
-      (
-        user as {
-          roles?: Array<{ id: number; name?: string | null; code?: string }>;
-        }
-      ).roles ?? [];
+    const roles = (user as any).roles ?? [];
     const roleNames = roles.map(
       (r) => (r.name && r.name.trim() !== '' ? r.name : r.code) ?? '',
     );
 
     const roleIds = roles.map((r) => r.id);
-    const policies: Array<{ description: string; resource: string }> = [];
     const permissionsFlattenSet = new Set<string>();
-    if (roleIds.length > 0) {
-      const policiesData = await this.prisma.policy.findMany({
-        where: { roles: { some: { id: { in: roleIds } } } },
-        include: { resource: true },
-        distinct: ['id'],
-      });
-      for (const perm of policiesData) {
-        const res = perm.resource;
-        const resourceCode = res?.code ?? '';
-        const resourceName = res?.name ?? resourceCode;
-        const description = `${perm.action} - ${resourceName}`.trim();
-        policies.push({ description, resource: resourceCode });
-        if (resourceCode && perm.action) {
-          permissionsFlattenSet.add(`${resourceCode}:${perm.action}`);
+    const isSuperAdmin = roles.some((r) => r.code === 'SUPER_ADMIN');
+
+    for (const role of user.roles ?? []) {
+      for (const policy of role.policies ?? []) {
+        const resourceCode = policy.resource?.code ?? '';
+        if (resourceCode && policy.action) {
+          permissionsFlattenSet.add(`${resourceCode}:${policy.action}`);
         }
       }
     }
 
-    const permissionsFlatten = roles.some((r) => r.code === 'SUPER_ADMIN')
+    const permissionsFlatten = isSuperAdmin
       ? []
       : Array.from(permissionsFlattenSet);
 
@@ -489,7 +478,6 @@ export class UsersService implements OnModuleInit {
       roleNames,
       role_names: roleNames,
       roles,
-      policies,
       permissionsFlatten,
       permissions_flatten: permissionsFlatten,
       unitId,

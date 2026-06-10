@@ -45,7 +45,7 @@ export function useRoleLogic() {
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
   const [createMode, setCreateMode] = useState<boolean>(false);
 
-  // Chi tiết vai trò (kèm permissionIds) — GET /roles/:id khi chọn từ list
+  // Chi tiết vai trò (kèm policies) — GET /roles/:id khi chọn từ list
   const { data: roleDetail } = useQuery({
     queryKey: [...roleKeys.lists(), "detail", selectedRoleId],
     queryFn: () => roleApi.getRoleById(selectedRoleId!),
