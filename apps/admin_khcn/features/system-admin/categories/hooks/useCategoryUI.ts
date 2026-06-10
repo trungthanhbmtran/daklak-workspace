@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import type { CategoryItem } from "../types";
 
@@ -6,7 +6,15 @@ export function useCategoryUI(serverData: CategoryItem[] = [], groups: { code: s
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('search') || "";
   const [searchGroupTerm, setSearchGroupTerm] = useState("");
-  const [activeGroup, setActiveGroup] = useState<string>("UNIT_TYPE");
+  // Mặc định rỗng — sẽ tự động chọn group đầu tiên khi data load xong
+  const [activeGroup, setActiveGroup] = useState<string>("");
+
+  // Khi groups được fetch xong, tự động chọn group đầu tiên (nếu chưa có)
+  useEffect(() => {
+    if (!activeGroup && groups.length > 0) {
+      setActiveGroup(groups[0].code);
+    }
+  }, [groups, activeGroup]);
 
   // Trạng thái điều khiển Modal
   const [isCreateOpen, setIsCreateOpen] = useState(false);

@@ -1,19 +1,19 @@
 "use client";
 
 import React, { useState, useCallback } from "react";
-import { FileText, GitMerge, TrendingUp, LayoutList, Table2 } from "lucide-react";
+import { FileText, TrendingUp, LayoutList, Table2, Info } from "lucide-react";
 import { useMasterPlanContext } from "./MasterPlanContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MasterPlanForm } from "./MasterPlanForm";
-import { TaskAssignModal } from "../../tasks/assign/TaskAssignModal";
+import { SmartAssignDrawer } from "../../tasks/assign/SmartAssignDrawer";
+import { SubTaskModal } from "../../tasks/subtask/SubTaskModal";
 import { PlanTaskTree } from "../../tasks/tree/PlanTaskTree";
 import { PlanExecutionMatrix } from "../../tasks/matrix/PlanExecutionMatrix";
-import { SubTaskModal } from "../../tasks/subtask/SubTaskModal";
 import { hrmTasksApi } from "@/features/hrm/api";
 import { useQuery } from "@tanstack/react-query";
 import { Target, AlertTriangle, Building2, PieChart as PieChartIcon } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
 const COLORS = ['#22c55e', '#3b82f6', '#eab308', '#ef4444', '#94a3b8'];
@@ -21,8 +21,9 @@ const COLORS = ['#22c55e', '#3b82f6', '#eab308', '#ef4444', '#94a3b8'];
 export function MasterPlanDetail() {
   const { state, actions } = useMasterPlanContext();
 
-  const [assignModalOpen, setAssignModalOpen] = useState(false);
+  // SmartAssignDrawer — dùng chung cho cả PlanTaskTree và TaskListClient
   const [taskToAssign, setTaskToAssign] = useState<any>(null);
+  // SubTaskModal — chỉ để thêm đầu việc GỐC vào kế hoạch (không phân rã sub-task)
   const [addRootTaskOpen, setAddRootTaskOpen] = useState(false);
 
   const selectedPlan = state.masterPlans.find(p => p.id === state.selectedId);
@@ -151,10 +152,10 @@ export function MasterPlanDetail() {
               <TrendingUp className="h-3.5 w-3.5 shrink-0" /> Tổng quan
             </TabsTrigger>
             <TabsTrigger value="execution" className="gap-1.5 px-4 h-8 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-violet-700 text-xs font-semibold">
-              <LayoutList className="h-3.5 w-3.5 shrink-0" /> Cấu trúc & Giao việc
+              <LayoutList className="h-3.5 w-3.5 shrink-0" /> Đầu việc & Giao việc
             </TabsTrigger>
             <TabsTrigger value="matrix" className="gap-1.5 px-4 h-8 rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-emerald-700 text-xs font-semibold">
-              <Table2 className="h-3.5 w-3.5 shrink-0" /> Tổng hợp
+              <Table2 className="h-3.5 w-3.5 shrink-0" /> Tổng hợp tiến độ
             </TabsTrigger>
           </TabsList>
         </div>
@@ -296,8 +297,22 @@ export function MasterPlanDetail() {
           </div>
         </TabsContent>
 
-        {/* ── Tab: Triển khai — Cây nhiệm vụ phân cấp ── */}
-        <TabsContent value="execution" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30">
+        {/* ── Tab: Triển khai — Cây đầu việc cấp 1 (KHÔNG phân rã tại đây) ── */}
+        <TabsContent value="execution" className="flex-1 overflow-y-auto p-6 m-0 focus-visible:outline-none bg-slate-50/30 space-y-4">
+
+          {/* Hướng dẫn mô hình phân cấp */}
+          <div className="flex items-start gap-3 p-4 bg-indigo-50 border border-indigo-100 rounded-2xl text-sm">
+            <Info className="w-4 h-4 text-indigo-500 mt-0.5 shrink-0" />
+            <div className="text-indigo-800">
+              <p className="font-bold mb-1">Mô hình phân cấp giao việc</p>
+              <p className="text-xs text-indigo-700/80 leading-relaxed">
+                Lãnh đạo tạo <b>đầu việc lớn</b> và giao cho Trưởng phòng/đơn vị.
+                Người nhận sẽ tự <b>xây dựng kế hoạch thực hiện chi tiết</b> trong tab "Việc của tôi"
+                — tránh lẫn lộn giữa kế hoạch chiến lược và kế hoạch tác nghiệp.
+              </p>
+            </div>
+          </div>
+
           <PlanTaskTree
             tasks={taskTree}
             planId={selectedPlan.id}
@@ -305,6 +320,7 @@ export function MasterPlanDetail() {
             onAddRootTask={() => setAddRootTaskOpen(true)}
             onRefresh={handleRefresh}
             isLoading={planTasksLoading}
+            onRequestAssign={(task) => setTaskToAssign(task)}
           />
         </TabsContent>
 
@@ -318,17 +334,18 @@ export function MasterPlanDetail() {
         </TabsContent>
       </Tabs>
 
-      {/* Modal giao việc */}
-      <TaskAssignModal
-        isOpen={assignModalOpen}
+      {/* SmartAssignDrawer dùng chung — thay thế TaskAssignModal cũ */}
+      <SmartAssignDrawer
         task={taskToAssign}
-        onClose={(assignedTaskId) => {
-          setAssignModalOpen(false);
-          if (assignedTaskId) handleRefresh();
+        open={!!taskToAssign}
+        onOpenChange={(open) => !open && setTaskToAssign(null)}
+        onAssignSuccess={() => {
+          setTaskToAssign(null);
+          handleRefresh();
         }}
       />
 
-      {/* Modal thêm đầu việc gốc */}
+      {/* SubTaskModal — CHỈ để thêm ĐẦU VIỆC GỐC vào kế hoạch (không phân rã sub-task) */}
       <SubTaskModal
         isOpen={addRootTaskOpen}
         onClose={(created) => {

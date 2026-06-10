@@ -5,56 +5,52 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   ChevronDown, ChevronRight, PlusCircle, UserCheck,
-  Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw
+  Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw,
+  CornerDownRight, Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SubTaskModal } from '../subtask/SubTaskModal';
-import { TaskAssignModal } from '../assign/TaskAssignModal';
 
-// ─── Utils ──────────────────────────────────────────────────────────────────
-// Tree is now built by backend, no need to build it here
+// ─── Status Config ────────────────────────────────────────────────────────────
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-  TEMPLATE: { label: 'Chờ giao', icon: <Circle className="w-3 h-3" />, cls: 'bg-slate-100 text-slate-600 border-slate-200' },
-  TODO: { label: 'Chờ thực hiện', icon: <Clock className="w-3 h-3" />, cls: 'bg-blue-50 text-blue-700 border-blue-200' },
-  IN_PROGRESS: { label: 'Đang thực hiện', icon: <RotateCcw className="w-3 h-3" />, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  REVIEWING: { label: 'Chờ duyệt', icon: <Clock className="w-3 h-3" />, cls: 'bg-violet-50 text-violet-700 border-violet-200' },
-  DONE: { label: 'Hoàn thành', icon: <CheckCircle2 className="w-3 h-3" />, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  OVERDUE: { label: 'Quá hạn', icon: <AlertTriangle className="w-3 h-3" />, cls: 'bg-red-50 text-red-700 border-red-200' },
-  RETURNED: { label: 'Trả lại', icon: <RotateCcw className="w-3 h-3" />, cls: 'bg-orange-50 text-orange-700 border-orange-200' },
+  TEMPLATE:    { label: 'Chờ giao',      icon: <Circle className="w-3 h-3" />,       cls: 'bg-slate-100 text-slate-600 border-slate-200' },
+  TODO:        { label: 'Chờ thực hiện', icon: <Clock className="w-3 h-3" />,        cls: 'bg-blue-50 text-blue-700 border-blue-200' },
+  IN_PROGRESS: { label: 'Đang thực hiện',icon: <RotateCcw className="w-3 h-3" />,   cls: 'bg-amber-50 text-amber-700 border-amber-200' },
+  REVIEWING:   { label: 'Chờ duyệt',     icon: <Clock className="w-3 h-3" />,        cls: 'bg-violet-50 text-violet-700 border-violet-200' },
+  DONE:        { label: 'Hoàn thành',    icon: <CheckCircle2 className="w-3 h-3" />, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  OVERDUE:     { label: 'Quá hạn',       icon: <AlertTriangle className="w-3 h-3" />,cls: 'bg-red-50 text-red-700 border-red-200' },
+  RETURNED:    { label: 'Trả lại',       icon: <RotateCcw className="w-3 h-3" />,   cls: 'bg-orange-50 text-orange-700 border-orange-200' },
 };
+
+// ─── TaskRow ──────────────────────────────────────────────────────────────────
 
 interface TaskRowProps {
   task: any;
   depth: number;
-
   planId: number;
-  onRefresh: () => void;
   isLastChild?: boolean;
+  /**
+   * Khi user click "Giao việc" → MasterPlanDetail mở SmartAssignDrawer dùng chung.
+   * KHÔNG mở modal riêng tại đây — tránh trùng lặp với TaskListClient.
+   */
+  onRequestAssign: (task: any) => void;
 }
 
-import { CornerDownRight } from 'lucide-react';
-
-function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) {
-  const [expanded, setExpanded] = useState(depth < 2); // Mở 2 cấp đầu mặc định
-  const [subTaskModalOpen, setSubTaskModalOpen] = useState(false);
-  const [assignModalOpen, setAssignModalOpen] = useState(false);
+function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowProps) {
+  const [expanded, setExpanded] = useState(depth < 2);
 
   const hasChildren = task.children?.length > 0;
-
   const allowedActions = task.allowedActions || [];
-  // Sử dụng hoàn toàn phân quyền do backend trả về
-  const canEdit = allowedActions.includes('EDIT');
   const canAssign = allowedActions.includes('ASSIGN');
-  const canAddSubTask = allowedActions.includes('ADD_SUBTASK');
 
   const statusCfg = STATUS_CONFIG[task.status] || STATUS_CONFIG.TODO;
+  const isUnassigned = !task.assigneeCode || task.assigneeCode === 'UNASSIGNED';
 
   return (
     <div className="relative">
-      {/* Nét đứt dọc nối các sub-tasks cùng cấp (nếu không phải là phần tử cuối) */}
+      {/* Nét dọc nối sub-tasks cùng cấp */}
       {depth > 0 && !isLastChild && (
-        <div className="absolute left-[-16px] top-8 bottom-[-8px] w-px bg-slate-200/80"></div>
+        <div className="absolute left-[-16px] top-8 bottom-[-8px] w-px bg-slate-200/80" />
       )}
 
       {/* Row */}
@@ -70,7 +66,7 @@ function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) 
             <div className={cn(
               "w-[16px] border-b-[1.5px] border-slate-300",
               isLastChild ? "h-[20px] border-l-[1.5px] rounded-bl-xl absolute bottom-0 left-0" : "h-px absolute"
-            )}></div>
+            )} />
           </div>
         )}
 
@@ -98,13 +94,12 @@ function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) 
                 {task.title}
               </p>
 
-              {/* Assignee + Status */}
               <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge variant="outline" className={cn('text-[10px] font-bold border px-1.5 py-0 gap-1', statusCfg.cls)}>
                   {statusCfg.icon} {statusCfg.label}
                 </Badge>
 
-                {task.assigneeCode && task.assigneeCode !== 'UNASSIGNED' ? (
+                {!isUnassigned ? (
                   <span className="text-xs text-slate-500 flex items-center gap-1">
                     <span className="w-4 h-4 rounded-full bg-indigo-100 flex items-center justify-center text-[9px] text-indigo-700 font-bold">
                       {(task.assigneeName || task.assigneeCode).charAt(0).toUpperCase()}
@@ -112,7 +107,7 @@ function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) 
                     {task.assigneeName || task.assigneeCode}
                   </span>
                 ) : (
-                  <span className="text-xs text-slate-400 italic">Chưa phân công</span>
+                  <span className="text-xs text-amber-500 italic font-medium">Chưa phân công</span>
                 )}
 
                 {task.dueDate && (
@@ -122,46 +117,34 @@ function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) 
                   </span>
                 )}
 
-                {task.children?.length > 0 && (
+                {hasChildren && (
                   <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200">
-                    {task.children.length} việc con
+                    {task.children.length} việc con (cấp dưới tự xây dựng)
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Actions */}
+            {/* Actions — CHỈ giao việc cấp 1, không phân rã tại đây */}
             <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-              {canAddSubTask && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-7 px-2 text-[11px] font-bold text-violet-700 border-violet-200 hover:bg-violet-50 rounded-md gap-1"
-                  onClick={() => setSubTaskModalOpen(true)}
-                  title="Thêm việc con"
-                >
-                  <PlusCircle className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Thêm việc con</span>
-                </Button>
-              )}
-
-              {(!task.assigneeCode || task.assigneeCode === 'UNASSIGNED') && canAssign && (
+              {isUnassigned && canAssign && (
                 <Button
                   size="sm"
                   className="h-7 px-3 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md gap-1"
-                  onClick={() => setAssignModalOpen(true)}
+                  onClick={() => onRequestAssign(task)}
+                  title="Mở SmartAssign để giao việc"
                 >
                   <UserCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Giao việc ngay</span>
+                  <span className="hidden sm:inline">Giao việc</span>
                 </Button>
               )}
 
-              {task.assigneeCode && task.assigneeCode !== 'UNASSIGNED' && task.status !== 'DONE' && canAssign && (
+              {!isUnassigned && task.status !== 'DONE' && canAssign && (
                 <Button
                   size="sm"
                   variant="ghost"
                   className="h-7 px-2 text-[11px] text-slate-500 hover:text-slate-800 rounded-md gap-1 border border-transparent hover:border-slate-200"
-                  onClick={() => setAssignModalOpen(true)}
+                  onClick={() => onRequestAssign(task)}
                 >
                   Chuyển giao
                 </Button>
@@ -171,44 +154,22 @@ function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) 
         </div>
       </div>
 
-      {/* Sub-task rows (đệ quy) */}
+      {/* Sub-task rows (đệ quy) — hiển thị để xem, không có action */}
       {expanded && hasChildren && (
         <div className={cn("ml-8 pl-4", depth === 0 && "ml-4 pl-4", "relative")}>
-          {/* Nét dọc chính của block con - chạy xuyên suốt ngoại trừ phần của con cuối cùng */}
-          <div className="absolute left-[-8px] top-0 bottom-4 w-[1.5px] bg-slate-300"></div>
+          <div className="absolute left-[-8px] top-0 bottom-4 w-[1.5px] bg-slate-300" />
           {task.children.map((child: any, index: number) => (
             <TaskRow
               key={child.id}
               task={child}
               depth={depth + 1}
-
               planId={planId}
-              onRefresh={onRefresh}
+              onRequestAssign={onRequestAssign}
               isLastChild={index === task.children.length - 1}
             />
           ))}
         </div>
       )}
-
-      {/* Modals */}
-      <SubTaskModal
-        isOpen={subTaskModalOpen}
-        onClose={(created) => {
-          setSubTaskModalOpen(false);
-          if (created) onRefresh();
-        }}
-        parentTask={task}
-        planId={planId}
-      />
-
-      <TaskAssignModal
-        isOpen={assignModalOpen}
-        task={task}
-        onClose={(taskId) => {
-          setAssignModalOpen(false);
-          if (taskId) onRefresh();
-        }}
-      />
     </div>
   );
 }
@@ -216,12 +177,14 @@ function TaskRow({ task, depth, planId, onRefresh, isLastChild }: TaskRowProps) 
 // ─── PlanTaskTree ─────────────────────────────────────────────────────────────
 
 interface PlanTaskTreeProps {
-  tasks: any[];        // Flat list từ API
+  tasks: any[];
   planId: number;
-  canAddRoot?: boolean;      // Quyền thêm đầu việc lớn
+  canAddRoot?: boolean;
   onAddRootTask?: () => void;
   onRefresh: () => void;
   isLoading?: boolean;
+  /** Callback giao việc — MasterPlanDetail truyền vào để mở SmartAssignDrawer dùng chung */
+  onRequestAssign?: (task: any) => void;
 }
 
 export function PlanTaskTree({
@@ -231,6 +194,7 @@ export function PlanTaskTree({
   onAddRootTask,
   onRefresh,
   isLoading,
+  onRequestAssign,
 }: PlanTaskTreeProps) {
   const tree = tasks || [];
 
@@ -248,8 +212,10 @@ export function PlanTaskTree({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 bg-slate-50/80 border-b border-slate-100">
         <div>
-          <h3 className="font-bold text-slate-800 text-sm">Cây nhiệm vụ triển khai</h3>
-          <p className="text-xs text-slate-500 mt-0.5">{tasks.length} nhiệm vụ · mọi cấp phân cấp</p>
+          <h3 className="font-bold text-slate-800 text-sm">Cấu trúc đầu việc — Kế hoạch</h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {tree.length} đầu việc cấp 1 · Sub-task do người được giao tự xây dựng
+          </p>
         </div>
         {canAddRoot && onAddRootTask && (
           <Button
@@ -262,12 +228,18 @@ export function PlanTaskTree({
         )}
       </div>
 
+      {/* Context hint */}
+      <div className="flex items-center gap-2 px-4 py-2 bg-amber-50/60 border-b border-amber-100 text-[11px] text-amber-700 font-semibold">
+        <Info className="w-3.5 h-3.5 shrink-0" />
+        Sau khi giao việc, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong tab "Việc của tôi"
+      </div>
+
       {/* Tree rows */}
       <div className="divide-y divide-slate-50/50 p-2">
         {tree.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-sm">
             <Circle className="w-8 h-8 mx-auto mb-2 opacity-30" />
-            Chưa có nhiệm vụ nào. Thêm đầu việc để bắt đầu triển khai.
+            Chưa có đầu việc nào. Thêm đầu việc lớn để bắt đầu kế hoạch.
           </div>
         ) : (
           tree.map((task, index) => (
@@ -276,7 +248,7 @@ export function PlanTaskTree({
               task={task}
               depth={0}
               planId={planId}
-              onRefresh={onRefresh}
+              onRequestAssign={onRequestAssign || (() => {})}
               isLastChild={index === tree.length - 1}
             />
           ))

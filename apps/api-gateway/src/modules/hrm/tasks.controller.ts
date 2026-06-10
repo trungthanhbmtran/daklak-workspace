@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -193,11 +193,12 @@ export class TasksController implements OnModuleInit {
   async list(
     @Req() req: any,
     @Query('tab') tab: string,
+    @Query('role') role: string,          // NEW: ASSIGNEE | OWNER (3-layer model)
     @Query('assigneeCode') assigneeCode: string,
     @Query('filter') filter: string,
     @Query('search') search: string,
     @Query('departmentId') departmentId: string,
-    @Query('planId') planId: string, // Lấy toàn bộ task của 1 kế hoạch
+    @Query('planId') planId: string,
     @Query('isSupervisor') isSupervisor: string,
     @Query('status') status: string,
     @Query('priority') priority: string,
@@ -209,19 +210,29 @@ export class TasksController implements OnModuleInit {
       ? parseInt(departmentId, 10)
       : undefined;
 
-    if (tab === 'MY_TASKS' && user) {
-      // Công việc được giao CHO tôi (tôi là người thực hiện)
+    // ── 3-layer model (new tabs) ──────────────────────────────────────────────
+    if (role === 'ASSIGNEE' && user) {
+      // Tab ② "Việc của tôi": tasks được giao cho tôi thực hiện
       finalAssigneeCode = user.employeeCode;
-    } else if (tab === 'ASSIGNED_BY_ME' && user) {
-      // Công việc TÔI đã giao cho người khác (tôi là người giao việc)
+    } else if (role === 'OWNER' && user) {
+      // Tab ③ "Tôi đã giao": tasks tôi tạo/giao cho người khác
       finalAssignerCode = user.employeeCode;
-    } else if (tab === 'DEPT_TASKS' && user) {
-      finalDepartmentId = user.unitId;
+    }
+    // Tab ①  "Chờ giao" (PENDING_ASSIGN): assigneeCode=UNASSIGNED được pass thẳng từ query
+
+    // ── Backward compatible (old tabs) ───────────────────────────────────────
+    if (!role) {
+      if (tab === 'MY_TASKS' && user) {
+        finalAssigneeCode = user.employeeCode;
+      } else if (tab === 'ASSIGNED_BY_ME' && user) {
+        finalAssignerCode = user.employeeCode;
+      } else if (tab === 'DEPT_TASKS' && user) {
+        finalDepartmentId = user.unitId;
+      }
     }
 
     const isAdmin = user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
-    // Tính ancestor unit IDs cho visibility và phân quyền theo cây tổ chức
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
@@ -240,12 +251,12 @@ export class TasksController implements OnModuleInit {
         status,
         priority,
         departmentId: finalDepartmentId,
-        planId: planId ? parseInt(planId, 10) : undefined, // Pass planId cho plan tree
+        planId: planId ? parseInt(planId, 10) : undefined,
         isSupervisor: isSupervisor === 'true',
         currentUserCode: user?.employeeCode,
         isAdmin,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
-        callerAncestorUnitIds, // Danh sách đơn vị cha để lọc task cấp trên
+        callerAncestorUnitIds,
       }),
     );
 
