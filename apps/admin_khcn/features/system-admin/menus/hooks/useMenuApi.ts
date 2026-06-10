@@ -3,48 +3,16 @@ import { toast } from "sonner";
 import apiClient from "@/lib/axiosInstance";
 import { menuApi } from "../api";
 import { menuKeys } from "../keys";
-import { MenuItem, Permission } from "../types";
+import { MenuItem, PbacResource } from "../types";
 
-/** Nhóm danh mục dùng chung: MICROSERVICE (ưu tiên) + SERVICE – khớp seed user-service */
-const CATEGORY_GROUP_MICROSERVICE = "MICROSERVICE";
-const CATEGORY_GROUP_SERVICE = "SERVICE";
-
-export interface ServiceOption {
-  code: string;
-  name: string;
+/** Lấy danh sách PBAC Resources — dùng cho dropdown menu form */
+async function fetchResources(): Promise<PbacResource[]> {
+  const res = await apiClient.get("/resources");
+  const list = Array.isArray(res) ? res : (res as { data?: PbacResource[] })?.data ?? [];
+  return (list as PbacResource[]).sort((a, b) => (a.name ?? '').localeCompare(b.name ?? ''));
 }
 
-async function fetchCategoriesByGroup(group: string): Promise<{ code: string; name: string; order?: number }[]> {
-  const res = await apiClient.get("/categories", { params: { group } });
-  const list = Array.isArray(res) ? res : (res as { data?: unknown[] })?.data ?? [];
-  return (list as { code?: string; name?: string; order?: number }[]).map((item) => ({
-    code: item.code ?? "",
-    name: item.name ?? item.code ?? "",
-    order: item.order ?? 0,
-  })).filter((item) => item.code);
-}
-
-// Hàm lấy Matrix Quyền
-async function fetchPermissions(): Promise<Permission[]> {
-  const res = await apiClient.get("/roles/permissions/matrix");
-  const body = res as { data?: { resources?: unknown[] }; resources?: unknown[] };
-  const raw = body?.data?.resources ?? body?.resources ?? [];
-  const list = Array.isArray(raw) ? raw : [];
-  const out: Permission[] = [];
-  for (const r of list as { id: number; code: string; name: string; serviceCode?: string; permissions?: { id: number; action: string }[] }[]) {
-    for (const p of r.permissions ?? []) {
-      out.push({
-        id: p.id,
-        module: r.name ?? r.code ?? "",
-        action: p.action ?? "",
-        code: `${r.code}:${p.action}`, serviceCode: r.serviceCode,
-      });
-    }
-  }
-  return out;
-}
-
-export function useMenuApi(needPermissions = false, needServiceOptions = false) {
+export function useMenuApi(needResources = false) {
   const queryClient = useQueryClient();
 
   // 1. Fetch Danh sách Menu — luôn fetch (cần để render tree sidebar)
@@ -57,32 +25,14 @@ export function useMenuApi(needPermissions = false, needServiceOptions = false) 
     },
   });
 
-  // 2. Fetch Service options — lazy: chỉ fetch khi mở form tạo/sửa
-  const { data: serviceOptions = [] } = useQuery({
-    queryKey: ["categories", CATEGORY_GROUP_MICROSERVICE, CATEGORY_GROUP_SERVICE],
-    queryFn: async (): Promise<ServiceOption[]> => {
-      const [microList, serviceList] = await Promise.all([
-        fetchCategoriesByGroup(CATEGORY_GROUP_MICROSERVICE),
-        fetchCategoriesByGroup(CATEGORY_GROUP_SERVICE),
-      ]);
-      const byCode = new Map<string, ServiceOption>();
-      [...microList, ...serviceList].forEach((item) => {
-        if (!byCode.has(item.code)) byCode.set(item.code, { code: item.code, name: item.name });
-      });
-      return Array.from(byCode.values()).sort((a, b) => a.code.localeCompare(b.code));
-    },
-    enabled: needServiceOptions,
-    staleTime: 10 * 60 * 1000,  // 10 phút — danh mục ít đổi
+  // 2. Fetch PBAC Resources — lazy: chỉ fetch khi mở form tạo/sửa menu
+  //    Thay thế fetchPermissions (matrix) — đơn giản hơn nhiều (~20 resources thay vì ~200 permissions)
+  const { data: resources = [], isLoading: isLoadingResources } = useQuery({
+    queryKey: ["pbac", "resources"],
+    queryFn: fetchResources,
+    enabled: needResources,
+    staleTime: 10 * 60 * 1000,  // 10 phút — resources ít thay đổi
     gcTime: 20 * 60 * 1000,
-  });
-
-  // 3. Fetch Permissions matrix — lazy: chỉ fetch khi mở form phân quyền
-  const { data: permissions = [], isLoading: isLoadingPermissions } = useQuery({
-    queryKey: ["roles", "permissions", "matrix"],
-    queryFn: fetchPermissions,
-    enabled: needPermissions,
-    staleTime: 5 * 60 * 1000,   // 5 phút — quyền ít thay đổi
-    gcTime: 15 * 60 * 1000,
   });
 
   const getErrorMessage = (err: unknown): string => {
@@ -93,7 +43,7 @@ export function useMenuApi(needPermissions = false, needServiceOptions = false) 
     return ax?.message ?? "Lỗi không xác định";
   };
 
-  // 4. Mutations (Lưu / Xóa) — PBAC: quyền gắn Permission, hiển thị lỗi từ backend
+  // 3. Mutations (Lưu / Xóa)
   const saveMutation = useMutation({
     mutationFn: menuApi.saveMenu,
     onSuccess: () => {
@@ -115,13 +65,11 @@ export function useMenuApi(needPermissions = false, needServiceOptions = false) 
   return {
     menus,
     isLoadingMenus,
-    serviceOptions,
-    permissions,
-    isLoadingPermissions: isLoadingPermissions && needPermissions,
+    resources,
+    isLoadingResources: isLoadingResources && needResources,
     saveMenu: saveMutation.mutateAsync,
     isSaving: saveMutation.isPending,
     deleteMenu: deleteMutation.mutateAsync,
-    isDeleting: deleteMutation.isPending
+    isDeleting: deleteMutation.isPending,
   };
 }
-

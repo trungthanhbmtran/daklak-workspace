@@ -18,6 +18,14 @@ model Menu {
   createdAt           DateTime                 @default(now()) @map("created_at")
   updatedAt           DateTime                 @updatedAt @map("updated_at")
 
+  /**
+   * PBAC chuẩn: Resource code để kiểm soát hiển thị menu.
+   * Menu visible nếu user có BẤT KỲ policy nào trên resource này.
+   * Để trống = menu công khai (không yêu cầu quyền).
+   * Thay thế dần cơ chế requiredPermissions (sẽ deprecated).
+   */
+  linkedResourceCode  String?                  @map("linked_resource_code")
+
   @@index([application, parentId, order])
   @@map("sys_menus")
 }

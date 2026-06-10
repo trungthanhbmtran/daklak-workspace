@@ -1,5 +1,6 @@
-﻿import {
+import {
   Controller,
+  Get,
   Post,
   Put,
   Delete,
@@ -21,7 +22,7 @@ import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
 import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
 
-@ApiTags('PBAC � T�i nguy�n')
+@ApiTags('PBAC – Tài nguyên')
 @Controller('admin/resources')
 @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
 @ApiBearerAuth('JWT-auth')
@@ -39,12 +40,28 @@ export class ResourcesController implements OnModuleInit {
     );
   }
 
+  /**
+   * GET /admin/resources
+   * Trả danh sách PBAC Resource phẳng — dùng cho dropdown menu form
+   * Chuẩn PBAC: menu gắn với resource thay vì danh sách permission IDs
+   */
+  @Get()
+  @ApiOperation({ summary: 'Danh sách PBAC Resource (dùng cho menu form)' })
+  @ApiResponse({ status: 200, description: 'Mảng resources phẳng' })
+  async listResources() {
+    const res = await firstValueFrom(this.pbacService.GetPermissionMatrix({})) as any;
+    const rawResources = res?.resources ?? res?.data?.resources ?? [];
+    return (rawResources as any[]).map((r: any) => ({
+      id: r.id,
+      code: r.code ?? '',
+      name: r.name ?? r.code ?? '',
+      serviceCode: r.serviceCode ?? null,
+    }));
+  }
+
   @Post()
-  @ApiOperation({ summary: 'T?o t�i nguy�n m?i' })
-  @ApiResponse({
-    status: 201,
-    description: 'T�i nguy�n v?a du?c t?o',
-  })
+  @ApiOperation({ summary: 'Tạo tài nguyên mới' })
+  @ApiResponse({ status: 201, description: 'Tài nguyên vừa được tạo' })
   async createResource(
     @Body() body: { code: string; name: string; serviceCode?: string },
   ) {
@@ -56,11 +73,8 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t t�i nguy�n' })
-  @ApiResponse({
-    status: 200,
-    description: 'T�i nguy�n sau khi c?p nh?t',
-  })
+  @ApiOperation({ summary: 'Cập nhật tài nguyên' })
+  @ApiResponse({ status: 200, description: 'Tài nguyên sau khi cập nhật' })
   async updateResource(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { code?: string; name?: string; serviceCode?: string },
@@ -74,54 +88,28 @@ export class ResourcesController implements OnModuleInit {
   }
 
   @Delete('permissions/:id')
-  @ApiOperation({ summary: 'X�a m?t quy?n theo ID' })
-  @ApiResponse({
-    status: 200,
-    description: 'K?t qu? x�a',
-  })
-  async deletePermission(
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    return firstValueFrom(
-      this.pbacService.DeletePermission({ id }),
-    );
+  @ApiOperation({ summary: 'Xóa một quyền theo ID' })
+  @ApiResponse({ status: 200, description: 'Kết quả xóa' })
+  async deletePermission(@Param('id', ParseIntPipe) id: number) {
+    return firstValueFrom(this.pbacService.DeletePermission({ id }));
   }
 
   @Delete(':id')
-  @ApiOperation({
-    summary:
-      'X�a t�i nguy�n (ch? khi kh�ng c�n quy?n n�o thu?c t�i nguy�n n�y)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'K?t qu? x�a',
-  })
-  async deleteResource(
-    @Param('id', ParseIntPipe) id: number,
-  ) {
-    return firstValueFrom(
-      this.pbacService.DeleteResource({ id }),
-    );
+  @ApiOperation({ summary: 'Xóa tài nguyên (chỉ khi không còn quyền nào thuộc tài nguyên này)' })
+  @ApiResponse({ status: 200, description: 'Kết quả xóa' })
+  async deleteResource(@Param('id', ParseIntPipe) id: number) {
+    return firstValueFrom(this.pbacService.DeleteResource({ id }));
   }
 
   @Post(':id/permissions')
-  @ApiOperation({
-    summary: 'Th�m quy?n (action) cho t�i nguy�n',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'Quy?n v?a du?c t?o',
-  })
+  @ApiOperation({ summary: 'Thêm quyền (action) cho tài nguyên' })
+  @ApiResponse({ status: 201, description: 'Quyền vừa được tạo' })
   async createPermission(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { action: string },
   ) {
     return firstValueFrom(
-      this.pbacService.CreatePermission({
-        resourceId: id,
-        action: body.action,
-      }),
+      this.pbacService.CreatePermission({ resourceId: id, action: body.action }),
     );
   }
 }
-

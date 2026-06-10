@@ -16,6 +16,8 @@ export type CreateMenuDto = {
   parentId?: number | null;
   requiredPermissionIds?: number[];
   isActive?: boolean;
+  /** PBAC chuẩn: resource.code để kiểm soát hiển thị menu */
+  linkedResourceCode?: string | null;
 };
 
 export type UpdateMenuDto = Partial<CreateMenuDto>;
@@ -81,6 +83,7 @@ export class MenusService {
         target: dto.target ?? 'SELF',
         parentId: dto.parentId ?? null,
         isActive: dto.isActive ?? true,
+        linkedResourceCode: dto.linkedResourceCode ?? null,
         requiredPermissions:
           permIds.length > 0
             ? { create: permIds.map((permissionId) => ({ permissionId })) }
@@ -92,9 +95,7 @@ export class MenusService {
       include: { requiredPermissions: { select: { permissionId: true } } },
     });
 
-    // Invalidate cache
     this.menuCache.clear();
-
     return this.toFlat(withPerms ?? menu);
   }
 
@@ -157,6 +158,10 @@ export class MenusService {
             dto.parentId === null || dto.parentId === 0 ? null : dto.parentId,
         }),
         ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+        // PBAC chuẩn: cập nhật linkedResourceCode (null = công khai)
+        ...(dto.linkedResourceCode !== undefined && {
+          linkedResourceCode: dto.linkedResourceCode || null,
+        }),
       },
     });
     const withPerms = await this.prisma.menu.findUnique({
@@ -164,9 +169,7 @@ export class MenusService {
       include: { requiredPermissions: { select: { permissionId: true } } },
     });
 
-    // Invalidate cache
     this.menuCache.clear();
-
     return this.toFlat(withPerms ?? updated);
   }
 
@@ -182,10 +185,7 @@ export class MenusService {
       );
     }
     await this.prisma.menu.delete({ where: { id } });
-
-    // Invalidate cache
     this.menuCache.clear();
-
     return true;
   }
 
@@ -203,6 +203,7 @@ export class MenusService {
     target: string;
     parentId: number | null;
     isActive: boolean;
+    linkedResourceCode?: string | null;
     requiredPermissions?: { permissionId: number }[];
   }) {
     const requiredPermissionIds =
@@ -221,6 +222,7 @@ export class MenusService {
       target: m.target,
       parentId: m.parentId ?? 0,
       requiredPermissionIds,
+      linkedResourceCode: m.linkedResourceCode ?? null,
       isActive: m.isActive,
     };
   }
@@ -234,27 +236,42 @@ export class MenusService {
       },
     });
 
-    const allowedSet = new Set<string>();
     const isSuperAdmin = user?.roles?.some(r => r.code === 'SUPER_ADMIN') ?? false;
+
+    // PBAC chuẩn: Set resource codes mà user có quyền (bất kỳ action nào)
+    const allowedResources = new Set<string>();
+    // Backward compat: vẫn giữ allowedSet cho menu dùng requiredPermissions cũ
+    const allowedSet = new Set<string>();
 
     for (const role of user?.roles ?? []) {
       for (const p of role.policies ?? []) {
         if (p.resource?.code) {
+          allowedResources.add(p.resource.code);
           allowedSet.add(`${p.resource.code}:${p.action}`);
         }
       }
     }
 
-    // 2. Query Menu: hiển thị nếu công khai (không yêu cầu quyền) HOẶC user có ít nhất 1 quyền trong danh sách yêu cầu
+    // 2. Query Menu
     const rawMenus = await this.prisma.menu.findMany({
       where: { application, isActive: true },
       orderBy: { order: 'asc' },
-      include: { requiredPermissions: { include: { permission: { include: { resource: true } } } } },
+      include: {
+        requiredPermissions: {
+          include: { permission: { include: { resource: true } } },
+        },
+      },
     });
 
     const visibleMenus = rawMenus.filter((menu) => {
       if (isSuperAdmin) return true;
-      if (menu.route && menu.route.toLowerCase().includes('organization')) return true;
+
+      // PBAC chuẩn: dùng linkedResourceCode (ưu tiên)
+      if (menu.linkedResourceCode) {
+        return allowedResources.has(menu.linkedResourceCode);
+      }
+
+      // Backward compat: dùng requiredPermissions cũ nếu chưa migrate
       const reqPerms = menu.requiredPermissions ?? [];
       if (reqPerms.length === 0) return true; // công khai
       return reqPerms.some((rp) => {
@@ -264,10 +281,10 @@ export class MenusService {
       });
     });
 
-    // 3. Dựng cây (dùng danh sách đã lọc theo quyền)
+    // 3. Dựng cây
     const menuTree = buildTree(visibleMenus, null);
 
-    // 4. Cắt tỉa menu cha rỗng (Quan trọng)
+    // 4. Cắt tỉa menu cha rỗng
     const result = pruneEmptyParents(menuTree);
 
     return result;

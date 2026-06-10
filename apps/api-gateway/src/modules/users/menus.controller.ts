@@ -67,6 +67,7 @@ function toFrontendItem(m: MenuDto): MenuDto {
     description: m.description ?? null,
     iconColor: m.iconColor ?? null,
     requiredPermissionIds: m.requiredPermissionIds ?? [],
+    linkedResourceCode: m.linkedResourceCode ?? null,
   };
 }
 
@@ -232,6 +233,7 @@ export class MenusController implements OnModuleInit {
         ? body.requiredPermissionIds.map(Number).filter(Boolean)
         : [],
       isActive: body.active !== 0,
+      linkedResourceCode: body.linkedResourceCode ?? null,
     };
   }
 
@@ -268,6 +270,7 @@ export class MenusController implements OnModuleInit {
       service: body.service ?? '',
       application: body.portal ?? 'ADMIN_PORTAL',
       target: body.target ?? 'SELF',
+      linkedResourceCode: body.linkedResourceCode ?? null,
     };
     if (body.parentId !== undefined) payload.parentId = body.parentId ?? 0;
     if (body.requiredPermissionIds !== undefined) {

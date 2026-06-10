@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useWatch } from "react-hook-form";
 import {
   Plus, Edit, Trash2, LayoutDashboard, CornerDownRight,
-  ExternalLink, Lock, CheckCircle2, ChevronDown, ChevronRight, Loader2
+  ExternalLink, Lock, Shield, ShieldCheck, Loader2
 } from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,29 +11,21 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
 import { Separator } from "@/components/ui/separator";
-import {
-  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger
-} from "@/components/ui/dialog";
 
-import { MenuItem, Permission } from "../types";
+import { MenuItem, PbacResource } from "../types";
 import { menuFormSchema, type MenuFormValues } from "../schemas";
 import { renderIcon } from "../utils";
 import type { ViewState } from "..";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
-
-const EMPTY_PERMISSION_IDS: number[] = [];
-
-// Import Custom Hooks
 import { useMenuApi } from "../hooks/useMenuApi";
 import { useFormLogic } from "../hooks/useFormLogic";
-import { Badge } from "@/components/ui/badge";
 
 // ============================================================================
 // 1. COMPONENT CHÍNH: MENU FORM
@@ -47,15 +38,14 @@ interface MenuFormProps {
 }
 
 export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProps) {
-  // Chỉ fetch permissions khi user đang tạo/sửa menu (không phải idle)
-  const needData = viewState.mode !== "idle";
-  const { permissions, isLoadingPermissions, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(needData, false);
+  // Chỉ fetch resources khi mở form tạo/sửa
+  const needResources = viewState.mode !== "idle";
+  const { resources, isLoadingResources, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(needResources);
   const { getParentPathPrefix } = useFormLogic(menus);
 
   const { mode, selectedId, parentId } = viewState;
   const isCreate = mode.startsWith("create");
 
-  // Xử lý Trạng thái trống (Idle)
   if (mode === "idle") {
     return (
       <Card className="flex-1 w-full h-full shadow-none border-border flex items-center justify-center bg-muted/5 border-dashed rounded-xl transition-all">
@@ -69,7 +59,6 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
     );
   }
 
-  // TẠO KEY ĐỘC NHẤT ĐỂ ÉP REACT MOUNT LẠI COMPONENT INNER (CHỐNG LẶP INFINITE LOOP)
   const formKey = isCreate ? `create-${parentId || 'root'}` : `edit-${selectedId}`;
 
   return (
@@ -77,8 +66,8 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
       key={formKey}
       menus={menus}
       viewState={viewState}
-      availablePermissions={permissions}
-      isLoadingPermissions={isLoadingPermissions}
+      resources={resources}
+      isLoadingResources={isLoadingResources}
       getParentPathPrefix={getParentPathPrefix}
       saveMenu={saveMenu}
       isSaving={isSaving}
@@ -95,7 +84,7 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
 // ============================================================================
 function MenuFormInner(props: any) {
   const {
-    menus, viewState, availablePermissions, isLoadingPermissions,
+    menus, viewState, resources, isLoadingResources,
     getParentPathPrefix, saveMenu, isSaving, deleteMenu, isDeleting, onSuccess, onCancel
   } = props;
 
@@ -104,17 +93,16 @@ function MenuFormInner(props: any) {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  // Lấy data menu hiện tại và menu cha — parentId lấy từ viewState (khi Thêm con từ list)
+  // Lấy data menu hiện tại và menu cha
   const selectedMenu = !isCreate ? menus.find((m: MenuItem) => m.id === selectedId) : null;
   const parentId = viewParentId ?? (isCreate ? undefined : selectedMenu?.parentId ?? undefined);
   const parentMenu = isCreate
     ? (parentId != null ? menus.find((m: MenuItem) => m.id === parentId) : null)
     : (selectedMenu ? menus.find((m: MenuItem) => m.id === selectedMenu.parentId) : null);
 
-  // Node gốc: không có menu cha. Node con: kế thừa service/portal từ cha
   const isRootMenu = parentMenu == null && parentId == null;
 
-  // Tính số thứ tự tự động: số côn hiện có của node cha + 1
+  // Tính số thứ tự tự động: số con hiện có + 1
   const autoSort = useMemo(() => {
     if (!isCreate) return null;
     const siblingCount = menus.filter((m: MenuItem) =>
@@ -125,7 +113,17 @@ function MenuFormInner(props: any) {
 
   const parentPathPrefix = getParentPathPrefix(parentMenu?.id ?? parentId ?? null);
 
-  // Khởi tạo Form với Default Values (create: dùng parentMenu cho service/portal khi có)
+  // Nhóm resources theo serviceCode để hiển thị grouped dropdown
+  const groupedResources = useMemo(() => {
+    const groups: Record<string, PbacResource[]> = {};
+    for (const r of (resources as PbacResource[])) {
+      const key = r.serviceCode || "Khác";
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    }
+    return groups;
+  }, [resources]);
+
   const defaultValues = useMemo(() => {
     let initialSuffix = "";
     if (!isCreate && selectedMenu?.path) {
@@ -134,7 +132,7 @@ function MenuFormInner(props: any) {
         : selectedMenu.path;
     }
 
-    const base = isCreate
+    return isCreate
       ? {
         name: "",
         code: "",
@@ -146,7 +144,7 @@ function MenuFormInner(props: any) {
         portal: "ADMIN_PORTAL",
         sort: autoSort ?? 1,
         active: 1,
-        requiredPermissionIds: EMPTY_PERMISSION_IDS,
+        linkedResourceCode: null,
       }
       : {
         name: selectedMenu?.name ?? "",
@@ -159,47 +157,38 @@ function MenuFormInner(props: any) {
         portal: selectedMenu?.portal ?? "ADMIN_PORTAL",
         sort: selectedMenu?.sort ?? 1,
         active: selectedMenu?.active ?? 1,
-        requiredPermissionIds: selectedMenu?.requiredPermissionIds || EMPTY_PERMISSION_IDS,
+        linkedResourceCode: selectedMenu?.linkedResourceCode ?? null,
       };
-
-    return base;
-  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, isRootMenu, autoSort]);
+  }, [selectedMenu, isCreate, parentPathPrefix, isRootMenu, autoSort]);
 
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(menuFormSchema) as unknown as Resolver<MenuFormValues>,
     defaultValues,
   });
 
+  useEffect(() => {
+    form.reset(defaultValues);
+  }, [defaultValues]);
+
   // Theo dõi Path để hiển thị Full Path real-time
   const watchPath = form.watch("path") || "";
+  const watchLinkedResource = form.watch("linkedResourceCode");
 
-  // Gom nhóm quyền
-  const groupedPermissions = useMemo(() => {
-    return availablePermissions.reduce((acc: Record<string, Permission[]>, perm: Permission) => {
-      const groupKey = perm.module || "Hệ thống";
-      if (!acc[groupKey]) acc[groupKey] = [];
-      acc[groupKey].push(perm);
-      return acc;
-    }, {});
-  }, [availablePermissions]);
+  // Lấy tên resource đang chọn để hiển thị badge
+  const selectedResource = (resources as PbacResource[]).find(r => r.code === watchLinkedResource);
 
-  // Xử lý Submit: build payload rõ ràng cho API (path = full path, parentId null = gốc)
+  // Xử lý Submit
   const handleSubmit = async (values: MenuFormValues) => {
     const suffix = (values.path ?? "").replace(/^\/+/, "").trim();
     const fullPath = suffix ? `${parentPathPrefix.replace(/\/+$/, "")}/${suffix}` : parentPathPrefix.replace(/\/+$/, "") || "/";
 
-    // Node con: tự kế thừa service/portal từ menu cha (không để form rỗng ghi đè)
-    const resolvedService = isRootMenu
-      ? (values.service || "")
-      : (parentMenu?.service || values.service || "");
-    const resolvedPortal = values.portal || "ADMIN_PORTAL";
-
     const payload: Partial<MenuItem> = {
       ...values,
-      service: resolvedService,
-      portal: resolvedPortal,
+      service: "",
+      portal: "ADMIN_PORTAL",
       path: fullPath,
       target: "SELF",
+      linkedResourceCode: values.linkedResourceCode || null,
     };
 
     if (isCreate) {
@@ -215,9 +204,7 @@ function MenuFormInner(props: any) {
   };
 
   const handleDelete = () => {
-    if (selectedId) {
-      setIsDeleteDialogOpen(true);
-    }
+    if (selectedId) setIsDeleteDialogOpen(true);
   };
 
   const executeDelete = async () => {
@@ -229,72 +216,85 @@ function MenuFormInner(props: any) {
   };
 
   return (
-    <Card className="flex-1 w-full h-full shadow-sm border-border overflow-hidden flex flex-col rounded-xl bg-background font-sans antialiased">
-      {/* HEADER SÁT MÉP */}
-      <CardHeader className="bg-muted/10 border-b py-4 px-6 shrink-0 flex flex-row items-center justify-between space-y-0">
-        <div className="flex items-center gap-3">
-          <div className={`p-2.5 rounded-lg shadow-sm ${isCreate ? "bg-primary/10 text-primary border border-primary/10" : "bg-blue-500/10 text-blue-600 border border-blue-500/10"}`}>
-            {isCreate ? <Plus className="h-5 w-5" /> : <Edit className="h-5 w-5" />}
-          </div>
-          <div>
-            <CardTitle className="text-lg font-bold">{isCreate ? "Thêm mới Menu" : `Cấu hình: ${selectedMenu?.name}`}</CardTitle>
-            <div className="flex items-center gap-2 mt-0.5">
-              <Badge variant="outline" className="text-[10px] font-mono tracking-wider uppercase px-2 py-0 h-4 bg-background">
-                {isCreate ? "NEW_MENU" : selectedMenu?.code}
-              </Badge>
-            </div>
-          </div>
-        </div>
-        {!isCreate && (
-          <Button variant="outline" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/20 h-9" disabled={isDeleting} onClick={handleDelete}>
-            <Trash2 className="h-4 w-4 mr-1.5" /> Xóa Menu
+    <Card className="flex-1 w-full h-full shadow-none border-border rounded-xl overflow-hidden flex flex-col bg-background">
+      {/* HEADER */}
+      <CardHeader className="p-5 border-b bg-gradient-to-r from-background to-muted/20 shrink-0 flex-row items-center justify-between">
+        <CardTitle className="text-base font-bold flex items-center gap-2">
+          {isCreate
+            ? <><Plus className="h-4 w-4 text-primary" /> Thêm Menu {parentMenu ? `con vào "${parentMenu.name}"` : "gốc"}</>
+            : <><Edit className="h-4 w-4 text-primary" /> Chỉnh sửa: {selectedMenu?.name}</>
+          }
+        </CardTitle>
+        {!isCreate && selectedId && (
+          <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:bg-destructive/10" onClick={handleDelete} disabled={isDeleting}>
+            <Trash2 className="h-4 w-4" />
           </Button>
         )}
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto p-0 scrollbar-thin">
+      <CardContent className="flex-1 overflow-y-auto p-0">
         <Form {...form}>
-          <form id="menu-form" onSubmit={(e) => e.preventDefault()}>
+          <form onSubmit={form.handleSubmit(handleSubmit)}>
 
-            {/* 1. THÔNG TIN CƠ BẢN */}
-            <div className="p-6 space-y-4 bg-background">
-              {parentMenu && (
-                <div className="flex items-center gap-3 p-3 bg-primary/5 rounded-lg border border-primary/20 text-sm font-medium text-foreground mb-6">
-                  <Badge variant="secondary" className="font-semibold text-primary bg-primary/10 shadow-none">Trực thuộc</Badge>
-                  {parentMenu.name}
-                </div>
-              )}
-
+            {/* SECTION 1: THÔNG TIN CƠ BẢN */}
+            <div className="p-6 space-y-4 border-b border-border/50">
               <h3 className="text-[13px] font-bold text-foreground border-b pb-2 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 1. Thông tin cơ bản
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <FormField control={form.control} name="name" render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="md:col-span-2">
                     <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Tên hiển thị *</FormLabel>
-                    <FormControl><Input className="h-10 bg-muted/5 focus-visible:ring-primary/20" placeholder="VD: Quản lý người dùng" {...field} /></FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormControl><Input className="h-10 bg-background" placeholder="Ví dụ: Quản lý Người dùng" {...field} /></FormControl>
+                    <FormMessage />
                   </FormItem>
                 )} />
+
                 <FormField control={form.control} name="code" render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Mã hệ thống *</FormLabel>
+                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Mã định danh *</FormLabel>
                     <FormControl>
                       <Input
-                        className="h-10 font-mono font-bold uppercase bg-muted/5 focus-visible:ring-primary/20"
-                        placeholder="VD: SYS_USER"
+                        className="h-10 font-mono text-sm bg-background"
+                        placeholder="MENU_USERS"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value.toUpperCase())}
+                        onChange={(e) => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, '_').replace(/[^A-Z0-9_]/g, ''))}
                       />
                     </FormControl>
-                    <FormMessage className="text-[10px]" />
+                    <FormMessage />
                   </FormItem>
                 )} />
+
+                <div className="flex gap-3">
+                  <FormField control={form.control} name="sort" render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Thứ tự</FormLabel>
+                      <FormControl><Input type="number" className="h-10 bg-background" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="active" render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
+                      <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString()}>
+                        <FormControl>
+                          <SelectTrigger className={`h-10 font-bold ${field.value === 1 ? "text-primary bg-primary/5 border-primary/30" : "text-destructive bg-destructive/5"}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="1">Hiển thị</SelectItem>
+                          <SelectItem value="0">Tạm khóa</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )} />
+                </div>
               </div>
 
-              <div className="pt-2">
-                <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Đường dẫn truy cập (Path)</FormLabel>
+              {/* Path */}
+              <div className="pt-1">
+                <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Đường dẫn (Path)</FormLabel>
                 <div className="relative flex items-center shadow-sm rounded-lg overflow-hidden border focus-within:ring-2 focus-within:ring-primary/20 transition-all mt-2 bg-background">
                   <div className="flex items-center justify-center px-4 bg-muted text-sm font-mono font-bold text-muted-foreground select-none h-11 border-r">
                     {parentPathPrefix}
@@ -304,7 +304,7 @@ function MenuFormInner(props: any) {
                       className="h-11 font-mono text-sm border-0 focus-visible:ring-0 rounded-none bg-transparent"
                       placeholder="ten-duong-dan"
                       {...field}
-                      onChange={(e) => field.onChange(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}
+                      onChange={(e) => field.onChange(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-/]/g, ''))}
                     />
                   )} />
                 </div>
@@ -317,15 +317,13 @@ function MenuFormInner(props: any) {
 
             <Separator className="bg-border/50" />
 
-            {/* 2. CÀI ĐẶT HỆ THỐNG */}
+            {/* SECTION 2: HIỂN THỊ */}
             <div className="p-6 space-y-4 bg-muted/5 border-b border-border/50">
               <h3 className="text-[13px] font-bold text-foreground border-b pb-2 flex items-center gap-2">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary" /> 2. Cài đặt hiển thị
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pt-2">
-
-                {/* ICON + MÀU — luôn hiển */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 <FormField control={form.control} name="icon" render={({ field }) => (
                   <FormItem>
                     <div className="flex justify-between items-center pb-1">
@@ -358,34 +356,7 @@ function MenuFormInner(props: any) {
                   </FormItem>
                 )} />
 
-                <div className="flex gap-4">
-                  <FormField control={form.control} name="sort" render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Thứ tự</FormLabel>
-                      <FormControl><Input type="number" className="h-10 bg-background" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="active" render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
-                      <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger className={`h-10 font-bold ${field.value === 1 ? "text-primary bg-primary/5 border-primary/30" : "text-destructive bg-destructive/5"}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">Hiển thị</SelectItem>
-                          <SelectItem value="0">Tạm khóa</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </FormItem>
-                  )} />
-                </div>
-
-                {/* DỊCH VỤ — Hướng A: bỏ hoàn toàn, không cần khai báo */}
-
-                {/* MÔ TẢ Hub Card — chỉ hiện với node gốc (hiển trên Hub) */}
+                {/* Mô tả — chỉ node gốc (hiển trên Hub card) */}
                 {isRootMenu && (
                   <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem className="lg:col-span-3">
@@ -399,40 +370,97 @@ function MenuFormInner(props: any) {
               </div>
             </div>
 
-            {/* 3. PHÂN QUYỀN */}
-            <div className="p-6 space-y-4 bg-background border-t">
-              <div className="flex items-center justify-between border-b pb-2">
-                <div className="space-y-1">
+            <Separator className="bg-border/50" />
+
+            {/* SECTION 3: KIỂM SOÁT TRUY CẬP — PBAC CHUẨN */}
+            <div className="p-6 space-y-4 bg-background">
+              <div className="flex items-center justify-between border-b pb-3">
+                <div>
                   <h3 className="text-[13px] font-bold text-foreground flex items-center gap-2">
-                    <Lock className="h-4 w-4 text-primary" /> 3. Điều kiện hiển thị Menu (Access Control)
+                    <Shield className="h-4 w-4 text-primary" /> 3. Kiểm soát truy cập (PBAC)
                   </h3>
                   <p className="text-[11px] text-muted-foreground mt-1">
-                    Nhấn vào từng nhóm phân hệ bên dưới để chọn các quyền tương ứng. Đã chọn <strong className="text-primary">{form.watch("requiredPermissionIds")?.length || 0}</strong> quyền.
+                    Chọn tài nguyên mà menu này quản lý. Menu chỉ hiển thị với user có ít nhất 1 quyền trên tài nguyên đó.
                   </p>
                 </div>
-                <Badge variant="outline" className="text-[10px] font-mono bg-background shadow-sm">
-                  {Object.keys(groupedPermissions).length} Nhóm phân hệ
-                </Badge>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-2">
-                {isLoadingPermissions ? (
-                  <div className="col-span-full flex items-center justify-center py-8 text-muted-foreground gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="text-sm">Đang tải ma trận phân quyền...</span>
-                  </div>
-                ) : (
-                  Object.entries(groupedPermissions).map(([resourceName, perms]: [string, unknown]) => (
-                    <PermissionCardDialog key={resourceName} resourceName={resourceName} perms={perms as Permission[]} form={form} />
-                  ))
+                {watchLinkedResource && selectedResource && (
+                  <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20 font-mono shrink-0">
+                    <ShieldCheck className="h-3 w-3 mr-1" />
+                    {selectedResource.code}
+                  </Badge>
                 )}
               </div>
+
+              <FormField control={form.control} name="linkedResourceCode" render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">
+                    Tài nguyên PBAC liên kết
+                  </FormLabel>
+                  {isLoadingResources ? (
+                    <div className="flex items-center gap-2 h-10 text-muted-foreground text-sm">
+                      <Loader2 className="h-4 w-4 animate-spin" /> Đang tải danh sách tài nguyên...
+                    </div>
+                  ) : (
+                    <Select
+                      onValueChange={(v) => field.onChange(v === "__PUBLIC__" ? null : v)}
+                      value={field.value ?? "__PUBLIC__"}
+                    >
+                      <FormControl>
+                        <SelectTrigger className={`h-10 bg-background ${field.value ? "border-primary/30 text-primary" : ""}`}>
+                          <SelectValue placeholder="Chọn tài nguyên..." />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-[300px]">
+                        <SelectItem value="__PUBLIC__">
+                          <span className="flex items-center gap-2 text-muted-foreground">
+                            <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+                            Công khai — hiển thị với tất cả user đăng nhập
+                          </span>
+                        </SelectItem>
+                        <Separator className="my-1" />
+                        {Object.entries(groupedResources).sort().map(([group, items]) => (
+                          <SelectGroup key={group}>
+                            <SelectLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60">{group}</SelectLabel>
+                            {(items as PbacResource[]).map((r) => (
+                              <SelectItem key={r.code} value={r.code}>
+                                <span className="flex items-center gap-2">
+                                  <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{r.code}</span>
+                                  <span>{r.name}</span>
+                                </span>
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  {/* Thông tin giải thích */}
+                  <div className={`mt-2 p-3 rounded-lg text-[11px] border ${field.value
+                    ? "bg-primary/5 border-primary/20 text-primary"
+                    : "bg-muted/30 border-border text-muted-foreground"
+                    }`}>
+                    {field.value && selectedResource ? (
+                      <span className="flex items-center gap-2">
+                        <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
+                        Menu này chỉ hiện với user có quyền trên tài nguyên <strong>{selectedResource.name}</strong> ({selectedResource.code})
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-green-500 inline-block shrink-0" />
+                        Menu công khai — hiển thị với tất cả user đã đăng nhập
+                      </span>
+                    )}
+                  </div>
+                </FormItem>
+              )} />
             </div>
 
           </form>
         </Form>
       </CardContent>
 
+      {/* FOOTER */}
       <div className="p-4 border-t bg-background shrink-0 flex justify-end gap-3 items-center shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
         <Button type="button" variant="ghost" onClick={onCancel} className="text-xs font-bold h-10 px-6">
           Hủy bỏ
@@ -451,105 +479,5 @@ function MenuFormInner(props: any) {
         isDeleting={isDeleting}
       />
     </Card>
-  );
-}
-
-// ============================================================================
-// 3. COMPONENT CON: NHÓM QUYỀN (PERMISSION CARD DIALOG)
-// ============================================================================
-function PermissionCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  // useWatch đảm bảo luôn nhận giá trị mới nhất, tránh stale closure
-  const selectedIds: number[] = useWatch({ control: form.control, name: "requiredPermissionIds" }) || [];
-
-  const groupPermIds = perms.map((p: Permission) => p.id);
-  const selectedInGroup = selectedIds.filter((id: number) => groupPermIds.includes(id));
-  const hasSelected = selectedInGroup.length > 0;
-
-  const handleToggle = (permId: number, checked: boolean) => {
-    // form.getValues lấy giá trị hiện tại tại thời điểm gọi (không bị stale closure)
-    const current: number[] = form.getValues("requiredPermissionIds") || [];
-    const next = checked
-      ? current.includes(permId) ? current : [...current, permId]
-      : current.filter((val: number) => val !== permId);
-    form.setValue("requiredPermissionIds", next, { shouldDirty: true });
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <div
-          className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group"
-        >
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-[13px] flex items-center gap-2">
-              <CheckCircle2 className={`h-4 w-4 ${hasSelected ? 'text-primary' : 'text-muted-foreground opacity-40'}`} />
-              {resourceName}
-            </span>
-            <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60">
-              {perms[0]?.module || 'N/A'}
-            </code>
-          </div>
-
-          <div className="flex items-center justify-between">
-            {hasSelected ? (
-              <Badge variant="secondary" className="text-[10px] px-2 bg-primary/10 text-primary border-primary/20 shadow-none">
-                Đã chọn {selectedInGroup.length} quyền
-              </Badge>
-            ) : (
-              <span className="text-[11px] text-muted-foreground/80">Chưa cấu hình</span>
-            )}
-
-            <div className="h-6 w-6 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-              <ChevronRight className="h-3.5 w-3.5" />
-            </div>
-          </div>
-        </div>
-      </DialogTrigger>
-
-      {isOpen && (
-        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-background">
-          <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background z-10 shadow-sm">
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-              <Lock className="h-5 w-5 text-primary" /> Phân quyền: {resourceName}
-            </DialogTitle>
-            <DialogDescription className="text-xs mt-2">
-              Tích chọn các quyền thuộc nhóm <strong className="text-foreground">{resourceName}</strong> mà người dùng bắt buộc phải có.
-              Bạn đang chọn: <strong className="text-primary">{selectedInGroup.length}/{perms.length}</strong> quyền.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {perms.map((perm: Permission) => {
-                const isChecked = selectedIds.includes(perm.id);
-                return (
-                  <div
-                    key={perm.id}
-                    className={`flex flex-row items-center space-x-2.5 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 shadow-sm ${isChecked ? "bg-primary/5 border-primary/30" : ""
-                      }`}
-                    onClick={() => handleToggle(perm.id, !isChecked)}
-                  >
-                    <Checkbox
-                      checked={isChecked}
-                      onCheckedChange={(checked) => handleToggle(perm.id, !!checked)}
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <div className="space-y-0.5 leading-none overflow-hidden">
-                      <p className={`text-[11px] font-bold cursor-pointer transition-colors block leading-none truncate ${isChecked ? "text-primary" : "text-foreground/80"}`}>
-                        {perm.action}
-                      </p>
-                      <p className="text-[9px] font-mono font-medium text-muted-foreground/60 uppercase truncate">
-                        {perm.code ? perm.code.split('_').pop() : 'ACTION'}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </DialogContent>
-      )}
-    </Dialog>
   );
 }
