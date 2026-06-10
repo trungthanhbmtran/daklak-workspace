@@ -20,7 +20,8 @@ import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 interface RoleFormProps {
   selectedRole: Role | null;
   createMode: boolean;
-  permissions: Permission[]; // Danh sách phẳng chứa { id, action, module, code: "RESOURCE_CODE:ACTION" }
+  permissions: Permission[];
+  isLoadingPerms?: boolean;
   onSave: (data: Partial<Role>) => void;
   onDelete: () => void;
   onCancel: () => void;
@@ -28,7 +29,7 @@ interface RoleFormProps {
   isDeleting: boolean;
 }
 
-export function RoleForm({ selectedRole, createMode, permissions, onSave, onDelete, onCancel, isSaving, isDeleting }: RoleFormProps) {
+export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms, onSave, onDelete, onCancel, isSaving, isDeleting }: RoleFormProps) {
   const form = useForm<RoleFormValues>({
     resolver: zodResolver(roleFormSchema) as unknown as Resolver<RoleFormValues>,
     defaultValues: {
@@ -156,9 +157,16 @@ export function RoleForm({ selectedRole, createMode, permissions, onSave, onDele
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {Object.entries(groupedPermissions).map(([resourceName, perms]) => (
-                  <PolicyCardDialog key={resourceName} resourceName={resourceName} perms={perms} form={form} />
-                ))}
+                {isLoadingPerms ? (
+                  // Skeleton khi permissions đang lazy load
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="border rounded-xl bg-muted/30 animate-pulse h-[100px]" />
+                  ))
+                ) : (
+                  Object.entries(groupedPermissions).map(([resourceName, perms]) => (
+                    <PolicyCardDialog key={resourceName} resourceName={resourceName} perms={perms} form={form} />
+                  ))
+                )}
               </div>
             </div>
           </form>

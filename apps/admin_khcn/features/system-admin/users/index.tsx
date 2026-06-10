@@ -3,49 +3,67 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
-import { useUserList, useUserDetail, useSetUserActive, useAssignRoles } from "./hooks/useUserApi";
+import {
+  useUserList,
+  useUserDetail,
+  useSetUserActive,
+  useAssignRoles,
+  usePaginatedUsers,
+} from "./hooks/useUserApi";
 import { useUserUI } from "./hooks/useUserUI";
 import { UserTable } from "./components/UserTable";
 import { CreateUserModal } from "./components/CreateUserModal";
-// Thay thế UserDetailCard bằng UserDetailSheet
 import { UserDetailSheet } from "./components/UserDetailCard";
 
 export function UserClient() {
-  // GIỮ NGUYÊN TOÀN BỘ LOGIC API VÀ STATE CỦA BẠN
   const { data: serverData = [], isLoading, isError } = useUserList();
   const ui = useUserUI(serverData);
   const { data: detailUser, isLoading: isLoadingDetail } = useUserDetail(ui.state.detailId);
   const setActiveMutation = useSetUserActive();
   const assignRolesMutation = useAssignRoles();
 
+  // Phân trang trên dữ liệu đã lọc
+  const { page, setPage, totalPages, pageData, pageSize } = usePaginatedUsers(
+    ui.derived.filteredData
+  );
+
   return (
-    // Đổi layout thành flex-col để Table chiếm 100% chiều ngang màn hình
-    <div className="flex flex-col gap-6">
-      <div className="flex-1 space-y-4">
-
-        {/* Thanh công cụ tìm kiếm và nút Thêm */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-4 rounded-lg border shadow-sm">
-          <Search placeholder="Tìm email, tên đăng nhập, họ tên..." className="w-full sm:w-96" />
-          <Button className="shrink-0 w-full sm:w-auto" onClick={() => ui.setters.setIsCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Thêm người dùng
-          </Button>
-        </div>
-
-        {/* Bảng dữ liệu chiếm full width */}
-        <div className="bg-card rounded-lg border shadow-sm overflow-hidden">
-          <UserTable
-            isLoading={isLoading}
-            isError={isError}
-            data={ui.derived.filteredData}
-            onViewDetail={(item) => ui.setters.setDetailId(item.id)}
-          />
-        </div>
+    <div className="flex flex-col gap-4">
+      {/* Toolbar */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-card p-4 rounded-lg border shadow-sm">
+        <Search
+          placeholder="Tìm email, tên đăng nhập, họ tên..."
+          className="w-full sm:w-80"
+        />
+        <Button
+          className="shrink-0 w-full sm:w-auto"
+          onClick={() => ui.setters.setIsCreateOpen(true)}
+        >
+          <Plus className="mr-2 h-4 w-4" /> Thêm người dùng
+        </Button>
       </div>
 
-      {/* Hiển thị ngăn kéo trượt từ phải sang (Sheet) dựa trên logic state cũ của bạn */}
+      {/* Bảng + phân trang */}
+      <UserTable
+        isLoading={isLoading}
+        isError={isError}
+        data={pageData}
+        total={ui.derived.filteredData.length}
+        page={page}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageChange={setPage}
+        onViewDetail={(item) => ui.setters.setDetailId(item.id)}
+      />
+
+      {/* Sheet chi tiết – policies lazy load bên trong */}
       <UserDetailSheet
         isOpen={ui.state.detailId !== null}
-        user={ui.state.detailId ? (detailUser ?? serverData.find((u) => u.id === ui.state.detailId)) ?? null : null}
+        user={
+          ui.state.detailId
+            ? (detailUser ?? serverData.find((u) => u.id === ui.state.detailId)) ?? null
+            : null
+        }
         isLoading={ui.state.detailId != null && isLoadingDetail}
         onClose={() => ui.setters.setDetailId(null)}
         onSetActive={(id, isActive) => setActiveMutation.mutate({ id, isActive })}

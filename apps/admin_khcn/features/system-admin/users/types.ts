@@ -15,8 +15,8 @@ export interface UserItem {
 /** Chi tiết user (sheet) – có thể có thêm roles, policies, lastLogin từ API */
 export type UserDetail = UserItem & {
   status?: string;
-  roles?: string[] | { name?: string }[];
-  policies?: { description?: string; resource?: string }[];
+  roles?: Array<{ id?: number; code?: string; name?: string } | string>;
+  policies?: { description?: string; resource?: string; action?: string; effect?: string }[];
   lastLogin?: string | number | null;
 };
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -6,19 +6,44 @@ import { roleApi } from "../api";
 import { roleKeys } from "../keys";
 import { Role } from "../types";
 
+const PAGE_SIZE = 10;
+
 export function useRoleLogic() {
   const queryClient = useQueryClient();
 
-  // 1. Danh sách vai trò — GET /roles
+  // 1. Danh sách vai trò — luôn fetch (nhẹ)
   const { data: roles = [], isLoading: isLoadingRoles } = useQuery({
     queryKey: roleKeys.lists(),
     queryFn: () => roleApi.getRoles(),
+    staleTime: 2 * 60 * 1000,
   });
 
-  // 2. Ma trận quyền (Resource -> Permissions) — GET /roles/permissions/matrix
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('search') || "";
+  const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
+  const [createMode, setCreateMode] = useState<boolean>(false);
+  const [page, setPage] = useState(1);
+
+  // Lọc theo tìm kiếm
+  const filteredRoles = useMemo(() => roles.filter((r: Role) =>
+    r.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    r.code.toLowerCase().includes(searchTerm.toLowerCase())
+  ), [roles, searchTerm]);
+
+  // Phân trang
+  const totalPages = Math.max(1, Math.ceil(filteredRoles.length / PAGE_SIZE));
+  const pagedRoles = useMemo(() => {
+    const safePage = page > totalPages ? 1 : page;
+    return filteredRoles.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  }, [filteredRoles, page, totalPages]);
+
+  // 2. Permission matrix — lazy: chỉ fetch khi đang chọn role hoặc createMode
+  const needPerms = !!selectedRoleId || createMode;
   const { data: permissions = [], isLoading: isLoadingPerms } = useQuery({
     queryKey: roleKeys.permissions(),
     queryFn: () => roleApi.getPermissionMatrix(),
+    enabled: needPerms,
+    staleTime: 5 * 60 * 1000,
   });
 
   const saveMutation = useMutation({
@@ -40,16 +65,12 @@ export function useRoleLogic() {
     },
   });
 
-  const searchParams = useSearchParams();
-  const searchTerm = searchParams.get('search') || "";
-  const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
-  const [createMode, setCreateMode] = useState<boolean>(false);
-
-  // Chi tiết vai trò (kèm policies) — GET /roles/:id khi chọn từ list
+  // Chi tiết vai trò (kèm policies) — chỉ fetch khi chọn
   const { data: roleDetail } = useQuery({
     queryKey: [...roleKeys.lists(), "detail", selectedRoleId],
     queryFn: () => roleApi.getRoleById(selectedRoleId!),
     enabled: !!selectedRoleId && !createMode,
+    staleTime: 60 * 1000,
   });
 
   const selectedRole = roleDetail ?? (selectedRoleId ? roles.find((r: Role) => r.id === selectedRoleId) ?? null : null);
@@ -65,23 +86,15 @@ export function useRoleLogic() {
   };
 
   const handleSave = (data: Partial<Role>) => {
-    // Khi đang sửa vai trò có sẵn, bắt buộc gửi id để gateway gọi PUT thay vì POST (tránh lỗi "Mã Role đã tồn tại")
     const payload = !createMode && selectedRole?.id
       ? { ...data, id: selectedRole.id }
       : data;
     saveMutation.mutate(payload);
   };
-  const handleDelete = () => {
-    if (selectedRole) {
-      deleteMutation.mutate(selectedRole.id);
-    }
-  };
 
-  // Lọc vai trò theo tìm kiếm
-  const filteredRoles = roles.filter((r: Role) => 
-    r.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    r.code.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleDelete = () => {
+    if (selectedRole) deleteMutation.mutate(selectedRole.id);
+  };
 
   const handleCancel = () => {
     setCreateMode(false);
@@ -89,9 +102,15 @@ export function useRoleLogic() {
   };
 
   return {
-    roles: filteredRoles,
+    roles: pagedRoles,
+    allRolesCount: filteredRoles.length,
+    page,
+    setPage,
+    totalPages,
+    pageSize: PAGE_SIZE,
     permissions,
-    isLoading: isLoadingRoles || isLoadingPerms,
+    isLoading: isLoadingRoles,
+    isLoadingPerms: isLoadingPerms && needPerms,
     searchTerm,
     selectedRole,
     handleSelectRole,

@@ -1,5 +1,7 @@
+"use client";
+
 import { useState } from "react";
-import { Shield, Key, AlertTriangle, User, CalendarDays } from "lucide-react";
+import { Shield, Key, AlertTriangle, User, CalendarDays, ChevronDown, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -12,7 +14,13 @@ import {
   SheetDescription,
   SheetFooter,
 } from "@/components/ui/sheet";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { EditRolesModal } from "./EditRolesModal";
+import { useUserPolicies } from "../hooks/useUserApi";
 import type { UserDetail } from "../types";
 
 interface UserDetailSheetProps {
@@ -20,10 +28,8 @@ interface UserDetailSheetProps {
   isOpen: boolean;
   isLoading: boolean;
   onClose: () => void;
-  /** Khóa/mở tài khoản: (userId, isActive) */
   onSetActive?: (userId: number, isActive: boolean) => void;
   isSettingActive?: boolean;
-  /** Gán lại vai trò: (userId, roleIds) */
   onAssignRoles?: (payload: { id: number; roleIds: number[] }) => void;
   isAssigningRoles?: boolean;
 }
@@ -39,9 +45,16 @@ export function UserDetailSheet({
   isAssigningRoles,
 }: UserDetailSheetProps) {
   const [editRolesOpen, setEditRolesOpen] = useState(false);
+  const [policiesOpen, setPoliciesOpen] = useState(false);
+
+  // Lazy load policies — chỉ fetch khi user mở collapsible
+  const {
+    data: policiesData,
+    isLoading: isPoliciesLoading,
+  } = useUserPolicies(user?.id ?? null, policiesOpen && isOpen);
+
   const isActive = user ? (user.status === "ACTIVE" || user.isActive !== false) : false;
   const roles = user?.roles ?? [];
-  const policies = user?.policies ?? [];
   const lastLogin = user?.lastLogin;
 
   const handleLockUnlock = () => {
@@ -49,96 +62,159 @@ export function UserDetailSheet({
     onSetActive(user.id, !isActive);
   };
 
+  // Reset khi đóng sheet
+  const handleClose = () => {
+    setPoliciesOpen(false);
+    onClose();
+  };
+
   return (
     <>
-      <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-        {/* Kích thước rộng rãi (max-w-[500px]) để đọc rõ các chính sách PBAC */}
-        <SheetContent className="sm:max-w-[500px] p-0 flex flex-col w-full shadow-2xl">
-          <SheetHeader className="p-6 border-b bg-muted/10 shrink-0">
-            <SheetTitle className="flex items-center gap-2 text-xl">
+      <Sheet open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <SheetContent className="sm:max-w-[460px] p-0 flex flex-col w-full shadow-2xl">
+          <SheetHeader className="p-5 border-b bg-muted/10 shrink-0">
+            <SheetTitle className="flex items-center gap-2 text-lg">
               <Shield className="w-5 h-5 text-primary" />
-              Chi tiết phân quyền User
+              Chi tiết phân quyền
             </SheetTitle>
-            <SheetDescription>
-              Xem và quản lý các vai trò, chính sách áp dụng cho tài khoản này.
+            <SheetDescription className="text-xs">
+              Vai trò và chính sách áp dụng cho tài khoản này.
             </SheetDescription>
           </SheetHeader>
 
           {isLoading ? (
-            <div className="flex-1 p-6 text-center text-muted-foreground flex items-center justify-center">
-              Đang tải thông tin...
+            <div className="flex-1 flex items-center justify-center text-muted-foreground gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" /> Đang tải...
             </div>
           ) : !user ? (
-            <div className="flex-1 p-6 text-center text-muted-foreground flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
               Không tìm thấy thông tin người dùng.
             </div>
           ) : (
-            <ScrollArea className="flex-1 p-6">
-              <div className="space-y-6 pb-6">
+            <ScrollArea className="flex-1">
+              <div className="p-5 space-y-5">
 
-                {/* Thông tin cá nhân */}
-                <div className="flex items-start gap-4">
-                  <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                    <User className="h-6 w-6 text-primary" />
+                {/* Thông tin cơ bản */}
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <User className="h-5 w-5 text-primary" />
                   </div>
-                  <div>
-                    <h4 className="text-xl font-bold">{user.fullName ?? user.email ?? "—"}</h4>
-                    <p className="text-sm text-muted-foreground mb-2">{user.email ?? "—"}</p>
-                    <div className="flex gap-2">
-                      <Badge variant={isActive ? "default" : "destructive"} className="shadow-sm">
-                        {isActive ? "Đang hoạt động" : "Đã khóa"}
-                      </Badge>
-                    </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold truncate">{user.fullName ?? user.email ?? "—"}</h4>
+                    <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                    <Badge
+                      variant={isActive ? "default" : "destructive"}
+                      className="mt-1 text-xs px-2 py-0 h-5"
+                    >
+                      {isActive ? "Hoạt động" : "Đã khóa"}
+                    </Badge>
                   </div>
                 </div>
 
                 <Separator />
 
-                {/* Danh sách Role */}
+                {/* Roles */}
                 <section>
-                  <h5 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-                    <Key className="w-4 h-4 text-muted-foreground" /> Vai trò được gán (Roles)
+                  <h5 className="font-semibold mb-2.5 flex items-center gap-2 text-sm">
+                    <Key className="w-4 h-4 text-muted-foreground" />
+                    Vai trò ({roles.length})
                   </h5>
-                  <div className="flex flex-wrap gap-2">
-                    {roles.length > 0 ? roles.map((role, i) => (
-                      <Badge key={i} variant="secondary" className="px-3 py-1 font-medium border">
-                        {typeof role === "string" ? role : (role as { name?: string }).name ?? String(role)}
-                      </Badge>
-                    )) : <span className="text-sm text-muted-foreground italic">Chưa gán vai trò nào.</span>}
+                  <div className="flex flex-wrap gap-1.5">
+                    {roles.length > 0 ? roles.map((role, i) => {
+                      const name = typeof role === "string" ? role
+                        : (role as { name?: string; code?: string }).name
+                        ?? (role as { code?: string }).code
+                        ?? String(role);
+                      const code = typeof role === "string" ? undefined : (role as { code?: string }).code;
+                      return (
+                        <Badge key={i} variant="secondary" className="px-2.5 py-0.5 font-medium border text-xs flex items-center gap-1">
+                          {name}
+                          {code && code !== name && (
+                            <span className="text-muted-foreground font-mono opacity-70">({code})</span>
+                          )}
+                        </Badge>
+                      );
+                    }) : (
+                      <span className="text-sm text-muted-foreground italic">Chưa gán vai trò nào.</span>
+                    )}
                   </div>
                 </section>
 
-                {/* Danh sách Policy */}
+                <Separator />
+
+                {/* Policies — Collapsible lazy */}
                 <section>
-                  <div className="bg-primary/5 p-4 rounded-lg border border-primary/10">
-                    <h5 className="font-semibold mb-3 flex items-center gap-2 text-sm">
-                      <AlertTriangle className="w-4 h-4 text-amber-500" /> Chính sách hiệu lực (Policies)
-                    </h5>
-                    <ScrollArea className="h-[250px] pr-4">
-                      <ul className="text-sm space-y-3">
-                        {policies.length > 0 ? policies.map((policy, idx) => (
-                          <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0 border-primary/5">
-                            <div className="flex items-start gap-2">
-                              <span className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0" />
-                              <span className="font-medium">{policy.description ?? "—"}</span>
-                            </div>
-                            <span className="text-xs text-muted-foreground pl-3.5">
-                              Tài nguyên: <code className="bg-background px-1.5 py-0.5 rounded border">{policy.resource ?? "—"}</code>
-                            </span>
-                          </li>
-                        )) : (
-                          <li className="text-muted-foreground text-xs italic">
-                            Người dùng chưa có chính sách quyền hạn nào được áp dụng.
-                          </li>
+                  <Collapsible open={policiesOpen} onOpenChange={setPoliciesOpen}>
+                    <CollapsibleTrigger asChild>
+                      <button className="w-full flex items-center justify-between group">
+                        <span className="font-semibold flex items-center gap-2 text-sm">
+                          <AlertTriangle className="w-4 h-4 text-amber-500" />
+                          Chính sách hiệu lực
+                          {policiesData && policiesData.length > 0 && (
+                            <Badge variant="outline" className="font-mono text-xs px-1.5 py-0 h-4">
+                              {policiesData.length}
+                            </Badge>
+                          )}
+                        </span>
+                        <ChevronDown
+                          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${policiesOpen ? "rotate-180" : ""}`}
+                        />
+                      </button>
+                    </CollapsibleTrigger>
+
+                    <CollapsibleContent className="mt-3">
+                      <div className="bg-muted/30 rounded-lg border p-3">
+                        {isPoliciesLoading ? (
+                          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground text-sm">
+                            <Loader2 className="w-4 h-4 animate-spin" /> Đang tải chính sách...
+                          </div>
+                        ) : !policiesData || policiesData.length === 0 ? (
+                          <p className="text-xs text-muted-foreground italic text-center py-4">
+                            Chưa có chính sách nào được áp dụng.
+                          </p>
+                        ) : (
+                          <ScrollArea className="max-h-[220px] pr-2">
+                            <ul className="text-xs space-y-2.5">
+                              {policiesData.map((policy, idx) => (
+                                <li key={idx} className="flex flex-col gap-1 pb-2 border-b last:border-0 last:pb-0">
+                                  <div className="flex items-center gap-2">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                                    <span className="font-medium flex-1 truncate">{policy.description ?? "—"}</span>
+                                    {policy.effect && (
+                                      <Badge
+                                        variant={policy.effect === "ALLOW" ? "default" : "destructive"}
+                                        className="text-[10px] px-1.5 py-0 h-4 shrink-0"
+                                      >
+                                        {policy.effect}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 pl-3.5 text-muted-foreground">
+                                    <span>
+                                      Tài nguyên: <code className="bg-background px-1 py-0.5 rounded border text-[10px]">{policy.resource ?? "—"}</code>
+                                    </span>
+                                    {policy.action && (
+                                      <span>
+                                        Hành động: <code className="bg-background px-1 py-0.5 rounded border text-[10px]">{policy.action}</code>
+                                      </span>
+                                    )}
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          </ScrollArea>
                         )}
-                      </ul>
-                    </ScrollArea>
-                  </div>
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
                 </section>
 
-                <section className="text-xs text-muted-foreground flex items-center gap-2 pt-2">
-                  <CalendarDays className="w-4 h-4" /> Đăng nhập lần cuối: {lastLogin != null ? new Date(lastLogin).toLocaleString() : "Chưa từng đăng nhập"}
-                </section>
+                {/* Last login */}
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <CalendarDays className="w-3.5 h-3.5" />
+                  Đăng nhập lần cuối:{" "}
+                  {lastLogin != null ? new Date(lastLogin).toLocaleString("vi-VN") : "Chưa từng đăng nhập"}
+                </p>
               </div>
             </ScrollArea>
           )}
@@ -146,14 +222,14 @@ export function UserDetailSheet({
           <SheetFooter className="p-4 border-t bg-muted/10 shrink-0 flex gap-2">
             <Button
               variant={isActive ? "outline" : "default"}
-              className={isActive ? "flex-1 text-destructive hover:text-destructive hover:bg-destructive/10" : "flex-1"}
+              className={`flex-1 text-sm ${isActive ? "text-destructive hover:text-destructive hover:bg-destructive/10" : ""}`}
               onClick={handleLockUnlock}
               disabled={!user?.id || isSettingActive}
             >
-              {isSettingActive ? "Đang xử lý..." : isActive ? "Khóa tài khoản" : "Mở khóa tài khoản"}
+              {isSettingActive ? "Đang xử lý..." : isActive ? "Khóa tài khoản" : "Mở khóa"}
             </Button>
             <Button
-              className="flex-1"
+              className="flex-1 text-sm"
               variant="secondary"
               onClick={() => setEditRolesOpen(true)}
               disabled={!user?.id || isAssigningRoles}

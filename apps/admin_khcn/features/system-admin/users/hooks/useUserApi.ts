@@ -1,8 +1,11 @@
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { userApi } from "../api";
 import type { UserCreatePayload, UserItem } from "../types";
 import { USER_KEYS } from "../keys";
+
+const PAGE_SIZE = 10;
 
 export function useUserList() {
   return useQuery({
@@ -12,11 +15,36 @@ export function useUserList() {
   });
 }
 
+/** Phân trang client-side từ danh sách đã lọc */
+export function usePaginatedUsers(filteredData: UserItem[]) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredData.length / PAGE_SIZE));
+  // Reset về trang 1 khi dữ liệu filter thay đổi
+  const safeData = useMemo(() => {
+    if (page > totalPages) setPage(1);
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredData.slice(start, start + PAGE_SIZE);
+  }, [filteredData, page, totalPages]);
+
+  return { page, setPage, totalPages, pageData: safeData, pageSize: PAGE_SIZE };
+}
+
 export function useUserDetail(id: number | null) {
   return useQuery({
     queryKey: USER_KEYS.detail(id!),
     queryFn: () => userApi.getOne(id!),
     enabled: id != null && id > 0,
+    staleTime: 60 * 1000,
+  });
+}
+
+/** Lazy load – chỉ fetch khi enabled=true (user mở tab Policies) */
+export function useUserPolicies(id: number | null, enabled: boolean) {
+  return useQuery({
+    queryKey: USER_KEYS.policies(id!),
+    queryFn: () => userApi.getPolicies(id!),
+    enabled: enabled && id != null && id > 0,
+    staleTime: 2 * 60 * 1000,
   });
 }
 
@@ -65,6 +93,7 @@ export function useAssignRoles() {
     onSuccess: async (res, { id }) => {
       queryClient.invalidateQueries({ queryKey: USER_KEYS.list() });
       queryClient.invalidateQueries({ queryKey: USER_KEYS.detail(id) });
+      queryClient.invalidateQueries({ queryKey: USER_KEYS.policies(id) });
       await queryClient.refetchQueries({ queryKey: USER_KEYS.detail(id) });
       toast.success(res?.message ?? "Đã cập nhật vai trò.");
     },

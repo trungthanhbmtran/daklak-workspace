@@ -17,31 +17,47 @@ function normalizeUser(raw: Record<string, unknown>): UserItem {
 
 function normalizeUserDetail(raw: Record<string, unknown>): UserDetail {
   const base = normalizeUser(raw);
-  // Backend trả role_names (snake_case) hoặc roleNames (camelCase) – luôn đọc và luôn trả roles để UI không bị dính dữ liệu cũ
-  const roleNames = raw.roleNames ?? raw.role_names ?? raw.roles;
-  const rolesArr = Array.isArray(roleNames)
-    ? (roleNames as unknown[]).map((r) => (typeof r === "string" ? r : (r as { name?: string; code?: string })?.name ?? (r as { code?: string })?.code ?? String(r)))
+
+  // Roles: backend trả [{id, code, name}] hoặc [string]
+  const rolesRaw = raw.roles ?? raw.roleNames ?? raw.role_names;
+  const roles: Array<{ id?: number; code?: string; name?: string }> = Array.isArray(rolesRaw)
+    ? (rolesRaw as unknown[]).map((r) => {
+        if (typeof r === "string") return { name: r, code: r };
+        const o = (r as Record<string, unknown>);
+        return {
+          id: o.id != null ? Number(o.id) : undefined,
+          code: o.code != null ? String(o.code) : undefined,
+          name: o.name != null ? String(o.name) : o.code != null ? String(o.code) : String(r),
+        };
+      })
     : [];
+
+  // Policies: backend trả [{description, resource, action, effect}]
   const policiesRaw = raw.policies ?? (raw as Record<string, unknown>).policiesList;
-  const policiesArr: { description?: string; resource?: string }[] = Array.isArray(policiesRaw)
-    ? (policiesRaw as unknown[]).map((p) => {
-      const o = (p != null && typeof p === "object" ? p : {}) as Record<string, unknown>;
-      return {
-        description: String(o.description ?? o.name ?? ""),
-        resource: String(o.resource ?? o.resource_code ?? ""),
-      };
-    })
-    : [];
+  const policies: { description?: string; resource?: string; action?: string; effect?: string }[] =
+    Array.isArray(policiesRaw)
+      ? (policiesRaw as unknown[]).map((p) => {
+          const o = (p != null && typeof p === "object" ? p : {}) as Record<string, unknown>;
+          return {
+            description: String(o.description ?? o.name ?? ""),
+            resource: String(o.resource ?? o.resource_code ?? o.resourceCode ?? ""),
+            action: o.action != null ? String(o.action) : undefined,
+            effect: o.effect != null ? String(o.effect) : "ALLOW",
+          };
+        })
+      : [];
+
   const lastLogin = raw.lastLogin ?? raw.last_login;
   const status = raw.status != null ? String(raw.status) : undefined;
   return {
     ...base,
     ...(status != null && { status }),
-    roles: rolesArr,
-    policies: policiesArr,
+    roles,
+    policies,
     ...(lastLogin != null && { lastLogin: String(lastLogin) }),
   };
 }
+
 
 /** Gateway TransformInterceptor bọc response: { success, data, meta }. */
 function unwrapData<T>(res: any): T {
@@ -66,6 +82,19 @@ export const userApi = {
     const res = await apiClient.get(`/users/${id}`);
     const raw = unwrapData<Record<string, unknown> | null>(res);
     return normalizeUserDetail(raw ?? {});
+  },
+
+  /** Lazy load policies – chỉ gọi khi user mở section policies */
+  getPolicies: async (id: number): Promise<{ description?: string; resource?: string; action?: string; effect?: string }[]> => {
+    const res = await apiClient.get(`/users/${id}/policies`);
+    const data = unwrapData<unknown>(res);
+    const arr = Array.isArray(data) ? data : [];
+    return arr.map((p: any) => ({
+      description: String(p.description ?? p.name ?? ""),
+      resource: String(p.resource ?? p.resource_code ?? ""),
+      action: p.action != null ? String(p.action) : undefined,
+      effect: p.effect != null ? String(p.effect) : "ALLOW",
+    }));
   },
 
   create: async (payload: UserCreatePayload): Promise<UserItem> => {

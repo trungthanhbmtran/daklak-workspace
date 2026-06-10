@@ -90,10 +90,62 @@ export class UserController implements OnModuleInit {
     description: 'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
   })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
-    const data = await firstValueFrom(this.userService.FindOne({ id }));
+    const data: any = await firstValueFrom(this.userService.FindOne({ id }));
+    if (!data) return { success: true, data: null };
+
+    // Chỉ trả roles (nhẹ) – policies load riêng qua /users/:id/policies
+    const rawRoles: any[] = Array.isArray(data.roles) ? data.roles : [];
+    const roles = rawRoles.map((r: any) => ({
+      id: r.id,
+      code: r.code,
+      name: r.name,
+    }));
+
     return {
       success: true,
-      data: sanitizeUserForClient(data),
+      data: {
+        id: data.id,
+        email: data.email,
+        username: data.username,
+        fullName: data.fullName ?? data.full_name,
+        phoneNumber: data.phoneNumber ?? data.phone_number,
+        avatarUrl: data.avatarUrl ?? data.avatar_url,
+        isActive: data.isActive ?? data.is_active ?? true,
+        cccd: data.cccd,
+        employeeCode: data.employeeCode ?? data.employee_code,
+        lastLogin: data.lastLogin ?? data.last_login,
+        roles,
+      },
+    };
+  }
+
+  @Get(':id/policies')
+  @ApiOperation({ summary: 'Chính sách hiệu lực của user (lazy load)' })
+  @ApiResponse({ status: 200, description: 'Danh sách policies từ tất cả roles của user' })
+  async getUserPolicies(@Param('id', ParseIntPipe) id: number) {
+    const data: any = await firstValueFrom(this.userService.FindOne({ id }));
+    if (!data) return { success: true, data: [] };
+
+    const rawRoles: any[] = Array.isArray(data.roles) ? data.roles : [];
+    const policiesMap = new Map<string, any>();
+    for (const r of rawRoles) {
+      const rolePolicies: any[] = Array.isArray(r.policies) ? r.policies : [];
+      for (const p of rolePolicies) {
+        const key = `${p.resourceId ?? p.resource_id}-${p.action}`;
+        if (!policiesMap.has(key)) {
+          policiesMap.set(key, {
+            description: `${p.action} trên ${p.resource?.name ?? p.resource?.code ?? p.resourceId ?? '—'}`,
+            resource: p.resource?.code ?? p.resourceCode ?? p.resource_code ?? String(p.resourceId ?? '—'),
+            action: p.action,
+            effect: p.effect ?? 'ALLOW',
+          });
+        }
+      }
+    }
+
+    return {
+      success: true,
+      data: Array.from(policiesMap.values()),
     };
   }
 

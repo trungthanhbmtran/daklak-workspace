@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   KeyRound, ArrowRight, Plus, Trash2, Loader2,
-  ShieldAlert, Database, Component, Check
+  ShieldAlert, Database, Component, Check, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +36,11 @@ export function ResourceClient() {
   const {
     resources: filteredResources,
     allResources,
+    totalResources,
+    page,
+    setPage,
+    totalPages,
+    pageSize,
     isLoading,
     isError,
     searchTerm,
@@ -183,6 +188,24 @@ export function ResourceClient() {
             </div>
           )}
         </div>
+
+        {/* Phân trang */}
+        {totalResources > pageSize && (
+          <div className="flex items-center justify-between px-3 py-2 border-t bg-muted/10 shrink-0">
+            <span className="text-[10px] text-muted-foreground">
+              {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, totalResources)} / {totalResources}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="icon" className="h-6 w-6" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              <span className="text-[10px] font-medium px-1">{page}/{totalPages}</span>
+              <Button variant="ghost" size="icon" className="h-6 w-6" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* ========================================== */}
