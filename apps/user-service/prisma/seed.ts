@@ -1,10 +1,14 @@
 import * as bcrypt from 'bcrypt';
-import type { PrismaClient as PrismaClientType } from '@generated/prisma/client';
-let PrismaClient: typeof PrismaClientType;
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+let PrismaClient: any;
 try {
   PrismaClient = require('@generated/prisma/client').PrismaClient;
 } catch (e) {
-  PrismaClient = require('../generated/prisma/client').PrismaClient;
+  try {
+    PrismaClient = require('../generated/prisma/client').PrismaClient;
+  } catch (e2) {
+    PrismaClient = require('@prisma/client').PrismaClient;
+  }
 }
 import * as dotenv from 'dotenv';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
@@ -77,8 +81,7 @@ async function main() {
     { code: 'REPORT', name: 'Báo cáo', serviceCode: 'WORKFLOW_SERVICE' },
   ];
 
-  const resources: Record<string, { id: number; code: string; name: string }> =
-    {};
+  const resources: Record<string, { id: number; code: string; name: string; serviceCode?: string | null }> = {};
   for (const res of resourcesData) {
     const created = await prisma.resource.upsert({
       where: { code: res.code },
@@ -108,22 +111,17 @@ async function main() {
     'REJECT',
     'PUBLISH'
   ];
-  const allPermissions: { id: number }[] = [];
-  const allPoliciesData: { resourceId: number; action: string; effect: string }[] = [];
-
   for (const res of Object.values(resources)) {
     for (const action of actions) {
       // Logic constraint: SYSTEM only has VIEW/MANAGE
       if (res.code === 'SYSTEM' && !['VIEW', 'MANAGE'].includes(action))
         continue;
 
-      const perm = await prisma.permission.upsert({
+      await prisma.permission.upsert({
         where: { action_resourceId: { action, resourceId: res.id } },
         update: {},
         create: { action, resourceId: res.id },
       });
-      allPermissions.push({ id: perm.id });
-      allPoliciesData.push({ resourceId: res.id, action, effect: 'ALLOW' });
     }
   }
 
@@ -2231,7 +2229,6 @@ async function main() {
     create: {
       code: 'SUPER_ADMIN',
       name: 'Super Administrator',
-      policies: { create: allPoliciesData },
     },
   });
 
@@ -2243,7 +2240,6 @@ async function main() {
     create: {
       code: 'ADMIN',
       name: 'Quản trị viên hệ thống',
-      policies: { create: allPoliciesData },
     },
   });
 
@@ -2289,7 +2285,7 @@ async function main() {
           resourceId: resId,
           action: action === 'REJECT' ? 'UPDATE' : action,
           effect: 'ALLOW',
-          conditions: conditionString ? { expression: conditionString } : {}
+          conditions: conditionString ? { expression: conditionString } : null
         });
       }
     }
@@ -2339,11 +2335,11 @@ async function main() {
           conditionString = 'currentUserId IN resource.assigneeIds'; // Người được giao / Cây nhiệm vụ
         }
 
-        rolePoliciesData.push({ 
-          resourceId: resId, 
-          action, 
+        rolePoliciesData.push({
+          resourceId: resId,
+          action,
           effect: 'ALLOW',
-          conditions: conditionString ? { expression: conditionString } : {}
+          conditions: conditionString ? { expression: conditionString } : null
         });
       }
     }
@@ -4859,20 +4855,20 @@ async function main() {
 
   console.log('🔹 Seeding PBAC Roles & Policies...');
   await prisma.policy.deleteMany({}); // Clear existing policies to avoid duplicates on re-run
-  
+
   const getPolicies = async (specs: string[]) => {
     const allResources = await prisma.resource.findMany();
     const result: { id: number }[] = [];
-    
+
     for (const spec of specs) {
       if (spec === 'ALL') {
-         for (const res of allResources) {
-            const pol = await prisma.policy.create({
-               data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
-            });
-            result.push({ id: pol.id });
-         }
-         return result;
+        for (const res of allResources) {
+          const pol = await prisma.policy.create({
+            data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
+          });
+          result.push({ id: pol.id });
+        }
+        return result;
       }
 
       if (spec.endsWith('.*')) {
@@ -4880,7 +4876,7 @@ async function main() {
         const res = allResources.find(r => r.code === resCode);
         if (res) {
           const pol = await prisma.policy.create({
-             data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
+            data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
           });
           result.push({ id: pol.id });
         }
@@ -4890,12 +4886,12 @@ async function main() {
         if (res) {
           const conditionString = (extendedPbacPolicies as any)[spec] || (pbacPolicies as any)[spec];
           const pol = await prisma.policy.create({
-             data: { 
-                 resourceId: res.id, 
-                 action: actCode, 
-                 effect: 'ALLOW', 
-                 conditions: conditionString ? { expression: conditionString } : {} 
-             }
+            data: {
+              resourceId: res.id,
+              action: actCode,
+              effect: 'ALLOW',
+              conditions: conditionString ? { expression: conditionString } : null
+            }
           });
           result.push({ id: pol.id });
         }
