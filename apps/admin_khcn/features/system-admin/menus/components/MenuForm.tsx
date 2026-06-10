@@ -218,7 +218,7 @@ function MenuFormInner(props: any) {
   return (
     <Card className="flex-1 w-full h-full shadow-none border-border rounded-xl overflow-hidden flex flex-col bg-background">
       {/* HEADER */}
-      <CardHeader className="p-5 border-b bg-gradient-to-r from-background to-muted/20 shrink-0 flex-row items-center justify-between">
+      <CardHeader className="p-5 border-b bg-linear-to-r from-background to-muted/20 shrink-0 flex-row items-center justify-between">
         <CardTitle className="text-base font-bold flex items-center gap-2">
           {isCreate
             ? <><Plus className="h-4 w-4 text-primary" /> Thêm Menu {parentMenu ? `con vào "${parentMenu.name}"` : "gốc"}</>
