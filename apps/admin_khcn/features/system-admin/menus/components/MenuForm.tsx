@@ -12,7 +12,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -30,18 +29,6 @@ import { renderIcon } from "../utils";
 import type { ViewState } from "..";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
 
-/** Fallback khi danh mục MICROSERVICE/SERVICE chưa load – khớp seed (user-service prisma/seed) */
-const DEFAULT_SERVICE_LIST_FALLBACK: { code: string; name: string }[] = [
-  { code: "CORE_SERVICE", name: "Core Service (Tổng quan, Cấu hình)" },
-  { code: "USER_SERVICE", name: "User Service (Xác thực, PBAC, Menu)" },
-  { code: "CONTENT_SERVICE", name: "Content Service (Nội dung Cổng)" },
-  { code: "HRM_SERVICE", name: "HRM Service (Nhân sự)" },
-  { code: "NOTIFICATION_SERVICE", name: "Notification Service (Thông báo, Email)" },
-  { code: "DOCUMENT_SERVICE", name: "Document Service (Văn bản)" },
-  { code: "POSTS_SERVICE", name: "Posts Service (Bài viết, Tin tức)" },
-  { code: "STORAGE_SERVICE", name: "Storage Service (Kho lưu trữ)" },
-  { code: "API_GATEWAY", name: "API Gateway" },
-];
 const EMPTY_PERMISSION_IDS: number[] = [];
 
 // Import Custom Hooks
@@ -59,9 +46,9 @@ interface MenuFormProps {
 }
 
 export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProps) {
-  // Chỉ fetch permissions và serviceOptions khi user đang tạo/sửa menu (không phải idle)
+  // Chỉ fetch permissions khi user đang tạo/sửa menu (không phải idle)
   const needData = viewState.mode !== "idle";
-  const { serviceOptions, permissions, isLoadingPermissions, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(needData, needData);
+  const { permissions, isLoadingPermissions, saveMenu, isSaving, deleteMenu, isDeleting } = useMenuApi(needData, false);
   const { getParentPathPrefix } = useFormLogic(menus);
 
   const { mode, selectedId, parentId } = viewState;
@@ -89,7 +76,6 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
       key={formKey}
       menus={menus}
       viewState={viewState}
-      serviceOptions={serviceOptions}
       availablePermissions={permissions}
       isLoadingPermissions={isLoadingPermissions}
       getParentPathPrefix={getParentPathPrefix}
@@ -108,7 +94,7 @@ export function MenuForm({ menus, viewState, onSuccess, onCancel }: MenuFormProp
 // ============================================================================
 function MenuFormInner(props: any) {
   const {
-    menus, viewState, serviceOptions, availablePermissions, isLoadingPermissions,
+    menus, viewState, availablePermissions, isLoadingPermissions,
     getParentPathPrefix, saveMenu, isSaving, deleteMenu, isDeleting, onSuccess, onCancel
   } = props;
 
@@ -116,8 +102,6 @@ function MenuFormInner(props: any) {
   const isCreate = mode.startsWith("create");
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-
-  const serviceList = serviceOptions?.length > 0 ? serviceOptions : DEFAULT_SERVICE_LIST_FALLBACK;
 
   // Lấy data menu hiện tại và menu cha — parentId lấy từ viewState (khi Thêm con từ list)
   const selectedMenu = !isCreate ? menus.find((m: MenuItem) => m.id === selectedId) : null;
@@ -157,9 +141,8 @@ function MenuFormInner(props: any) {
         icon: isRootMenu ? "LayoutDashboard" : "FileText",
         description: "",
         iconColor: "",
-        // Node con: tự kế thừa service/portal từ cha, không cần user chọn
-        service: parentMenu?.service ?? (isRootMenu ? (serviceList[0]?.code ?? "CORE_SERVICE") : ""),
-        portal: parentMenu?.portal ?? "ADMIN_PORTAL",
+        service: "",
+        portal: "ADMIN_PORTAL",
         sort: autoSort ?? 1,
         active: 1,
         requiredPermissionIds: EMPTY_PERMISSION_IDS,
@@ -171,7 +154,7 @@ function MenuFormInner(props: any) {
         icon: selectedMenu?.icon ?? "Circle",
         description: selectedMenu?.description ?? "",
         iconColor: selectedMenu?.iconColor ?? "",
-        service: selectedMenu?.service ?? (isRootMenu ? (serviceList[0]?.code ?? "CORE_SERVICE") : ""),
+        service: selectedMenu?.service ?? "",
         portal: selectedMenu?.portal ?? "ADMIN_PORTAL",
         sort: selectedMenu?.sort ?? 1,
         active: selectedMenu?.active ?? 1,
@@ -179,7 +162,7 @@ function MenuFormInner(props: any) {
       };
 
     return base;
-  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, serviceList, isRootMenu, autoSort]);
+  }, [selectedMenu, isCreate, parentPathPrefix, parentMenu, isRootMenu, autoSort]);
 
   const form = useForm<MenuFormValues>({
     resolver: zodResolver(menuFormSchema) as unknown as Resolver<MenuFormValues>,
@@ -399,33 +382,7 @@ function MenuFormInner(props: any) {
                   )} />
                 </div>
 
-                {/* DỊCH VỤ — chỉ hiện với node gốc; node con tự kế thừa */}
-                {isRootMenu ? (
-                  <FormField control={form.control} name="service" render={({ field }) => (
-                    <FormItem className="md:col-span-2">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Dịch vụ (Service) *</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl><SelectTrigger className="h-10 bg-background"><SelectValue placeholder="Chọn dịch vụ..." /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          {serviceList.map((s: { code: string, name: string }) => <SelectItem key={s.code} value={s.code}>{s.name}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <p className="text-[10px] text-muted-foreground">Xác định menu này thuộc phân hệ nào (dùng bởi sidebar và Hub).</p>
-                    </FormItem>
-                  )} />
-                ) : (
-                  // Node con: hiển thị service kế thừa dưới dạng readonly badge
-                  parentMenu?.service && (
-                    <div className="md:col-span-2 flex flex-col gap-1">
-                      <span className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Dịch vụ (kế thừa)</span>
-                      <div className="flex items-center gap-2 h-10 px-3 rounded-lg border border-dashed border-border bg-muted/30">
-                        <span className="text-xs text-muted-foreground">↳ Kế thừa từ</span>
-                        <Badge variant="secondary" className="text-[10px] font-mono font-bold">{parentMenu.service}</Badge>
-                        <span className="text-[11px] text-muted-foreground">{serviceList.find((s: any) => s.code === parentMenu.service)?.name ?? ""}</span>
-                      </div>
-                    </div>
-                  )
-                )}
+                {/* DỊCH VỤ — Hướng A: bỏ hoàn toàn, không cần khai báo */}
 
                 {/* MÔ TẢ Hub Card — chỉ hiện với node gốc (hiển trên Hub) */}
                 {isRootMenu && (

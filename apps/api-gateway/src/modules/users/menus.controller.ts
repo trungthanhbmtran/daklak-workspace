@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -119,8 +119,8 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Danh s�ch menu (flat) cho trang qu?n l� menu' })
-  @ApiResponse({ status: 200, description: 'M?ng menu ph?ng' })
+  @ApiOperation({ summary: 'Danh sách menu (flat) cho trang quản lý menu' })
+  @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
   async getAll(@Query('app') app?: string) {
     const res = (await firstValueFrom(
       this.menuService.GetAll({ app: app || 'ADMIN_PORTAL' }),
@@ -130,14 +130,14 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get('me')
-  @ApiOperation({ summary: 'Menu sidebar theo user dang nh?p v� ?ng d?ng' })
+  @ApiOperation({ summary: 'Menu sidebar theo user đăng nhập và ứng dụng' })
   @ApiQuery({
     name: 'app',
     required: false,
     description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
     example: 'ADMIN_PORTAL',
   })
-  @ApiResponse({ status: 200, description: 'C�y menu (ch? m?c user c� quy?n)' })
+  @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
@@ -159,15 +159,15 @@ export class MenusController implements OnModuleInit {
       response.meta.currentUser = sanitizeUserForClient(req.user);
 
       // --- BFF Logic: Tính toán cấu trúc hiển thị cho Frontend ---
+      // Hướng A: không phụ thuộc vào service field nữa — dùng route + code
       const branches = getRealBranches(response.items ?? []);
 
+      // hubApps: filter theo route thay vì service (node gốc phải có route)
       response.hubApps = branches
-        .filter((b: any) => (b.service ?? '').trim() !== '')
+        .filter((b: any) => (b.route ?? '').trim() !== '')
         .map((b: any) => {
-          const svcCode = (b.service ?? '').trim();
-          const basePath =
-            (b.route ?? '').trim() ||
-            `/services/${svcCode.toLowerCase().replace('_service', '')}`;
+          const basePath = (b.route ?? '').trim();
+          const menuCode = (b.code ?? '').trim();
 
           let href = basePath;
           if (b.children && b.children.length > 0) {
@@ -183,9 +183,9 @@ export class MenusController implements OnModuleInit {
           href = href.replace(/([^:])\/\//g, '$1/');
 
           return {
-            id: svcCode,
-            title: (b.name ?? '').trim() || svcCode,
-            desc: (b.description ?? '').trim() || 'Ph�n h? nghi?p v?',
+            id: menuCode,            // dùng menu.code thay vì service code
+            title: (b.name ?? '').trim() || menuCode,
+            desc: (b.description ?? '').trim() || 'Phân hệ nghiệp vụ',
             href,
             icon: b.icon ?? '',
             iconColor: (b.iconColor ?? '').trim() || null,
@@ -193,16 +193,17 @@ export class MenusController implements OnModuleInit {
           };
         });
 
+      // sidebarMenus: dùng menu.code làm serviceCode (không cần service field)
       response.sidebarMenus = branches.map((b: any) => {
-        const svcCode = (b.service ?? '').trim();
+        const menuCode = (b.code ?? '').trim();
         const basePath = (b.route ?? '').trim();
         const items = flattenMenus(b.children ?? [], basePath).sort(
           (a: any, b: any) => a.order - b.order,
         );
 
         return {
-          serviceCode: svcCode,
-          serviceName: (b.name ?? '').trim() || svcCode,
+          serviceCode: menuCode,     // menu.code làm định danh sidebar
+          serviceName: (b.name ?? '').trim() || menuCode,
           serviceIcon: b.icon ?? '',
           basePath,
           items,
@@ -223,9 +224,9 @@ export class MenusController implements OnModuleInit {
       order: body.sort,
       description: body.description,
       iconColor: body.iconColor,
-      service: body.service,
-      application: body.portal,
-      target: body.target,
+      service: body.service ?? '',
+      application: body.portal ?? 'ADMIN_PORTAL',
+      target: body.target ?? 'SELF',
       parentId: body.parentId ?? 0,
       requiredPermissionIds: Array.isArray(body.requiredPermissionIds)
         ? body.requiredPermissionIds.map(Number).filter(Boolean)
@@ -235,9 +236,9 @@ export class MenusController implements OnModuleInit {
   }
 
   @Post()
-  @ApiOperation({ summary: 'T?o menu m?i (PBAC: quy?n g�n v?i Permission)' })
-  @ApiBody({ description: 'Th�ng tin menu' })
-  @ApiResponse({ status: 201, description: 'Menu d� t?o' })
+  @ApiOperation({ summary: 'Tạo menu mới (PBAC: quyền gắn với Permission)' })
+  @ApiBody({ description: 'Thông tin menu' })
+  @ApiResponse({ status: 201, description: 'Menu đã tạo' })
   async create(@Body() body: MenuDto) {
     try {
       const payload = this.toCreatePayload(body);
@@ -246,7 +247,7 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'L?i t?o menu';
+      const message = err?.message ?? err?.details ?? 'Lỗi tạo menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
@@ -264,9 +265,9 @@ export class MenusController implements OnModuleInit {
       order: body.sort,
       description: body.description,
       iconColor: body.iconColor,
-      service: body.service,
-      application: body.portal,
-      target: body.target,
+      service: body.service ?? '',
+      application: body.portal ?? 'ADMIN_PORTAL',
+      target: body.target ?? 'SELF',
     };
     if (body.parentId !== undefined) payload.parentId = body.parentId ?? 0;
     if (body.requiredPermissionIds !== undefined) {
@@ -280,8 +281,8 @@ export class MenusController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t menu (PBAC: quy?n g�n v?i Permission)' })
-  @ApiResponse({ status: 200, description: 'Menu d� c?p nh?t' })
+  @ApiOperation({ summary: 'Cập nhật menu (PBAC: quyền gắn với Permission)' })
+  @ApiResponse({ status: 200, description: 'Menu đã cập nhật' })
   async update(@Param('id', ParseIntPipe) id: number, @Body() body: MenuDto) {
     try {
       const payload = this.toUpdatePayload(id, body);
@@ -290,7 +291,7 @@ export class MenusController implements OnModuleInit {
       )) as any;
       return toFrontendItem(res?.menu ?? {});
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'L?i c?p nh?t menu';
+      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật menu';
       throw new BadRequestException(
         typeof message === 'string' ? message : message,
       );
@@ -298,14 +299,13 @@ export class MenusController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'X�a menu' })
-  @ApiResponse({ status: 200, description: '�� x�a' })
+  @ApiOperation({ summary: 'Xóa menu' })
+  @ApiResponse({ status: 200, description: 'Đã xóa' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(this.menuService.Delete({ id }))) as any;
     return {
       success: res?.success ?? true,
-      message: res?.message ?? '�� x�a menu',
+      message: res?.message ?? 'Đã xóa menu',
     };
   }
 }
-
