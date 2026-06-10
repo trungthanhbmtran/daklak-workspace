@@ -34,6 +34,7 @@ const EMPTY_PERMISSION_IDS: number[] = [];
 // Import Custom Hooks
 import { useMenuApi } from "../hooks/useMenuApi";
 import { useFormLogic } from "../hooks/useFormLogic";
+import { Badge } from "@/components/ui/badge";
 
 // ============================================================================
 // 1. COMPONENT CHÍNH: MENU FORM
@@ -525,9 +526,8 @@ function PermissionCardDialog({ resourceName, perms, form }: { resourceName: str
                 return (
                   <div
                     key={perm.id}
-                    className={`flex flex-row items-center space-x-2.5 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 shadow-sm ${
-                      isChecked ? "bg-primary/5 border-primary/30" : ""
-                    }`}
+                    className={`flex flex-row items-center space-x-2.5 p-2.5 rounded-lg border bg-background transition-colors cursor-pointer hover:bg-muted/80 shadow-sm ${isChecked ? "bg-primary/5 border-primary/30" : ""
+                      }`}
                     onClick={() => handleToggle(perm.id, !isChecked)}
                   >
                     <Checkbox
