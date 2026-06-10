@@ -4806,6 +4806,57 @@ async function main() {
     create: { key: 'PBAC_POLICIES', value: JSON.stringify(pbacPolicies), description: 'PBAC Policies' }
   });
 
+  // ==========================================================
+  // MỞ RỘNG POLICY PBAC CHO HỆ THỐNG LIÊN THÔNG & HRM
+  // ==========================================================
+  console.log('🔹 Mở rộng Policy PBAC cho hệ thống liên thông & HRM...');
+
+  const extendedPbacPolicies = {
+    ...pbacPolicies,
+    // Document Incoming
+    'DOC_INCOMING.PROCESS': "ALLOW IF currentUserId IN resource.processingUsers OR currentDepartmentId == resource.processingDepartmentId",
+    'DOC_INCOMING.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId",
+    'DOC_OUTGOING.ISSUE': "ALLOW IF user.positionLevel >= 2",
+
+    // Plan
+    'PLAN.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR resource.visibility == 'PUBLIC'",
+    'PLAN.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.collaborators",
+    'PLAN.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
+    'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
+
+    // Task
+    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode OR resource.ownerId == currentUserId",
+    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+    'TASK.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.COMPLETE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+
+    // Objective
+    'OBJECTIVE.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode",
+    'OBJECTIVE.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
+    'OBJECTIVE.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
+
+    // KPI
+    'KPI.VIEW': "ALLOW IF resource.ownerId == currentUserId OR resource.managerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+    'KPI.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
+    'KPI.EVALUATE': "ALLOW IF currentUserId == resource.managerId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+
+    // HRM
+    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR targetUser.unitCode STARTSWITH user.unitCode OR user.role == 'ADMIN'",
+    'HRM_EMPLOYEE.UPDATE': "ALLOW IF resource.id == currentUserId OR user.role == 'ADMIN'",
+
+    // Report
+    'REPORT.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR user.isOrganizationLeader == true",
+    'REPORT.EXPORT': "ALLOW IF user.isOrganizationLeader == true"
+  };
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_POLICIES_EXTENDED' },
+    update: { value: JSON.stringify(extendedPbacPolicies) },
+    create: { key: 'PBAC_POLICIES_EXTENDED', value: JSON.stringify(extendedPbacPolicies), description: 'Extended PBAC Policies' }
+  });
+
+
   console.log('🔹 Seeding PBAC Roles & Policies...');
   await prisma.policy.deleteMany({}); // Clear existing policies to avoid duplicates on re-run
   
@@ -5047,55 +5098,7 @@ async function main() {
   }
   console.log('✅ Hoàn tất Seed PBAC Engine.');
 
-  // ==========================================================
-  // MỞ RỘNG POLICY PBAC CHO HỆ THỐNG LIÊN THÔNG & HRM
-  // ==========================================================
-  console.log('🔹 Mở rộng Policy PBAC cho hệ thống liên thông & HRM...');
 
-  const extendedPbacPolicies = {
-    ...pbacPolicies,
-    // Document Incoming
-    'DOC_INCOMING.PROCESS': "ALLOW IF currentUserId IN resource.processingUsers OR currentDepartmentId == resource.processingDepartmentId",
-    'DOC_INCOMING.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId",
-    'DOC_OUTGOING.ISSUE': "ALLOW IF user.positionLevel >= 2",
-
-    // Plan
-    'PLAN.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR resource.visibility == 'PUBLIC'",
-    'PLAN.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.collaborators",
-    'PLAN.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
-    'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
-
-    // Task
-    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode OR resource.ownerId == currentUserId",
-    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
-    'TASK.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
-    'TASK.COMPLETE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
-    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
-
-    // Objective
-    'OBJECTIVE.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode",
-    'OBJECTIVE.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
-    'OBJECTIVE.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
-
-    // KPI
-    'KPI.VIEW': "ALLOW IF resource.ownerId == currentUserId OR resource.managerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
-    'KPI.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
-    'KPI.EVALUATE': "ALLOW IF currentUserId == resource.managerId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
-
-    // HRM
-    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR targetUser.unitCode STARTSWITH user.unitCode OR user.role == 'ADMIN'",
-    'HRM_EMPLOYEE.UPDATE': "ALLOW IF resource.id == currentUserId OR user.role == 'ADMIN'",
-
-    // Report
-    'REPORT.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR user.isOrganizationLeader == true",
-    'REPORT.EXPORT': "ALLOW IF user.isOrganizationLeader == true"
-  };
-
-  await prisma.systemConfig.upsert({
-    where: { key: 'PBAC_POLICIES_EXTENDED' },
-    update: { value: JSON.stringify(extendedPbacPolicies) },
-    create: { key: 'PBAC_POLICIES_EXTENDED', value: JSON.stringify(extendedPbacPolicies), description: 'Extended PBAC Policies' }
-  });
 
 
 
