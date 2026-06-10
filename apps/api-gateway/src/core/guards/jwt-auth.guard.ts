@@ -3,31 +3,13 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
-  Inject,
 } from '@nestjs/common';
 import { Request } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { ClientGrpc } from '@nestjs/microservices';
-import { MICROSERVICES } from '../constants/services';
-import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  private userService: any;
-
-  constructor(
-    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: ClientGrpc,
-  ) { }
-
-  onModuleInit() {
-    this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-  }
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (!this.userService) {
-      this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
-    }
-
     const request = context.switchToHttp().getRequest<Request>();
     let token: string | undefined;
 
@@ -57,27 +39,14 @@ export class JwtAuthGuard implements CanActivate {
 
       const decoded = jwt.verify(token, secret) as any;
 
-      // Call User Service to fetch permissions dynamically
-      let userRes: any = null;
-      const userId = parseInt(decoded.sub, 10);
-      try {
-        userRes = await firstValueFrom(
-          this.userService.FindOne({ id: userId })
-        );
-      } catch (err) {
-        console.error('Failed to fetch user permissions from user-service:', err.message);
-      }
-
-
-      // Gắn thông tin user vào request
+      // Chỉ lưu userId từ JWT – mỗi controller tự gọi FindOne khi cần
       (request as any).user = {
-        id: userId,
-        employeeId: userRes?.employeeId,
+        id: parseInt(decoded.sub, 10),
       };
 
       return true;
-    } catch (error) {
-      console.error('JWT Verification Error:', error.message);
+    } catch (error: any) {
+      console.error('JWT Verification Error:', error?.message);
       throw new UnauthorizedException('Token không hợp lệ hoặc đã hết hạn');
     }
   }

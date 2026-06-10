@@ -50,14 +50,10 @@ export const organizationApi = {
   getTree: (): Promise<{ items: OrganizationUnitNode[]; meta: any }> =>
     apiClient
       .get("/organizations/tree")
-      .then((r: any) => {
-        const res = r?.data ?? r;
-        const list = Array.isArray(res?.data) ? res.data : [];
-        return {
-          items: list.map(normalizeUnitNode),
-          meta: res?.meta ?? { allowedActions: [] }
-        };
-      }),
+      .then((r: any) => ({
+        items: (r.data ?? []).map(normalizeUnitNode),
+        meta: r.meta ?? { allowedActions: [] },
+      })),
 
   getOne: (id: number) =>
     apiClient.get(`/organizations/${id}`).then(r => unwrapData<any>(r)),

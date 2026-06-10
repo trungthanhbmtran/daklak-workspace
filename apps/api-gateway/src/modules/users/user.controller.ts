@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -51,19 +51,26 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách user' })
   @ApiResponse({
     status: 200,
-    description:
-      'Máº£ng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
+    description: 'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
   })
   async list(@Req() req: any) {
-    const user = req?.user;
-    const isAdmin = Array.isArray(user?.roles) && user.roles.some((r: any) => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN');
+    const userId = req?.user?.id;
+
+    // Gọi FindOne để lấy roles và unitCode của người đang đăng nhập
+    const userInfo: any = userId
+      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(() => null)
+      : null;
+
+    const isAdmin: boolean = !!(userInfo?.roles?.some(
+      (r: any) => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN',
+    ));
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
-      if (!user?.unitCode) {
+      if (!userInfo?.unitCode) {
         return { success: true, data: [], meta: { total: 0 } };
       }
-      unitCodeStartsWith = user.unitCode;
+      unitCodeStartsWith = userInfo!.unitCode;
     }
 
     const response = (await firstValueFrom(
@@ -80,8 +87,7 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Chi tiết user theo ID' })
   @ApiResponse({
     status: 200,
-    description:
-      'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
+    description: 'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
   })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
     const data = await firstValueFrom(this.userService.FindOne({ id }));
@@ -211,9 +217,3 @@ export class UserController implements OnModuleInit {
     throw new NotAcceptableException('UserService mới chưa hỗ trợ DeleteUser.');
   }
 }
-
-
-
-
-
-

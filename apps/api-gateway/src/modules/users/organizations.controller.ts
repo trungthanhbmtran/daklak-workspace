@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -33,15 +33,18 @@ import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.g
 @ApiBearerAuth('JWT-auth')
 export class OrganizationsController implements OnModuleInit {
   private orgService: any;
+  private userService: any;
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
+    @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
   ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(
       MICROSERVICES.ORGANIZATION.SERVICE,
     );
+    this.userService = this.userClient.getService(MICROSERVICES.USER.SERVICE);
   }
 
   @Post()
@@ -111,18 +114,18 @@ export class OrganizationsController implements OnModuleInit {
     const res = (await firstValueFrom(this.orgService.GetFullTree({}))) as any;
     let nodes = res.nodes || [];
 
-    const user = request?.user;
-    const checkRole = (roleCode: string) => {
-      if (Array.isArray(user?.roles)) {
-        return user.roles.some((r: any) => r === roleCode || r?.code === roleCode);
-      }
-      return false;
-    };
+    // Gọi FindOne để lấy roles và unitCode của người đang đăng nhập
+    const userId = request?.user?.id;
+    const userInfo: any = userId
+      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(() => null)
+      : null;
 
-    const isAdmin = checkRole('SUPER_ADMIN') || checkRole('ADMIN');
+    const isAdmin: boolean = !!(userInfo?.roles?.some(
+      (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN',
+    ));
 
     if (!isAdmin) {
-      if (!user?.unitCode) {
+      if (!userInfo?.unitCode) {
         nodes = [];
       } else {
         const findNodeByCodePrefix = (treeNodes: any[], prefix: string): any | null => {
@@ -136,7 +139,7 @@ export class OrganizationsController implements OnModuleInit {
           return null;
         };
 
-        const userUnitNode = findNodeByCodePrefix(nodes, user.unitCode);
+        const userUnitNode = findNodeByCodePrefix(nodes, userInfo!.unitCode);
         nodes = userUnitNode ? [userUnitNode] : [];
       }
     }
@@ -149,9 +152,7 @@ export class OrganizationsController implements OnModuleInit {
     return {
       success: true,
       data: nodes,
-      meta: {
-        allowedActions,
-      },
+      meta: { allowedActions },
     };
   }
 
@@ -286,7 +287,7 @@ export class OrganizationsController implements OnModuleInit {
     } catch (err: any) {
       const message = err?.message ?? err?.details ?? 'Lỗi xóa đơn vị';
       if (err?.code === 5) throw new NotFoundException(message);
-      if (err?.code === 9) throw new ConflictException(message); // FAILED_PRECONDITION
+      if (err?.code === 9) throw new ConflictException(message);
       throw new BadRequestException(message);
     }
   }
@@ -406,8 +407,8 @@ export class PublicOrganizationsController implements OnModuleInit {
       const nodes = res.nodes || [];
       const flatList = this.flattenTree(nodes);
       return { success: true, data: flatList };
-    } catch (error) {
-      return { success: false, data: [], message: error.message };
+    } catch (error: any) {
+      return { success: false, data: [], message: error?.message };
     }
   }
 
