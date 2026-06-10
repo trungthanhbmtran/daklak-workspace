@@ -10,14 +10,17 @@ export function ServiceLayout({ children }: ServiceLayoutProps) {
   return (
     <SidebarProvider>
 
-      {/* 2. Gắn Sidebar Component vào */}
+      {/* Sidebar cố định bên trái */}
       <AppSidebar />
 
+      {/* Vùng bên phải: header sticky + content scroll */}
       <SidebarInset>
 
+        {/* Header cố định — không scroll */}
         <ServiceHeader />
 
-        <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:p-8 bg-muted/20">
+        {/* Content area — scroll nội bộ, không scroll body */}
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-6 md:p-8 bg-muted/20 overflow-y-auto min-h-0">
           {children}
         </div>
 

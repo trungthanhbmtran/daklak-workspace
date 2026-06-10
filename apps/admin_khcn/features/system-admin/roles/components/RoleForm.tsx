@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, ChevronRight, Settings2 } from "lucide-react";
-import { Resolver, useForm, useFieldArray } from "react-hook-form";
+import { Resolver, useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
@@ -201,12 +201,52 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
 // ============================================================================
 function PolicyCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
   const [isOpen, setIsOpen] = useState(false);
-  const policies: Policy[] = form.watch("policies") || [];
-  
+
+  // useWatch đảm bảo luôn nhận giá trị policies mới nhất từ form, tránh stale closure
+  const policies: Policy[] = useWatch({ control: form.control, name: "policies" }) || [];
+
   // Lọc ra các chính sách thuộc resource này
   const resourceCode = perms[0]?.code.split(":")[0] || "";
   const configuredPolicies = policies.filter(p => p.resourceCode === resourceCode);
   const hasPolicies = configuredPolicies.length > 0;
+
+  const handleTogglePolicy = (actionCode: string, checked: boolean) => {
+    // Dùng form.getValues để lấy giá trị mới nhất tại thời điểm gọi (không bị stale closure)
+    const latest = [...(form.getValues("policies") as Policy[])];
+    if (checked) {
+      const alreadyExists = latest.some(p => p.resourceCode === resourceCode && p.action === actionCode);
+      if (!alreadyExists) {
+        latest.push({
+          resourceCode,
+          action: actionCode,
+          effect: "ALLOW",
+          conditions: { expression: "" },
+        });
+      }
+    } else {
+      const idx = latest.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
+      if (idx > -1) latest.splice(idx, 1);
+    }
+    form.setValue("policies", latest, { shouldDirty: true });
+  };
+
+  const handleChangeEffect = (actionCode: string, val: string) => {
+    const latest = [...(form.getValues("policies") as Policy[])];
+    const idx = latest.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
+    if (idx > -1) {
+      latest[idx] = { ...latest[idx], effect: val as "ALLOW" | "DENY" };
+      form.setValue("policies", latest, { shouldDirty: true });
+    }
+  };
+
+  const handleChangeExpression = (actionCode: string, expression: string) => {
+    const latest = [...(form.getValues("policies") as Policy[])];
+    const idx = latest.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
+    if (idx > -1) {
+      latest[idx] = { ...latest[idx], conditions: { expression } };
+      form.setValue("policies", latest, { shouldDirty: true });
+    }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -247,16 +287,15 @@ function PolicyCardDialog({ resourceName, perms, form }: { resourceName: string,
               <Lock className="h-5 w-5 text-primary" /> Cấu hình Chính sách: {resourceName}
             </DialogTitle>
             <DialogDescription className="text-xs mt-2">
-              Bật các hành động mà vai trò này có thể thao tác, và tuỳ chọn nhập điều kiện phân quyền động (PBAC expression). 
+              Bật các hành động mà vai trò này có thể thao tác, và tuỳ chọn nhập điều kiện phân quyền động (PBAC expression).
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
             <div className="space-y-4">
               {perms.map((perm) => {
                 const actionCode = perm.code.split(":")[1] || perm.action;
-                const existingPolicyIndex = policies.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
-                const isEnabled = existingPolicyIndex !== -1;
-                const currentPolicy = isEnabled ? policies[existingPolicyIndex] : null;
+                const currentPolicy = policies.find(p => p.resourceCode === resourceCode && p.action === actionCode) ?? null;
+                const isEnabled = currentPolicy !== null;
 
                 return (
                   <div key={perm.id} className="p-4 rounded-lg border bg-background flex flex-col gap-4 shadow-sm">
@@ -265,38 +304,20 @@ function PolicyCardDialog({ resourceName, perms, form }: { resourceName: string,
                         <span className="text-sm font-bold">{perm.action}</span>
                         <code className="text-[10px] text-muted-foreground mt-0.5">{perm.code}</code>
                       </div>
-                      <Switch 
-                        checked={isEnabled} 
-                        onCheckedChange={(checked) => {
-                          const currentPolicies = [...policies];
-                          if (checked) {
-                            currentPolicies.push({
-                              resourceCode,
-                              action: actionCode,
-                              effect: 'ALLOW',
-                              conditions: { expression: '' }
-                            });
-                          } else {
-                            const idx = currentPolicies.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
-                            if (idx > -1) currentPolicies.splice(idx, 1);
-                          }
-                          form.setValue("policies", currentPolicies, { shouldDirty: true });
-                        }} 
+                      <Switch
+                        checked={isEnabled}
+                        onCheckedChange={(checked) => handleTogglePolicy(actionCode, checked)}
                       />
                     </div>
-                    
+
                     {isEnabled && (
                       <div className="pl-4 border-l-2 border-primary/20 space-y-3 pt-2">
                         <div className="flex gap-4">
                           <div className="space-y-1">
                             <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Effect (Tác dụng)</FormLabel>
-                            <Select 
-                              value={currentPolicy?.effect} 
-                              onValueChange={(val) => {
-                                const currentPolicies = [...policies];
-                                currentPolicies[existingPolicyIndex].effect = val as 'ALLOW' | 'DENY';
-                                form.setValue("policies", currentPolicies, { shouldDirty: true });
-                              }}
+                            <Select
+                              value={currentPolicy?.effect || "ALLOW"}
+                              onValueChange={(val) => handleChangeEffect(actionCode, val)}
                             >
                               <SelectTrigger className="h-8 text-xs w-[120px]">
                                 <SelectValue />
@@ -307,18 +328,14 @@ function PolicyCardDialog({ resourceName, perms, form }: { resourceName: string,
                               </SelectContent>
                             </Select>
                           </div>
-                          
+
                           <div className="flex-1 space-y-1">
                             <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Điều kiện động (Expression)</FormLabel>
-                            <Input 
-                              placeholder="VD: ALLOW IF resource.ownerId == currentUserId (Bỏ trống = Luôn cho phép)" 
-                              className="h-8 text-xs font-mono placeholder:font-sans" 
+                            <Input
+                              placeholder="VD: ALLOW IF resource.ownerId == currentUserId (Bỏ trống = Luôn cho phép)"
+                              className="h-8 text-xs font-mono placeholder:font-sans"
                               value={currentPolicy?.conditions?.expression || ''}
-                              onChange={(e) => {
-                                const currentPolicies = [...policies];
-                                currentPolicies[existingPolicyIndex].conditions = { expression: e.target.value };
-                                form.setValue("policies", currentPolicies, { shouldDirty: true });
-                              }}
+                              onChange={(e) => handleChangeExpression(actionCode, e.target.value)}
                             />
                           </div>
                         </div>
