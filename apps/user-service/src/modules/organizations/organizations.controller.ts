@@ -323,8 +323,6 @@ export class OrganizationsController {
       staffingId: data.staffingId,
       slotOrder: data.slotOrder,
       description: data.description,
-      geographicAreaIds: data.geographicAreaIds ?? [],
-      domainIds: data.domainIds ?? [],
       monitoredUnitIds: data.monitoredUnitIds ?? [],
     });
     return {
@@ -332,21 +330,9 @@ export class OrganizationsController {
       staffingId: slot.staffingId,
       slotOrder: slot.slotOrder,
       description: slot.description ?? '',
-      geographicAreaId: slot.geographicAreaId ?? 0,
-      geographicAreaName: this.getCatName(slot.geographicArea),
-      domainIds: (slot.domains ?? []).map((d: any) => d.domainId),
-      domainNames: (slot.domains ?? []).map((d: any) =>
-        this.getCatName(d.domain),
-      ),
       monitoredUnitIds: (slot.monitoredUnits ?? []).map((mu: any) => mu.unitId),
       monitoredUnitNames: (slot.monitoredUnits ?? []).map(
         (mu: any) => mu.unit?.name ?? '',
-      ),
-      geographicAreaIds: (slot.geographicAreas ?? []).map(
-        (ga: any) => ga.geographicAreaId,
-      ),
-      geographicAreaNames: (slot.geographicAreas ?? []).map((ga: any) =>
-        this.getCatName(ga.geographicArea),
       ),
     };
   }
@@ -363,14 +349,10 @@ export class OrganizationsController {
   @GrpcMethod('OrganizationService', 'UpdateJobTitle')
   async updateJobTitle(data: {
     id: number;
-    domainId?: number;
-    geographicAreaId?: number;
     monitoredUnitIds?: number[];
   }) {
     const j = await this.orgService.updateJobTitle({
       id: data.id,
-      domainId: data.domainId,
-      geographicAreaId: data.geographicAreaId,
       monitoredUnitIds: data.monitoredUnitIds,
     });
     return this.mapJobTitleItem(j);
@@ -395,14 +377,10 @@ export class OrganizationsController {
       id: j.id,
       code: j.code,
       name: j.name,
-      domainId: j.domainId ?? 0,
-      domainName: this.getCatName(j.domain),
       monitoredUnitIds: (j.monitoredUnits ?? []).map((mu: any) => mu.unitId),
       monitoredUnitNames: (j.monitoredUnits ?? []).map(
         (mu: any) => mu.unit?.name ?? '',
       ),
-      geographicAreaId: j.geographicAreaId ?? 0,
-      geographicAreaName: this.getCatName(j.geographicArea),
       category: j.category ?? '',
       rank: j.rank ?? 0,
       type: j.type ?? '',

@@ -52,9 +52,7 @@ CREATE TABLE `sys_categories` (
     `group_code` VARCHAR(191) NOT NULL,
     `code` VARCHAR(191) NOT NULL,
     `order` INTEGER NOT NULL DEFAULT 0,
-    `is_system` BOOLEAN NOT NULL DEFAULT false,
     `is_active` BOOLEAN NOT NULL DEFAULT true,
-    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     INDEX `sys_categories_group_code_idx`(`group_code`),
     UNIQUE INDEX `sys_categories_group_code_code_key`(`group_code`, `code`),
@@ -78,10 +76,8 @@ CREATE TABLE `sys_category_translations` (
 CREATE TABLE `sys_category_groups` (
     `code` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NULL,
     `order` INTEGER NOT NULL DEFAULT 0,
     `isActive` BOOLEAN NOT NULL DEFAULT true,
-    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`code`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -180,18 +176,14 @@ CREATE TABLE `job_titles` (
     `code` VARCHAR(191) NOT NULL,
     `name` VARCHAR(191) NOT NULL,
     `description` VARCHAR(191) NULL,
-    `domain_id` INTEGER NULL,
     `category` VARCHAR(191) NULL,
     `rank` INTEGER NOT NULL DEFAULT 0,
     `authority_level` VARCHAR(191) NULL,
     `reports_to_position_id` INTEGER NULL,
-    `geographic_area_id` INTEGER NULL,
     `type` VARCHAR(191) NULL DEFAULT 'GOVERNMENT',
 
     UNIQUE INDEX `job_titles_code_key`(`code`),
-    INDEX `job_titles_domain_id_idx`(`domain_id`),
     INDEX `job_titles_reports_to_position_id_idx`(`reports_to_position_id`),
-    INDEX `job_titles_geographic_area_id_idx`(`geographic_area_id`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -224,19 +216,10 @@ CREATE TABLE `staffing_slots` (
     `staffing_id` INTEGER NOT NULL,
     `slot_order` INTEGER NOT NULL,
     `description` VARCHAR(191) NULL,
-    `geographic_area_id` INTEGER NULL,
 
     INDEX `staffing_slots_staffing_id_idx`(`staffing_id`),
     UNIQUE INDEX `staffing_slots_staffing_id_slot_order_key`(`staffing_id`, `slot_order`),
     PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `staffing_slot_domains` (
-    `slot_id` INTEGER NOT NULL,
-    `domain_id` INTEGER NOT NULL,
-
-    PRIMARY KEY (`slot_id`, `domain_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -245,14 +228,6 @@ CREATE TABLE `staffing_slot_monitored_units` (
     `unit_id` INTEGER NOT NULL,
 
     PRIMARY KEY (`slot_id`, `unit_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `staffing_slot_geographic_areas` (
-    `slot_id` INTEGER NOT NULL,
-    `geographic_area_id` INTEGER NOT NULL,
-
-    PRIMARY KEY (`slot_id`, `geographic_area_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -462,13 +437,7 @@ ALTER TABLE `organization_unit_geographic_areas` ADD CONSTRAINT `organization_un
 ALTER TABLE `organization_unit_geographic_areas` ADD CONSTRAINT `organization_unit_geographic_areas_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_domain_id_fkey` FOREIGN KEY (`domain_id`) REFERENCES `sys_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_reports_to_position_id_fkey` FOREIGN KEY (`reports_to_position_id`) REFERENCES `job_titles`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `job_title_monitored_units` ADD CONSTRAINT `job_title_monitored_units_job_title_id_fkey` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -483,28 +452,13 @@ ALTER TABLE `org_staffing` ADD CONSTRAINT `org_staffing_unit_id_fkey` FOREIGN KE
 ALTER TABLE `org_staffing` ADD CONSTRAINT `org_staffing_job_title_id_fkey` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `staffing_slots` ADD CONSTRAINT `staffing_slots_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `staffing_slots` ADD CONSTRAINT `staffing_slots_staffing_id_fkey` FOREIGN KEY (`staffing_id`) REFERENCES `org_staffing`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `staffing_slot_domains` ADD CONSTRAINT `staffing_slot_domains_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `staffing_slot_domains` ADD CONSTRAINT `staffing_slot_domains_domain_id_fkey` FOREIGN KEY (`domain_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monitored_units_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monitored_units_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `staffing_slot_geographic_areas` ADD CONSTRAINT `staffing_slot_geographic_areas_slot_id_fkey` FOREIGN KEY (`slot_id`) REFERENCES `staffing_slots`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `staffing_slot_geographic_areas` ADD CONSTRAINT `staffing_slot_geographic_areas_geographic_area_id_fkey` FOREIGN KEY (`geographic_area_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `policies` ADD CONSTRAINT `policies_resource_id_fkey` FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

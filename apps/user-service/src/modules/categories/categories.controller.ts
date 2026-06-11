@@ -11,7 +11,6 @@ function toItem(c: any) {
     name: c.name,
     description: c.description ?? '',
     sort: c.order,
-    is_system: c.isSystem ?? false,
     active: c.isActive ? 1 : 0,
   };
 }
@@ -27,13 +26,21 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'GetByGroup')
-  async getByGroup(data: { group: string; lang?: string; search?: string; limit?: number; skip?: number }) {
+  async getByGroup(data: {
+    group: string;
+    lang?: string;
+    search?: string;
+    limit?: number;
+    skip?: number;
+    selectedIds?: number[];
+  }) {
     const list = await this.catService.getByGroup(data.group || '', data.lang, {
       search: data.search,
       limit: data.limit,
       skip: data.skip,
+      selectedIds: data.selectedIds ?? [],
     });
-    return { data: list.map(toItem) };
+    return { data: list.map(item => ({ ...toItem(item), selected: item.selected ?? false })) };
   }
 
   @GrpcMethod('CategoryService', 'GetAllGroups')

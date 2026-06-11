@@ -4,18 +4,11 @@ model Category {
   code  String
   order Int    @default(0)
 
-  isSystem  Boolean  @default(false) @map("is_system")
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
+  isActive Boolean @default(true) @map("is_active")
 
-  unitDomains                 UnitDomain[]
-  unitGeographicAreas         UnitGeographicArea[]
-  jobTitlesDomain             JobTitle[]                   @relation("JobTitleDomain")
-  jobTitlesGeographicArea     JobTitle[]                   @relation("JobTitleGeographicArea")
-  staffingSlotsGeographicArea StaffingSlot[]               @relation("StaffingSlotGeographicArea")
-  staffingSlotGeographicAreas StaffingSlotGeographicArea[] @relation("StaffingSlotGeographicAreas")
-  staffingSlotDomains         StaffingSlotDomain[]
-  translations                CategoryTranslation[]
+  unitDomains         UnitDomain[]
+  unitGeographicAreas UnitGeographicArea[]
+  translations        CategoryTranslation[]
 
   @@unique([group, code])
   @@index([group])
@@ -37,12 +30,10 @@ model CategoryTranslation {
 }
 
 model CategoryGroup {
-  code        String   @id
-  name        String
-  description String?
-  order       Int      @default(0)
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  code     String  @id
+  name     String
+  order    Int     @default(0)
+  isActive Boolean @default(true)
 
   @@map("sys_category_groups")
 }

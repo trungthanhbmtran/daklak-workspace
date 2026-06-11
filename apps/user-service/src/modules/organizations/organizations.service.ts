@@ -426,35 +426,12 @@ export class OrganizationsService {
       include: {
         jobTitle: {
           include: {
-            domain: {
-              include: { translations: { where: { langCode: 'vi' } } },
-            },
-            geographicArea: {
-              include: { translations: { where: { langCode: 'vi' } } },
-            },
             monitoredUnits: { include: { unit: true } },
           },
         },
         slots: {
           orderBy: { slotOrder: 'asc' },
           include: {
-            geographicArea: {
-              include: { translations: { where: { langCode: 'vi' } } },
-            },
-            geographicAreas: {
-              include: {
-                geographicArea: {
-                  include: { translations: { where: { langCode: 'vi' } } },
-                },
-              },
-            },
-            domains: {
-              include: {
-                domain: {
-                  include: { translations: { where: { langCode: 'vi' } } },
-                },
-              },
-            },
             monitoredUnits: { include: { unit: true } },
           },
         },
@@ -485,10 +462,6 @@ export class OrganizationsService {
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
   async listJobTitles(unitId?: number) {
     const include = {
-      domain: { include: { translations: { where: { langCode: 'vi' } } } },
-      geographicArea: {
-        include: { translations: { where: { langCode: 'vi' } } },
-      },
       monitoredUnits: { include: { unit: true } },
     };
     let items;
@@ -520,22 +493,12 @@ export class OrganizationsService {
     return { data: items };
   }
 
-  // Cập nhật chức danh: lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý
+  // Cập nhật chức danh: đơn vị theo dõi
   async updateJobTitle(dto: {
     id: number;
-    domainId?: number | null;
-    geographicAreaId?: number | null;
     monitoredUnitIds?: number[];
   }) {
-    const { id, domainId, geographicAreaId, monitoredUnitIds } = dto;
-    await this.prisma.jobTitle.update({
-      where: { id },
-      data: {
-        domainId: domainId === 0 ? null : (domainId ?? undefined),
-        geographicAreaId:
-          geographicAreaId === 0 ? null : (geographicAreaId ?? undefined),
-      },
-    });
+    const { id, monitoredUnitIds } = dto;
     if (monitoredUnitIds !== undefined) {
       await this.prisma.jobTitleMonitoredUnit.deleteMany({
         where: { jobTitleId: id },
@@ -549,73 +512,25 @@ export class OrganizationsService {
     const updated = await this.prisma.jobTitle.findUnique({
       where: { id },
       include: {
-        domain: { include: { translations: { where: { langCode: 'vi' } } } },
-        geographicArea: {
-          include: { translations: { where: { langCode: 'vi' } } },
-        },
         monitoredUnits: { include: { unit: true } },
       },
     });
     return updated!;
   }
 
-  // Phân công từng vị trí (từng phó): lĩnh vực, nhiệm vụ, khu vực riêng cho từng slot
+  // Phân công từng vị trí (từng phó): nhiệm vụ, đơn vị theo dõi riêng cho từng slot
   async setStaffingSlot(dto: {
     staffingId: number;
     slotOrder: number;
     description?: string | null;
-    geographicAreaId?: number | null; // deprecated
-    geographicAreaIds?: number[]; // mới: nhiều khu vực
-    domainIds?: number[];
     monitoredUnitIds?: number[];
   }) {
-    const {
-      staffingId,
-      slotOrder,
-      description,
-      geographicAreaIds,
-      domainIds,
-      monitoredUnitIds,
-    } = dto;
+    const { staffingId, slotOrder, description, monitoredUnitIds } = dto;
     const slot = await this.prisma.staffingSlot.upsert({
-      where: {
-        staffingId_slotOrder: { staffingId, slotOrder },
-      },
-      update: {
-        description: description ?? undefined,
-      },
-      create: {
-        staffingId,
-        slotOrder,
-        description: description ?? undefined,
-      },
+      where: { staffingId_slotOrder: { staffingId, slotOrder } },
+      update: { description: description ?? undefined },
+      create: { staffingId, slotOrder, description: description ?? undefined },
     });
-    // Xử lý nhiều khu vực địa lý (geographicAreaIds)
-    if (geographicAreaIds !== undefined) {
-      await this.prisma.staffingSlotGeographicArea.deleteMany({
-        where: { slotId: slot.id },
-      });
-      const validIds = geographicAreaIds.filter((id) => id > 0);
-      if (validIds.length > 0) {
-        await this.prisma.staffingSlotGeographicArea.createMany({
-          data: validIds.map((geographicAreaId) => ({
-            slotId: slot.id,
-            geographicAreaId,
-          })),
-          skipDuplicates: true,
-        });
-      }
-    }
-    if (domainIds !== undefined) {
-      await this.prisma.staffingSlotDomain.deleteMany({
-        where: { slotId: slot.id },
-      });
-      if (domainIds.length > 0) {
-        await this.prisma.staffingSlotDomain.createMany({
-          data: domainIds.map((domainId) => ({ slotId: slot.id, domainId })),
-        });
-      }
-    }
     if (monitoredUnitIds !== undefined) {
       await this.prisma.staffingSlotMonitoredUnit.deleteMany({
         where: { slotId: slot.id },
@@ -628,26 +543,7 @@ export class OrganizationsService {
     }
     const updated = await this.prisma.staffingSlot.findUnique({
       where: { id: slot.id },
-      include: {
-        geographicArea: {
-          include: { translations: { where: { langCode: 'vi' } } },
-        },
-        geographicAreas: {
-          include: {
-            geographicArea: {
-              include: { translations: { where: { langCode: 'vi' } } },
-            },
-          },
-        },
-        domains: {
-          include: {
-            domain: {
-              include: { translations: { where: { langCode: 'vi' } } },
-            },
-          },
-        },
-        monitoredUnits: { include: { unit: true } },
-      },
+      include: { monitoredUnits: { include: { unit: true } } },
     });
     return updated!;
   }

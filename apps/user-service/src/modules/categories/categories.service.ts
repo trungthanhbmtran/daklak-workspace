@@ -3,7 +3,7 @@ import { PrismaService } from '../../database/prisma.service';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // Lấy tất cả danh mục của tất cả các nhóm (tự động hợp nhất bản dịch)
   async getAll(lang?: string) {
@@ -24,9 +24,7 @@ export class CategoriesService {
         group: item.group,
         code: item.code,
         order: item.order,
-        isSystem: item.isSystem,
         isActive: item.isActive,
-        createdAt: item.createdAt,
         name: trans?.name || '',
         description: trans?.description || '',
       };
@@ -34,36 +32,47 @@ export class CategoriesService {
   }
 
   // Lấy danh mục theo nhóm (tự động hợp nhất bản dịch)
-  async getByGroup(group: string, lang?: string, opts?: { search?: string; limit?: number; skip?: number }) {
+  async getByGroup(
+    group: string,
+    lang?: string,
+    opts?: { search?: string; limit?: number; skip?: number; selectedIds?: number[] },
+  ) {
     const targetLang = lang || 'vi';
-    const { search, limit, skip } = opts ?? {};
+    const { search, limit, skip, selectedIds = [] } = opts ?? {};
+    const hasSelected = selectedIds.length > 0;
 
-    const items = await this.prisma.category.findMany({
+    // 1. Luôn fetch selected items (dù không khớp search) để đảm bảo chúng xuất hiện
+    const selectedItems = hasSelected
+      ? await this.prisma.category.findMany({
+        where: { group, id: { in: selectedIds } },
+        include: { translations: { where: { langCode: targetLang } } },
+        orderBy: { order: 'asc' },
+      })
+      : [];
+
+    // 2. Fetch search results (loại trừ các ID đã có trong selected)
+    const excludeIds = selectedItems.map(i => i.id);
+    const searchItems = await this.prisma.category.findMany({
       where: {
         group,
         isActive: true,
+        ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
         ...(search?.trim()
           ? {
-              translations: {
-                some: {
-                  langCode: targetLang,
-                  name: { contains: search.trim() },
-                },
-              },
-            }
+            translations: {
+              some: { langCode: targetLang, name: { contains: search.trim() } },
+            },
+          }
           : {}),
       },
       orderBy: { order: 'asc' },
-      take: limit && limit > 0 ? limit : undefined,
+      take: limit && limit > 0 ? Math.max(limit - selectedItems.length, 0) : undefined,
       skip: skip && skip > 0 ? skip : undefined,
-      include: {
-        translations: {
-          where: { langCode: targetLang },
-        },
-      },
+      include: { translations: { where: { langCode: targetLang } } },
     });
 
-    return items.map((item) => {
+    // 3. Merge: selected first, rồi search results
+    const mapItem = (item: any, selected: boolean) => {
       const trans = item.translations?.[0];
       return {
         id: item.id,
@@ -75,8 +84,14 @@ export class CategoriesService {
         createdAt: item.createdAt,
         name: trans?.name || '',
         description: trans?.description || '',
+        selected,
       };
-    });
+    };
+
+    return [
+      ...selectedItems.map(i => mapItem(i, true)),
+      ...searchItems.map(i => mapItem(i, false)),
+    ];
   }
 
   async getAllGroups() {
@@ -147,9 +162,7 @@ export class CategoriesService {
       group: created.group,
       code: created.code,
       order: created.order,
-      isSystem: created.isSystem,
       isActive: created.isActive,
-      createdAt: created.createdAt,
       name: trans?.name || '',
       description: trans?.description || '',
     };
@@ -215,21 +228,16 @@ export class CategoriesService {
       group: updatedCategory.group,
       code: updatedCategory.code,
       order: updatedCategory.order,
-      isSystem: updatedCategory.isSystem,
       isActive: updatedCategory.isActive,
-      createdAt: updatedCategory.createdAt,
       name: trans?.name || '',
       description: trans?.description || '',
     };
   }
 
-  // Xóa (không cho xóa dữ liệu hệ thống)
+  // Xóa danh mục
   async delete(id: number) {
     const category = await this.prisma.category.findUnique({ where: { id } });
     if (!category) return false;
-    if (category.isSystem) {
-      throw new Error('Không thể xóa danh mục hệ thống.');
-    }
     await this.prisma.category.delete({ where: { id } });
     return true;
   }
