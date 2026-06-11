@@ -48,10 +48,8 @@ export function OrganizationClient() {
     },
     meta: {
       allowedActions: api.allowedActions,
-      unitTypes: api.unitTypes,
       domains: api.domains,
       geoAreas: api.geoAreas,
-      isLoadingTypes: api.isLoadingTypes,
       isLoadingDomains: api.isLoadingDomains,
       isLoadingGeoAreas: api.isLoadingGeoAreas,
       isCreating: api.isCreating,

@@ -4,12 +4,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { organizationApi } from "../api";
 import { organizationQueryKeys, categoryQueryKeys } from "../constants/queryKeys";
-import type { CreateUnitPayload, OrganizationUnitNode } from "../types";
-import type { UpdateUnitPayload } from "../api";
+import type { CreateUnitPayload, OrganizationUnitNode, UpdateUnitPayload } from "../types";
 
 const STALE_TIME = 2 * 60 * 1000;   // 2 phút — cây tổ chức ít đổi
-const GC_TIME = 10 * 60 * 1000;     // 10 phút
-const CAT_STALE = 10 * 60 * 1000;   // 10 phút — danh mục rất ít đổi
+const GC_TIME   = 10 * 60 * 1000;   // 10 phút
+const CAT_STALE = 10 * 60 * 1000;   // danh mục rất ít đổi
 
 function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
   if (!Array.isArray(nodes) || nodes.length === 0) return [];
@@ -19,14 +18,22 @@ function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
   ]);
 }
 
+function extractErrorMessage(err: unknown, fallback: string): string {
+  return (
+    (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+    (err as Error)?.message ??
+    fallback
+  );
+}
+
 /**
- * needCategories: true khi user đang mở form tạo/sửa đơn vị.
- * Tránh fetch unitTypes/domains/geoAreas khi chỉ xem cây tổ chức.
+ * Hook quản lý toàn bộ state + actions cho trang tổ chức.
+ * needCategories = true khi form tạo/sửa đơn vị đang mở (lazy load domains, geoAreas).
  */
 export function useOrganizationApi(needCategories = false) {
   const queryClient = useQueryClient();
 
-  // Tree luôn fetch (cần để render sidebar)
+  // Cây tổ chức — luôn fetch
   const { data: treeResponse, isLoading: isLoadingTree } = useQuery({
     queryKey: organizationQueryKeys.tree(),
     queryFn: () => organizationApi.getTree(),
@@ -34,19 +41,11 @@ export function useOrganizationApi(needCategories = false) {
     gcTime: GC_TIME,
   });
 
-  const tree = treeResponse?.items || [];
-  const allowedActions = treeResponse?.meta?.allowedActions || [];
-  const flatUnits = flattenTree(Array.isArray(tree) ? tree : []);
+  const tree        = treeResponse?.items ?? [];
+  const allowedActions = treeResponse?.meta?.allowedActions ?? [];
+  const flatUnits   = flattenTree(tree);
 
-  // Danh mục — lazy: chỉ fetch khi cần (form tạo/sửa)
-  const { data: unitTypes = [], isLoading: isLoadingTypes } = useQuery({
-    queryKey: categoryQueryKeys.unitTypes(),
-    queryFn: () => organizationApi.getUnitTypes(),
-    enabled: needCategories,
-    staleTime: CAT_STALE,
-    gcTime: GC_TIME,
-  });
-
+  // Lĩnh vực + khu vực địa lý — lazy (chỉ cần khi form mở)
   const { data: domains = [], isLoading: isLoadingDomains } = useQuery({
     queryKey: categoryQueryKeys.domains(),
     queryFn: () => organizationApi.getDomains(),
@@ -75,14 +74,7 @@ export function useOrganizationApi(needCategories = false) {
       queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
       toast.success("Đã thêm đơn vị tổ chức.");
     },
-    onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { message?: string }; message?: string } })
-          ?.response?.data?.message ??
-        (err as Error)?.message ??
-        "Không thể tạo đơn vị.";
-      toast.error(msg);
-    },
+    onError: (err) => toast.error(extractErrorMessage(err, "Không thể tạo đơn vị.")),
   });
 
   const updateUnit = useMutation({
@@ -92,14 +84,7 @@ export function useOrganizationApi(needCategories = false) {
       queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
       toast.success("Đã cập nhật thông tin đơn vị.");
     },
-    onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { message?: string } }; message?: string })
-          ?.response?.data?.message ??
-        (err as Error)?.message ??
-        "Không thể cập nhật đơn vị.";
-      toast.error(msg);
-    },
+    onError: (err) => toast.error(extractErrorMessage(err, "Không thể cập nhật đơn vị.")),
   });
 
   const deleteUnit = useMutation({
@@ -108,30 +93,20 @@ export function useOrganizationApi(needCategories = false) {
       queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
       toast.success("Đã xóa đơn vị tổ chức.");
     },
-    onError: (err: unknown) => {
-      const msg =
-        (err as { response?: { data?: { message?: string } }; message?: string })
-          ?.response?.data?.message ??
-        (err as Error)?.message ??
-        "Không thể xóa đơn vị.";
-      toast.error(msg);
-    },
+    onError: (err) => toast.error(extractErrorMessage(err, "Không thể xóa đơn vị.")),
   });
 
   return {
-    flatUnits,
     tree,
+    flatUnits,
     allowedActions,
-    unitTypes,
     domains,
     geoAreas,
     isLoadingTree,
-    isLoadingTypes: isLoadingTypes && needCategories,
     isLoadingDomains: isLoadingDomains && needCategories,
     isLoadingGeoAreas: isLoadingGeoAreas && needCategories,
     createUnit: createUnit.mutateAsync,
-    updateUnit: (id: number, payload: UpdateUnitPayload) =>
-      updateUnit.mutateAsync({ id, payload }),
+    updateUnit: (id: number, payload: UpdateUnitPayload) => updateUnit.mutateAsync({ id, payload }),
     deleteUnit: deleteUnit.mutateAsync,
     isCreating: createUnit.isPending,
     isUpdating: updateUnit.isPending,

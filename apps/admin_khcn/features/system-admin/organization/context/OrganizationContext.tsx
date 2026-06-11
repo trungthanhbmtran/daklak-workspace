@@ -1,8 +1,7 @@
 "use client";
 
 import { createContext, useContext, type ReactNode } from "react";
-import type { OrganizationUnitNode, CreateUnitPayload } from "../types";
-import type { UpdateUnitPayload } from "../api";
+import type { OrganizationUnitNode, CreateUnitPayload, UpdateUnitPayload } from "../types";
 
 export type ViewMode = "idle" | "create_root" | "create_child";
 
@@ -26,10 +25,8 @@ export interface OrganizationActions {
 
 export interface OrganizationMeta {
   allowedActions: string[];
-  unitTypes: { id: number; code?: string; name: string }[];
   domains: { id: number; code?: string; name: string }[];
   geoAreas: { id: number; name: string }[];
-  isLoadingTypes: boolean;
   isLoadingDomains: boolean;
   isLoadingGeoAreas: boolean;
   isCreating: boolean;

@@ -2,6 +2,7 @@ import apiClient from "@/lib/axiosInstance";
 import type {
   OrganizationUnitNode,
   CreateUnitPayload,
+  UpdateUnitPayload,
   JobTitleItem,
   StaffingReportItem,
   StaffingSlotItem,
@@ -10,6 +11,10 @@ import type {
   UpdateJobTitlePayload,
 } from "./types";
 
+function unwrapData<T>(res: any): T {
+  return (res?.data ?? res) as T;
+}
+
 function normalizeUnitNode(n: any): OrganizationUnitNode {
   const rawParentId = n.parentId ?? n.parent_id ?? null;
   return {
@@ -17,10 +22,9 @@ function normalizeUnitNode(n: any): OrganizationUnitNode {
     code: n.code ?? "",
     name: n.name ?? "",
     shortName: n.shortName ?? n.short_name,
-    typeId: n.typeId ?? n.type_id,
+    categoryCode: n.categoryCode ?? n.category_code ?? undefined,
     parentId: rawParentId === 0 ? null : rawParentId,
     hierarchyPath: n.hierarchyPath ?? n.hierarchy_path,
-    typeName: n.typeName ?? n.type_name,
     domainIds: n.domainIds ?? n.domain_ids ?? [],
     domainNames: n.domainNames ?? n.domain_names ?? [],
     scope: n.scope,
@@ -29,85 +33,6 @@ function normalizeUnitNode(n: any): OrganizationUnitNode {
     children: Array.isArray(n.children) ? n.children.map(normalizeUnitNode) : undefined,
   };
 }
-
-export interface UpdateUnitPayload {
-  code?: string;
-  name?: string;
-  shortName?: string;
-  typeId?: number;
-  parentId?: number | null;
-  domainIds?: number[];
-  scope?: string;
-  geographicAreaIds?: number[];
-}
-
-function unwrapData<T>(res: any): T {
-  // Axios interceptor returns response.data which is { success, data, meta }
-  return (res?.data ?? res) as T;
-}
-
-export const organizationApi = {
-  getTree: (): Promise<{ items: OrganizationUnitNode[]; meta: any }> =>
-    apiClient
-      .get("/organizations/tree")
-      .then((r: any) => ({
-        items: (r.data ?? []).map(normalizeUnitNode),
-        meta: r.meta ?? { allowedActions: [] },
-      })),
-
-  getOne: (id: number) =>
-    apiClient.get(`/organizations/${id}`).then(r => unwrapData<any>(r)),
-
-  createUnit: (payload: CreateUnitPayload) =>
-    apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),
-
-  updateUnit: (id: number, payload: UpdateUnitPayload) =>
-    apiClient.put(`/organizations/${id}`, payload).then(r => unwrapData<any>(r)),
-
-  deleteUnit: (id: number) =>
-    apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
-
-  getUnitTypes: () =>
-    apiClient.get("/organizations/unit-types").then(r => unwrapData<any[]>(r)),
-
-  getDomains: () =>
-    apiClient.get("/categories", { params: { group: "DOMAIN" } }).then(r => unwrapData<any[]>(r)),
-
-  /** Danh sách chức danh (unitId: chỉ chức danh áp dụng cho loại đơn vị đó, VD Sở không có Chủ tịch) */
-  getJobTitles: (unitId?: number): Promise<{ items: JobTitleItem[] }> =>
-    apiClient
-      .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
-      .then((r: any) => {
-        const data = unwrapData<any[]>(r);
-        return {
-          items: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem),
-        };
-      }),
-
-  /** Cập nhật chức danh: lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý */
-  updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
-    apiClient.put(`/organizations/job-titles/${id}`, payload).then(r => unwrapData<any>(r)),
-
-  getGeoAreas: () =>
-    apiClient.get("/categories", { params: { group: "GEO_AREA" } }).then(r => unwrapData<any[]>(r)),
-
-  /** Thiết lập định biên: đơn vị + chức danh + số lượng */
-  setStaffing: (payload: SetStaffingPayload) =>
-    apiClient.post("/organizations/staffing", payload).then(r => unwrapData<any>(r)),
-
-  /** Báo cáo định biên của đơn vị (chức danh + số lượng + hiện có + slots từng vị trí) */
-  getStaffingReport: (unitId: number): Promise<StaffingReportItem[]> =>
-    apiClient
-      .get(`/organizations/${unitId}/staffing-report`)
-      .then((r: any) => {
-        const data = unwrapData<any[]>(r);
-        return (Array.isArray(data) ? data : []).map(normalizeStaffingReportItem);
-      }),
-
-  /** Phân công từng vị trí (từng phó): lưu lĩnh vực, nhiệm vụ, khu vực riêng cho slot */
-  setStaffingSlot: (payload: SetStaffingSlotPayload) =>
-    apiClient.post("/organizations/staffing-slots", payload).then(r => unwrapData<any>(r)),
-};
 
 function normalizeJobTitleItem(j: any): JobTitleItem {
   return {
@@ -132,8 +57,6 @@ function normalizeStaffingSlotItem(s: any): StaffingSlotItem {
     staffingId: s.staffingId ?? s.staffing_id,
     slotOrder: s.slotOrder ?? s.slot_order,
     description: s.description,
-    geographicAreaId: s.geographicAreaId ?? s.geographic_area_id,
-    geographicAreaName: s.geographicAreaName ?? s.geographic_area_name,
     geographicAreaIds: s.geographicAreaIds ?? s.geographic_area_ids ?? [],
     geographicAreaNames: s.geographicAreaNames ?? s.geographic_area_names ?? [],
     domainIds: s.domainIds ?? s.domain_ids ?? [],
@@ -144,7 +67,6 @@ function normalizeStaffingSlotItem(s: any): StaffingSlotItem {
 }
 
 function normalizeStaffingReportItem(r: any): StaffingReportItem {
-  const slotsRaw = r.slots ?? [];
   return {
     id: r.id,
     unitId: r.unitId ?? r.unit_id,
@@ -154,10 +76,59 @@ function normalizeStaffingReportItem(r: any): StaffingReportItem {
     currentCount: r.currentCount ?? r.current_count ?? 0,
     currentEmployeeNames: r.currentEmployeeNames ?? r.current_employee_names ?? [],
     jobTitleDomainName: r.jobTitleDomainName ?? r.job_title_domain_name,
-    jobTitleMonitoredUnitNames:
-      r.jobTitleMonitoredUnitNames ?? r.job_title_monitored_unit_names ?? [],
-    jobTitleGeographicAreaName:
-      r.jobTitleGeographicAreaName ?? r.job_title_geographic_area_name,
-    slots: Array.isArray(slotsRaw) ? slotsRaw.map(normalizeStaffingSlotItem) : [],
+    jobTitleMonitoredUnitNames: r.jobTitleMonitoredUnitNames ?? r.job_title_monitored_unit_names ?? [],
+    jobTitleGeographicAreaName: r.jobTitleGeographicAreaName ?? r.job_title_geographic_area_name,
+    slots: Array.isArray(r.slots) ? r.slots.map(normalizeStaffingSlotItem) : [],
   };
 }
+
+export const organizationApi = {
+  getTree: (): Promise<{ items: OrganizationUnitNode[]; meta: any }> =>
+    apiClient.get("/organizations/tree").then((r: any) => ({
+      items: (r.data ?? []).map(normalizeUnitNode),
+      meta: r.meta ?? { allowedActions: [] },
+    })),
+
+  getOne: (id: number) =>
+    apiClient.get(`/organizations/${id}`).then(r => unwrapData<any>(r)),
+
+  createUnit: (payload: CreateUnitPayload) =>
+    apiClient.post("/organizations", payload).then(r => unwrapData<any>(r)),
+
+  updateUnit: (id: number, payload: UpdateUnitPayload) =>
+    apiClient.put(`/organizations/${id}`, payload).then(r => unwrapData<any>(r)),
+
+  deleteUnit: (id: number) =>
+    apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
+
+  getDomains: () =>
+    apiClient.get("/categories", { params: { group: "DOMAIN" } }).then(r => unwrapData<any[]>(r)),
+
+  getGeoAreas: () =>
+    apiClient.get("/categories", { params: { group: "GEO_AREA" } }).then(r => unwrapData<any[]>(r)),
+
+  getJobTitles: (unitId?: number): Promise<{ items: JobTitleItem[] }> =>
+    apiClient
+      .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)
+      .then((r: any) => {
+        const data = unwrapData<any[]>(r);
+        return { items: (Array.isArray(data) ? data : []).map(normalizeJobTitleItem) };
+      }),
+
+  updateJobTitle: (id: number, payload: UpdateJobTitlePayload) =>
+    apiClient.put(`/organizations/job-titles/${id}`, payload).then(r => unwrapData<any>(r)),
+
+  setStaffing: (payload: SetStaffingPayload) =>
+    apiClient.post("/organizations/staffing", payload).then(r => unwrapData<any>(r)),
+
+  getStaffingReport: (unitId: number): Promise<StaffingReportItem[]> =>
+    apiClient
+      .get(`/organizations/${unitId}/staffing-report`)
+      .then((r: any) => {
+        const data = unwrapData<any[]>(r);
+        return (Array.isArray(data) ? data : []).map(normalizeStaffingReportItem);
+      }),
+
+  setStaffingSlot: (payload: SetStaffingSlotPayload) =>
+    apiClient.post("/organizations/staffing-slots", payload).then(r => unwrapData<any>(r)),
+};

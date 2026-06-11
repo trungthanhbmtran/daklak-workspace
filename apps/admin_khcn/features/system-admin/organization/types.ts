@@ -1,12 +1,13 @@
+/** Một node trong cây tổ chức */
 export interface OrganizationUnitNode {
   id: number;
   code: string;
   name: string;
   shortName?: string;
-  typeId: number;
+  /** Tag phân loại: CHINH_QUYEN | DANG | THAM_MUU | CHUYEN_MON | SU_NGHIEP | PHONG_THUOC_SN */
+  categoryCode?: string;
   parentId: number | null;
   hierarchyPath?: string;
-  typeName?: string;
   domainIds?: number[];
   domainNames?: string[];
   scope?: string;
@@ -15,61 +16,31 @@ export interface OrganizationUnitNode {
   children?: OrganizationUnitNode[];
 }
 
+/** Payload tạo mới đơn vị */
 export interface CreateUnitPayload {
   code: string;
   name: string;
   shortName?: string;
-  typeId: number;
+  categoryCode: string;
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
   geographicAreaIds?: number[];
 }
 
-export interface CategoryOption {
-  id: number;
-  group_code: string;
-  code: string;
-  name: string;
-  order?: number;
-}
-export interface OrganizationUnitNode {
-  id: number;
-  code: string;
-  name: string;
+/** Payload cập nhật đơn vị (mọi field optional) */
+export interface UpdateUnitPayload {
+  code?: string;
+  name?: string;
   shortName?: string;
-  typeId: number;
-  parentId: number | null;
-  hierarchyPath?: string;
-  typeName?: string;
-  domainIds?: number[];
-  domainNames?: string[];
-  scope?: string;
-  geographicAreaIds?: number[];
-  geographicAreaNames?: string[];
-  children?: OrganizationUnitNode[];
-}
-
-export interface CreateUnitPayload {
-  code: string;
-  name: string;
-  shortName?: string;
-  typeId: number;
+  categoryCode?: string;
   parentId?: number | null;
   domainIds?: number[];
   scope?: string;
   geographicAreaIds?: number[];
 }
 
-export interface CategoryOption {
-  id: number;
-  group_code: string;
-  code: string;
-  name: string;
-  order?: number;
-}
-
-/** Chức danh (dùng cho dropdown định biên), kèm lĩnh vực phụ trách, theo dõi phòng ban, khu vực địa lý */
+/** Chức danh kèm lĩnh vực phụ trách, phòng ban theo dõi, khu vực địa lý */
 export interface JobTitleItem {
   id: number;
   code: string;
@@ -91,10 +62,8 @@ export interface StaffingSlotItem {
   staffingId: number;
   slotOrder: number;
   description?: string;
-  geographicAreaId?: number;       // deprecated
-  geographicAreaName?: string;     // deprecated
-  geographicAreaIds?: number[];    // mới: nhiều khu vực
-  geographicAreaNames?: string[];  // mới
+  geographicAreaIds?: number[];
+  geographicAreaNames?: string[];
   domainIds?: number[];
   domainNames?: string[];
   monitoredUnitIds?: number[];
@@ -109,14 +78,10 @@ export interface StaffingReportItem {
   jobTitleName: string;
   quantity: number;
   currentCount: number;
-  /** Danh sách tên người đang giữ vị trí */
   currentEmployeeNames?: string[];
-  /** Lĩnh vực phụ trách (chức danh - mặc định chung) */
   jobTitleDomainName?: string;
-  /** Khu vực địa lý phụ trách */
   jobTitleMonitoredUnitNames?: string[];
   jobTitleGeographicAreaName?: string;
-  /** Phân công từng vị trí (từng phó): mỗi slot có lĩnh vực, nhiệm vụ, khu vực riêng */
   slots?: StaffingSlotItem[];
 }
 
@@ -132,12 +97,11 @@ export interface SetStaffingPayload {
   quantity: number;
 }
 
-/** Phân công từng vị trí (từng phó): lưu lĩnh vực, nhiệm vụ, khu vực riêng cho slot */
 export interface SetStaffingSlotPayload {
   staffingId: number;
   slotOrder: number;
   description?: string;
-  geographicAreaIds?: number[];  // nhiều khu vực địa lý
+  geographicAreaIds?: number[];
   domainIds?: number[];
   monitoredUnitIds?: number[];
 }

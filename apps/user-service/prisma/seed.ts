@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt';
+﻿import * as bcrypt from 'bcrypt';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 let PrismaClient: any;
 try {
@@ -2081,7 +2081,60 @@ async function main() {
       nameVi: 'Bo góc lớn (16px)',
       nameEn: 'Large radius (16px)',
     },
+    // ==========================================================
+    // UNIT_TYPE_CATEGORY - Phan loai to chuc don vi hanh chinh
+    // description: JSON { icon, color, description, typeCodes }
+    // ==========================================================
+    {
+      group: 'UNIT_TYPE_CATEGORY',
+      code: 'CHINH_QUYEN',
+      order: 1,
+      nameVi: 'T\u1ed5 ch\u1ee9c ch\u00ednh quy\u1ec1n',
+      nameEn: 'Government Organization',
+      description: '{"icon":"Landmark","color":"blue","description":"UBND, H\u0110ND, S\u1edf, UBND huy\u1ec7n/x\u00e3","typeCodes":["TINH_UY","HUYEN_UY","XA_PHUONG","SO_NGANH","PHONG_HUYEN"]}'
+    },
+    {
+      group: 'UNIT_TYPE_CATEGORY',
+      code: 'DANG',
+      order: 2,
+      nameVi: 'T\u1ed5 ch\u1ee9c \u0111\u1ea3ng',
+      nameEn: 'Party Organization',
+      description: '{"icon":"Flag","color":"red","description":"T\u1ec9nh \u1ee7y, Huy\u1ec7n \u1ee7y, \u0110\u1ea3ng b\u1ed9, Chi b\u1ed9","typeCodes":["TINH_UY_DANG","HUYEN_UY_DANG","DANG_BO_CO_SO","CHI_BO","BAN_DANG_UY"]}'
+    },
+    {
+      group: 'UNIT_TYPE_CATEGORY',
+      code: 'THAM_MUU',
+      order: 3,
+      nameVi: 'Ph\u00f2ng ban tham m\u01b0u',
+      nameEn: 'Advisory Department',
+      description: '{"icon":"BookOpen","color":"violet","description":"V\u0103n ph\u00f2ng, Thanh tra, Ph\u00f2ng T\u1ed5 ch\u1ee9c c\u00e1n b\u1ed9","typeCodes":["VAN_PHONG","THANH_TRA","PHONG_TO_CHUC","PHONG_KE_HOACH","PHONG_PHAP_CHE","PHONG_THAM_MUU"]}'
+    },
+    {
+      group: 'UNIT_TYPE_CATEGORY',
+      code: 'CHUYEN_MON',
+      order: 4,
+      nameVi: 'Ph\u00f2ng ban chuy\u00ean m\u00f4n',
+      nameEn: 'Specialized Department',
+      description: '{"icon":"FlaskConical","color":"emerald","description":"Ph\u00f2ng nghi\u1ec7p v\u1ee5, chuy\u00ean ng\u00e0nh thu\u1ed9c S\u1edf","typeCodes":["PHONG_QUAN_LY","PHONG_NGHIEP_VU","CHI_CUC","PHONG_THUOC_CHI_CUC"]}'
+    },
+    {
+      group: 'UNIT_TYPE_CATEGORY',
+      code: 'SU_NGHIEP',
+      order: 5,
+      nameVi: '\u0110\u01a1n v\u1ecb s\u1ef1 nghi\u1ec7p c\u00f4ng l\u1eadp',
+      nameEn: 'Public Service Unit',
+      description: '{"icon":"GraduationCap","color":"amber","description":"Trung t\u00e2m, Tr\u01b0\u1eddng, B\u1ec7nh vi\u1ec7n, Ban qu\u1ea3n l\u00fd","typeCodes":["TRUNG_TAM","TRUONG_HOC","BENH_VIEN","BAN_QUAN_LY","QUY_NN","DON_VI_SN_KHAC"]}'
+    },
+    {
+      group: 'UNIT_TYPE_CATEGORY',
+      code: 'PHONG_THUOC_SN',
+      order: 6,
+      nameVi: 'Ph\u00f2ng ban thu\u1ed9c \u0111\u01a1n v\u1ecb s\u1ef1 nghi\u1ec7p',
+      nameEn: 'Department under Public Service Unit',
+      description: '{"icon":"Building","color":"slate","description":"Ph\u00f2ng H\u00e0nh ch\u00ednh, Ph\u00f2ng chuy\u00ean m\u00f4n thu\u1ed9c Trung t\u00e2m","typeCodes":["PHONG_HC_TH","PHONG_CM_SN","PHONG_KT_DVTU","TO_DOI"]}'
+    },
   ];
+
 
   console.log(
     `📦 Seeding ${categoriesData.length} categories with dual translations...`,

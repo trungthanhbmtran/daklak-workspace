@@ -3,12 +3,12 @@
 import { useState, useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Building2, CornerDownRight, Briefcase, MapPin, Search } from "lucide-react";
+import { Plus, Building2, CornerDownRight, Briefcase, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MultiSelectModal } from "./MultiSelectModal";
+import { UnitTypeSelector } from "./UnitTypeSelector";
 import type { OrganizationUnitNode } from "../types";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 import { useOrganizationContext } from "../context/OrganizationContext";
@@ -42,10 +42,8 @@ export function OrganizationForm() {
       key={formKey}
       parentUnit={parentUnit}
       parentId={parentId ?? undefined}
-      unitTypes={meta.unitTypes}
       domains={meta.domains}
       geoAreas={meta.geoAreas}
-      isLoadingTypes={meta.isLoadingTypes}
       isLoadingDomains={meta.isLoadingDomains}
       isLoadingGeoAreas={meta.isLoadingGeoAreas}
       createUnit={actions.createUnit}
@@ -59,10 +57,8 @@ export function OrganizationForm() {
 function OrganizationFormInner({
   parentUnit,
   parentId,
-  unitTypes,
   domains,
   geoAreas,
-  isLoadingTypes,
   isLoadingDomains,
   isLoadingGeoAreas,
   createUnit,
@@ -72,17 +68,15 @@ function OrganizationFormInner({
 }: {
   parentUnit: OrganizationUnitNode | null | undefined;
   parentId?: number;
-  unitTypes: { id: number; code?: string; name: string }[];
   domains: { id: number; code?: string; name: string }[];
   geoAreas: { id: number; name: string }[];
-  isLoadingTypes: boolean;
   isLoadingDomains: boolean;
   isLoadingGeoAreas: boolean;
   createUnit: (payload: {
     code: string;
     name: string;
     shortName?: string;
-    typeId: number;
+    categoryCode: string;
     parentId?: number;
     domainIds?: number[];
     geographicAreaIds?: number[];
@@ -92,15 +86,13 @@ function OrganizationFormInner({
   onSuccess: () => void;
   onCancel: () => void;
 }) {
-  const firstTypeId = unitTypes[0]?.id ?? 0;
-
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
     defaultValues: {
       code: "",
       name: "",
       shortName: "",
-      typeId: firstTypeId,
+      categoryCode: "",
       domainIds: [],
       geographicAreaIds: [],
       scope: "",
@@ -112,12 +104,12 @@ function OrganizationFormInner({
       code: "",
       name: "",
       shortName: "",
-      typeId: unitTypes[0]?.id ?? 0,
+      categoryCode: "",
       domainIds: [],
       geographicAreaIds: [],
       scope: "",
     });
-  }, [parentId, firstTypeId, form]);
+  }, [parentId, form]);
 
   const domainsToOffer =
     parentId != null && parentUnit?.domainIds?.length
@@ -135,7 +127,7 @@ function OrganizationFormInner({
       code: values.code.trim(),
       name: values.name.trim(),
       shortName: values.shortName?.trim() || undefined,
-      typeId: values.typeId,
+      categoryCode: values.categoryCode,
       parentId: parentId ?? undefined,
       domainIds: values.domainIds?.length ? values.domainIds : undefined,
       geographicAreaIds: values.geographicAreaIds?.length ? values.geographicAreaIds : undefined,
@@ -210,26 +202,16 @@ function OrganizationFormInner({
               />
               <FormField
                 control={form.control}
-                name="typeId"
+                name="categoryCode"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Loại đơn vị <span className="text-destructive">*</span></FormLabel>
-                    <Select
-                      onValueChange={(v) => field.onChange(Number(v))}
-                      value={field.value ? String(field.value) : ""}
-                      disabled={isLoadingTypes}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Chọn cấp/loại đơn vị" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {unitTypes.map((t) => (
-                          <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                  <FormItem className="col-span-1 md:col-span-2">
+                    <FormLabel>Phân loại tổ chức <span className="text-destructive">*</span></FormLabel>
+                    <FormControl>
+                      <UnitTypeSelector
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
