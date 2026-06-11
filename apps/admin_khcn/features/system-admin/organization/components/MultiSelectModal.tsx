@@ -17,6 +17,7 @@ type MultiSelectModalProps = {
   placeholderSearch?: string;
   triggerLabel?: React.ReactNode;
   isLoading?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 export function MultiSelectModal({
@@ -28,10 +29,15 @@ export function MultiSelectModal({
   placeholderSearch = "Tìm kiếm...",
   triggerLabel = "Chọn mục",
   isLoading = false,
+  onOpenChange: onOpenChangeProp,
 }: MultiSelectModalProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    onOpenChangeProp?.(next);
+  };
   const filteredItems = open
     ? items.filter(
       (item) =>
@@ -64,7 +70,7 @@ export function MultiSelectModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" className="w-full justify-between font-normal bg-background hover:bg-muted/50 border-input h-auto min-h-11 py-2 shadow-sm">
           <span className="flex items-center gap-2 truncate text-muted-foreground font-medium">

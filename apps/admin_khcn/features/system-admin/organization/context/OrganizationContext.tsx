@@ -20,6 +20,7 @@ export interface OrganizationActions {
   cancel: () => void;
   createUnit: (payload: CreateUnitPayload) => Promise<unknown>;
   updateUnit: (id: number, payload: UpdateUnitPayload) => Promise<unknown>;
+  updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) => Promise<unknown>;
   deleteUnit: (id: number) => Promise<unknown>;
 }
 
@@ -28,8 +29,10 @@ export interface OrganizationMeta {
   geoAreas: { id: number; name: string }[];
   isLoadingDomains: boolean;
   isLoadingGeoAreas: boolean;
+  loadGeoAreas: () => void;
   isCreating: boolean;
   isUpdating: boolean;
+  isUpdatingScope: boolean;
   isDeleting: boolean;
 }
 

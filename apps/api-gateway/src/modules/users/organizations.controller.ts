@@ -292,6 +292,38 @@ export class OrganizationsController implements OnModuleInit {
     }
   }
 
+  @Put(':id/scope')
+  @ApiOperation({
+    summary: 'Cập nhật phạm vi phụ trách của đơn vị (lĩnh vực + địa bàn)',
+    description: 'Endpoint chuyên biệt, chỉ cập nhật domainIds và geographicAreaIds. Không ảnh hưởng đến tên, mã, phân loại.',
+  })
+  @ApiResponse({ status: 200, description: 'Đơn vị đã cập nhật phạm vi (camelCase)' })
+  async updateScope(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { domainIds?: number[]; geographicAreaIds?: number[] },
+  ) {
+    if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
+      throw new BadRequestException('domainIds phải là một mảng');
+    }
+    if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+      throw new BadRequestException('geographicAreaIds phải là một mảng');
+    }
+    try {
+      const result = await firstValueFrom(
+        this.orgService.UpdateUnit({
+          id,
+          domainIds: body.domainIds ?? [],
+          geographicAreaIds: body.geographicAreaIds ?? [],
+        }),
+      );
+      return { success: true, data: result };
+    } catch (err: any) {
+      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật phạm vi phụ trách';
+      if (err?.code === 5) throw new NotFoundException(message);
+      throw new BadRequestException(message);
+    }
+  }
+
   @Get(':id/subtree')
   @ApiOperation({ summary: 'Cây con của một đơn vị' })
   @ApiResponse({ status: 200, description: 'Cây con từ đơn vị id' })

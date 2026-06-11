@@ -106,6 +106,10 @@ export const organizationApi = {
   getGeoAreas: () =>
     apiClient.get("/categories", { params: { group: "GEO_AREA" } }).then(r => unwrapData<any[]>(r)),
 
+  /** Endpoint chuyên biệt: chỉ cập nhật lĩnh vực + địa bàn, không đụng tên/mã/phân loại */
+  updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) =>
+    apiClient.put(`/organizations/${id}/scope`, payload).then(r => unwrapData<any>(r)),
+
   getJobTitles: (unitId?: number): Promise<{ items: JobTitleItem[] }> =>
     apiClient
       .get("/organizations/job-titles", unitId != null ? { params: { unitId } } : undefined)

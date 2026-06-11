@@ -44,6 +44,7 @@ export function OrganizationClient() {
       cancel: view.cancel,
       createUnit: api.createUnit,
       updateUnit: api.updateUnit,
+      updateScope: api.updateScope,
       deleteUnit: api.deleteUnit,
     },
     meta: {
@@ -51,8 +52,10 @@ export function OrganizationClient() {
       geoAreas: api.geoAreas,
       isLoadingDomains: api.isLoadingDomains,
       isLoadingGeoAreas: api.isLoadingGeoAreas,
+      loadGeoAreas: api.loadGeoAreas,
       isCreating: api.isCreating,
       isUpdating: api.isUpdating,
+      isUpdatingScope: api.isUpdatingScope,
       isDeleting: api.isDeleting,
     },
   };

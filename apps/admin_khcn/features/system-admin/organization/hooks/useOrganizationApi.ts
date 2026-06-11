@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { organizationApi } from "../api";
@@ -28,10 +29,12 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 
 /**
  * Hook quản lý toàn bộ state + actions cho trang tổ chức.
- * needCategories = true khi form tạo/sửa đơn vị đang mở (lazy load domains, geoAreas).
+ * needCategories = true khi form tạo/sửa đơn vị đang mở (lazy load domains).
+ * geoAreas được load riêng khi user chủ động click tab Địa bàn.
  */
 export function useOrganizationApi(needCategories = false) {
   const queryClient = useQueryClient();
+  const [needGeoAreas, setNeedGeoAreas] = useState(false);
 
   // Cây tổ chức — luôn fetch
   const { data: treeResponse, isLoading: isLoadingTree } = useQuery({
@@ -56,7 +59,7 @@ export function useOrganizationApi(needCategories = false) {
   const { data: geoAreas = [], isLoading: isLoadingGeoAreas } = useQuery({
     queryKey: categoryQueryKeys.geoAreas(),
     queryFn: () => organizationApi.getGeoAreas(),
-    enabled: needCategories,
+    enabled: needCategories && needGeoAreas,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
   });
@@ -86,6 +89,16 @@ export function useOrganizationApi(needCategories = false) {
     onError: (err) => toast.error(extractErrorMessage(err, "Không thể cập nhật đơn vị.")),
   });
 
+  const updateScope = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: { domainIds?: number[]; geographicAreaIds?: number[] } }) =>
+      organizationApi.updateScope(id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: organizationQueryKeys.tree() });
+      toast.success("Đã cập nhật phạm vi phụ trách.");
+    },
+    onError: (err) => toast.error(extractErrorMessage(err, "Không thể cập nhật phạm vi.")),
+  });
+
   const deleteUnit = useMutation({
     mutationFn: (id: number) => organizationApi.deleteUnit(id),
     onSuccess: () => {
@@ -102,12 +115,16 @@ export function useOrganizationApi(needCategories = false) {
     geoAreas,
     isLoadingTree,
     isLoadingDomains: isLoadingDomains && needCategories,
-    isLoadingGeoAreas: isLoadingGeoAreas && needCategories,
+    isLoadingGeoAreas: isLoadingGeoAreas && needGeoAreas,
+    loadGeoAreas: () => setNeedGeoAreas(true),
     createUnit: createUnit.mutateAsync,
     updateUnit: (id: number, payload: UpdateUnitPayload) => updateUnit.mutateAsync({ id, payload }),
+    updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) =>
+      updateScope.mutateAsync({ id, payload }),
     deleteUnit: deleteUnit.mutateAsync,
     isCreating: createUnit.isPending,
     isUpdating: updateUnit.isPending,
+    isUpdatingScope: updateScope.isPending,
     isDeleting: deleteUnit.isPending,
   };
 }
