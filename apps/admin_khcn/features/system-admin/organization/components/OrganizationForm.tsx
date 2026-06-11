@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Building2, CornerDownRight, Briefcase, MapPin } from "lucide-react";
+import {
+  Plus, Building2, ChevronRight, Briefcase, MapPin,
+  Shield, Info, Globe, Pen, BadgeCheck,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MultiSelectModal } from "./MultiSelectModal";
 import { UnitTypeSelector } from "./UnitTypeSelector";
@@ -14,6 +18,20 @@ import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../hooks/us
 import type { OrganizationUnitNode } from "../types";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 import { useOrganizationContext } from "../context/OrganizationContext";
+
+const COLOR_MAP: Record<string, string> = {
+  blue: "bg-blue-50 border-blue-200 text-blue-700",
+  red: "bg-red-50 border-red-200 text-red-700",
+  violet: "bg-violet-50 border-violet-200 text-violet-700",
+  emerald: "bg-emerald-50 border-emerald-200 text-emerald-700",
+  amber: "bg-amber-50 border-amber-200 text-amber-700",
+  slate: "bg-slate-50 border-slate-200 text-slate-600",
+};
+const AUTHORITY_LABEL: Record<string, { label: string; color: string }> = {
+  FULL: { label: "Toàn quyền ký", color: "bg-blue-100 text-blue-700" },
+  DELEGATED: { label: "Ký theo ủy quyền", color: "bg-violet-100 text-violet-700" },
+  INTERNAL: { label: "Nội bộ (không ký đối ngoại)", color: "bg-slate-100 text-slate-600" },
+};
 
 export function OrganizationForm() {
   const { state, actions, meta } = useOrganizationContext();
@@ -88,26 +106,34 @@ function OrganizationFormInner({
   });
 
   useEffect(() => {
-    form.reset({
-      code: "", name: "", shortName: "", categoryCode: "",
-      domainIds: [], geographicAreaIds: [], scope: "",
-    });
+    form.reset({ code: "", name: "", shortName: "", categoryCode: "", domainIds: [], geographicAreaIds: [], scope: "" });
   }, [parentId, form]);
 
-  // requiredFields từ server — quyết định domain/geo có hiển thị không
+  /* requiredFields từ server */
   const categoryCode = form.watch("categoryCode");
   const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
-  const requiredFields = categoryCode
-    ? (categoryItems.find((c) => c.code === categoryCode)
-        ? parseUnitTypeCategoryMeta(categoryItems.find((c) => c.code === categoryCode)!).requiredFields
-        : [])
-    : [];
+  const selectedCat = categoryItems.find((c) => c.code === categoryCode);
+  const categoryMeta = selectedCat ? parseUnitTypeCategoryMeta(selectedCat) : null;
+  const requiredFields = categoryMeta?.requiredFields ?? [];
+  const colorClass = COLOR_MAP[categoryMeta?.color ?? "slate"] ?? COLOR_MAP["slate"];
+  const authority = AUTHORITY_LABEL[categoryMeta?.signingAuthority ?? ""] ?? null;
 
-  // Lọc lĩnh vực theo cha (kế thừa ngành dọc)
-  const domainsToOffer =
-    parentId != null && parentUnit?.domainIds?.length
-      ? domains.filter((d) => parentUnit.domainIds!.includes(d.id))
-      : domains;
+  /* Lọc lĩnh vực theo cha */
+  const domainsToOffer = useMemo(
+    () => parentUnit?.domainIds?.length ? domains.filter((d) => parentUnit.domainIds!.includes(d.id)) : domains,
+    [parentUnit, domains],
+  );
+
+  /* Preview selections */
+  const selectedDomainNames = useMemo(() => {
+    const ids = form.watch("domainIds") ?? [];
+    return domains.filter((d) => ids.includes(d.id)).map((d) => d.name);
+  }, [form.watch("domainIds"), domains]);
+
+  const selectedGeoNames = useMemo(() => {
+    const ids = form.watch("geographicAreaIds") ?? [];
+    return geoAreas.filter((g) => ids.includes(g.id)).map((g) => g.name);
+  }, [form.watch("geographicAreaIds"), geoAreas]);
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     await createUnit({
@@ -125,147 +151,250 @@ function OrganizationFormInner({
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden rounded-xl border bg-card shadow-sm">
-      <div className="shrink-0 border-b bg-muted/20 px-6 py-4">
+
+      {/* ── HEADER ── */}
+      <div className="shrink-0 border-b bg-gradient-to-r from-slate-50 to-white px-6 py-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <Plus className="h-5 w-5" />
+          <div className="h-9 w-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+            <Plus className="h-4.5 w-4.5 text-primary" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold">Thêm đơn vị tổ chức</h2>
-            {parentUnit ? (
-              <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1">
-                <CornerDownRight className="h-3 w-3" />
-                Trực thuộc: <span className="font-medium text-foreground">{parentUnit.name}</span> ({parentUnit.code})
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground mt-0.5">Đơn vị cấp gốc</p>
-            )}
+            <div className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-0.5">
+              {parentUnit ? (
+                <>
+                  <span className="truncate max-w-[140px]">{parentUnit.name}</span>
+                  <ChevronRight className="h-3 w-3 shrink-0" />
+                  <span className="text-primary font-black">Đơn vị mới</span>
+                </>
+              ) : (
+                <>
+                  <span>Cơ cấu tổ chức</span>
+                  <ChevronRight className="h-3 w-3 shrink-0" />
+                  <span className="text-primary font-black">Đơn vị gốc mới</span>
+                </>
+              )}
+            </div>
+            <h2 className="text-base font-bold text-slate-800 leading-none">Thêm đơn vị tổ chức</h2>
           </div>
         </div>
       </div>
 
+      {/* ── BODY ── */}
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="flex flex-1 flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
-              <FormField
-                control={form.control} name="name"
-                render={({ field }) => (
-                  <FormItem className="col-span-1 md:col-span-2">
-                    <FormLabel>Tên đơn vị <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <Input placeholder="VD: Sở Khoa học và Công nghệ tỉnh Đắk Lắk" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control} name="code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mã đơn vị <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <Input placeholder="VD: SKHCN_DL" {...field} className="font-mono uppercase" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control} name="shortName"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tên viết tắt (Tùy chọn)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="VD: SKHCN" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
 
-              {/* PHÂN LOẠI */}
-              <FormField
-                control={form.control} name="categoryCode"
-                render={({ field }) => (
-                  <FormItem className="col-span-1 md:col-span-2">
-                    <FormLabel>Phân loại tổ chức <span className="text-destructive">*</span></FormLabel>
-                    <FormControl>
-                      <UnitTypeSelector value={field.value} onChange={field.onChange} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* ── 1. ĐỊNH DANH ── */}
+            <section>
+              <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground mb-3 flex items-center gap-1.5">
+                <Pen className="h-3 w-3" /> Thông tin định danh
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                <FormField
+                  control={form.control} name="name"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-3">
+                      <FormLabel className="text-xs font-semibold text-slate-500 uppercase">
+                        Tên đầy đủ <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="VD: Sở Khoa học và Công nghệ tỉnh Đắk Lắk" {...field} className="h-10" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control} name="shortName"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-1">
+                      <FormLabel className="text-xs font-semibold text-slate-500 uppercase">Tên tắt</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="VD: SKHCN" className="h-10 font-mono" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control} name="code"
+                  render={({ field }) => (
+                    <FormItem className="md:col-span-1">
+                      <FormLabel className="text-xs font-semibold text-slate-500 uppercase">
+                        Mã <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="SKHCN_DL" className="h-10 font-mono uppercase" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </section>
 
-              {/* LĨNH VỰC & ĐỊA BÀN — chỉ hiển thị khi server yêu cầu */}
-              {(requiredFields.includes("domainIds") || requiredFields.includes("geographicAreaIds")) && (
-                <div className="col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-                  {requiredFields.includes("domainIds") && (
-                    <FormField
-                      control={form.control} name="domainIds"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col space-y-1.5">
-                          <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs">
-                            <Briefcase className="h-4 w-4 text-slate-400" /> Lĩnh vực chuyên môn
-                          </FormLabel>
-                          {parentUnit?.domainIds?.length ? (
-                            <p className="text-xs text-muted-foreground">
-                              Giới hạn trong lĩnh vực của đơn vị cha <strong>{parentUnit.name}</strong>.
-                            </p>
-                          ) : null}
-                          <FormControl>
-                            <MultiSelectModal
-                              title="Chọn lĩnh vực chuyên môn"
-                              icon={<Briefcase className="h-5 w-5" />}
-                              items={domainsToOffer}
-                              selectedIds={field.value ?? []}
-                              onChange={field.onChange}
-                              placeholderSearch="Tìm lĩnh vực..."
-                              triggerLabel="Chọn lĩnh vực"
-                              isLoading={isLoadingDomains}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+            {/* ── 2. PHÂN LOẠI TỔ CHỨC ── */}
+            <section className="border border-slate-200 rounded-xl overflow-hidden">
+              <div className="bg-slate-50/80 px-4 py-3 border-b flex items-center gap-2">
+                <Shield className="h-4 w-4 text-slate-500" />
+                <p className="text-[11px] font-black uppercase tracking-widest text-slate-600">
+                  Phân loại tổ chức — Hệ thống chính trị <span className="text-destructive ml-1">*</span>
+                </p>
+              </div>
+              <div className="p-4 space-y-4">
+                <FormField
+                  control={form.control} name="categoryCode"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <UnitTypeSelector value={field.value} onChange={field.onChange} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {categoryMeta && (
+                  <div className={`rounded-lg border px-4 py-3 space-y-2 ${colorClass}`}>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {authority && (
+                        <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${authority.color}`}>
+                          <BadgeCheck className="h-3 w-3" />
+                          {authority.label}
+                        </span>
                       )}
-                    />
+                      {categoryMeta.politicalSystem && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-black/5">
+                          {categoryMeta.politicalSystem}
+                        </span>
+                      )}
+                    </div>
+                    {categoryMeta.purposeNote && (
+                      <p className="text-[11px] leading-relaxed opacity-80">{categoryMeta.purposeNote}</p>
+                    )}
+                    {categoryMeta.signingNote && (
+                      <p className="text-[11px] leading-relaxed opacity-70 flex gap-1.5 items-start">
+                        <Info className="h-3 w-3 mt-0.5 shrink-0" />
+                        {categoryMeta.signingNote}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* ── 3. LĨNH VỰC & ĐỊA BÀN ── */}
+            {(requiredFields.includes("domainIds") || requiredFields.includes("geographicAreaIds")) && (
+              <section className="border border-slate-200 rounded-xl overflow-hidden">
+                <div className="bg-slate-50/80 px-4 py-3 border-b flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-slate-500" />
+                  <p className="text-[11px] font-black uppercase tracking-widest text-slate-600">Phạm vi phụ trách</p>
+                  {parentUnit?.domainIds?.length ? (
+                    <span className="ml-auto text-[10px] text-muted-foreground italic">
+                      Giới hạn trong lĩnh vực của đơn vị cha
+                    </span>
+                  ) : null}
+                </div>
+                <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {requiredFields.includes("domainIds") && (
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control} name="domainIds"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel className="text-xs font-semibold text-slate-500 uppercase flex items-center gap-1.5">
+                              <Briefcase className="h-3.5 w-3.5 text-blue-500" /> Lĩnh vực chuyên môn
+                            </FormLabel>
+                            <FormControl>
+                              <MultiSelectModal
+                                title="Chọn lĩnh vực chuyên môn"
+                                icon={<Briefcase className="h-5 w-5" />}
+                                items={domainsToOffer}
+                                selectedIds={field.value ?? []}
+                                onChange={field.onChange}
+                                placeholderSearch="Tìm lĩnh vực..."
+                                triggerLabel="Chọn lĩnh vực"
+                                isLoading={isLoadingDomains}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {selectedDomainNames.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {selectedDomainNames.slice(0, 4).map((n) => (
+                            <Badge key={n} variant="secondary" className="text-[10px] h-5 px-2 bg-blue-50 text-blue-700 border-blue-200 border">
+                              {n}
+                            </Badge>
+                          ))}
+                          {selectedDomainNames.length > 4 && (
+                            <Badge variant="secondary" className="text-[10px] h-5 px-2 bg-slate-100 text-slate-500">
+                              +{selectedDomainNames.length - 4}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   )}
                   {requiredFields.includes("geographicAreaIds") && (
-                    <FormField
-                      control={form.control} name="geographicAreaIds"
-                      render={({ field }) => (
-                        <FormItem className="flex flex-col space-y-1.5">
-                          <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs">
-                            <MapPin className="h-4 w-4 text-emerald-600" /> Phạm vi địa lý
-                          </FormLabel>
-                          <FormControl>
-                            <MultiSelectModal
-                              title="Chọn phạm vi địa lý"
-                              icon={<MapPin className="h-5 w-5" />}
-                              items={geoAreas}
-                              selectedIds={field.value ?? []}
-                              onChange={field.onChange}
-                              placeholderSearch="Tìm tỉnh thành, khu vực..."
-                              triggerLabel="Chọn khu vực địa lý"
-                              isLoading={isLoadingGeoAreas}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
+                    <div className="space-y-2">
+                      <FormField
+                        control={form.control} name="geographicAreaIds"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-col">
+                            <FormLabel className="text-xs font-semibold text-slate-500 uppercase flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5 text-emerald-500" /> Địa bàn phụ trách
+                            </FormLabel>
+                            <FormControl>
+                              <MultiSelectModal
+                                title="Chọn phạm vi địa lý"
+                                icon={<MapPin className="h-5 w-5" />}
+                                items={geoAreas}
+                                selectedIds={field.value ?? []}
+                                onChange={field.onChange}
+                                placeholderSearch="Tìm tỉnh thành, khu vực..."
+                                triggerLabel="Chọn địa bàn"
+                                isLoading={isLoadingGeoAreas}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      {selectedGeoNames.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {selectedGeoNames.slice(0, 4).map((n) => (
+                            <Badge key={n} variant="secondary" className="text-[10px] h-5 px-2 bg-emerald-50 text-emerald-700 border-emerald-200 border">
+                              {n}
+                            </Badge>
+                          ))}
+                          {selectedGeoNames.length > 4 && (
+                            <Badge variant="secondary" className="text-[10px] h-5 px-2 bg-slate-100 text-slate-500">
+                              +{selectedGeoNames.length - 4}
+                            </Badge>
+                          )}
+                        </div>
                       )}
-                    />
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
+              </section>
+            )}
           </div>
 
-          <div className="shrink-0 border-t bg-muted/20 px-6 py-4 flex justify-end gap-3">
-            <Button type="button" variant="outline" size="sm" onClick={onCancel}>Hủy</Button>
-            <Button type="submit" size="sm" disabled={isCreating}>
-              {isCreating ? "Đang lưu..." : "Thêm đơn vị"}
+          {/* ── FOOTER ── */}
+          <div className="shrink-0 border-t bg-slate-50/50 px-6 py-4 flex items-center justify-end gap-3">
+            <Button type="button" variant="outline" className="h-10 px-5 font-semibold" onClick={onCancel}>
+              Hủy
+            </Button>
+            <Button type="submit" className="h-10 px-8 font-bold shadow-sm" disabled={isCreating}>
+              {isCreating ? "Đang thêm..." : (
+                <>
+                  <Plus className="h-4 w-4 mr-1.5" />
+                  Thêm đơn vị
+                </>
+              )}
             </Button>
           </div>
         </form>
