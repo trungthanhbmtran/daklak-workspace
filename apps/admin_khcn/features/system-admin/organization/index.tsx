@@ -1,10 +1,11 @@
 "use client";
 
-import { Building2, FileText, Users } from "lucide-react";
+import { Building2, FileText, Users, MapPin } from "lucide-react";
 import { OrganizationSidebar } from "./components/OrganizationSidebar";
 import { OrganizationForm } from "./components/OrganizationForm";
 import { OrganizationUnitEdit } from "./components/OrganizationUnitEdit";
 import { OrganizationStaffing } from "./components/OrganizationStaffing";
+import { UnitScopePanel } from "./components/UnitScopePanel";
 import { useOrganizationApi } from "./hooks/useOrganizationApi";
 import { useOrganizationView } from "./hooks/useOrganizationView";
 import { OrganizationProvider, type ViewMode } from "./context/OrganizationContext";
@@ -25,8 +26,8 @@ export function OrganizationClient() {
   const view = useOrganizationView();
   const { viewState, activeTab, setActiveTab } = view;
 
-  // Chỉ fetch danh mục khi user đang tạo/sửa đơn vị (không phải xem cây)
-  const needCategories = viewState.mode !== "idle";
+  // Fetch danh mục khi đang tạo mới ĐV hoặc khi tab scope/info đang mở
+  const needCategories = viewState.mode !== "idle" || viewState.selectedId != null;
   const api = useOrganizationApi(needCategories);
 
   const contextValue = {
@@ -72,6 +73,11 @@ export function OrganizationClient() {
   const isCreate = viewState.mode !== "idle";
   const hasSelection = viewState.selectedId != null;
 
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    // Khi vào tab scope, trigger load geoAreas nếu cần (sẽ do UnitScopePanel handle)
+  };
+
   const renderRightContent = () => {
     if (isCreate) return <OrganizationForm />;
 
@@ -80,27 +86,53 @@ export function OrganizationClient() {
         <div className="h-full min-h-0 flex flex-col overflow-hidden rounded-xl border bg-card text-card-foreground shadow-sm">
           <Tabs
             value={activeTab}
-            onValueChange={setActiveTab}
+            onValueChange={handleTabChange}
             className="flex-1 flex flex-col min-h-0"
           >
+            {/* Tab bar */}
             <div className="shrink-0 border-b bg-muted/30 px-4 pt-3 pb-2">
               <TabsList className="h-9 w-full sm:w-auto bg-muted/60 p-0.5 rounded-lg">
-                <TabsTrigger value="info" className="gap-2 px-4 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="info"
+                  className="gap-2 px-4 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   <FileText className="h-4 w-4 shrink-0" />
-                  Thông tin đơn vị
+                  Thông tin
                 </TabsTrigger>
-                <TabsTrigger value="staffing" className="gap-2 px-4 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                <TabsTrigger
+                  value="scope"
+                  className="gap-2 px-4 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
+                  <MapPin className="h-4 w-4 shrink-0" />
+                  Phạm vi phụ trách
+                </TabsTrigger>
+                <TabsTrigger
+                  value="staffing"
+                  className="gap-2 px-4 rounded-md data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                >
                   <Users className="h-4 w-4 shrink-0" />
                   Định biên & Chức danh
                 </TabsTrigger>
               </TabsList>
             </div>
+
+            {/* Tab: Thông tin đơn vị */}
             <TabsContent
               value="info"
               className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 data-[state=active]:flex flex-col focus-visible:outline-none"
             >
               <OrganizationUnitEdit />
             </TabsContent>
+
+            {/* Tab: Phạm vi phụ trách */}
+            <TabsContent
+              value="scope"
+              className="flex-1 min-h-0 overflow-y-auto mt-0 pt-6 px-6 pb-6 data-[state=active]:flex flex-col focus-visible:outline-none"
+            >
+              <UnitScopePanel />
+            </TabsContent>
+
+            {/* Tab: Định biên & Chức danh */}
             <TabsContent
               value="staffing"
               className="flex-1 min-h-0 overflow-y-auto mt-0 pt-4 px-4 pb-4 data-[state=active]:flex flex-col focus-visible:outline-none"
