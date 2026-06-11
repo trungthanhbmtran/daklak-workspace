@@ -1,21 +1,22 @@
-import { useEffect, useMemo, useState } from "react";
-import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, ChevronRight, Settings2 } from "lucide-react";
-import { Resolver, useForm, useFieldArray, useWatch } from "react-hook-form";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { Plus, Trash2, ShieldAlert, ShieldCheck, Lock, CheckCircle2, Settings2 } from "lucide-react";
+import { Resolver, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
-import { Role, Permission, Policy } from "../types";
+import { Role, Permission } from "../types";
 import { roleFormSchema, type RoleFormValues } from "../schemas";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ConfirmDeleteModal } from "@/shared/ConfirmDeleteModal";
+
+// Lazy load: chỉ tải khi có role được chọn / tạo mới
+const PolicyCardDialog = lazy(() => import("./PolicyCardDialog"));
 
 interface RoleFormProps {
   selectedRole: Role | null;
@@ -158,13 +159,17 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {isLoadingPerms ? (
-                  // Skeleton khi permissions đang lazy load
                   Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="border rounded-xl bg-muted/30 animate-pulse h-[100px]" />
                   ))
                 ) : (
                   Object.entries(groupedPermissions).map(([resourceName, perms]) => (
-                    <PolicyCardDialog key={resourceName} resourceName={resourceName} perms={perms} form={form} />
+                    <Suspense
+                      key={resourceName}
+                      fallback={<div className="border rounded-xl bg-muted/30 animate-pulse h-[100px]" />}
+                    >
+                      <PolicyCardDialog resourceName={resourceName} perms={perms} form={form} />
+                    </Suspense>
                   ))
                 )}
               </div>
@@ -196,163 +201,3 @@ export function RoleForm({ selectedRole, createMode, permissions, isLoadingPerms
   );
 }
 
-// ============================================================================
-// COMPONENT CON: THIẾT LẬP CHÍNH SÁCH CHO MỘT TÀI NGUYÊN (POLICY CARD DIALOG)
-// ============================================================================
-function PolicyCardDialog({ resourceName, perms, form }: { resourceName: string, perms: Permission[], form: any }) {
-  const [isOpen, setIsOpen] = useState(false);
-
-  // useWatch đảm bảo luôn nhận giá trị policies mới nhất từ form, tránh stale closure
-  const policies: Policy[] = useWatch({ control: form.control, name: "policies" }) || [];
-
-  // Lọc ra các chính sách thuộc resource này
-  const resourceCode = perms[0]?.code.split(":")[0] || "";
-  const configuredPolicies = policies.filter(p => p.resourceCode === resourceCode);
-  const hasPolicies = configuredPolicies.length > 0;
-
-  const handleTogglePolicy = (actionCode: string, checked: boolean) => {
-    // Dùng form.getValues để lấy giá trị mới nhất tại thời điểm gọi (không bị stale closure)
-    const latest = [...(form.getValues("policies") as Policy[])];
-    if (checked) {
-      const alreadyExists = latest.some(p => p.resourceCode === resourceCode && p.action === actionCode);
-      if (!alreadyExists) {
-        latest.push({
-          resourceCode,
-          action: actionCode,
-          effect: "ALLOW",
-          conditions: { expression: "" },
-        });
-      }
-    } else {
-      const idx = latest.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
-      if (idx > -1) latest.splice(idx, 1);
-    }
-    form.setValue("policies", latest, { shouldDirty: true });
-  };
-
-  const handleChangeEffect = (actionCode: string, val: string) => {
-    const latest = [...(form.getValues("policies") as Policy[])];
-    const idx = latest.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
-    if (idx > -1) {
-      latest[idx] = { ...latest[idx], effect: val as "ALLOW" | "DENY" };
-      form.setValue("policies", latest, { shouldDirty: true });
-    }
-  };
-
-  const handleChangeExpression = (actionCode: string, expression: string) => {
-    const latest = [...(form.getValues("policies") as Policy[])];
-    const idx = latest.findIndex(p => p.resourceCode === resourceCode && p.action === actionCode);
-    if (idx > -1) {
-      latest[idx] = { ...latest[idx], conditions: { expression } };
-      form.setValue("policies", latest, { shouldDirty: true });
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <div className="border rounded-xl bg-background shadow-sm hover:shadow-md transition-all cursor-pointer p-4 flex flex-col gap-3 hover:border-primary/50 relative group min-h-[100px]">
-          <div className="flex items-start justify-between gap-2">
-            <span className="font-bold text-[13px] flex items-center gap-2 leading-tight">
-              <CheckCircle2 className={`h-4 w-4 shrink-0 ${hasPolicies ? 'text-primary' : 'text-muted-foreground opacity-40'}`} />
-              <span className="line-clamp-2">{resourceName}</span>
-            </span>
-            <code className="text-[9px] font-mono text-muted-foreground uppercase opacity-60 shrink-0 bg-muted/50 px-1.5 py-0.5 rounded">
-              {resourceCode}
-            </code>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 items-center pr-8 mt-auto">
-            {hasPolicies ? (
-              configuredPolicies.map((p, idx) => (
-                <Badge key={idx} variant="secondary" className={`text-[9px] px-1.5 py-0 border-primary/20 shadow-none font-medium truncate max-w-[120px] ${p.effect === 'DENY' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>
-                  {p.action} {p.conditions?.expression ? '*' : ''}
-                </Badge>
-              ))
-            ) : (
-              <span className="text-[11px] text-muted-foreground/60 italic">Chưa cấu hình chính sách...</span>
-            )}
-          </div>
-
-          <div className="absolute right-4 bottom-4 h-6 w-6 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-            <Settings2 className="h-3.5 w-3.5" />
-          </div>
-        </div>
-      </DialogTrigger>
-
-      {isOpen && (
-        <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden bg-background">
-          <DialogHeader className="p-6 pb-4 border-b shrink-0 bg-background z-10 shadow-sm">
-            <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-              <Lock className="h-5 w-5 text-primary" /> Cấu hình Chính sách: {resourceName}
-            </DialogTitle>
-            <DialogDescription className="text-xs mt-2">
-              Bật các hành động mà vai trò này có thể thao tác, và tuỳ chọn nhập điều kiện phân quyền động (PBAC expression).
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto p-6 bg-muted/5 scrollbar-thin">
-            <div className="space-y-4">
-              {perms.map((perm) => {
-                const actionCode = perm.code.split(":")[1] || perm.action;
-                const currentPolicy = policies.find(p => p.resourceCode === resourceCode && p.action === actionCode) ?? null;
-                const isEnabled = currentPolicy !== null;
-
-                return (
-                  <div key={perm.id} className="p-4 rounded-lg border bg-background flex flex-col gap-4 shadow-sm">
-                    <div className="flex items-center justify-between">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold">{perm.action}</span>
-                        <code className="text-[10px] text-muted-foreground mt-0.5">{perm.code}</code>
-                      </div>
-                      <Switch
-                        checked={isEnabled}
-                        onCheckedChange={(checked) => handleTogglePolicy(actionCode, checked)}
-                      />
-                    </div>
-
-                    {isEnabled && (
-                      <div className="pl-4 border-l-2 border-primary/20 space-y-3 pt-2">
-                        <div className="flex gap-4">
-                          <div className="space-y-1">
-                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Effect (Tác dụng)</FormLabel>
-                            <Select
-                              value={currentPolicy?.effect || "ALLOW"}
-                              onValueChange={(val) => handleChangeEffect(actionCode, val)}
-                            >
-                              <SelectTrigger className="h-8 text-xs w-[120px]">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="ALLOW">ALLOW</SelectItem>
-                                <SelectItem value="DENY">DENY</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-
-                          <div className="flex-1 space-y-1">
-                            <FormLabel className="text-[10px] font-bold uppercase text-muted-foreground">Điều kiện động (Expression)</FormLabel>
-                            <Input
-                              placeholder="VD: ALLOW IF resource.ownerId == currentUserId (Bỏ trống = Luôn cho phép)"
-                              className="h-8 text-xs font-mono placeholder:font-sans"
-                              value={currentPolicy?.conditions?.expression || ''}
-                              onChange={(e) => handleChangeExpression(actionCode, e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        {currentPolicy?.conditions?.expression && (
-                          <p className="text-[10px] text-primary/80 italic">
-                            * Chính sách này áp dụng điều kiện động.
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </DialogContent>
-      )}
-    </Dialog>
-  );
-}
