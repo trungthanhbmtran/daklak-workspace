@@ -4,20 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Pencil,
-  Trash2,
-  Landmark,
-  ArrowRight,
-  Info,
-  ArrowLeftCircleIcon,
-  Briefcase,
-  MapPin,
+  Pencil, Trash2, Landmark, ArrowRight,
+  Info, ArrowLeftCircleIcon, Briefcase, MapPin,
 } from "lucide-react";
 
 import { UnitTypeSelector } from "./UnitTypeSelector";
-import {
-  getUnitCategoryConfig,
-} from "../constants/unitCategoryTaxonomy";
+import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";
+import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../hooks/useUnitTypeCategories";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,18 +25,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue
-} from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { Checkbox } from "@/components/ui/checkbox";
-import { cn } from "@/lib/utils";
 import { useOrganizationContext } from "../context/OrganizationContext";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 
@@ -57,9 +39,7 @@ export function OrganizationUnitEdit() {
   const hasChildren = unit != null && flatUnits.some((u) => u.parentId === unit.id);
   const parentUnit = unit?.parentId != null ? flatUnits.find((u) => u.id === unit.parentId) : null;
 
-  /**
-   * Lọc lĩnh vực chuyên môn dựa trên đơn vị cha (Tính kế thừa ngành dọc)
-   */
+  /** Lọc lĩnh vực theo đơn vị cha (kế thừa ngành dọc) */
   const domainsToOffer = useMemo(() => {
     if (parentUnit?.domainIds?.length && domains.length) {
       return domains.filter((d) => parentUnit.domainIds!.includes(d.id));
@@ -70,13 +50,8 @@ export function OrganizationUnitEdit() {
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
     defaultValues: {
-      code: "",
-      name: "",
-      shortName: "",
-      categoryCode: "",
-      domainIds: [],
-      geographicAreaIds: [],
-      scope: "",
+      code: "", name: "", shortName: "", categoryCode: "",
+      domainIds: [], geographicAreaIds: [], scope: "",
     },
   });
 
@@ -94,10 +69,17 @@ export function OrganizationUnitEdit() {
     }
   }, [unit, form]);
 
-  // Lấy config taxonomy theo categoryCode hiện tại để conditionally render fields
+  // requiredFields từ server — quyết định field nào hiển thị
   const categoryCode = form.watch("categoryCode");
-  const categoryConfig = getUnitCategoryConfig(categoryCode);
-
+  const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
+  const categoryMeta = categoryItems.length
+    ? parseUnitTypeCategoryMeta(categoryItems.find((c) => c.code === categoryCode) ?? categoryItems[0])
+    : null;
+  const requiredFields = categoryCode
+    ? (categoryItems.find((c) => c.code === categoryCode)
+        ? parseUnitTypeCategoryMeta(categoryItems.find((c) => c.code === categoryCode)!).requiredFields
+        : [])
+    : [];
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     if (selectedId == null) return;
@@ -105,7 +87,6 @@ export function OrganizationUnitEdit() {
       ...values,
       code: values.code.trim(),
       name: values.name.trim(),
-      categoryCode: values.categoryCode,
     });
   };
 
@@ -113,7 +94,7 @@ export function OrganizationUnitEdit() {
 
   return (
     <div className="rounded-xl border bg-card shadow-sm border-slate-200 overflow-hidden">
-      {/* HEADER: Phân cấp Cha - Con */}
+      {/* HEADER */}
       <div className="border-b bg-slate-50/80 px-6 py-5 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-sm border border-primary/20">
@@ -137,11 +118,10 @@ export function OrganizationUnitEdit() {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
 
-            {/* THÔNG TIN TÊN & ĐỊNH DANH */}
+            {/* THÔNG TIN CƠ BẢN */}
             <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <FormField
-                control={form.control}
-                name="name"
+                control={form.control} name="name"
                 render={({ field }) => (
                   <FormItem className="md:col-span-2">
                     <FormLabel className="font-bold flex items-center gap-2">
@@ -149,19 +129,17 @@ export function OrganizationUnitEdit() {
                       Tên đầy đủ (theo Quyết định/Con dấu)
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Ví dụ: Sở Nội vụ tỉnh ABC..." {...field} className="h-11 shadow-sm focus:border-primary" />
+                      <Input placeholder="Ví dụ: Sở Nội vụ tỉnh Đắk Lắk" {...field} className="h-11 shadow-sm" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
               <FormField
-                control={form.control}
-                name="code"
+                control={form.control} name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="font-semibold text-xs uppercase text-slate-500">Mã định danh điện tử</FormLabel>
+                    <FormLabel className="font-semibold text-xs uppercase text-slate-500">Mã định danh</FormLabel>
                     <FormControl>
                       <Input {...field} className="font-mono bg-slate-50/50" />
                     </FormControl>
@@ -169,10 +147,8 @@ export function OrganizationUnitEdit() {
                   </FormItem>
                 )}
               />
-
               <FormField
-                control={form.control}
-                name="shortName"
+                control={form.control} name="shortName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="font-semibold text-xs uppercase text-slate-500">Tên viết tắt</FormLabel>
@@ -185,22 +161,17 @@ export function OrganizationUnitEdit() {
               />
             </section>
 
-            {/* PHÂN LOẠI TỔ CHỨC — dùng taxonomy để drive toàn bộ logic */}
+            {/* PHÂN LOẠI TỔ CHỨC */}
             <section className="bg-slate-50/50 p-5 rounded-xl border border-slate-100 space-y-4">
               <FormField
-                control={form.control}
-                name="categoryCode"
+                control={form.control} name="categoryCode"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="text-blue-900 font-black uppercase text-[11px] tracking-widest flex items-center gap-2">
-                      <Star className="h-4 w-4 text-amber-500 fill-amber-500" />
                       Phân loại tổ chức — Hệ thống chính trị
                     </FormLabel>
                     <FormControl>
-                      <UnitTypeSelector
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
+                      <UnitTypeSelector value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormDescription className="text-[11px] flex items-start gap-1.5 mt-2 text-slate-500">
                       <Info className="h-3 w-3 mt-0.5 shrink-0" />
@@ -212,18 +183,15 @@ export function OrganizationUnitEdit() {
               />
             </section>
 
-
-
-            {/* LĨNH VỰC & ĐỊA BÀN QUẢN LÝ — chỉ show nếu taxonomy yêu cầu */}
-            {(categoryConfig?.requiredFields.includes("domainIds") || categoryConfig?.requiredFields.includes("geographicAreaIds")) && (
+            {/* LĨNH VỰC & ĐỊA BÀN — chỉ show nếu server yêu cầu */}
+            {(requiredFields.includes("domainIds") || requiredFields.includes("geographicAreaIds")) && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {categoryConfig.requiredFields.includes("domainIds") && (
+                {requiredFields.includes("domainIds") && (
                   <FormField
-                    control={form.control}
-                    name="domainIds"
+                    control={form.control} name="domainIds"
                     render={({ field }) => (
                       <FormItem className="flex flex-col space-y-1.5">
-                        <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs mb-1">
+                        <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs">
                           <Briefcase className="h-4 w-4 text-slate-400" /> Lĩnh vực
                         </FormLabel>
                         <FormControl>
@@ -243,14 +211,12 @@ export function OrganizationUnitEdit() {
                     )}
                   />
                 )}
-
-                {categoryConfig.requiredFields.includes("geographicAreaIds") && (
+                {requiredFields.includes("geographicAreaIds") && (
                   <FormField
-                    control={form.control}
-                    name="geographicAreaIds"
+                    control={form.control} name="geographicAreaIds"
                     render={({ field }) => (
                       <FormItem className="flex flex-col space-y-1.5">
-                        <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs mb-1">
+                        <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs">
                           <MapPin className="h-4 w-4 text-emerald-600" /> Phạm vi địa lý
                         </FormLabel>
                         <FormControl>
@@ -273,30 +239,24 @@ export function OrganizationUnitEdit() {
               </div>
             )}
 
-            {/* FOOTER ACTIONS */}
-            <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100 mt-10">
-              {meta.allowedActions?.includes('DELETE') ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  className="w-full sm:w-auto text-destructive hover:bg-red-50 hover:text-destructive font-semibold"
-                  disabled={isDeleting}
-                  onClick={() => setDeleteOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Gỡ bỏ đơn vị
-                </Button>
-              ) : <div />}
+            {/* FOOTER */}
+            <div className="flex flex-col-reverse sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
+              <Button
+                type="button" variant="ghost"
+                className="w-full sm:w-auto text-destructive hover:bg-red-50 font-semibold"
+                disabled={isDeleting}
+                onClick={() => setDeleteOpen(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Gỡ bỏ đơn vị
+              </Button>
 
               <div className="flex w-full sm:w-auto items-center gap-3">
                 <Button type="button" variant="outline" className="flex-1 sm:flex-none h-11 px-6 font-semibold" onClick={() => actions.cancel()}>
                   Hủy
                 </Button>
-                {meta.allowedActions?.includes('EDIT') && (
-                  <Button type="submit" className="flex-1 sm:flex-none h-11 px-10 font-bold shadow-md shadow-primary/20" disabled={isUpdating}>
-                    {isUpdating ? "Đang xử lý..." : "Lưu dữ liệu"}
-                  </Button>
-                )}
+                <Button type="submit" className="flex-1 sm:flex-none h-11 px-10 font-bold shadow-md shadow-primary/20" disabled={isUpdating}>
+                  {isUpdating ? "Đang xử lý..." : "Lưu dữ liệu"}
+                </Button>
               </div>
             </div>
           </form>
@@ -309,14 +269,14 @@ export function OrganizationUnitEdit() {
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-bold">Xác nhận xóa đơn vị?</AlertDialogTitle>
             <AlertDialogDescription className="space-y-3 pt-2">
-              <p>Bạn đang yêu cầu gỡ bỏ <b>&quot;{unit?.name}&quot;</b> khỏi hệ thống quản lý.</p>
+              <p>Bạn đang yêu cầu gỡ bỏ <b>&quot;{unit?.name}&quot;</b> khỏi hệ thống.</p>
               {hasChildren ? (
                 <div className="p-4 bg-red-50 text-red-700 rounded-lg border border-red-100 flex gap-3 italic font-semibold text-xs">
                   <ArrowLeftCircleIcon className="h-5 w-5 shrink-0" />
                   Hành động bị từ chối: Đơn vị đang có đơn vị con trực thuộc. Vui lòng di dời hoặc xóa đơn vị con trước.
                 </div>
               ) : (
-                <p className="text-xs text-muted-foreground italic underline decoration-red-200 decoration-2 underline-offset-4 uppercase font-black tracking-tighter">
+                <p className="text-xs text-muted-foreground italic uppercase font-black tracking-tighter">
                   Cảnh báo: Thao tác này không thể khôi phục sau khi xác nhận.
                 </p>
               )}
@@ -325,8 +285,7 @@ export function OrganizationUnitEdit() {
           <AlertDialogFooter className="mt-4 gap-2 sm:justify-center">
             <AlertDialogCancel className="w-full sm:w-28 font-bold">Quay lại</AlertDialogCancel>
             <Button
-              variant="destructive"
-              className="w-full sm:w-32 font-bold"
+              variant="destructive" className="w-full sm:w-32 font-bold"
               disabled={isDeleting || hasChildren}
               onClick={() => {
                 actions.deleteUnit(selectedId!).then(() => {

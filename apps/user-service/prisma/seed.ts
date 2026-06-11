@@ -1,4 +1,4 @@
-﻿import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 let PrismaClient: any;
 try {
@@ -5147,8 +5147,130 @@ async function main() {
   }
   console.log('✅ Hoàn tất Seed PBAC Engine.');
 
+  // ==========================================================
+  // UNIT_TYPE_CATEGORY — Phân loại tổ chức (nguồn sự thật từ server)
+  // Frontend chỉ parse description JSON và render, không hardcode logic.
+  // ==========================================================
+  const unitTypeCategories = [
+    {
+      code: 'CHINH_QUYEN',
+      name: 'Cơ quan hành chính nhà nước',
+      order: 1,
+      description: JSON.stringify({
+        icon: 'Landmark',
+        color: 'blue',
+        description: 'Sở, Ban, UBND các cấp, Chi cục trực thuộc',
+        signingNote: 'Ký ban hành văn bản quản lý nhà nước (QĐ, CV, TB) theo thẩm quyền được phân cấp.',
+        purposeNote: 'Thực hiện chức năng quản lý hành chính nhà nước trong lĩnh vực được giao.',
+        signingAuthority: 'FULL',
+        politicalSystem: 'HANH_CHINH',
+        requiredFields: ['domainIds', 'geographicAreaIds'],
+        leaderTitleKeywords: ['Giám đốc', 'Phó Giám đốc', 'Chủ tịch UBND', 'Phó Chủ tịch UBND'],
+        staffTitleKeywords: ['Chuyên viên cao cấp', 'Chuyên viên chính', 'Chuyên viên', 'Nhân viên'],
+      }),
+    },
+    {
+      code: 'DANG',
+      name: 'Tổ chức đảng',
+      order: 2,
+      description: JSON.stringify({
+        icon: 'Flag',
+        color: 'red',
+        description: 'Tỉnh ủy, Huyện ủy, Đảng bộ, Chi bộ, Ban Đảng',
+        signingNote: 'Ký ban hành nghị quyết, chỉ thị, thông báo kết luận của Đảng. Không thay thế văn bản hành chính nhà nước.',
+        purposeNote: 'Lãnh đạo chính trị theo hệ thống Đảng, song song với hệ thống hành chính chính quyền.',
+        signingAuthority: 'FULL',
+        politicalSystem: 'DANG',
+        requiredFields: [],
+        leaderTitleKeywords: ['Bí thư', 'Phó Bí thư', 'Ủy viên Ban Thường vụ', 'Tỉnh ủy viên'],
+        staffTitleKeywords: ['Chuyên viên đảng', 'Nhân viên văn phòng Đảng ủy'],
+      }),
+    },
+    {
+      code: 'THAM_MUU',
+      name: 'Phòng ban tham mưu tổng hợp',
+      order: 3,
+      description: JSON.stringify({
+        icon: 'ClipboardList',
+        color: 'violet',
+        description: 'Văn phòng, Thanh tra, Phòng Tổ chức cán bộ, Kế hoạch–Tài chính',
+        signingNote: 'Ký thừa lệnh hoặc theo ủy quyền. Không ban hành văn bản quy phạm pháp luật độc lập.',
+        purposeNote: 'Tham mưu tổng hợp, điều phối nội bộ, hành chính quản trị cho lãnh đạo cơ quan.',
+        signingAuthority: 'DELEGATED',
+        politicalSystem: 'HANH_CHINH',
+        requiredFields: ['domainIds'],
+        leaderTitleKeywords: ['Chánh Văn phòng', 'Phó Chánh Văn phòng', 'Chánh Thanh tra', 'Trưởng phòng', 'Phó Trưởng phòng'],
+        staffTitleKeywords: ['Chuyên viên', 'Kế toán viên', 'Nhân viên'],
+      }),
+    },
+    {
+      code: 'CHUYEN_MON',
+      name: 'Phòng ban chuyên môn nghiệp vụ',
+      order: 4,
+      description: JSON.stringify({
+        icon: 'BookOpen',
+        color: 'emerald',
+        description: 'Phòng nghiệp vụ, Chi cục trực thuộc Sở',
+        signingNote: 'Tham mưu và thực thi chuyên ngành. Chi cục có thể ký một số văn bản theo phân cấp cụ thể.',
+        purposeNote: 'Quản lý chuyên môn theo ngành dọc; thanh tra, kiểm tra, hướng dẫn nghiệp vụ.',
+        signingAuthority: 'DELEGATED',
+        politicalSystem: 'HANH_CHINH',
+        requiredFields: ['domainIds', 'geographicAreaIds'],
+        leaderTitleKeywords: ['Trưởng phòng', 'Phó Trưởng phòng', 'Chi cục trưởng', 'Phó Chi cục trưởng'],
+        staffTitleKeywords: ['Chuyên viên', 'Chuyên viên chính', 'Chuyên viên cao cấp', 'Kiểm soát viên'],
+      }),
+    },
+    {
+      code: 'SU_NGHIEP',
+      name: 'Đơn vị sự nghiệp công lập',
+      order: 5,
+      description: JSON.stringify({
+        icon: 'GraduationCap',
+        color: 'amber',
+        description: 'Trung tâm, Trường, Bệnh viện, Ban quản lý dự án',
+        signingNote: 'Ký hợp đồng dịch vụ, văn bản nội bộ. Vượt thẩm quyền phải trình cơ quan chủ quản (Sở).',
+        purposeNote: 'Cung cấp dịch vụ công theo cơ chế tự chủ (toàn phần hoặc một phần). Hoạt động theo Luật Viên chức.',
+        signingAuthority: 'FULL',
+        politicalSystem: 'SU_NGHIEP',
+        requiredFields: ['domainIds', 'scope'],
+        leaderTitleKeywords: ['Giám đốc', 'Phó Giám đốc', 'Hiệu trưởng', 'Phó Hiệu trưởng', 'Trưởng ban'],
+        staffTitleKeywords: ['Viên chức', 'Giáo viên', 'Bác sĩ', 'Điều dưỡng', 'Kỹ sư', 'Giảng viên'],
+      }),
+    },
+    {
+      code: 'PHONG_THUOC_SN',
+      name: 'Phòng/Tổ thuộc đơn vị sự nghiệp',
+      order: 6,
+      description: JSON.stringify({
+        icon: 'Users',
+        color: 'slate',
+        description: 'Phòng HC–TH, Tổ chuyên môn nội bộ TT/Trường/BV',
+        signingNote: 'Không ký văn bản đối ngoại. Mọi trao đổi ra ngoài phải qua Giám đốc/Hiệu trưởng đơn vị.',
+        purposeNote: 'Thực hiện chức năng chuyên môn nội bộ trong đơn vị sự nghiệp. Không có tư cách pháp nhân độc lập.',
+        signingAuthority: 'INTERNAL',
+        politicalSystem: 'SU_NGHIEP',
+        requiredFields: ['domainIds'],
+        leaderTitleKeywords: ['Trưởng phòng', 'Phó Trưởng phòng', 'Tổ trưởng', 'Tổ phó'],
+        staffTitleKeywords: ['Viên chức', 'Nhân viên', 'Kỹ thuật viên', 'Y tá', 'Hộ lý'],
+      }),
+    },
+  ];
 
-
+  for (const cat of unitTypeCategories) {
+    await (prisma as any).category.upsert({
+      where: { code_group: { code: cat.code, group: 'UNIT_TYPE_CATEGORY' } },
+      update: { name: cat.name, sort: cat.order, description: cat.description, active: 1 },
+      create: {
+        group: 'UNIT_TYPE_CATEGORY',
+        code: cat.code,
+        name: cat.name,
+        sort: cat.order,
+        active: 1,
+        description: cat.description,
+      },
+    });
+  }
+  console.log('✅ Hoàn tất seed UNIT_TYPE_CATEGORY (6 nhóm phân loại tổ chức).');
 
 
   // ==========================================================

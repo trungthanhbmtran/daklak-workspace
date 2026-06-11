@@ -7,7 +7,7 @@ import { organizationQueryKeys, categoryQueryKeys } from "../constants/queryKeys
 import type { CreateUnitPayload, OrganizationUnitNode, UpdateUnitPayload } from "../types";
 
 const STALE_TIME = 2 * 60 * 1000;   // 2 phút — cây tổ chức ít đổi
-const GC_TIME   = 10 * 60 * 1000;   // 10 phút
+const GC_TIME = 10 * 60 * 1000;   // 10 phút
 const CAT_STALE = 10 * 60 * 1000;   // danh mục rất ít đổi
 
 function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
@@ -41,9 +41,8 @@ export function useOrganizationApi(needCategories = false) {
     gcTime: GC_TIME,
   });
 
-  const tree        = treeResponse?.items ?? [];
-  const allowedActions = treeResponse?.meta?.allowedActions ?? [];
-  const flatUnits   = flattenTree(tree);
+  const tree = treeResponse?.items ?? [];
+  const flatUnits = flattenTree(tree);
 
   // Lĩnh vực + khu vực địa lý — lazy (chỉ cần khi form mở)
   const { data: domains = [], isLoading: isLoadingDomains } = useQuery({
@@ -99,7 +98,6 @@ export function useOrganizationApi(needCategories = false) {
   return {
     tree,
     flatUnits,
-    allowedActions,
     domains,
     geoAreas,
     isLoadingTree,

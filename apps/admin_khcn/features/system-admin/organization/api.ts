@@ -83,10 +83,9 @@ function normalizeStaffingReportItem(r: any): StaffingReportItem {
 }
 
 export const organizationApi = {
-  getTree: (): Promise<{ items: OrganizationUnitNode[]; meta: any }> =>
+  getTree: (): Promise<{ items: OrganizationUnitNode[] }> =>
     apiClient.get("/organizations/tree").then((r: any) => ({
       items: (r.data ?? []).map(normalizeUnitNode),
-      meta: r.meta ?? { allowedActions: [] },
     })),
 
   getOne: (id: number) =>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Building2, CornerDownRight, Briefcase, MapPin } from "lucide-react";
@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { MultiSelectModal } from "./MultiSelectModal";
 import { UnitTypeSelector } from "./UnitTypeSelector";
+import { useGetCategoryByGroup } from "../../categories/hooks/useCategoryApi";
+import { parseUnitTypeCategoryMeta, UNIT_TYPE_CATEGORY_GROUP } from "../hooks/useUnitTypeCategories";
 import type { OrganizationUnitNode } from "../types";
 import { organizationUnitSchema, type OrganizationUnitFormValues } from "../schemas";
 import { useOrganizationContext } from "../context/OrganizationContext";
@@ -16,7 +18,6 @@ import { useOrganizationContext } from "../context/OrganizationContext";
 export function OrganizationForm() {
   const { state, actions, meta } = useOrganizationContext();
   const { flatUnits, mode, parentId } = state;
-  const isCreate = mode.startsWith("create");
 
   if (mode === "idle") {
     return (
@@ -33,13 +34,11 @@ export function OrganizationForm() {
     );
   }
 
-  const parentUnit =
-    parentId != null ? flatUnits.find((u) => u.id === parentId) : null;
-  const formKey = `create-${parentId ?? "root"}`;
+  const parentUnit = parentId != null ? flatUnits.find((u) => u.id === parentId) : null;
 
   return (
     <OrganizationFormInner
-      key={formKey}
+      key={`create-${parentId ?? "root"}`}
       parentUnit={parentUnit}
       parentId={parentId ?? undefined}
       domains={meta.domains}
@@ -73,14 +72,8 @@ function OrganizationFormInner({
   isLoadingDomains: boolean;
   isLoadingGeoAreas: boolean;
   createUnit: (payload: {
-    code: string;
-    name: string;
-    shortName?: string;
-    categoryCode: string;
-    parentId?: number;
-    domainIds?: number[];
-    geographicAreaIds?: number[];
-    scope?: string;
+    code: string; name: string; shortName?: string; categoryCode: string;
+    parentId?: number; domainIds?: number[]; geographicAreaIds?: number[]; scope?: string;
   }) => Promise<unknown>;
   isCreating: boolean;
   onSuccess: () => void;
@@ -89,38 +82,32 @@ function OrganizationFormInner({
   const form = useForm<OrganizationUnitFormValues>({
     resolver: zodResolver(organizationUnitSchema) as unknown as Resolver<OrganizationUnitFormValues>,
     defaultValues: {
-      code: "",
-      name: "",
-      shortName: "",
-      categoryCode: "",
-      domainIds: [],
-      geographicAreaIds: [],
-      scope: "",
+      code: "", name: "", shortName: "", categoryCode: "",
+      domainIds: [], geographicAreaIds: [], scope: "",
     },
   });
 
   useEffect(() => {
     form.reset({
-      code: "",
-      name: "",
-      shortName: "",
-      categoryCode: "",
-      domainIds: [],
-      geographicAreaIds: [],
-      scope: "",
+      code: "", name: "", shortName: "", categoryCode: "",
+      domainIds: [], geographicAreaIds: [], scope: "",
     });
   }, [parentId, form]);
 
+  // requiredFields từ server — quyết định domain/geo có hiển thị không
+  const categoryCode = form.watch("categoryCode");
+  const { data: categoryItems = [] } = useGetCategoryByGroup(UNIT_TYPE_CATEGORY_GROUP);
+  const requiredFields = categoryCode
+    ? (categoryItems.find((c) => c.code === categoryCode)
+        ? parseUnitTypeCategoryMeta(categoryItems.find((c) => c.code === categoryCode)!).requiredFields
+        : [])
+    : [];
+
+  // Lọc lĩnh vực theo cha (kế thừa ngành dọc)
   const domainsToOffer =
     parentId != null && parentUnit?.domainIds?.length
       ? domains.filter((d) => parentUnit.domainIds!.includes(d.id))
       : domains;
-
-  const [searchDomain, setSearchDomain] = useState("");
-  const [searchGeo, setSearchGeo] = useState("");
-
-  const filteredDomains = domainsToOffer.filter(d => d.name.toLowerCase().includes(searchDomain.toLowerCase()));
-  const filteredGeos = (geoAreas || []).filter(g => g.name.toLowerCase().includes(searchGeo.toLowerCase()));
 
   const handleSubmit = async (values: OrganizationUnitFormValues) => {
     await createUnit({
@@ -162,8 +149,7 @@ function OrganizationFormInner({
           <div className="flex-1 overflow-y-auto p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-3xl">
               <FormField
-                control={form.control}
-                name="name"
+                control={form.control} name="name"
                 render={({ field }) => (
                   <FormItem className="col-span-1 md:col-span-2">
                     <FormLabel>Tên đơn vị <span className="text-destructive">*</span></FormLabel>
@@ -175,8 +161,7 @@ function OrganizationFormInner({
                 )}
               />
               <FormField
-                control={form.control}
-                name="code"
+                control={form.control} name="code"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Mã đơn vị <span className="text-destructive">*</span></FormLabel>
@@ -188,8 +173,7 @@ function OrganizationFormInner({
                 )}
               />
               <FormField
-                control={form.control}
-                name="shortName"
+                control={form.control} name="shortName"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Tên viết tắt (Tùy chọn)</FormLabel>
@@ -200,85 +184,86 @@ function OrganizationFormInner({
                   </FormItem>
                 )}
               />
+
+              {/* PHÂN LOẠI */}
               <FormField
-                control={form.control}
-                name="categoryCode"
+                control={form.control} name="categoryCode"
                 render={({ field }) => (
                   <FormItem className="col-span-1 md:col-span-2">
                     <FormLabel>Phân loại tổ chức <span className="text-destructive">*</span></FormLabel>
                     <FormControl>
-                      <UnitTypeSelector
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
+                      <UnitTypeSelector value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
-                <FormField
-                  control={form.control}
-                  name="domainIds"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col space-y-1.5">
-                      <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs mb-1">
-                        <span className="flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-slate-400" /> Lĩnh vực chuyên môn</span>
-                      </FormLabel>
-                      {parentUnit?.domainIds?.length != null && parentUnit.domainIds.length > 0 && (
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Giới hạn trong lĩnh vực mà đơn vị cha <strong>{parentUnit.name}</strong> được giao.
-                        </p>
-                      )}
-                      <FormControl>
-                        <MultiSelectModal
-                          title="Chọn lĩnh vực chuyên môn"
-                          icon={<Briefcase className="h-5 w-5" />}
-                          items={domainsToOffer}
-                          selectedIds={field.value ?? []}
-                          onChange={field.onChange}
-                          placeholderSearch="Tìm lĩnh vực..."
-                          triggerLabel="Chọn lĩnh vực"
-                          isLoading={isLoadingDomains}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
 
-                <FormField
-                  control={form.control}
-                  name="geographicAreaIds"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col space-y-1.5">
-                      <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center justify-between text-xs mb-1">
-                        <span className="flex items-center gap-1.5"><MapPin className="h-4 w-4 text-emerald-600" /> Phạm vi địa lý</span>
-                      </FormLabel>
-                      <FormControl>
-                        <MultiSelectModal
-                          title="Chọn phạm vi địa lý"
-                          icon={<MapPin className="h-5 w-5" />}
-                          items={geoAreas}
-                          selectedIds={field.value ?? []}
-                          onChange={field.onChange}
-                          placeholderSearch="Tìm tỉnh thành, khu vực..."
-                          triggerLabel="Chọn khu vực địa lý"
-                          isLoading={isLoadingGeoAreas}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+              {/* LĨNH VỰC & ĐỊA BÀN — chỉ hiển thị khi server yêu cầu */}
+              {(requiredFields.includes("domainIds") || requiredFields.includes("geographicAreaIds")) && (
+                <div className="col-span-1 md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                  {requiredFields.includes("domainIds") && (
+                    <FormField
+                      control={form.control} name="domainIds"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col space-y-1.5">
+                          <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs">
+                            <Briefcase className="h-4 w-4 text-slate-400" /> Lĩnh vực chuyên môn
+                          </FormLabel>
+                          {parentUnit?.domainIds?.length ? (
+                            <p className="text-xs text-muted-foreground">
+                              Giới hạn trong lĩnh vực của đơn vị cha <strong>{parentUnit.name}</strong>.
+                            </p>
+                          ) : null}
+                          <FormControl>
+                            <MultiSelectModal
+                              title="Chọn lĩnh vực chuyên môn"
+                              icon={<Briefcase className="h-5 w-5" />}
+                              items={domainsToOffer}
+                              selectedIds={field.value ?? []}
+                              onChange={field.onChange}
+                              placeholderSearch="Tìm lĩnh vực..."
+                              triggerLabel="Chọn lĩnh vực"
+                              isLoading={isLoadingDomains}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
-              </div>
+                  {requiredFields.includes("geographicAreaIds") && (
+                    <FormField
+                      control={form.control} name="geographicAreaIds"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col space-y-1.5">
+                          <FormLabel className="font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 text-xs">
+                            <MapPin className="h-4 w-4 text-emerald-600" /> Phạm vi địa lý
+                          </FormLabel>
+                          <FormControl>
+                            <MultiSelectModal
+                              title="Chọn phạm vi địa lý"
+                              icon={<MapPin className="h-5 w-5" />}
+                              items={geoAreas}
+                              selectedIds={field.value ?? []}
+                              onChange={field.onChange}
+                              placeholderSearch="Tìm tỉnh thành, khu vực..."
+                              triggerLabel="Chọn khu vực địa lý"
+                              isLoading={isLoadingGeoAreas}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="shrink-0 border-t bg-muted/20 px-6 py-4 flex justify-end gap-3">
-            <Button type="button" variant="outline" size="sm" onClick={onCancel}>
-              Hủy
-            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={onCancel}>Hủy</Button>
             <Button type="submit" size="sm" disabled={isCreating}>
               {isCreating ? "Đang lưu..." : "Thêm đơn vị"}
             </Button>
