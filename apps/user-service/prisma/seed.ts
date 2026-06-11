@@ -5148,130 +5148,164 @@ async function main() {
   console.log('✅ Hoàn tất Seed PBAC Engine.');
 
   // ==========================================================
-  // UNIT_TYPE_CATEGORY — Phân loại tổ chức (nguồn sự thật từ server)
-  // Frontend chỉ parse description JSON và render, không hardcode logic.
+  // UNIT_TYPE_CATEGORY — Cập nhật description với metadata đầy đủ
+  // Categories đã tạo qua loop chuẩn ở trên (group_code unique).
+  // description lưu trong CategoryTranslation.description (JSON).
+  // Frontend parse và render, không hardcode logic nghiệp vụ.
   // ==========================================================
-  const unitTypeCategories = [
-    {
-      code: 'CHINH_QUYEN',
-      name: 'Cơ quan hành chính nhà nước',
-      order: 1,
-      description: JSON.stringify({
-        icon: 'Landmark',
-        color: 'blue',
+  const unitTypeMeta: Record<string, { descVi: string; descEn: string }> = {
+    CHINH_QUYEN: {
+      descVi: JSON.stringify({
+        icon: 'Landmark', color: 'blue',
         description: 'Sở, Ban, UBND các cấp, Chi cục trực thuộc',
         signingNote: 'Ký ban hành văn bản quản lý nhà nước (QĐ, CV, TB) theo thẩm quyền được phân cấp.',
         purposeNote: 'Thực hiện chức năng quản lý hành chính nhà nước trong lĩnh vực được giao.',
-        signingAuthority: 'FULL',
-        politicalSystem: 'HANH_CHINH',
+        signingAuthority: 'FULL', politicalSystem: 'HANH_CHINH',
         requiredFields: ['domainIds', 'geographicAreaIds'],
         leaderTitleKeywords: ['Giám đốc', 'Phó Giám đốc', 'Chủ tịch UBND', 'Phó Chủ tịch UBND'],
         staffTitleKeywords: ['Chuyên viên cao cấp', 'Chuyên viên chính', 'Chuyên viên', 'Nhân viên'],
       }),
+      descEn: JSON.stringify({
+        icon: 'Landmark', color: 'blue',
+        description: 'Departments, Offices, People\'s Committees, Sub-departments',
+        signingNote: 'Issue state management documents (Decisions, Dispatches, Notices) within delegated authority.',
+        purposeNote: 'Performs state administrative management functions in assigned fields.',
+        signingAuthority: 'FULL', politicalSystem: 'HANH_CHINH',
+        requiredFields: ['domainIds', 'geographicAreaIds'],
+        leaderTitleKeywords: ['Director', 'Deputy Director', 'Chairman', 'Vice Chairman'],
+        staffTitleKeywords: ['Senior Expert', 'Principal Expert', 'Expert', 'Staff'],
+      }),
     },
-    {
-      code: 'DANG',
-      name: 'Tổ chức đảng',
-      order: 2,
-      description: JSON.stringify({
-        icon: 'Flag',
-        color: 'red',
+    DANG: {
+      descVi: JSON.stringify({
+        icon: 'Flag', color: 'red',
         description: 'Tỉnh ủy, Huyện ủy, Đảng bộ, Chi bộ, Ban Đảng',
-        signingNote: 'Ký ban hành nghị quyết, chỉ thị, thông báo kết luận của Đảng. Không thay thế văn bản hành chính nhà nước.',
-        purposeNote: 'Lãnh đạo chính trị theo hệ thống Đảng, song song với hệ thống hành chính chính quyền.',
-        signingAuthority: 'FULL',
-        politicalSystem: 'DANG',
+        signingNote: 'Ký ban hành nghị quyết, chỉ thị, thông báo kết luận của Đảng.',
+        purposeNote: 'Lãnh đạo chính trị theo hệ thống Đảng, song song với hệ thống hành chính.',
+        signingAuthority: 'FULL', politicalSystem: 'DANG',
         requiredFields: [],
         leaderTitleKeywords: ['Bí thư', 'Phó Bí thư', 'Ủy viên Ban Thường vụ', 'Tỉnh ủy viên'],
         staffTitleKeywords: ['Chuyên viên đảng', 'Nhân viên văn phòng Đảng ủy'],
       }),
+      descEn: JSON.stringify({
+        icon: 'Flag', color: 'red',
+        description: 'Provincial/District Party Committees, Party Cells',
+        signingNote: 'Issue Party resolutions, directives, and conclusion notices.',
+        purposeNote: 'Political leadership through the Party system, parallel to administrative governance.',
+        signingAuthority: 'FULL', politicalSystem: 'DANG',
+        requiredFields: [],
+        leaderTitleKeywords: ['Secretary', 'Deputy Secretary', 'Standing Committee Member'],
+        staffTitleKeywords: ['Party Expert', 'Party Office Staff'],
+      }),
     },
-    {
-      code: 'THAM_MUU',
-      name: 'Phòng ban tham mưu tổng hợp',
-      order: 3,
-      description: JSON.stringify({
-        icon: 'ClipboardList',
-        color: 'violet',
+    THAM_MUU: {
+      descVi: JSON.stringify({
+        icon: 'ClipboardList', color: 'violet',
         description: 'Văn phòng, Thanh tra, Phòng Tổ chức cán bộ, Kế hoạch–Tài chính',
         signingNote: 'Ký thừa lệnh hoặc theo ủy quyền. Không ban hành văn bản quy phạm pháp luật độc lập.',
         purposeNote: 'Tham mưu tổng hợp, điều phối nội bộ, hành chính quản trị cho lãnh đạo cơ quan.',
-        signingAuthority: 'DELEGATED',
-        politicalSystem: 'HANH_CHINH',
+        signingAuthority: 'DELEGATED', politicalSystem: 'HANH_CHINH',
         requiredFields: ['domainIds'],
         leaderTitleKeywords: ['Chánh Văn phòng', 'Phó Chánh Văn phòng', 'Chánh Thanh tra', 'Trưởng phòng', 'Phó Trưởng phòng'],
         staffTitleKeywords: ['Chuyên viên', 'Kế toán viên', 'Nhân viên'],
       }),
+      descEn: JSON.stringify({
+        icon: 'ClipboardList', color: 'violet',
+        description: 'Office, Inspectorate, Personnel Dept, Finance & Planning',
+        signingNote: 'Sign on behalf of or by delegation. Cannot independently issue regulatory documents.',
+        purposeNote: 'Comprehensive advisory, internal coordination, and administrative management.',
+        signingAuthority: 'DELEGATED', politicalSystem: 'HANH_CHINH',
+        requiredFields: ['domainIds'],
+        leaderTitleKeywords: ['Chief of Office', 'Deputy Chief', 'Chief Inspector', 'Head of Department'],
+        staffTitleKeywords: ['Expert', 'Accountant', 'Staff'],
+      }),
     },
-    {
-      code: 'CHUYEN_MON',
-      name: 'Phòng ban chuyên môn nghiệp vụ',
-      order: 4,
-      description: JSON.stringify({
-        icon: 'BookOpen',
-        color: 'emerald',
+    CHUYEN_MON: {
+      descVi: JSON.stringify({
+        icon: 'BookOpen', color: 'emerald',
         description: 'Phòng nghiệp vụ, Chi cục trực thuộc Sở',
-        signingNote: 'Tham mưu và thực thi chuyên ngành. Chi cục có thể ký một số văn bản theo phân cấp cụ thể.',
+        signingNote: 'Tham mưu và thực thi chuyên ngành. Chi cục có thể ký một số văn bản theo phân cấp.',
         purposeNote: 'Quản lý chuyên môn theo ngành dọc; thanh tra, kiểm tra, hướng dẫn nghiệp vụ.',
-        signingAuthority: 'DELEGATED',
-        politicalSystem: 'HANH_CHINH',
+        signingAuthority: 'DELEGATED', politicalSystem: 'HANH_CHINH',
         requiredFields: ['domainIds', 'geographicAreaIds'],
         leaderTitleKeywords: ['Trưởng phòng', 'Phó Trưởng phòng', 'Chi cục trưởng', 'Phó Chi cục trưởng'],
         staffTitleKeywords: ['Chuyên viên', 'Chuyên viên chính', 'Chuyên viên cao cấp', 'Kiểm soát viên'],
       }),
+      descEn: JSON.stringify({
+        icon: 'BookOpen', color: 'emerald',
+        description: 'Specialized divisions, Sub-departments under Departments',
+        signingNote: 'Advisory and implementation in specialized fields. Sub-departments may sign certain documents.',
+        purposeNote: 'Vertical sector management; inspection, guidance on professional matters.',
+        signingAuthority: 'DELEGATED', politicalSystem: 'HANH_CHINH',
+        requiredFields: ['domainIds', 'geographicAreaIds'],
+        leaderTitleKeywords: ['Head of Division', 'Deputy Head', 'Sub-department Director'],
+        staffTitleKeywords: ['Expert', 'Principal Expert', 'Senior Expert', 'Inspector'],
+      }),
     },
-    {
-      code: 'SU_NGHIEP',
-      name: 'Đơn vị sự nghiệp công lập',
-      order: 5,
-      description: JSON.stringify({
-        icon: 'GraduationCap',
-        color: 'amber',
+    SU_NGHIEP: {
+      descVi: JSON.stringify({
+        icon: 'GraduationCap', color: 'amber',
         description: 'Trung tâm, Trường, Bệnh viện, Ban quản lý dự án',
-        signingNote: 'Ký hợp đồng dịch vụ, văn bản nội bộ. Vượt thẩm quyền phải trình cơ quan chủ quản (Sở).',
-        purposeNote: 'Cung cấp dịch vụ công theo cơ chế tự chủ (toàn phần hoặc một phần). Hoạt động theo Luật Viên chức.',
-        signingAuthority: 'FULL',
-        politicalSystem: 'SU_NGHIEP',
+        signingNote: 'Ký hợp đồng dịch vụ, văn bản nội bộ. Vượt thẩm quyền phải trình cơ quan chủ quản.',
+        purposeNote: 'Cung cấp dịch vụ công theo cơ chế tự chủ. Hoạt động theo Luật Viên chức.',
+        signingAuthority: 'FULL', politicalSystem: 'SU_NGHIEP',
         requiredFields: ['domainIds', 'scope'],
         leaderTitleKeywords: ['Giám đốc', 'Phó Giám đốc', 'Hiệu trưởng', 'Phó Hiệu trưởng', 'Trưởng ban'],
         staffTitleKeywords: ['Viên chức', 'Giáo viên', 'Bác sĩ', 'Điều dưỡng', 'Kỹ sư', 'Giảng viên'],
       }),
+      descEn: JSON.stringify({
+        icon: 'GraduationCap', color: 'amber',
+        description: 'Centers, Schools, Hospitals, Project Management Boards',
+        signingNote: 'Sign service contracts, internal documents. Exceed authority must report to supervising agency.',
+        purposeNote: 'Provide public services under autonomous mechanism. Operate under Civil Servant Law.',
+        signingAuthority: 'FULL', politicalSystem: 'SU_NGHIEP',
+        requiredFields: ['domainIds', 'scope'],
+        leaderTitleKeywords: ['Director', 'Deputy Director', 'Principal', 'Vice Principal'],
+        staffTitleKeywords: ['Official', 'Teacher', 'Doctor', 'Nurse', 'Engineer', 'Lecturer'],
+      }),
     },
-    {
-      code: 'PHONG_THUOC_SN',
-      name: 'Phòng/Tổ thuộc đơn vị sự nghiệp',
-      order: 6,
-      description: JSON.stringify({
-        icon: 'Users',
-        color: 'slate',
+    PHONG_THUOC_SN: {
+      descVi: JSON.stringify({
+        icon: 'Users', color: 'slate',
         description: 'Phòng HC–TH, Tổ chuyên môn nội bộ TT/Trường/BV',
-        signingNote: 'Không ký văn bản đối ngoại. Mọi trao đổi ra ngoài phải qua Giám đốc/Hiệu trưởng đơn vị.',
-        purposeNote: 'Thực hiện chức năng chuyên môn nội bộ trong đơn vị sự nghiệp. Không có tư cách pháp nhân độc lập.',
-        signingAuthority: 'INTERNAL',
-        politicalSystem: 'SU_NGHIEP',
+        signingNote: 'Không ký văn bản đối ngoại. Mọi trao đổi ra ngoài qua Giám đốc/Hiệu trưởng đơn vị.',
+        purposeNote: 'Thực hiện chức năng chuyên môn nội bộ trong đơn vị sự nghiệp.',
+        signingAuthority: 'INTERNAL', politicalSystem: 'SU_NGHIEP',
         requiredFields: ['domainIds'],
         leaderTitleKeywords: ['Trưởng phòng', 'Phó Trưởng phòng', 'Tổ trưởng', 'Tổ phó'],
         staffTitleKeywords: ['Viên chức', 'Nhân viên', 'Kỹ thuật viên', 'Y tá', 'Hộ lý'],
       }),
+      descEn: JSON.stringify({
+        icon: 'Users', color: 'slate',
+        description: 'Admin Division, Internal specialist teams in Centers/Schools/Hospitals',
+        signingNote: 'No external document signing. All external communications via Director/Principal.',
+        purposeNote: 'Internal specialized functions within public service units.',
+        signingAuthority: 'INTERNAL', politicalSystem: 'SU_NGHIEP',
+        requiredFields: ['domainIds'],
+        leaderTitleKeywords: ['Head of Department', 'Deputy Head', 'Team Leader', 'Deputy Team Leader'],
+        staffTitleKeywords: ['Official', 'Staff', 'Technician', 'Nurse', 'Care Worker'],
+      }),
     },
-  ];
+  };
 
-  for (const cat of unitTypeCategories) {
-    await (prisma as any).category.upsert({
-      where: { code_group: { code: cat.code, group: 'UNIT_TYPE_CATEGORY' } },
-      update: { name: cat.name, sort: cat.order, description: cat.description, active: 1 },
-      create: {
-        group: 'UNIT_TYPE_CATEGORY',
-        code: cat.code,
-        name: cat.name,
-        sort: cat.order,
-        active: 1,
-        description: cat.description,
-      },
+  for (const [code, meta] of Object.entries(unitTypeMeta)) {
+    const cat = await prisma.category.findUnique({
+      where: { group_code: { group: 'UNIT_TYPE_CATEGORY', code } },
+    });
+    if (!cat) continue;
+
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_langCode: { categoryId: cat.id, langCode: 'vi' } },
+      update: { description: meta.descVi },
+      create: { categoryId: cat.id, langCode: 'vi', name: '', description: meta.descVi },
+    });
+    await prisma.categoryTranslation.upsert({
+      where: { categoryId_langCode: { categoryId: cat.id, langCode: 'en' } },
+      update: { description: meta.descEn },
+      create: { categoryId: cat.id, langCode: 'en', name: '', description: meta.descEn },
     });
   }
-  console.log('✅ Hoàn tất seed UNIT_TYPE_CATEGORY (6 nhóm phân loại tổ chức).');
-
+  console.log('✅ Đã cập nhật metadata đầy đủ cho UNIT_TYPE_CATEGORY (6 nhóm phân loại tổ chức).');
 
   // ==========================================================
   console.log('🌱 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
@@ -5284,4 +5318,3 @@ main()
     prisma.$disconnect();
     process.exit(1);
   });
-

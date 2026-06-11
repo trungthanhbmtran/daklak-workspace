@@ -117,6 +117,7 @@ CREATE TABLE `sys_menus` (
     `is_active` BOOLEAN NOT NULL DEFAULT true,
     `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updated_at` DATETIME(3) NOT NULL,
+    `linked_resource_code` VARCHAR(191) NULL,
 
     UNIQUE INDEX `sys_menus_code_key`(`code`),
     INDEX `sys_menus_application_parent_id_order_idx`(`application`, `parent_id`, `order`),
