@@ -15,7 +15,6 @@ import {
 import { Plus, Search as SearchIcon, ChevronRight, Building2, ChevronDown, FolderOpen, GripVertical } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Search } from "@/components/ui/search";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
