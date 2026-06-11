@@ -27,8 +27,12 @@ export class CategoriesController {
   }
 
   @GrpcMethod('CategoryService', 'GetByGroup')
-  async getByGroup(data: { group: string; lang?: string }) {
-    const list = await this.catService.getByGroup(data.group || '', data.lang);
+  async getByGroup(data: { group: string; lang?: string; search?: string; limit?: number; skip?: number }) {
+    const list = await this.catService.getByGroup(data.group || '', data.lang, {
+      search: data.search,
+      limit: data.limit,
+      skip: data.skip,
+    });
     return { data: list.map(toItem) };
   }
 

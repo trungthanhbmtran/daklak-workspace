@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -56,46 +56,41 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Get('groups')
-  @ApiOperation({ summary: 'L?y danh s�ch t?t c? c�c nh�m danh m?c' })
-  @ApiResponse({ status: 200, description: 'Danh s�ch t?t c? c�c nh�m danh m?c' })
-  @ApiResponse({ status: 201, description: 'Nh�m danh m?c v?a t?o' })
-  @ApiResponse({ status: 400, description: 'D? li?u kh�ng h?p l?' })
-  @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
+  @ApiOperation({ summary: 'Lấy danh sách tất cả các nhóm danh mục' })
+  @ApiResponse({ status: 200, description: 'Danh sách nhóm danh mục' })
   async getGroups() {
-    console.log(
-      '[CategoriesController] Requesting GetAllGroups from user-service...',
-    );
     try {
       const res: any = await firstValueFrom(
         this.categoryService.GetAllGroups({}),
       );
-      console.log('[CategoriesController] GetAllGroups response:', res);
       return { success: true, data: res.groups || [] };
     } catch (error) {
-      console.error(
-        '[CategoriesController] Error calling GetAllGroups:',
-        error.message,
-      );
       return {
         success: false,
         data: [],
-        message:
-          'Chua th? k?t n?i t?i d?ch v? danh m?c ho?c phuong th?c chua du?c h? tr?',
+        message: 'Chưa thể kết nối tới dịch vụ danh mục',
       };
     }
   }
 
   @Get()
   @ApiOperation({
-    summary: 'L?y danh m?c theo nh�m ho?c t?t c? n?u kh�ng truy?n group',
+    summary: 'Lấy danh mục theo nhóm (hỗ trợ tìm kiếm và phân trang server-side)',
   })
-  @ApiQuery({
-    name: 'group',
-    required: false,
-    description: 'M� nh�m danh m?c (d? tr?ng d? l?y t?t c?)',
-  })
-  @ApiResponse({ status: 200, description: 'Danh s�ch danh m?c thu?c nh�m' })
-  async getByGroup(@Query('group') group?: string) {
+  @ApiQuery({ name: 'group', required: false, description: 'Mã nhóm danh mục (để trống lấy tất cả)' })
+  @ApiQuery({ name: 'q', required: false, description: 'Từ khóa tìm kiếm (tìm theo tên)' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Số lượng trả về (mặc định 50)' })
+  @ApiQuery({ name: 'skip', required: false, description: 'Bỏ qua N phần tử đầu (mặc định 0)' })
+  @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
+  async getByGroup(
+    @Query('group') group?: string,
+    @Query('q') q?: string,
+    @Query('limit') limit?: string,
+    @Query('skip') skip?: string,
+  ) {
+    const limitNum = limit ? parseInt(limit, 10) : 50;
+    const skipNum  = skip  ? parseInt(skip,  10) : 0;
+
     if (!group) {
       const result = await firstValueFrom(
         this.categoryService.GetAllCategories({}),
@@ -103,17 +98,21 @@ export class CategoriesController implements OnModuleInit {
       return { success: true, data: (result as any)?.data || [] };
     }
     const result = await firstValueFrom(
-      this.categoryService.GetByGroup({ group: group || '' }),
+      this.categoryService.GetByGroup({
+        group: group || '',
+        search: q || '',
+        limit: limitNum,
+        skip: skipNum,
+      }),
     );
     return { success: true, data: (result as any)?.data || [] };
   }
 
   @Post()
-  @ApiOperation({ summary: 'T?o danh m?c m?i (Admin)' })
+  @ApiOperation({ summary: 'Tạo danh mục mới (Admin)' })
   @ApiBody({ description: 'group, code, name, description?, order?' })
-  @ApiResponse({ status: 201, description: 'Danh m?c v?a t?o' })
-  @ApiResponse({ status: 400, description: 'D? li?u kh�ng h?p l?' })
-  @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
+  @ApiResponse({ status: 201, description: 'Danh mục vừa tạo' })
+  @ApiResponse({ status: 400, description: 'Dữ liệu không hợp lệ' })
   async create(
     @Body()
     body: {
@@ -137,11 +136,9 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t danh m?c' })
-  @ApiBody({ description: 'group, code, name, description?, order?' })
-  @ApiResponse({ status: 200, description: 'Danh m?c d� c?p nh?t' })
-  @ApiResponse({ status: 400, description: 'D? li?u kh�ng h?p l?' })
-  @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
+  @ApiOperation({ summary: 'Cập nhật danh mục' })
+  @ApiBody({ description: 'code, name, description?, order?, active?' })
+  @ApiResponse({ status: 200, description: 'Danh mục đã cập nhật' })
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body()
@@ -167,11 +164,9 @@ export class CategoriesController implements OnModuleInit {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'X�a danh m?c (kh�ng x�a du?c danh m?c h? th?ng)' })
-  @ApiResponse({ status: 200, description: '�� x�a danh m?c' })
-  @ApiResponse({ status: 404, description: 'Danh m?c kh�ng t?n t?i' })
-  @ApiResponse({ status: 403, description: 'Kh�ng c� quy?n x�a danh m?c' })
-  @ApiResponse({ status: 500, description: 'L?i h? th?ng' })
+  @ApiOperation({ summary: 'Xóa danh mục (không xóa được danh mục hệ thống)' })
+  @ApiResponse({ status: 200, description: 'Đã xóa danh mục' })
+  @ApiResponse({ status: 404, description: 'Danh mục không tồn tại' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const res = (await firstValueFrom(
       this.categoryService.Delete({ id }),
@@ -183,7 +178,7 @@ export class CategoriesController implements OnModuleInit {
   }
 }
 
-@ApiTags('Danh m?c h? th?ng c�ng khai')
+@ApiTags('Danh mục hệ thống công khai')
 @Controller('public/categories')
 export class PublicCategoriesController implements OnModuleInit {
   private categoryService: any;
@@ -200,19 +195,20 @@ export class PublicCategoriesController implements OnModuleInit {
 
   @Get()
   @ApiOperation({
-    summary:
-      'L?y danh m?c theo nh�m ho?c t?t c? n?u kh�ng truy?n group (C�ng khai)',
+    summary: 'Lấy danh mục theo nhóm (hỗ trợ tìm kiếm, phân trang, công khai)',
   })
-  @ApiQuery({
-    name: 'group',
-    required: false,
-    description: 'M� nh�m danh m?c (d? tr?ng d? l?y t?t c?)',
-  })
-  @ApiQuery({ name: 'lang', required: false, description: 'M� ng�n ng?' })
-  @ApiResponse({ status: 200, description: 'Danh s�ch danh m?c thu?c nh�m' })
+  @ApiQuery({ name: 'group', required: false, description: 'Mã nhóm danh mục' })
+  @ApiQuery({ name: 'lang', required: false, description: 'Mã ngôn ngữ' })
+  @ApiQuery({ name: 'q', required: false, description: 'Từ khóa tìm kiếm' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Số lượng trả về' })
+  @ApiQuery({ name: 'skip', required: false, description: 'Bỏ qua N phần tử đầu' })
+  @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
   async getByGroup(@Query() query: any) {
-    const group = query.group;
-    const lang = query.lang || 'vi';
+    const group    = query.group;
+    const lang     = query.lang || 'vi';
+    const limitNum = query.limit ? parseInt(query.limit, 10) : 50;
+    const skipNum  = query.skip  ? parseInt(query.skip,  10) : 0;
+
     if (!group) {
       const result = await firstValueFrom(
         this.categoryService.GetAllCategories({ lang }),
@@ -220,10 +216,14 @@ export class PublicCategoriesController implements OnModuleInit {
       return { success: true, data: (result as any)?.data || [] };
     }
     const result = await firstValueFrom(
-      this.categoryService.GetByGroup({ group: group || '', lang }),
+      this.categoryService.GetByGroup({
+        group: group || '',
+        lang,
+        search: query.q || '',
+        limit: limitNum,
+        skip: skipNum,
+      }),
     );
     return { success: true, data: (result as any)?.data || [] };
   }
 }
-
-

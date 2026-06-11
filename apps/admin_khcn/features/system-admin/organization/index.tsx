@@ -8,7 +8,7 @@ import { OrganizationStaffing } from "./components/OrganizationStaffing";
 import { UnitScopePanel } from "./components/UnitScopePanel";
 import { useOrganizationApi } from "./hooks/useOrganizationApi";
 import { useOrganizationView } from "./hooks/useOrganizationView";
-import { OrganizationProvider, type ViewMode } from "./context/OrganizationContext";
+import { OrganizationProvider } from "./context/OrganizationContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -26,9 +26,8 @@ export function OrganizationClient() {
   const view = useOrganizationView();
   const { viewState, activeTab, setActiveTab } = view;
 
-  // Fetch danh mục khi đang tạo mới ĐV hoặc khi tab scope/info đang mở
-  const needCategories = viewState.mode !== "idle" || viewState.selectedId != null;
-  const api = useOrganizationApi(needCategories);
+  // Không preload catalog — UnitScopePanel tự fetch khi cần
+  const api = useOrganizationApi();
 
   const contextValue = {
     state: {
@@ -49,11 +48,6 @@ export function OrganizationClient() {
       deleteUnit: api.deleteUnit,
     },
     meta: {
-      domains: api.domains,
-      geoAreas: api.geoAreas,
-      isLoadingDomains: api.isLoadingDomains,
-      isLoadingGeoAreas: api.isLoadingGeoAreas,
-      loadGeoAreas: api.loadGeoAreas,
       isCreating: api.isCreating,
       isUpdating: api.isUpdating,
       isUpdatingScope: api.isUpdatingScope,

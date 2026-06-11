@@ -25,11 +25,6 @@ export interface OrganizationActions {
 }
 
 export interface OrganizationMeta {
-  domains: { id: number; code?: string; name: string }[];
-  geoAreas: { id: number; name: string }[];
-  isLoadingDomains: boolean;
-  isLoadingGeoAreas: boolean;
-  loadGeoAreas: () => void;
   isCreating: boolean;
   isUpdating: boolean;
   isUpdatingScope: boolean;

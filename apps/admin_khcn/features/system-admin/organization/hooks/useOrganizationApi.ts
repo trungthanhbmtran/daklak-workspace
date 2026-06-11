@@ -1,15 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { organizationApi } from "../api";
-import { organizationQueryKeys, categoryQueryKeys } from "../constants/queryKeys";
+import { organizationQueryKeys } from "../constants/queryKeys";
 import type { CreateUnitPayload, OrganizationUnitNode, UpdateUnitPayload } from "../types";
 
-const STALE_TIME = 2 * 60 * 1000;   // 2 phút — cây tổ chức ít đổi
-const GC_TIME = 10 * 60 * 1000;   // 10 phút
-const CAT_STALE = 10 * 60 * 1000;   // danh mục rất ít đổi
+const STALE_TIME = 2 * 60 * 1000;
+const GC_TIME    = 10 * 60 * 1000;
 
 function flattenTree(nodes: OrganizationUnitNode[]): OrganizationUnitNode[] {
   if (!Array.isArray(nodes) || nodes.length === 0) return [];
@@ -29,12 +27,10 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 
 /**
  * Hook quản lý toàn bộ state + actions cho trang tổ chức.
- * needCategories = true khi form tạo/sửa đơn vị đang mở (lazy load domains).
- * geoAreas được load riêng khi user chủ động click tab Địa bàn.
+ * Scope catalog (domains, geoAreas) được quản lý riêng trong useScopeCatalog.
  */
-export function useOrganizationApi(needCategories = false) {
+export function useOrganizationApi() {
   const queryClient = useQueryClient();
-  const [needGeoAreas, setNeedGeoAreas] = useState(false);
 
   // Cây tổ chức — luôn fetch
   const { data: treeResponse, isLoading: isLoadingTree } = useQuery({
@@ -47,22 +43,6 @@ export function useOrganizationApi(needCategories = false) {
   const tree = treeResponse?.items ?? [];
   const flatUnits = flattenTree(tree);
 
-  // Lĩnh vực + khu vực địa lý — lazy (chỉ cần khi form mở)
-  const { data: domains = [], isLoading: isLoadingDomains } = useQuery({
-    queryKey: categoryQueryKeys.domains(),
-    queryFn: () => organizationApi.getDomains(),
-    enabled: needCategories,
-    staleTime: CAT_STALE,
-    gcTime: GC_TIME,
-  });
-
-  const { data: geoAreas = [], isLoading: isLoadingGeoAreas } = useQuery({
-    queryKey: categoryQueryKeys.geoAreas(),
-    queryFn: () => organizationApi.getGeoAreas(),
-    enabled: needCategories && needGeoAreas,
-    staleTime: CAT_STALE,
-    gcTime: GC_TIME,
-  });
 
   const createUnit = useMutation({
     mutationFn: (payload: CreateUnitPayload) =>
@@ -111,12 +91,7 @@ export function useOrganizationApi(needCategories = false) {
   return {
     tree,
     flatUnits,
-    domains,
-    geoAreas,
     isLoadingTree,
-    isLoadingDomains: isLoadingDomains && needCategories,
-    isLoadingGeoAreas: isLoadingGeoAreas && needGeoAreas,
-    loadGeoAreas: () => setNeedGeoAreas(true),
     createUnit: createUnit.mutateAsync,
     updateUnit: (id: number, payload: UpdateUnitPayload) => updateUnit.mutateAsync({ id, payload }),
     updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) =>

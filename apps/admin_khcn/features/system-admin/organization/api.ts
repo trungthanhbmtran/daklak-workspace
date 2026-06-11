@@ -100,11 +100,15 @@ export const organizationApi = {
   deleteUnit: (id: number) =>
     apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
-  getDomains: () =>
-    apiClient.get("/categories", { params: { group: "DOMAIN" } }).then(r => unwrapData<any[]>(r)),
+  getDomains: (q?: string) =>
+    apiClient
+      .get("/categories", { params: { group: "DOMAIN", q: q || "", limit: 50 } })
+      .then(r => unwrapData<any[]>(r)),
 
-  getGeoAreas: () =>
-    apiClient.get("/categories", { params: { group: "GEO_AREA" } }).then(r => unwrapData<any[]>(r)),
+  getGeoAreas: (q?: string) =>
+    apiClient
+      .get("/categories", { params: { group: "GEO_AREA", q: q || "", limit: 50 } })
+      .then(r => unwrapData<any[]>(r)),
 
   /** Endpoint chuyên biệt: chỉ cập nhật lĩnh vực + địa bàn, không đụng tên/mã/phân loại */
   updateScope: (id: number, payload: { domainIds?: number[]; geographicAreaIds?: number[] }) =>

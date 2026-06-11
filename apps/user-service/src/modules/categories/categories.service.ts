@@ -34,11 +34,28 @@ export class CategoriesService {
   }
 
   // Lấy danh mục theo nhóm (tự động hợp nhất bản dịch)
-  async getByGroup(group: string, lang?: string) {
+  async getByGroup(group: string, lang?: string, opts?: { search?: string; limit?: number; skip?: number }) {
     const targetLang = lang || 'vi';
+    const { search, limit, skip } = opts ?? {};
+
     const items = await this.prisma.category.findMany({
-      where: { group },
+      where: {
+        group,
+        isActive: true,
+        ...(search?.trim()
+          ? {
+              translations: {
+                some: {
+                  langCode: targetLang,
+                  name: { contains: search.trim() },
+                },
+              },
+            }
+          : {}),
+      },
       orderBy: { order: 'asc' },
+      take: limit && limit > 0 ? limit : undefined,
+      skip: skip && skip > 0 ? skip : undefined,
       include: {
         translations: {
           where: { langCode: targetLang },
