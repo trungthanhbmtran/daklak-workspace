@@ -1,14 +1,10 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Search } from "@/components/ui/search";
-import { Input } from "@/components/ui/input";
-
 import { useGetCategories, useDeleteCategory, useGetCategoryGroups } from "./hooks/useCategoryApi";
 import { useCategoryUI } from "./hooks/useCategoryUI";
-import { GROUP_LABELS } from "./constants";
 import { CategorySidebar } from "./components/CategorySidebar";
 import { CategoryTable } from "./components/CategoryTable";
 import { CreateCategoryModal, EditCategoryModal } from "./components/CategoryModals";
@@ -18,8 +14,6 @@ import { useState } from "react";
 export function CategoryClient() {
   const { data: queryData, isLoading: isLoadingData, isError } = useGetCategories();
   const { data: groups, isLoading: isLoadingGroups } = useGetCategoryGroups();
-
-  // console.log('groups', groups);
 
   const deleteMutation = useDeleteCategory();
   const ui = useCategoryUI(queryData, groups);

@@ -11,7 +11,7 @@ Hướng dẫn build và deploy ứng dụng Daklak bằng Docker Compose thông
 1. **Build & Push**: GitHub Actions build Docker images cho các dịch vụ thay đổi và push lên Docker Hub.
 2. **Deploy**: GitHub Actions SSH vào server đích, copy file `docker-compose.prod.yml`, và chạy các lệnh docker compose để cập nhật ứng dụng.
 
-## 2. Cấu hình GitHub SecretsƯ
+## 2. Cấu hình GitHub Secrets
 Để workflow hoạt động, bạn cần cấu hình các Secrets sau trong repository:
 
 | Biến | Mô tả |

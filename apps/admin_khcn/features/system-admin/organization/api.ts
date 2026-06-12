@@ -100,14 +100,28 @@ export const organizationApi = {
   deleteUnit: (id: number) =>
     apiClient.delete(`/organizations/${id}`).then(r => unwrapData<any>(r)),
 
-  getDomains: (q?: string) =>
+  getDomains: (q?: string, selectedIds?: number[]) =>
     apiClient
-      .get("/categories", { params: { group: "DOMAIN", q: q || "", limit: 50 } })
+      .get("/categories", {
+        params: {
+          group: "DOMAIN",
+          q: q || "",
+          limit: 50,
+          ...(selectedIds?.length ? { selectedIds: selectedIds.join(',') } : {}),
+        },
+      })
       .then(r => unwrapData<any[]>(r)),
 
-  getGeoAreas: (q?: string) =>
+  getGeoAreas: (q?: string, selectedIds?: number[]) =>
     apiClient
-      .get("/categories", { params: { group: "GEO_AREA", q: q || "", limit: 50 } })
+      .get("/categories", {
+        params: {
+          group: "GEO_AREA",
+          q: q || "",
+          limit: 50,
+          ...(selectedIds?.length ? { selectedIds: selectedIds.join(',') } : {}),
+        },
+      })
       .then(r => unwrapData<any[]>(r)),
 
   /** Endpoint chuyên biệt: chỉ cập nhật lĩnh vực + địa bàn, không đụng tên/mã/phân loại */

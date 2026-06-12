@@ -75,21 +75,26 @@ export class CategoriesController implements OnModuleInit {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy danh mục theo nhóm (hỗ trợ tìm kiếm và phân trang server-side)',
+    summary: 'Lấy danh mục theo nhóm (hỗ trợ tìm kiếm, phân trang, selected-first server-side)',
   })
-  @ApiQuery({ name: 'group', required: false, description: 'Mã nhóm danh mục (để trống lấy tất cả)' })
-  @ApiQuery({ name: 'q', required: false, description: 'Từ khóa tìm kiếm (tìm theo tên)' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Số lượng trả về (mặc định 50)' })
-  @ApiQuery({ name: 'skip', required: false, description: 'Bỏ qua N phần tử đầu (mặc định 0)' })
-  @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
+  @ApiQuery({ name: 'group', required: false })
+  @ApiQuery({ name: 'q', required: false, description: 'Từ khóa tìm kiếm' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Số lượng (mặc định 50)' })
+  @ApiQuery({ name: 'skip', required: false })
+  @ApiQuery({ name: 'selectedIds', required: false, description: 'IDs đã chọn (comma-separated), luôn xuất hiện đầu' })
+  @ApiResponse({ status: 200 })
   async getByGroup(
     @Query('group') group?: string,
     @Query('q') q?: string,
     @Query('limit') limit?: string,
     @Query('skip') skip?: string,
+    @Query('selectedIds') selectedIds?: string,
   ) {
     const limitNum = limit ? parseInt(limit, 10) : 50;
-    const skipNum  = skip  ? parseInt(skip,  10) : 0;
+    const skipNum = skip ? parseInt(skip, 10) : 0;
+    const selectedIdsArr = selectedIds
+      ? selectedIds.split(',').map(Number).filter(n => !isNaN(n) && n > 0)
+      : [];
 
     if (!group) {
       const result = await firstValueFrom(
@@ -103,6 +108,7 @@ export class CategoriesController implements OnModuleInit {
         search: q || '',
         limit: limitNum,
         skip: skipNum,
+        selectedIds: selectedIdsArr,
       }),
     );
     return { success: true, data: (result as any)?.data || [] };
@@ -204,10 +210,10 @@ export class PublicCategoriesController implements OnModuleInit {
   @ApiQuery({ name: 'skip', required: false, description: 'Bỏ qua N phần tử đầu' })
   @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
   async getByGroup(@Query() query: any) {
-    const group    = query.group;
-    const lang     = query.lang || 'vi';
+    const group = query.group;
+    const lang = query.lang || 'vi';
     const limitNum = query.limit ? parseInt(query.limit, 10) : 50;
-    const skipNum  = query.skip  ? parseInt(query.skip,  10) : 0;
+    const skipNum = query.skip ? parseInt(query.skip, 10) : 0;
 
     if (!group) {
       const result = await firstValueFrom(

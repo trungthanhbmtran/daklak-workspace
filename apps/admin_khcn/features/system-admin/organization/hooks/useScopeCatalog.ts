@@ -3,19 +3,27 @@
 /**
  * useScopeCatalog — Hook tối ưu cho UnitScopePanel.
  *
- * Thay vì load toàn bộ list domains/geoAreas, hook này:
- * 1. Fetch theo từ khóa search (debounce 300ms) — giới hạn 50 items/lần
- * 2. Fetch riêng các selected items theo IDs để hiển thị đúng tên dù không có trong trang hiện tại
- * 3. GeoAreas chỉ được enable khi user click tab (lazy)
+ * Server-side logic:
+ * 1. selectedIds luôn được fetch và đặt đầu danh sách (server merge & sort)
+ * 2. Search debounce 300ms — giới hạn 50 items/lần
+ * 3. Server trả về field `selected: boolean` — client chỉ hiển thị
+ * 4. GeoAreas lazy khi user click tab
  */
 
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { organizationApi } from "../api";
 
-const CAT_STALE = 10 * 60 * 1000;
-const GC_TIME   = 15 * 60 * 1000;
+const CAT_STALE  = 10 * 60 * 1000;
+const GC_TIME    = 15 * 60 * 1000;
 const DEBOUNCE_MS = 300;
+
+export interface CatalogServerItem {
+  id: number;
+  name: string;
+  code?: string;
+  selected: boolean;
+}
 
 function useDebounce(value: string, delay = DEBOUNCE_MS) {
   const [debounced, setDebounced] = useState(value);
@@ -26,34 +34,34 @@ function useDebounce(value: string, delay = DEBOUNCE_MS) {
   return debounced;
 }
 
-/** Hook riêng cho lĩnh vực — search server-side */
-export function useDomainSearch() {
+/** Hook lĩnh vực — server-side search + selected-first sort */
+export function useDomainSearch(selectedIds: number[]) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
 
-  const { data: items = [], isFetching } = useQuery({
-    queryKey: ["categories", "DOMAIN", debouncedQ],
-    queryFn: () => organizationApi.getDomains(debouncedQ),
+  const { data: items = [], isFetching } = useQuery<CatalogServerItem[]>({
+    queryKey: ["categories", "DOMAIN", debouncedQ, selectedIds.join(",")],
+    queryFn: () => organizationApi.getDomains(debouncedQ, selectedIds),
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
-    placeholderData: (prev) => prev, // giữ kết quả cũ trong khi fetch mới
+    placeholderData: prev => prev,
   });
 
   return { items, isFetching, q, setQ };
 }
 
-/** Hook riêng cho địa bàn — lazy + search server-side */
-export function useGeoAreaSearch(enabled: boolean) {
+/** Hook địa bàn — lazy + server-side search + selected-first sort */
+export function useGeoAreaSearch(selectedIds: number[], enabled: boolean) {
   const [q, setQ] = useState("");
   const debouncedQ = useDebounce(q);
 
-  const { data: items = [], isFetching } = useQuery({
-    queryKey: ["categories", "GEO_AREA", debouncedQ],
-    queryFn: () => organizationApi.getGeoAreas(debouncedQ),
+  const { data: items = [], isFetching } = useQuery<CatalogServerItem[]>({
+    queryKey: ["categories", "GEO_AREA", debouncedQ, selectedIds.join(",")],
+    queryFn: () => organizationApi.getGeoAreas(debouncedQ, selectedIds),
     enabled,
     staleTime: CAT_STALE,
     gcTime: GC_TIME,
-    placeholderData: (prev) => prev,
+    placeholderData: prev => prev,
   });
 
   return { items, isFetching, q, setQ };
