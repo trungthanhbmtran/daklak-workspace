@@ -28,7 +28,8 @@ message MenuNode {
   string target = 9;
   int32 parent_id = 10;
   bool is_active = 11;
-  repeated MenuNode children = 12;
+  string linked_resource_code = 12;
+  repeated MenuNode children = 13;
 }
 
 message GetMyMenusResponse {
@@ -60,8 +61,8 @@ message MenuItemFlat {
   string application = 8;
   string target = 9;
   int32 parent_id = 10;
-  repeated int32 required_permission_ids = 11;
-  bool is_active = 12;
+  bool is_active = 11;
+  string linked_resource_code = 12;
 }
 
 message CreateMenuRequest {
@@ -74,8 +75,8 @@ message CreateMenuRequest {
   string application = 7;
   string target = 8;
   int32 parent_id = 9;
-  repeated int32 required_permission_ids = 10;
-  bool is_active = 11;
+  bool is_active = 10;
+  string linked_resource_code = 11;
 }
 
 message UpdateMenuRequest {
@@ -89,8 +90,8 @@ message UpdateMenuRequest {
   string application = 8;
   string target = 9;
   int32 parent_id = 10;
-  repeated int32 required_permission_ids = 11;
-  bool is_active = 12;
+  bool is_active = 11;
+  string linked_resource_code = 12;
 }
 
 message CreateMenuResponse {

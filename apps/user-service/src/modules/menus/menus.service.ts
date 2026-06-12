@@ -14,7 +14,6 @@ export type CreateMenuDto = {
   application?: string;
   target?: string;
   parentId?: number | null;
-  requiredPermissionIds?: number[];
   isActive?: boolean;
   /** PBAC chuẩn: resource.code để kiểm soát hiển thị menu */
   linkedResourceCode?: string | null;
@@ -33,7 +32,6 @@ export class MenusService {
     const list = await this.prisma.menu.findMany({
       where: { application },
       orderBy: [{ order: 'asc' }, { id: 'asc' }],
-      include: { requiredPermissions: { select: { permissionId: true } } },
     });
     return list.map((m) => this.toFlat(m));
   }
@@ -41,7 +39,6 @@ export class MenusService {
   async getById(id: number) {
     const menu = await this.prisma.menu.findUnique({
       where: { id },
-      include: { requiredPermissions: { select: { permissionId: true } } },
     });
     if (!menu) return null;
     return this.toFlat(menu);
@@ -52,22 +49,6 @@ export class MenusService {
     if (!code) throw new Error('Mã menu (code) không được để trống.');
     const existing = await this.prisma.menu.findUnique({ where: { code } });
     if (existing) throw new Error(`Mã menu "${code}" đã tồn tại.`);
-
-    const permIds = (dto.requiredPermissionIds ?? []).filter(
-      (id) => id != null && id !== 0,
-    );
-    if (permIds.length > 0) {
-      const found = await this.prisma.permission.findMany({
-        where: { id: { in: permIds } },
-      });
-      const foundIds = new Set(found.map((p) => p.id));
-      const missing = permIds.filter((id) => !foundIds.has(id));
-      if (missing.length > 0) {
-        throw new Error(
-          `Quyền (Permission) id=${missing.join(', ')} không tồn tại trong hệ thống PBAC.`,
-        );
-      }
-    }
 
     const menu = await this.prisma.menu.create({
       data: {
@@ -84,19 +65,11 @@ export class MenusService {
         parentId: dto.parentId ?? null,
         isActive: dto.isActive ?? true,
         linkedResourceCode: dto.linkedResourceCode ?? null,
-        requiredPermissions:
-          permIds.length > 0
-            ? { create: permIds.map((permissionId) => ({ permissionId })) }
-            : undefined,
       },
-    });
-    const withPerms = await this.prisma.menu.findUnique({
-      where: { id: menu.id },
-      include: { requiredPermissions: { select: { permissionId: true } } },
     });
 
     this.menuCache.clear();
-    return this.toFlat(withPerms ?? menu);
+    return this.toFlat(menu);
   }
 
   async update(id: number, dto: UpdateMenuDto) {
@@ -109,35 +82,6 @@ export class MenusService {
       const existing = await this.prisma.menu.findUnique({ where: { code } });
       if (existing && existing.id !== id)
         throw new Error(`Mã menu "${code}" đã được sử dụng bởi menu khác.`);
-    }
-
-    if (dto.requiredPermissionIds !== undefined) {
-      const permIds = (dto.requiredPermissionIds ?? []).filter(
-        (id) => id != null && id !== 0,
-      );
-      if (permIds.length > 0) {
-        const found = await this.prisma.permission.findMany({
-          where: { id: { in: permIds } },
-        });
-        const foundIds = new Set(found.map((p) => p.id));
-        const missing = permIds.filter((id) => !foundIds.has(id));
-        if (missing.length > 0) {
-          throw new Error(
-            `Quyền (Permission) id=${missing.join(', ')} không tồn tại trong hệ thống PBAC.`,
-          );
-        }
-      }
-      await (this.prisma as any).menuRequiredPermission.deleteMany({
-        where: { menuId: id },
-      });
-      if (permIds.length > 0) {
-        await (this.prisma as any).menuRequiredPermission.createMany({
-          data: permIds.map((permissionId: number) => ({
-            menuId: id,
-            permissionId,
-          })),
-        });
-      }
     }
 
     const updated = await this.prisma.menu.update({
@@ -164,13 +108,9 @@ export class MenusService {
         }),
       },
     });
-    const withPerms = await this.prisma.menu.findUnique({
-      where: { id: updated.id },
-      include: { requiredPermissions: { select: { permissionId: true } } },
-    });
 
     this.menuCache.clear();
-    return this.toFlat(withPerms ?? updated);
+    return this.toFlat(updated);
   }
 
   async delete(id: number) {
@@ -204,10 +144,7 @@ export class MenusService {
     parentId: number | null;
     isActive: boolean;
     linkedResourceCode?: string | null;
-    requiredPermissions?: { permissionId: number }[];
   }) {
-    const requiredPermissionIds =
-      m.requiredPermissions?.map((rp) => rp.permissionId) ?? [];
     return {
       id: m.id,
       code: m.code,
@@ -221,7 +158,6 @@ export class MenusService {
       application: m.application,
       target: m.target,
       parentId: m.parentId ?? 0,
-      requiredPermissionIds,
       linkedResourceCode: m.linkedResourceCode ?? null,
       isActive: m.isActive,
     };
@@ -240,14 +176,11 @@ export class MenusService {
 
     // PBAC chuẩn: Set resource codes mà user có quyền (bất kỳ action nào)
     const allowedResources = new Set<string>();
-    // Backward compat: vẫn giữ allowedSet cho menu dùng requiredPermissions cũ
-    const allowedSet = new Set<string>();
 
     for (const role of user?.roles ?? []) {
       for (const p of role.policies ?? []) {
         if (p.resource?.code) {
           allowedResources.add(p.resource.code);
-          allowedSet.add(`${p.resource.code}:${p.action}`);
         }
       }
     }
@@ -256,11 +189,6 @@ export class MenusService {
     const rawMenus = await this.prisma.menu.findMany({
       where: { application, isActive: true },
       orderBy: { order: 'asc' },
-      include: {
-        requiredPermissions: {
-          include: { permission: { include: { resource: true } } },
-        },
-      },
     });
 
     const visibleMenus = rawMenus.filter((menu) => {
@@ -271,14 +199,8 @@ export class MenusService {
         return allowedResources.has(menu.linkedResourceCode);
       }
 
-      // Backward compat: dùng requiredPermissions cũ nếu chưa migrate
-      const reqPerms = menu.requiredPermissions ?? [];
-      if (reqPerms.length === 0) return true; // công khai
-      return reqPerms.some((rp) => {
-        const resCode = rp.permission?.resource?.code;
-        const action = rp.permission?.action;
-        return resCode && action && allowedSet.has(`${resCode}:${action}`);
-      });
+      // Nếu không cấu hình resource (public)
+      return true;
     });
 
     // 3. Dựng cây

@@ -167,7 +167,6 @@ export class OrganizationsController {
         parentId: data.parentId,
         domainIds: data.domainIds,
         geographicAreaIds: data.geographicAreaIds,
-        scope: data.scope,
       });
       if (!unit) {
         throw new RpcException({
@@ -256,7 +255,7 @@ export class OrganizationsController {
           jobTitleDomainName:
             this.getCatName(j?.domain) ||
             [...new Set((s.slots ?? []).flatMap((slot: any) => (slot.domains ?? []).map((d: any) => this.getCatName(d.domain))))].filter(Boolean).join(', '),
-          jobTitleMonitoredUnitNames: (j?.monitoredUnits?.length ? j.monitoredUnits : (s.slots ?? []).flatMap((slot: any) => slot.monitoredUnits ?? []))
+          jobTitleMonitoredUnitNames: ((s.slots ?? []).flatMap((slot: any) => slot.monitoredUnits ?? []))
             .map((mu: any) => mu.unit?.name ?? '')
             .filter((v: string, i: number, a: string[]) => v && a.indexOf(v) === i),
           jobTitleGeographicAreaName:
@@ -349,11 +348,9 @@ export class OrganizationsController {
   @GrpcMethod('OrganizationService', 'UpdateJobTitle')
   async updateJobTitle(data: {
     id: number;
-    monitoredUnitIds?: number[];
   }) {
     const j = await this.orgService.updateJobTitle({
       id: data.id,
-      monitoredUnitIds: data.monitoredUnitIds,
     });
     return this.mapJobTitleItem(j);
   }
@@ -377,10 +374,6 @@ export class OrganizationsController {
       id: j.id,
       code: j.code,
       name: j.name,
-      monitoredUnitIds: (j.monitoredUnits ?? []).map((mu: any) => mu.unitId),
-      monitoredUnitNames: (j.monitoredUnits ?? []).map(
-        (mu: any) => mu.unit?.name ?? '',
-      ),
       category: j.category ?? '',
       rank: j.rank ?? 0,
       type: j.type ?? '',

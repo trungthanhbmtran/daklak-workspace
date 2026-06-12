@@ -9,7 +9,7 @@ export class CategoriesService {
   async getAll(lang?: string) {
     const targetLang = lang || 'vi';
     const items = await this.prisma.category.findMany({
-      orderBy: [{ group: 'asc' }, { order: 'asc' }],
+      orderBy: [{ groupCode: 'asc' }, { order: 'asc' }],
       include: {
         translations: {
           where: { langCode: targetLang },
@@ -21,7 +21,7 @@ export class CategoriesService {
       const trans = item.translations?.[0];
       return {
         id: item.id,
-        group: item.group,
+        group: item.groupCode,
         code: item.code,
         order: item.order,
         isActive: item.isActive,
@@ -44,7 +44,7 @@ export class CategoriesService {
     // 1. Luôn fetch selected items (dù không khớp search) để đảm bảo chúng xuất hiện
     const selectedItems = hasSelected
       ? await this.prisma.category.findMany({
-        where: { group, id: { in: selectedIds } },
+        where: { groupCode: group, id: { in: selectedIds } },
         include: { translations: { where: { langCode: targetLang } } },
         orderBy: { order: 'asc' },
       })
@@ -54,7 +54,7 @@ export class CategoriesService {
     const excludeIds = selectedItems.map(i => i.id);
     const searchItems = await this.prisma.category.findMany({
       where: {
-        group,
+        groupCode: group,
         isActive: true,
         ...(excludeIds.length > 0 ? { id: { notIn: excludeIds } } : {}),
         ...(search?.trim()
@@ -76,7 +76,7 @@ export class CategoriesService {
       const trans = item.translations?.[0];
       return {
         id: item.id,
-        group: item.group,
+        group: item.groupCode,
         code: item.code,
         order: item.order,
         isSystem: item.isSystem,
@@ -102,15 +102,15 @@ export class CategoriesService {
 
     // 2. Lấy tất cả các mã nhóm thực tế đang có trong bảng dữ liệu (Category)
     const actualGroups = await this.prisma.category.findMany({
-      select: { group: true },
-      distinct: ['group'],
+      select: { groupCode: true },
+      distinct: ['groupCode'],
     });
 
     // 3. Hợp nhất mã nhóm từ cả 2 nguồn để không bỏ sót bất kỳ nhóm nào
     const allCodes = Array.from(
       new Set([
         ...definedGroups.map((g) => g.code),
-        ...actualGroups.map((g) => g.group),
+        ...actualGroups.map((g) => g.groupCode),
       ]),
     );
 
@@ -138,7 +138,7 @@ export class CategoriesService {
   }) {
     const created = await this.prisma.category.create({
       data: {
-        group: data.group,
+        groupCode: data.group,
         code: data.code,
         order: data.order ?? 0,
         translations: {
@@ -159,7 +159,7 @@ export class CategoriesService {
     const trans = created.translations?.[0];
     return {
       id: created.id,
-      group: created.group,
+      group: created.groupCode,
       code: created.code,
       order: created.order,
       isActive: created.isActive,
@@ -225,7 +225,7 @@ export class CategoriesService {
     const trans = updatedCategory.translations?.[0];
     return {
       id: updatedCategory.id,
-      group: updatedCategory.group,
+      group: updatedCategory.groupCode,
       code: updatedCategory.code,
       order: updatedCategory.order,
       isActive: updatedCategory.isActive,

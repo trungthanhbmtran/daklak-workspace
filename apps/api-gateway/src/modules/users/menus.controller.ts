@@ -46,7 +46,7 @@ interface MenuDto {
   isActive?: boolean;
   description?: string | null;
   iconColor?: string | null;
-  requiredPermissionIds?: number[];
+  linkedResourceCode?: string | null;
   [key: string]: unknown;
 }
 
@@ -66,7 +66,6 @@ function toFrontendItem(m: MenuDto): MenuDto {
     active: m.isActive ? 1 : 0,
     description: m.description ?? null,
     iconColor: m.iconColor ?? null,
-    requiredPermissionIds: m.requiredPermissionIds ?? [],
     linkedResourceCode: m.linkedResourceCode ?? null,
   };
 }
@@ -229,9 +228,6 @@ export class MenusController implements OnModuleInit {
       application: body.portal ?? 'ADMIN_PORTAL',
       target: body.target ?? 'SELF',
       parentId: body.parentId ?? 0,
-      requiredPermissionIds: Array.isArray(body.requiredPermissionIds)
-        ? body.requiredPermissionIds.map(Number).filter(Boolean)
-        : [],
       isActive: body.active !== 0,
       linkedResourceCode: body.linkedResourceCode ?? null,
     };
@@ -273,11 +269,6 @@ export class MenusController implements OnModuleInit {
       linkedResourceCode: body.linkedResourceCode ?? null,
     };
     if (body.parentId !== undefined) payload.parentId = body.parentId ?? 0;
-    if (body.requiredPermissionIds !== undefined) {
-      payload.requiredPermissionIds = Array.isArray(body.requiredPermissionIds)
-        ? body.requiredPermissionIds.map(Number).filter(Boolean)
-        : [];
-    }
     if (body.active !== undefined) payload.isActive = body.active !== 0;
 
     return payload;

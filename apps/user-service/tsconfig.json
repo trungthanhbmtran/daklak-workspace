@@ -14,8 +14,12 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "@generated/*": ["generated/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@generated/*": [
+        "generated/*"
+      ]
     },
     "incremental": true,
     "skipLibCheck": true,

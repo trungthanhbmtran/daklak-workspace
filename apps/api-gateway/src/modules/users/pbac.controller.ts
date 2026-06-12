@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -38,49 +38,37 @@ export class PbacController implements OnModuleInit {
   }
 
   @Get()
-  @ApiOperation({ summary: 'L?y danh s�ch vai tr�' })
+  @ApiOperation({ summary: 'Lấy danh sách vai trò' })
   @ApiResponse({
     status: 200,
-    description: 'Danh s�ch vai tr� (c� s? ngu?i d�ng, s? quy?n)',
+    description: 'Danh sách vai trò (cả số người dùng, số chính sách)',
   })
   async findAll() {
     return firstValueFrom(this.pbacService.FindAllRoles({}));
   }
 
-  @Get('permissions/matrix')
-  @ApiOperation({
-    summary: 'Ma tr?n quy?n (T�i nguy�n ? Quy?n) ph?c v? giao di?n c?p quy?n',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Danh s�ch t�i nguy�n, m?i t�i nguy�n ch?a danh s�ch quy?n tuong ?ng',
-  })
-  getPermissionMatrix() {
-    return firstValueFrom(this.pbacService.GetPermissionMatrix({}));
-  }
-
   @Get(':id')
   @ApiOperation({
-    summary: 'Chi ti?t m?t vai tr� (k�m danh s�ch quy?n)',
+    summary: 'Chi tiết một vai trò (kèm danh sách chính sách)',
   })
   @ApiResponse({
     status: 200,
-    description: 'Vai tr� v� danh s�ch quy?n',
+    description: 'Vai trò và danh sách chính sách',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.FindOneRole({ id }));
   }
 
   @Post()
-  @ApiOperation({ summary: 'T?o vai tr� m?i' })
-  @ApiResponse({ status: 201, description: 'Vai tr� v?a du?c t?o (camelCase)' })
+  @ApiOperation({ summary: 'Tạo vai trò mới' })
+  @ApiResponse({ status: 201, description: 'Vai trò vừa được tạo (camelCase)' })
   async create(
     @Body()
     body: {
       code: string;
       name: string;
       description?: string;
-      permissionIds?: number[];
+      policies?: { resourceId: number; action: string; effect?: string; conditions?: string }[];
     },
   ) {
     return firstValueFrom(
@@ -88,16 +76,16 @@ export class PbacController implements OnModuleInit {
         code: body.code,
         name: body.name,
         description: body.description,
-        permissionIds: body.permissionIds,
+        policies: body.policies,
       }),
     );
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'C?p nh?t vai tr�' })
+  @ApiOperation({ summary: 'Cập nhật vai trò' })
   @ApiResponse({
     status: 200,
-    description: 'Vai tr� sau khi c?p nh?t (camelCase)',
+    description: 'Vai trò sau khi cập nhật (camelCase)',
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -105,7 +93,7 @@ export class PbacController implements OnModuleInit {
     body: {
       name?: string;
       description?: string;
-      permissionIds?: number[];
+      policies?: { resourceId: number; action: string; effect?: string; conditions?: string }[];
     },
   ) {
     return firstValueFrom(
@@ -113,20 +101,17 @@ export class PbacController implements OnModuleInit {
         id,
         name: body.name,
         description: body.description,
-        permissionIds: body.permissionIds,
+        policies: body.policies,
       }),
     );
   }
 
   @Delete(':id')
   @ApiOperation({
-    summary: 'xo� vai tr� (kh�ng xo� du?c khi c� user du?c g�n)',
+    summary: 'Xoá vai trò (không xoá được khi có user được gán)',
   })
-  @ApiResponse({ status: 200, description: '�� xo�' })
+  @ApiResponse({ status: 200, description: 'Đã xoá' })
   async delete(@Param('id', ParseIntPipe) id: number) {
     return firstValueFrom(this.pbacService.DeleteRole({ id }));
   }
 }
-
-
-

@@ -33,7 +33,6 @@ export class OrganizationsService {
         shortName: data.shortName ?? null,
         typeId: data.typeId,
         parentId: data.parentId || null,
-        scope: data.scope ?? null,
         hierarchyPath: '', // Placeholder
       },
     });
@@ -137,7 +136,6 @@ export class OrganizationsService {
       parentId?: number | null;
       domainIds?: number[] | null;
       geographicAreaIds?: number[] | null;
-      scope?: string | null;
     },
   ) {
     const unit = await this.prisma.organizationUnit.findUnique({
@@ -205,7 +203,6 @@ export class OrganizationsService {
       updateData.shortName = data.shortName || null;
     if (data.typeId !== undefined && data.typeId > 0)
       updateData.typeId = data.typeId;
-    if (data.scope !== undefined) updateData.scope = data.scope || null;
     // Đổi đơn vị cha: luôn dùng code làm hierarchyPath
     if (data.code !== undefined && String(data.code).trim() !== '') {
       updateData.hierarchyPath = String(data.code).trim();
@@ -424,11 +421,7 @@ export class OrganizationsService {
     const items = await this.prisma.organizationStaffing.findMany({
       where: { unitId },
       include: {
-        jobTitle: {
-          include: {
-            monitoredUnits: { include: { unit: true } },
-          },
-        },
+        jobTitle: true,
         slots: {
           orderBy: { slotOrder: 'asc' },
           include: {
@@ -461,9 +454,7 @@ export class OrganizationsService {
 
   // Danh sách chức danh (cho dropdown định biên). unitId: chỉ lấy chức danh áp dụng cho loại đơn vị đó
   async listJobTitles(unitId?: number) {
-    const include = {
-      monitoredUnits: { include: { unit: true } },
-    };
+    const include = {};
     let items;
     if (!unitId || unitId === 0) {
       items = await this.prisma.jobTitle.findMany({
@@ -493,27 +484,9 @@ export class OrganizationsService {
     return { data: items };
   }
 
-  // Cập nhật chức danh: đơn vị theo dõi
-  async updateJobTitle(dto: {
-    id: number;
-    monitoredUnitIds?: number[];
-  }) {
-    const { id, monitoredUnitIds } = dto;
-    if (monitoredUnitIds !== undefined) {
-      await this.prisma.jobTitleMonitoredUnit.deleteMany({
-        where: { jobTitleId: id },
-      });
-      if (monitoredUnitIds.length > 0) {
-        await this.prisma.jobTitleMonitoredUnit.createMany({
-          data: monitoredUnitIds.map((unitId) => ({ jobTitleId: id, unitId })),
-        });
-      }
-    }
+  async updateJobTitle(dto: { id: number }) {
     const updated = await this.prisma.jobTitle.findUnique({
-      where: { id },
-      include: {
-        monitoredUnits: { include: { unit: true } },
-      },
+      where: { id: dto.id },
     });
     return updated!;
   }

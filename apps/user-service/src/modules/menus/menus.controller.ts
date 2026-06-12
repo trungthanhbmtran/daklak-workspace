@@ -22,7 +22,7 @@ export class MenusController {
       target: node.target ?? 'SELF',
       parentId: node.parentId ?? 0,
       isActive: node.isActive ?? true,
-      requiredPermissionIds: node.requiredPermissionIds ?? [],
+      linkedResourceCode: node.linkedResourceCode ?? null,
       children:
         node.children && node.children.length
           ? node.children.map((c: any) => this.mapMenuNode(c))
@@ -77,8 +77,8 @@ export class MenusController {
         application: data.application,
         target: data.target,
         parentId: data.parentId === 0 ? null : data.parentId,
-        requiredPermissionIds: data.requiredPermissionIds ?? [],
         isActive: data.isActive,
+        linkedResourceCode: data.linkedResourceCode,
       });
       return { menu };
     } catch (e: any) {
@@ -106,8 +106,8 @@ export class MenusController {
         application: rest.application,
         target: rest.target,
         parentId: rest.parentId === 0 ? null : rest.parentId,
-        requiredPermissionIds: rest.requiredPermissionIds,
         isActive: rest.isActive,
+        linkedResourceCode: rest.linkedResourceCode,
       });
       if (!menu) {
         throw new RpcException({

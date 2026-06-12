@@ -92,21 +92,10 @@ export class PbacController {
     return this.toRoleResponse(role);
   }
 
-  @GrpcMethod('PbacService', 'GetPermissionMatrix')
-  async getPermissionMatrix() {
-    const resources = await this.pbacService.getPermissionMatrix();
-    return {
-      resources: resources.map((r: any) => ({
-        id: r.id,
-        code: r.code,
-        name: r.name,
-        permissions: (r.permissions ?? []).map((p: any) => ({
-          id: p.id,
-          action: p.action,
-          resourceId: p.resourceId,
-        })),
-      })),
-    };
+  @GrpcMethod('PbacService', 'GetResources')
+  async getResources() {
+    const resources = await this.pbacService.getResources();
+    return { resources: resources.map(r => ({ id: r.id, code: r.code, name: r.name, service_code: r.serviceCode })) };
   }
 
   @GrpcMethod('PbacService', 'CreateResource')
@@ -133,75 +122,6 @@ export class PbacController {
     return {
       success: ok,
       message: ok ? 'Đã xóa tài nguyên' : 'Không tìm thấy',
-    };
-  }
-
-  @GrpcMethod('PbacService', 'CreatePermission')
-  async createPermission(data: {
-    resourceId?: number;
-    resource_id?: number;
-    action: string;
-  }) {
-    const resourceId = data.resourceId ?? data.resource_id;
-    if (!resourceId)
-      throw new RpcException({ message: 'resource_id required', code: 3 });
-    const permission = await this.pbacService.createPermission({
-      resourceId,
-      action: data.action,
-    });
-    return {
-      id: permission.id,
-      action: permission.action,
-      resource_id: permission.resourceId,
-    };
-  }
-
-  @GrpcMethod('PbacService', 'DeletePermission')
-  async deletePermission(data: { id: number }) {
-    const ok = await this.pbacService.deletePermission(data.id);
-    return { success: ok, message: ok ? 'Đã xóa quyền' : 'Không tìm thấy' };
-  }
-  @GrpcMethod('PbacService', 'SyncEndpoints')
-  async syncEndpoints(data: { endpoints: { method: string; path: string }[] }) {
-    const count = await this.pbacService.syncEndpoints(data.endpoints);
-    return { success: true, count };
-  }
-
-  @GrpcMethod('PbacService', 'GetEndpoints')
-  async getEndpoints() {
-    const list = await this.pbacService.getEndpoints();
-    return {
-      endpoints: list.map((ep: any) => ({
-        id: ep.id,
-        method: ep.method,
-        path: ep.path,
-        description: ep.description || '',
-        permission_id: ep.permissionId || 0,
-        permission: ep.permission ? {
-          id: ep.permission.id,
-          action: ep.permission.action,
-          resource_id: ep.permission.resourceId,
-          resource_code: ep.permission.resource?.code || '',
-        } : null,
-      }))
-    };
-  }
-
-  @GrpcMethod('PbacService', 'AssignEndpointPermission')
-  async assignEndpointPermission(data: { id: number; permission_id: number }) {
-    const ep = await this.pbacService.assignEndpointPermission(data.id, data.permission_id);
-    return {
-      id: ep.id,
-      method: ep.method,
-      path: ep.path,
-      description: ep.description || '',
-      permission_id: ep.permissionId || 0,
-      permission: ep.permission ? {
-        id: ep.permission.id,
-        action: ep.permission.action,
-        resource_id: ep.permission.resourceId,
-        resource_code: ep.permission.resource?.code || '',
-      } : null,
     };
   }
 }

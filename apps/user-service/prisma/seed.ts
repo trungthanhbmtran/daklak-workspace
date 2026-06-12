@@ -1,15 +1,5 @@
 import * as bcrypt from 'bcrypt';
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-let PrismaClient: any;
-try {
-  PrismaClient = require('@generated/prisma/client').PrismaClient;
-} catch (e) {
-  try {
-    PrismaClient = require('../generated/prisma/client').PrismaClient;
-  } catch (e2) {
-    PrismaClient = require('@prisma/client').PrismaClient;
-  }
-}
+import { PrismaClient } from '@generated/prisma/client';
 import * as dotenv from 'dotenv';
 import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 
@@ -95,35 +85,6 @@ async function main() {
     resources[res.code] = created;
   }
 
-  // ==========================================================
-  // 2. PERMISSIONS (CRUD for all)
-  // ==========================================================
-  const actions = [
-    'CREATE',
-    'READ',
-    'UPDATE',
-    'DELETE',
-    'VIEW',
-    'APPROVE',
-    'MANAGE',
-    'ASSIGN',
-    'PROCESS',
-    'REJECT',
-    'PUBLISH'
-  ];
-  for (const res of Object.values(resources)) {
-    for (const action of actions) {
-      // Logic constraint: SYSTEM only has VIEW/MANAGE
-      if (res.code === 'SYSTEM' && !['VIEW', 'MANAGE'].includes(action))
-        continue;
-
-      await prisma.permission.upsert({
-        where: { action_resourceId: { action, resourceId: res.id } },
-        update: {},
-        create: { action, resourceId: res.id },
-      });
-    }
-  }
 
   // ==========================================================
   // 3. COMMON CATEGORIES (E-GOV STANDARD)
@@ -2152,13 +2113,12 @@ async function main() {
     if (cat.group) currentGroup = cat.group;
     cat.group = currentGroup;
     const category = await prisma.category.upsert({
-      where: { group_code: { group: cat.group, code: cat.code } },
+      where: { groupCode_code: { groupCode: cat.group, code: cat.code } },
       update: { order: cat.order },
       create: {
-        group: cat.group,
+        groupCode: cat.group,
         code: cat.code,
         order: cat.order,
-        isSystem: true,
       },
     });
 
@@ -2431,18 +2391,10 @@ async function main() {
     action: string = 'READ',
   ) => {
     if (!resCode) return;
-    const resId = resources[resCode]?.id;
-    if (!resId) return;
-    const perm = await prisma.permission.findUnique({
-      where: { action_resourceId: { action, resourceId: resId } },
+    await prisma.menu.update({
+      where: { id: menuId },
+      data: { linkedResourceCode: resCode }
     });
-    if (perm) {
-      await prisma.menuRequiredPermission.upsert({
-        where: { menuId_permissionId: { menuId, permissionId: perm.id } },
-        update: {},
-        create: { menuId, permissionId: perm.id },
-      });
-    }
   };
 
   // --- SERVICE ROOTS ---
@@ -4630,9 +4582,9 @@ async function main() {
 
   for (const fw of planFrameworks) {
     const cat = await prisma.category.upsert({
-      where: { group_code: { group: 'PLAN_FRAMEWORK', code: fw.code } },
+      where: { groupCode_code: { groupCode: 'PLAN_FRAMEWORK', code: fw.code } },
       update: { order: fw.order },
-      create: { group: 'PLAN_FRAMEWORK', code: fw.code, order: fw.order },
+      create: { groupCode: 'PLAN_FRAMEWORK', code: fw.code, order: fw.order },
     });
 
     await prisma.categoryTranslation.upsert({
@@ -4651,8 +4603,8 @@ async function main() {
   const allGeoAreas = await prisma.category.findMany({
     where: {
       OR: [
-        { group: 'GEO_AREA' },
-        { code: '47', group: 'PROVINCE' }
+        { groupCode: 'GEO_AREA' },
+        { code: '47', groupCode: 'PROVINCE' }
       ]
     },
   });
@@ -4666,7 +4618,7 @@ async function main() {
 
   const techDomains = await prisma.category.findMany({
     where: {
-      group: 'DOMAIN',
+      groupCode: 'DOMAIN',
       code: {
         in: allDomainCodes
       }
@@ -4822,11 +4774,9 @@ async function main() {
       }
     }
 
-    await prisma.staffingSlotGeographicArea.createMany({ data: slotGeos, skipDuplicates: true });
-    await prisma.staffingSlotDomain.createMany({ data: slotDomains, skipDuplicates: true });
     await prisma.staffingSlotMonitoredUnit.createMany({ data: slotMonitored, skipDuplicates: true });
 
-    console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Slot domains: ${slotDomains.length}, Geos: ${slotGeos.length}, Monitored Units: ${slotMonitored.length})`);
+    console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Monitored Units: ${slotMonitored.length})`);
   }
 
   // ==========================================================
@@ -4943,7 +4893,7 @@ async function main() {
               resourceId: res.id,
               action: actCode,
               effect: 'ALLOW',
-              conditions: conditionString ? { expression: conditionString } : null
+              conditions: conditionString ? { expression: conditionString } : undefined
             }
           });
           result.push({ id: pol.id });
@@ -5290,7 +5240,7 @@ async function main() {
 
   for (const [code, meta] of Object.entries(unitTypeMeta)) {
     const cat = await prisma.category.findUnique({
-      where: { group_code: { group: 'UNIT_TYPE_CATEGORY', code } },
+      where: { groupCode_code: { groupCode: 'UNIT_TYPE_CATEGORY', code } },
     });
     if (!cat) continue;
 

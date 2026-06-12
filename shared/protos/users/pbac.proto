@@ -1,27 +1,20 @@
-﻿syntax = "proto3";
+syntax = "proto3";
 
 package pbac;
 
-// PBAC: ChÃ­nh sÃ¡ch phÃ¢n quyá»n (Policy-Based) â€“ Vai trÃ² + Ma tráº­n quyá»n
+// PBAC: Chính sách phân quyền (Policy-Based) – Vai trò + Ma trận quyền
 service PbacService {
-  // --- Vai trÃ² (Roles) ---
+  // --- Vai trò (Roles) ---
   rpc CreateRole (CreateRoleRequest) returns (RoleResponse);
   rpc FindAllRoles (Empty) returns (FindAllRolesResponse);
   rpc FindOneRole (FindOneRoleRequest) returns (RoleDetailResponse);
   rpc UpdateRole (UpdateRoleRequest) returns (RoleResponse);
   rpc DeleteRole (DeleteRoleRequest) returns (RoleResponse);
-  // --- Ma tráº­n quyá»n (Permissions) ---
-  rpc GetPermissionMatrix (Empty) returns (PermissionMatrixResponse);
-  // --- TÃ i nguyÃªn & Quyá»n CRUD ---
+  // --- Tài nguyên & Quyền CRUD ---
+  rpc GetResources (Empty) returns (GetResourcesResponse);
   rpc CreateResource (CreateResourceRequest) returns (ResourceResponse);
   rpc UpdateResource (UpdateResourceRequest) returns (ResourceResponse);
   rpc DeleteResource (DeleteResourceRequest) returns (ResourceResponse);
-  rpc CreatePermission (CreatePermissionRequest) returns (PermissionItemResponse);
-  rpc DeletePermission (DeletePermissionRequest) returns (DeletePermissionResponse);
-  // --- Dynamic Endpoints ---
-  rpc SyncEndpoints (SyncEndpointsRequest) returns (SyncEndpointsResponse);
-  rpc GetEndpoints (Empty) returns (GetEndpointsResponse);
-  rpc AssignEndpointPermission (AssignEndpointPermissionRequest) returns (EndpointItemResponse);
 }
 
 message CreateResourceRequest {
@@ -48,33 +41,25 @@ message ResourceResponse {
   string service_code = 4;
 }
 
-message CreatePermissionRequest {
-  int32 resource_id = 1;
-  string action = 2;
-}
-
-message DeletePermissionRequest {
-  int32 id = 1;
-}
-
-message PermissionItemResponse {
-  int32 id = 1;
-  string action = 2;
-  int32 resource_id = 3;
-}
-
-message DeletePermissionResponse {
-  bool success = 1;
-  string message = 2;
+message GetResourcesResponse {
+  repeated ResourceResponse resources = 1;
 }
 
 message Empty {}
+
+message PolicyItem {
+  int32 id = 1;
+  int32 resource_id = 2;
+  string action = 3;
+  string effect = 4;
+  string conditions = 5;
+}
 
 message CreateRoleRequest {
   string code = 1;
   string name = 2;
   string description = 3;
-  repeated int32 permission_ids = 4;
+  repeated PolicyItem policies = 4;
 }
 
 message FindOneRoleRequest {
@@ -85,7 +70,7 @@ message UpdateRoleRequest {
   int32 id = 1;
   string name = 2;
   string description = 3;
-  repeated int32 permission_ids = 4;
+  repeated PolicyItem policies = 4;
 }
 
 message DeleteRoleRequest {
@@ -99,19 +84,12 @@ message RoleResponse {
   string description = 4;
 }
 
-message PermissionItem {
-  int32 id = 1;
-  string action = 2;
-  int32 resource_id = 3;
-  string resource_code = 4;
-}
-
 message RoleDetailResponse {
   int32 id = 1;
   string code = 2;
   string name = 3;
   string description = 4;
-  repeated PermissionItem permissions = 5;
+  repeated PolicyItem policies = 5;
 }
 
 message RoleWithCount {
@@ -126,49 +104,3 @@ message RoleWithCount {
 message FindAllRolesResponse {
   repeated RoleWithCount roles = 1;
 }
-
-message ResourceWithPermissions {
-  int32 id = 1;
-  string code = 2;
-  string name = 3;
-  string service_code = 4;
-  repeated PermissionItem permissions = 5;
-}
-
-message PermissionMatrixResponse {
-  repeated ResourceWithPermissions resources = 1;
-}
-
-
-message EndpointItem {
-  string method = 1;
-  string path = 2;
-}
-
-message SyncEndpointsRequest {
-  repeated EndpointItem endpoints = 1;
-}
-
-message SyncEndpointsResponse {
-  bool success = 1;
-  int32 count = 2;
-}
-
-message EndpointItemResponse {
-  int32 id = 1;
-  string method = 2;
-  string path = 3;
-  string description = 4;
-  int32 permission_id = 5;
-  PermissionItem permission = 6;
-}
-
-message GetEndpointsResponse {
-  repeated EndpointItemResponse endpoints = 1;
-}
-
-message AssignEndpointPermissionRequest {
-  int32 id = 1;
-  int32 permission_id = 2;
-}
-

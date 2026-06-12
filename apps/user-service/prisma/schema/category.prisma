@@ -1,7 +1,8 @@
 model Category {
   id    Int    @id @default(autoincrement())
-  group String @map("group_code")
-  code  String
+  groupCode String @map("group_code")
+  group     CategoryGroup @relation(fields: [groupCode], references: [code])
+  code      String
   order Int    @default(0)
 
   isActive Boolean @default(true) @map("is_active")
@@ -10,8 +11,8 @@ model Category {
   unitGeographicAreas UnitGeographicArea[]
   translations        CategoryTranslation[]
 
-  @@unique([group, code])
-  @@index([group])
+  @@unique([groupCode, code])
+  @@index([groupCode])
   @@map("sys_categories")
 }
 
@@ -33,7 +34,9 @@ model CategoryGroup {
   code     String  @id
   name     String
   order    Int     @default(0)
-  isActive Boolean @default(true)
+  isActive   Boolean @default(true)
+
+  categories Category[]
 
   @@map("sys_category_groups")
 }

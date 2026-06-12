@@ -49,7 +49,7 @@ export class ResourcesController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách PBAC Resource (dùng cho menu form)' })
   @ApiResponse({ status: 200, description: 'Mảng resources phẳng' })
   async listResources() {
-    const res = await firstValueFrom(this.pbacService.GetPermissionMatrix({})) as any;
+    const res = await firstValueFrom(this.pbacService.GetResources({})) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
     return (rawResources as any[]).map((r: any) => ({
       id: r.id,
@@ -87,29 +87,5 @@ export class ResourcesController implements OnModuleInit {
     );
   }
 
-  @Delete('permissions/:id')
-  @ApiOperation({ summary: 'Xóa một quyền theo ID' })
-  @ApiResponse({ status: 200, description: 'Kết quả xóa' })
-  async deletePermission(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.DeletePermission({ id }));
-  }
 
-  @Delete(':id')
-  @ApiOperation({ summary: 'Xóa tài nguyên (chỉ khi không còn quyền nào thuộc tài nguyên này)' })
-  @ApiResponse({ status: 200, description: 'Kết quả xóa' })
-  async deleteResource(@Param('id', ParseIntPipe) id: number) {
-    return firstValueFrom(this.pbacService.DeleteResource({ id }));
-  }
-
-  @Post(':id/permissions')
-  @ApiOperation({ summary: 'Thêm quyền (action) cho tài nguyên' })
-  @ApiResponse({ status: 201, description: 'Quyền vừa được tạo' })
-  async createPermission(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { action: string },
-  ) {
-    return firstValueFrom(
-      this.pbacService.CreatePermission({ resourceId: id, action: body.action }),
-    );
-  }
 }
