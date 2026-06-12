@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   KeyRound, ArrowRight, Plus, Trash2, Loader2,
-  ShieldAlert, Database, Component, Check, ChevronLeft, ChevronRight
+  ShieldAlert, Database, Component, ChevronLeft, ChevronRight
 } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +31,6 @@ export function ResourceClient() {
   const [newCode, setNewCode] = useState("");
   const [newServiceCode, setNewServiceCode] = useState("USER_SERVICE");
   const [newName, setNewName] = useState("");
-  const [newAction, setNewAction] = useState("");
 
   const {
     resources: filteredResources,
@@ -46,16 +45,10 @@ export function ResourceClient() {
     searchTerm,
     selectedResource,
     setSelectedResource,
-    currentPermissions,
     createResourceMutation,
     updateResourceMutation,
     deleteResourceMutation,
-    createPermissionMutation,
-    deletePermissionMutation,
-    commonActions,
   } = useResourceLogic();
-
-  const currentActionNames = currentPermissions.map((p) => p.action);
 
   const handleCreateResource = () => {
     const code = newCode.trim();
@@ -72,13 +65,7 @@ export function ResourceClient() {
     );
   };
 
-  const handleAddPermission = (action: string) => {
-    if (!selectedResource || !action.trim()) return;
-    const a = action.trim().toUpperCase();
-    if (currentActionNames.includes(a)) return;
-    createPermissionMutation.mutate({ resourceId: selectedResource.id, action: a });
-    setNewAction("");
-  };
+
 
   if (isLoading) {
     return (
@@ -104,8 +91,8 @@ export function ResourceClient() {
 
   return (
     <div className="flex flex-col lg:flex-row gap-6 items-start h-[calc(100vh-120px)] overflow-hidden">
-      {/* CỘT TRÁI: DANH SÁCH TÀI NGUYÊN (từ API GET /roles/permissions/matrix) */}
-      <Card className="w-full lg:w-[380px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0">
+      {/* CỘT TRÁI: DANH SÁCH TÀI NGUYÊN */}
+      <Card className="w-full lg:w-[480px] flex flex-col h-full shadow-sm border-border overflow-hidden shrink-0 mx-auto">
         <div className="p-4 space-y-4 border-b bg-muted/40 shrink-0">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
@@ -143,7 +130,7 @@ export function ResourceClient() {
             <div className="text-center p-4 text-sm text-muted-foreground italic">Không tìm thấy tài nguyên nào.</div>
           ) : (
             <div className="space-y-4">
-              {Object.entries(filteredResources.reduce((acc, res) => {
+              {Object.entries(filteredResources.reduce((acc: Record<string, Resource[]>, res: Resource) => {
                 const svc = res.serviceCode || "OTHER";
                 if (!acc[svc]) acc[svc] = [];
                 acc[svc].push(res);
@@ -209,7 +196,7 @@ export function ResourceClient() {
       </Card>
 
       {/* ========================================== */}
-      {/* CỘT PHẢI: QUẢN LÝ QUYỀN */}
+      {/* CỘT PHẢI: QUẢN LÝ TÀI NGUYÊN */}
       {/* ========================================== */}
       {!selectedResource ? (
         <Card className="flex-1 w-full h-full shadow-none border-border flex items-center justify-center bg-muted/20 border-dashed  rounded-xl">
@@ -218,11 +205,11 @@ export function ResourceClient() {
               <ShieldAlert className="h-10 w-10 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-semibold text-foreground mb-1">Chưa chọn Tài nguyên</h3>
-            <p className="text-sm text-muted-foreground">Vui lòng chọn một Module ở danh sách bên trái để định nghĩa các thao tác cấp quyền.</p>
+            <p className="text-sm text-muted-foreground">Vui lòng chọn một Module ở danh sách bên trái để xem và chỉnh sửa thông tin tài nguyên.</p>
           </div>
         </Card>
       ) : (
-        <Card className="flex-1 w-full h-full shadow-sm border-border overflow-hidden flex flex-col">
+        <Card className="flex-1 w-full h-fit shadow-sm border-border overflow-hidden flex flex-col mt-6">
           <CardHeader className="bg-muted/40 border-b px-8 shrink-0">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-xl bg-primary/10 text-primary">
@@ -230,7 +217,7 @@ export function ResourceClient() {
               </div>
               <div>
                 <CardTitle className="text-xl font-semibold text-foreground">
-                  Phân rã Quyền: {selectedResource.name}
+                  Chỉnh sửa: {selectedResource.name}
                 </CardTitle>
                 <div className="flex items-center gap-2 mt-1.5">
                   <span className="text-sm text-muted-foreground">Mã định danh hệ thống:</span>
@@ -243,135 +230,55 @@ export function ResourceClient() {
           </CardHeader>
 
           <CardContent className="flex-1 overflow-y-auto p-8 scrollbar-thin space-y-10">
-
-            {/* Sửa tài nguyên (code / name) */}
-            <div className="space-y-2 p-4 rounded-lg border bg-muted/20">
-              <h3 className="text-sm font-semibold text-foreground">Cập nhật tài nguyên</h3>
-              <div className="flex flex-wrap gap-2 items-end">
-                <Input
-                  className="h-8 font-mono max-w-[140px]"
-                  placeholder="Mã"
-                  value={selectedResource.code}
-                  onChange={(e) => setSelectedResource((prev) => prev ? { ...prev, code: e.target.value } : null)}
-                />
-                <Input
-                  className="h-8 max-w-[200px]"
-                  placeholder="Tên"
-                  value={selectedResource.name}
-                  onChange={(e) => setSelectedResource((prev) => prev ? { ...prev, name: e.target.value } : null)}
-                />
-                <Button
-                  size="sm"
-                  className="h-8"
-                  onClick={() =>
-                    selectedResource &&
-                    updateResourceMutation.mutate(
-                      { id: selectedResource.id, code: selectedResource.code, name: selectedResource.name },
-                      {
-                        onSuccess: (res: { data?: { id: number; code: string; name: string } }) => {
-                          const d = res?.data;
-                          if (d) setSelectedResource({ id: d.id, code: d.code, name: d.name });
-                        },
-                      }
-                    )
-                  }
-                  disabled={updateResourceMutation.isPending}
-                >
-                  {updateResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Cập nhật"}
-                </Button>
-              </div>
-              {updateResourceMutation.isError && (
-                <p className="text-xs text-destructive">{String((updateResourceMutation.error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Lỗi cập nhật")}</p>
-              )}
-            </div>
-
-            {/* THÊM HÀNH ĐỘNG */}
             <div className="space-y-4">
               <h3 className="text-sm font-semibold text-foreground border-b pb-2 flex items-center gap-2">
-                1. Khai báo hành động (Action)
+                Thông tin cơ bản
               </h3>
-
-              <div className="p-4 bg-accent/30 rounded-lg border border-border space-y-4">
-                <div className="space-y-2">
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Gợi ý - bấm để thêm quyền</p>
-                  <div className="flex flex-wrap gap-2">
-                    {commonActions.map((actionCode: string) => {
-                      const isAdded = currentActionNames.includes(actionCode);
-                      return (
-                        <Badge
-                          key={actionCode}
-                          variant={isAdded ? "secondary" : "outline"}
-                          className={`font-mono text-xs py-1 px-3 cursor-pointer ${isAdded ? "" : "hover:bg-primary hover:text-primary-foreground"}`}
-                          onClick={() => !isAdded && handleAddPermission(actionCode)}
-                        >
-                          {isAdded && <Check className="h-3 w-3 mr-1" />}
-                          {actionCode}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-                <div className="flex gap-2 flex-wrap items-center">
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <span className="text-sm font-medium text-muted-foreground">Tên tài nguyên</span>
                   <Input
-                    placeholder="Action tùy chỉnh (VD: APPROVE)"
-                    className="h-8 text-sm font-mono max-w-[200px]"
-                    value={newAction}
-                    onChange={(e) => setNewAction(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), handleAddPermission(newAction))}
+                    className="h-10 w-full max-w-md"
+                    placeholder="Tên hiển thị"
+                    value={selectedResource.name}
+                    onChange={(e) => setSelectedResource((prev) => prev ? { ...prev, name: e.target.value } : null)}
                   />
-                  <Button size="sm" className="h-8" onClick={() => handleAddPermission(newAction)} disabled={createPermissionMutation.isPending || !newAction.trim()}>
-                    {createPermissionMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Thêm"}
+                </div>
+                <div className="grid gap-2">
+                  <span className="text-sm font-medium text-muted-foreground">Mã hệ thống (Code)</span>
+                  <Input
+                    className="h-10 w-full max-w-md font-mono"
+                    placeholder="Mã"
+                    value={selectedResource.code}
+                    onChange={(e) => setSelectedResource((prev) => prev ? { ...prev, code: e.target.value } : null)}
+                  />
+                </div>
+                <div>
+                  <Button
+                    className="mt-4"
+                    onClick={() =>
+                      selectedResource &&
+                      updateResourceMutation.mutate(
+                        { id: selectedResource.id, code: selectedResource.code, name: selectedResource.name },
+                        {
+                          onSuccess: (res: { data?: { id: number; code: string; name: string } }) => {
+                            const d = res?.data;
+                            if (d) setSelectedResource({ id: d.id, code: d.code, name: d.name });
+                          },
+                        }
+                      )
+                    }
+                    disabled={updateResourceMutation.isPending}
+                  >
+                    {updateResourceMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Lưu thay đổi
                   </Button>
                 </div>
-                {createPermissionMutation.isError && (
-                  <p className="text-xs text-destructive">{String((createPermissionMutation.error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Lỗi thêm quyền")}</p>
+                {updateResourceMutation.isError && (
+                  <p className="text-sm text-destructive mt-2">{String((updateResourceMutation.error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Lỗi cập nhật")}</p>
                 )}
               </div>
             </div>
-
-            {/* DANH SÁCH QUYỀN ĐANG CÓ */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between border-b pb-2">
-                <h3 className="text-sm font-semibold text-foreground">
-                  2. Ma trận Quyền hiện tại
-                </h3>
-                <Badge variant="secondary">{currentPermissions.length} Quyền</Badge>
-              </div>
-
-              {currentPermissions.length === 0 ? (
-                <div className="p-8 border border-dashed rounded-lg bg-muted/20 text-center">
-                  <p className="text-sm text-muted-foreground italic">Tài nguyên này chưa có hành động nào được định nghĩa.</p>
-                  <p className="text-xs text-muted-foreground mt-1">Hãy bấm vào các nhãn gợi ý bên trên để thêm nhanh.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {currentPermissions.map((perm) => (
-                    <div
-                      key={perm.id}
-                      className="group flex flex-col justify-between p-4 border rounded-xl bg-card text-card-foreground shadow-sm hover:shadow-md hover:border-primary/50 transition-all relative overflow-hidden"
-                    >
-                      <div className="absolute top-0 left-0 w-full h-1 bg-primary/10 group-hover:bg-primary transition-colors" />
-                      <div className="flex justify-between items-start mb-2 mt-1">
-                        <span className="font-mono font-semibold text-sm">{perm.action}</span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
-                          onClick={() => deletePermissionMutation.mutate(perm.id)}
-                          disabled={deletePermissionMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <p className="text-[10px] text-muted-foreground font-mono bg-muted inline-block px-2 py-1 rounded w-fit">
-                        {selectedResource.code}:{perm.action}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
           </CardContent>
         </Card>
       )}
