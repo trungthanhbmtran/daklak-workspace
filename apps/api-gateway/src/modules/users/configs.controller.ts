@@ -11,11 +11,11 @@ import { ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
 
 @ApiTags('System Configs')
 @Controller('admin/system-configs')
-@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ConfigsController implements OnModuleInit {
   private configService: any;
 

@@ -15,13 +15,13 @@
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { MICROSERVICES } from '../../core/constants/services';
 
 @ApiTags('HRM - Master Plans')
 @ApiBearerAuth('JWT-auth')
 @Controller('admin/hrm/master-plans')
-@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 export class MasterPlansController implements OnModuleInit {
   private masterPlanService: any;
   private orgService: any;

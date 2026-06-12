@@ -25,7 +25,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import { sanitizeUserForClient } from '../../common/utils/user.util';
 
 interface MenuDto {
@@ -105,7 +105,7 @@ const flattenMenus = (nodes: any[], basePath: string): any[] => {
 
 @ApiTags('Menu')
 @Controller('admin/menus')
-@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class MenusController implements OnModuleInit {
   private menuService: any;

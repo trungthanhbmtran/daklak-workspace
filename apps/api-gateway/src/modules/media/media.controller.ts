@@ -21,7 +21,7 @@ import * as microservices from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
 import {
   RequestUploadDto,
   ConfirmUploadDto,
@@ -77,7 +77,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('request-upload')
-  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({
     summary: 'Request a presigned URL for direct upload to storage',
   })
@@ -89,7 +89,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('confirm-upload')
-  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Confirm file upload completion' })
   @ApiResponse({
     status: 200,
@@ -100,7 +100,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('init-multipart-upload')
-  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Initialize multipart upload for large files' })
   async initMultipartUpload(
     @Req() req: any,
@@ -112,7 +112,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('get-multipart-urls')
-  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Get presigned URLs for upload parts' })
   async getMultipartUrls(@Body() body: GetMultipartUrlsDto) {
     return await firstValueFrom(
@@ -121,7 +121,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Post('complete-multipart-upload')
-  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({
     summary: 'Complete multipart upload after all parts are uploaded',
   })
@@ -132,7 +132,7 @@ export class MediaGatewayController implements OnModuleInit {
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
   @ApiOperation({ summary: 'Get media metadata and download link' })
   @ApiResponse({ status: 200, description: 'Media info with downloadUrl' })
   async getMedia(@Param('id') id: string) {

@@ -15,11 +15,11 @@ import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
 
 @ApiTags('HRM - Tasks')
 @Controller('admin/hrm/tasks')
-@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class TasksController implements OnModuleInit {
   private taskService: any;

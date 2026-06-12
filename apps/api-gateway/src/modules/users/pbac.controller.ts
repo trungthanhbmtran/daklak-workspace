@@ -20,11 +20,11 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { MICROSERVICES } from '../../core/constants/services';
 import { JwtAuthGuard } from '../../core/guards/jwt-auth.guard';
-import { DynamicPermissionsGuard } from '../../core/guards/dynamic-permissions.guard';
+import { PermissionsGuard } from '../../core/guards/permissions.guard';
 
 @ApiTags('PBAC – Chính sách phân quyền')
 @Controller('admin/roles')
-@UseGuards(JwtAuthGuard, DynamicPermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiBearerAuth('JWT-auth')
 export class PbacController implements OnModuleInit {
   private pbacService: any;
