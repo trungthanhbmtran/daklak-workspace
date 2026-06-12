@@ -3881,6 +3881,320 @@ async function main() {
   });
 
   // ==========================================================
+  // PBAC SEED: SCOPES, POLICIES, ROLES & MAPPINGS
+  // ==========================================================
+  console.log('🔹 Seeding PBAC Scopes & Policies into SystemConfig...');
+  const pbacScopes = ['SELF', 'DEPARTMENT', 'ORGANIZATION', 'GLOBAL'];
+  const pbacPolicies = {
+    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assignees OR currentUserId IN resource.supervisors OR currentUserId IN resource.collaborators",
+    'TASK.UPDATE': "ALLOW IF currentUserId IN resource.assignees AND resource.status NOT IN ('COMPLETED','CLOSED')",
+    'TASK.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
+    'DOCUMENT.UPDATE': "ALLOW IF resource.createdBy == currentUserId AND resource.status == 'DRAFT'",
+    'DOCUMENT.APPROVE': "ALLOW IF user.positionLevel >= 3",
+    'DOCUMENT.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId OR resource.visibility == 'PUBLIC'"
+  };
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_SCOPES' },
+    update: { value: JSON.stringify(pbacScopes) },
+    create: { key: 'PBAC_SCOPES', value: JSON.stringify(pbacScopes), description: 'PBAC Scopes' }
+  });
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_POLICIES' },
+    update: { value: JSON.stringify(pbacPolicies) },
+    create: { key: 'PBAC_POLICIES', value: JSON.stringify(pbacPolicies), description: 'PBAC Policies' }
+  });
+
+  // ==========================================================
+  // MỞ RỘNG POLICY PBAC CHO HỆ THỐNG LIÊN THÔNG & HRM
+  // ==========================================================
+  console.log('≡ƒö╣ Mở rộng Policy PBAC cho hệ thống liên thông & HRM...');
+
+  const extendedPbacPolicies = {
+    ...pbacPolicies,
+    // Document Incoming
+    'DOC_INCOMING.PROCESS': "ALLOW IF currentUserId IN resource.processingUsers OR currentDepartmentId == resource.processingDepartmentId",
+    'DOC_INCOMING.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId",
+    'DOC_OUTGOING.ISSUE': "ALLOW IF user.positionLevel >= 2",
+
+    // Plan
+    'PLAN.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR resource.visibility == 'PUBLIC'",
+    'PLAN.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.collaborators",
+    'PLAN.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
+    'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
+
+    // Task
+    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.managerId == currentUserId OR resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.treeParticipantIds OR (user.isLeader == true AND targetUser.managerId == currentUserId)",
+    'TASK.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.COMMENT': "ALLOW IF currentUserId IN resource.treeParticipantIds",
+    'TASK.COMPLETE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.CREATE': "ALLOW IF currentUserId IN resource.assigneeIds OR user.isLeader == true OR resource.ownerId == currentUserId",
+    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.managerId == currentUserId)",
+
+    // Objective
+    'OBJECTIVE.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode",
+    'OBJECTIVE.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
+    'OBJECTIVE.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
+
+    // KPI
+    'KPI.VIEW': "ALLOW IF resource.ownerId == currentUserId OR resource.managerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+    'KPI.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
+    'KPI.EVALUATE': "ALLOW IF currentUserId == resource.managerId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+
+    // HRM
+    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR targetUser.managerId == currentUserId OR user.role == 'ADMIN'",
+    'HRM_EMPLOYEE.UPDATE': "ALLOW IF resource.id == currentUserId OR user.role == 'ADMIN'",
+
+    // Report
+    'REPORT.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR user.isOrganizationLeader == true",
+    'REPORT.EXPORT': "ALLOW IF user.isOrganizationLeader == true"
+  };
+
+  await prisma.systemConfig.upsert({
+    where: { key: 'PBAC_POLICIES_EXTENDED' },
+    update: { value: JSON.stringify(extendedPbacPolicies) },
+    create: { key: 'PBAC_POLICIES_EXTENDED', value: JSON.stringify(extendedPbacPolicies), description: 'Extended PBAC Policies' }
+  });
+
+
+  console.log('🔹 Seeding PBAC Roles & Policies...');
+  await prisma.policy.deleteMany({}); // Clear existing policies to avoid duplicates on re-run
+
+  const getPolicies = async (specs: string[]) => {
+    const allResources = await prisma.resource.findMany();
+    const result: { id: number }[] = [];
+
+    for (const spec of specs) {
+      if (spec === 'ALL') {
+        for (const res of allResources) {
+          const pol = await prisma.policy.create({
+            data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
+          });
+          result.push({ id: pol.id });
+        }
+        return result;
+      }
+
+      if (spec.endsWith('.*')) {
+        const resCode = spec.split('.')[0];
+        const res = allResources.find(r => r.code === resCode);
+        if (res) {
+          const pol = await prisma.policy.create({
+            data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
+          });
+          result.push({ id: pol.id });
+        }
+      } else {
+        const [resCode, actCode] = spec.split('.');
+        const res = allResources.find(r => r.code === resCode);
+        if (res) {
+          const conditionString = (extendedPbacPolicies as any)[spec] || (pbacPolicies as any)[spec];
+          const pol = await prisma.policy.create({
+            data: {
+              resourceId: res.id,
+              action: actCode,
+              effect: 'ALLOW',
+              conditions: conditionString ? { expression: conditionString } : undefined
+            }
+          });
+          result.push({ id: pol.id });
+        }
+      }
+    }
+    return result;
+  };
+
+  const roleDefinitions = [
+    { code: 'SUPER_ADMIN', name: 'Quản trị viên cấp cao', scope: 'GLOBAL', perms: ['ALL'] },
+    { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
+    {
+      code: 'LEADER',
+      name: 'Lãnh đạo đơn vị',
+      scope: 'ORGANIZATION',
+      perms: [
+        'HRM_EMPLOYEE.*',
+        'ORGANIZATION.*',
+        'USER.*',
+        'DOCUMENT.*',
+        'DOC_INCOMING.*',
+        'DOC_OUTGOING.*',
+        'DOC_PROCESSING.*',
+        'DOC_PUBLISH.*',
+        'DOC_TRANSPARENCY.*',
+        'DOC_CONSULTATION.*',
+        'DOC_MINUTES.*',
+        'DOC_CATEGORIES.*',
+        'PLAN.*',
+        'TASK.*',
+        'OBJECTIVE.*',
+        'KPI.*',
+        'REPORT.*',
+        'WORKFLOW.*'
+      ]
+    },
+    {
+      code: 'MANAGER',
+      name: 'Quản lý',
+      scope: 'DEPARTMENT',
+      perms: [
+        'HRM_EMPLOYEE.VIEW',
+        'HRM_EMPLOYEE.READ',
+        'HRM_EMPLOYEE.MANAGE',
+        'ORGANIZATION.VIEW',
+        'ORGANIZATION.READ',
+        'USER.VIEW',
+        'USER.READ',
+        'DOCUMENT.VIEW',
+        'DOCUMENT.READ',
+        'DOCUMENT.PROCESS',
+        'DOCUMENT.ASSIGN',
+        'DOC_INCOMING.VIEW',
+        'DOC_INCOMING.READ',
+        'DOC_INCOMING.PROCESS',
+        'DOC_INCOMING.ASSIGN',
+        'DOC_OUTGOING.VIEW',
+        'DOC_OUTGOING.READ',
+        'DOC_OUTGOING.PROCESS',
+        'DOC_PROCESSING.VIEW',
+        'DOC_PROCESSING.READ',
+        'DOC_PROCESSING.PROCESS',
+        'DOC_PUBLISH.VIEW',
+        'DOC_PUBLISH.READ',
+        'DOC_PUBLISH.PROCESS',
+        'DOC_TRANSPARENCY.VIEW',
+        'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW',
+        'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW',
+        'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW',
+        'DOC_CATEGORIES.READ',
+        'PLAN.VIEW',
+        'PLAN.READ',
+        'PLAN.UPDATE',
+        'OBJECTIVE.VIEW',
+        'OBJECTIVE.READ',
+        'OBJECTIVE.UPDATE',
+        'TASK.VIEW',
+        'TASK.READ',
+        'TASK.CREATE',
+        'TASK.UPDATE',
+        'TASK.ASSIGN',
+        'TASK.COMPLETE',
+        'KPI.VIEW',
+        'KPI.READ',
+        'REPORT.VIEW',
+        'REPORT.READ',
+        'WORKFLOW.VIEW',
+        'WORKFLOW.READ'
+      ]
+    },
+    {
+      code: 'STAFF',
+      name: 'Nhân viên',
+      scope: 'SELF',
+      perms: [
+        'HRM_EMPLOYEE.VIEW',
+        'HRM_EMPLOYEE.READ',
+        'DOCUMENT.VIEW',
+        'DOCUMENT.READ',
+        'DOCUMENT.PROCESS',
+        'DOC_INCOMING.VIEW',
+        'DOC_INCOMING.READ',
+        'DOC_INCOMING.PROCESS',
+        'DOC_OUTGOING.VIEW',
+        'DOC_OUTGOING.READ',
+        'DOC_OUTGOING.PROCESS',
+        'DOC_PROCESSING.VIEW',
+        'DOC_PROCESSING.READ',
+        'DOC_PROCESSING.PROCESS',
+        'DOC_PUBLISH.VIEW',
+        'DOC_PUBLISH.READ',
+        'DOC_PUBLISH.PROCESS',
+        'DOC_TRANSPARENCY.VIEW',
+        'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW',
+        'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW',
+        'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW',
+        'DOC_CATEGORIES.READ',
+        'TASK.VIEW',
+        'TASK.READ',
+        'TASK.UPDATE',
+        'TASK.COMMENT',
+        'TASK.COMPLETE',
+        'TASK.CREATE',
+        'TASK.ASSIGN',
+        'KPI.VIEW',
+        'KPI.READ',
+        'WORKFLOW.VIEW',
+        'WORKFLOW.READ'
+      ]
+    },
+    {
+      code: 'SUPERVISOR',
+      name: 'Giám sát',
+      scope: 'DEPARTMENT',
+      perms: [
+        'HRM_EMPLOYEE.VIEW',
+        'HRM_EMPLOYEE.READ',
+        'DOCUMENT.VIEW',
+        'DOCUMENT.READ',
+        'DOC_INCOMING.VIEW',
+        'DOC_INCOMING.READ',
+        'DOC_OUTGOING.VIEW',
+        'DOC_OUTGOING.READ',
+        'DOC_PROCESSING.VIEW',
+        'DOC_PROCESSING.READ',
+        'DOC_PUBLISH.VIEW',
+        'DOC_PUBLISH.READ',
+        'DOC_TRANSPARENCY.VIEW',
+        'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW',
+        'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW',
+        'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW',
+        'DOC_CATEGORIES.READ',
+        'TASK.VIEW',
+        'TASK.READ',
+        'KPI.VIEW',
+        'KPI.READ',
+        'REPORT.VIEW',
+        'REPORT.READ',
+        'WORKFLOW.VIEW',
+        'WORKFLOW.READ'
+      ]
+    }
+  ];
+
+  for (const rd of roleDefinitions) {
+    const policyConnect = await getPolicies(rd.perms);
+    await prisma.systemConfig.upsert({
+      where: { key: `ROLE_SCOPE_${rd.code}` },
+      update: { value: rd.scope },
+      create: { key: `ROLE_SCOPE_${rd.code}`, value: rd.scope, description: `Scope for ${rd.code}` }
+    });
+
+    await prisma.role.upsert({
+      where: { code: rd.code },
+      update: {
+        name: rd.name,
+        policies: { set: [], connect: policyConnect }
+      },
+      create: {
+        code: rd.code,
+        name: rd.name,
+        policies: { connect: policyConnect }
+      }
+    });
+  }
+  console.log('✅ Hoàn tất Seed PBAC Engine.');
+
+  // ==========================================================
   // 9. JOB POSITIONS
   // ==========================================================
   console.log('📦 Seeding Job Positions & Leaders (April 2026)...');
@@ -4779,327 +5093,7 @@ async function main() {
     console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Monitored Units: ${slotMonitored.length})`);
   }
 
-  // ==========================================================
-  // PBAC SEED: SCOPES, POLICIES, ROLES & MAPPINGS
-  // ==========================================================
-  console.log('🔹 Seeding PBAC Scopes & Policies into SystemConfig...');
-  const pbacScopes = ['SELF', 'DEPARTMENT', 'ORGANIZATION', 'GLOBAL'];
-  const pbacPolicies = {
-    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assignees OR currentUserId IN resource.supervisors OR currentUserId IN resource.collaborators",
-    'TASK.UPDATE': "ALLOW IF currentUserId IN resource.assignees AND resource.status NOT IN ('COMPLETED','CLOSED')",
-    'TASK.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
-    'DOCUMENT.UPDATE': "ALLOW IF resource.createdBy == currentUserId AND resource.status == 'DRAFT'",
-    'DOCUMENT.APPROVE': "ALLOW IF user.positionLevel >= 3",
-    'DOCUMENT.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId OR resource.visibility == 'PUBLIC'"
-  };
-
-  await prisma.systemConfig.upsert({
-    where: { key: 'PBAC_SCOPES' },
-    update: { value: JSON.stringify(pbacScopes) },
-    create: { key: 'PBAC_SCOPES', value: JSON.stringify(pbacScopes), description: 'PBAC Scopes' }
-  });
-
-  await prisma.systemConfig.upsert({
-    where: { key: 'PBAC_POLICIES' },
-    update: { value: JSON.stringify(pbacPolicies) },
-    create: { key: 'PBAC_POLICIES', value: JSON.stringify(pbacPolicies), description: 'PBAC Policies' }
-  });
-
-  // ==========================================================
-  // MỞ RỘNG POLICY PBAC CHO HỆ THỐNG LIÊN THÔNG & HRM
-  // ==========================================================
-  console.log('≡ƒö╣ Mở rộng Policy PBAC cho hệ thống liên thông & HRM...');
-
-  const extendedPbacPolicies = {
-    ...pbacPolicies,
-    // Document Incoming
-    'DOC_INCOMING.PROCESS': "ALLOW IF currentUserId IN resource.processingUsers OR currentDepartmentId == resource.processingDepartmentId",
-    'DOC_INCOMING.VIEW': "ALLOW IF resource.departmentId == currentDepartmentId",
-    'DOC_OUTGOING.ISSUE': "ALLOW IF user.positionLevel >= 2",
-
-    // Plan
-    'PLAN.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR resource.visibility == 'PUBLIC'",
-    'PLAN.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.collaborators",
-    'PLAN.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
-    'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
-
-    // Task
-    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.managerId == currentUserId OR resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
-    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.treeParticipantIds OR (user.isLeader == true AND targetUser.managerId == currentUserId)",
-    'TASK.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
-    'TASK.COMMENT': "ALLOW IF currentUserId IN resource.treeParticipantIds",
-    'TASK.COMPLETE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
-    'TASK.CREATE': "ALLOW IF currentUserId IN resource.assigneeIds OR user.isLeader == true OR resource.ownerId == currentUserId",
-    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.managerId == currentUserId)",
-
-    // Objective
-    'OBJECTIVE.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode",
-    'OBJECTIVE.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
-    'OBJECTIVE.APPROVE': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode",
-
-    // KPI
-    'KPI.VIEW': "ALLOW IF resource.ownerId == currentUserId OR resource.managerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
-    'KPI.UPDATE': "ALLOW IF resource.ownerId == currentUserId",
-    'KPI.EVALUATE': "ALLOW IF currentUserId == resource.managerId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
-
-    // HRM
-    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR targetUser.managerId == currentUserId OR user.role == 'ADMIN'",
-    'HRM_EMPLOYEE.UPDATE': "ALLOW IF resource.id == currentUserId OR user.role == 'ADMIN'",
-
-    // Report
-    'REPORT.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode OR user.isOrganizationLeader == true",
-    'REPORT.EXPORT': "ALLOW IF user.isOrganizationLeader == true"
-  };
-
-  await prisma.systemConfig.upsert({
-    where: { key: 'PBAC_POLICIES_EXTENDED' },
-    update: { value: JSON.stringify(extendedPbacPolicies) },
-    create: { key: 'PBAC_POLICIES_EXTENDED', value: JSON.stringify(extendedPbacPolicies), description: 'Extended PBAC Policies' }
-  });
-
-
-  console.log('🔹 Seeding PBAC Roles & Policies...');
-  await prisma.policy.deleteMany({}); // Clear existing policies to avoid duplicates on re-run
-
-  const getPolicies = async (specs: string[]) => {
-    const allResources = await prisma.resource.findMany();
-    const result: { id: number }[] = [];
-
-    for (const spec of specs) {
-      if (spec === 'ALL') {
-        for (const res of allResources) {
-          const pol = await prisma.policy.create({
-            data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
-          });
-          result.push({ id: pol.id });
-        }
-        return result;
-      }
-
-      if (spec.endsWith('.*')) {
-        const resCode = spec.split('.')[0];
-        const res = allResources.find(r => r.code === resCode);
-        if (res) {
-          const pol = await prisma.policy.create({
-            data: { resourceId: res.id, action: '*', effect: 'ALLOW', conditions: { expression: 'ALLOW ALWAYS' } }
-          });
-          result.push({ id: pol.id });
-        }
-      } else {
-        const [resCode, actCode] = spec.split('.');
-        const res = allResources.find(r => r.code === resCode);
-        if (res) {
-          const conditionString = (extendedPbacPolicies as any)[spec] || (pbacPolicies as any)[spec];
-          const pol = await prisma.policy.create({
-            data: {
-              resourceId: res.id,
-              action: actCode,
-              effect: 'ALLOW',
-              conditions: conditionString ? { expression: conditionString } : undefined
-            }
-          });
-          result.push({ id: pol.id });
-        }
-      }
-    }
-    return result;
-  };
-
-  const roleDefinitions = [
-    { code: 'SUPER_ADMIN', name: 'Quản trị viên cấp cao', scope: 'GLOBAL', perms: ['ALL'] },
-    { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
-    {
-      code: 'LEADER',
-      name: 'Lãnh đạo đơn vị',
-      scope: 'ORGANIZATION',
-      perms: [
-        'HRM_EMPLOYEE.*',
-        'ORGANIZATION.*',
-        'USER.*',
-        'DOCUMENT.*',
-        'DOC_INCOMING.*',
-        'DOC_OUTGOING.*',
-        'DOC_PROCESSING.*',
-        'DOC_PUBLISH.*',
-        'DOC_TRANSPARENCY.*',
-        'DOC_CONSULTATION.*',
-        'DOC_MINUTES.*',
-        'DOC_CATEGORIES.*',
-        'PLAN.*',
-        'TASK.*',
-        'OBJECTIVE.*',
-        'KPI.*',
-        'REPORT.*',
-        'WORKFLOW.*'
-      ]
-    },
-    {
-      code: 'MANAGER',
-      name: 'Quản lý',
-      scope: 'DEPARTMENT',
-      perms: [
-        'HRM_EMPLOYEE.VIEW',
-        'HRM_EMPLOYEE.READ',
-        'HRM_EMPLOYEE.MANAGE',
-        'ORGANIZATION.VIEW',
-        'ORGANIZATION.READ',
-        'USER.VIEW',
-        'USER.READ',
-        'DOCUMENT.VIEW',
-        'DOCUMENT.READ',
-        'DOCUMENT.PROCESS',
-        'DOCUMENT.ASSIGN',
-        'DOC_INCOMING.VIEW',
-        'DOC_INCOMING.READ',
-        'DOC_INCOMING.PROCESS',
-        'DOC_INCOMING.ASSIGN',
-        'DOC_OUTGOING.VIEW',
-        'DOC_OUTGOING.READ',
-        'DOC_OUTGOING.PROCESS',
-        'DOC_PROCESSING.VIEW',
-        'DOC_PROCESSING.READ',
-        'DOC_PROCESSING.PROCESS',
-        'DOC_PUBLISH.VIEW',
-        'DOC_PUBLISH.READ',
-        'DOC_PUBLISH.PROCESS',
-        'DOC_TRANSPARENCY.VIEW',
-        'DOC_TRANSPARENCY.READ',
-        'DOC_CONSULTATION.VIEW',
-        'DOC_CONSULTATION.READ',
-        'DOC_MINUTES.VIEW',
-        'DOC_MINUTES.READ',
-        'DOC_CATEGORIES.VIEW',
-        'DOC_CATEGORIES.READ',
-        'PLAN.VIEW',
-        'PLAN.READ',
-        'PLAN.UPDATE',
-        'OBJECTIVE.VIEW',
-        'OBJECTIVE.READ',
-        'OBJECTIVE.UPDATE',
-        'TASK.VIEW',
-        'TASK.READ',
-        'TASK.CREATE',
-        'TASK.UPDATE',
-        'TASK.ASSIGN',
-        'TASK.COMPLETE',
-        'KPI.VIEW',
-        'KPI.READ',
-        'REPORT.VIEW',
-        'REPORT.READ',
-        'WORKFLOW.VIEW',
-        'WORKFLOW.READ'
-      ]
-    },
-    {
-      code: 'STAFF',
-      name: 'Nhân viên',
-      scope: 'SELF',
-      perms: [
-        'HRM_EMPLOYEE.VIEW',
-        'HRM_EMPLOYEE.READ',
-        'DOCUMENT.VIEW',
-        'DOCUMENT.READ',
-        'DOCUMENT.PROCESS',
-        'DOC_INCOMING.VIEW',
-        'DOC_INCOMING.READ',
-        'DOC_INCOMING.PROCESS',
-        'DOC_OUTGOING.VIEW',
-        'DOC_OUTGOING.READ',
-        'DOC_OUTGOING.PROCESS',
-        'DOC_PROCESSING.VIEW',
-        'DOC_PROCESSING.READ',
-        'DOC_PROCESSING.PROCESS',
-        'DOC_PUBLISH.VIEW',
-        'DOC_PUBLISH.READ',
-        'DOC_PUBLISH.PROCESS',
-        'DOC_TRANSPARENCY.VIEW',
-        'DOC_TRANSPARENCY.READ',
-        'DOC_CONSULTATION.VIEW',
-        'DOC_CONSULTATION.READ',
-        'DOC_MINUTES.VIEW',
-        'DOC_MINUTES.READ',
-        'DOC_CATEGORIES.VIEW',
-        'DOC_CATEGORIES.READ',
-        'PLAN.VIEW',
-        'PLAN.READ',
-        'OBJECTIVE.VIEW',
-        'OBJECTIVE.READ',
-        'TASK.VIEW',
-        'TASK.READ',
-        'TASK.UPDATE',
-        'TASK.COMMENT',
-        'TASK.COMPLETE',
-        'TASK.CREATE',
-        'TASK.ASSIGN',
-        'KPI.VIEW',
-        'KPI.READ',
-        'WORKFLOW.VIEW',
-        'WORKFLOW.READ'
-      ]
-    },
-    {
-      code: 'SUPERVISOR',
-      name: 'Giám sát',
-      scope: 'DEPARTMENT',
-      perms: [
-        'HRM_EMPLOYEE.VIEW',
-        'HRM_EMPLOYEE.READ',
-        'DOCUMENT.VIEW',
-        'DOCUMENT.READ',
-        'DOC_INCOMING.VIEW',
-        'DOC_INCOMING.READ',
-        'DOC_OUTGOING.VIEW',
-        'DOC_OUTGOING.READ',
-        'DOC_PROCESSING.VIEW',
-        'DOC_PROCESSING.READ',
-        'DOC_PUBLISH.VIEW',
-        'DOC_PUBLISH.READ',
-        'DOC_TRANSPARENCY.VIEW',
-        'DOC_TRANSPARENCY.READ',
-        'DOC_CONSULTATION.VIEW',
-        'DOC_CONSULTATION.READ',
-        'DOC_MINUTES.VIEW',
-        'DOC_MINUTES.READ',
-        'DOC_CATEGORIES.VIEW',
-        'DOC_CATEGORIES.READ',
-        'PLAN.VIEW',
-        'PLAN.READ',
-        'OBJECTIVE.VIEW',
-        'OBJECTIVE.READ',
-        'TASK.VIEW',
-        'TASK.READ',
-        'KPI.VIEW',
-        'KPI.READ',
-        'REPORT.VIEW',
-        'REPORT.READ',
-        'WORKFLOW.VIEW',
-        'WORKFLOW.READ'
-      ]
-    }
-  ];
-
-  for (const rd of roleDefinitions) {
-    const policyConnect = await getPolicies(rd.perms);
-    await prisma.systemConfig.upsert({
-      where: { key: `ROLE_SCOPE_${rd.code}` },
-      update: { value: rd.scope },
-      create: { key: `ROLE_SCOPE_${rd.code}`, value: rd.scope, description: `Scope for ${rd.code}` }
-    });
-
-    await prisma.role.upsert({
-      where: { code: rd.code },
-      update: {
-        name: rd.name,
-        policies: { set: [], connect: policyConnect }
-      },
-      create: {
-        code: rd.code,
-        name: rd.name,
-        policies: { connect: policyConnect }
-      }
-    });
-  }
-  console.log('✅ Hoàn tất Seed PBAC Engine.');
+  
 
   // ==========================================================
   // UNIT_TYPE_CATEGORY — Cập nhật description với metadata đầy đủ
