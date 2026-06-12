@@ -19,8 +19,6 @@ export interface MenuItem {
    * Thay thế requiredPermissionIds — menu visible nếu user có BẤT KỲ policy nào trên resource này.
    */
   linkedResourceCode?: string | null;
-  /** @deprecated Dùng linkedResourceCode thay thế. Giữ lại để backward compat. */
-  requiredPermissionIds?: number[];
 }
 
 /**

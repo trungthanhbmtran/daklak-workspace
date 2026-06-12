@@ -7,29 +7,40 @@ const rolesListRes = (res: unknown): Role[] => {
   const list = Array.isArray(data) ? data : (data && Array.isArray((data as { roles?: unknown[] }).roles) ? (data as { roles: unknown[] }).roles : []);
   return list.map((r: unknown) => {
     const row = r as Record<string, unknown>;
+    const rawPolicies = (row.policies as any[]) || [];
+    const policies: Policy[] = rawPolicies.map((p) => ({
+      id: p.id,
+      resourceId: p.resourceId,
+      resourceCode: p.resource?.code ?? p.resourceCode ?? "",
+      action: p.action,
+      effect: p.effect,
+      conditions: p.conditions,
+    }));
     return {
-    id: Number(row.id),
-    code: String(row.code ?? ""),
-    name: String(row.name ?? ""),
-    description: String(row.description ?? ""),
-    active: 1,
-    policies: (row.policies as Policy[]) || [],
+      id: Number(row.id),
+      code: String(row.code ?? ""),
+      name: String(row.name ?? ""),
+      description: String(row.description ?? ""),
+      active: 1,
+      policies: policies,
   };
   });
 };
 
-/** Response từ GET /roles/permissions/matrix — gateway trả về { data: { resources } } hoặc { resources } */
+/** Response từ GET /resources — gateway trả về danh sách resource */
 const permissionMatrixToFlat = (res: unknown): Permission[] => {
-  const body = res as { data?: { resources?: unknown[] }; resources?: unknown[] };
-  const resources = (body?.data?.resources ?? body?.resources ?? []) as Array<{ id: number; code: string; name: string; permissions?: Array<{ id: number; action: string }> }>;
+  const data = (res as { data?: unknown[] })?.data ?? res;
+  const resources = (Array.isArray(data) ? data : []) as Array<{ id: number; code: string; name: string }>;
   const out: Permission[] = [];
+  const STD_ACTIONS = ['VIEW', 'CREATE', 'UPDATE', 'DELETE', 'MANAGE'];
+  
   for (const r of resources) {
-    for (const p of r.permissions ?? []) {
+    for (const action of STD_ACTIONS) {
       out.push({
-        id: p.id,
+        id: r.id, // Lưu id của resource vào id của Permission để PolicyForm dùng
         module: r.name ?? r.code ?? "",
-        action: p.action ?? "",
-        code: `${r.code}:${p.action}`,
+        action: action,
+        code: `${r.code}:${action}`,
       });
     }
   }
@@ -41,7 +52,15 @@ const roleDetailRes = (res: unknown): Role | null => {
   const raw = (res as { data?: Record<string, unknown> })?.data ?? res;
   const r = raw as Record<string, unknown>;
   if (!r || r.id === 0) return null;
-  const policies = (r.policies as Policy[]) ?? [];
+  const rawPolicies = (r.policies as any[]) ?? [];
+  const policies: Policy[] = rawPolicies.map((p) => ({
+    id: p.id,
+    resourceId: p.resourceId,
+    resourceCode: p.resource?.code ?? p.resourceCode ?? "",
+    action: p.action,
+    effect: p.effect,
+    conditions: p.conditions,
+  }));
   return {
     id: Number(r.id),
     code: String(r.code ?? ""),
@@ -59,7 +78,7 @@ export const roleApi = {
   },
 
   getPermissionMatrix: async (): Promise<Permission[]> => {
-    const res = await apiClient.get("/roles/permissions/matrix");
+    const res = await apiClient.get("/resources");
     return permissionMatrixToFlat(res);
   },
 

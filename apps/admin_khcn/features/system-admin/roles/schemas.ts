@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 const policySchema = z.object({
+  resourceId: z.number().optional(),
   resourceCode: z.string().min(1),
   action: z.string().min(1),
   effect: z.enum(['ALLOW', 'DENY']),

@@ -1,16 +1,10 @@
 import apiClient from "@/lib/axiosInstance";
 import { MenuItem } from "./types";
 
-/** Chuẩn hóa payload gửi backend (PBAC): nhiều quyền = requiredPermissionIds[] */
-function toMenuPayload(data: Partial<MenuItem> & { requiredPermissionId?: number }) {
-  const requiredPermissionIds = data.requiredPermissionIds?.length
-    ? data.requiredPermissionIds
-    : (data.requiredPermissionId != null && data.requiredPermissionId !== 0 ? [data.requiredPermissionId] : []);
-  const { requiredPermissionId, ...rest } = data;
-  return {
-    ...rest,
-    requiredPermissionIds,
-  };
+/** Chuẩn hóa payload gửi backend (PBAC) */
+function toMenuPayload(data: Partial<MenuItem>) {
+  const { requiredPermissionIds, requiredPermissionId, ...rest } = data as any;
+  return rest;
 }
 
 /** Node menu từ API /menus/me (cây theo quyền user) */

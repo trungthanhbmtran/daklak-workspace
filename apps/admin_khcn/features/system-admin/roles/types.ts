@@ -1,5 +1,6 @@
 export interface Policy {
   id?: number;
+  resourceId?: number;
   resourceCode: string;
   action: string;
   effect: 'ALLOW' | 'DENY';

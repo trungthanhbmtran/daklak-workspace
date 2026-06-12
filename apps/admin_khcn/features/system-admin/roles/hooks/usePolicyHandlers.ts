@@ -5,7 +5,7 @@ import { Policy } from "../types";
  * Tách logic ra khỏi component để dễ test và tái sử dụng.
  */
 export function usePolicyHandlers(form: any, resourceCode: string) {
-  const handleTogglePolicy = (actionCode: string, checked: boolean) => {
+  const handleTogglePolicy = (actionCode: string, checked: boolean, resourceId: number) => {
     const latest = [...(form.getValues("policies") as Policy[])];
     if (checked) {
       const alreadyExists = latest.some(
@@ -13,6 +13,7 @@ export function usePolicyHandlers(form: any, resourceCode: string) {
       );
       if (!alreadyExists) {
         latest.push({
+          resourceId,
           resourceCode,
           action: actionCode,
           effect: "ALLOW",
