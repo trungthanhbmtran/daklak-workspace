@@ -4824,11 +4824,13 @@ async function main() {
     'PLAN.CLOSE': "ALLOW IF resource.ownerId == currentUserId",
 
     // Task
-    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode OR resource.ownerId == currentUserId",
-    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+    'TASK.ASSIGN': "ALLOW IF user.isLeader == true AND targetUser.managerId == currentUserId OR resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.VIEW': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.treeParticipantIds OR (user.isLeader == true AND targetUser.managerId == currentUserId)",
     'TASK.UPDATE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
+    'TASK.COMMENT': "ALLOW IF currentUserId IN resource.treeParticipantIds",
     'TASK.COMPLETE': "ALLOW IF resource.ownerId == currentUserId OR currentUserId IN resource.assigneeIds",
-    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
+    'TASK.CREATE': "ALLOW IF currentUserId IN resource.assigneeIds OR user.isLeader == true OR resource.ownerId == currentUserId",
+    'TASK.EVALUATE': "ALLOW IF resource.ownerId == currentUserId OR (user.isLeader == true AND targetUser.managerId == currentUserId)",
 
     // Objective
     'OBJECTIVE.VIEW': "ALLOW IF targetUser.unitCode STARTSWITH user.unitCode",
@@ -4841,7 +4843,7 @@ async function main() {
     'KPI.EVALUATE': "ALLOW IF currentUserId == resource.managerId OR (user.isLeader == true AND targetUser.unitCode STARTSWITH user.unitCode)",
 
     // HRM
-    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR targetUser.unitCode STARTSWITH user.unitCode OR user.role == 'ADMIN'",
+    'HRM_EMPLOYEE.VIEW': "ALLOW IF resource.id == currentUserId OR targetUser.managerId == currentUserId OR user.role == 'ADMIN'",
     'HRM_EMPLOYEE.UPDATE': "ALLOW IF resource.id == currentUserId OR user.role == 'ADMIN'",
 
     // Report
@@ -4924,8 +4926,8 @@ async function main() {
         'DOC_MINUTES.*',
         'DOC_CATEGORIES.*',
         'PLAN.*',
-        'OBJECTIVE.*',
         'TASK.*',
+        'OBJECTIVE.*',
         'KPI.*',
         'REPORT.*',
         'WORKFLOW.*'
@@ -5027,6 +5029,8 @@ async function main() {
         'TASK.UPDATE',
         'TASK.COMMENT',
         'TASK.COMPLETE',
+        'TASK.CREATE',
+        'TASK.ASSIGN',
         'KPI.VIEW',
         'KPI.READ',
         'WORKFLOW.VIEW',
@@ -5256,6 +5260,63 @@ async function main() {
     });
   }
   console.log('✅ Đã cập nhật metadata đầy đủ cho UNIT_TYPE_CATEGORY (6 nhóm phân loại tổ chức).');
+
+  // ==========================================================
+  // PBAC MENU SEED (Giao diện chuẩn)
+  // ==========================================================
+  console.log('🔹 Seeding Standard Menus...');
+
+  const menuData = [
+    // 1. Dashboard (Public/No PBAC required)
+    { code: 'DASHBOARD', name: 'Bảng điều khiển', route: '/', icon: 'LayoutDashboard', order: 1, application: 'ADMIN_PORTAL', linkedResourceCode: null },
+    
+    // 2. Hệ thống
+    { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: null, icon: 'Settings', order: 99, application: 'ADMIN_PORTAL', linkedResourceCode: 'SYSTEM' },
+    { code: 'SYS_ORG', name: 'Cơ cấu tổ chức', route: '/system/organizations', icon: 'Building2', order: 1, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'ORGANIZATION' },
+    { code: 'SYS_USER', name: 'Người dùng', route: '/system/users', icon: 'Users', order: 2, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'USER' },
+    { code: 'SYS_ROLE', name: 'Vai trò & Quyền', route: '/system/roles', icon: 'ShieldCheck', order: 3, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'ROLE' },
+    { code: 'SYS_RESOURCE', name: 'Tài nguyên PBAC', route: '/system/resources', icon: 'Database', order: 4, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'RESOURCE' },
+    { code: 'SYS_MENU', name: 'Quản lý Menu', route: '/system/menus', icon: 'Menu', order: 5, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'MENU' },
+    { code: 'SYS_CAT', name: 'Danh mục', route: '/system/categories', icon: 'ListTree', order: 6, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'CATEGORY' },
+
+    // 3. Quản lý Nhân sự & Công việc (HRM PORTAL)
+    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: null, icon: 'Users', order: 2, application: 'HRM_PORTAL', linkedResourceCode: 'HRM_EMPLOYEE' },
+    { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/hrm/employees', icon: 'UserCircle', order: 1, application: 'HRM_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE' },
+    { code: 'HRM_TASK_MENU', name: 'Quản lý công việc', route: '/hrm/tasks', icon: 'CheckSquare', order: 2, application: 'HRM_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK' },
+    { code: 'HRM_PLAN_MENU', name: 'Kế hoạch công tác', route: '/hrm/plans', icon: 'Calendar', order: 3, application: 'HRM_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN' },
+  ];
+
+  for (const m of menuData) {
+    let parentId: number | null = null;
+    if (m.parentCode) {
+      const parentMenu = await prisma.menu.findUnique({ where: { code: m.parentCode } });
+      if (parentMenu) parentId = parentMenu.id;
+    }
+    
+    await prisma.menu.upsert({
+      where: { code: m.code },
+      update: {
+        name: m.name,
+        route: m.route,
+        icon: m.icon,
+        order: m.order,
+        application: m.application,
+        linkedResourceCode: m.linkedResourceCode,
+        parentId
+      },
+      create: {
+        code: m.code,
+        name: m.name,
+        route: m.route,
+        icon: m.icon,
+        order: m.order,
+        application: m.application,
+        linkedResourceCode: m.linkedResourceCode,
+        parentId
+      }
+    });
+  }
+  console.log('✅ Hoàn tất cấu hình PBAC Menus.');
 
   // ==========================================================
   console.log('🌱 READY FOR GRPC MICROSERVICES DEPLOYMENT!');
