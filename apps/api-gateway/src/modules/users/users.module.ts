@@ -1,4 +1,4 @@
-﻿import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { registerGrpcService } from '../../core/factories/grpc.factory';
 import { MICROSERVICES } from '../../core/constants/services';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -15,7 +15,6 @@ import {
   PublicOrganizationsController,
 } from './organizations.controller';
 import { ConfigsController } from './configs.controller';
-import { EndpointDiscoveryService } from '../../core/discovery/endpoint-discovery.service';
 
 @Module({
   imports: [
@@ -39,7 +38,7 @@ import { EndpointDiscoveryService } from '../../core/discovery/endpoint-discover
     PublicOrganizationsController,
     ConfigsController,
   ],
-  providers: [EndpointDiscoveryService],
+  providers: [],
 })
 export class UsersModule { }
 
