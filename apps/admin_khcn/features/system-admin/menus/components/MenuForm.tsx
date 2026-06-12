@@ -13,7 +13,16 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxGroup,
+  ComboboxLabel,
+  ComboboxSeparator,
+} from "@/components/ui/combobox";
 import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage
 } from "@/components/ui/form";
@@ -276,17 +285,10 @@ function MenuFormInner(props: any) {
                   <FormField control={form.control} name="active" render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
-                      <Select onValueChange={(v) => field.onChange(parseInt(v))} value={field.value?.toString()}>
-                        <FormControl>
-                          <SelectTrigger className={`h-10 font-bold ${field.value === 1 ? "text-primary bg-primary/5 border-primary/30" : "text-destructive bg-destructive/5"}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="1">Hiển thị</SelectItem>
-                          <SelectItem value="0">Tạm khóa</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <select className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onChange={(v) => field.onChange(parseInt(v.target.value))} value={field.value?.toString()}>
+                        <option value="1" className="text-primary">Hiển thị</option>
+                        <option value="0" className="text-destructive">Tạm khóa</option>
+                      </select>
                     </FormItem>
                   )} />
                 </div>
@@ -374,81 +376,80 @@ function MenuFormInner(props: any) {
 
             {/* SECTION 3: KIỂM SOÁT TRUY CẬP — PBAC CHUẨN */}
             <div className="p-6 space-y-4 bg-background">
-              <div className="flex items-center justify-between border-b pb-3">
-                <div>
-                  <h3 className="text-[13px] font-bold text-foreground flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-primary" /> 3. Kiểm soát truy cập (PBAC)
-                  </h3>
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Chọn tài nguyên mà menu này quản lý. Menu chỉ hiển thị với user có ít nhất 1 quyền trên tài nguyên đó.
-                  </p>
-                </div>
-                {watchLinkedResource && selectedResource && (
-                  <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20 font-mono shrink-0">
-                    <ShieldCheck className="h-3 w-3 mr-1" />
-                    {selectedResource.code}
-                  </Badge>
-                )}
+              <div className="flex items-center gap-2 mb-4 border-b pb-2">
+                <h3 className="text-sm font-bold flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" /> 3. Kiểm soát truy cập (PBAC)
+                </h3>
+                <p className="text-[11px] text-muted-foreground mt-1 ml-auto">
+                  (Phân quyền hiển thị Menu theo Tài nguyên)
+                </p>
               </div>
+              {watchLinkedResource && selectedResource && (
+                <Badge className="text-[10px] bg-primary/10 text-primary border-primary/20 font-mono shrink-0 mb-4 inline-flex">
+                  <ShieldCheck className="h-3 w-3 mr-1" />
+                  Đang bảo vệ bởi: {selectedResource.code}
+                </Badge>
+              )}
 
               <FormField control={form.control} name="linkedResourceCode" render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">
-                    Tài nguyên PBAC liên kết
+                <FormItem className="flex flex-col">
+                  <FormLabel className="text-[12px] font-bold text-foreground">
+                    Tài nguyên PBAC bảo vệ Menu này
                   </FormLabel>
+                  <p className="text-[11px] text-muted-foreground mb-1">
+                    Chỉ những người dùng được cấp quyền trên Tài nguyên bạn chọn dưới đây mới có thể nhìn thấy Menu này trên thanh Sidebar.
+                  </p>
                   {isLoadingResources ? (
                     <div className="flex items-center gap-2 h-10 text-muted-foreground text-sm">
                       <Loader2 className="h-4 w-4 animate-spin" /> Đang tải danh sách tài nguyên...
                     </div>
                   ) : (
-                    <Select
-                      onValueChange={(v) => field.onChange(v === "__PUBLIC__" ? null : v)}
+                    <Combobox
                       value={field.value ?? "__PUBLIC__"}
+                      onValueChange={(v) => field.onChange(v === "__PUBLIC__" ? null : v)}
                     >
-                      <FormControl>
-                        <SelectTrigger className={`h-10 bg-background ${field.value ? "border-primary/30 text-primary" : ""}`}>
-                          <SelectValue placeholder="Chọn tài nguyên..." />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="max-h-[300px]">
-                        <SelectItem value="__PUBLIC__">
-                          <span className="flex items-center gap-2 text-muted-foreground">
-                            <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
-                            Công khai — hiển thị với tất cả user đăng nhập
-                          </span>
-                        </SelectItem>
-                        <Separator className="my-1" />
-                        {Object.entries(groupedResources).sort().map(([group, items]) => (
-                          <SelectGroup key={group}>
-                            <SelectLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60">{group}</SelectLabel>
-                            {(items as PbacResource[]).map((r) => (
-                              <SelectItem key={r.code} value={r.code}>
-                                <span className="flex items-center gap-2">
-                                  <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">{r.code}</span>
-                                  <span>{r.name}</span>
-                                </span>
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <ComboboxInput placeholder="Tìm kiếm tài nguyên (VD: USER, SYSTEM)..." />
+                      <ComboboxContent>
+                        <ComboboxList>
+                          <ComboboxItem value="__PUBLIC__">
+                            <span className="flex items-center gap-2">
+                              <span className="h-2 w-2 rounded-full bg-green-500 inline-block" />
+                              Không kiểm soát (Công khai) — Hiển thị với tất cả user
+                            </span>
+                          </ComboboxItem>
+                          <ComboboxSeparator />
+                          {Object.entries(groupedResources).sort().map(([group, items]) => (
+                            <ComboboxGroup key={group}>
+                              <ComboboxLabel className="text-[10px] uppercase tracking-wider text-muted-foreground/60">{group}</ComboboxLabel>
+                              {(items as PbacResource[]).map((r) => (
+                                <ComboboxItem key={r.code} value={r.code}>
+                                  <span className="flex items-center gap-2">
+                                    <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">{r.code}</span>
+                                    <span>{r.name}</span>
+                                  </span>
+                                </ComboboxItem>
+                              ))}
+                            </ComboboxGroup>
+                          ))}
+                        </ComboboxList>
+                      </ComboboxContent>
+                    </Combobox>
                   )}
 
                   {/* Thông tin giải thích */}
-                  <div className={`mt-2 p-3 rounded-lg text-[11px] border ${field.value
+                  <div className={`mt-2 p-3 rounded-lg text-[12px] border leading-relaxed ${field.value
                     ? "bg-primary/5 border-primary/20 text-primary"
                     : "bg-muted/30 border-border text-muted-foreground"
                     }`}>
                     {field.value && selectedResource ? (
                       <span className="flex items-center gap-2">
-                        <ShieldCheck className="h-3.5 w-3.5 shrink-0" />
-                        Menu này chỉ hiện với user có quyền trên tài nguyên <strong>{selectedResource.name}</strong> ({selectedResource.code})
+                        <ShieldCheck className="h-4 w-4 shrink-0" />
+                        <span>Menu này <strong>chỉ hiển thị</strong> với những người dùng có ít nhất một quyền (Action) trên tài nguyên <strong>{selectedResource.name}</strong> (Mã: <code className="bg-primary/10 px-1 py-0.5 rounded">{selectedResource.code}</code>).</span>
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
                         <span className="h-2 w-2 rounded-full bg-green-500 inline-block shrink-0" />
-                        Menu công khai — hiển thị với tất cả user đã đăng nhập
+                        <span><strong>Menu Công Khai:</strong> Sẽ luôn luôn hiển thị trên thanh Menu đối với bất kỳ người dùng nào đăng nhập thành công vào hệ thống.</span>
                       </span>
                     )}
                   </div>

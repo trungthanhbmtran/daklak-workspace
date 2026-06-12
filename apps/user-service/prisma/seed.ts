@@ -5269,7 +5269,7 @@ async function main() {
   const menuData = [
     // 1. Dashboard (Public/No PBAC required)
     { code: 'DASHBOARD', name: 'Bảng điều khiển', route: '/', icon: 'LayoutDashboard', order: 1, application: 'ADMIN_PORTAL', linkedResourceCode: null },
-    
+
     // 2. Hệ thống
     { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: null, icon: 'Settings', order: 99, application: 'ADMIN_PORTAL', linkedResourceCode: 'SYSTEM' },
     { code: 'SYS_ORG', name: 'Cơ cấu tổ chức', route: '/system/organizations', icon: 'Building2', order: 1, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'ORGANIZATION' },
@@ -5292,7 +5292,7 @@ async function main() {
       const parentMenu = await prisma.menu.findUnique({ where: { code: m.parentCode } });
       if (parentMenu) parentId = parentMenu.id;
     }
-    
+
     await prisma.menu.upsert({
       where: { code: m.code },
       update: {
