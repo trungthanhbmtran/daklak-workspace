@@ -5279,11 +5279,11 @@ async function main() {
     { code: 'SYS_MENU', name: 'Quản lý Menu', route: '/system/menus', icon: 'Menu', order: 5, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'MENU' },
     { code: 'SYS_CAT', name: 'Danh mục', route: '/system/categories', icon: 'ListTree', order: 6, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'CATEGORY' },
 
-    // 3. Quản lý Nhân sự & Công việc (HRM PORTAL)
-    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: null, icon: 'Users', order: 2, application: 'HRM_PORTAL', linkedResourceCode: 'HRM_EMPLOYEE' },
-    { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/hrm/employees', icon: 'UserCircle', order: 1, application: 'HRM_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE' },
-    { code: 'HRM_TASK_MENU', name: 'Quản lý công việc', route: '/hrm/tasks', icon: 'CheckSquare', order: 2, application: 'HRM_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK' },
-    { code: 'HRM_PLAN_MENU', name: 'Kế hoạch công tác', route: '/hrm/plans', icon: 'Calendar', order: 3, application: 'HRM_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN' },
+    // 3. Quản lý Nhân sự & Công việc
+    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: null, icon: 'Users', order: 2, application: 'ADMIN_PORTAL', linkedResourceCode: 'HRM_EMPLOYEE' },
+    { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/hrm/employees', icon: 'UserCircle', order: 1, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE' },
+    { code: 'HRM_TASK_MENU', name: 'Quản lý công việc', route: '/hrm/tasks', icon: 'CheckSquare', order: 2, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK' },
+    { code: 'HRM_PLAN_MENU', name: 'Kế hoạch công tác', route: '/hrm/plans', icon: 'Calendar', order: 3, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN' },
   ];
 
   for (const m of menuData) {
