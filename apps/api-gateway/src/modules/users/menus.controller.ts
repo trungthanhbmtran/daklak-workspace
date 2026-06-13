@@ -90,9 +90,10 @@ const flattenMenus = (nodes: any[], basePath: string): any[] => {
     const route = (node.route ?? '').trim();
     // Chỉ thêm node vào danh sách khi có route thực sự (không rỗng)
     if (route !== '') {
+      const href = route.startsWith('/') ? route : joinPath(basePath, route);
       acc.push({
         name: (node.name ?? '').trim(),
-        href: joinPath(basePath, route),
+        href,
         icon: node.icon ?? '',
         order: node.order ?? 0,
       });
