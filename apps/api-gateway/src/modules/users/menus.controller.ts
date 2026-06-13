@@ -88,7 +88,8 @@ const getRealBranches = (nodes: any[]): any[] => {
 const flattenMenus = (nodes: any[], basePath: string): any[] => {
   return nodes.reduce<any[]>((acc, node) => {
     const route = (node.route ?? '').trim();
-    if (route !== undefined && route !== null) {
+    // Chỉ thêm node vào danh sách khi có route thực sự (không rỗng)
+    if (route !== '') {
       acc.push({
         name: (node.name ?? '').trim(),
         href: joinPath(basePath, route),
