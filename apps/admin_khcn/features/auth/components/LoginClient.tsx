@@ -64,9 +64,9 @@ export function LoginClient() {
         toast.success("Đăng nhập thành công! Đang chuyển hướng...");
 
         if (callbackUrl) {
-          window.location.href = callbackUrl;
+          router.push(callbackUrl);
         } else {
-          window.location.href = '/admin/hub';
+          router.push('/hub');
         }
       } catch (error: any) {
         const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";

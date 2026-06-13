@@ -2,6 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import apiClient from "@/lib/axiosInstance";
 
 /**
@@ -10,6 +11,7 @@ import apiClient from "@/lib/axiosInstance";
  */
 export function useLogout() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleLogout() {
@@ -23,10 +25,9 @@ export function useLogout() {
       } catch (error) {
         console.error("Logout error:", error);
       } finally {
-        // 3. Luôn chuyển hướng về trang login kể cả khi API lỗi
-        // Dùng window.location.href (hard reload) để xoá toàn bộ cache Next.js App Router
-        // và đảm bảo React Query cache không bị dùng lại giữa các user khác nhau
-        window.location.href = "/admin/login";
+        // 3. Middleware (proxy.ts) sẽ detect không có token và redirect về /login
+        // router.push tự thêm basePath /admin → thành /admin/login
+        router.push("/login");
       }
     });
   }
