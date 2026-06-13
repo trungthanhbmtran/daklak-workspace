@@ -2256,6 +2256,23 @@ async function main() {
     },
   });
 
+  // Gán đầy đủ policies cho ADMIN role (quản lý toàn bộ hệ thống nội bộ)
+  const adminResourceCodes = ['USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'SYSTEM', 'NOTIFICATION', 'HRM_EMPLOYEE', 'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_PROCESSING', 'DOC_PUBLISH', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES', 'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION', 'WORKFLOW', 'TASK', 'PLAN', 'REPORT'];
+  const adminActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'PUBLISH', 'APPROVE'];
+  const adminPoliciesData: { resourceId: number; action: string; effect: string }[] = [];
+  for (const resCode of adminResourceCodes) {
+    const resId = resources[resCode]?.id;
+    if (!resId) continue;
+    for (const action of adminActions) {
+      adminPoliciesData.push({ resourceId: resId, action, effect: 'ALLOW' });
+    }
+  }
+  // Xóa policies cũ rồi tạo lại để tránh trùng
+  await prisma.policy.deleteMany({ where: { roleId: adminRole.id } });
+  if (adminPoliciesData.length > 0) {
+    await prisma.policy.createMany({ data: adminPoliciesData.map(p => ({ ...p, roleId: adminRole.id })), skipDuplicates: true });
+  }
+
   // --- CMS ROLES ---
   const cmsRoles = [
     {
@@ -2406,7 +2423,7 @@ async function main() {
       service: 'USER_SERVICE',
       color: '#3b82f6',
       order: 1,
-      // res: 'USER',
+      res: 'USER',
       route: '/services/admin',
       description: 'Quản lý tài khoản, phân quyền (PBAC), tổ chức đơn vị và thiết lập hệ thống.',
     },
@@ -2530,7 +2547,7 @@ async function main() {
       route: 'organization',
       icon: 'apartment',
       order: 5,
-      // res: 'ORGANIZATION',
+      res: 'ORGANIZATION',
     },
     {
       code: 'ADMIN_CATEGORIES',
