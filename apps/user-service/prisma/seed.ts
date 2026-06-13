@@ -5067,7 +5067,7 @@ async function main() {
     const domainNS = techDomains.find(d => d.code === 'NGAN_SACH');
     const domainCDS = techDomains.find(d => d.code === 'CHUYEN_DOI_SO');
 
-    const daklakGeo = allGeoAreas.find(g => g.code === '47');
+    const daklakGeo = defaultGeoAreas.find(g => g.code === '47');
 
     for (const staffing of allStaffing) {
       for (let i = 1; i <= staffing.quantity; i++) {
