@@ -417,9 +417,13 @@ export class TasksController implements OnModuleInit {
     const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     const taskId = parseInt(id, 10);
-    const taskData: any = await firstValueFrom(
+    const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: taskId }),
     );
+    const taskData = taskResponse?.data;
+    if (!taskData) {
+      throw new Error('Nhiệm vụ không tồn tại');
+    }
 
     // Task UNASSIGNED/TEMPLATE: bất kỳ ai đã đăng nhập đều có thể giao
     // Task đã có người xử lý: chỉ chính người đó hoặc admin mới được giao lại
@@ -505,9 +509,13 @@ export class TasksController implements OnModuleInit {
     const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
     const taskId = parseInt(id, 10);
-    const taskData: any = await firstValueFrom(
+    const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: taskId }),
     );
+    const taskData = taskResponse?.data;
+    if (!taskData) {
+      throw new Error('Nhiệm vụ không tồn tại');
+    }
 
     // Chỉ owner (người được giao hiện tại) hoặc admin mới được tạo task con
     if (!isAdmin && taskData.assigneeCode !== assignerCode) {
@@ -577,9 +585,10 @@ export class TasksController implements OnModuleInit {
     const requesterCode = user?.employeeCode;
     const taskId = parseInt(id, 10);
 
-    const taskData: any = await firstValueFrom(
+    const taskResponse: any = await firstValueFrom(
       this.taskService.GetTask({ id: taskId }),
     );
+    const taskData = taskResponse?.data;
     if (!taskData) throw new Error('Task not found.');
 
     const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
