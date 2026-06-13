@@ -121,14 +121,6 @@ CREATE TABLE `sys_menus` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `menu_required_permissions` (
-    `menu_id` INTEGER NOT NULL,
-    `permission_id` INTEGER NOT NULL,
-
-    PRIMARY KEY (`menu_id`, `permission_id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `organization_units` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
@@ -137,7 +129,6 @@ CREATE TABLE `organization_units` (
     `type_id` INTEGER NOT NULL,
     `parent_id` INTEGER NULL,
     `hierarchy_path` VARCHAR(191) NULL,
-    `scope` VARCHAR(191) NULL,
     `address` VARCHAR(191) NULL,
     `phone_number` VARCHAR(191) NULL,
     `email` VARCHAR(191) NULL,
@@ -185,14 +176,6 @@ CREATE TABLE `job_titles` (
     UNIQUE INDEX `job_titles_code_key`(`code`),
     INDEX `job_titles_reports_to_position_id_idx`(`reports_to_position_id`),
     PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `job_title_monitored_units` (
-    `job_title_id` INTEGER NOT NULL,
-    `unit_id` INTEGER NOT NULL,
-
-    PRIMARY KEY (`job_title_id`, `unit_id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
@@ -253,16 +236,6 @@ CREATE TABLE `policies` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `permissions` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `action` VARCHAR(191) NOT NULL,
-    `resource_id` INTEGER NOT NULL,
-
-    UNIQUE INDEX `permissions_action_resource_id_key`(`action`, `resource_id`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
 CREATE TABLE `resources` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `code` VARCHAR(191) NOT NULL,
@@ -270,18 +243,6 @@ CREATE TABLE `resources` (
     `service_code` VARCHAR(191) NULL,
 
     UNIQUE INDEX `resources_code_key`(`code`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-
--- CreateTable
-CREATE TABLE `api_endpoints` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `method` VARCHAR(191) NOT NULL,
-    `path` VARCHAR(191) NOT NULL,
-    `description` VARCHAR(191) NULL,
-    `permissionId` INTEGER NULL,
-
-    UNIQUE INDEX `api_endpoints_method_path_key`(`method`, `path`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -407,16 +368,13 @@ ALTER TABLE `auth_accounts` ADD CONSTRAINT `auth_accounts_user_id_fkey` FOREIGN 
 ALTER TABLE `auth_refresh_tokens` ADD CONSTRAINT `auth_refresh_tokens_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `sys_categories` ADD CONSTRAINT `sys_categories_group_code_fkey` FOREIGN KEY (`group_code`) REFERENCES `sys_category_groups`(`code`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `sys_category_translations` ADD CONSTRAINT `sys_category_translations_category_id_fkey` FOREIGN KEY (`category_id`) REFERENCES `sys_categories`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `sys_menus` ADD CONSTRAINT `sys_menus_parent_id_fkey` FOREIGN KEY (`parent_id`) REFERENCES `sys_menus`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `menu_required_permissions` ADD CONSTRAINT `menu_required_permissions_menu_id_fkey` FOREIGN KEY (`menu_id`) REFERENCES `sys_menus`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `menu_required_permissions` ADD CONSTRAINT `menu_required_permissions_permission_id_fkey` FOREIGN KEY (`permission_id`) REFERENCES `permissions`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `organization_units` ADD CONSTRAINT `organization_units_type_id_fkey` FOREIGN KEY (`type_id`) REFERENCES `unit_types`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -440,12 +398,6 @@ ALTER TABLE `organization_unit_geographic_areas` ADD CONSTRAINT `organization_un
 ALTER TABLE `job_titles` ADD CONSTRAINT `job_titles_reports_to_position_id_fkey` FOREIGN KEY (`reports_to_position_id`) REFERENCES `job_titles`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `job_title_monitored_units` ADD CONSTRAINT `job_title_monitored_units_job_title_id_fkey` FOREIGN KEY (`job_title_id`) REFERENCES `job_titles`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `job_title_monitored_units` ADD CONSTRAINT `job_title_monitored_units_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `org_staffing` ADD CONSTRAINT `org_staffing_unit_id_fkey` FOREIGN KEY (`unit_id`) REFERENCES `organization_units`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -462,12 +414,6 @@ ALTER TABLE `staffing_slot_monitored_units` ADD CONSTRAINT `staffing_slot_monito
 
 -- AddForeignKey
 ALTER TABLE `policies` ADD CONSTRAINT `policies_resource_id_fkey` FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `permissions` ADD CONSTRAINT `permissions_resource_id_fkey` FOREIGN KEY (`resource_id`) REFERENCES `resources`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE `api_endpoints` ADD CONSTRAINT `api_endpoints_permissionId_fkey` FOREIGN KEY (`permissionId`) REFERENCES `permissions`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `unit_type_job_templates` ADD CONSTRAINT `unit_type_job_templates_unit_type_id_fkey` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_types`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
