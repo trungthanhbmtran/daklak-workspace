@@ -132,20 +132,13 @@ export class MenusController implements OnModuleInit {
 
   @Get('me')
   @ApiOperation({ summary: 'Menu sidebar theo user đăng nhập và ứng dụng' })
-  @ApiQuery({
-    name: 'app',
-    required: false,
-    description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
-    example: 'ADMIN_PORTAL',
-  })
+  @ApiQuery({ name: 'app', required: false, description: 'ADMIN_PORTAL | CITIZEN_PORTAL', example: 'ADMIN_PORTAL' })
   @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
       rawId != null && rawId !== ''
-        ? typeof rawId === 'number'
-          ? rawId
-          : parseInt(String(rawId), 10)
+        ? typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
@@ -154,65 +147,106 @@ export class MenusController implements OnModuleInit {
       }),
     );
 
-    // Bổ sung meta chứa currentUser để Frontend (HubClient) dùng
     if (response) {
       if (!response.meta) response.meta = {};
       response.meta.currentUser = sanitizeUserForClient(req.user);
-
-      // --- BFF Logic: Tính toán cấu trúc hiển thị cho Frontend ---
-      // Hướng A: không phụ thuộc vào service field nữa — dùng route + code
       const branches = getRealBranches(response.items ?? []);
+      response.hubApps = this.buildHubApps(branches);
+      response.sidebarMenus = this.buildSidebarMenus(branches);
+    }
+    return response;
+  }
 
-      // hubApps: filter theo route thay vì service (node gốc phải có route)
-      response.hubApps = branches
-        .filter((b: any) => (b.route ?? '').trim() !== '')
-        .map((b: any) => {
-          const basePath = (b.route ?? '').trim();
-          const menuCode = (b.code ?? '').trim();
+  @Get('hub')
+  @ApiOperation({ summary: 'Danh sách phân hệ cho trang Hub (chỉ root cards, không sidebar)' })
+  @ApiQuery({ name: 'app', required: false, example: 'ADMIN_PORTAL' })
+  @ApiResponse({ status: 200, description: 'Mảng AppItem cho Hub' })
+  async getHubApps(@Req() req: any, @Query('app') app?: string) {
+    const rawId = req.user?.id ?? req.user?.userId;
+    const userId =
+      rawId != null && rawId !== ''
+        ? typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)
+        : 0;
+    const response: any = await firstValueFrom(
+      this.menuService.GetMyMenus({
+        userId: Number.isNaN(userId) ? 0 : userId,
+        app: app || 'ADMIN_PORTAL',
+      }),
+    );
+    const branches = getRealBranches(response?.items ?? []);
+    return { apps: this.buildHubApps(branches) };
+  }
 
-          let href = basePath;
-          if (b.children && b.children.length > 0) {
-            const firstChild = [...b.children].sort(
-              (x, y) => (x.order || 0) - (y.order || 0),
-            )[0];
-            if (firstChild.route) {
-              href = firstChild.route.startsWith('/')
-                ? firstChild.route
-                : `${basePath}/${firstChild.route}`;
-            }
-          }
-          href = href.replace(/([^:])\/\//g, '$1/');
+  @Get('sidebar')
+  @ApiOperation({ summary: 'Sidebar items theo service (load khi user chọn phân hệ)' })
+  @ApiQuery({ name: 'code', required: true, description: 'Menu code của service root (VD: HRM_GROUP)', example: 'HRM_GROUP' })
+  @ApiQuery({ name: 'app', required: false, example: 'ADMIN_PORTAL' })
+  @ApiResponse({ status: 200, description: 'Sidebar items cho 1 service' })
+  async getServiceSidebar(
+    @Req() req: any,
+    @Query('code') code: string,
+    @Query('app') app?: string,
+  ) {
+    const rawId = req.user?.id ?? req.user?.userId;
+    const userId =
+      rawId != null && rawId !== ''
+        ? typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)
+        : 0;
+    const response: any = await firstValueFrom(
+      this.menuService.GetMyMenus({
+        userId: Number.isNaN(userId) ? 0 : userId,
+        app: app || 'ADMIN_PORTAL',
+      }),
+    );
+    const branches = getRealBranches(response?.items ?? []);
+    const sidebarMenus = this.buildSidebarMenus(branches);
+    const sidebar = sidebarMenus.find((s: any) => s.serviceCode === code) ?? null;
+    return { sidebar };
+  }
 
-          return {
-            id: menuCode,            // dùng menu.code thay vì service code
-            title: (b.name ?? '').trim() || menuCode,
-            desc: (b.description ?? '').trim() || 'Phân hệ nghiệp vụ',
-            href,
-            icon: b.icon ?? '',
-            iconColor: (b.iconColor ?? '').trim() || null,
-            disabled: false,
-          };
-        });
+  // ---- Private BFF helpers ----
 
-      // sidebarMenus: dùng menu.code làm serviceCode (không cần service field)
-      response.sidebarMenus = branches.map((b: any) => {
-        const menuCode = (b.code ?? '').trim();
+  private buildHubApps(branches: any[]) {
+    return branches
+      .filter((b: any) => (b.route ?? '').trim() !== '')
+      .map((b: any) => {
         const basePath = (b.route ?? '').trim();
-        const items = flattenMenus(b.children ?? [], basePath).sort(
-          (a: any, b: any) => a.order - b.order,
-        );
-
+        const menuCode = (b.code ?? '').trim();
+        let href = basePath;
+        if (b.children?.length) {
+          const firstChild = [...b.children].sort((x, y) => (x.order || 0) - (y.order || 0))[0];
+          if (firstChild.route) {
+            href = firstChild.route.startsWith('/') ? firstChild.route : `${basePath}/${firstChild.route}`;
+          }
+        }
+        href = href.replace(/([^:])\/\//g, '$1/');
         return {
-          serviceCode: menuCode,     // menu.code làm định danh sidebar
-          serviceName: (b.name ?? '').trim() || menuCode,
-          serviceIcon: b.icon ?? '',
-          basePath,
-          items,
+          id: menuCode,
+          title: (b.name ?? '').trim() || menuCode,
+          desc: (b.description ?? '').trim() || 'Phân hệ nghiệp vụ',
+          href,
+          icon: b.icon ?? '',
+          iconColor: (b.iconColor ?? '').trim() || null,
+          disabled: false,
         };
       });
-    }
+  }
 
-    return response;
+  private buildSidebarMenus(branches: any[]) {
+    return branches.map((b: any) => {
+      const menuCode = (b.code ?? '').trim();
+      const basePath = (b.route ?? '').trim();
+      const items = flattenMenus(b.children ?? [], basePath).sort(
+        (a: any, b: any) => a.order - b.order,
+      );
+      return {
+        serviceCode: menuCode,
+        serviceName: (b.name ?? '').trim() || menuCode,
+        serviceIcon: b.icon ?? '',
+        basePath,
+        items,
+      };
+    });
   }
 
   /** Chuẩn hóa body từ frontend sang payload gRPC */

@@ -5187,7 +5187,7 @@ async function main() {
     { code: 'DASHBOARD', name: 'Bảng điều khiển', route: '/', icon: 'LayoutDashboard', order: 1, application: 'ADMIN_PORTAL', linkedResourceCode: null },
 
     // 2. Quản trị hệ thống (chỉ SUPER_ADMIN + ADMIN thấy)
-    { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: null, icon: 'Settings', order: 99, application: 'ADMIN_PORTAL', linkedResourceCode: 'SYSTEM' },
+    { code: 'SYS_GROUP', name: 'Quản trị hệ thống', route: '/system', icon: 'Settings', order: 99, application: 'ADMIN_PORTAL', linkedResourceCode: 'SYSTEM' },
     { code: 'SYS_ORG', name: 'Cơ cấu tổ chức', route: '/system/organizations', icon: 'Building2', order: 1, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'ORGANIZATION' },
     { code: 'SYS_USER', name: 'Người dùng', route: '/system/users', icon: 'Users', order: 2, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'USER' },
     { code: 'SYS_ROLE', name: 'Vai trò & Quyền', route: '/system/roles', icon: 'ShieldCheck', order: 3, application: 'ADMIN_PORTAL', parentCode: 'SYS_GROUP', linkedResourceCode: 'ROLE' },
@@ -5197,28 +5197,26 @@ async function main() {
 
     // 3. Quản lý Nhân sự & Công việc
     // Hiển thị với: LEADER (HRM_EMPLOYEE.*), MANAGER (HRM_EMPLOYEE.MANAGE), STAFF (HRM_EMPLOYEE.READ), OFFICER (HRM_EMPLOYEE.READ)
-    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: null, icon: 'Users', order: 2, application: 'ADMIN_PORTAL', linkedResourceCode: 'HRM_EMPLOYEE' },
+    { code: 'HRM_GROUP', name: 'Nhân sự & Công việc', route: '/hrm', icon: 'Users', order: 2, application: 'ADMIN_PORTAL', linkedResourceCode: 'HRM_EMPLOYEE' },
     { code: 'HRM_EMPLOYEE_MENU', name: 'Hồ sơ nhân sự', route: '/hrm/employees', icon: 'UserCircle', order: 1, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'HRM_EMPLOYEE' },
     { code: 'HRM_TASK_MENU', name: 'Quản lý công việc', route: '/hrm/tasks', icon: 'CheckSquare', order: 2, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'TASK' },
     { code: 'HRM_PLAN_MENU', name: 'Kế hoạch công tác', route: '/hrm/plans', icon: 'Calendar', order: 3, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'PLAN' },
     { code: 'HRM_KPI_MENU', name: 'Theo dõi KPI', route: '/hrm/kpi', icon: 'BarChart2', order: 4, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'KPI' },
-    // Chỉ LEADER và MANAGER (có MANAGE) mới thấy
     { code: 'HRM_REPORT_MENU', name: 'Báo cáo đánh giá', route: '/hrm/reports', icon: 'FileText', order: 5, application: 'ADMIN_PORTAL', parentCode: 'HRM_GROUP', linkedResourceCode: 'REPORT' },
 
     // 4. Quản lý Văn bản
     // Hiển thị với: LEADER, MANAGER, STAFF (có DOC_INCOMING.*)
-    { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: null, icon: 'FileText', order: 3, application: 'ADMIN_PORTAL', linkedResourceCode: 'DOC_INCOMING' },
+    { code: 'DOC_GROUP', name: 'Quản lý Văn bản', route: '/documents', icon: 'FileText', order: 3, application: 'ADMIN_PORTAL', linkedResourceCode: 'DOC_INCOMING' },
     { code: 'DOC_INCOMING_MENU', name: 'Văn bản đến', route: '/documents/incoming', icon: 'Mail', order: 1, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_INCOMING' },
     { code: 'DOC_OUTGOING_MENU', name: 'Văn bản đi', route: '/documents/outgoing', icon: 'Send', order: 2, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_OUTGOING' },
     { code: 'DOC_INTERNAL_MENU', name: 'Văn bản nội bộ', route: '/documents/internal', icon: 'Inbox', order: 3, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_INTERNAL' },
     { code: 'DOC_PROCESSING_MENU', name: 'Xử lý văn bản', route: '/documents/processing', icon: 'Layers', order: 4, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_PROCESSING' },
-    // Chỉ LEADER + MANAGER mới thấy (được quyền DOC_PUBLISH, DOC_TRANSPARENCY)
     { code: 'DOC_PUBLISH_MENU', name: 'Phát hành văn bản', route: '/documents/publish', icon: 'Globe', order: 5, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_PUBLISH' },
     { code: 'DOC_TRANSPARENCY_MENU', name: 'Công khai văn bản', route: '/documents/transparency', icon: 'Eye', order: 6, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_TRANSPARENCY' },
     { code: 'DOC_MINUTES_MENU', name: 'Biên bản cuộc họ p', route: '/documents/minutes', icon: 'ClipboardList', order: 7, application: 'ADMIN_PORTAL', parentCode: 'DOC_GROUP', linkedResourceCode: 'DOC_MINUTES' },
 
     // 5. Quản lý Nội dung (chỉ AUTHOR / REVIEWER / PUBLISHER thấy)
-    { code: 'CONTENT_GROUP', name: 'Quản lý Nội dung', route: null, icon: 'Newspaper', order: 4, application: 'ADMIN_PORTAL', linkedResourceCode: 'POST' },
+    { code: 'CONTENT_GROUP', name: 'Quản lý Nội dung', route: '/content', icon: 'Newspaper', order: 4, application: 'ADMIN_PORTAL', linkedResourceCode: 'POST' },
     { code: 'CONTENT_POST_MENU', name: 'Bài viết', route: '/content/posts', icon: 'FileEdit', order: 1, application: 'ADMIN_PORTAL', parentCode: 'CONTENT_GROUP', linkedResourceCode: 'POST' },
     { code: 'CONTENT_CAT_MENU', name: 'Chuyên mục', route: '/content/categories', icon: 'Tag', order: 2, application: 'ADMIN_PORTAL', parentCode: 'CONTENT_GROUP', linkedResourceCode: 'POST_CATEGORY' },
     { code: 'CONTENT_BANNER_MENU', name: 'Banner', route: '/content/banners', icon: 'Image', order: 3, application: 'ADMIN_PORTAL', parentCode: 'CONTENT_GROUP', linkedResourceCode: 'BANNER' },
@@ -5226,7 +5224,7 @@ async function main() {
     { code: 'CONTENT_INTERACT_MENU', name: 'Tương tác công dân', route: '/content/interactions', icon: 'MessageSquare', order: 5, application: 'ADMIN_PORTAL', parentCode: 'CONTENT_GROUP', linkedResourceCode: 'CITIZEN_INTERACTION' },
 
     // 6. Quy trình & Tích hợp (chỉ LEADER + SUPER_ADMIN thấy)
-    { code: 'WORKFLOW_GROUP', name: 'Quy trình & Liên thông', route: null, icon: 'GitBranch', order: 5, application: 'ADMIN_PORTAL', linkedResourceCode: 'WORKFLOW' },
+    { code: 'WORKFLOW_GROUP', name: 'Quy trình & Liên thông', route: '/workflow', icon: 'GitBranch', order: 5, application: 'ADMIN_PORTAL', linkedResourceCode: 'WORKFLOW' },
     { code: 'WORKFLOW_BUILDER_MENU', name: 'Thiết kế quy trình', route: '/workflow/builder', icon: 'Workflow', order: 1, application: 'ADMIN_PORTAL', parentCode: 'WORKFLOW_GROUP', linkedResourceCode: 'WORKFLOW' },
   ];
 

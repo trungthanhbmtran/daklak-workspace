@@ -31,6 +31,15 @@ export const menuApi = {
   /** Menu sidebar theo user đăng nhập (cây, chỉ mục user có quyền) */
   getMyMenus: (app = "ADMIN_PORTAL") =>
     apiClient.get<{ items: MenuNode[] }>("/menus/me", { params: { app } }),
+
+  /** Hub Apps: Danh sách phân hệ (card Hub) theo PBAC của user */
+  getHubApps: (app = "ADMIN_PORTAL") =>
+    apiClient.get<{ apps: any[] }>("/menus/hub", { params: { app } }),
+
+  /** Sidebar: Lấy menu items của 1 service theo code (lazy load khi vào service) */
+  getServiceSidebar: (code: string, app = "ADMIN_PORTAL") =>
+    apiClient.get<{ sidebar: any }>("/menus/sidebar", { params: { code, app } }),
+
   saveMenu: (data: Partial<MenuItem>) => {
     const payload = toMenuPayload(data);
     if (data.id) return apiClient.put(`/menus/${data.id}`, payload);
