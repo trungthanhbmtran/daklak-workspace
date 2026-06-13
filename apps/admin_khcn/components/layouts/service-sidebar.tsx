@@ -57,7 +57,7 @@ export function AppSidebar({
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip="Đổi ứng dụng">
-                <Link href="/">
+                <Link href="/hub">
                   <Grid className="size-4" />
                   <span>Về trang Portal (Hub)</span>
                 </Link>

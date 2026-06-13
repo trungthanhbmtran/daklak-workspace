@@ -1,9 +1,6 @@
-import { HubClient } from "@/features/hub";
-
-export const metadata = {
-  title: "Cổng Ứng dụng Nội bộ | Sở KH&CN Đắk Lắk",
-};
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return <HubClient />;
+  redirect("/hub");
 }
+
