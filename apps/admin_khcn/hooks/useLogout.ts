@@ -26,7 +26,7 @@ export function useLogout() {
         // 3. Luôn chuyển hướng về trang login kể cả khi API lỗi
         // Dùng window.location.href (hard reload) để xoá toàn bộ cache Next.js App Router
         // và đảm bảo React Query cache không bị dùng lại giữa các user khác nhau
-        window.location.href = "/login";
+        window.location.href = "/admin/login";
       }
     });
   }

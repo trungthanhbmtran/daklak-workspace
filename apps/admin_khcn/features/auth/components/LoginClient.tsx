@@ -66,7 +66,7 @@ export function LoginClient() {
         if (callbackUrl) {
           window.location.href = callbackUrl;
         } else {
-          window.location.href = '/admin/';
+          window.location.href = '/admin/hub';
         }
       } catch (error: any) {
         const message = error.response?.data?.message || "Thông tin đăng nhập không chính xác.";
