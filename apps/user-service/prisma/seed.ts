@@ -2097,6 +2097,58 @@ async function main() {
   ];
 
 
+  // ==========================================================
+  // 3.2 CATEGORY GROUPS — Phải seed TRƯỚC categories (FK constraint: group_code)
+  // ==========================================================
+  const groupLabels = [
+    { code: 'STATUS', name: 'Trạng thái hệ thống' },
+    { code: 'TASK_ROLE', name: 'Vai trò công việc' },
+    { code: 'TASK_STATUS', name: 'Trạng thái công việc' },
+    { code: 'SYSTEM_ACTION', name: 'Hành động hệ thống' },
+    { code: 'MICROSERVICE', name: 'Dịch vụ hệ thống' },
+    { code: 'PROVINCE', name: 'Danh mục Tỉnh/Thành' },
+    { code: 'DISTRICT', name: 'Danh mục Quận/Huyện' },
+    { code: 'GEO_AREA', name: 'Khu vực địa lý' },
+    { code: 'DOCUMENT_TYPE', name: 'Loại văn bản' },
+    { code: 'URGENCY_LEVEL', name: 'Độ khẩn' },
+    { code: 'SECURITY_LEVEL', name: 'Độ mật' },
+    { code: 'DOCUMENT_DOMAIN', name: 'Lĩnh vực văn bản' },
+    { code: 'STORAGE_PERIOD', name: 'Thời hạn bảo quản' },
+    { code: 'GENDER', name: 'Giới tính' },
+    { code: 'ETHNICITY', name: 'Dân tộc' },
+    { code: 'RELIGION', name: 'Tôn giáo' },
+    { code: 'IDENTITY_TYPE', name: 'Giấy tờ định danh' },
+    { code: 'POSITION', name: 'Chức vụ' },
+    { code: 'CIVIL_SERVANT_RANK', name: 'Ngạch công chức' },
+    { code: 'PUBLIC_EMPLOYEE_RANK', name: 'Ngạch viên chức' },
+    { code: 'UNIT', name: 'Đơn vị tính' },
+    { code: 'ACADEMIC_RANK', name: 'Học hàm/Học vị' },
+    { code: 'POLITICAL_THEORY', name: 'Lý luận chính trị' },
+    { code: 'IT_SKILL', name: 'Trình độ tin học' },
+    { code: 'LANGUAGE_SKILL', name: 'Trình độ ngoại ngữ' },
+    { code: 'LANGUAGE', name: 'Ngôn ngữ hệ thống' },
+    { code: 'DOMAIN', name: 'Lĩnh vực nghiệp vụ' },
+    { code: 'CONTENT_TYPE', name: 'Loại nội dung' },
+    { code: 'DEPARTMENT', name: 'Phòng ban' },
+    { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
+    { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
+    { code: 'font_family', name: 'Phông chữ giao diện (Portal)' },
+    { code: 'border_radius', name: 'Độ bo góc khối (Portal)' },
+    { code: 'AI_PROVIDER_TYPE', name: 'Nhà cung cấp AI (LLM)' },
+    { code: 'TRANSLATION_SERVICE_TYPE', name: 'Dịch vụ Dịch thuật' },
+    { code: 'UNIT_TYPE_CATEGORY', name: 'Phân loại tổ chức đơn vị' },
+    { code: 'PLAN_FRAMEWORK', name: 'Mô hình Quản trị / Kế hoạch' },
+  ];
+  console.log('📦 Seeding Category Groups FIRST (FK dependency)...');
+  for (const g of groupLabels) {
+    await prisma.categoryGroup.upsert({
+      where: { code: g.code },
+      update: { name: g.name },
+      create: g,
+    });
+  }
+  console.log('✅ Category Groups seeded');
+
   console.log(
     `📦 Seeding ${categoriesData.length} categories with dual translations...`,
   );
@@ -2151,58 +2203,9 @@ async function main() {
   console.log('✅ Categories and dual Vietnamese/English translations seeded');
 
   // ==========================================================
-  // 3.2 CATEGORY GROUPS (For friendly names)
-  // ==========================================================
-  const groupLabels = [
-    { code: 'STATUS', name: 'Trạng thái hệ thống' },
-    { code: 'SYSTEM_ACTION', name: 'Hành động hệ thống' },
-    { code: 'MICROSERVICE', name: 'Dịch vụ hệ thống' },
-    { code: 'PROVINCE', name: 'Danh mục Tỉnh/Thành' },
-    { code: 'DISTRICT', name: 'Danh mục Quận/Huyện' },
-    { code: 'GEO_AREA', name: 'Khu vực địa lý' },
-    { code: 'DOCUMENT_TYPE', name: 'Loại văn bản' },
-    { code: 'URGENCY_LEVEL', name: 'Độ khẩn' },
-    { code: 'SECURITY_LEVEL', name: 'Độ mật' },
-    { code: 'DOCUMENT_DOMAIN', name: 'Lĩnh vực văn bản' },
-    { code: 'STORAGE_PERIOD', name: 'Thời hạn bảo quản' },
-    { code: 'GENDER', name: 'Giới tính' },
-    { code: 'ETHNICITY', name: 'Dân tộc' },
-    { code: 'RELIGION', name: 'Tôn giáo' },
-    { code: 'IDENTITY_TYPE', name: 'Giấy tờ định danh' },
-    { code: 'POSITION', name: 'Chức vụ' },
-    { code: 'CIVIL_SERVANT_RANK', name: 'Ngạch công chức' },
-    { code: 'PUBLIC_EMPLOYEE_RANK', name: 'Ngạch viên chức' },
-    { code: 'UNIT', name: 'Đơn vị tính' },
-    { code: 'ACADEMIC_RANK', name: 'Học hàm/Học vị' },
-    { code: 'POLITICAL_THEORY', name: 'Lý luận chính trị' },
-
-    { code: 'IT_SKILL', name: 'Trình độ tin học' },
-    { code: 'LANGUAGE_SKILL', name: 'Trình độ ngoại ngữ' },
-    { code: 'LANGUAGE', name: 'Ngôn ngữ hệ thống' },
-    { code: 'DOMAIN', name: 'Lĩnh vực nghiệp vụ' },
-    { code: 'CONTENT_TYPE', name: 'Loại nội dung' },
-    { code: 'DEPARTMENT', name: 'Phòng ban' },
-    { code: 'WORKFLOW_TRIGGER', name: 'Kích hoạt quy trình' },
-    { code: 'BANNER_POSITION', name: 'Vị trí hiển thị Banner' },
-    { code: 'font_family', name: 'Phông chữ giao diện (Portal)' },
-    { code: 'border_radius', name: 'Độ bo góc khối (Portal)' },
-    { code: 'AI_PROVIDER_TYPE', name: 'Nhà cung cấp AI (LLM)' },
-    { code: 'TRANSLATION_SERVICE_TYPE', name: 'Dịch vụ Dịch thuật' },
-  ];
-
-  console.log('📦 Seeding Category Groups...');
-  for (const g of groupLabels) {
-    await prisma.categoryGroup.upsert({
-      where: { code: g.code },
-      update: { name: g.name },
-      create: g,
-    });
-  }
-  console.log('✅ Category Groups seeded');
-
-  // ==========================================================
   // 3.1 UNIT TYPES (New Model)
   // ==========================================================
+
   console.log('📦 Seeding Unit Types...');
   const unitTypesData = [
     { code: 'CQ_TU', name: 'Cơ quan Trung ương', level: 1 },
@@ -2256,23 +2259,28 @@ async function main() {
     },
   });
 
-  // Gán đầy đủ policies cho ADMIN role (quản lý toàn bộ hệ thống nội bộ)
+  // Gán đầy đủ policies cho ADMIN role
+  // Policy<->Role là many-to-many nên phải dùng findFirst/create + role.update connect
   const adminResourceCodes = ['USER', 'ROLE', 'RESOURCE', 'MENU', 'ORGANIZATION', 'CATEGORY', 'SYSTEM', 'NOTIFICATION', 'HRM_EMPLOYEE', 'DOCUMENT', 'DOC_INCOMING', 'DOC_OUTGOING', 'DOC_INTERNAL', 'DOC_PROCESSING', 'DOC_PUBLISH', 'DOC_TRANSPARENCY', 'DOC_CONSULTATION', 'DOC_MINUTES', 'DOC_CATEGORIES', 'POST', 'POST_CATEGORY', 'BANNER', 'PORTAL_MENU', 'CITIZEN_INTERACTION', 'WORKFLOW', 'TASK', 'PLAN', 'REPORT'];
   const adminActions = ['READ', 'CREATE', 'UPDATE', 'DELETE', 'VIEW', 'PUBLISH', 'APPROVE'];
-  const adminPoliciesData: { resourceId: number; action: string; effect: string }[] = [];
+  const adminPolicyIds: number[] = [];
   for (const resCode of adminResourceCodes) {
     const resId = resources[resCode]?.id;
     if (!resId) continue;
     for (const action of adminActions) {
-      adminPoliciesData.push({ resourceId: resId, action, effect: 'ALLOW' });
+      let policy = await prisma.policy.findFirst({ where: { resourceId: resId, action, effect: 'ALLOW' } });
+      if (!policy) {
+        policy = await prisma.policy.create({ data: { resourceId: resId, action, effect: 'ALLOW' } });
+      }
+      adminPolicyIds.push(policy.id);
     }
   }
-  // Xóa policies cũ rồi tạo lại để tránh trùng
-  await prisma.policy.deleteMany({ where: { roleId: adminRole.id } });
-  if (adminPoliciesData.length > 0) {
-    await prisma.policy.createMany({ data: adminPoliciesData.map(p => ({ ...p, roleId: adminRole.id })), skipDuplicates: true });
+  if (adminPolicyIds.length > 0) {
+    await prisma.role.update({
+      where: { id: adminRole.id },
+      data: { policies: { connect: adminPolicyIds.map(id => ({ id })) } },
+    });
   }
-
   // --- CMS ROLES ---
   const cmsRoles = [
     {
@@ -5110,7 +5118,7 @@ async function main() {
     console.log(`✅ Đã phân bổ chi tiết Định biên (StaffingSlots) cho toàn Sở và các đơn vị trực thuộc (Monitored Units: ${slotMonitored.length})`);
   }
 
-  
+
 
   // ==========================================================
   // UNIT_TYPE_CATEGORY — Cập nhật description với metadata đầy đủ
