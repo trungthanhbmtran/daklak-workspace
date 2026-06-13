@@ -124,32 +124,6 @@ function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowP
                 )}
               </div>
             </div>
-
-            {/* Actions — CHỈ giao việc cấp 1, không phân rã tại đây */}
-            <div className="flex items-center gap-1.5 shrink-0 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
-              {isUnassigned && canAssign && (
-                <Button
-                  size="sm"
-                  className="h-7 px-3 text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md gap-1"
-                  onClick={() => onRequestAssign(task)}
-                  title="Mở SmartAssign để giao việc"
-                >
-                  <UserCheck className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Giao việc</span>
-                </Button>
-              )}
-
-              {!isUnassigned && task.status !== 'DONE' && canAssign && (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-7 px-2 text-[11px] text-slate-500 hover:text-slate-800 rounded-md gap-1 border border-transparent hover:border-slate-200"
-                  onClick={() => onRequestAssign(task)}
-                >
-                  Chuyển giao
-                </Button>
-              )}
-            </div>
           </div>
         </div>
       </div>
