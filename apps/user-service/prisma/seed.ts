@@ -4937,8 +4937,7 @@ async function main() {
 
   console.log('✅ Categories seeded successfully!');
 
-  // 4. Chỉ lấy địa bàn cấp tỉnh: Tỉnh Đắk Lắk (PROVINCE 47)
-  // Không gán từng xã/phường — cấp Sở quản lý toàn tỉnh
+  // 4. Chỉ lấy địa bàn cấp tỉnh: Tỉnh Đắk Lắk (PROVINCE 47) — không gán từng xã/phường
   const daklakProvince = await prisma.category.findFirst({
     where: { code: '47', groupCode: 'PROVINCE' },
   });
@@ -5011,9 +5010,9 @@ async function main() {
 
       // TT IOC — Giám sát Đô thị Thông minh (H15.07.04)
       'H15.07.04': ['DU_LIEU_SO', 'HA_TANG_SO', 'THONG_TIN_TRUYEN_THONG', 'CHUYEN_DOI_SO', 'AN_TOAN_THONG_TIN'],
-      'H15.07.04.01': ['DU_LIEU_SO', 'CHUYEN_DOI_SO'],
-      'H15.07.04.02': ['DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'CHUYEN_DOI_SO'],
-      'H15.07.04.03': ['HA_TANG_SO', 'AN_TOAN_THONG_TIN', 'THONG_TIN_TRUYEN_THONG'],
+      'H15.07.04.01': ['DU_LIEU_SO', 'CHUYEN_DOI_SO'],                                        // HC-TH IOC
+      'H15.07.04.02': ['DU_LIEU_SO', 'AN_TOAN_THONG_TIN', 'CHUYEN_DOI_SO'],                   // Khai thác dữ liệu
+      'H15.07.04.03': ['HA_TANG_SO', 'AN_TOAN_THONG_TIN', 'THONG_TIN_TRUYEN_THONG'],          // Hạ tầng ĐT thông minh
 
       // TT ĐMST (H15.07.01)
       'H15.07.01': ['H15.07'],
@@ -5046,7 +5045,7 @@ async function main() {
       skipDuplicates: true,
     });
 
-    console.log(`✅ Đã cập nhật ${defaultGeoAreas.length} Địa bàn (toàn tỉnh Đắk Lắk) cho ${soKhcnUnits.length} đơn vị KH&CN (Tổng: ${geoData.length} bản ghi)`);
+    console.log(`✅ Đã gán địa bàn Tỉnh Đắk Lắk cho ${soKhcnUnits.length} đơn vị KH&CN (Tổng: ${geoData.length} bản ghi)`);
     console.log(`✅ Đã phân bổ Lĩnh vực chuyên môn theo chức năng cho các đơn vị KH&CN (Tổng: ${domainData.length} bản ghi)`);
 
     // ----------------------------------------------------
