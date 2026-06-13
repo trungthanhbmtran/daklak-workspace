@@ -2340,59 +2340,9 @@ async function main() {
     roleMap[r.code] = createdRole;
   }
 
-  // --- TASK ROLES ---
-  const taskRoles = [
-    {
-      code: 'LEADER',
-      name: 'Lãnh đạo đơn vị (Giao việc)',
-      permissions: ['CREATE', 'READ', 'UPDATE', 'DELETE', 'VIEW', 'ASSIGN', 'COMPLETE', 'COMMENT', 'EVALUATE', 'APPROVE'],
-    },
-    {
-      code: 'MANAGER',
-      name: 'Quản lý cấp phòng (Giao việc)',
-      permissions: ['CREATE', 'READ', 'UPDATE', 'VIEW', 'ASSIGN', 'COMPLETE'],
-    },
-    {
-      code: 'STAFF',
-      name: 'Chuyên viên / Nhân viên (Giao việc)',
-      permissions: ['READ', 'VIEW', 'UPDATE', 'COMMENT', 'COMPLETE'],
-    },
-  ];
+  // NOTE: LEADER / MANAGER / STAFF roles được định nghĩa trong PBAC Engine (bên dưới)
+  // Không seed riêng ở đây để tránh bị overwrite và mất điều kiện PBAC
 
-  for (const r of taskRoles) {
-    const rolePoliciesData: { resourceId: number; action: string; effect: string; conditions?: any }[] = [];
-    const resId = resources['TASK']?.id;
-    if (resId) {
-      for (const action of r.permissions) {
-        let conditionString = '';
-        if (r.code === 'LEADER' && ['ASSIGN', 'COMPLETE', 'EVALUATE', 'APPROVE'].includes(action)) {
-          conditionString = 'user.isLeader == true'; // Cơ cấu tổ chức / Đơn vị trực thuộc
-        } else if (r.code === 'MANAGER' && ['ASSIGN', 'COMPLETE'].includes(action)) {
-          conditionString = 'user.isLeader == true'; // Cơ cấu tổ chức / Phòng ban
-        } else if (r.code === 'STAFF' && ['UPDATE', 'COMMENT', 'COMPLETE'].includes(action)) {
-          conditionString = 'currentUserId IN resource.assigneeIds'; // Người được giao / Cây nhiệm vụ
-        }
-
-        rolePoliciesData.push({
-          resourceId: resId,
-          action,
-          effect: 'ALLOW',
-          conditions: conditionString ? { expression: conditionString } : null
-        });
-      }
-    }
-
-    const createdRole = await prisma.role.upsert({
-      where: { code: r.code },
-      update: { name: r.name },
-      create: {
-        code: r.code,
-        name: r.name,
-        policies: { create: rolePoliciesData },
-      },
-    });
-    roleMap[r.code] = createdRole;
-  }
 
   // ==========================================================
   // 5. MENUS (ADMIN_PORTAL) - PBAC Implementation
@@ -4032,166 +3982,112 @@ async function main() {
   };
 
   const roleDefinitions = [
-    { code: 'SUPER_ADMIN', name: 'Quản trị viên cấp cao', scope: 'GLOBAL', perms: ['ALL'] },
-    { code: 'ADMIN', name: 'Quản trị hệ thống', scope: 'GLOBAL', perms: ['ALL'] },
+    // ==========================================================
+    // Mô hình PBAC Chính phủ Việt Nam
+    // Căn cứ: Nghị định 47/2020/NĐ-CP, Nghị định 09/2019/NĐ-CP
+    // Phân cấp: GLOBAL > ORGANIZATION > DEPARTMENT > SELF
+    // ==========================================================
+
+    // 1. Quản trị tối cao - IT Admin - toàn quyền hệ thống
+    {
+      code: 'SUPER_ADMIN',
+      name: 'Quản trị viên cấp cao',
+      scope: 'GLOBAL',
+      perms: ['ALL']
+    },
+
+    // 2. Quản trị nghiệp vụ - chỉ quản lý user, cấu hình, danh mục (không có quyền nội dung)
+    {
+      code: 'ADMIN',
+      name: 'Quản trị hệ thống',
+      scope: 'GLOBAL',
+      perms: [
+        'USER.*', 'ROLE.*', 'RESOURCE.*', 'MENU.*',
+        'ORGANIZATION.*', 'CATEGORY.*', 'SYSTEM.*', 'NOTIFICATION.*'
+      ]
+    },
+
+    // 3. Lãnh đạo đơn vị (Giám đốc, Phó GD, Chủ tịch, Phó CT UBND)
+    // Phạm vi: TOÀN TỔ CHỨC - đọc + xử lý + phê duyệt mọi nghịệp vụ
     {
       code: 'LEADER',
       name: 'Lãnh đạo đơn vị',
       scope: 'ORGANIZATION',
       perms: [
         'HRM_EMPLOYEE.*',
-        'ORGANIZATION.*',
-        'USER.*',
-        'DOCUMENT.*',
-        'DOC_INCOMING.*',
-        'DOC_OUTGOING.*',
-        'DOC_PROCESSING.*',
-        'DOC_PUBLISH.*',
-        'DOC_TRANSPARENCY.*',
-        'DOC_CONSULTATION.*',
-        'DOC_MINUTES.*',
-        'DOC_CATEGORIES.*',
-        'PLAN.*',
-        'TASK.*',
-        'OBJECTIVE.*',
-        'KPI.*',
-        'REPORT.*',
-        'WORKFLOW.*'
+        'DOCUMENT.*', 'DOC_INCOMING.*', 'DOC_OUTGOING.*', 'DOC_INTERNAL.*',
+        'DOC_PROCESSING.*', 'DOC_PUBLISH.*', 'DOC_TRANSPARENCY.*',
+        'DOC_CONSULTATION.*', 'DOC_MINUTES.*', 'DOC_CATEGORIES.*',
+        'PLAN.*', 'TASK.*', 'OBJECTIVE.*', 'KPI.*', 'REPORT.*', 'WORKFLOW.*'
       ]
     },
+
+    // 4. Trưởng đơn vị (Trưởng phòng, Chánh VP, Giám đốc Trung tâm)
+    // Phạm vi: PHÒNG BAN - quản lý công việc, phân công nhiệm vụ
     {
       code: 'MANAGER',
-      name: 'Quản lý',
+      name: 'Trưởng đơn vị',
       scope: 'DEPARTMENT',
       perms: [
-        'HRM_EMPLOYEE.VIEW',
-        'HRM_EMPLOYEE.READ',
-        'HRM_EMPLOYEE.MANAGE',
-        'ORGANIZATION.VIEW',
-        'ORGANIZATION.READ',
-        'USER.VIEW',
-        'USER.READ',
-        'DOCUMENT.VIEW',
-        'DOCUMENT.READ',
-        'DOCUMENT.PROCESS',
-        'DOCUMENT.ASSIGN',
-        'DOC_INCOMING.VIEW',
-        'DOC_INCOMING.READ',
-        'DOC_INCOMING.PROCESS',
-        'DOC_INCOMING.ASSIGN',
-        'DOC_OUTGOING.VIEW',
-        'DOC_OUTGOING.READ',
-        'DOC_OUTGOING.PROCESS',
-        'DOC_PROCESSING.VIEW',
-        'DOC_PROCESSING.READ',
-        'DOC_PROCESSING.PROCESS',
-        'DOC_PUBLISH.VIEW',
-        'DOC_PUBLISH.READ',
-        'DOC_PUBLISH.PROCESS',
-        'DOC_TRANSPARENCY.VIEW',
-        'DOC_TRANSPARENCY.READ',
-        'DOC_CONSULTATION.VIEW',
-        'DOC_CONSULTATION.READ',
-        'DOC_MINUTES.VIEW',
-        'DOC_MINUTES.READ',
-        'DOC_CATEGORIES.VIEW',
-        'DOC_CATEGORIES.READ',
-        'PLAN.VIEW',
-        'PLAN.READ',
-        'PLAN.UPDATE',
-        'OBJECTIVE.VIEW',
-        'OBJECTIVE.READ',
-        'OBJECTIVE.UPDATE',
-        'TASK.VIEW',
-        'TASK.READ',
-        'TASK.CREATE',
-        'TASK.UPDATE',
-        'TASK.ASSIGN',
-        'TASK.COMPLETE',
-        'KPI.VIEW',
-        'KPI.READ',
-        'REPORT.VIEW',
-        'REPORT.READ',
-        'WORKFLOW.VIEW',
-        'WORKFLOW.READ'
+        'HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.READ', 'HRM_EMPLOYEE.MANAGE',
+        'ORGANIZATION.VIEW', 'ORGANIZATION.READ',
+        'DOCUMENT.VIEW', 'DOCUMENT.READ', 'DOCUMENT.PROCESS', 'DOCUMENT.ASSIGN',
+        'DOC_INCOMING.VIEW', 'DOC_INCOMING.READ', 'DOC_INCOMING.PROCESS', 'DOC_INCOMING.ASSIGN',
+        'DOC_OUTGOING.VIEW', 'DOC_OUTGOING.READ', 'DOC_OUTGOING.PROCESS',
+        'DOC_INTERNAL.VIEW', 'DOC_INTERNAL.READ', 'DOC_INTERNAL.PROCESS',
+        'DOC_PROCESSING.VIEW', 'DOC_PROCESSING.READ', 'DOC_PROCESSING.PROCESS',
+        'DOC_PUBLISH.VIEW', 'DOC_PUBLISH.READ',
+        'DOC_TRANSPARENCY.VIEW', 'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW', 'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW', 'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW', 'DOC_CATEGORIES.READ',
+        'PLAN.VIEW', 'PLAN.READ', 'PLAN.UPDATE',
+        'TASK.VIEW', 'TASK.READ', 'TASK.CREATE', 'TASK.UPDATE', 'TASK.ASSIGN', 'TASK.COMPLETE', 'TASK.EVALUATE',
+        'OBJECTIVE.VIEW', 'OBJECTIVE.READ', 'OBJECTIVE.UPDATE',
+        'KPI.VIEW', 'KPI.READ',
+        'REPORT.VIEW', 'REPORT.READ',
+        'WORKFLOW.VIEW', 'WORKFLOW.READ'
       ]
     },
+
+    // 5. Chuyên viên xử lý (Chuyên viên, Nghiên cứu viên, Kỹ sư, Viên chức Hạng II/III)
+    // Phạm vi: PHÒNG BAN - xử lý công việc được giao, soạn thảo văn bản
     {
       code: 'STAFF',
+      name: 'Chuyên viên xử lý',
+      scope: 'DEPARTMENT',
+      perms: [
+        'HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.READ',
+        'DOCUMENT.VIEW', 'DOCUMENT.READ', 'DOCUMENT.PROCESS',
+        'DOC_INCOMING.VIEW', 'DOC_INCOMING.READ', 'DOC_INCOMING.PROCESS',
+        'DOC_OUTGOING.VIEW', 'DOC_OUTGOING.READ', 'DOC_OUTGOING.PROCESS',
+        'DOC_INTERNAL.VIEW', 'DOC_INTERNAL.READ', 'DOC_INTERNAL.PROCESS',
+        'DOC_PROCESSING.VIEW', 'DOC_PROCESSING.READ', 'DOC_PROCESSING.PROCESS',
+        'DOC_PUBLISH.VIEW', 'DOC_PUBLISH.READ',
+        'DOC_TRANSPARENCY.VIEW', 'DOC_TRANSPARENCY.READ',
+        'DOC_CONSULTATION.VIEW', 'DOC_CONSULTATION.READ',
+        'DOC_MINUTES.VIEW', 'DOC_MINUTES.READ',
+        'DOC_CATEGORIES.VIEW', 'DOC_CATEGORIES.READ',
+        'TASK.VIEW', 'TASK.READ', 'TASK.UPDATE', 'TASK.COMPLETE', 'TASK.COMMENT',
+        'KPI.VIEW', 'KPI.READ',
+        'WORKFLOW.VIEW', 'WORKFLOW.READ'
+      ]
+    },
+
+    // 6. Nhân viên cơ bản (Viên chức Hạng IV, Bảo vệ, Lái xe, Tạp vụ)
+    // Phạm vi: SELF - chỉ xem và xử lý phần việc được giao
+    {
+      code: 'OFFICER',
       name: 'Nhân viên',
       scope: 'SELF',
       perms: [
-        'HRM_EMPLOYEE.VIEW',
-        'HRM_EMPLOYEE.READ',
-        'DOCUMENT.VIEW',
-        'DOCUMENT.READ',
-        'DOCUMENT.PROCESS',
-        'DOC_INCOMING.VIEW',
-        'DOC_INCOMING.READ',
-        'DOC_INCOMING.PROCESS',
-        'DOC_OUTGOING.VIEW',
-        'DOC_OUTGOING.READ',
-        'DOC_OUTGOING.PROCESS',
-        'DOC_PROCESSING.VIEW',
-        'DOC_PROCESSING.READ',
-        'DOC_PROCESSING.PROCESS',
-        'DOC_PUBLISH.VIEW',
-        'DOC_PUBLISH.READ',
-        'DOC_PUBLISH.PROCESS',
-        'DOC_TRANSPARENCY.VIEW',
-        'DOC_TRANSPARENCY.READ',
-        'DOC_CONSULTATION.VIEW',
-        'DOC_CONSULTATION.READ',
-        'DOC_MINUTES.VIEW',
-        'DOC_MINUTES.READ',
-        'DOC_CATEGORIES.VIEW',
-        'DOC_CATEGORIES.READ',
-        'TASK.VIEW',
-        'TASK.READ',
-        'TASK.UPDATE',
-        'TASK.COMMENT',
-        'TASK.COMPLETE',
-        'TASK.CREATE',
-        'TASK.ASSIGN',
-        'KPI.VIEW',
-        'KPI.READ',
-        'WORKFLOW.VIEW',
-        'WORKFLOW.READ'
-      ]
-    },
-    {
-      code: 'SUPERVISOR',
-      name: 'Giám sát',
-      scope: 'DEPARTMENT',
-      perms: [
-        'HRM_EMPLOYEE.VIEW',
-        'HRM_EMPLOYEE.READ',
-        'DOCUMENT.VIEW',
-        'DOCUMENT.READ',
-        'DOC_INCOMING.VIEW',
-        'DOC_INCOMING.READ',
-        'DOC_OUTGOING.VIEW',
-        'DOC_OUTGOING.READ',
-        'DOC_PROCESSING.VIEW',
-        'DOC_PROCESSING.READ',
-        'DOC_PUBLISH.VIEW',
-        'DOC_PUBLISH.READ',
-        'DOC_TRANSPARENCY.VIEW',
-        'DOC_TRANSPARENCY.READ',
-        'DOC_CONSULTATION.VIEW',
-        'DOC_CONSULTATION.READ',
-        'DOC_MINUTES.VIEW',
-        'DOC_MINUTES.READ',
-        'DOC_CATEGORIES.VIEW',
-        'DOC_CATEGORIES.READ',
-        'TASK.VIEW',
-        'TASK.READ',
-        'KPI.VIEW',
-        'KPI.READ',
-        'REPORT.VIEW',
-        'REPORT.READ',
-        'WORKFLOW.VIEW',
-        'WORKFLOW.READ'
+        'HRM_EMPLOYEE.VIEW', 'HRM_EMPLOYEE.READ',
+        'DOCUMENT.VIEW', 'DOCUMENT.READ',
+        'DOC_INCOMING.VIEW', 'DOC_INCOMING.READ',
+        'DOC_OUTGOING.VIEW', 'DOC_OUTGOING.READ',
+        'DOC_PROCESSING.VIEW', 'DOC_PROCESSING.READ', 'DOC_PROCESSING.PROCESS',
+        'TASK.VIEW', 'TASK.READ', 'TASK.COMPLETE',
+        'WORKFLOW.VIEW', 'WORKFLOW.READ'
       ]
     }
   ];
@@ -4232,13 +4128,20 @@ async function main() {
     jobTitleCode: string,
     isUnitLeader: boolean,
   ) => {
-    // Determine PBAC Role based on job title
-    let pbacRoleCode = 'STAFF';
+    // Xác định PBAC Role theo chức vụ (hệ thống chính phủ)
+    let pbacRoleCode = 'STAFF'; // Mặc định: Chuyên viên
     if (['GIAM_DOC', 'PHO_GIAM_DOC', 'CHU_TICH', 'PHO_CHU_TICH'].includes(jobTitleCode)) {
-      pbacRoleCode = 'LEADER';
-    } else if (['CHANH_VAN_PHONG', 'PHO_CHANH_VAN_PHONG', 'TRUONG_PHONG', 'PHO_PHONG', 'GIAM_DOC_TRUNG_TAM', 'PHO_GIAM_DOC_TRUNG_TAM'].includes(jobTitleCode)) {
-      pbacRoleCode = 'MANAGER';
+      pbacRoleCode = 'LEADER'; // Lãnh đạo cấp Sở/Tỉnh
+    } else if ([
+      'CHANH_VAN_PHONG', 'PHO_CHANH_VAN_PHONG',
+      'TRUONG_PHONG', 'PHO_PHONG',
+      'GIAM_DOC_TRUNG_TAM', 'PHO_GIAM_DOC_TRUNG_TAM'
+    ].includes(jobTitleCode)) {
+      pbacRoleCode = 'MANAGER'; // Trưởng đơn vị cấp phòng/trung tâm
+    } else if (['NHAN_VIEN', 'BAO_VE', 'TAP_VU', 'LAI_XE'].includes(jobTitleCode)) {
+      pbacRoleCode = 'OFFICER'; // Nhân viên phục vụ (quyền cơ bản nhất)
     }
+    // Còn lại (KE_TOAN, VAN_THU, VIEN_CHUC, CAN_SU...) giữ STAFF = Chuyên viên xử lý
 
     const pbacRole = await prisma.role.findUnique({ where: { code: pbacRoleCode } });
     const rolesConnect = [{ id: roleMap['AUTHOR']?.id || 1 }];
