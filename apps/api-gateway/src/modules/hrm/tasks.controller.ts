@@ -232,6 +232,7 @@ export class TasksController implements OnModuleInit {
     }
 
     const isAdmin = user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isLeader = isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*');
 
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
@@ -255,6 +256,7 @@ export class TasksController implements OnModuleInit {
         isSupervisor: isSupervisor === 'true',
         currentUserCode: user?.employeeCode,
         isAdmin,
+        isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
       }),
@@ -639,6 +641,7 @@ export class TasksController implements OnModuleInit {
   async getSubTasks(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
     const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isLeader = isAdmin || user?.permissionsFlatten?.includes('TASK.ASSIGN') || user?.permissionsFlatten?.includes('TASK.*');
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
@@ -653,6 +656,7 @@ export class TasksController implements OnModuleInit {
         taskId: parseInt(id, 10),
         currentUserCode: user?.employeeCode,
         isAdmin,
+        isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
       }),

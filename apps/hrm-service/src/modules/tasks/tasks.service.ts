@@ -62,11 +62,11 @@ export class TasksService implements OnModuleInit {
     const isCoordinator = coordinators.includes(currentUserCode);
 
     const isPlanCreator = t.plan?.createdByCode === currentUserCode;
-    const canEdit = isUserAdmin || isAssigner || isAssignee || isPlanCreator;
+    const canEdit = isUserAdmin || isAssigner || isAssignee || isPlanCreator || query.isLeader === true;
 
     const allowedActions: string[] = [];
     if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
-    if (isUserAdmin || isAssigner || isPlanCreator) allowedActions.push('DELETE');
+    if (isUserAdmin || isAssigner || isPlanCreator || query.isLeader === true) allowedActions.push('DELETE');
     if (isAssignee && t.status !== 'DONE') {
       allowedActions.push('COMPLETE');
       if (t.status !== 'RETURNED') allowedActions.push('RETURN');
