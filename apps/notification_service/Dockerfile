@@ -1,42 +1,43 @@
 # ==========================================
-# 1️⃣ Dependency Stage
+# 1️⃣ Builder Stage
 # ==========================================
-FROM node:20-alpine AS deps
+FROM node:22-alpine AS builder
 WORKDIR /app
+
 COPY apps/notification_service/package*.json ./
 RUN npm ci
 
-# ==========================================
-# 2️⃣ Builder Stage
-# ==========================================
-FROM node:20-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY apps/notification_service/ ./
 COPY shared/protos ./shared/protos
 
-# Notification service is plain Node.js, no build step needed but copying for consistency
-# (If it had a build step, it would go here)
 
 # ==========================================
-# 3️⃣ Production Runner Stage
+# 2️⃣ Runner Stage
 # ==========================================
-FROM node:20-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
+
 ENV NODE_ENV=production
 
-COPY apps/notification_service/package*.json ./
-RUN npm ci --omit=dev
+# Create non-root user early to run container and install packages under its ownership
+RUN addgroup -S app && adduser -S app -G app && chown app:app /app
+USER app
 
-COPY --from=builder /app ./
-COPY --from=builder /app/shared/protos ./protos
+# Copy package files and install production dependencies directly as non-root user (avoids slow chown at the end)
+COPY --chown=app:app apps/notification_service/package*.json ./
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+
+# Copy source and shared files with correct ownership
+COPY --chown=app:app --from=builder /app/server.js ./server.js
+COPY --chown=app:app --from=builder /app/adapters ./adapters
+COPY --chown=app:app --from=builder /app/config ./config
+COPY --chown=app:app --from=builder /app/controllers ./controllers
+COPY --chown=app:app --from=builder /app/utils ./utils
+COPY --chown=app:app --from=builder /app/worker ./worker
+COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
 ENV PROTO_PATH=/app/protos
 
-# Security
-RUN addgroup -S app && adduser -S app -G app
-RUN chown -R app:app /app
-USER app
-
 EXPOSE 50075
+
 CMD ["node", "server.js"]

@@ -12,12 +12,7 @@ RUN npm ci
 COPY apps/hrm-service/ ./
 COPY shared/protos ./shared/protos
 
-# 🔥 SỬA LỖI TRÊN CI: Bắt buộc phải chạy prisma generate trước khi build NestJS.
-# Lệnh này sẽ tự động sinh ra thư mục 'generated/' và các TypeScript Types 
-# giúp quá trình biên dịch không còn bị lỗi "Property 'user' does not exist".
-RUN npx prisma generate
-
-# Build the NestJS app directly
+# Build the NestJS app directly (without prisma generate, since client is pre-generated in 'generated/')
 RUN npx nest build
 
 
@@ -37,12 +32,11 @@ USER app
 
 # Copy package files and install production dependencies directly as non-root user (avoids slow chown at the end)
 COPY --chown=app:app apps/hrm-service/package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 
 # Copy build outputs from builder stage with correct ownership
 COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/prisma ./prisma
-COPY --chown=app:app --from=builder /app/generated ./generated
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 COPY --chown=app:app --from=builder /app/prisma.config.ts ./prisma.config.ts
 
