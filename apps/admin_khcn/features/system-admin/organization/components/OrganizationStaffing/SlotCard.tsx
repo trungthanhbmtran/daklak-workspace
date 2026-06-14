@@ -38,18 +38,14 @@ export function SlotCard({
   const [description, setDescription] = useState(existingSlot?.description ?? "");
   const [domainIds, setDomainIds] = useState<number[]>(existingSlot?.domainIds ?? []);
   const [geographicAreaIds, setGeographicAreaIds] = useState<number[]>(
-    existingSlot?.geographicAreaIds?.length ? existingSlot.geographicAreaIds :
-      (existingSlot?.geographicAreaId ? [existingSlot.geographicAreaId] : [])
+    existingSlot?.geographicAreaIds ?? []
   );
   const [monitoredUnitIds, setMonitoredUnitIds] = useState<number[]>(existingSlot?.monitoredUnitIds ?? []);
 
   useEffect(() => {
     setDescription(existingSlot?.description ?? "");
     setDomainIds(existingSlot?.domainIds ?? []);
-    setGeographicAreaIds(
-      existingSlot?.geographicAreaIds?.length ? existingSlot.geographicAreaIds :
-        (existingSlot?.geographicAreaId ? [existingSlot.geographicAreaId] : [])
-    );
+    setGeographicAreaIds(existingSlot?.geographicAreaIds ?? []);
     setMonitoredUnitIds(existingSlot?.monitoredUnitIds ?? []);
   }, [existingSlot]);
 

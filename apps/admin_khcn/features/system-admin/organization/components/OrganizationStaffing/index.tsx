@@ -19,11 +19,11 @@ import { StaffingTable } from "./StaffingTable";
 import { JobTitleConfigDialog } from "./JobTitleConfigDialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { JobTitleItem, StaffingReportItem } from "../../types";
+import { useDomainSearch, useGeoAreaSearch } from "../../hooks/useScopeCatalog";
 
 export function OrganizationStaffing() {
-  const { state, meta } = useOrganizationContext();
+  const { state } = useOrganizationContext();
   const { selectedId, flatUnits } = state;
-  const { domains } = meta;
 
   const [activeTab, setActiveTab] = useState<"DANG" | "CHINH_QUYEN">("CHINH_QUYEN");
   const [selectedJobTitleId, setSelectedJobTitleId] = useState<string>("");
@@ -48,15 +48,15 @@ export function OrganizationStaffing() {
     isError,
   } = useStaffingReport(selectedId ?? null);
 
-  // geoAreas lấy từ context (tránh fetch lại)
-  const geoAreas = meta.geoAreas ?? [];
+  const { items: domains } = useDomainSearch([]);
+  const { items: geoAreas } = useGeoAreaSearch([], true);
 
   const { setStaffing, setStaffingSlot, updateJobTitle } =
     useStaffingMutations(selectedId ?? null);
 
   const domainsForUnit =
     unit?.domainIds?.length && domains.length
-      ? domains.filter((d) => unit.domainIds!.includes(d.id))
+      ? domains.filter((d: any) => unit.domainIds!.includes(d.id))
       : domains;
   const subordinateUnits = flatUnits.filter((u) => u.parentId === selectedId);
 
