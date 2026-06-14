@@ -31,8 +31,6 @@ RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
 COPY --chown=app:app --from=builder /app/server.js ./server.js
 COPY --chown=app:app --from=builder /app/adapters ./adapters
 COPY --chown=app:app --from=builder /app/config ./config
-COPY --chown=app:app --from=builder /app/controllers ./controllers
-COPY --chown=app:app --from=builder /app/utils ./utils
 COPY --chown=app:app --from=builder /app/worker ./worker
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 
