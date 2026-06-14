@@ -131,8 +131,8 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
               {/* Cột Đề xuất Phòng ban */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center">
+              <div className="flex flex-col h-full">
+                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center shrink-0">
                   <span className="w-1.5 h-5 bg-emerald-500 rounded mr-2"></span> Top Đề xuất Phòng ban
                 </h4>
                 {isLoadingRecs ? (
@@ -140,37 +140,39 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="flex flex-col gap-2 max-h-[450px] overflow-y-auto pr-1">
                     {topDepartments.map((rec: any, idx: number) => (
-                      <div key={rec.departmentId} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs px-1">
-                              {rec.departmentName?.charAt(0) || `P`}
+                      <div key={rec.departmentId} className="group flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-200">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="shrink-0 w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                            {rec.departmentName?.charAt(0) || `P`}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-sm text-slate-800 truncate">{rec.departmentName || `Phòng ban ${rec.departmentId}`}</p>
+                              {idx === 0 && <Badge className="bg-emerald-500 text-[9px] uppercase px-1 py-0 h-4">Top 1</Badge>}
                             </div>
-                            <div>
-                              <p className="font-bold text-sm text-slate-800">{rec.departmentName || `Phòng ban ${rec.departmentId}`}</p>
-                              <p className="text-xs text-slate-500">{rec.employeeCount} nhân sự</p>
+                            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                              <span>Tải: <b className="text-emerald-700">{Math.round(rec.currentLoad)}</b></span>
+                              <span>•</span>
+                              <span>Hiệu suất: <b className="text-emerald-700">{Math.round(rec.performanceScore)}</b></span>
+                              <span>•</span>
+                              <span className="truncate">{rec.employeeCount} NS</span>
                             </div>
                           </div>
-                          {idx === 0 && <Badge className="bg-emerald-500 text-[9px] uppercase">Phù hợp nhất</Badge>}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-4 p-2 bg-slate-50 rounded-lg">
-                          <div>Tải TB: <b className="text-slate-700 block text-sm mt-0.5">{Math.round(rec.currentLoad)}</b></div>
-                          <div>Hiệu suất TB: <b className="text-slate-700 block text-sm mt-0.5">{Math.round(rec.performanceScore)}</b></div>
                         </div>
                         <Button
                           size="sm"
                           disabled={assignMutation.isPending}
-                          className="w-full rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white"
+                          className="shrink-0 ml-2 h-8 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white transition-colors"
                           onClick={() => handleAssignToDepartment(rec.departmentId)}
                         >
-                          Giao cho Phòng này
+                          Giao
                         </Button>
                       </div>
                     ))}
                     {topDepartments.length === 0 && !isLoadingRecs && (
-                      <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                         <p className="text-xs text-slate-400 font-medium">Không có gợi ý phòng ban phù hợp</p>
                       </div>
                     )}
@@ -179,20 +181,20 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
               </div>
  
               {/* Cột Đề xuất Cá nhân */}
-              <div>
-                <h4 className="text-sm font-bold text-slate-700 mb-2 flex items-center">
+              <div className="flex flex-col h-full">
+                <h4 className="text-sm font-bold text-slate-700 mb-2 flex items-center shrink-0">
                   <span className="w-1.5 h-5 bg-indigo-500 rounded mr-2"></span> Đề xuất Cá nhân
                 </h4>
                 
                 {/* Search input to look for any employee */}
-                <div className="relative mb-4">
+                <div className="relative mb-3 shrink-0">
                   <Input
                     placeholder="Tìm tên, mã cán bộ, phòng..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10 rounded-xl pl-9 bg-slate-50/50 border-slate-200 dark:border-slate-700 focus:bg-white transition-all text-xs font-medium"
+                    className="h-9 rounded-xl pl-9 bg-slate-50/50 border-slate-200 focus:bg-white transition-all text-xs font-medium"
                   />
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 </div>
  
                 {isLoadingRecs ? (
@@ -200,37 +202,39 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
                   </div>
                 ) : (
-                  <div className="space-y-4 max-h-[450px] overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-2 max-h-[450px] overflow-y-auto pr-1">
                     {filteredEmployees.map((rec: any, idx: number) => (
-                      <div key={rec.employeeCode} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-300">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold">
-                              {rec.employeeName?.charAt(0) || '?'}
+                      <div key={rec.employeeCode} className="group flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold text-sm">
+                            {rec.employeeName?.charAt(0) || '?'}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-sm text-slate-800 truncate">{rec.employeeName}</p>
+                              {idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase px-1 py-0 h-4">Top 1</Badge>}
                             </div>
-                            <div>
-                              <p className="font-bold text-sm text-slate-800">{rec.employeeName}</p>
-                              <p className="text-xs text-slate-500">{rec.departmentName || `Phòng ${rec.departmentId || '?'}`}</p>
+                            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                              <span className="truncate max-w-[80px] sm:max-w-[120px]" title={rec.departmentName}>{rec.departmentName || `P.${rec.departmentId || '?'}`}</span>
+                              <span>•</span>
+                              <span>Tải: <b className="text-indigo-700">{Math.round(rec.currentLoad)}</b></span>
+                              <span>•</span>
+                              <span>HS: <b className="text-indigo-700">{Math.round(rec.performanceScore)}</b></span>
                             </div>
                           </div>
-                          {idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase">Phù hợp nhất</Badge>}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 mb-4 p-2 bg-slate-50 rounded-lg">
-                          <div>Tải việc: <b className="text-slate-700 block text-sm mt-0.5">{Math.round(rec.currentLoad)}</b></div>
-                          <div>Hiệu suất: <b className="text-slate-700 block text-sm mt-0.5">{Math.round(rec.performanceScore)}</b></div>
                         </div>
                         <Button
                           size="sm"
                           disabled={assignMutation.isPending}
-                          className="w-full rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-600 hover:text-white"
+                          className="shrink-0 ml-2 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-colors"
                           onClick={() => handleAssignToEmployee(rec.employeeCode)}
                         >
-                          Giao trực tiếp
+                          Giao
                         </Button>
                       </div>
                     ))}
                     {filteredEmployees.length === 0 && (
-                      <div className="text-center py-8 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                      <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                         <p className="text-xs text-slate-400 font-medium">Không tìm thấy nhân sự phù hợp</p>
                       </div>
                     )}
