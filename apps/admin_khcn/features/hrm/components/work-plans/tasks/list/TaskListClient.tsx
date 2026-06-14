@@ -77,19 +77,19 @@ export const TaskListClient = () => {
   // ── Data theo tab đang active ──────────────────────────────────────────────
   const activeData = activeTab === 'PENDING_ASSIGN' ? pendingAssignData
     : activeTab === 'MY_EXECUTION' ? myExecutionData
-    : iAssignedData;
+      : iAssignedData;
 
   const isLoading = activeTab === 'PENDING_ASSIGN' ? isLoadingPending
     : activeTab === 'MY_EXECUTION' ? isLoadingMine
-    : isLoadingIAssigned;
+      : isLoadingIAssigned;
 
   const isFetching = activeTab === 'PENDING_ASSIGN' ? isFetchingPending
     : activeTab === 'MY_EXECUTION' ? isFetchingMine
-    : isFetchingIAssigned;
+      : isFetchingIAssigned;
 
   const refetch = activeTab === 'PENDING_ASSIGN' ? refetchPending
     : activeTab === 'MY_EXECUTION' ? refetchMine
-    : refetchIAssigned;
+      : refetchIAssigned;
 
   const allTasks = (activeData?.data || []) as any[];
 

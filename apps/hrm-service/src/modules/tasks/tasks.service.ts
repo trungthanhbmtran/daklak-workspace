@@ -49,6 +49,51 @@ export class TasksService implements OnModuleInit {
     return { owner, assignee, approver, coordinators };
   }
 
+  private async enrichTasks(tasks: any[]) {
+    if (!tasks || tasks.length === 0) return tasks;
+
+    const employeeCodes = new Set<string>();
+    const collectCodes = (t: any) => {
+      if (t.participants) {
+        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
+        if (assignee && assignee !== 'UNASSIGNED') employeeCodes.add(assignee);
+        if (owner) employeeCodes.add(owner);
+        if (approver) employeeCodes.add(approver);
+        if (coordinators) coordinators.forEach((c: string) => employeeCodes.add(c));
+      }
+      if (t.children) t.children.forEach(collectCodes);
+    };
+    tasks.forEach(collectCodes);
+
+    const codesArray = Array.from(employeeCodes).filter(Boolean);
+    const employeeMap = new Map<string, string>();
+
+    if (codesArray.length > 0) {
+      const employees = await this.prisma.employee.findMany({
+        where: { employeeCode: { in: codesArray } },
+        select: { employeeCode: true, fullName: true }
+      });
+      employees.forEach(emp => employeeMap.set(emp.employeeCode, emp.fullName));
+    }
+
+    const mapNames = (t: any) => {
+      if (t.participants) {
+        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
+        t.assigneeCode = assignee || 'UNASSIGNED';
+        t.assigneeName = assignee && assignee !== 'UNASSIGNED' ? (employeeMap.get(assignee) || assignee) : 'Chưa phân công';
+        t.assignerCode = owner || '';
+        t.assignerName = owner ? (employeeMap.get(owner) || owner) : '';
+        t.supervisorCode = approver || '';
+        t.supervisorName = approver ? (employeeMap.get(approver) || approver) : '';
+        t.coassigneeCodes = coordinators;
+      }
+      if (t.children) t.children.forEach(mapNames);
+    };
+    tasks.forEach(mapNames);
+
+    return tasks;
+  }
+
   private async computeAllowedActions(t: any, query: any, isUserInTree: boolean = false): Promise<string[]> {
     if (!query || !query.currentUserCode) return [];
     const isUserAdmin = query.isAdmin === true;
@@ -149,19 +194,16 @@ export class TasksService implements OnModuleInit {
       }
     });
 
+    const enrichedTasks = await this.enrichTasks(tasks);
+
     return {
       success: true,
       message: 'Lấy danh sách nhiệm vụ thành công',
-      data: await Promise.all(tasks.map(async (t: any) => {
+      data: await Promise.all(enrichedTasks.map(async (t: any) => {
         const allowedActions = await this.computeAllowedActions(t, query);
-        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
 
         return {
           ...t,
-          assigneeCode: assignee || 'UNASSIGNED',
-          assignerCode: owner || '',
-          supervisorCode: approver || '',
-          coassigneeCodes: coordinators,
           dueDate: t.dueDate?.toISOString() || '',
           startDate: t.startDate?.toISOString() || '',
           createdAt: t.createdAt?.toISOString() || '',
@@ -250,7 +292,16 @@ export class TasksService implements OnModuleInit {
       return newTask;
     });
 
-    return t;
+    const createdTask = await this.prisma.task.findUnique({
+      where: { id: t.id },
+      include: {
+        participants: true,
+        plan: { select: { id: true, title: true, createdByCode: true } }
+      }
+    });
+
+    const enriched = await this.enrichTasks([createdTask]);
+    return enriched[0];
   }
 
   async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string) {
@@ -281,7 +332,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async assignTask(id: number, assigneeCode: string, coassigneeCodes?: string[], departmentId?: number, assignerCode?: string) {
-    return this.prisma.$transaction(async (tx) => {
+    const t = await this.prisma.$transaction(async (tx) => {
       const currentTask = await tx.task.findUnique({
         where: { id },
         include: { participants: true }
@@ -289,11 +340,11 @@ export class TasksService implements OnModuleInit {
       if (!currentTask) throw new RpcException('Nhiệm vụ không tồn tại');
 
       // Update assignee
-      if (assigneeCode) {
+      if (assigneeCode !== undefined) {
         await tx.taskParticipant.deleteMany({
           where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
         });
-        if (assigneeCode !== 'UNASSIGNED') {
+        if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
           await tx.taskParticipant.create({
             data: { taskId: id, employeeCode: assigneeCode, participantRole: TaskRole.ASSIGNEE }
           });
@@ -330,6 +381,9 @@ export class TasksService implements OnModuleInit {
 
       return tx.task.findUnique({ where: { id }, include: { participants: true } });
     });
+
+    const enriched = await this.enrichTasks([t]);
+    return enriched[0];
   }
 
   async getTask(id: number, query: any) {
@@ -343,16 +397,12 @@ export class TasksService implements OnModuleInit {
     if (!t) throw new RpcException('Không tìm thấy nhiệm vụ');
 
     const allowedActions = await this.computeAllowedActions(t, query);
-    const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
+    const enriched = await this.enrichTasks([t]);
 
     return {
       success: true,
       data: {
-        ...t,
-        assigneeCode: assignee || 'UNASSIGNED',
-        assignerCode: owner || '',
-        supervisorCode: approver || '',
-        coassigneeCodes: coordinators,
+        ...enriched[0],
         allowedActions
       }
     };
@@ -372,15 +422,12 @@ export class TasksService implements OnModuleInit {
       include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } } }
     });
 
-    const data = await Promise.all(tasks.map(async (t: any) => {
+    const enriched = await this.enrichTasks(tasks);
+
+    const data = await Promise.all(enriched.map(async (t: any) => {
       const allowedActions = await this.computeAllowedActions(t, query);
-      const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
       return {
         ...t,
-        assigneeCode: assignee || 'UNASSIGNED',
-        assignerCode: owner || '',
-        supervisorCode: approver || '',
-        coassigneeCodes: coordinators,
         allowedActions
       };
     }));
@@ -400,28 +447,22 @@ export class TasksService implements OnModuleInit {
       orderBy: { depth: 'asc' }
     });
 
-    const nodes = await Promise.all(closureData.map(async c => {
-      const t = c.descendant as any;
-      const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
-      return {
-        ...t,
-        assigneeCode: assignee || 'UNASSIGNED',
-        assignerCode: owner || '',
-        supervisorCode: approver || '',
-        coassigneeCodes: coordinators,
-        depth: c.depth
-      };
+    const descendants = closureData.map(c => ({
+      ...(c.descendant as any),
+      depth: c.depth
     }));
+
+    const enriched = await this.enrichTasks(descendants);
 
     // Build tree
     const map = new Map<number, any>();
     const roots: any[] = [];
-    nodes.forEach(n => {
+    enriched.forEach(n => {
       n.children = [];
       map.set(n.id, n);
     });
 
-    nodes.forEach(n => {
+    enriched.forEach(n => {
       if (n.parentId && map.has(n.parentId) && n.id !== id) {
         map.get(n.parentId).children.push(n);
       } else if (n.id === id) {
@@ -602,16 +643,126 @@ export class TasksService implements OnModuleInit {
     return this.createSubTask(id, data);
   }
   async addComment(id: number, data: any) {
+    const actorCode = data.authorCode || data.currentUserCode || 'SYSTEM';
     const c = await this.prisma.taskComment.create({
-      data: { taskId: id, employeeCode: data.currentUserCode, content: data.content }
+      data: { taskId: id, employeeCode: actorCode, content: data.content, isSystemMessage: data.isSystemMessage || false }
     });
-    return { success: true, data: c };
+
+    const emp = await this.prisma.employee.findUnique({
+      where: { employeeCode: actorCode },
+      select: { fullName: true, avatar: true }
+    });
+
+    return {
+      success: true,
+      data: {
+        id: c.id,
+        taskId: c.taskId,
+        authorCode: c.employeeCode || '',
+        authorName: emp ? emp.fullName : (c.employeeCode || ''),
+        authorAvatar: emp ? emp.avatar : '',
+        content: c.content,
+        isSystemMessage: c.isSystemMessage,
+        createdAt: c.createdAt.toISOString(),
+      }
+    };
   }
   async getComments(id: number, query: any) {
-    const comments = await this.prisma.taskComment.findMany({ where: { taskId: id } });
-    return { success: true, data: comments };
+    const comments = await this.prisma.taskComment.findMany({
+      where: { taskId: id },
+      orderBy: { createdAt: 'asc' },
+    });
+
+    const employeeCodes = new Set<string>();
+    comments.forEach(c => {
+      if (c.employeeCode) employeeCodes.add(c.employeeCode);
+    });
+
+    const employees = await this.prisma.employee.findMany({
+      where: { employeeCode: { in: Array.from(employeeCodes) } },
+      select: { employeeCode: true, fullName: true, avatar: true }
+    });
+
+    const employeeMap = new Map<string, { fullName: string; avatar: string }>();
+    employees.forEach(emp => {
+      employeeMap.set(emp.employeeCode, {
+        fullName: emp.fullName,
+        avatar: emp.avatar || '',
+      });
+    });
+
+    const data = comments.map(c => {
+      const emp = c.employeeCode ? employeeMap.get(c.employeeCode) : null;
+      return {
+        id: c.id,
+        taskId: c.taskId,
+        authorCode: c.employeeCode || '',
+        authorName: emp ? emp.fullName : (c.employeeCode || ''),
+        authorAvatar: emp ? emp.avatar : '',
+        content: c.content,
+        isSystemMessage: c.isSystemMessage,
+        createdAt: c.createdAt.toISOString(),
+      };
+    });
+
+    return { success: true, data };
   }
   async requestCoordination(id: number, data: any) {
-    return this.addCoAssignees(id, data.coassigneeCodes);
+    const leadCode = data.leadId || data.leadCode;
+    const coordinatorCodes = data.coordinatorIds || data.coordinatorCodes || [];
+    const message = data.message;
+    const requesterCode = data.requesterCode;
+
+    if (!leadCode && coordinatorCodes.length === 0) {
+      // Just a request for coordination from the assignee
+      if (message) {
+        await this.prisma.taskComment.create({
+          data: {
+            taskId: id,
+            employeeCode: requesterCode || null,
+            content: `Gửi yêu cầu phối hợp: ${message}`,
+            isSystemMessage: true,
+          }
+        });
+      }
+      return { success: true };
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const currentTask = await tx.task.findUnique({
+        where: { id },
+        select: { status: true }
+      });
+
+      // 1. Update Lead (ASSIGNEE role) if provided
+      if (leadCode) {
+        await tx.taskParticipant.deleteMany({
+          where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
+        });
+        await tx.taskParticipant.create({
+          data: { taskId: id, employeeCode: leadCode, participantRole: TaskRole.ASSIGNEE }
+        });
+      }
+
+      // 2. Update Coordinators (COORDINATOR role)
+      await tx.taskParticipant.deleteMany({
+        where: { taskId: id, participantRole: TaskRole.COORDINATOR }
+      });
+      if (coordinatorCodes.length > 0) {
+        const coData = coordinatorCodes.map((code: string) => ({
+          taskId: id,
+          employeeCode: code,
+          participantRole: TaskRole.COORDINATOR
+        }));
+        await tx.taskParticipant.createMany({ data: coData, skipDuplicates: true });
+      }
+
+      // Update status to TODO if it was TEMPLATE
+      if (currentTask && currentTask.status === 'TEMPLATE') {
+        await tx.task.update({ where: { id }, data: { status: 'TODO' } });
+      }
+
+      return { success: true };
+    });
   }
 }

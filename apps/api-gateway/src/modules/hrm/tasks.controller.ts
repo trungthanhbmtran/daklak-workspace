@@ -410,10 +410,12 @@ export class TasksController implements OnModuleInit {
   async assignTask(
     @Req() req: any,
     @Param('id') id: string,
-    @Body('assigneeCode') assigneeCode: string,
-    @Body('coassigneeCodes') coassigneeCodes?: string[],
-    @Body('departmentId') departmentId?: number,
+    @Body() body: any,
   ) {
+    const assigneeCode = body.assigneeCode;
+    const coassigneeCodes = body.coassigneeCodes || body.coAssigneeCodes || [];
+    const departmentId = body.departmentId;
+
     const user = req.user;
     const assignerCode = user?.employeeCode;
     const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
@@ -579,10 +581,12 @@ export class TasksController implements OnModuleInit {
   async requestCoordination(
     @Req() req: any,
     @Param('id') id: string,
-    @Body('message') message?: string,
-    @Body('leadCode') leadCode?: string,
-    @Body('coordinatorCodes') coordinatorCodes?: string[],
+    @Body() body: any,
   ) {
+    const message = body.message;
+    const leadCode = body.leadCode || body.leadId;
+    const coordinatorCodes = body.coordinatorCodes || body.coordinatorIds || [];
+
     const user = req.user;
     const requesterCode = user?.employeeCode;
     const taskId = parseInt(id, 10);
@@ -616,8 +620,8 @@ export class TasksController implements OnModuleInit {
         taskId,
         requesterCode,
         message: message || '',
-        leadCode: leadCode || '',
-        coordinatorCodes: coordinatorCodes || [],
+        leadId: leadCode || '',
+        coordinatorIds: coordinatorCodes || [],
       }),
     );
   }
