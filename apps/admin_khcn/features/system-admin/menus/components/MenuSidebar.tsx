@@ -70,7 +70,7 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                               ? (isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
                               : (isSelected ? 'bg-white/10 text-white' : 'bg-muted text-muted-foreground')
                           }`}>
-                            {menu.type === 'SERVICE_ITEM' ? 'SERVICE_ITEM' : 'MENU'}
+                            {menu.type === 'SERVICE_ITEM' ? 'PHÂN HỆ' : 'MENU'}
                           </span>
                         </>
                       )}

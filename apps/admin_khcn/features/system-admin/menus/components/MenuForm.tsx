@@ -180,6 +180,7 @@ function MenuFormInner(props: any) {
   // Theo dõi Path để hiển thị Full Path real-time
   const watchPath = form.watch("path") || "";
   const watchLinkedResource = form.watch("linkedResourceCode");
+  const watchType = form.watch("type") || "MENU";
 
   // Lấy tên resource đang chọn để hiển thị badge
   const selectedResource = (resources as PbacResource[]).find(r => r.code === watchLinkedResource);
@@ -269,32 +270,41 @@ function MenuFormInner(props: any) {
                   </FormItem>
                 )} />
 
-                <div className="flex gap-3">
-                  <FormField control={form.control} name="sort" render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Thứ tự</FormLabel>
-                      <FormControl><Input type="number" className="h-10 bg-background" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="active" render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
-                      <select className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onChange={(v) => field.onChange(parseInt(v.target.value))} value={field.value?.toString()}>
-                        <option value="1" className="text-primary">Hiển thị</option>
-                        <option value="0" className="text-destructive">Tạm khóa</option>
-                      </select>
-                    </FormItem>
-                  )} />
-                  <FormField control={form.control} name="type" render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Loại Menu</FormLabel>
-                      <select className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" {...field}>
-                        <option value="MENU">Menu (Link)</option>
-                        <option value="SERVICE_ITEM">Phân hệ (Hub)</option>
-                      </select>
-                    </FormItem>
-                  )} />
-                </div>
+                <FormField control={form.control} name="type" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Loại Menu</FormLabel>
+                    <select 
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" 
+                      value={field.value ?? "MENU"} 
+                      onChange={(e) => field.onChange(e.target.value)}
+                    >
+                      <option value="MENU">Menu (Link)</option>
+                      <option value="SERVICE_ITEM">Phân hệ (Hub)</option>
+                    </select>
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="sort" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Thứ tự</FormLabel>
+                    <FormControl><Input type="number" className="h-10 bg-background" {...field} onChange={e => field.onChange(parseInt(e.target.value) || 1)} /></FormControl>
+                  </FormItem>
+                )} />
+
+                <FormField control={form.control} name="active" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Trạng thái</FormLabel>
+                    <select 
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" 
+                      onChange={(v) => field.onChange(parseInt(v.target.value))} 
+                      value={field.value?.toString()}
+                    >
+                      <option value="1" className="text-primary">Hiển thị</option>
+                      <option value="0" className="text-destructive">Tạm khóa</option>
+                    </select>
+                  </FormItem>
+                )} />
+
               </div>
 
               {/* Path */}
@@ -361,8 +371,8 @@ function MenuFormInner(props: any) {
                   </FormItem>
                 )} />
 
-                {/* Mô tả — chỉ node gốc (hiển trên Hub card) */}
-                {isRootMenu && (
+                {/* Mô tả — chỉ node gốc hoặc loại Phân hệ (hiển trên Hub card) */}
+                {(isRootMenu || watchType === "SERVICE_ITEM") && (
                   <FormField control={form.control} name="description" render={({ field }) => (
                     <FormItem className="lg:col-span-3">
                       <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Mô tả (Hiển trên thẻ Hub)</FormLabel>
