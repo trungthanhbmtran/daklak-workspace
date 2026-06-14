@@ -546,8 +546,19 @@ export class TasksService implements OnModuleInit {
         throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
       }
 
-      // Check hierarchy if not admin - BYPASSED as requested by user
-
+      // Check hierarchy if not admin
+      if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
+        try {
+          const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId: context.currentUserId }));
+          const allowedCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
+          if (!allowedCodes.includes(assigneeCode)) {
+            throw new RpcException('Bạn chỉ được phép giao việc cho nhân sự cấp dưới hoặc cấp phó trực thuộc.');
+          }
+        } catch (e: any) {
+          if (e instanceof RpcException) throw e;
+          throw new RpcException('Lỗi kiểm tra phân quyền cấp dưới: ' + e.message);
+        }
+      }
       // Look up userIds for assignee, assigner, coassignee codes
       const codesToLookup: string[] = ['UNASSIGNED'];
       if (assigneeCode) codesToLookup.push(assigneeCode);
@@ -939,6 +950,16 @@ export class TasksService implements OnModuleInit {
     return this.createSubTask(id, data);
   }
   async addComment(id: number, data: any) {
+    const t = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } } }
+    });
+    if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
+    const allowedActions = await this.computeAllowedActions(t, data);
+    if (!allowedActions.includes('CHAT')) {
+      throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
+    }
+
     const actorCode = data.authorCode || data.currentUserCode || 'SYSTEM';
     let actorUserId: number | null = null;
     if (actorCode && actorCode !== 'SYSTEM') {
@@ -973,6 +994,16 @@ export class TasksService implements OnModuleInit {
     };
   }
   async getComments(id: number, query: any) {
+    const t = await this.prisma.task.findUnique({
+      where: { id },
+      include: { participants: true, plan: { select: { id: true, title: true, createdByCode: true } } }
+    });
+    if (!t) throw new RpcException('Nhiệm vụ không tồn tại.');
+    const allowedActions = await this.computeAllowedActions(t, query);
+    if (!allowedActions.includes('CHAT')) {
+      throw new RpcException('Bạn không có quyền tham gia trao đổi trong công việc này.');
+    }
+
     const comments = await this.prisma.taskComment.findMany({
       where: { taskId: id },
       orderBy: { createdAt: 'asc' },

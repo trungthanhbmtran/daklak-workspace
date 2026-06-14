@@ -203,6 +203,49 @@ async function main() {
     }
   });
 
+  // 4. Document Processing Workflow (Nghiệp vụ chuẩn)
+  await prisma.workflow.upsert({
+    where: { id: 'doc-processing-002' },
+    update: {},
+    create: {
+      id: 'doc-processing-002',
+      name: 'Quy trình Xử lý Văn bản (Chuẩn)',
+      description: 'Chỉ lãnh đạo mới giao việc, nhân viên thụ lý.',
+      trigger: 'DOC_PROCESSING',
+      active: true,
+      version: 1,
+      definition: {
+        nodes: [
+          { id: 'start', type: 'start', position: { x: 300, y: 0 }, data: { label: 'Bắt đầu' } },
+          { 
+            id: 'manager-assign', 
+            type: 'user_task', 
+            position: { x: 300, y: 100 },
+            data: { 
+              label: 'Lãnh đạo phân công',
+              role: 'MANAGER' 
+            } 
+          },
+          { 
+            id: 'staff-process', 
+            type: 'user_task', 
+            position: { x: 300, y: 200 },
+            data: { 
+              label: 'Nhân viên thụ lý',
+              role: 'STAFF' 
+            } 
+          },
+          { id: 'end', type: 'end', position: { x: 300, y: 350 }, data: { label: 'Kết thúc' } }
+        ],
+        edges: [
+          { id: 'ep-1', source: 'start', target: 'manager-assign' },
+          { id: 'ep-2', source: 'manager-assign', target: 'staff-process' },
+          { id: 'ep-3', source: 'staff-process', target: 'end' }
+        ]
+      }
+    }
+  });
+
   console.log('Seeding completed.');
 }
 

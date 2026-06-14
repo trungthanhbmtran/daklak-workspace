@@ -459,8 +459,12 @@ export class TasksController implements OnModuleInit {
   async getComments(@Req() req: any, @Param('id') id: string) {
     const user = req.user;
     const isAdmin =
-      user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') ||
+      user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') ||
       user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isLeader =
+      isAdmin ||
+      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
+      user?.permissionsFlatten?.includes('TASK.*');
     let callerAncestorUnitIds: number[] = [];
     if (!isAdmin && user?.unitId) {
       const unitMap = await this.getUnitMap();
@@ -475,6 +479,7 @@ export class TasksController implements OnModuleInit {
         taskId: parseInt(id, 10),
         currentUserCode: user?.employeeCode,
         isAdmin,
+        isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
       }),
@@ -487,12 +492,34 @@ export class TasksController implements OnModuleInit {
     @Param('id') id: string,
     @Body() body: { content: string; isSystemMessage?: boolean },
   ) {
+    const user = req.user;
+    const isAdmin =
+      user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') ||
+      user?.permissionsFlatten?.includes('TASK:MANAGE');
+    const isLeader =
+      isAdmin ||
+      user?.permissionsFlatten?.includes('TASK.ASSIGN') ||
+      user?.permissionsFlatten?.includes('TASK.*');
+    let callerAncestorUnitIds: number[] = [];
+    if (!isAdmin && user?.unitId) {
+      const unitMap = await this.getUnitMap();
+      callerAncestorUnitIds = this.getAncestorUnitIds(
+        unitMap,
+        parseInt(user.unitId, 10),
+      );
+    }
+
     return firstValueFrom(
       this.taskService.AddComment({
         taskId: parseInt(id, 10),
         authorCode: req.user?.employeeCode || '',
         content: body.content,
         isSystemMessage: body.isSystemMessage || false,
+        currentUserCode: user?.employeeCode,
+        isAdmin,
+        isLeader,
+        currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
+        callerAncestorUnitIds,
       }),
     );
   }
