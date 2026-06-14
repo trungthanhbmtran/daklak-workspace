@@ -26,7 +26,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   const { data: recommendations, isLoading: isLoadingRecs } = useQuery({
     queryKey: ['smart-assign', task?.id, assignStrategy],
     queryFn: async () => {
-      const res: any = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: assignStrategy, strictSubordinates: 'true' } as any);
+      const res: any = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: assignStrategy });
       if (res.success) {
         if (Array.isArray(res.data)) {
           return { topEmployees: res.data, topDepartments: [] };

@@ -536,8 +536,22 @@ export class TasksService implements OnModuleInit {
 
   async recommendAssignees(query: any) {
     try {
+      const whereClause: any = { employmentStatus: 'active' };
+
+      if (query.allowedDepartmentIds) {
+        whereClause.departmentId = { in: query.allowedDepartmentIds };
+      }
+      
+      if (query.allowedJobTitleIds) {
+        whereClause.jobTitleId = { in: query.allowedJobTitleIds };
+      }
+
+      if (query.excludeEmployeeCode) {
+        whereClause.employeeCode = { not: query.excludeEmployeeCode };
+      }
+
       const employees = await this.prisma.employee.findMany({
-        where: { employmentStatus: 'active' },
+        where: whereClause,
       });
 
       const activeTasksCount = await this.prisma.taskParticipant.groupBy({

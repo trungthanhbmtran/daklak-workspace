@@ -312,36 +312,18 @@ export class TasksController implements OnModuleInit {
     @Req() req: any,
     @Query('rankCode') rankCode: string,
     @Query('strategy') strategy: string,
-    @Query('strictSubordinates') strictSubordinates?: string,
   ) {
     const user = req.user;
     const isAdmin = user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
 
-    // ── Gọi taskService.RecommendAssignees ở backend ───────────────────────────
-    let res: any;
-    try {
-      res = await firstValueFrom(
-        this.taskService.RecommendAssignees({
-          rankCode: rankCode || 'ALL',
-          strategy: strategy || 'LOW_PERFORMANCE',
-        }),
-      );
-    } catch (e) {
-      console.error('Failed to call recommendAssignees from taskService:', e);
-      res = { success: true, data: { topEmployees: [], topDepartments: [] } };
-    }
-
-    let topEmployees = Array.isArray(res?.data)
-      ? res.data
-      : res?.data?.topEmployees || [];
-    let topDepartments = Array.isArray(res?.data)
-      ? []
-      : res?.data?.topDepartments || [];
-
     const unitMap = await this.getUnitMap();
 
-    // ── Áp dụng filter phân cấp cho non-admin (hoặc khi bật strictSubordinates) ──────────────────────────────────
-    if ((!isAdmin || strictSubordinates === 'true') && user?.unitId) {
+    let allowedDepartmentIds: number[] | undefined = undefined;
+    let allowedJobTitleIds: number[] | undefined = undefined;
+    let excludeEmployeeCode: string | undefined = undefined;
+
+    // ── Áp dụng filter phân cấp cho non-admin ──────────────────────────────────
+    if (!isAdmin && user?.unitId) {
       const jtMap = await this.getJobTitlesMap();
       const callerUnitId = parseInt(user.unitId, 10);
       const callerUnit = unitMap[callerUnitId];
@@ -355,17 +337,10 @@ export class TasksController implements OnModuleInit {
       };
 
       if (callerUnit?.isLeaf) {
-        // Leaf unit (phòng): giao cho nhân viên cùng phòng, trừ bản thân
-        topEmployees = topEmployees.filter((emp: any) => {
-          if (String(emp.employeeCode) === String(user.employeeCode)) return false;
-          const empDeptId = parseInt(emp.departmentId, 10);
-          return empDeptId === callerUnitId;
-        });
-        topDepartments = topDepartments.filter((d: any) => parseInt(d.departmentId, 10) === callerUnitId);
+        allowedDepartmentIds = [callerUnitId];
+        excludeEmployeeCode = user.employeeCode;
       } else {
-        // Non-leaf (ban, sở): chỉ giao cho LÃNH ĐẠO phòng con trực tiếp
         const callerUnitCode = callerUnit?.code || '';
-
         const directChildIds = new Set<number>();
         Object.values(unitMap).forEach((u: any) => {
           if (isDirectChildByCode(u.code, callerUnitCode)) {
@@ -373,22 +348,39 @@ export class TasksController implements OnModuleInit {
           }
         });
 
+        allowedDepartmentIds = Array.from(directChildIds);
+        excludeEmployeeCode = user.employeeCode;
+        
         const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
-
-        topEmployees = topEmployees.filter((emp: any) => {
-          if (String(emp.employeeCode) === String(user.employeeCode)) return false;
-          const empDeptId = parseInt(emp.departmentId, 10);
-          if (!directChildIds.has(empDeptId)) return false;
-          if (emp.jobTitleId) {
-            const jt = jtMap[parseInt(emp.jobTitleId, 10)];
-            if (jt) return leaderCategories.has(jt.category);
-          }
-          return true;
-        });
-
-        topDepartments = topDepartments.filter((d: any) => directChildIds.has(parseInt(d.departmentId, 10)));
+        allowedJobTitleIds = Object.values(jtMap)
+          .filter((jt: any) => leaderCategories.has(jt.category))
+          .map((jt: any) => jt.id);
       }
     }
+
+    // ── Gọi taskService.RecommendAssignees ở backend ───────────────────────────
+    let res: any;
+    try {
+      res = await firstValueFrom(
+        this.taskService.RecommendAssignees({
+          rankCode: rankCode || 'ALL',
+          strategy: strategy || 'LOW_PERFORMANCE',
+          allowedDepartmentIds,
+          allowedJobTitleIds,
+          excludeEmployeeCode
+        }),
+      );
+    } catch (e) {
+      console.error('Failed to call recommendAssignees from taskService:', e);
+      res = { success: true, data: { topEmployees: [], topDepartments: [] } };
+    }
+
+    let topEmployees = Array.isArray(res?.data)
+      ? res.data
+      : res?.data?.topEmployees || [];
+    let topDepartments = Array.isArray(res?.data)
+      ? []
+      : res?.data?.topDepartments || [];
 
     // Normalize field names and resolve department names
     topEmployees = topEmployees.map((emp: any, idx: number) => {
