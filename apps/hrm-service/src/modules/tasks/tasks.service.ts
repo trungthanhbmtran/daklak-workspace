@@ -10,17 +10,20 @@ import { RpcException } from '@nestjs/microservices';
 export class TasksService implements OnModuleInit {
   private integrationService: any;
   private userService: any;
+  private workflowService: any;
 
   constructor(
     private prisma: PrismaService,
     @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
     @Inject('INTEGRATION_PACKAGE') private integrationClient: any,
     @Inject('USER_PACKAGE') private userClient: any,
+    @Inject('WORKFLOW_PACKAGE') private workflowClient: any,
   ) { }
 
   onModuleInit() {
     this.integrationService = this.integrationClient.getService('IntegrationService');
     this.userService = this.userClient.getService('UserService');
+    this.workflowService = this.workflowClient.getService('WorkflowService');
   }
 
   private async getDynamicConfig() {
@@ -466,6 +469,23 @@ export class TasksService implements OnModuleInit {
       return newTask;
     });
 
+    let workflowInstId = null;
+    try {
+      const wfRes: any = await firstValueFrom(this.workflowService.TriggerWorkflow({
+        trigger: 'TASK_PROCESSING',
+        initiatorId: data.currentUserCode || '',
+        businessId: t.id.toString(),
+        businessType: 'TASK',
+        initialContext: { taskId: t.id, creatorCode: data.currentUserCode || '' }
+      }));
+      if (wfRes && wfRes.id) {
+        workflowInstId = wfRes.id;
+        await this.prisma.task.update({ where: { id: t.id }, data: { workflowInstId } });
+      }
+    } catch (e) {
+      console.error('Failed to trigger workflow for task:', t.id, e);
+    }
+
     const createdTask = await this.prisma.task.findUnique({
       where: { id: t.id },
       include: {
@@ -478,7 +498,33 @@ export class TasksService implements OnModuleInit {
     return enriched[0];
   }
 
-  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string) {
+  async updateTaskStatus(id: number, status: string, rejectReason?: string, actorCode?: string, context?: any) {
+    const tCheck = await this.prisma.task.findUnique({ where: { id } });
+    if (!tCheck) throw new RpcException('Nhiệm vụ không tồn tại');
+
+    // Validate Action with Workflow Engine
+    if (tCheck.workflowInstId) {
+      let actionName = 'UPDATE';
+      if (status === 'DONE') actionName = 'COMPLETE';
+      if (status === 'RETURNED') actionName = 'RETURN';
+      
+      try {
+        const valRes: any = await firstValueFrom(this.workflowService.ValidateAction({
+          instanceId: tCheck.workflowInstId,
+          actionName: actionName,
+          userRoles: context?.currentUserRoles || [],
+          userId: actorCode || context?.currentUserCode
+        }));
+        if (valRes && !valRes.allowed) {
+          throw new RpcException(`Không thể chuyển trạng thái do quy trình chặn: ${valRes.reason || 'Không có quyền'}`);
+        }
+      } catch (e: any) {
+         if (e instanceof RpcException) throw e;
+         // Log but allow fallback if workflow service is unavailable to not break legacy tasks completely
+         console.warn(`[Workflow Validation] Failed for Task ${id}:`, e.message);
+      }
+    }
+
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
     if (status === 'DONE') dataToUpdate.completedAt = new Date();
@@ -539,26 +585,59 @@ export class TasksService implements OnModuleInit {
         if (emp) currentAssigneeCode = emp.employeeCode;
       }
 
-      const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
       const isUnassigned = currentAssigneeCode === 'UNASSIGNED' || currentTask.status === 'TEMPLATE';
 
-      if (!isAdmin && !isUnassigned && currentAssigneeCode !== context?.currentUserCode) {
-        throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
+      // 1. Workflow Engine Validation
+      if (currentTask.workflowInstId) {
+         try {
+           const valRes: any = await firstValueFrom(this.workflowService.ValidateAction({
+             instanceId: currentTask.workflowInstId,
+             actionName: 'ASSIGN',
+             userRoles: context?.currentUserRoles || [],
+             userId: context?.currentUserCode || context?.currentUserId?.toString()
+           }));
+           if (valRes && !valRes.allowed) {
+             throw new RpcException(`Không thể giao việc do quy trình chặn: ${valRes.reason || 'Không đủ thẩm quyền'}`);
+           }
+         } catch (e: any) {
+           if (e instanceof RpcException) throw e;
+           console.warn(`[Workflow Validation] Failed for Task ${id}:`, e.message);
+           // Fallback to legacy validation if workflow service is unavailable
+           const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
+           if (!isAdmin && !isUnassigned && currentAssigneeCode !== context?.currentUserCode) {
+             throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
+           }
+           if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
+             try {
+               const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId: context.currentUserId }));
+               const allowedCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
+               if (!allowedCodes.includes(assigneeCode)) {
+                 throw new RpcException('Bạn chỉ được phép giao việc cho nhân sự cấp dưới hoặc cấp phó trực thuộc.');
+               }
+             } catch (subErr: any) {
+               throw new RpcException('Lỗi kiểm tra phân quyền cấp dưới: ' + subErr.message);
+             }
+           }
+         }
+      } else {
+         // Legacy validation for tasks without workflow
+         const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
+         if (!isAdmin && !isUnassigned && currentAssigneeCode !== context?.currentUserCode) {
+           throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
+         }
+         if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
+           try {
+             const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId: context.currentUserId }));
+             const allowedCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
+             if (!allowedCodes.includes(assigneeCode)) {
+               throw new RpcException('Bạn chỉ được phép giao việc cho nhân sự cấp dưới hoặc cấp phó trực thuộc.');
+             }
+           } catch (subErr: any) {
+             throw new RpcException('Lỗi kiểm tra phân quyền cấp dưới: ' + subErr.message);
+           }
+         }
       }
 
-      // Check hierarchy if not admin
-      if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
-        try {
-          const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId: context.currentUserId }));
-          const allowedCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
-          if (!allowedCodes.includes(assigneeCode)) {
-            throw new RpcException('Bạn chỉ được phép giao việc cho nhân sự cấp dưới hoặc cấp phó trực thuộc.');
-          }
-        } catch (e: any) {
-          if (e instanceof RpcException) throw e;
-          throw new RpcException('Lỗi kiểm tra phân quyền cấp dưới: ' + e.message);
-        }
-      }
       // Look up userIds for assignee, assigner, coassignee codes
       const codesToLookup: string[] = ['UNASSIGNED'];
       if (assigneeCode) codesToLookup.push(assigneeCode);

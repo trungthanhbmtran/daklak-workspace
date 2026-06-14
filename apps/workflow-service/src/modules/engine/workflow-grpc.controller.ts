@@ -206,12 +206,16 @@ export class WorkflowGrpcController {
     workflowId: string;
     initialContext?: any;
     initiatorId?: string;
+    businessId?: string;
+    businessType?: string;
   }) {
     try {
       const result = await this.engine.startWorkflow(
         data.workflowId,
         data.initialContext || {},
         data.initiatorId,
+        data.businessId,
+        data.businessType,
       );
       return this.mapInstance(result);
     } catch (e) {
@@ -224,12 +228,17 @@ export class WorkflowGrpcController {
     trigger: string;
     initialContext?: any;
     initiatorId?: string;
+    businessId?: string;
+    businessType?: string;
   }) {
     try {
+      // NOTE: engine.triggerWorkflow must be updated to accept businessId and businessType too
       const instance = await this.engine.triggerWorkflow(
         data.trigger,
         data.initialContext || {},
         data.initiatorId,
+        data.businessId,
+        data.businessType,
       );
       if (!instance) {
         return { id: '', status: 'NOT_FOUND' };
@@ -248,13 +257,34 @@ export class WorkflowGrpcController {
     userRoles?: string[];
   }) {
     try {
-      const result = await this.engine.resumeWorkflow(
+      await this.engine.resumeWorkflow(
         data.instanceId,
         data.nodeId,
         data.actionData || {},
         data.userRoles || [],
       );
-      return this.mapInstance(result);
+      // return a default success response
+      return { id: data.instanceId, status: 'RUNNING' };
+    } catch (e) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
+  @GrpcMethod('WorkflowService', 'ValidateAction')
+  async validateAction(data: {
+    instanceId: string;
+    actionName: string;
+    userRoles?: string[];
+    userId?: string;
+  }) {
+    try {
+      const result = await this.engine.validateAction(
+        data.instanceId,
+        data.actionName,
+        data.userRoles || [],
+        data.userId,
+      );
+      return { allowed: result.allowed, reason: result.reason || '' };
     } catch (e) {
       throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
     }

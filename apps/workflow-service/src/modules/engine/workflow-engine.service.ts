@@ -49,6 +49,8 @@ export class WorkflowEngineService implements OnModuleInit {
     workflowId: string,
     initialContext: any = {},
     initiatorId?: string,
+    businessId?: string,
+    businessType?: string,
   ) {
     const workflow = await this.prisma.workflow.findUnique({
       where: { id: workflowId },
@@ -80,6 +82,8 @@ export class WorkflowEngineService implements OnModuleInit {
         status: WorkflowStatus.RUNNING,
         context: initialContext,
         initiatorId,
+        businessId,
+        businessType,
       },
     });
 
@@ -105,6 +109,8 @@ export class WorkflowEngineService implements OnModuleInit {
     trigger: string,
     initialContext: any = {},
     initiatorId?: string,
+    businessId?: string,
+    businessType?: string,
   ) {
     const workflow = await this.prisma.workflow.findFirst({
       where: { trigger, active: true },
@@ -116,7 +122,7 @@ export class WorkflowEngineService implements OnModuleInit {
       return null;
     }
 
-    return this.startWorkflow(workflow.id, initialContext, initiatorId);
+    return this.startWorkflow(workflow.id, initialContext, initiatorId, businessId, businessType);
   }
 
   /**
@@ -141,9 +147,11 @@ export class WorkflowEngineService implements OnModuleInit {
       throw new Error('Instance not found or not in waiting state');
     }
 
-    if (instance.currentNodeId !== nodeId) {
-      throw new Error('Invalid node to resume from');
+    if (instance.currentNodeId !== nodeId && nodeId !== '') {
+      throw new Error(`Invalid node to resume from. Expected ${instance.currentNodeId}, got ${nodeId}`);
     }
+
+    const targetNodeId = nodeId || instance.currentNodeId || '';
 
     // PBAC Validation
     let definition: any = instance.workflow.definition;
@@ -155,11 +163,11 @@ export class WorkflowEngineService implements OnModuleInit {
       }
     }
     const nodes = (definition?.nodes || []) as any[];
-    const node = nodes.find((n: any) => n.id === nodeId);
+    const node = nodes.find((n: any) => n.id === targetNodeId);
     const requiredRole = node?.data?.role;
 
     if (requiredRole && !userRoles.includes(requiredRole)) {
-      await this.log(instanceId, nodeId, 'ACCESS_DENIED', {
+      await this.log(instanceId, targetNodeId, 'ACCESS_DENIED', {
         userRoles,
         requiredRole,
       });
@@ -177,10 +185,89 @@ export class WorkflowEngineService implements OnModuleInit {
       },
     });
 
-    await this.log(instanceId, nodeId, 'RESUME', actionData);
+    await this.log(instanceId, targetNodeId, 'RESUME', actionData);
 
     // Move to next node
-    this.moveToNext(instanceId, nodeId, newContext);
+    this.moveToNext(instanceId, targetNodeId, newContext);
+  }
+
+  /**
+   * Validate if a user can perform an action based on workflow state
+   */
+  async validateAction(
+    instanceId: string,
+    actionName: string,
+    userRoles: string[] = [],
+    userId?: string,
+  ): Promise<{ allowed: boolean; reason?: string }> {
+    const instance = await this.prisma.workflowInstance.findUnique({
+      where: { id: instanceId },
+      include: { workflow: true },
+    });
+
+    if (!instance) return { allowed: false, reason: 'Instance not found' };
+    if (instance.status !== WorkflowStatus.WAITING) return { allowed: false, reason: `Workflow is currently ${instance.status}, not waiting for user action` };
+
+    let definition: any = instance.workflow.definition;
+    if (typeof definition === 'string') {
+      try {
+        definition = JSON.parse(definition);
+      } catch (e) {
+        definition = {};
+      }
+    }
+
+    const nodes = (definition?.nodes || []) as any[];
+    const node = nodes.find((n: any) => n.id === instance.currentNodeId);
+
+    if (!node) return { allowed: false, reason: 'Current node not found in workflow definition' };
+
+    // Check PBAC required role on node
+    const requiredRole = node?.data?.role;
+    if (requiredRole && !userRoles.includes(requiredRole)) {
+      return { allowed: false, reason: `Requires role: ${requiredRole}` };
+    }
+
+    // Evaluate dynamic validation expression if present
+    if (node?.data?.validationExpression) {
+       try {
+         // Optionally load user data if requested
+         let userContext: any = {};
+         if (userId) {
+            // Load user subordinates as an example
+            try {
+               const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId }));
+               userContext.allowedEmployeeCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
+            } catch(e) {
+               this.logger.warn(`Failed to fetch subordinates for user ${userId}`);
+            }
+         }
+
+         const evalContext = {
+           ...instance.context as any,
+           actionName,
+           userId,
+           userRoles,
+           userContext
+         };
+         
+         // Use new Function for complex JS business rules instead of expr-eval
+         const validator = new Function('context', `
+            with (context) {
+               ${node.data.validationExpression}
+            }
+         `);
+         const isAllowed = !!validator(evalContext);
+         if (!isAllowed) {
+            return { allowed: false, reason: `Không thỏa mãn điều kiện quy trình chặn.` };
+         }
+       } catch (e) {
+         this.logger.error(`Validation expression failed: ${e.message}`);
+         return { allowed: false, reason: `Lỗi tính toán biểu thức phân quyền: ${e.message}` };
+       }
+    }
+
+    return { allowed: true };
   }
 
   /**
@@ -254,6 +341,49 @@ export class WorkflowEngineService implements OnModuleInit {
           );
           break;
 
+        case 'exclusive_gateway':
+          // Evaluates conditions on edges in moveToNext.
+          break;
+
+        case 'parallel_gateway':
+          const incomingEdges = (definition.edges || []).filter((e: any) => e.target === nodeId);
+          if (incomingEdges.length > 1) {
+            let currentContext = instance.context as any || {};
+            currentContext._gatewayState = currentContext._gatewayState || {};
+            currentContext._gatewayState[nodeId] = currentContext._gatewayState[nodeId] || { tokens: 0 };
+            currentContext._gatewayState[nodeId].tokens += 1;
+            
+            await this.updateContext(instanceId, currentContext);
+            
+            if (currentContext._gatewayState[nodeId].tokens < incomingEdges.length) {
+              nextOperation = 'HALT';
+              this.logger.log(`Parallel Join [${nodeId}]: Waiting for more tokens (${currentContext._gatewayState[nodeId].tokens}/${incomingEdges.length})`);
+            } else {
+              currentContext._gatewayState[nodeId].tokens = 0;
+              await this.updateContext(instanceId, currentContext);
+              nextOperation = 'CONTINUE';
+              this.logger.log(`Parallel Join [${nodeId}]: All tokens arrived, continuing.`);
+            }
+          } else {
+            nextOperation = 'CONTINUE';
+          }
+          break;
+
+        case 'script_task':
+          try {
+            if (node.data?.expression) {
+              const result = this.parser.evaluate(node.data.expression, (instance.context || {}) as any);
+              executionResult = result;
+              await this.updateContext(instanceId, {
+                ...(instance.context as any),
+                [node.id]: result,
+              });
+            }
+          } catch (e) {
+            this.logger.error('Script evaluation failed', e);
+          }
+          break;
+
         case 'service_task':
           executionResult = await this.callService(node.data, instance.context);
           // Merge service response into context
@@ -312,23 +442,40 @@ export class WorkflowEngineService implements OnModuleInit {
       return;
     }
 
-    // For condition nodes, we might have specific target based on result
-    let nextNodeId = edges[0].target;
-
-    // Simple heuristic: if result is boolean (from condition), maybe choice logic?
-    // In our simplified UI, we'll assume the first edge is 'true' or 'default'
-    // To be more robust, we'd check edge properties like 'label === "True"'
-
-    if (typeof result === 'boolean') {
-      const labeledEdge = edges.find(
-        (e: any) =>
-          (result && e.label?.toLowerCase() === 'true') ||
-          (!result && e.label?.toLowerCase() === 'false'),
-      );
-      if (labeledEdge) nextNodeId = labeledEdge.target;
+    const currentNode = (definition.nodes || []).find((n: any) => n.id === currentNodeId);
+    
+    if (currentNode?.type === 'exclusive_gateway') {
+      let chosenEdge = edges.find((e: any) => e.label === 'default' || e.data?.isDefault);
+      for (const edge of edges) {
+        if (edge.data?.expression) {
+          if (this.evaluateCondition(edge.data.expression, context)) {
+            chosenEdge = edge;
+            break;
+          }
+        }
+      }
+      if (!chosenEdge) chosenEdge = edges[0];
+      this.executeNode(instanceId, chosenEdge.target);
+    } 
+    else if (currentNode?.type === 'parallel_gateway' || edges.length > 1) {
+      // Fork
+      for (const edge of edges) {
+        this.executeNode(instanceId, edge.target);
+      }
+    } 
+    else {
+      // For condition nodes backward compatibility
+      let nextNodeId = edges[0].target;
+      if (currentNode?.type === 'condition' && typeof result === 'boolean') {
+        const labeledEdge = edges.find(
+          (e: any) =>
+            (result && e.label?.toLowerCase() === 'true') ||
+            (!result && e.label?.toLowerCase() === 'false'),
+        );
+        if (labeledEdge) nextNodeId = labeledEdge.target;
+      }
+      this.executeNode(instanceId, nextNodeId);
     }
-
-    this.executeNode(instanceId, nextNodeId);
   }
 
   private evaluateCondition(expression: string, context: any): boolean {

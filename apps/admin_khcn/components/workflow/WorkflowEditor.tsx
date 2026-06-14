@@ -269,7 +269,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
 
   if (isLoading) {
     return (
-        <div className="h-screen w-full flex flex-col items-center justify-center bg-background">
+        <div className="w-full h-full min-h-[500px] flex flex-col items-center justify-center bg-background rounded-xl border border-border">
             <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
             <p className="text-muted-foreground animate-pulse">Đang tải cấu hình quy trình...</p>
         </div>
@@ -277,7 +277,7 @@ const Flow = ({ id, onBack }: WorkflowEditorProps) => {
   }
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-background">
+    <div className="flex flex-col w-full h-full min-h-[700px] overflow-hidden bg-background rounded-xl border border-border shadow-sm">
       <Topbar 
         onSave={onSave} 
         onPublish={onPublish} 

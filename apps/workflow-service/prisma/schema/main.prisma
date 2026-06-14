@@ -30,6 +30,8 @@ model WorkflowInstance {
   status        String // PENDING, RUNNING, COMPLETED, FAILED, WAITING
   currentNodeId String?
   context       Json // Data/Variables processed during the workflow
+  businessId    String? // ID của business entity liên kết (Task, Document, v.v.)
+  businessType  String? // Tên loại entity (ví dụ: 'TASK', 'DOCUMENT')
   logs          ExecutionLog[]
   initiatorId   String? // User ID who started the workflow
   createdAt     DateTime       @default(now())

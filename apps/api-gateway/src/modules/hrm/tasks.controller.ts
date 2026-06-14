@@ -302,13 +302,18 @@ export class TasksController implements OnModuleInit {
     @Body('status') status: string,
     @Body('rejectReason') rejectReason?: string,
   ) {
+    const user = req.user;
     return firstValueFrom(
       this.taskService.UpdateTaskStatus({
         id: parseInt(id, 10),
         status,
         rejectReason,
         // Inject người thực hiện từ JWT token
-        actorCode: req.user?.employeeCode || '',
+        actorCode: user?.employeeCode || '',
+        currentUserRoles: user?.roles?.map((r: any) => typeof r === 'string' ? r : r.code) || [],
+        currentUserPermissions: user?.permissionsFlatten || [],
+        currentUserId: user?.id,
+        currentUserCode: user?.employeeCode || user?.username,
       }),
     );
   }

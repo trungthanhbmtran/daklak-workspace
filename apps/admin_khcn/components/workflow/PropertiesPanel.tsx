@@ -164,6 +164,52 @@ export const PropertiesPanel = ({
                 placeholder="Mô tả công việc cần thực hiện ở bước này..."
               />
             </div>
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Biểu thức xác thực động (Validation fx)
+              </label>
+              <input
+                type="text"
+                name="validationExpression"
+                value={data.validationExpression || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-2.5 font-mono text-xs focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                placeholder="e.g. userContext.allowedEmployeeCodes.includes('NV_001')"
+              />
+            </div>
+          </div>
+        );
+      case "script_task":
+        return (
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs font-semibold text-muted-foreground uppercase mb-1.5 block">
+                Mã kịch bản (Script / Expression)
+              </label>
+              <textarea
+                name="expression"
+                value={data.expression || ""}
+                onChange={handleChange}
+                className="w-full bg-background border border-border rounded-lg p-3 text-sm min-h-[150px] font-mono focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
+                placeholder="Math.random() > 0.5 ? 'approved' : 'rejected'"
+              />
+            </div>
+          </div>
+        );
+      case "parallel_gateway":
+      case "exclusive_gateway":
+        return (
+          <div className="space-y-4">
+            <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+              <div className="flex gap-2">
+                <Info className="h-4 w-4 text-orange-600 shrink-0" />
+                <p className="text-[11px] text-orange-800 leading-normal">
+                  {type === "exclusive_gateway" 
+                    ? "Sử dụng Edit Edge (đường nối) để cấu hình biểu thức rẽ nhánh (expression)."
+                    : "Tất cả các luồng đầu ra sẽ thực thi song song. Hệ thống tự động chờ (Join) ở các nút tiếp theo nếu có nhiều nhánh đi vào."}
+                </p>
+              </div>
+            </div>
           </div>
         );
       case "condition":

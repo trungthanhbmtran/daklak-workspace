@@ -15,6 +15,7 @@ service WorkflowService {
   rpc StartWorkflow (StartWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc TriggerWorkflow (TriggerWorkflowRequest) returns (WorkflowInstanceResponse);
   rpc ResumeWorkflow (ResumeWorkflowRequest) returns (WorkflowInstanceResponse);
+  rpc ValidateAction (ValidateActionRequest) returns (ValidateActionResponse);
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
 }
@@ -72,12 +73,28 @@ message StartWorkflowRequest {
   string workflowId = 1;
   google.protobuf.Struct initialContext = 2;
   string initiatorId = 3;
+  string businessId = 4;
+  string businessType = 5;
+}
+
+message ValidateActionRequest {
+  string instanceId = 1;
+  string actionName = 2;
+  repeated string userRoles = 3;
+  string userId = 4;
+}
+
+message ValidateActionResponse {
+  bool allowed = 1;
+  string reason = 2;
 }
 
 message TriggerWorkflowRequest {
   string trigger = 1;
   google.protobuf.Struct initialContext = 2;
   string initiatorId = 3;
+  string businessId = 4;
+  string businessType = 5;
 }
 
 message ResumeWorkflowRequest {

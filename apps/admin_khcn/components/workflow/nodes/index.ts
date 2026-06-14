@@ -1,21 +1,26 @@
 import StartNode from "./StartNode";
-import EndNode from "./EndNode";
-import UserTaskNode from "./UserTaskNode";
-import ConditionNode from "./ConditionNode";
 import ActionNode from "./ActionNode";
-import NginxProxyNode from "./NginxProxyNode";
+import EndNode from "./EndNode";
+import ConditionNode from "./ConditionNode";
+import UserTaskNode from "./UserTaskNode";
 import ApiGatewayNode from "./ApiGatewayNode";
+import NginxProxyNode from "./NginxProxyNode";
 import ExternalSystemNode from "./ExternalSystemNode";
+import GatewayNode from "./GatewayNode";
+import ScriptTaskNode from "./ScriptTaskNode";
 
 export const nodeTypes = {
   start: StartNode,
-  end: EndNode,
-  user_task: UserTaskNode,
-  condition: ConditionNode,
   service_task: ActionNode,
-  nginx_proxy: NginxProxyNode,
+  end: EndNode,
+  condition: ConditionNode,
+  user_task: UserTaskNode,
   api_gateway: ApiGatewayNode,
+  nginx_proxy: NginxProxyNode,
   external_system: ExternalSystemNode,
+  parallel_gateway: GatewayNode,
+  exclusive_gateway: GatewayNode,
+  script_task: ScriptTaskNode,
 };
 
 export default nodeTypes;

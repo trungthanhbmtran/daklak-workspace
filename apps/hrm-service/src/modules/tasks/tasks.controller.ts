@@ -17,8 +17,8 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'UpdateTaskStatus')
-  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string }) {
-    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode);
+  updateTaskStatus(data: { id: number; status: string; rejectReason?: string; actorCode?: string; currentUserRoles?: string[]; currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }) {
+    return this.tasksService.updateTaskStatus(data.id, data.status, data.rejectReason, data.actorCode, data);
   }
 
   @GrpcMethod('TaskService', 'UpdateTask')

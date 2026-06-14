@@ -12,8 +12,11 @@ import { cn } from "@/lib/utils";
 const NODE_TYPES = [
   { type: "start", label: "Start", icon: Play, color: "text-emerald-500", bgColor: "bg-emerald-50" },
   { type: "user_task", label: "User Task", icon: UserCheck, color: "text-blue-500", bgColor: "bg-blue-50" },
-  { type: "condition", label: "Condition", icon: Split, color: "text-amber-500", bgColor: "bg-amber-50" },
+  { type: "exclusive_gateway", label: "Exclusive Gateway", icon: Split, color: "text-orange-500", bgColor: "bg-orange-50" },
+  { type: "parallel_gateway", label: "Parallel Gateway", icon: Split, color: "text-orange-500", bgColor: "bg-orange-50" },
+  { type: "condition", label: "Condition (Legacy)", icon: Split, color: "text-amber-500", bgColor: "bg-amber-50" },
   { type: "service_task", label: "Action", icon: Zap, color: "text-violet-500", bgColor: "bg-violet-50" },
+  { type: "script_task", label: "Script Task", icon: Zap, color: "text-purple-500", bgColor: "bg-purple-50" },
   { type: "end", label: "End", icon: CircleStop, color: "text-rose-500", bgColor: "bg-rose-50" },
 ];
 
