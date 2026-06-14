@@ -8,14 +8,10 @@ import { Input } from '@/components/ui/input';
 import { 
   PlayCircle, 
   Search, 
-  Users, 
   Crown, 
   CheckCheck, 
-  X, 
   Activity, 
   Sparkles, 
-  UserCheck, 
-  UserPlus, 
   TrendingUp, 
   Target 
 } from 'lucide-react';
@@ -32,7 +28,6 @@ interface SmartAssignDrawerProps {
 export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }: SmartAssignDrawerProps) {
   const queryClient = useQueryClient();
   const [assignStrategy, setAssignStrategy] = useState<string>('LOW_PERFORMANCE');
-  const [isGroupMode, setIsGroupMode] = useState<boolean>(false);
   const [leadCode, setLeadCode] = useState<string>('');
   const [coordinatorCodes, setCoordinatorCodes] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -72,7 +67,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
     staleTime: 60_000,
   });
 
-  const topEmployees = recommendations?.topEmployees || [];
+  const topEmployees = useMemo(() => recommendations?.topEmployees || [], [recommendations]);
 
   // Enrich recommended list with real department & job title names
   const enrichedEmployees = useMemo(() => {
@@ -101,24 +96,14 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   }, [enrichedEmployees, searchQuery]);
 
   const assignMutation = useMutation({
-    mutationFn: (data: { departmentId?: number, employeeCode?: string, leadCode?: string, coordinatorCodes?: string[] }) => {
-      if (data.leadCode) {
-        return hrmTasksApi.assignCoordination(task.id.toString(), {
-          leadCode: data.leadCode,
-          coordinatorCodes: data.coordinatorCodes || [],
-        });
-      }
-      return hrmTasksApi.assignTask(task.id.toString(), {
-        assigneeCode: data.employeeCode || '',
-        departmentId: data.departmentId,
+    mutationFn: (data: { leadCode: string; coordinatorCodes: string[] }) => {
+      return hrmTasksApi.assignTask(task!.id.toString(), {
+        assigneeCode: data.leadCode,
+        coAssigneeCodes: data.coordinatorCodes || [],
       });
     },
-    onSuccess: (_, variables) => {
-      if (variables.leadCode) {
-        toast.success('Đã giao việc theo nhóm thành công!');
-      } else {
-        toast.success(variables.departmentId ? 'Đã giao việc cho Phòng ban!' : 'Đã giao việc trực tiếp cho cá nhân!');
-      }
+    onSuccess: () => {
+      toast.success('Giao việc thành công!');
       queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
       onAssignSuccess();
       onOpenChange(false);
@@ -127,23 +112,29 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   });
 
   const toggleCoordinator = (code: string) => {
-    if (code === leadCode) return;
+    if (code === leadCode) {
+      setLeadCode('');
+    }
     setCoordinatorCodes(prev =>
       prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
     );
   };
 
+  const handleSetLead = (code: string) => {
+    if (leadCode === code) {
+      setLeadCode('');
+    } else {
+      setLeadCode(code);
+      setCoordinatorCodes(prev => prev.filter(c => c !== code));
+    }
+  };
+
   const handleGroupAssignSubmit = () => {
     if (!leadCode) {
-      toast.error('Vui lòng chọn 1 người Chủ trì');
+      toast.error('Vui lòng chọn 1 người Giao chính');
       return;
     }
     assignMutation.mutate({ leadCode, coordinatorCodes });
-  };
-
-  const handleAssignToEmployee = (employeeCode: string) => {
-    if (!task) return;
-    assignMutation.mutate({ employeeCode });
   };
 
   return (
@@ -250,35 +241,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
               </div>
             </div>
 
-            {/* Toggle group vs individual */}
-            <div className="flex items-center justify-center p-1.5 bg-slate-200/60 dark:bg-slate-900/80 rounded-2xl w-full sm:max-w-md mx-auto border border-slate-300/30 dark:border-slate-800 shadow-inner">
-              <button
-                className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                  !isGroupMode 
-                    ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-sm ring-1 ring-slate-200/10' 
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-                onClick={() => {
-                  setIsGroupMode(false);
-                  setLeadCode('');
-                  setCoordinatorCodes([]);
-                }}
-              >
-                <UserCheck className="w-3.5 h-3.5" />
-                Giao Cá nhân
-              </button>
-              <button
-                className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1.5 ${
-                  isGroupMode 
-                    ? 'bg-white dark:bg-slate-800 text-violet-700 dark:text-violet-300 shadow-sm ring-1 ring-slate-200/10' 
-                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
-                }`}
-                onClick={() => setIsGroupMode(true)}
-              >
-                <Users className="w-3.5 h-3.5" />
-                Giao theo nhóm
-              </button>
-            </div>
+
 
             {/* Main listing and search section */}
             <div className="flex flex-col h-full">
@@ -372,7 +335,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                                     <span className="text-[10px] text-slate-400 font-bold bg-slate-50 dark:bg-slate-850 px-1.5 py-0.5 rounded-md border border-slate-100 dark:border-slate-800">
                                       {rec.employeeCode}
                                     </span>
-                                    {!isGroupMode && groupIdx === 0 && idx === 0 && !searchQuery && (
+                                    {groupIdx === 0 && idx === 0 && !searchQuery && (
                                       <Badge className="bg-indigo-600 hover:bg-indigo-700 text-[9px] uppercase px-2 py-0 h-4.5 animate-pulse shadow-sm shadow-indigo-200">
                                         Gợi ý tối ưu
                                       </Badge>
@@ -410,24 +373,10 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                                   </div>
                                 </div>
 
-                                {!isGroupMode ? (
-                                  <Button
-                                    size="sm"
-                                    disabled={assignMutation.isPending}
-                                    className="w-full md:w-auto h-9.5 px-5 rounded-xl font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white transition-all shadow-sm hover:shadow-indigo-200/50 flex items-center justify-center gap-1.5"
-                                    onClick={() => handleAssignToEmployee(rec.employeeCode)}
-                                  >
-                                    <UserPlus className="w-4 h-4" /> Giao việc
-                                  </Button>
-                                ) : (
                                   <div className="flex gap-2 w-full md:w-auto">
                                     <button
-                                      onClick={() => {
-                                        setLeadCode(rec.employeeCode);
-                                        // Remove from coordinators if made lead
-                                        setCoordinatorCodes(prev => prev.filter(c => c !== rec.employeeCode));
-                                      }}
-                                      title="Đặt làm Chủ trì"
+                                      onClick={() => handleSetLead(rec.employeeCode)}
+                                      title="Đặt làm Giao chính"
                                       className={`flex-1 md:flex-none px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-sm flex items-center justify-center gap-1 hover:scale-103 ${
                                         isLead 
                                           ? 'bg-violet-600 text-white shadow-violet-200 dark:shadow-violet-950' 
@@ -435,7 +384,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                                       }`}
                                     >
                                       {isLead ? <CheckCheck className="w-3.5 h-3.5" /> : null}
-                                      Chủ trì
+                                      Giao chính
                                     </button>
                                     <button
                                       onClick={() => toggleCoordinator(rec.employeeCode)}
@@ -451,7 +400,6 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                                       Phối hợp
                                     </button>
                                   </div>
-                                )}
                               </div>
                             </div>
                           );
@@ -472,16 +420,16 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
           </div>
         )}
 
-        {/* Sticky Footer for Group Mode */}
-        {task && isGroupMode && (
+        {/* Sticky Footer */}
+        {task && (
           <div className="absolute bottom-0 left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800/80 p-5 shadow-[0_-12px_42px_rgba(0,0,0,0.06)] z-20 flex items-center justify-between transition-all duration-300">
             <div className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
               {!leadCode ? (
-                <span className="text-amber-600 dark:text-amber-400 font-bold">Vui lòng chọn 1 Chủ trì</span>
+                <span className="text-amber-600 dark:text-amber-400 font-bold">Vui lòng chọn 1 người Giao chính</span>
               ) : (
                 <span>
-                  Đã chọn <b className="text-violet-700 dark:text-violet-400 font-black">1 Chủ trì</b> 
+                  Đã chọn <b className="text-violet-700 dark:text-violet-400 font-black">1 Giao chính</b> 
                   {coordinatorCodes.length > 0 && (
                     <span> và <b className="text-amber-600 dark:text-amber-400 font-black">{coordinatorCodes.length} Phối hợp</b></span>
                   )}
