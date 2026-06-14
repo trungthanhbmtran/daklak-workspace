@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { PlayCircle, Search } from 'lucide-react';
+import { PlayCircle, Search, Users, Crown, CheckCheck, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { hrmTasksApi } from "@/features/hrm/api";
 
@@ -19,11 +19,14 @@ interface SmartAssignDrawerProps {
 export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }: SmartAssignDrawerProps) {
   const queryClient = useQueryClient();
   const [assignStrategy, setAssignStrategy] = useState<string>('LOW_PERFORMANCE');
+  const [isGroupMode, setIsGroupMode] = useState<boolean>(false);
+  const [leadCode, setLeadCode] = useState<string>('');
+  const [coordinatorCodes, setCoordinatorCodes] = useState<string[]>([]);
 
   const { data: recommendations, isLoading: isLoadingRecs } = useQuery({
     queryKey: ['smart-assign', task?.id, assignStrategy],
     queryFn: async () => {
-      const res: any = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: assignStrategy });
+      const res: any = await hrmTasksApi.recommendAssignees({ rankCode: 'ALL', strategy: assignStrategy, strictSubordinates: 'true' } as any);
       if (res.success) {
         if (Array.isArray(res.data)) {
           return { topEmployees: res.data, topDepartments: [] };
@@ -59,19 +62,45 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   }, [topEmployees, searchQuery]);
 
   const assignMutation = useMutation({
-    mutationFn: (data: { departmentId?: number, employeeCode?: string }) =>
-      hrmTasksApi.assignTask(task.id.toString(), {
+    mutationFn: (data: { departmentId?: number, employeeCode?: string, leadCode?: string, coordinatorCodes?: string[] }) => {
+      if (data.leadCode) {
+        return hrmTasksApi.assignCoordination(task.id.toString(), {
+          leadCode: data.leadCode,
+          coordinatorCodes: data.coordinatorCodes || [],
+        });
+      }
+      return hrmTasksApi.assignTask(task.id.toString(), {
         assigneeCode: data.employeeCode || '',
         departmentId: data.departmentId,
-      }),
+      });
+    },
     onSuccess: (_, variables) => {
-      toast.success(variables.departmentId ? 'Đã giao việc cho Phòng ban!' : 'Đã giao việc trực tiếp cho cá nhân!');
+      if (variables.leadCode) {
+        toast.success('Đã giao việc theo nhóm thành công!');
+      } else {
+        toast.success(variables.departmentId ? 'Đã giao việc cho Phòng ban!' : 'Đã giao việc trực tiếp cho cá nhân!');
+      }
       queryClient.invalidateQueries({ queryKey: ['hrm-tasks'] });
       onAssignSuccess();
       onOpenChange(false);
     },
-    onError: () => toast.error('Giao việc thất bại')
+    onError: (e: any) => toast.error(e?.response?.data?.message || e?.message || 'Giao việc thất bại')
   });
+
+  const toggleCoordinator = (code: string) => {
+    if (code === leadCode) return;
+    setCoordinatorCodes(prev =>
+      prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code]
+    );
+  };
+
+  const handleGroupAssignSubmit = () => {
+    if (!leadCode) {
+      toast.error('Vui lòng chọn 1 người Chủ trì');
+      return;
+    }
+    assignMutation.mutate({ leadCode, coordinatorCodes });
+  };
 
   const handleAssignToDepartment = (departmentId: number) => {
     if (!task) return;
@@ -129,12 +158,34 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+            {/* Chế độ giao việc Toggle */}
+            <div className="flex items-center gap-2 p-1 bg-slate-100 rounded-xl max-w-sm mx-auto my-6">
+              <button
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all ${!isGroupMode ? 'bg-white text-indigo-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                onClick={() => {
+                  setIsGroupMode(false);
+                  setLeadCode('');
+                  setCoordinatorCodes([]);
+                }}
+              >
+                Giao Cá nhân / Phòng ban
+              </button>
+              <button
+                className={`flex-1 py-2 px-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 ${isGroupMode ? 'bg-white text-violet-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                onClick={() => setIsGroupMode(true)}
+              >
+                <Users className="w-4 h-4" />
+                Giao theo nhóm
+              </button>
+            </div>
+
+            <div className={`grid grid-cols-1 ${!isGroupMode ? 'md:grid-cols-2' : ''} gap-6 pt-4`}>
               {/* Cột Đề xuất Phòng ban */}
-              <div className="flex flex-col h-full">
-                <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center shrink-0">
-                  <span className="w-1.5 h-5 bg-emerald-500 rounded mr-2"></span> Top Đề xuất Phòng ban
-                </h4>
+              {!isGroupMode && (
+                <div className="flex flex-col h-full">
+                  <h4 className="text-sm font-bold text-slate-700 mb-4 flex items-center shrink-0">
+                    <span className="w-1.5 h-5 bg-emerald-500 rounded mr-2"></span> Top Đề xuất Phòng ban
+                  </h4>
                 {isLoadingRecs ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
@@ -179,6 +230,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                   </div>
                 )}
               </div>
+              )}
  
               {/* Cột Đề xuất Cá nhân */}
               <div className="flex flex-col h-full">
@@ -203,36 +255,61 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2 max-h-[450px] overflow-y-auto pr-1">
-                    {filteredEmployees.map((rec: any, idx: number) => (
-                      <div key={rec.employeeCode} className="group flex items-center justify-between p-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200 transition-all duration-200">
-                        <div className="flex items-center gap-3 overflow-hidden">
-                          <div className="shrink-0 w-10 h-10 rounded-full bg-linear-to-br from-indigo-500 to-violet-500 text-white flex justify-center items-center font-bold text-sm">
-                            {rec.employeeName?.charAt(0) || '?'}
-                          </div>
-                          <div className="min-w-0">
-                            <div className="flex items-center gap-2">
-                              <p className="font-bold text-sm text-slate-800 truncate">{rec.employeeName}</p>
-                              {idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase px-1 py-0 h-4">Top 1</Badge>}
+                    {filteredEmployees.map((rec: any, idx: number) => {
+                      const isLead = rec.employeeCode === leadCode;
+                      const isCoordinator = coordinatorCodes.includes(rec.employeeCode);
+
+                      return (
+                        <div key={rec.employeeCode} className={`group flex items-center justify-between p-3 rounded-xl border transition-all duration-200 ${isLead ? 'bg-violet-50 border-violet-300 shadow-sm' : isCoordinator ? 'bg-amber-50 border-amber-300 shadow-sm' : 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200'}`}>
+                          <div className="flex items-center gap-3 overflow-hidden">
+                            <div className={`shrink-0 w-10 h-10 rounded-full flex justify-center items-center font-bold text-sm text-white ${isLead ? 'bg-violet-500' : isCoordinator ? 'bg-amber-500' : 'bg-linear-to-br from-indigo-500 to-violet-500'}`}>
+                              {isLead ? <Crown className="w-4 h-4" /> : rec.employeeName?.charAt(0) || '?'}
                             </div>
-                            <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
-                              <span className="truncate max-w-[80px] sm:max-w-[120px]" title={rec.departmentName}>{rec.departmentName || `P.${rec.departmentId || '?'}`}</span>
-                              <span>•</span>
-                              <span>Tải: <b className="text-indigo-700">{Math.round(rec.currentLoad)}</b></span>
-                              <span>•</span>
-                              <span>HS: <b className="text-indigo-700">{Math.round(rec.performanceScore)}</b></span>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="font-bold text-sm text-slate-800 truncate">{rec.employeeName}</p>
+                                {!isGroupMode && idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase px-1 py-0 h-4">Top 1</Badge>}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-500">
+                                <span className="truncate max-w-[80px] sm:max-w-[120px]" title={rec.departmentName}>{rec.departmentName || `P.${rec.departmentId || '?'}`}</span>
+                                <span>•</span>
+                                <span>Tải: <b className="text-indigo-700">{Math.round(rec.currentLoad)}</b></span>
+                                <span>•</span>
+                                <span>HS: <b className="text-indigo-700">{Math.round(rec.performanceScore)}</b></span>
+                              </div>
                             </div>
                           </div>
+                          {!isGroupMode ? (
+                            <Button
+                              size="sm"
+                              disabled={assignMutation.isPending}
+                              className="shrink-0 ml-2 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-colors"
+                              onClick={() => handleAssignToEmployee(rec.employeeCode)}
+                            >
+                              Giao
+                            </Button>
+                          ) : (
+                            <div className="flex gap-1.5 shrink-0 ml-2">
+                              <button
+                                onClick={() => setLeadCode(rec.employeeCode)}
+                                title="Đặt làm Chủ trì"
+                                className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all ${isLead ? 'bg-violet-500 text-white' : 'bg-violet-50 text-violet-600 hover:bg-violet-100 border border-violet-200'}`}
+                              >
+                                {isLead ? <CheckCheck className="w-3 h-3" /> : 'Chủ trì'}
+                              </button>
+                              <button
+                                onClick={() => toggleCoordinator(rec.employeeCode)}
+                                title="Thêm vào Phối hợp"
+                                disabled={isLead}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-black transition-all disabled:opacity-30 ${isCoordinator ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200'}`}
+                              >
+                                {isCoordinator ? <CheckCheck className="w-3 h-3" /> : 'Phối hợp'}
+                              </button>
+                            </div>
+                          )}
                         </div>
-                        <Button
-                          size="sm"
-                          disabled={assignMutation.isPending}
-                          className="shrink-0 ml-2 h-8 rounded-lg bg-indigo-50 text-indigo-600 hover:bg-indigo-500 hover:text-white transition-colors"
-                          onClick={() => handleAssignToEmployee(rec.employeeCode)}
-                        >
-                          Giao
-                        </Button>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {filteredEmployees.length === 0 && (
                       <div className="text-center py-8 bg-slate-50 rounded-xl border border-dashed border-slate-200">
                         <p className="text-xs text-slate-400 font-medium">Không tìm thấy nhân sự phù hợp</p>
@@ -241,6 +318,29 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Sticky Footer for Group Mode */}
+        {task && isGroupMode && (
+          <div className="absolute bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20 flex items-center justify-between">
+            <div className="text-sm text-slate-600 font-medium">
+              {!leadCode ? (
+                <span className="text-amber-600">Vui lòng chọn Chủ trì</span>
+              ) : (
+                <span>Đã chọn <b className="text-violet-700">1 Chủ trì</b> {coordinatorCodes.length > 0 && <span>và <b className="text-amber-600">{coordinatorCodes.length} Phối hợp</b></span>}</span>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)} disabled={assignMutation.isPending}>Hủy</Button>
+              <Button 
+                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md font-bold" 
+                disabled={!leadCode || assignMutation.isPending}
+                onClick={handleGroupAssignSubmit}
+              >
+                Xác nhận giao việc
+              </Button>
             </div>
           </div>
         )}

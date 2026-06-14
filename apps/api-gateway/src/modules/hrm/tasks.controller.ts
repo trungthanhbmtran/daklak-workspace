@@ -312,6 +312,7 @@ export class TasksController implements OnModuleInit {
     @Req() req: any,
     @Query('rankCode') rankCode: string,
     @Query('strategy') strategy: string,
+    @Query('strictSubordinates') strictSubordinates?: string,
   ) {
     const user = req.user;
     const isAdmin = user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
@@ -339,8 +340,8 @@ export class TasksController implements OnModuleInit {
 
     const unitMap = await this.getUnitMap();
 
-    // ── Áp dụng filter phân cấp cho non-admin ──────────────────────────────────
-    if (!isAdmin && user?.unitId) {
+    // ── Áp dụng filter phân cấp cho non-admin (hoặc khi bật strictSubordinates) ──────────────────────────────────
+    if ((!isAdmin || strictSubordinates === 'true') && user?.unitId) {
       const jtMap = await this.getJobTitlesMap();
       const callerUnitId = parseInt(user.unitId, 10);
       const callerUnit = unitMap[callerUnitId];
