@@ -122,6 +122,7 @@ export class TasksController implements OnModuleInit {
           if (nId) {
             unitMap[nId] = {
               id: nId,
+              name: n.name || n.title || '',
               code: n.code,
               parentId: n.parentId ? parseInt(n.parentId, 10) : null,
               isLeaf: n.isLeaf ?? !n.children?.length,
@@ -336,12 +337,11 @@ export class TasksController implements OnModuleInit {
       ? []
       : res?.data?.topDepartments || [];
 
+    const unitMap = await this.getUnitMap();
+
     // ── Áp dụng filter phân cấp cho non-admin ──────────────────────────────────
     if (!isAdmin && user?.unitId) {
-      const [unitMap, jtMap] = await Promise.all([
-        this.getUnitMap(),
-        this.getJobTitlesMap(),
-      ]);
+      const jtMap = await this.getJobTitlesMap();
       const callerUnitId = parseInt(user.unitId, 10);
       const callerUnit = unitMap[callerUnitId];
 
@@ -389,13 +389,27 @@ export class TasksController implements OnModuleInit {
       }
     }
 
-    // Normalize field names
-    topEmployees = topEmployees.map((emp: any, idx: number) => ({
-      ...emp,
-      employeeName: emp.fullName || emp.employeeName || emp.username || emp.employeeCode,
-      currentLoad: emp.taskCount || 0,
-      performanceScore: emp.kpiScore || Math.max(50, 100 - idx * 5),
-    }));
+    // Normalize field names and resolve department names
+    topEmployees = topEmployees.map((emp: any, idx: number) => {
+      const deptId = emp.departmentId ? parseInt(emp.departmentId, 10) : 0;
+      const dept = unitMap[deptId];
+      return {
+        ...emp,
+        employeeName: emp.fullName || emp.employeeName || emp.username || emp.employeeCode,
+        departmentName: dept?.name || '',
+        currentLoad: emp.currentLoad !== undefined ? emp.currentLoad : (emp.taskCount || 0),
+        performanceScore: emp.performanceScore !== undefined ? emp.performanceScore : (emp.kpiScore || Math.max(50, 100 - idx * 5)),
+      };
+    });
+
+    topDepartments = topDepartments.map((d: any) => {
+      const deptId = d.departmentId ? parseInt(d.departmentId, 10) : 0;
+      const dept = unitMap[deptId];
+      return {
+        ...d,
+        departmentName: dept?.name || '',
+      };
+    });
 
     return {
       success: true,

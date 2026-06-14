@@ -53,6 +53,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
     return topEmployees.filter((rec: any) => 
       rec.employeeName?.toLowerCase().includes(query) ||
       rec.employeeCode?.toLowerCase().includes(query) ||
+      rec.departmentName?.toLowerCase().includes(query) ||
       (rec.departmentId && String(rec.departmentId).includes(query))
     );
   }, [topEmployees, searchQuery]);
@@ -144,11 +145,11 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                       <div key={rec.departmentId} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">
-                              P{rec.departmentId}
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs px-1">
+                              {rec.departmentName?.charAt(0) || `P`}
                             </div>
                             <div>
-                              <p className="font-bold text-sm text-slate-800">Phòng ban {rec.departmentId}</p>
+                              <p className="font-bold text-sm text-slate-800">{rec.departmentName || `Phòng ban ${rec.departmentId}`}</p>
                               <p className="text-xs text-slate-500">{rec.employeeCount} nhân sự</p>
                             </div>
                           </div>
@@ -176,7 +177,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                   </div>
                 )}
               </div>
-
+ 
               {/* Cột Đề xuất Cá nhân */}
               <div>
                 <h4 className="text-sm font-bold text-slate-700 mb-2 flex items-center">
@@ -193,7 +194,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                   />
                   <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
                 </div>
-
+ 
                 {isLoadingRecs ? (
                   <div className="flex justify-center py-8">
                     <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-100 border-t-indigo-600"></div>
@@ -209,7 +210,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                             </div>
                             <div>
                               <p className="font-bold text-sm text-slate-800">{rec.employeeName}</p>
-                              <p className="text-xs text-slate-500">Phòng {rec.departmentId || '?'}</p>
+                              <p className="text-xs text-slate-500">{rec.departmentName || `Phòng ${rec.departmentId || '?'}`}</p>
                             </div>
                           </div>
                           {idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase">Phù hợp nhất</Badge>}

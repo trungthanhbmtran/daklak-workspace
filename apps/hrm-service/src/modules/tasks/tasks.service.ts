@@ -566,21 +566,22 @@ export class TasksService implements OnModuleInit {
         return {
           id: emp.id,
           employeeCode: emp.employeeCode,
+          employeeName: emp.fullName,
           fullName: emp.fullName,
           departmentId: emp.departmentId,
           jobTitleId: emp.jobTitleId,
-          taskCount,
-          kpiScore,
+          currentLoad: taskCount,
+          performanceScore: kpiScore,
         };
       });
 
       const strategy = query?.strategy || 'LOW_PERFORMANCE';
       if (strategy === 'HIGH_PERFORMANCE') {
-        employeeList.sort((a, b) => b.kpiScore - a.kpiScore || a.taskCount - b.taskCount);
+        employeeList.sort((a, b) => b.performanceScore - a.performanceScore || a.currentLoad - b.currentLoad);
       } else if (strategy === 'UNDER_QUOTA') {
-        employeeList.sort((a, b) => a.taskCount - b.taskCount || b.kpiScore - a.kpiScore);
+        employeeList.sort((a, b) => a.currentLoad - b.currentLoad || b.performanceScore - a.performanceScore);
       } else { // 'LOW_PERFORMANCE'
-        employeeList.sort((a, b) => a.kpiScore - b.kpiScore || a.taskCount - b.taskCount);
+        employeeList.sort((a, b) => a.performanceScore - b.performanceScore || a.currentLoad - b.currentLoad);
       }
 
       // Group by department for topDepartments
@@ -598,8 +599,8 @@ export class TasksService implements OnModuleInit {
         }
         const dept = deptMap.get(deptId)!;
         dept.employeeCount += 1;
-        dept.currentLoad += emp.taskCount;
-        dept.performanceScore += emp.kpiScore;
+        dept.currentLoad += emp.currentLoad;
+        dept.performanceScore += emp.performanceScore;
       });
 
       const topDepartments = Array.from(deptMap.values()).map(dept => ({
