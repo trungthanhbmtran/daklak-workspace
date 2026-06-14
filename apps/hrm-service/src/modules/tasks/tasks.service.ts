@@ -199,7 +199,7 @@ export class TasksService implements OnModuleInit {
   }
 
   async listTasks(query: any) {
-    const where: any = { status: { not: 'TEMPLATE' } };
+    const where: any = {};
 
     // Resolve currentUserId by currentUserCode
     let currentUserId: number | undefined = undefined;
@@ -213,44 +213,98 @@ export class TasksService implements OnModuleInit {
       }
     }
 
-    // Logic: find tasks where user has a specific role
-    const participantConditions: any[] = [];
-    if (query.assigneeCode) {
-      const emp = await this.prisma.employee.findUnique({
-        where: { employeeCode: query.assigneeCode },
-        select: { userId: true }
-      });
-      if (emp?.userId) {
-        participantConditions.push({
-          userId: parseInt(emp.userId, 10),
-          participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
-        });
+    const conditions: any[] = [];
+
+    // Default status filter
+    if (query.assigneeCode === 'UNASSIGNED') {
+      where.status = 'TEMPLATE';
+    } else {
+      if (query.status && query.status !== 'ALL') {
+        where.status = query.status;
       } else {
-        participantConditions.push({ userId: -1 });
+        where.status = { not: 'TEMPLATE' };
       }
     }
 
+    // Role filter
+    if (query.role && currentUserId) {
+      conditions.push({
+        participants: {
+          some: {
+            userId: currentUserId,
+            participantRole: query.role
+          }
+        }
+      });
+    }
+
+    // Assignee filter
+    if (query.assigneeCode) {
+      if (query.assigneeCode === 'UNASSIGNED') {
+        conditions.push({
+          OR: [
+            {
+              participants: {
+                none: {
+                  participantRole: TaskRole.ASSIGNEE
+                }
+              }
+            },
+            {
+              participants: {
+                some: {
+                  userId: 0,
+                  participantRole: TaskRole.ASSIGNEE
+                }
+              }
+            }
+          ]
+        });
+      } else {
+        const emp = await this.prisma.employee.findUnique({
+          where: { employeeCode: query.assigneeCode },
+          select: { userId: true }
+        });
+        if (emp?.userId) {
+          conditions.push({
+            participants: {
+              some: {
+                userId: parseInt(emp.userId, 10),
+                participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
+              }
+            }
+          });
+        } else {
+          conditions.push({ id: -1 });
+        }
+      }
+    }
+
+    // Assigner/Owner filter
     if (query.assignerCode) {
       const emp = await this.prisma.employee.findUnique({
         where: { employeeCode: query.assignerCode },
         select: { userId: true }
       });
       if (emp?.userId) {
-        participantConditions.push({
-          userId: parseInt(emp.userId, 10),
-          participantRole: TaskRole.OWNER
+        conditions.push({
+          participants: {
+            some: {
+              userId: parseInt(emp.userId, 10),
+              participantRole: TaskRole.OWNER
+            }
+          }
         });
       } else {
-        participantConditions.push({ userId: -1 });
+        conditions.push({ id: -1 });
       }
     }
 
-    if (participantConditions.length > 0) {
-      where.AND = participantConditions.map(c => ({ participants: { some: c } }));
+    if (conditions.length > 0) {
+      where.AND = conditions;
     }
 
     if (query.search) where.title = { contains: query.search };
-    if (query.status && query.status !== 'ALL') where.status = query.status;
     if (query.priority && query.priority !== 'ALL') where.priority = query.priority;
 
     if (query.planId) {
@@ -353,8 +407,8 @@ export class TasksService implements OnModuleInit {
 
       // Look up userIds for assignee, assigner, supervisor codes
       const codesToLookup = [
-        data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? data.assigneeCode : null,
-        data.assignerCode || null,
+        data.assigneeCode || 'UNASSIGNED',
+        data.assignerCode || 'UNASSIGNED',
         data.supervisorCode || null
       ].filter(Boolean) as string[];
 
@@ -369,22 +423,22 @@ export class TasksService implements OnModuleInit {
 
       // Tạo participants
       const participantsData: any[] = [];
-      if (data.assigneeCode && data.assigneeCode !== 'UNASSIGNED') {
-        const uid = codeToUidMap.get(data.assigneeCode);
-        if (uid) {
-          participantsData.push({ taskId: newTask.id, userId: uid, participantRole: TaskRole.ASSIGNEE });
-        }
+      const assigneeCode = data.assigneeCode || 'UNASSIGNED';
+      const assigneeUid = codeToUidMap.get(assigneeCode);
+      if (assigneeUid !== undefined && assigneeUid !== null) {
+        participantsData.push({ taskId: newTask.id, userId: assigneeUid, participantRole: TaskRole.ASSIGNEE });
       }
-      if (data.assignerCode) {
-        const uid = codeToUidMap.get(data.assignerCode);
-        if (uid) {
-          participantsData.push({ taskId: newTask.id, userId: uid, participantRole: TaskRole.OWNER });
-        }
+
+      const assignerCode = data.assignerCode || 'UNASSIGNED';
+      const assignerUid = codeToUidMap.get(assignerCode);
+      if (assignerUid !== undefined && assignerUid !== null) {
+        participantsData.push({ taskId: newTask.id, userId: assignerUid, participantRole: TaskRole.OWNER });
       }
+
       if (data.supervisorCode) {
-        const uid = codeToUidMap.get(data.supervisorCode);
-        if (uid) {
-          participantsData.push({ taskId: newTask.id, userId: uid, participantRole: TaskRole.APPROVER });
+        const supervisorUid = codeToUidMap.get(data.supervisorCode);
+        if (supervisorUid !== undefined && supervisorUid !== null) {
+          participantsData.push({ taskId: newTask.id, userId: supervisorUid, participantRole: TaskRole.APPROVER });
         }
       }
 
@@ -499,8 +553,8 @@ export class TasksService implements OnModuleInit {
       // Check hierarchy if not admin - BYPASSED as requested by user
 
       // Look up userIds for assignee, assigner, coassignee codes
-      const codesToLookup: string[] = [];
-      if (assigneeCode && assigneeCode !== 'UNASSIGNED') codesToLookup.push(assigneeCode);
+      const codesToLookup: string[] = ['UNASSIGNED'];
+      if (assigneeCode) codesToLookup.push(assigneeCode);
       if (assignerCode) codesToLookup.push(assignerCode);
       if (coassigneeCodes && coassigneeCodes.length > 0) codesToLookup.push(...coassigneeCodes);
 
@@ -520,13 +574,11 @@ export class TasksService implements OnModuleInit {
         await tx.taskParticipant.deleteMany({
           where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
         });
-        if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
-          const uid = getUserId(assigneeCode);
-          if (uid) {
-            await tx.taskParticipant.create({
-              data: { taskId: id, userId: uid, participantRole: TaskRole.ASSIGNEE }
-            });
-          }
+        const uid = getUserId(assigneeCode || 'UNASSIGNED');
+        if (uid !== undefined && uid !== null) {
+          await tx.taskParticipant.create({
+            data: { taskId: id, userId: uid, participantRole: TaskRole.ASSIGNEE }
+          });
         }
       }
 
@@ -536,7 +588,7 @@ export class TasksService implements OnModuleInit {
           where: { taskId: id, participantRole: TaskRole.OWNER }
         });
         const uid = getUserId(assignerCode);
-        if (uid) {
+        if (uid !== undefined && uid !== null) {
           await tx.taskParticipant.create({
             data: { taskId: id, userId: uid, participantRole: TaskRole.OWNER }
           });

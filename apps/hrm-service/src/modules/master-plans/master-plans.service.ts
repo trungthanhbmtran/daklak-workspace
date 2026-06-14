@@ -277,15 +277,15 @@ export class MasterPlansService {
       for (const task of data.tasks) {
         let creatorUserId = 0;
         const creatorUid = getUserId(data.createdByCode || '');
-        if (creatorUid) creatorUserId = creatorUid;
+        if (creatorUid !== undefined && creatorUid !== null) creatorUserId = creatorUid;
 
         const participants: any[] = [];
         const unassignedUid = getUserId('UNASSIGNED');
-        if (unassignedUid) {
+        if (unassignedUid !== undefined && unassignedUid !== null) {
           participants.push({ userId: unassignedUid, participantRole: 'ASSIGNEE' });
         }
         const ownerUid = getUserId(data.createdByCode || 'UNASSIGNED');
-        if (ownerUid) {
+        if (ownerUid !== undefined && ownerUid !== null) {
           participants.push({ userId: ownerUid, participantRole: 'OWNER' });
         }
 

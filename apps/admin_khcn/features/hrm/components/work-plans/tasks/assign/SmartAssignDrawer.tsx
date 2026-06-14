@@ -5,9 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { PlayCircle, Search, Users, Crown, CheckCheck, X } from 'lucide-react';
+import { 
+  PlayCircle, 
+  Search, 
+  Users, 
+  Crown, 
+  CheckCheck, 
+  X, 
+  Activity, 
+  Sparkles, 
+  UserCheck, 
+  UserPlus, 
+  TrendingUp, 
+  Target 
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { hrmTasksApi } from "@/features/hrm/api";
+import { hrmTasksApi, hrmApi } from "@/features/hrm/api";
 
 interface SmartAssignDrawerProps {
   task: any | null;
@@ -22,6 +35,23 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
   const [isGroupMode, setIsGroupMode] = useState<boolean>(false);
   const [leadCode, setLeadCode] = useState<string>('');
   const [coordinatorCodes, setCoordinatorCodes] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Fetch all employees to enrich recommended list with actual department & job title names
+  const { data: allEmployeesRes } = useQuery({
+    queryKey: ['hrm-employees-dict'],
+    queryFn: () => hrmApi.list({ pageSize: 150 }),
+    staleTime: 5 * 60 * 1000,
+    enabled: !!open,
+  });
+
+  const employeeDetailsMap = useMemo(() => {
+    const map = new Map<string, any>();
+    (allEmployeesRes?.data || []).forEach((emp: any) => {
+      map.set(emp.employeeCode, emp);
+    });
+    return map;
+  }, [allEmployeesRes]);
 
   const { data: recommendations, isLoading: isLoadingRecs } = useQuery({
     queryKey: ['smart-assign', task?.id, assignStrategy],
@@ -42,24 +72,33 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
     staleTime: 60_000,
   });
 
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
   const topEmployees = recommendations?.topEmployees || [];
-  const topDepartments = recommendations?.topDepartments || [];
+
+  // Enrich recommended list with real department & job title names
+  const enrichedEmployees = useMemo(() => {
+    return topEmployees.map((emp: any) => {
+      const details = employeeDetailsMap.get(emp.employeeCode);
+      return {
+        ...emp,
+        departmentName: details?.department?.name || emp.departmentName || 'Chưa phân phòng',
+        jobTitleName: details?.jobTitle?.name || emp.jobTitleName || 'Cán bộ',
+        avatar: details?.avatar || '',
+      };
+    });
+  }, [topEmployees, employeeDetailsMap]);
 
   const filteredEmployees = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) {
-      // Show top 10 recommended by default
-      return topEmployees.slice(0, 10);
+      return enrichedEmployees.slice(0, 12);
     }
-    return topEmployees.filter((rec: any) =>
+    return enrichedEmployees.filter((rec: any) =>
       (rec.employeeName || '').toLowerCase().includes(query) ||
       (rec.employeeCode || '').toLowerCase().includes(query) ||
       (rec.departmentName || '').toLowerCase().includes(query) ||
-      (rec.departmentId && String(rec.departmentId).includes(query))
+      (rec.jobTitleName || '').toLowerCase().includes(query)
     );
-  }, [topEmployees, searchQuery]);
+  }, [enrichedEmployees, searchQuery]);
 
   const assignMutation = useMutation({
     mutationFn: (data: { departmentId?: number, employeeCode?: string, leadCode?: string, coordinatorCodes?: string[] }) => {
@@ -102,11 +141,6 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
     assignMutation.mutate({ leadCode, coordinatorCodes });
   };
 
-  const handleAssignToDepartment = (departmentId: number) => {
-    if (!task) return;
-    assignMutation.mutate({ departmentId });
-  };
-
   const handleAssignToEmployee = (employeeCode: string) => {
     if (!task) return;
     assignMutation.mutate({ employeeCode });
@@ -114,95 +148,165 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-2xl lg:max-w-3xl overflow-y-auto">
-        <SheetHeader className="mb-6">
-          <SheetTitle className="text-xl font-bold flex items-center gap-2">
-            <PlayCircle className="w-5 h-5 text-indigo-600" /> Phân công thông minh
+      <SheetContent className="w-full sm:max-w-2xl lg:max-w-3xl overflow-y-auto custom-scrollbar font-sans bg-slate-50/90 dark:bg-slate-950/95 backdrop-blur-md border-l border-slate-200/80 dark:border-slate-800/80">
+        <SheetHeader className="mb-6 relative">
+          <div className="absolute top-0 right-0 p-1 bg-white dark:bg-slate-900 rounded-full shadow-sm">
+            <Sparkles className="w-4 h-4 text-indigo-500 animate-pulse" />
+          </div>
+          <SheetTitle className="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
+            <PlayCircle className="w-5.5 h-5.5 text-indigo-600 dark:text-indigo-400" /> Phân công thông minh
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-slate-500 dark:text-slate-400 text-sm">
             Hệ thống tự động tính toán dựa trên khối lượng công việc hiện tại và hiệu suất của Phòng ban / Nhân viên.
           </SheetDescription>
         </SheetHeader>
 
         {task && (
-          <div className="space-y-6 pb-20">
-            <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-              <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider mb-1">Nhiệm vụ cần giao</p>
-              <h4 className="font-semibold text-indigo-900">{task.title}</h4>
+          <div className="space-y-6 pb-24">
+            {/* Task Card details */}
+            <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 border-l-4 border-l-indigo-600 dark:border-l-indigo-500 shadow-sm transition-all duration-300 hover:shadow-md">
+              <p className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Target className="w-3.5 h-3.5" /> Nhiệm vụ cần giao
+              </p>
+              <h4 className="font-extrabold text-slate-800 dark:text-slate-200 text-base leading-snug">{task.title}</h4>
+              {task.description && (
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium line-clamp-2">
+                  {task.description}
+                </p>
+              )}
             </div>
 
-            <div className="flex flex-col gap-3">
-              <Label className="font-bold text-slate-700 mb-2">Chiến lược phân công ưu tiên</Label>
+            {/* Strategic select section */}
+            <div className="flex flex-col gap-2">
+              <Label className="font-bold text-xs text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">
+                Chiến lược phân công ưu tiên
+              </Label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div
                   onClick={() => setAssignStrategy('HIGH_PERFORMANCE')}
-                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'HIGH_PERFORMANCE' ? 'border-indigo-500 bg-indigo-50 shadow-md scale-[1.02] z-10' : 'border-slate-100 hover:border-indigo-200 bg-white'}`}
+                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-300 flex flex-col justify-between ${
+                    assignStrategy === 'HIGH_PERFORMANCE' 
+                      ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-md scale-[1.02]' 
+                      : 'border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-300 dark:hover:border-indigo-800'
+                  }`}
                 >
-                  <p className={`font-bold text-sm ${assignStrategy === 'HIGH_PERFORMANCE' ? 'text-indigo-700' : 'text-slate-700'}`}>🏆 Giỏi nhất</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Đảm bảo chất lượng công việc cao nhất</p>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">🏆</span>
+                      {assignStrategy === 'HIGH_PERFORMANCE' && (
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 animate-ping" />
+                      )}
+                    </div>
+                    <p className={`font-bold text-sm ${assignStrategy === 'HIGH_PERFORMANCE' ? 'text-indigo-700 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'}`}>Giỏi nhất</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                      Ưu tiên những cán bộ có điểm KPI và hiệu suất công việc cao nhất.
+                    </p>
+                  </div>
                 </div>
+
                 <div
                   onClick={() => setAssignStrategy('UNDER_QUOTA')}
-                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'UNDER_QUOTA' ? 'border-emerald-500 bg-emerald-50 shadow-md scale-[1.02] z-10' : 'border-slate-100 hover:border-emerald-200 bg-white'}`}
+                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-300 flex flex-col justify-between ${
+                    assignStrategy === 'UNDER_QUOTA' 
+                      ? 'border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/20 shadow-md scale-[1.02]' 
+                      : 'border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-emerald-300 dark:hover:border-emerald-800'
+                  }`}
                 >
-                  <p className={`font-bold text-sm ${assignStrategy === 'UNDER_QUOTA' ? 'text-emerald-700' : 'text-slate-700'}`}>⚖️ Chưa đủ mức</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Ưu tiên người/phòng đang rảnh rỗi</p>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">⚖️</span>
+                      {assignStrategy === 'UNDER_QUOTA' && (
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                      )}
+                    </div>
+                    <p className={`font-bold text-sm ${assignStrategy === 'UNDER_QUOTA' ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-200'}`}>Ít tải nhất</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                      Ưu tiên những nhân sự có ít đầu việc đang thực hiện nhất để cân bằng tải.
+                    </p>
+                  </div>
                 </div>
+
                 <div
                   onClick={() => setAssignStrategy('LOW_PERFORMANCE')}
-                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all ${assignStrategy === 'LOW_PERFORMANCE' ? 'border-amber-500 bg-amber-50 shadow-md scale-[1.02] z-10' : 'border-slate-100 hover:border-amber-200 bg-white'}`}
+                  className={`cursor-pointer rounded-2xl p-4 border-2 transition-all duration-300 flex flex-col justify-between ${
+                    assignStrategy === 'LOW_PERFORMANCE' 
+                      ? 'border-amber-500 bg-amber-50/50 dark:bg-amber-950/20 shadow-md scale-[1.02]' 
+                      : 'border-slate-200/60 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-amber-300 dark:hover:border-amber-800'
+                  }`}
                 >
-                  <p className={`font-bold text-sm ${assignStrategy === 'LOW_PERFORMANCE' ? 'text-amber-700' : 'text-slate-700'}`}>📈 Cần cải thiện</p>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">Tạo cơ hội nâng cao hiệu suất</p>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xl">📈</span>
+                      {assignStrategy === 'LOW_PERFORMANCE' && (
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+                      )}
+                    </div>
+                    <p className={`font-bold text-sm ${assignStrategy === 'LOW_PERFORMANCE' ? 'text-amber-700 dark:text-amber-400' : 'text-slate-800 dark:text-slate-200'}`}>Cần rèn luyện</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                      Ưu tiên tạo cơ hội cho những người cần bổ sung kinh nghiệm, nâng cao hiệu quả.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Chế độ giao việc Toggle */}
-            <div className="flex items-center justify-center p-1 bg-slate-100 rounded-xl w-full sm:max-w-md mx-auto my-8 border border-slate-200">
+            {/* Toggle group vs individual */}
+            <div className="flex items-center justify-center p-1.5 bg-slate-200/60 dark:bg-slate-900/80 rounded-2xl w-full sm:max-w-md mx-auto border border-slate-300/30 dark:border-slate-800 shadow-inner">
               <button
-                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-300 ${!isGroupMode ? 'bg-white text-indigo-700 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                  !isGroupMode 
+                    ? 'bg-white dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 shadow-sm ring-1 ring-slate-200/10' 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
                 onClick={() => {
                   setIsGroupMode(false);
                   setLeadCode('');
                   setCoordinatorCodes([]);
                 }}
               >
+                <UserCheck className="w-3.5 h-3.5" />
                 Giao Cá nhân
               </button>
               <button
-                className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-bold transition-all duration-300 flex items-center justify-center gap-2 ${isGroupMode ? 'bg-white text-violet-700 shadow-sm ring-1 ring-slate-200/50' : 'text-slate-500 hover:text-slate-700'}`}
+                className={`flex-1 py-2.5 px-4 rounded-xl text-xs font-black tracking-wide uppercase transition-all duration-300 flex items-center justify-center gap-1.5 ${
+                  isGroupMode 
+                    ? 'bg-white dark:bg-slate-800 text-violet-700 dark:text-violet-300 shadow-sm ring-1 ring-slate-200/10' 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'
+                }`}
                 onClick={() => setIsGroupMode(true)}
               >
-                <Users className="w-4 h-4" />
+                <Users className="w-3.5 h-3.5" />
                 Giao theo nhóm
               </button>
             </div>
 
-            <div className="flex flex-col h-full mt-4">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-sm font-bold text-slate-700 flex items-center shrink-0">
-                  <span className="w-2 h-6 bg-gradient-to-b from-indigo-500 to-violet-500 rounded mr-3"></span>
+            {/* Main listing and search section */}
+            <div className="flex flex-col h-full">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                <h4 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider flex items-center shrink-0">
+                  <span className="w-1.5 h-5 bg-gradient-to-b from-indigo-500 to-violet-600 rounded mr-2" />
                   Danh sách đề xuất theo Đơn vị
                 </h4>
-                {/* Search input to look for any employee */}
-                <div className="relative w-64 shrink-0">
+                <div className="relative w-full sm:w-72 shrink-0">
                   <Input
                     placeholder="Tìm tên, mã cán bộ, phòng..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="h-10 rounded-xl pl-10 bg-slate-50/50 border-slate-200 focus:bg-white focus:border-indigo-300 transition-all text-sm font-medium shadow-sm"
+                    className="h-10 rounded-xl pl-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 focus:border-indigo-400 dark:focus:border-indigo-700 text-xs font-medium shadow-sm transition-all"
                   />
                   <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
                 </div>
               </div>
 
               {isLoadingRecs ? (
-                <div className="flex justify-center py-12">
-                  <div className="animate-spin rounded-full h-10 w-10 border-4 border-indigo-100 border-t-indigo-600"></div>
+                <div className="flex justify-center items-center py-20 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/50 dark:border-slate-800">
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="animate-spin rounded-full h-10 w-10 border-4 border-slate-100 border-t-indigo-600" />
+                    <p className="text-xs text-slate-500 font-semibold">Đang tổng hợp dữ liệu nhân sự...</p>
+                  </div>
                 </div>
               ) : (
-                <div className="flex flex-col gap-5 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                <div className="flex flex-col gap-6 max-h-[520px] overflow-y-auto pr-2 custom-scrollbar">
                   {Object.entries(
                     filteredEmployees.reduce((acc: any, emp: any) => {
                       const dept = emp.departmentName || 'Chưa phân phòng';
@@ -211,68 +315,144 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                       return acc;
                     }, {})
                   ).map(([deptName, emps]: [string, any], groupIdx) => (
-                    <div key={deptName} className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
-                      <div className="bg-slate-50/80 px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xs shrink-0">
+                    <div key={deptName} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/60 dark:border-slate-800 shadow-sm overflow-hidden flex flex-col">
+                      <div className="bg-slate-50/50 dark:bg-slate-900/80 px-5 py-3.5 border-b border-slate-100 dark:border-slate-800/80 flex items-center gap-2.5">
+                        <div className="w-7 h-7 rounded-xl bg-indigo-100 dark:bg-indigo-950/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-extrabold text-xs shrink-0">
                           {deptName.charAt(0).toUpperCase()}
                         </div>
-                        <h5 className="font-bold text-slate-700 text-sm">{deptName}</h5>
-                        <Badge className="ml-auto bg-slate-200 text-slate-600 hover:bg-slate-300 transition-colors text-[10px]">{emps.length} nhân sự</Badge>
+                        <h5 className="font-extrabold text-slate-700 dark:text-slate-300 text-xs tracking-wide">{deptName}</h5>
+                        <Badge className="ml-auto bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-600 dark:text-slate-400 border border-slate-200/20 text-[9px] font-bold px-2 py-0.5 rounded-full">
+                          {emps.length} nhân sự
+                        </Badge>
                       </div>
-                      <div className="flex flex-col p-2 gap-2">
+                      <div className="flex flex-col p-3 gap-2.5">
                         {emps.map((rec: any, idx: number) => {
                           const isLead = rec.employeeCode === leadCode;
                           const isCoordinator = coordinatorCodes.includes(rec.employeeCode);
 
+                          // Workload capacity bar calculation
+                          const loadRatio = Math.min(1, rec.currentLoad / (rec.rankLimit || 5));
+                          const loadPercentage = Math.round(loadRatio * 100);
+                          let loadColor = 'bg-emerald-500';
+                          let loadTextColor = 'text-emerald-600 dark:text-emerald-400';
+                          if (loadPercentage >= 100) {
+                            loadColor = 'bg-rose-500';
+                            loadTextColor = 'text-rose-600 dark:text-rose-400';
+                          } else if (loadPercentage >= 60) {
+                            loadColor = 'bg-amber-500';
+                            loadTextColor = 'text-amber-600 dark:text-amber-400';
+                          }
+
                           return (
-                            <div key={rec.employeeCode} className={`group flex items-center justify-between p-3 rounded-xl border transition-all duration-300 hover:scale-[1.01] ${isLead ? 'bg-violet-50 border-violet-300 shadow-[0_4px_12px_rgba(139,92,246,0.15)]' : isCoordinator ? 'bg-amber-50 border-amber-300 shadow-[0_4px_12px_rgba(245,158,11,0.15)]' : 'bg-white border-slate-100 shadow-sm hover:shadow-md hover:border-indigo-200'}`}>
-                              <div className="flex items-center gap-4 overflow-hidden">
-                                <div className={`shrink-0 w-12 h-12 rounded-full shadow-inner flex justify-center items-center font-bold text-base text-white ${isLead ? 'bg-violet-500 ring-4 ring-violet-100' : isCoordinator ? 'bg-amber-500 ring-4 ring-amber-100' : 'bg-gradient-to-br from-indigo-500 to-violet-500 ring-2 ring-transparent group-hover:ring-indigo-100'}`}>
-                                  {isLead ? <Crown className="w-5 h-5" /> : rec.employeeName?.charAt(0) || '?'}
+                            <div 
+                              key={rec.employeeCode} 
+                              className={`group flex flex-col md:flex-row md:items-center justify-between p-4 rounded-2xl border transition-all duration-300 ${
+                                isLead 
+                                  ? 'bg-violet-50/50 dark:bg-violet-950/10 border-violet-400/80 dark:border-violet-800/80 shadow-md shadow-violet-200/20' 
+                                  : isCoordinator 
+                                  ? 'bg-amber-50/50 dark:bg-amber-950/10 border-amber-400/80 dark:border-amber-800/80 shadow-md shadow-amber-200/20' 
+                                  : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800/50 shadow-sm hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 hover:scale-[1.005]'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3.5 min-w-0 flex-1 pr-4">
+                                <div className={`shrink-0 w-11 h-11 rounded-full shadow-inner flex justify-center items-center font-bold text-sm text-white transition-all duration-300 ${
+                                  isLead 
+                                    ? 'bg-violet-600 ring-4 ring-violet-100 dark:ring-violet-950' 
+                                    : isCoordinator 
+                                    ? 'bg-amber-500 ring-4 ring-amber-100 dark:ring-amber-950' 
+                                    : 'bg-gradient-to-br from-indigo-500 to-violet-500 ring-2 ring-transparent group-hover:ring-indigo-100 dark:group-hover:ring-indigo-950'
+                                }`}>
+                                  {isLead ? <Crown className="w-5.5 h-5.5 text-white" /> : rec.employeeName?.charAt(0) || '?'}
                                 </div>
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <p className="font-bold text-sm text-slate-800 truncate group-hover:text-indigo-700 transition-colors">{rec.employeeName}</p>
-                                    {!isGroupMode && groupIdx === 0 && idx === 0 && !searchQuery && <Badge className="bg-indigo-500 text-[9px] uppercase px-1.5 py-0 h-4 animate-pulse shadow-sm shadow-indigo-200">Đề xuất ưu tiên</Badge>}
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="font-extrabold text-sm text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                      {rec.employeeName}
+                                    </p>
+                                    <span className="text-[10px] text-slate-400 font-bold bg-slate-50 dark:bg-slate-850 px-1.5 py-0.5 rounded-md border border-slate-100 dark:border-slate-800">
+                                      {rec.employeeCode}
+                                    </span>
+                                    {!isGroupMode && groupIdx === 0 && idx === 0 && !searchQuery && (
+                                      <Badge className="bg-indigo-600 hover:bg-indigo-700 text-[9px] uppercase px-2 py-0 h-4.5 animate-pulse shadow-sm shadow-indigo-200">
+                                        Gợi ý tối ưu
+                                      </Badge>
+                                    )}
                                   </div>
-                                  <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 font-medium">
-                                    <div className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
-                                      Khối lượng: <b className="text-indigo-700">{Math.round(rec.currentLoad)}</b>
+                                  <p className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-0.5">
+                                    {rec.jobTitleName}
+                                  </p>
+
+                                  {/* Workload Capacity Progress Bar */}
+                                  <div className="w-full mt-2.5 max-w-sm">
+                                    <div className="flex justify-between items-center text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1">
+                                      <span className="flex items-center gap-1">
+                                        <Activity className="w-3 h-3 text-indigo-500" />
+                                        Khối lượng: {rec.currentLoad}/{rec.rankLimit || 5} việc
+                                      </span>
+                                      <span className={loadTextColor}>{loadPercentage}% tải</span>
                                     </div>
-                                    <div className="flex items-center gap-1 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">
-                                      Hiệu suất: <b className="text-emerald-600">{Math.round(rec.performanceScore)}</b>
+                                    <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                      <div 
+                                        className={`h-full ${loadColor} rounded-full transition-all duration-500`} 
+                                        style={{ width: `${loadPercentage}%` }} 
+                                      />
                                     </div>
                                   </div>
                                 </div>
                               </div>
-                              {!isGroupMode ? (
-                                <Button
-                                  size="sm"
-                                  disabled={assignMutation.isPending}
-                                  className="shrink-0 ml-4 h-9 px-5 rounded-xl font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-600 hover:text-white transition-all shadow-sm group-hover:shadow-indigo-200"
-                                  onClick={() => handleAssignToEmployee(rec.employeeCode)}
-                                >
-                                  Giao việc
-                                </Button>
-                              ) : (
-                                <div className="flex gap-2 shrink-0 ml-4">
-                                  <button
-                                    onClick={() => setLeadCode(rec.employeeCode)}
-                                    title="Đặt làm Chủ trì"
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm ${isLead ? 'bg-violet-500 text-white shadow-violet-200 scale-105' : 'bg-violet-50 text-violet-600 hover:bg-violet-100 border border-violet-200 hover:scale-105'}`}
-                                  >
-                                    {isLead ? <CheckCheck className="w-4 h-4" /> : 'Chủ trì'}
-                                  </button>
-                                  <button
-                                    onClick={() => toggleCoordinator(rec.employeeCode)}
-                                    title="Thêm vào Phối hợp"
-                                    disabled={isLead}
-                                    className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all shadow-sm disabled:opacity-40 disabled:hover:scale-100 ${isCoordinator ? 'bg-amber-500 text-white shadow-amber-200 scale-105' : 'bg-amber-50 text-amber-600 hover:bg-amber-100 border border-amber-200 hover:scale-105'}`}
-                                  >
-                                    {isCoordinator ? <CheckCheck className="w-4 h-4" /> : 'Phối hợp'}
-                                  </button>
+
+                              <div className="flex items-center justify-between md:justify-end gap-3 mt-4 md:mt-0 pt-3 md:pt-0 border-t border-slate-100 dark:border-slate-800 md:border-0 shrink-0">
+                                <div className="text-right hidden xl:block mr-2">
+                                  <div className="text-[10px] font-extrabold text-slate-400 uppercase">Điểm KPI</div>
+                                  <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5 justify-end mt-0.5">
+                                    <TrendingUp className="w-3.5 h-3.5" />
+                                    {Math.round(rec.performanceScore)}
+                                  </div>
                                 </div>
-                              )}
+
+                                {!isGroupMode ? (
+                                  <Button
+                                    size="sm"
+                                    disabled={assignMutation.isPending}
+                                    className="w-full md:w-auto h-9.5 px-5 rounded-xl font-bold bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-600 hover:text-white dark:hover:bg-indigo-600 dark:hover:text-white transition-all shadow-sm hover:shadow-indigo-200/50 flex items-center justify-center gap-1.5"
+                                    onClick={() => handleAssignToEmployee(rec.employeeCode)}
+                                  >
+                                    <UserPlus className="w-4 h-4" /> Giao việc
+                                  </Button>
+                                ) : (
+                                  <div className="flex gap-2 w-full md:w-auto">
+                                    <button
+                                      onClick={() => {
+                                        setLeadCode(rec.employeeCode);
+                                        // Remove from coordinators if made lead
+                                        setCoordinatorCodes(prev => prev.filter(c => c !== rec.employeeCode));
+                                      }}
+                                      title="Đặt làm Chủ trì"
+                                      className={`flex-1 md:flex-none px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-sm flex items-center justify-center gap-1 hover:scale-103 ${
+                                        isLead 
+                                          ? 'bg-violet-600 text-white shadow-violet-200 dark:shadow-violet-950' 
+                                          : 'bg-violet-50 dark:bg-violet-950/35 text-violet-600 dark:text-violet-400 hover:bg-violet-100 dark:hover:bg-violet-900 border border-violet-200/50 dark:border-violet-900/50'
+                                      }`}
+                                    >
+                                      {isLead ? <CheckCheck className="w-3.5 h-3.5" /> : null}
+                                      Chủ trì
+                                    </button>
+                                    <button
+                                      onClick={() => toggleCoordinator(rec.employeeCode)}
+                                      title="Thêm vào Phối hợp"
+                                      disabled={isLead}
+                                      className={`flex-1 md:flex-none px-3.5 py-2 rounded-xl text-xs font-black transition-all shadow-sm disabled:opacity-40 disabled:hover:scale-100 flex items-center justify-center gap-1 hover:scale-103 ${
+                                        isCoordinator 
+                                          ? 'bg-amber-500 text-white shadow-amber-200 dark:shadow-amber-950' 
+                                          : 'bg-amber-50 dark:bg-amber-950/35 text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900 border border-amber-200/50 dark:border-amber-900/50'
+                                      }`}
+                                    >
+                                      {isCoordinator ? <CheckCheck className="w-3.5 h-3.5" /> : null}
+                                      Phối hợp
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
                             </div>
                           );
                         })}
@@ -280,9 +460,10 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
                     </div>
                   ))}
                   {filteredEmployees.length === 0 && (
-                    <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                      <Search className="w-8 h-8 text-slate-300 mx-auto mb-3" />
-                      <p className="text-sm text-slate-500 font-medium">Không tìm thấy nhân sự phù hợp</p>
+                    <div className="text-center py-16 bg-white dark:bg-slate-900 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800 shadow-inner">
+                      <Search className="w-9 h-9 text-slate-350 dark:text-slate-700 mx-auto mb-3" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400 font-bold">Không tìm thấy nhân sự phù hợp</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Vui lòng kiểm tra lại từ khóa tìm kiếm</p>
                     </div>
                   )}
                 </div>
@@ -293,18 +474,31 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
 
         {/* Sticky Footer for Group Mode */}
         {task && isGroupMode && (
-          <div className="absolute bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20 flex items-center justify-between">
-            <div className="text-sm text-slate-600 font-medium">
+          <div className="absolute bottom-0 left-0 w-full bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800/80 p-5 shadow-[0_-12px_42px_rgba(0,0,0,0.06)] z-20 flex items-center justify-between transition-all duration-300">
+            <div className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-violet-500 animate-pulse" />
               {!leadCode ? (
-                <span className="text-amber-600">Vui lòng chọn Chủ trì</span>
+                <span className="text-amber-600 dark:text-amber-400 font-bold">Vui lòng chọn 1 Chủ trì</span>
               ) : (
-                <span>Đã chọn <b className="text-violet-700">1 Chủ trì</b> {coordinatorCodes.length > 0 && <span>và <b className="text-amber-600">{coordinatorCodes.length} Phối hợp</b></span>}</span>
+                <span>
+                  Đã chọn <b className="text-violet-700 dark:text-violet-400 font-black">1 Chủ trì</b> 
+                  {coordinatorCodes.length > 0 && (
+                    <span> và <b className="text-amber-600 dark:text-amber-400 font-black">{coordinatorCodes.length} Phối hợp</b></span>
+                  )}
+                </span>
               )}
             </div>
             <div className="flex gap-3">
-              <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)} disabled={assignMutation.isPending}>Hủy</Button>
+              <Button 
+                variant="outline" 
+                className="rounded-xl border-slate-200 dark:border-slate-800 text-xs font-bold" 
+                onClick={() => onOpenChange(false)} 
+                disabled={assignMutation.isPending}
+              >
+                Hủy
+              </Button>
               <Button
-                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md font-bold"
+                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200/50 dark:shadow-violet-950/20 text-xs font-bold transition-all px-5"
                 disabled={!leadCode || assignMutation.isPending}
                 onClick={handleGroupAssignSubmit}
               >
