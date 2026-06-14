@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-  ChevronDown, ChevronRight, PlusCircle, UserCheck,
+  ChevronDown, ChevronRight, PlusCircle,
   Clock, CheckCircle2, AlertTriangle, Circle, RotateCcw,
-  CornerDownRight, Info
+  Info
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -124,6 +124,21 @@ function TaskRow({ task, depth, planId, onRequestAssign, isLastChild }: TaskRowP
                 )}
               </div>
             </div>
+
+            {canAssign && (
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-7 px-3 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 hover:text-indigo-700 rounded-full shrink-0 relative z-10"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onRequestAssign(task);
+                }}
+              >
+                Giao việc
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -155,7 +170,7 @@ interface PlanTaskTreeProps {
   planId: number;
   canAddRoot?: boolean;
   onAddRootTask?: () => void;
-  onRefresh: () => void;
+  onRefresh?: () => void;
   isLoading?: boolean;
   /** Callback giao việc — MasterPlanDetail truyền vào để mở SmartAssignDrawer dùng chung */
   onRequestAssign?: (task: any) => void;
@@ -166,7 +181,6 @@ export function PlanTaskTree({
   planId,
   canAddRoot = false,
   onAddRootTask,
-  onRefresh,
   isLoading,
   onRequestAssign,
 }: PlanTaskTreeProps) {
@@ -205,7 +219,7 @@ export function PlanTaskTree({
       {/* Context hint */}
       <div className="flex items-center gap-2 px-4 py-2 bg-amber-50/60 border-b border-amber-100 text-[11px] text-amber-700 font-semibold">
         <Info className="w-3.5 h-3.5 shrink-0" />
-        Sau khi giao việc, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong tab "Việc của tôi"
+        Sau khi giao việc, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong tab &quot;Việc của tôi&quot;
       </div>
 
       {/* Tree rows */}

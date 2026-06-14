@@ -6,9 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   CheckCircle2, Calendar, Split, ArrowLeftCircle,
-  MessageSquare, Send, Reply, User, Users, Target, X, BarChart3,
+  MessageSquare, Send, Reply, User, Users, Target, BarChart3,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { useTaskDetail } from '../hooks/useTaskDetail';
 import { SubTaskModal } from '../../subtask/SubTaskModal';
 import { CoordinationModal } from '../../coordination/CoordinationModal';
@@ -43,9 +42,7 @@ export function TaskDetailDialog({
   onClose,
   onRefetch,
   onSmartAssign,
-  onSelectTask,
   taskStatusCategories = [],
-  taskRoleCategories = [],
   context = 'MY_EXECUTION',
 }: TaskDetailDialogProps) {
   const [activeTask, setActiveTask] = React.useState(task);
@@ -308,7 +305,7 @@ export function TaskDetailDialog({
                               <span>🗂️</span> Chế độ Giao việc — chọn người nhận đầu việc này
                             </div>
                             <div className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-[10px] text-slate-500 leading-relaxed">
-                              Sau khi giao, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong "Việc của tôi" — bạn không cần phân rã tại đây.
+                              Sau khi giao, người nhận sẽ tự xây dựng kế hoạch thực hiện chi tiết trong &quot;Việc của tôi&quot; — bạn không cần phân rã tại đây.
                             </div>
                             <Button className="w-full h-11 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[13px] shadow-lg shadow-amber-500/20" onClick={() => { onSmartAssign(activeTask); }}>
                               <User className="w-4 h-4 mr-2" /> Phân công người thực hiện
@@ -561,7 +558,7 @@ export function TaskDetailDialog({
         task={activeTask}
         open={isCoordinationModalOpen}
         onOpenChange={setIsCoordinationModalOpen}
-        onSuccess={() => fetchComments(true)}
+        onSuccess={() => fetchComments()}
       />
 
       <AssignCoordinationModal
@@ -570,7 +567,7 @@ export function TaskDetailDialog({
         onOpenChange={setIsAssignCoordinationOpen}
         onSuccess={() => {
           onRefetch();
-          fetchComments(true);
+          fetchComments();
         }}
       />
     </>

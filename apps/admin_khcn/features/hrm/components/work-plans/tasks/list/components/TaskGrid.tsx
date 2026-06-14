@@ -4,7 +4,7 @@ import React, { memo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { UserCheck, CheckCircle2, Target, ArrowLeftCircle, BarChart3 } from 'lucide-react';
+import { UserCheck, CheckCircle2, Target, BarChart3 } from 'lucide-react';
 import { getStatusBadge, getPriorityColor, getPriorityName, getDueDateDisplay } from '../utils';
 import type { TaskTab } from './TaskToolbar';
 

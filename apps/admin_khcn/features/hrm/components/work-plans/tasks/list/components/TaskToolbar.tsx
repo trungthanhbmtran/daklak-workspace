@@ -6,7 +6,6 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search } from '@/components/ui/search';
 import { LayoutGrid, List as ListIcon, Filter, Target, ClipboardList, CheckCircle2, BarChart3, Clock } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 
 export type TaskTab = 'PENDING_ASSIGN' | 'MY_EXECUTION' | 'I_ASSIGNED';
 

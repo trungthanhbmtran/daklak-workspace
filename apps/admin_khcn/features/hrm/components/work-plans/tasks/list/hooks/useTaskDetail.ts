@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { hrmTasksApi } from '@/features/hrm/api';
 import { hrmKeys } from '@/features/hrm/keys';
 import {
   useTaskComments,
@@ -86,7 +85,7 @@ export function useTaskDetail(activeTaskId: number | undefined, rootTaskId: numb
   }, [activeTaskId, updateStatus, onRefetch]);
 
   /** Refresh comments thủ công (dùng sau khi CoordinationModal thành công) */
-  const fetchComments = useCallback((silent = false) => {
+  const fetchComments = useCallback(() => {
     if (!activeTaskId) return;
     qc.invalidateQueries({ queryKey: hrmKeys.taskComments(activeTaskId) });
   }, [activeTaskId, qc]);

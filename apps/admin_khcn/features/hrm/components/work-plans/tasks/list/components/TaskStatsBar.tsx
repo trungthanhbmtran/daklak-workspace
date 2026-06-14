@@ -29,7 +29,11 @@ export const TaskStatsBar = memo(function TaskStatsBar({
       if (task.status === 'DONE') {
         const completedDate = new Date(task.completedAt || task.updatedAt || Date.now());
         completedDate.setHours(0, 0, 0, 0);
-        (due && completedDate > due) ? doneOverdue++ : doneInTime++;
+        if (due && completedDate > due) {
+          doneOverdue++;
+        } else {
+          doneInTime++;
+        }
       } else {
         if (!due) { inTime++; }
         else {

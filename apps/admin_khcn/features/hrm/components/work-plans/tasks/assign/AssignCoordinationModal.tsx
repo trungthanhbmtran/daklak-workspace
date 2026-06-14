@@ -70,7 +70,7 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
   };
 
   const assignMutation = useMutation({
-    mutationFn: () => hrmTasksApi.assignCoordination(task.id.toString(), {
+    mutationFn: () => hrmTasksApi.assignCoordination(task?.id?.toString() || '', {
       leadCode,
       coordinatorCodes,
     }),
@@ -234,13 +234,13 @@ export function AssignCoordinationModal({ task, open, onOpenChange, onSuccess }:
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
-          <div className="text-sm text-slate-500">
+        <div className="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/40 rounded-b-3xl flex items-center justify-between gap-3 shrink-0">
+          <div className="text-sm text-slate-500 font-medium">
             {coordinatorCodes.length > 0 && (
               <span>1 Lead + <span className="font-bold text-amber-600">{coordinatorCodes.length} coordinator(s)</span></span>
             )}
           </div>
-          <div className="p-5 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 flex justify-end gap-3 rounded-b-3xl shrink-0">
+          <div className="flex gap-3">
             <Button variant="ghost" className="rounded-xl font-medium" onClick={() => onOpenChange(false)} disabled={assignMutation.isPending}>Cancel</Button>
             <Button
               className="rounded-xl font-bold bg-violet-600 hover:bg-violet-700 text-white shadow-md shadow-violet-200 dark:shadow-none"

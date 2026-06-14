@@ -25,7 +25,7 @@ export function CoordinationModal({ task, open, onOpenChange, onSuccess }: Coord
   const [message, setMessage] = useState('');
 
   const requestMutation = useMutation({
-    mutationFn: () => hrmTasksApi.requestCoordination(task.id.toString(), {
+    mutationFn: () => hrmTasksApi.requestCoordination(task?.id?.toString() || '', {
       message: message.trim() || undefined,
     }),
     onSuccess: () => {
