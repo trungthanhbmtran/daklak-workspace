@@ -12,8 +12,8 @@ RUN npm ci
 COPY apps/posts-service/ ./
 COPY shared/protos ./shared/protos
 
-# Build the NestJS app directly (without prisma generate, since client is pre-generated in 'generated/')
-RUN npx nest build
+# Generate Prisma client and build the NestJS app
+RUN npm run build
 
 
 # ==========================================
@@ -39,6 +39,7 @@ COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/prisma ./prisma
 COPY --chown=app:app --from=builder /app/shared/protos ./protos
 COPY --chown=app:app --from=builder /app/prisma.config.ts ./prisma.config.ts
+COPY --chown=app:app --from=builder /app/generated ./generated
 
 ENV PROTO_PATH=/app/protos
 
