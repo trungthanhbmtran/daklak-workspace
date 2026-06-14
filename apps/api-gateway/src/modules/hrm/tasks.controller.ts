@@ -387,77 +387,7 @@ export class TasksController implements OnModuleInit {
 
     const user = req.user;
     const assignerCode = user?.employeeCode;
-    const isAdmin = user?.roles?.some((r: any) => r.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
-
     const taskId = parseInt(id, 10);
-    const taskResponse: any = await firstValueFrom(
-      this.taskService.GetTask({ id: taskId }),
-    );
-    const taskData = taskResponse?.data;
-    if (!taskData) {
-      throw new Error('Nhiệm vụ không tồn tại');
-    }
-
-    // Task UNASSIGNED/TEMPLATE: bất kỳ ai đã đăng nhập đều có thể giao
-    // Task đã có người xử lý: chỉ chính người đó hoặc admin mới được giao lại
-    const isUnassigned =
-      taskData.assigneeCode === 'UNASSIGNED' || taskData.status === 'TEMPLATE';
-    if (!isAdmin && !isUnassigned && taskData.assigneeCode !== assignerCode) {
-      throw new Error(
-        'Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).',
-      );
-    }
-
-    // Nếu không phải admin, kiểm tra phạm vi quản lý
-    if (!isAdmin) {
-      const unitMap = await this.getUnitMap();
-      const callerUnitCode = user.unitCode;
-
-      const isDirectChildByCode = (childCode: string, parentCode: string) => {
-        if (!childCode || !parentCode || childCode.length <= parentCode.length) return false;
-        if (!childCode.startsWith(parentCode)) return false;
-        const remainder = childCode.substring(parentCode.length);
-        if (remainder[0] !== '.') return false;
-        const rest = remainder.substring(1);
-        return !rest.includes('.');
-      };
-
-      let targetUnitId: number | undefined;
-      let targetJobTitleId: number | undefined;
-
-      if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
-        const empListRes: any = await firstValueFrom(
-          this.employeeService.ListEmployees({ keyword: assigneeCode }),
-        );
-        const targetEmp = empListRes?.data?.[0];
-        if (targetEmp) {
-          targetUnitId = parseInt(targetEmp.departmentId, 10);
-          targetJobTitleId = parseInt(targetEmp.jobTitleId, 10);
-        }
-      } else if (departmentId) {
-        targetUnitId = parseInt(departmentId as any, 10);
-      }
-
-      if (targetUnitId) {
-        const targetUnit = unitMap[targetUnitId];
-        if (targetUnitId !== parseInt(user.unitId, 10)) {
-          // Giao việc xuống phòng ban khác -> Phải là phòng con trực tiếp
-          if (!targetUnit || !callerUnitCode || !isDirectChildByCode(targetUnit.code, callerUnitCode)) {
-            throw new Error('Bạn chỉ được phép giao việc cho phòng ban nội bộ hoặc phòng trực tiếp (theo mã đơn vị).');
-          }
-
-          // Nếu giao cho cá nhân ở phòng con, cá nhân đó phải là lãnh đạo
-          if (targetJobTitleId) {
-            const jtMap = await this.getJobTitlesMap();
-            const jt = jtMap[targetJobTitleId];
-            const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
-            if (!jt || !leaderCategories.has(jt.category)) {
-              throw new Error('Khi giao việc xuống phòng trực tiếp, chỉ được giao cho chức danh lãnh đạo của phòng đó.');
-            }
-          }
-        }
-      }
-    }
 
     return firstValueFrom(
       this.taskService.AssignTask({
@@ -465,8 +395,11 @@ export class TasksController implements OnModuleInit {
         assigneeCode,
         coassigneeCodes: coassigneeCodes || [],
         departmentId,
-        // Inject người giao việc từ JWT token (ghi đè lên assignerCode)
         assignerCode,
+        currentUserRoles: user?.roles?.map((r: any) => r.code) || [],
+        currentUserPermissions: user?.permissionsFlatten || [],
+        currentUserId: user?.id,
+        currentUserCode: user?.employeeCode || user?.username,
       }),
     );
   }

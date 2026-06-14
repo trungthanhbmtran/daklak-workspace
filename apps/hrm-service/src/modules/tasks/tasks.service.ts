@@ -342,13 +342,43 @@ export class TasksService implements OnModuleInit {
     return t;
   }
 
-  async assignTask(id: number, assigneeCode: string, coassigneeCodes?: string[], departmentId?: number, assignerCode?: string) {
+  async assignTask(
+    id: number,
+    assigneeCode: string,
+    coassigneeCodes?: string[],
+    departmentId?: number,
+    assignerCode?: string,
+    context?: { currentUserRoles?: string[]; currentUserPermissions?: string[]; currentUserId?: number; currentUserCode?: string }
+  ) {
     const t = await this.prisma.$transaction(async (tx) => {
       const currentTask = await tx.task.findUnique({
         where: { id },
         include: { participants: true }
       });
       if (!currentTask) throw new RpcException('Nhiệm vụ không tồn tại');
+
+      const currentAssignee = currentTask.participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || 'UNASSIGNED';
+      const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
+      const isUnassigned = currentAssignee === 'UNASSIGNED' || currentTask.status === 'TEMPLATE';
+
+      if (!isAdmin && !isUnassigned && currentAssignee !== context?.currentUserCode) {
+        throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
+      }
+
+      // Check hierarchy if not admin
+      if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
+        try {
+          const { firstValueFrom } = require('rxjs');
+          const getSubReq = { userId: context.currentUserId };
+          const subRes: any = await firstValueFrom(this.userService.GetSubordinates(getSubReq));
+          const allowedEmployees = subRes?.allowedEmployeeCodes || subRes?.allowed_employee_codes || [];
+          if (!allowedEmployees.includes(assigneeCode)) {
+            throw new RpcException('Người nhận việc không thuộc phạm vi quản lý của bạn (không phải cấp dưới trực tiếp).');
+          }
+        } catch (error: any) {
+          throw new RpcException(error.message || 'Lỗi kiểm tra quyền phân công');
+        }
+      }
 
       // Update assignee
       if (assigneeCode !== undefined) {

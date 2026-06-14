@@ -25,6 +25,10 @@ message AssignTaskRequest {
   int32 departmentId = 3;
   string assignerCode = 4;
   repeated string coassigneeCodes = 5;
+  repeated string currentUserRoles = 6;
+  repeated string currentUserPermissions = 7;
+  int32 currentUserId = 8;
+  string currentUserCode = 9;
 }
 
 message RecommendAssigneesRequest {
