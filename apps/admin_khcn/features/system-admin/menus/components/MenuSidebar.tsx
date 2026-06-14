@@ -65,12 +65,11 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                       {menu.type && (
                         <>
                           <span className={`text-[8px] ${isSelected ? "text-primary-foreground/30" : "text-muted-foreground/30"}`}>•</span>
-                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${
-                            menu.type === 'SERVICE_ITEM'
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${menu.type === 'SERVICE_ITEM'
                               ? (isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
                               : (isSelected ? 'bg-white/10 text-white' : 'bg-muted text-muted-foreground')
-                          }`}>
-                            {menu.type === 'SERVICE_ITEM' ? 'PHÂN HỆ' : 'MENU'}
+                            }`}>
+                            {menu.type === 'SERVICE_ITEM' ? 'SERVICE_ITEM' : 'MENU'}
                           </span>
                         </>
                       )}
