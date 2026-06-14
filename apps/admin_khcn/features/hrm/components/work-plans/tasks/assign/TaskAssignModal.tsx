@@ -31,13 +31,13 @@ interface TaskAssignModalProps {
   task: any;
 }
 
-function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): any[] {
+function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = "", level: number = 0): any[] {
   for (const node of nodes || []) {
     const currentPath = parentPath ? `${parentPath} / ${node.name}` : node.name;
     if (node.id != null) {
-      acc.push({ id: node.id, name: node.name, fullPath: currentPath, code: node.code });
+      acc.push({ id: node.id, name: node.name, fullPath: currentPath, code: node.code, level });
     }
-    flattenUnits(node.children ?? [], acc, currentPath);
+    flattenUnits(node.children ?? [], acc, currentPath, level + 1);
   }
   return acc;
 }
@@ -45,6 +45,7 @@ function flattenUnits(nodes: any[], acc: any[] = [], parentPath: string = ""): a
 export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps) {
   const queryClient = useQueryClient();
   const [openPopover, setOpenPopover] = useState(false);
+  const [openDeptPopover, setOpenDeptPopover] = useState(false);
 
   const [taskState, setTaskState] = useState({
     assigneeCode: '',
@@ -121,6 +122,18 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
     };
   });
 
+  const groupedEmployees = React.useMemo(() => {
+    const groups: { [key: string]: typeof assignableEmployees } = {};
+    for (const emp of assignableEmployees) {
+      const deptName = emp.department?.name || "Khác / Chưa xác định";
+      if (!groups[deptName]) {
+        groups[deptName] = [];
+      }
+      groups[deptName].push(emp);
+    }
+    return groups;
+  }, [assignableEmployees]);
+
   const currentEmp = (allEmployees.find((e: any) => e.employeeCode === taskState.assigneeCode) || (employeesData?.data || []).find((e: any) => e.employeeCode === taskState.assigneeCode)) as any;
 
   const currentEmpMapped = currentEmp ? {
@@ -184,7 +197,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
           {/* Subtle grid pattern background */}
           <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
           
-          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 pr-10 md:pr-12">
             <div className="space-y-1.5 flex-1 min-w-0">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center">
@@ -215,32 +228,89 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
         </div>
 
         {/* Form Body - Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 md:p-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 p-4 sm:p-6 md:p-8 lg:p-10">
           
           {/* Left Column - Assignee Picker (7 cols) */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm space-y-4">
+            <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm space-y-5">
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-indigo-500" /> Chọn cán bộ thực hiện
               </h3>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Lọc theo đơn vị */}
+                {/* Lọc theo đơn vị (Searchable Popover) */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Đơn vị chuyên môn</label>
-                  <Select value={selectedDeptId} onValueChange={setSelectedDeptId}>
-                    <SelectTrigger className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 font-semibold rounded-xl text-slate-700 dark:text-slate-350">
-                      <SelectValue placeholder="Tất cả đơn vị" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[300px] overflow-y-auto rounded-xl">
-                      <SelectItem value="ALL">🏢 Tất cả đơn vị</SelectItem>
-                      {units.map((unit) => (
-                        <SelectItem key={unit.id} value={String(unit.id)}>
-                          {unit.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Popover open={openDeptPopover} onOpenChange={setOpenDeptPopover}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className="w-full justify-between h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-left font-semibold px-4 rounded-xl text-slate-700 dark:text-slate-350">
+                        <span className="truncate">
+                          {selectedDeptId === 'ALL' 
+                            ? "🏢 Tất cả đơn vị" 
+                            : (units.find(u => String(u.id) === selectedDeptId)?.name || "Chọn đơn vị...")}
+                        </span>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-400" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[320px] sm:min-w-[420px] max-w-[95vw] p-0 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" align="start">
+                      <Command className="dark:bg-slate-900">
+                        <CommandInput placeholder="Tìm kiếm đơn vị..." className="h-11 border-none focus:ring-0" />
+                        <CommandList className="max-h-[280px]">
+                          <CommandEmpty className="p-4 text-center text-xs text-slate-500">Không tìm thấy đơn vị</CommandEmpty>
+                          <CommandGroup className="p-1.5">
+                            <CommandItem
+                              value="ALL"
+                              onSelect={() => {
+                                setSelectedDeptId('ALL');
+                                setOpenDeptPopover(false);
+                              }}
+                              className={cn(
+                                "px-4 py-2.5 my-0.5 rounded-xl cursor-pointer flex items-center text-xs transition-all",
+                                selectedDeptId === 'ALL'
+                                  ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold"
+                                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                              )}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400", selectedDeptId === 'ALL' ? "opacity-100" : "opacity-0")} />
+                              <span className="mr-1.5 shrink-0">🏢</span>
+                              <span className="truncate font-bold">Tất cả đơn vị</span>
+                            </CommandItem>
+                            {units.map((unit) => {
+                              const isSelected = selectedDeptId === String(unit.id);
+                              return (
+                                <CommandItem
+                                  key={unit.id}
+                                  value={`${unit.name} ${unit.code || ''} ${unit.fullPath || ''}`}
+                                  onSelect={() => {
+                                    setSelectedDeptId(String(unit.id));
+                                    setOpenDeptPopover(false);
+                                  }}
+                                  className={cn(
+                                    "px-4 py-2.5 my-0.5 rounded-xl cursor-pointer flex items-center text-xs transition-all",
+                                    isSelected
+                                      ? "bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 font-bold"
+                                      : "text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                                  )}
+                                  style={{ paddingLeft: `${unit.level * 16 + 16}px` }}
+                                >
+                                  <Check className={cn("mr-2 h-4 w-4 shrink-0 text-indigo-600 dark:text-indigo-400", isSelected ? "opacity-100" : "opacity-0")} />
+                                  <span className="mr-1.5 text-slate-400 dark:text-slate-500 shrink-0">
+                                    {unit.level > 0 ? "↳ 📁" : "🏢"}
+                                  </span>
+                                  <span className="truncate">{unit.name}</span>
+                                  {unit.code && (
+                                    <span className="text-[10px] text-slate-400 dark:text-slate-500 ml-1.5 font-normal shrink-0">
+                                      ({unit.code})
+                                    </span>
+                                  )}
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 {/* Chọn cán bộ & Giao thông minh */}
@@ -252,7 +322,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-5 px-2 text-[10px] bg-indigo-50 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 font-bold rounded-full flex items-center gap-1 transition-all"
+                      className="h-5 px-2 text-[10px] bg-indigo-50 text-indigo-650 dark:text-indigo-400 hover:bg-indigo-100 font-bold rounded-full flex items-center gap-1 transition-all"
                       onClick={() => {
                         if (assignableEmployees.length > 0) {
                           setTaskState(p => ({ ...p, assigneeCode: assignableEmployees[0].code }));
@@ -276,57 +346,59 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                         <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-400" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" align="start">
+                    <PopoverContent className="w-[var(--radix-popover-trigger-width)] min-w-[320px] sm:min-w-[420px] max-w-[95vw] p-0 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" align="end">
                       <Command className="dark:bg-slate-900">
                         <CommandInput placeholder="Tìm kiếm theo tên hoặc chức vụ..." className="h-11 border-none focus:ring-0" />
-                        <CommandList className="max-h-[300px]">
+                        <CommandList className="max-h-[320px] overflow-y-auto">
                           <CommandEmpty className="p-4 text-center text-xs text-slate-500">Không tìm thấy nhân sự phù hợp</CommandEmpty>
-                          <CommandGroup className="p-1">
-                            {assignableEmployees.map((emp: any, idx: number) => {
-                              const isMain = taskState.assigneeCode === emp.code;
-                              const isCo = taskState.coAssigneeCodes.includes(emp.code);
-                              const isSelected = isMain || isCo;
+                          {Object.entries(groupedEmployees).map(([deptName, emps]) => (
+                            <CommandGroup key={deptName} heading={deptName} className="p-1.5 text-slate-500 dark:text-slate-400 font-semibold text-[10px] uppercase tracking-wider">
+                              {emps.map((emp: any, idx: number) => {
+                                const isMain = taskState.assigneeCode === emp.code;
+                                const isCo = taskState.coAssigneeCodes.includes(emp.code);
+                                const isSelected = isMain || isCo;
 
-                              return (
-                                <CommandItem
-                                  key={emp.code}
-                                  value={`${emp.name} ${emp.jobTitle?.name || ''}`}
-                                  onSelect={() => {
-                                    setTaskState(p => {
-                                      if (isMain) return { ...p, assigneeCode: '' };
-                                      if (isCo) return { ...p, coAssigneeCodes: p.coAssigneeCodes.filter(c => c !== emp.code) };
-                                      if (!p.assigneeCode) return { ...p, assigneeCode: emp.code };
-                                      return { ...p, coAssigneeCodes: [...p.coAssigneeCodes, emp.code] };
-                                    });
-                                  }}
-                                  className={cn("p-2.5 rounded-lg cursor-pointer flex items-center transition-all",
-                                    idx === 0 && "bg-slate-50/50 dark:bg-slate-800/30",
-                                    emp.isOverloaded && "opacity-75"
-                                  )}
-                                >
-                                  <div className={cn("mr-3 flex items-center justify-center w-5 h-5 rounded-md border transition-all", isSelected ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 bg-white dark:bg-slate-950")}>
-                                    <Check className={cn("h-3.5 w-3.5", isSelected ? "opacity-100" : "opacity-0")} />
-                                  </div>
-                                  <div className="flex flex-col flex-1 gap-1">
-                                    <div className="flex justify-between font-bold text-slate-800 dark:text-slate-200 text-xs">
-                                      <div className="flex items-center gap-1.5 flex-wrap">
-                                        <span>{emp.name}</span>
-                                        {isMain && <span className="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-semibold">Chủ trì</span>}
-                                        {isCo && <span className="text-[9px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded-full font-semibold">Phối hợp</span>}
-                                        {emp.isOverloaded && <span className="text-[9px] bg-red-100 dark:bg-red-950/20 text-red-650 px-1.5 py-0.5 rounded-full font-semibold">Quá tải</span>}
+                                return (
+                                  <CommandItem
+                                    key={emp.code}
+                                    value={`${emp.name} ${emp.jobTitle?.name || ''} ${deptName}`}
+                                    onSelect={() => {
+                                      setTaskState(p => {
+                                        if (isMain) return { ...p, assigneeCode: '' };
+                                        if (isCo) return { ...p, coAssigneeCodes: p.coAssigneeCodes.filter(c => c !== emp.code) };
+                                        if (!p.assigneeCode) return { ...p, assigneeCode: emp.code };
+                                        return { ...p, coAssigneeCodes: [...p.coAssigneeCodes, emp.code] };
+                                      });
+                                    }}
+                                    className={cn("px-3.5 py-2.5 rounded-xl cursor-pointer flex items-center gap-2.5 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all my-0.5",
+                                      idx === 0 && "bg-slate-50/50 dark:bg-slate-800/30",
+                                      emp.isOverloaded && "opacity-80"
+                                    )}
+                                  >
+                                    <div className={cn("flex items-center justify-center w-5 h-5 rounded-md border transition-all shrink-0", isSelected ? "bg-indigo-600 border-indigo-600 text-white" : "border-slate-300 bg-white dark:bg-slate-950")}>
+                                      <Check className={cn("h-3.5 w-3.5", isSelected ? "opacity-100" : "opacity-0")} />
+                                    </div>
+                                    <div className="flex-1 min-w-0 flex items-center justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                          <span className="font-bold text-slate-800 dark:text-slate-200 text-xs truncate">{emp.name}</span>
+                                          {isMain && <span className="text-[9px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Chủ trì</span>}
+                                          {isCo && <span className="text-[9px] bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Phối hợp</span>}
+                                          {emp.isOverloaded && <span className="text-[9px] bg-red-100 dark:bg-red-950/20 text-red-655 px-1.5 py-0.5 rounded-full font-bold whitespace-nowrap">Quá tải</span>}
+                                        </div>
+                                        <p className="text-[10px] text-slate-500 truncate mt-1">
+                                          {emp.jobTitle?.name || 'Cán bộ'} • {emp.department?.name || deptName}
+                                        </p>
                                       </div>
-                                      <span className={cn("text-[10px]", emp.isOverloaded ? "text-red-500" : "text-indigo-600 dark:text-indigo-400")}>
-                                        Tải: {emp.availableCapacity}/{emp.rankLimit}đ
+                                      <span className={cn("text-[10px] font-bold shrink-0 whitespace-nowrap px-2 py-1 rounded bg-slate-100 dark:bg-slate-800", emp.isOverloaded ? "text-red-500 bg-red-50 dark:bg-red-950/20" : "text-indigo-600 dark:text-indigo-400")}>
+                                        Còn {emp.availableCapacity}đ
                                       </span>
                                     </div>
-                                    <div className="text-[10px] text-slate-500">
-                                      <span className="font-semibold">{emp.department?.name || 'Đơn vị'}</span> • {emp.jobTitle?.name || 'Chức vụ'}
-                                    </div>
-                                  </div>
-                                </CommandItem>
-                              );
-                            })}
-                          </CommandGroup>
+                                  </CommandItem>
+                                );
+                              })}
+                            </CommandGroup>
+                          ))}
                         </CommandList>
                       </Command>
                     </PopoverContent>
@@ -365,7 +437,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
             {/* Selected personnel display cards */}
             {(taskState.assigneeCode || taskState.coAssigneeCodes.length > 0) && (
-              <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm space-y-4">
+              <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm space-y-5">
                 <div className="flex items-center justify-between">
                   <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Nhân sự tham gia thực hiện</h3>
                   <span className="text-[10px] bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md text-slate-500 font-bold">
@@ -387,9 +459,9 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                       <p className="text-[11px] text-slate-500 truncate">{currentEmpMapped.jobTitle?.name || 'Cán bộ thực hiện'} • {currentEmpMapped.department?.name || 'Đơn vị'}</p>
                       
                       <div className="pt-2 space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold text-slate-700 dark:text-slate-300">
+                        <div className="flex justify-between text-[11px] font-bold text-slate-700 dark:text-slate-350">
                           <span className="flex items-center gap-1"><Activity className="w-3.5 h-3.5 text-indigo-500" /> Năng lực định mức:</span>
-                          <span className={currentEmpMapped.isOverloaded ? "text-red-650" : "text-indigo-600 dark:text-indigo-400"}>
+                          <span className={currentEmpMapped.isOverloaded ? "text-red-655" : "text-indigo-600 dark:text-indigo-400"}>
                             {currentEmpMapped.currentLoad} / {currentEmpMapped.rankLimit} đ (còn {currentEmpMapped.availableCapacity}đ)
                           </span>
                         </div>
@@ -405,7 +477,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                       </div>
                       
                       {currentEmpMapped.isOverloaded && (
-                        <div className="text-[10px] text-red-650 font-bold mt-1.5 flex items-center gap-1 bg-red-50 dark:bg-red-950/20 p-1.5 rounded-lg">
+                        <div className="text-[10px] text-red-655 font-bold mt-1.5 flex items-center gap-1 bg-red-50 dark:bg-red-950/20 p-1.5 rounded-lg">
                           <AlertTriangle className="w-3.5 h-3.5 shrink-0" /> Cán bộ chủ trì đang bị quá tải công việc!
                         </div>
                       )}
@@ -417,53 +489,55 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                 {taskState.coAssigneeCodes.length > 0 && (
                   <div className="space-y-2">
                     <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Cán bộ phối hợp</span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {taskState.coAssigneeCodes.map(code => {
-                        const name = getEmployeeName(code);
-                        const emp = allEmployees.find((e: any) => e.employeeCode === code);
-                        return (
-                          <div key={code} className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-150 dark:border-slate-800/60 flex items-center justify-between gap-2 hover:bg-slate-100/80 transition-all">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-350 font-bold text-xs">
-                                {name.charAt(0).toUpperCase()}
+                    <div className="max-h-[200px] overflow-y-auto pr-1.5 space-y-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800">
+                      <div className="grid grid-cols-1 gap-2">
+                        {taskState.coAssigneeCodes.map(code => {
+                          const name = getEmployeeName(code);
+                          const emp = allEmployees.find((e: any) => e.employeeCode === code);
+                          return (
+                            <div key={code} className="bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-150 dark:border-slate-800/60 flex items-center justify-between gap-2 hover:bg-slate-100/80 transition-all">
+                              <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="w-8 h-8 rounded-lg bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-700 dark:text-slate-350 font-bold text-xs">
+                                  {name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="min-w-0">
+                                  <p className="font-bold text-slate-700 dark:text-slate-300 text-xs truncate">{name}</p>
+                                  <p className="text-[10px] text-slate-500 truncate">{emp?.jobTitle?.name || 'Cán bộ phối hợp'}</p>
+                                </div>
                               </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-slate-700 dark:text-slate-300 text-xs truncate">{name}</p>
-                                <p className="text-[10px] text-slate-500 truncate">{emp?.jobTitle?.name || 'Cán bộ phối hợp'}</p>
+                              <div className="flex items-center gap-0.5">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 text-[10px] px-1.5 text-indigo-650 hover:bg-indigo-100/40 font-bold rounded"
+                                  onClick={() => {
+                                    setTaskState(p => ({
+                                      ...p,
+                                      assigneeCode: code,
+                                      coAssigneeCodes: [...p.coAssigneeCodes.filter(c => c !== code), ...(p.assigneeCode ? [p.assigneeCode] : [])]
+                                    }));
+                                  }}
+                                >
+                                  Đổi chủ trì
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 w-6 p-0 text-red-500 hover:bg-red-50 rounded"
+                                  onClick={() => {
+                                    setTaskState(p => ({
+                                      ...p,
+                                      coAssigneeCodes: p.coAssigneeCodes.filter(c => c !== code)
+                                    }));
+                                  }}
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </Button>
                               </div>
                             </div>
-                            <div className="flex items-center gap-0.5">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 text-[10px] px-1.5 text-indigo-600 hover:bg-indigo-100/40 font-bold rounded"
-                                onClick={() => {
-                                  setTaskState(p => ({
-                                    ...p,
-                                    assigneeCode: code,
-                                    coAssigneeCodes: [...p.coAssigneeCodes.filter(c => c !== code), ...(p.assigneeCode ? [p.assigneeCode] : [])]
-                                  }));
-                                }}
-                              >
-                                Đổi chủ trì
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 text-red-500 hover:bg-red-50 rounded"
-                                onClick={() => {
-                                  setTaskState(p => ({
-                                    ...p,
-                                    coAssigneeCodes: p.coAssigneeCodes.filter(c => c !== code)
-                                  }));
-                                }}
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </Button>
-                            </div>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -473,7 +547,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
 
           {/* Right Column - Task Parameters (5 cols) */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="bg-white dark:bg-slate-900 p-5 md:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm space-y-5">
+            <div className="bg-white dark:bg-slate-900 p-5 sm:p-6 rounded-2xl border border-slate-200/60 dark:border-slate-800/80 shadow-sm space-y-5">
               <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                 <Layers className="w-4 h-4 text-indigo-500" /> Tham số & Kế hoạch
               </h3>
@@ -495,7 +569,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                 </div>
 
                 {/* Grid 2 cột cho các tham số điểm/trọng số */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {/* Trọng số */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Trọng số</label>
@@ -523,7 +597,7 @@ export function TaskAssignModal({ isOpen, onClose, task }: TaskAssignModalProps)
                 </div>
 
                 {/* Grid 2 cột cho thời gian */}
-                <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                   {/* Ngày bắt đầu */}
                   <div className="space-y-1.5">
                     <label className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ngày bắt đầu</label>
