@@ -149,11 +149,10 @@ function MenuFormInner(props: any) {
         icon: isRootMenu ? "LayoutDashboard" : "FileText",
         description: "",
         iconColor: "",
-        service: "",
-        portal: "ADMIN_PORTAL",
         sort: autoSort ?? 1,
         active: 1,
         linkedResourceCode: null,
+        type: "MENU",
       }
       : {
         name: selectedMenu?.name ?? "",
@@ -162,11 +161,10 @@ function MenuFormInner(props: any) {
         icon: selectedMenu?.icon ?? "Circle",
         description: selectedMenu?.description ?? "",
         iconColor: selectedMenu?.iconColor ?? "",
-        service: selectedMenu?.service ?? "",
-        portal: selectedMenu?.portal ?? "ADMIN_PORTAL",
         sort: selectedMenu?.sort ?? 1,
         active: selectedMenu?.active ?? 1,
         linkedResourceCode: selectedMenu?.linkedResourceCode ?? null,
+        type: selectedMenu?.type ?? "MENU",
       };
   }, [selectedMenu, isCreate, parentPathPrefix, isRootMenu, autoSort]);
 
@@ -188,13 +186,9 @@ function MenuFormInner(props: any) {
 
   // Xử lý Submit
   const handleSubmit = async (values: MenuFormValues) => {
-    const suffix = (values.path ?? "").replace(/^\/+/, "").trim();
-    const fullPath = suffix ? `${parentPathPrefix.replace(/\/+$/, "")}/${suffix}` : parentPathPrefix.replace(/\/+$/, "") || "/";
-
+    const fullPath = `${parentPathPrefix}${watchPath}`;
     const payload: Partial<MenuItem> = {
       ...values,
-      service: "",
-      portal: "ADMIN_PORTAL",
       path: fullPath,
       target: "SELF",
       linkedResourceCode: values.linkedResourceCode || null,
@@ -288,6 +282,15 @@ function MenuFormInner(props: any) {
                       <select className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onChange={(v) => field.onChange(parseInt(v.target.value))} value={field.value?.toString()}>
                         <option value="1" className="text-primary">Hiển thị</option>
                         <option value="0" className="text-destructive">Tạm khóa</option>
+                      </select>
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="type" render={({ field }) => (
+                    <FormItem className="flex-1">
+                      <FormLabel className="text-[11px] font-bold uppercase text-muted-foreground/80 tracking-wide">Loại Menu</FormLabel>
+                      <select className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" {...field}>
+                        <option value="MENU">Menu (Link)</option>
+                        <option value="SERVICE_ITEM">Phân hệ (Hub)</option>
                       </select>
                     </FormItem>
                   )} />

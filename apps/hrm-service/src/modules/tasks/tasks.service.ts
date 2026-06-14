@@ -133,95 +133,6 @@ export class TasksService implements OnModuleInit {
   private async computeAllowedActions(t: any, query: any, isUserInTree: boolean = false): Promise<string[]> {
     return ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT'];
   }
-  private async computeAllowedActionsOriginal(t: any, query: any, isUserInTree: boolean = false): Promise<string[]> {
-    if (!query || !query.currentUserCode) return [];
-    const isUserAdmin = query.isAdmin === true;
-    const currentUserCode = query.currentUserCode;
-
-    // Resolve currentUserId by currentUserCode
-    let currentUserId: number | undefined = undefined;
-    const currentEmp = await this.prisma.employee.findUnique({
-      where: { employeeCode: currentUserCode },
-      select: { userId: true }
-    });
-    if (currentEmp?.userId) currentUserId = parseInt(currentEmp.userId, 10);
-
-    const userIds = new Set<number>();
-    t.participants?.forEach((p: any) => {
-      if (p.userId) userIds.add(p.userId);
-    });
-
-    const userToCodeMap = new Map<number, string>();
-    if (userIds.size > 0) {
-      const emps = await this.prisma.employee.findMany({
-        where: { userId: { in: Array.from(userIds).map(String) } },
-        select: { userId: true, employeeCode: true }
-      });
-      emps.forEach(emp => {
-        if (emp.userId) userToCodeMap.set(parseInt(emp.userId, 10), emp.employeeCode);
-      });
-    }
-
-    const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants, userToCodeMap);
-
-    const isAssigner = owner === currentUserCode;
-    const isAssignee = assignee === currentUserCode;
-    const isSupervisor = approver === currentUserCode;
-    const isCoordinator = coordinators.includes(currentUserCode);
-    const isPlanCreator = t.plan?.createdByCode === currentUserCode;
-    
-    let canChat = isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator || isUserInTree || isPlanCreator;
-    if (!canChat && t.id) {
-      const ancestorIds = await this.prisma.taskClosure.findMany({
-        where: { descendantId: t.id },
-        select: { ancestorId: true }
-      });
-      const aIds = ancestorIds.map(a => a.ancestorId);
-      if (aIds.length > 0 && currentUserId) {
-        const found = await this.prisma.taskParticipant.findFirst({
-          where: {
-            taskId: { in: aIds },
-            userId: currentUserId
-          }
-        });
-        if (found) canChat = true;
-      }
-    }
-
-    // Nếu task có workflow (bật workflow engine), gọi sang workflow-service
-    if (t.workflowInstId) {
-      try {
-        const res: any = await firstValueFrom(this.workflowService.GetAllowedActions({
-          instanceId: t.workflowInstId,
-          userRoles: query.currentUserRoles || (query.isAdmin ? ['SUPER_ADMIN'] : []),
-          userId: currentUserCode
-        }));
-        const allowedActions = res?.allowedActions || [];
-        // Nếu workflow-service đã phân quyền, chat luôn cho phép nếu user thuộc tree
-        if (canChat && !allowedActions.includes('CHAT')) {
-           allowedActions.push('CHAT');
-        }
-        return allowedActions;
-      } catch (e) {
-        console.warn(`[Workflow] Failed to get allowed actions for task ${t.id}:`, e.message);
-      }
-    }
-
-    // Default hardcoded fallback
-    const canEdit = isUserAdmin || isAssigner || isAssignee || isPlanCreator || query.isLeader === true;
-
-    const allowedActions: string[] = [];
-    if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
-    if (isUserAdmin || isAssigner || isPlanCreator || query.isLeader === true) allowedActions.push('DELETE');
-    if (isAssignee && t.status !== 'DONE') {
-      allowedActions.push('COMPLETE');
-      if (t.status !== 'RETURNED') allowedActions.push('RETURN');
-      allowedActions.push('COORDINATE');
-    }
-
-    if (canChat) allowedActions.push('CHAT');
-    return allowedActions;
-  }
 
   async listTasks(query: any) {
     const where: any = {};
@@ -333,21 +244,7 @@ export class TasksService implements OnModuleInit {
       delete where.status;
     }
 
-    // Bypassed PBAC for testing
-    /*
-    if (!query.isAdmin && query.currentUserCode) {
-      if (currentUserId) {
-        where.OR = [
-          // Quyền owner: việc mình tạo hoặc giao
-          { creatorUserId: currentUserId },
-          // Quyền assignee/coordinator: việc mình được giao/phối hợp
-          { participants: { some: { userId: currentUserId } } },
-        ];
-      } else {
-        where.id = -1;
-      }
-    }
-    */
+
 
     const tasks = await this.prisma.task.findMany({
       where,
@@ -526,30 +423,7 @@ export class TasksService implements OnModuleInit {
     const tCheck = await this.prisma.task.findUnique({ where: { id } });
     if (!tCheck) throw new RpcException('Nhiệm vụ không tồn tại');
 
-    // Validate Action with Workflow Engine (Bypassed for testing)
-    /*
-    if (tCheck.workflowInstId) {
-      let actionName = 'UPDATE';
-      if (status === 'DONE') actionName = 'COMPLETE';
-      if (status === 'RETURNED') actionName = 'RETURN';
-      
-      try {
-        const valRes: any = await firstValueFrom(this.workflowService.ValidateAction({
-          instanceId: tCheck.workflowInstId,
-          actionName: actionName,
-          userRoles: context?.currentUserRoles || [],
-          userId: actorCode || context?.currentUserCode
-        }));
-        if (valRes && !valRes.allowed) {
-          throw new RpcException(`Không thể chuyển trạng thái do quy trình chặn: ${valRes.reason || 'Không có quyền'}`);
-        }
-      } catch (e: any) {
-         if (e instanceof RpcException) throw e;
-         // Log but allow fallback if workflow service is unavailable to not break legacy tasks completely
-         console.warn(`[Workflow Validation] Failed for Task ${id}:`, e.message);
-      }
-    }
-    */
+
 
     const dataToUpdate: any = { status };
     if (rejectReason !== undefined) dataToUpdate.rejectReason = rejectReason;
@@ -613,58 +487,7 @@ export class TasksService implements OnModuleInit {
 
       const isUnassigned = currentAssigneeCode === 'UNASSIGNED' || currentTask.status === 'TEMPLATE';
 
-      // Bypassed validation for testing
-      /*
-      if (currentTask.workflowInstId) {
-         try {
-           const valRes: any = await firstValueFrom(this.workflowService.ValidateAction({
-             instanceId: currentTask.workflowInstId,
-             actionName: 'ASSIGN',
-             userRoles: context?.currentUserRoles || [],
-             userId: context?.currentUserCode || context?.currentUserId?.toString()
-           }));
-           if (valRes && !valRes.allowed) {
-             throw new RpcException(`Không thể giao việc do quy trình chặn: ${valRes.reason || 'Không đủ thẩm quyền'}`);
-           }
-         } catch (e: any) {
-           if (e instanceof RpcException) throw e;
-           console.warn(`[Workflow Validation] Failed for Task ${id}:`, e.message);
-           // Fallback to legacy validation if workflow service is unavailable
-           const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
-           if (!isAdmin && !isUnassigned && currentAssigneeCode !== context?.currentUserCode) {
-             throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
-           }
-           if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
-             try {
-               const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId: context.currentUserId }));
-               const allowedCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
-               if (!allowedCodes.includes(assigneeCode)) {
-                 throw new RpcException('Bạn chỉ được phép giao việc cho nhân sự cấp dưới hoặc cấp phó trực thuộc.');
-               }
-             } catch (subErr: any) {
-               throw new RpcException('Lỗi kiểm tra phân quyền cấp dưới: ' + subErr.message);
-             }
-           }
-         }
-      } else {
-         // Legacy validation for tasks without workflow
-         const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
-         if (!isAdmin && !isUnassigned && currentAssigneeCode !== context?.currentUserCode) {
-           throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
-         }
-         if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
-           try {
-             const subRes: any = await firstValueFrom(this.userService.GetSubordinates({ userId: context.currentUserId }));
-             const allowedCodes = subRes.allowedEmployeeCodes || subRes.allowed_employee_codes || [];
-             if (!allowedCodes.includes(assigneeCode)) {
-               throw new RpcException('Bạn chỉ được phép giao việc cho nhân sự cấp dưới hoặc cấp phó trực thuộc.');
-             }
-           } catch (subErr: any) {
-             throw new RpcException('Lỗi kiểm tra phân quyền cấp dưới: ' + subErr.message);
-           }
-         }
-      }
-      */
+
 
       // Look up userIds for assignee, assigner, coassignee codes
       const codesToLookup: string[] = ['UNASSIGNED'];
@@ -899,34 +722,6 @@ export class TasksService implements OnModuleInit {
       const roles = query.currentUserRoles || [];
       const perms = query.currentUserPermissions || [];
       const isAdmin = roles.includes('SUPER_ADMIN') || perms.includes('TASK:MANAGE');
-
-      // Bypassed subordinates recommend check for testing
-      /*
-      if (!isAdmin && query.currentUserId) {
-        try {
-          const subRes = await firstValueFrom<any>(this.userService.GetSubordinates({ userId: query.currentUserId }));
-          const allowedDepartmentIds = subRes?.allowedDepartmentIds || subRes?.allowed_department_ids || [];
-          const allowedEmployeeCodes = subRes?.allowedEmployeeCodes || subRes?.allowed_employee_codes || [];
-
-          const orConditions: any[] = [];
-          if (allowedDepartmentIds.length > 0) {
-            orConditions.push({ departmentId: { in: allowedDepartmentIds } });
-          }
-          if (allowedEmployeeCodes.length > 0) {
-            orConditions.push({ employeeCode: { in: allowedEmployeeCodes } });
-          }
-
-          if (orConditions.length > 0) {
-            whereClause.OR = orConditions;
-          } else {
-            whereClause.id = -1; // Không có quyền gì cả
-          }
-        } catch (e) {
-          console.error('Failed to get subordinates from user-service:', e);
-          whereClause.id = -1;
-        }
-      }
-      */
 
       if (query.excludeEmployeeCode) {
         whereClause.employeeCode = { not: query.excludeEmployeeCode };

@@ -9,19 +9,6 @@ import { Button } from "@/components/ui/button";
 import { MenuItem } from "../types";
 import { useSidebarLogic } from "../hooks/useSidebarLogic";
 
-// Từ điển định dạng cho Service
-const SERVICE_STYLE_MAP: Record<string, { label: string; dotClass: string }> = {
-  "CORE_SERVICE": { label: "CORE", dotClass: "bg-slate-400" },
-  "USER_SERVICE": { label: "USER", dotClass: "bg-blue-500" },
-  "CONTENT_SERVICE": { label: "CONTENT", dotClass: "bg-emerald-500" },
-  "HRM_SERVICE": { label: "HRM", dotClass: "bg-amber-500" },
-  "NOTIFICATION_SERVICE": { label: "NOTI", dotClass: "bg-rose-500" },
-  "DOCUMENT_SERVICE": { label: "DOC", dotClass: "bg-purple-500" },
-  "POSTS_SERVICE": { label: "POST", dotClass: "bg-indigo-500" },
-  "STORAGE_SERVICE": { label: "STORE", dotClass: "bg-cyan-500" },
-  "API_GATEWAY": { label: "GW", dotClass: "bg-gray-800" },
-};
-
 interface MenuSidebarProps {
   menus: MenuItem[];
   activeId?: number;
@@ -47,7 +34,6 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
           const isSelected = activeId === menu.id;
           const isExpanded = searchTerm ? true : expandedRows[menu.id];
           const hasChildren = menus.some(m => m.parentId === menu.id);
-          const serviceStyle = menu.service ? (SERVICE_STYLE_MAP[menu.service] || { label: "SYS", dotClass: "bg-gray-400" }) : null;
 
           return (
             <div key={menu.id}>
@@ -57,7 +43,7 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                 style={{ paddingLeft: `${(level * 16) + 8}px` }}
                 onClick={() => onSelect(menu.id)}
               >
-                <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
                   {hasChildren ? (
                     <button
                       className={`p-0.5 rounded-sm hover:bg-black/10 transition-colors ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`}
@@ -76,13 +62,16 @@ export function MenuSidebar({ menus, activeId, onSelect, onAddRoot, onAddChild }
                       <p className={`text-[10px] font-mono truncate uppercase ${isSelected ? "text-primary-foreground/70" : "text-muted-foreground/60"}`}>
                         {menu.code}
                       </p>
-                      {serviceStyle && (
+                      {menu.type && (
                         <>
                           <span className={`text-[8px] ${isSelected ? "text-primary-foreground/30" : "text-muted-foreground/30"}`}>•</span>
-                          <div className={`flex items-center gap-1 ${isSelected ? "text-primary-foreground/90" : "text-muted-foreground/70"}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${serviceStyle.dotClass} ${isSelected ? "ring-1 ring-white/30" : ""}`} />
-                            <span className="text-[9px] font-semibold tracking-wide uppercase">{serviceStyle.label}</span>
-                          </div>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm ${
+                            menu.type === 'SERVICE_ITEM'
+                              ? (isSelected ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-primary/10 text-primary')
+                              : (isSelected ? 'bg-white/10 text-white' : 'bg-muted text-muted-foreground')
+                          }`}>
+                            {menu.type === 'SERVICE_ITEM' ? 'SERVICE_ITEM' : 'MENU'}
+                          </span>
                         </>
                       )}
                     </div>

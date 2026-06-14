@@ -10,13 +10,12 @@ export type CreateMenuDto = {
   order?: number;
   description?: string | null;
   iconColor?: string | null;
-  service?: string;
-  application?: string;
   target?: string;
   parentId?: number | null;
   isActive?: boolean;
   /** PBAC chuẩn: resource.code để kiểm soát hiển thị menu */
   linkedResourceCode?: string | null;
+  type?: string;
 };
 
 export type UpdateMenuDto = Partial<CreateMenuDto>;
@@ -28,9 +27,8 @@ export class MenusService {
 
   constructor(private prisma: PrismaService) { }
 
-  async getAll(application = 'ADMIN_PORTAL') {
+  async getAll() {
     const list = await this.prisma.menu.findMany({
-      where: { application },
       orderBy: [{ order: 'asc' }, { id: 'asc' }],
     });
     return list.map((m) => this.toFlat(m));
@@ -59,12 +57,11 @@ export class MenusService {
         order: dto.order ?? 0,
         description: dto.description ?? null,
         iconColor: dto.iconColor ?? null,
-        service: dto.service ?? null,
-        application: dto.application ?? 'ADMIN_PORTAL',
         target: dto.target ?? 'SELF',
         parentId: dto.parentId ?? null,
         isActive: dto.isActive ?? true,
         linkedResourceCode: dto.linkedResourceCode ?? null,
+        type: dto.type ?? 'MENU',
       },
     });
 
@@ -94,8 +91,6 @@ export class MenusService {
         ...(dto.order !== undefined && { order: dto.order }),
         ...(dto.description !== undefined && { description: dto.description }),
         ...(dto.iconColor !== undefined && { iconColor: dto.iconColor }),
-        ...(dto.service !== undefined && { service: dto.service }),
-        ...(dto.application !== undefined && { application: dto.application }),
         ...(dto.target !== undefined && { target: dto.target }),
         ...(dto.parentId !== undefined && {
           parentId:
@@ -106,6 +101,7 @@ export class MenusService {
         ...(dto.linkedResourceCode !== undefined && {
           linkedResourceCode: dto.linkedResourceCode || null,
         }),
+        ...(dto.type !== undefined && { type: dto.type }),
       },
     });
 
@@ -138,12 +134,11 @@ export class MenusService {
     order: number;
     description?: string | null;
     iconColor?: string | null;
-    service: string | null;
-    application: string;
     target: string;
     parentId: number | null;
     isActive: boolean;
     linkedResourceCode?: string | null;
+    type: string;
   }) {
     return {
       id: m.id,
@@ -154,16 +149,15 @@ export class MenusService {
       order: m.order,
       description: m.description ?? null,
       iconColor: m.iconColor ?? null,
-      service: m.service ?? '',
-      application: m.application,
       target: m.target,
       parentId: m.parentId ?? 0,
       linkedResourceCode: m.linkedResourceCode ?? null,
       isActive: m.isActive,
+      type: m.type ?? 'MENU',
     };
   }
 
-  async getMyMenus(userId: number, application = 'ADMIN_PORTAL') {
+  async getMyMenus(userId: number) {
     // 1. Lấy tất cả quyền của User
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -187,7 +181,7 @@ export class MenusService {
 
     // 2. Query Menu
     const rawMenus = await this.prisma.menu.findMany({
-      where: { application, isActive: true },
+      where: { isActive: true },
       orderBy: { order: 'asc' },
     });
 

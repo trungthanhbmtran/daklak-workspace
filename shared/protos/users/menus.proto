@@ -23,13 +23,12 @@ message MenuNode {
   string route = 4;
   string icon = 5;
   int32 order = 6;
-  string service = 7;
-  string application = 8;
-  string target = 9;
-  int32 parent_id = 10;
-  bool is_active = 11;
-  string linked_resource_code = 12;
-  repeated MenuNode children = 13;
+  string target = 7;
+  int32 parent_id = 8;
+  bool is_active = 9;
+  string linked_resource_code = 10;
+  string type = 11;
+  repeated MenuNode children = 12;
 }
 
 message GetMyMenusResponse {
@@ -57,12 +56,11 @@ message MenuItemFlat {
   string route = 4;
   string icon = 5;
   int32 order = 6;
-  string service = 7;
-  string application = 8;
-  string target = 9;
-  int32 parent_id = 10;
-  bool is_active = 11;
-  string linked_resource_code = 12;
+  string target = 7;
+  int32 parent_id = 8;
+  bool is_active = 9;
+  string linked_resource_code = 10;
+  string type = 11;
 }
 
 message CreateMenuRequest {
@@ -71,12 +69,11 @@ message CreateMenuRequest {
   string route = 3;
   string icon = 4;
   int32 order = 5;
-  string service = 6;
-  string application = 7;
-  string target = 8;
-  int32 parent_id = 9;
-  bool is_active = 10;
-  string linked_resource_code = 11;
+  string target = 6;
+  int32 parent_id = 7;
+  bool is_active = 8;
+  string linked_resource_code = 9;
+  string type = 10;
 }
 
 message UpdateMenuRequest {
@@ -86,12 +83,11 @@ message UpdateMenuRequest {
   string route = 4;
   string icon = 5;
   int32 order = 6;
-  string service = 7;
-  string application = 8;
-  string target = 9;
-  int32 parent_id = 10;
-  bool is_active = 11;
-  string linked_resource_code = 12;
+  string target = 7;
+  int32 parent_id = 8;
+  bool is_active = 9;
+  string linked_resource_code = 10;
+  string type = 11;
 }
 
 message CreateMenuResponse {

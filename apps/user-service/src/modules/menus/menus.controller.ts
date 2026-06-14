@@ -17,12 +17,11 @@ export class MenusController {
       order: node.order ?? 0,
       description: node.description ?? null,
       iconColor: node.iconColor ?? null,
-      service: node.service ?? '',
-      application: node.application ?? 'ADMIN_PORTAL',
       target: node.target ?? 'SELF',
       parentId: node.parentId ?? 0,
       isActive: node.isActive ?? true,
       linkedResourceCode: node.linkedResourceCode ?? null,
+      type: node.type ?? 'MENU',
       children:
         node.children && node.children.length
           ? node.children.map((c: any) => this.mapMenuNode(c))
@@ -33,10 +32,8 @@ export class MenusController {
   @GrpcMethod('MenuService', 'GetMyMenus')
   async getMyMenus(data: any) {
     const userId = data.userId ?? data.user_id;
-    const app = data.app ?? 'ADMIN_PORTAL';
     const tree = await this.menusService.getMyMenus(
       typeof userId === 'number' ? userId : Number(userId),
-      app,
     );
     return {
       items: tree.map((node: any) => this.mapMenuNode(node)),
@@ -45,8 +42,7 @@ export class MenusController {
 
   @GrpcMethod('MenuService', 'GetAll')
   async getAll(data: any = {}) {
-    const app = data?.app ?? 'ADMIN_PORTAL';
-    const items = await this.menusService.getAll(app);
+    const items = await this.menusService.getAll();
     return { items };
   }
 
@@ -73,12 +69,11 @@ export class MenusController {
         order: data.order,
         description: data.description,
         iconColor: data.iconColor,
-        service: data.service,
-        application: data.application,
         target: data.target,
         parentId: data.parentId === 0 ? null : data.parentId,
         isActive: data.isActive,
         linkedResourceCode: data.linkedResourceCode,
+        type: data.type,
       });
       return { menu };
     } catch (e: any) {
@@ -102,12 +97,11 @@ export class MenusController {
         order: rest.order,
         description: rest.description,
         iconColor: rest.iconColor,
-        service: rest.service,
-        application: rest.application,
         target: rest.target,
         parentId: rest.parentId === 0 ? null : rest.parentId,
         isActive: rest.isActive,
         linkedResourceCode: rest.linkedResourceCode,
+        type: rest.type,
       });
       if (!menu) {
         throw new RpcException({

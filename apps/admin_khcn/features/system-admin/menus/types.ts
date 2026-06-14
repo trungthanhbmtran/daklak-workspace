@@ -5,8 +5,6 @@ export interface MenuItem {
   path: string;
   icon: string;
   parentId: number | null;
-  service: string;
-  portal: string;
   target: string;
   sort: number;
   active: number;
@@ -19,6 +17,7 @@ export interface MenuItem {
    * Thay thế requiredPermissionIds — menu visible nếu user có BẤT KỲ policy nào trên resource này.
    */
   linkedResourceCode?: string | null;
+  type: string;
 }
 
 /**

@@ -36,9 +36,6 @@ interface MenuDto {
   route?: string;
   icon?: string;
   parentId?: number | null;
-  service?: string;
-  portal?: string;
-  application?: string;
   target?: string;
   sort?: number;
   order?: number;
@@ -47,6 +44,7 @@ interface MenuDto {
   description?: string | null;
   iconColor?: string | null;
   linkedResourceCode?: string | null;
+  type?: string;
   [key: string]: unknown;
 }
 
@@ -59,14 +57,13 @@ function toFrontendItem(m: MenuDto): MenuDto {
     path: m.route ?? '',
     icon: m.icon ?? '',
     parentId: m.parentId === 0 ? null : m.parentId,
-    service: m.service ?? '',
-    portal: m.application ?? 'ADMIN_PORTAL',
     target: m.target ?? 'SELF',
     sort: m.order ?? 0,
     active: m.isActive ? 1 : 0,
     description: m.description ?? null,
     iconColor: m.iconColor ?? null,
     linkedResourceCode: m.linkedResourceCode ?? null,
+    type: m.type ?? 'MENU',
   };
 }
 
@@ -125,7 +122,7 @@ export class MenusController implements OnModuleInit {
   @ApiResponse({ status: 200, description: 'Mảng menu phẳng' })
   async getAll(@Query('app') app?: string) {
     const res = (await firstValueFrom(
-      this.menuService.GetAll({ app: app || 'ADMIN_PORTAL' }),
+      this.menuService.GetAll({}),
     )) as any;
     const items = res?.items ?? [];
     return items.map(toFrontendItem);
@@ -151,7 +148,6 @@ export class MenusController implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
-        app: app || 'ADMIN_PORTAL',
       }),
     );
 
@@ -182,7 +178,6 @@ export class MenusController implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
-        app: app || 'ADMIN_PORTAL',
       }),
     );
     const branches = getRealBranches(response?.items ?? []);
@@ -216,7 +211,6 @@ export class MenusController implements OnModuleInit {
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
         userId: Number.isNaN(userId) ? 0 : userId,
-        app: app || 'ADMIN_PORTAL',
       }),
     );
     const branches = getRealBranches(response?.items ?? []);
@@ -230,7 +224,7 @@ export class MenusController implements OnModuleInit {
 
   private buildHubApps(branches: any[]) {
     return branches
-      .filter((b: any) => (b.route ?? '').trim() !== '')
+      .filter((b: any) => b.type === 'SERVICE_ITEM')
       .map((b: any) => {
         const basePath = (b.route ?? '').trim();
         const menuCode = (b.code ?? '').trim();
@@ -259,20 +253,22 @@ export class MenusController implements OnModuleInit {
   }
 
   private buildSidebarMenus(branches: any[]) {
-    return branches.map((b: any) => {
-      const menuCode = (b.code ?? '').trim();
-      const basePath = (b.route ?? '').trim();
-      const items = flattenMenus(b.children ?? [], basePath).sort(
-        (a: any, b: any) => a.order - b.order,
-      );
-      return {
-        serviceCode: menuCode,
-        serviceName: (b.name ?? '').trim() || menuCode,
-        serviceIcon: b.icon ?? '',
-        basePath,
-        items,
-      };
-    });
+    return branches
+      .filter((b: any) => b.type === 'SERVICE_ITEM')
+      .map((b: any) => {
+        const menuCode = (b.code ?? '').trim();
+        const basePath = (b.route ?? '').trim();
+        const items = flattenMenus(b.children ?? [], basePath).sort(
+          (a: any, b: any) => a.order - b.order,
+        );
+        return {
+          serviceCode: menuCode,
+          serviceName: (b.name ?? '').trim() || menuCode,
+          serviceIcon: b.icon ?? '',
+          basePath,
+          items,
+        };
+      });
   }
 
   /** Chuẩn hóa body từ frontend sang payload gRPC */
@@ -285,12 +281,11 @@ export class MenusController implements OnModuleInit {
       order: body.sort,
       description: body.description,
       iconColor: body.iconColor,
-      service: body.service ?? '',
-      application: body.portal ?? 'ADMIN_PORTAL',
       target: body.target ?? 'SELF',
       parentId: body.parentId ?? 0,
       isActive: body.active !== 0,
       linkedResourceCode: body.linkedResourceCode ?? null,
+      type: body.type ?? 'MENU',
     };
   }
 
@@ -324,10 +319,9 @@ export class MenusController implements OnModuleInit {
       order: body.sort,
       description: body.description,
       iconColor: body.iconColor,
-      service: body.service ?? '',
-      application: body.portal ?? 'ADMIN_PORTAL',
       target: body.target ?? 'SELF',
       linkedResourceCode: body.linkedResourceCode ?? null,
+      type: body.type,
     };
     if (body.parentId !== undefined) payload.parentId = body.parentId ?? 0;
     if (body.active !== undefined) payload.isActive = body.active !== 0;

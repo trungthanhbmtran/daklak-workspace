@@ -7,8 +7,7 @@ model Menu {
   order              Int      @default(0)
   description        String?  @map("description")
   iconColor          String?  @map("icon_color")
-  service            String?  @map("service_code")
-  application        String   @default("ADMIN_PORTAL")
+  type               String   @default("MENU") @map("type")
   target             String   @default("SELF")
   parentId           Int?     @map("parent_id")
   isActive           Boolean  @default(true) @map("is_active")
@@ -23,7 +22,8 @@ model Menu {
   parent             Menu?    @relation("MenuHierarchy", fields: [parentId], references: [id])
   children           Menu[]   @relation("MenuHierarchy")
 
-  @@index([application, parentId, order])
+  @@index([parentId, order])
   @@index([parentId], map: "sys_menus_parent_id_fkey")
   @@map("sys_menus")
 }
+
