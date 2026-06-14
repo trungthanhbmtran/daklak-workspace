@@ -157,6 +157,7 @@ message ListTasksRequest {
   string priority = 11; // optional - lọc theo mức độ ưu tiên
   int32 planId = 12; // optional - id kế hoạch
   repeated int32 callerAncestorUnitIds = 13; // optional - danh sách id đơn vị cha
+  string role = 14; // optional - lọc theo vai trò (ASSIGNEE, OWNER)
 }
 
 message TaskStats {

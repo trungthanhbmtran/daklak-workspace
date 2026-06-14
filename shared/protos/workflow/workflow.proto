@@ -18,6 +18,7 @@ service WorkflowService {
   rpc ValidateAction (ValidateActionRequest) returns (ValidateActionResponse);
   rpc GetInstance (GetInstanceRequest) returns (WorkflowInstanceResponse);
   rpc GetLogs (GetLogsRequest) returns (GetLogsResponse);
+  rpc GetAllowedActions (GetAllowedActionsRequest) returns (GetAllowedActionsResponse);
 }
 
 message CreateWorkflowRequest {
@@ -87,6 +88,16 @@ message ValidateActionRequest {
 message ValidateActionResponse {
   bool allowed = 1;
   string reason = 2;
+}
+
+message GetAllowedActionsRequest {
+  string instanceId = 1;
+  repeated string userRoles = 2;
+  string userId = 3;
+}
+
+message GetAllowedActionsResponse {
+  repeated string allowedActions = 1;
 }
 
 message TriggerWorkflowRequest {

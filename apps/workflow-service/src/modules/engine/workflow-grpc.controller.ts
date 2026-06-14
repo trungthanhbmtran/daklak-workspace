@@ -290,6 +290,24 @@ export class WorkflowGrpcController {
     }
   }
 
+  @GrpcMethod('WorkflowService', 'GetAllowedActions')
+  async getAllowedActions(data: {
+    instanceId: string;
+    userRoles?: string[];
+    userId?: string;
+  }) {
+    try {
+      const allowedActions = await this.engine.getAllowedActions(
+        data.instanceId,
+        data.userRoles || [],
+        data.userId,
+      );
+      return { allowedActions };
+    } catch (e) {
+      throw new RpcException({ code: GrpcStatus.INTERNAL, message: e.message });
+    }
+  }
+
   @GrpcMethod('WorkflowService', 'GetInstance')
   async getInstance(data: { id: string }) {
     const instance = await this.prisma.workflowInstance.findUnique({

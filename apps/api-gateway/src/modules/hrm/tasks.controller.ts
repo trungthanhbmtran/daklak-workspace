@@ -266,6 +266,7 @@ export class TasksController implements OnModuleInit {
         isLeader,
         currentUserDept: user?.unitId ? parseInt(user.unitId, 10) : undefined,
         callerAncestorUnitIds,
+        role,
       }),
     );
 

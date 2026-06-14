@@ -165,21 +165,9 @@ export class TasksService implements OnModuleInit {
     const isAssignee = assignee === currentUserCode;
     const isSupervisor = approver === currentUserCode;
     const isCoordinator = coordinators.includes(currentUserCode);
-
     const isPlanCreator = t.plan?.createdByCode === currentUserCode;
-    const canEdit = isUserAdmin || isAssigner || isAssignee || isPlanCreator || query.isLeader === true;
-
-    const allowedActions: string[] = [];
-    if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
-    if (isUserAdmin || isAssigner || isPlanCreator || query.isLeader === true) allowedActions.push('DELETE');
-    if (isAssignee && t.status !== 'DONE') {
-      allowedActions.push('COMPLETE');
-      if (t.status !== 'RETURNED') allowedActions.push('RETURN');
-      allowedActions.push('COORDINATE');
-    }
-
+    
     let canChat = isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator || isUserInTree || isPlanCreator;
-
     if (!canChat && t.id) {
       const ancestorIds = await this.prisma.taskClosure.findMany({
         where: { descendantId: t.id },
@@ -195,6 +183,37 @@ export class TasksService implements OnModuleInit {
         });
         if (found) canChat = true;
       }
+    }
+
+    // Nếu task có workflow (bật workflow engine), gọi sang workflow-service
+    if (t.workflowInstId) {
+      try {
+        const res: any = await firstValueFrom(this.workflowService.GetAllowedActions({
+          instanceId: t.workflowInstId,
+          userRoles: query.currentUserRoles || (query.isAdmin ? ['SUPER_ADMIN'] : []),
+          userId: currentUserCode
+        }));
+        const allowedActions = res?.allowedActions || [];
+        // Nếu workflow-service đã phân quyền, chat luôn cho phép nếu user thuộc tree
+        if (canChat && !allowedActions.includes('CHAT')) {
+           allowedActions.push('CHAT');
+        }
+        return allowedActions;
+      } catch (e) {
+        console.warn(`[Workflow] Failed to get allowed actions for task ${t.id}:`, e.message);
+      }
+    }
+
+    // Default hardcoded fallback
+    const canEdit = isUserAdmin || isAssigner || isAssignee || isPlanCreator || query.isLeader === true;
+
+    const allowedActions: string[] = [];
+    if (canEdit) allowedActions.push('EDIT', 'ASSIGN', 'ADD_SUBTASK');
+    if (isUserAdmin || isAssigner || isPlanCreator || query.isLeader === true) allowedActions.push('DELETE');
+    if (isAssignee && t.status !== 'DONE') {
+      allowedActions.push('COMPLETE');
+      if (t.status !== 'RETURNED') allowedActions.push('RETURN');
+      allowedActions.push('COORDINATE');
     }
 
     if (canChat) allowedActions.push('CHAT');

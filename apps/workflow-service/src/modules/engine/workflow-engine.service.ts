@@ -271,6 +271,25 @@ export class WorkflowEngineService implements OnModuleInit {
   }
 
   /**
+   * Get all allowed actions for a user
+   */
+  async getAllowedActions(
+    instanceId: string,
+    userRoles: string[] = [],
+    userId?: string,
+  ): Promise<string[]> {
+    const possibleActions = ['EDIT', 'ASSIGN', 'ADD_SUBTASK', 'DELETE', 'COMPLETE', 'RETURN', 'COORDINATE', 'CHAT', 'APPROVED'];
+    const allowed: string[] = [];
+    
+    for (const action of possibleActions) {
+      const res = await this.validateAction(instanceId, action, userRoles, userId);
+      if (res.allowed) allowed.push(action);
+    }
+    
+    return allowed;
+  }
+
+  /**
    * Core node execution logic
    */
   private async executeNode(instanceId: string, nodeId: string) {
