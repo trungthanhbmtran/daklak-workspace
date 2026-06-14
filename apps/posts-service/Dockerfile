@@ -1,7 +1,7 @@
 # ==========================================
-# 1️⃣ Dependency Stage
+# 1️⃣ Builder Stage
 # ==========================================
-FROM node:22-alpine AS deps
+FROM node:22-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache openssl
@@ -9,28 +9,11 @@ RUN apk add --no-cache openssl
 COPY apps/posts-service/package*.json ./
 RUN npm ci
 
-
-# ==========================================
-# 2️⃣ Builder Stage
-# ==========================================
-FROM node:22-alpine AS builder
-WORKDIR /app
-
-RUN apk add --no-cache openssl
-
-COPY --from=deps /app/node_modules ./node_modules
 COPY apps/posts-service/ ./
 COPY shared/protos ./shared/protos
 
-# Nếu dùng multi schema → merge
-RUN if [ -d "prisma/schema" ]; then cat prisma/schema/*.prisma > prisma/schema.prisma; fi
-
-# 🔥 Prisma 7.6 → dùng config
-ENV DATABASE_URL="mysql://localhost:3306/dummy"
-
-RUN npx prisma generate --config=./prisma.config.ts
-
-RUN npm run build
+# Build the NestJS app directly (without prisma generate, since client is pre-generated in 'generated/')
+RUN npx nest build && npx tsc
 
 
 # ==========================================
