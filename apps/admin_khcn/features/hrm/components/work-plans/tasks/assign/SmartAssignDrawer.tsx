@@ -54,9 +54,9 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
       return topEmployees.slice(0, 10);
     }
     return topEmployees.filter((rec: any) => 
-      rec.employeeName?.toLowerCase().includes(query) ||
-      rec.employeeCode?.toLowerCase().includes(query) ||
-      rec.departmentName?.toLowerCase().includes(query) ||
+      (rec.employeeName || '').toLowerCase().includes(query) ||
+      (rec.employeeCode || '').toLowerCase().includes(query) ||
+      (rec.departmentName || '').toLowerCase().includes(query) ||
       (rec.departmentId && String(rec.departmentId).includes(query))
     );
   }, [topEmployees, searchQuery]);
