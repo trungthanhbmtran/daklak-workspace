@@ -1,15 +1,15 @@
-import { Injectable, Logger, OnModuleInit, Inject } from "@nestjs/common";
-import { PrismaService } from "@/database/prisma.service";
-import { ClientGrpc } from "@nestjs/microservices";
-import { Parser } from "expr-eval";
-import { firstValueFrom } from "rxjs";
+import { Injectable, Logger, OnModuleInit, Inject } from '@nestjs/common';
+import { PrismaService } from '@/database/prisma.service';
+import { ClientGrpc } from '@nestjs/microservices';
+import { Parser } from 'expr-eval';
+import { firstValueFrom } from 'rxjs';
 
 export enum WorkflowStatus {
-  PENDING = "PENDING",
-  RUNNING = "RUNNING",
-  COMPLETED = "COMPLETED",
-  FAILED = "FAILED",
-  WAITING = "WAITING",
+  PENDING = 'PENDING',
+  RUNNING = 'RUNNING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  WAITING = 'WAITING',
 }
 
 @Injectable()
@@ -30,25 +30,31 @@ export class WorkflowEngineService implements OnModuleInit {
     @Inject('HRM_SERVICE') private readonly hrmClient: ClientGrpc,
     @Inject('POSTS_SERVICE') private readonly postsClient: ClientGrpc,
     @Inject('DOCUMENT_SERVICE') private readonly documentClient: ClientGrpc,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.userService = this.usersClient.getService<any>('UserService');
-    this.categoryService = this.categoriesClient.getService<any>('CategoryService');
+    this.categoryService =
+      this.categoriesClient.getService<any>('CategoryService');
     this.employeeHandlers = this.hrmClient.getService<any>('EmployeeHandlers');
     this.postService = this.postsClient.getService<any>('PostService');
-    this.documentService = this.documentClient.getService<any>('DocumentService');
+    this.documentService =
+      this.documentClient.getService<any>('DocumentService');
   }
 
   /**
    * Start a new workflow instance
    */
-  async startWorkflow(workflowId: string, initialContext: any = {}, initiatorId?: string) {
+  async startWorkflow(
+    workflowId: string,
+    initialContext: any = {},
+    initiatorId?: string,
+  ) {
     const workflow = await this.prisma.workflow.findUnique({
       where: { id: workflowId },
     });
 
-    if (!workflow) throw new Error("Workflow not found");
+    if (!workflow) throw new Error('Workflow not found');
 
     // Defensive check for definition
     let definition: any = workflow.definition;
@@ -59,11 +65,13 @@ export class WorkflowEngineService implements OnModuleInit {
         definition = {};
       }
     }
-    
+
     const nodes = (definition?.nodes || []) as any[];
 
     if (!Array.isArray(nodes) || nodes.length === 0) {
-      throw new Error(`Workflow "${workflow.name}" definition is empty or invalid (no nodes found)`);
+      throw new Error(
+        `Workflow "${workflow.name}" definition is empty or invalid (no nodes found)`,
+      );
     }
 
     const instance = await this.prisma.workflowInstance.create({
@@ -76,7 +84,7 @@ export class WorkflowEngineService implements OnModuleInit {
     });
 
     // Find start node
-    const startNode = nodes.find((n: any) => n.type === "start");
+    const startNode = nodes.find((n: any) => n.type === 'start');
 
     if (!startNode) {
       const errorMsg = `No start node found in workflow "${workflow.name}" definition. Found ${nodes.length} nodes but none of type "start".`;
@@ -93,7 +101,11 @@ export class WorkflowEngineService implements OnModuleInit {
   /**
    * Trigger a workflow by event name
    */
-  async triggerWorkflow(trigger: string, initialContext: any = {}, initiatorId?: string) {
+  async triggerWorkflow(
+    trigger: string,
+    initialContext: any = {},
+    initiatorId?: string,
+  ) {
     const workflow = await this.prisma.workflow.findFirst({
       where: { trigger, active: true },
       orderBy: { version: 'desc' },
@@ -114,18 +126,23 @@ export class WorkflowEngineService implements OnModuleInit {
    * Resume a workflow from a waiting state (User Task)
    * @param userRoles Roles of the user attempting to resume
    */
-  async resumeWorkflow(instanceId: string, nodeId: string, actionData: any, userRoles: string[] = []) {
+  async resumeWorkflow(
+    instanceId: string,
+    nodeId: string,
+    actionData: any,
+    userRoles: string[] = [],
+  ) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: instanceId },
       include: { workflow: true },
     });
 
     if (!instance || instance.status !== WorkflowStatus.WAITING) {
-      throw new Error("Instance not found or not in waiting state");
+      throw new Error('Instance not found or not in waiting state');
     }
 
     if (instance.currentNodeId !== nodeId) {
-      throw new Error("Invalid node to resume from");
+      throw new Error('Invalid node to resume from');
     }
 
     // PBAC Validation
@@ -142,22 +159,25 @@ export class WorkflowEngineService implements OnModuleInit {
     const requiredRole = node?.data?.role;
 
     if (requiredRole && !userRoles.includes(requiredRole)) {
-      await this.log(instanceId, nodeId, "ACCESS_DENIED", { userRoles, requiredRole });
+      await this.log(instanceId, nodeId, 'ACCESS_DENIED', {
+        userRoles,
+        requiredRole,
+      });
       throw new Error(`Permission denied: node requires role ${requiredRole}`);
     }
 
     // Update context with user action data
-    const newContext = { ... (instance.context as any), ...actionData };
+    const newContext = { ...(instance.context as any), ...actionData };
 
     await this.prisma.workflowInstance.update({
       where: { id: instanceId },
       data: {
         context: newContext,
-        status: WorkflowStatus.RUNNING
+        status: WorkflowStatus.RUNNING,
       },
     });
 
-    await this.log(instanceId, nodeId, "RESUME", actionData);
+    await this.log(instanceId, nodeId, 'RESUME', actionData);
 
     // Move to next node
     this.moveToNext(instanceId, nodeId, newContext);
@@ -187,7 +207,11 @@ export class WorkflowEngineService implements OnModuleInit {
       const node = nodes.find((n: any) => n.id === nodeId);
 
       if (!node) {
-        await this.updateStatus(instanceId, WorkflowStatus.FAILED, `Node ${nodeId} not found`);
+        await this.updateStatus(
+          instanceId,
+          WorkflowStatus.FAILED,
+          `Node ${nodeId} not found`,
+        );
         return;
       }
 
@@ -196,35 +220,48 @@ export class WorkflowEngineService implements OnModuleInit {
         data: { currentNodeId: nodeId },
       });
 
-      await this.log(instanceId, nodeId, "ENTER", null, node.type, node.data?.label);
+      await this.log(
+        instanceId,
+        nodeId,
+        'ENTER',
+        null,
+        node.type,
+        node.data?.label,
+      );
 
-      let nextOperation: "CONTINUE" | "HALT" = "CONTINUE";
+      let nextOperation: 'CONTINUE' | 'HALT' = 'CONTINUE';
       let executionResult: any = null;
 
       switch (node.type) {
-        case "start":
+        case 'start':
           // Start node just passes through
           break;
 
-        case "end":
+        case 'end':
           await this.updateStatus(instanceId, WorkflowStatus.COMPLETED);
-          nextOperation = "HALT";
+          nextOperation = 'HALT';
           break;
 
-        case "user_task":
+        case 'user_task':
           await this.updateStatus(instanceId, WorkflowStatus.WAITING);
-          nextOperation = "HALT";
+          nextOperation = 'HALT';
           break;
 
-        case "condition":
-          executionResult = this.evaluateCondition(node.data?.expression, instance.context);
+        case 'condition':
+          executionResult = this.evaluateCondition(
+            node.data?.expression,
+            instance.context,
+          );
           break;
 
-        case "service_task":
+        case 'service_task':
           executionResult = await this.callService(node.data, instance.context);
           // Merge service response into context
           if (executionResult) {
-            await this.updateContext(instanceId, { ... (instance.context as any), [node.id]: executionResult });
+            await this.updateContext(instanceId, {
+              ...(instance.context as any),
+              [node.id]: executionResult,
+            });
           }
           break;
 
@@ -232,19 +269,32 @@ export class WorkflowEngineService implements OnModuleInit {
           this.logger.warn(`Unknown node type: ${node.type}`);
       }
 
-      await this.log(instanceId, nodeId, "EXECUTE", executionResult, node.type);
+      await this.log(instanceId, nodeId, 'EXECUTE', executionResult, node.type);
 
-      if (nextOperation === "CONTINUE") {
+      if (nextOperation === 'CONTINUE') {
         this.moveToNext(instanceId, nodeId, instance.context, executionResult);
       }
     } catch (error) {
       this.logger.error(`Error executing node ${nodeId}: ${error.message}`);
-      await this.log(instanceId, nodeId, "ERROR", null, "unknown", undefined, error.message);
+      await this.log(
+        instanceId,
+        nodeId,
+        'ERROR',
+        null,
+        'unknown',
+        undefined,
+        error.message,
+      );
       await this.updateStatus(instanceId, WorkflowStatus.FAILED, error.message);
     }
   }
 
-  private async moveToNext(instanceId: string, currentNodeId: string, context: any, result?: any) {
+  private async moveToNext(
+    instanceId: string,
+    currentNodeId: string,
+    context: any,
+    result?: any,
+  ) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: instanceId },
       include: { workflow: true },
@@ -253,7 +303,9 @@ export class WorkflowEngineService implements OnModuleInit {
     if (!instance) return;
 
     const definition = (instance.workflow.definition as any) || {};
-    const edges = (definition.edges || []).filter((e: any) => e.source === currentNodeId);
+    const edges = (definition.edges || []).filter(
+      (e: any) => e.source === currentNodeId,
+    );
 
     if (edges.length === 0) {
       await this.updateStatus(instanceId, WorkflowStatus.COMPLETED);
@@ -267,10 +319,11 @@ export class WorkflowEngineService implements OnModuleInit {
     // In our simplified UI, we'll assume the first edge is 'true' or 'default'
     // To be more robust, we'd check edge properties like 'label === "True"'
 
-    if (typeof result === "boolean") {
-      const labeledEdge = edges.find((e: any) =>
-        (result && e.label?.toLowerCase() === "true") ||
-        (!result && e.label?.toLowerCase() === "false")
+    if (typeof result === 'boolean') {
+      const labeledEdge = edges.find(
+        (e: any) =>
+          (result && e.label?.toLowerCase() === 'true') ||
+          (!result && e.label?.toLowerCase() === 'false'),
       );
       if (labeledEdge) nextNodeId = labeledEdge.target;
     }
@@ -299,7 +352,10 @@ export class WorkflowEngineService implements OnModuleInit {
         case 'user':
         case 'users':
         case 'user-service':
-          if (this.userService && typeof this.userService[action] === 'function') {
+          if (
+            this.userService &&
+            typeof this.userService[action] === 'function'
+          ) {
             response = await firstValueFrom(this.userService[action](context));
           } else {
             throw new Error(`Action ${action} not found on UserService`);
@@ -309,8 +365,13 @@ export class WorkflowEngineService implements OnModuleInit {
         case 'hrm':
         case 'hrm-service':
         case 'employee':
-          if (this.employeeHandlers && typeof this.employeeHandlers[action] === 'function') {
-            response = await firstValueFrom(this.employeeHandlers[action](context));
+          if (
+            this.employeeHandlers &&
+            typeof this.employeeHandlers[action] === 'function'
+          ) {
+            response = await firstValueFrom(
+              this.employeeHandlers[action](context),
+            );
           } else {
             throw new Error(`Action ${action} not found on EmployeeHandlers`);
           }
@@ -319,7 +380,10 @@ export class WorkflowEngineService implements OnModuleInit {
         case 'post':
         case 'posts':
         case 'posts-service':
-          if (this.postService && typeof this.postService[action] === 'function') {
+          if (
+            this.postService &&
+            typeof this.postService[action] === 'function'
+          ) {
             response = await firstValueFrom(this.postService[action](context));
           } else {
             throw new Error(`Action ${action} not found on PostService`);
@@ -329,8 +393,13 @@ export class WorkflowEngineService implements OnModuleInit {
         case 'document':
         case 'documents':
         case 'document-service':
-          if (this.documentService && typeof this.documentService[action] === 'function') {
-            response = await firstValueFrom(this.documentService[action](context));
+          if (
+            this.documentService &&
+            typeof this.documentService[action] === 'function'
+          ) {
+            response = await firstValueFrom(
+              this.documentService[action](context),
+            );
           } else {
             throw new Error(`Action ${action} not found on DocumentService`);
           }
@@ -338,18 +407,30 @@ export class WorkflowEngineService implements OnModuleInit {
 
         default:
           // Fallback to mock for unknown services or explicitly handled as common
-          this.logger.warn(`Service ${service} is not registered or supported via gRPC. Using mock.`);
-          return { success: true, timestamp: new Date().toISOString(), mock: true };
+          this.logger.warn(
+            `Service ${service} is not registered or supported via gRPC. Using mock.`,
+          );
+          return {
+            success: true,
+            timestamp: new Date().toISOString(),
+            mock: true,
+          };
       }
 
       return response;
     } catch (e) {
-      this.logger.error(`Service call to ${service}.${action} failed: ${e.message}`);
+      this.logger.error(
+        `Service call to ${service}.${action} failed: ${e.message}`,
+      );
       throw new Error(`Service call failed: ${e.message}`);
     }
   }
 
-  private async updateStatus(id: string, status: WorkflowStatus, error?: string) {
+  private async updateStatus(
+    id: string,
+    status: WorkflowStatus,
+    error?: string,
+  ) {
     await this.prisma.workflowInstance.update({
       where: { id },
       data: { status, updatedAt: new Date() },
@@ -364,12 +445,20 @@ export class WorkflowEngineService implements OnModuleInit {
     });
   }
 
-  private async log(instanceId: string, nodeId: string, action: string, data?: any, nodeType?: string, nodeLabel?: string, error?: string) {
+  private async log(
+    instanceId: string,
+    nodeId: string,
+    action: string,
+    data?: any,
+    nodeType?: string,
+    nodeLabel?: string,
+    error?: string,
+  ) {
     await this.prisma.executionLog.create({
       data: {
         instanceId,
         nodeId,
-        nodeType: nodeType || "unknown",
+        nodeType: nodeType || 'unknown',
         nodeLabel,
         action,
         data: data || undefined,

@@ -5,11 +5,7 @@ import { WorkflowModule } from '@/modules/engine/workflow.module';
 import { AppController } from './app.controller';
 
 @Module({
-  imports: [
-    ConfigModule,
-    PrismaModule,
-    WorkflowModule,
-  ],
+  imports: [ConfigModule, PrismaModule, WorkflowModule],
   controllers: [AppController],
 })
 export class AppModule {}

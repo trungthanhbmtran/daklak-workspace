@@ -1,14 +1,13 @@
-import { Module } from "@nestjs/common";
-import { ClientsModule, Transport } from "@nestjs/microservices";
-import { join } from "path";
-import { WorkflowEngineService } from "./workflow-engine.service";
-import { WorkflowController } from "./workflow.controller";
+import { Module } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+import { join } from 'path';
+import { WorkflowEngineService } from './workflow-engine.service';
+import { WorkflowController } from './workflow.controller';
 import { WorkflowGrpcController } from './workflow-grpc.controller';
-import { PrismaModule } from "@/database/prisma.module";
+import { PrismaModule } from '@/database/prisma.module';
 
 const protoRoot =
-  process.env.PROTO_PATH ||
-  join(process.cwd(), '..', '..', 'shared', 'protos');
+  process.env.PROTO_PATH || join(process.cwd(), '..', '..', 'shared', 'protos');
 
 @Module({
   imports: [
@@ -100,4 +99,4 @@ const protoRoot =
   providers: [WorkflowEngineService],
   exports: [WorkflowEngineService],
 })
-export class WorkflowModule { }
+export class WorkflowModule {}

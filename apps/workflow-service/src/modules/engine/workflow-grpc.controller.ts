@@ -26,11 +26,11 @@ export class WorkflowGrpcController {
   constructor(
     private readonly engine: WorkflowEngineService,
     private readonly prisma: PrismaService,
-  ) { }
+  ) {}
 
   private ensureValidDefinition(def: any): any {
     if (!def) return { nodes: [], edges: [] };
-    
+
     let result = def;
     if (typeof def === 'string') {
       try {
@@ -39,7 +39,7 @@ export class WorkflowGrpcController {
         return { nodes: [], edges: [] };
       }
     }
-    
+
     return {
       nodes: Array.isArray(result.nodes) ? result.nodes : [],
       edges: Array.isArray(result.edges) ? result.edges : [],
@@ -49,11 +49,16 @@ export class WorkflowGrpcController {
   // --- CRUD Operations ---
 
   @GrpcMethod('WorkflowService', 'CreateWorkflow')
-  async createWorkflow(data: { name: string; description?: string; definition?: string; trigger?: string }) {
+  async createWorkflow(data: {
+    name: string;
+    description?: string;
+    definition?: string;
+    trigger?: string;
+  }) {
     try {
       console.log('[WorkflowService] Creating workflow:', data.name);
       const definition = this.ensureValidDefinition(data.definition);
-      
+
       const workflow = await this.prisma.workflow.create({
         data: {
           name: data.name,
@@ -70,10 +75,16 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'UpdateWorkflow')
-  async updateWorkflow(data: { id: string; name?: string; description?: string; definition?: string; trigger?: string }) {
+  async updateWorkflow(data: {
+    id: string;
+    name?: string;
+    description?: string;
+    definition?: string;
+    trigger?: string;
+  }) {
     try {
       console.log('[WorkflowService] Updating workflow:', data.id);
-      
+
       const updateData: any = {
         name: data.name,
         description: data.description,
@@ -97,9 +108,14 @@ export class WorkflowGrpcController {
 
   @GrpcMethod('WorkflowService', 'FindOneWorkflow')
   async findOneWorkflow(data: { id: string }) {
-    const workflow = await this.prisma.workflow.findUnique({ where: { id: data.id } });
+    const workflow = await this.prisma.workflow.findUnique({
+      where: { id: data.id },
+    });
     if (!workflow) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Workflow not found' });
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Workflow not found',
+      });
     }
     return this.mapWorkflow(workflow);
   }
@@ -120,15 +136,16 @@ export class WorkflowGrpcController {
     ]);
 
     const ids = idsResult.map((w) => w.id);
-    const workflows = ids.length > 0
-      ? await this.prisma.workflow.findMany({
-          where: { id: { in: ids } },
-          orderBy: { createdAt: 'desc' },
-        })
-      : [];
+    const workflows =
+      ids.length > 0
+        ? await this.prisma.workflow.findMany({
+            where: { id: { in: ids } },
+            orderBy: { createdAt: 'desc' },
+          })
+        : [];
 
     return {
-      items: workflows.map(w => this.mapWorkflow(w)),
+      items: workflows.map((w) => this.mapWorkflow(w)),
       total,
     };
   }
@@ -185,7 +202,11 @@ export class WorkflowGrpcController {
   // --- Execution Engine ---
 
   @GrpcMethod('WorkflowService', 'StartWorkflow')
-  async startWorkflow(data: { workflowId: string; initialContext?: any; initiatorId?: string }) {
+  async startWorkflow(data: {
+    workflowId: string;
+    initialContext?: any;
+    initiatorId?: string;
+  }) {
     try {
       const result = await this.engine.startWorkflow(
         data.workflowId,
@@ -199,7 +220,11 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'TriggerWorkflow')
-  async triggerWorkflow(data: { trigger: string; initialContext?: any; initiatorId?: string }) {
+  async triggerWorkflow(data: {
+    trigger: string;
+    initialContext?: any;
+    initiatorId?: string;
+  }) {
     try {
       const instance = await this.engine.triggerWorkflow(
         data.trigger,
@@ -216,7 +241,12 @@ export class WorkflowGrpcController {
   }
 
   @GrpcMethod('WorkflowService', 'ResumeWorkflow')
-  async resumeWorkflow(data: { instanceId: string; nodeId: string; actionData?: any; userRoles?: string[] }) {
+  async resumeWorkflow(data: {
+    instanceId: string;
+    nodeId: string;
+    actionData?: any;
+    userRoles?: string[];
+  }) {
     try {
       const result = await this.engine.resumeWorkflow(
         data.instanceId,
@@ -234,10 +264,16 @@ export class WorkflowGrpcController {
   async getInstance(data: { id: string }) {
     const instance = await this.prisma.workflowInstance.findUnique({
       where: { id: data.id },
-      include: { workflow: true, logs: { orderBy: { createdAt: 'desc' }, take: 50 } },
+      include: {
+        workflow: true,
+        logs: { orderBy: { createdAt: 'desc' }, take: 50 },
+      },
     });
     if (!instance) {
-      throw new RpcException({ code: GrpcStatus.NOT_FOUND, message: 'Instance not found' });
+      throw new RpcException({
+        code: GrpcStatus.NOT_FOUND,
+        message: 'Instance not found',
+      });
     }
     return this.mapInstance(instance);
   }
@@ -248,6 +284,6 @@ export class WorkflowGrpcController {
       where: { instanceId: data.instanceId },
       orderBy: { createdAt: 'desc' },
     });
-    return { logs: logs.map(l => this.mapLog(l)) };
+    return { logs: logs.map((l) => this.mapLog(l)) };
   }
 }
