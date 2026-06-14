@@ -53,7 +53,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
       // Show top 10 recommended by default
       return topEmployees.slice(0, 10);
     }
-    return topEmployees.filter((rec: any) => 
+    return topEmployees.filter((rec: any) =>
       (rec.employeeName || '').toLowerCase().includes(query) ||
       (rec.employeeCode || '').toLowerCase().includes(query) ||
       (rec.departmentName || '').toLowerCase().includes(query) ||
@@ -182,7 +182,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
             <div className="flex flex-col h-full mt-4">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-sm font-bold text-slate-700 flex items-center shrink-0">
-                  <span className="w-2 h-6 bg-gradient-to-b from-indigo-500 to-violet-500 rounded mr-3"></span> 
+                  <span className="w-2 h-6 bg-gradient-to-b from-indigo-500 to-violet-500 rounded mr-3"></span>
                   Danh sách đề xuất theo Đơn vị
                 </h4>
                 {/* Search input to look for any employee */}
@@ -290,7 +290,7 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
             </div>
           </div>
         )}
-        
+
         {/* Sticky Footer for Group Mode */}
         {task && isGroupMode && (
           <div className="absolute bottom-0 left-0 w-full bg-white border-t border-slate-200 p-4 shadow-[0_-10px_40px_rgba(0,0,0,0.05)] z-20 flex items-center justify-between">
@@ -303,8 +303,8 @@ export function SmartAssignDrawer({ task, open, onOpenChange, onAssignSuccess }:
             </div>
             <div className="flex gap-3">
               <Button variant="outline" className="rounded-xl" onClick={() => onOpenChange(false)} disabled={assignMutation.isPending}>Hủy</Button>
-              <Button 
-                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md font-bold" 
+              <Button
+                className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white shadow-md font-bold"
                 disabled={!leadCode || assignMutation.isPending}
                 onClick={handleGroupAssignSubmit}
               >
