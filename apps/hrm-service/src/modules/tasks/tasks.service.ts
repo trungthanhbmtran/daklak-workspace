@@ -9,15 +9,18 @@ import { RpcException } from '@nestjs/microservices';
 @Injectable()
 export class TasksService implements OnModuleInit {
   private integrationService: any;
+  private userService: any;
 
   constructor(
     private prisma: PrismaService,
     @Inject('NOTIFICATION_SERVICE') private notificationClient: ClientProxy,
     @Inject('INTEGRATION_PACKAGE') private integrationClient: any,
+    @Inject('USER_PACKAGE') private userClient: any,
   ) { }
 
   onModuleInit() {
     this.integrationService = this.integrationClient.getService('IntegrationService');
+    this.userService = this.userClient.getService('UserService');
   }
 
   private async getDynamicConfig() {
@@ -538,28 +541,34 @@ export class TasksService implements OnModuleInit {
     try {
       const whereClause: any = { employmentStatus: 'active' };
 
-      if (query.allowedDepartmentIds || query.allowedEmployeeCodes) {
-        // Nếu có truyền filter phân quyền (non-admin), dùng điều kiện OR
-        const orConditions: any[] = [];
-        
-        if (query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0) {
-          orConditions.push({ departmentId: { in: query.allowedDepartmentIds } });
-        }
-        
-        if (query.allowedEmployeeCodes && query.allowedEmployeeCodes.length > 0) {
-          orConditions.push({ employeeCode: { in: query.allowedEmployeeCodes } });
-        }
-        
-        if (orConditions.length > 0) {
-          whereClause.OR = orConditions;
-        } else {
-          // Nếu mảng truyền vào nhưng rỗng -> không có quyền gì cả
-          whereClause.id = -1; // Không trả về ai
-        }
-      }
+      // 1. Phân quyền: Kiểm tra Admin
+      const roles = query.currentUserRoles || [];
+      const perms = query.currentUserPermissions || [];
+      const isAdmin = roles.includes('SUPER_ADMIN') || perms.includes('TASK:MANAGE');
 
-      if (query.allowedJobTitleIds && query.allowedJobTitleIds.length > 0) {
-        whereClause.jobTitleId = { in: query.allowedJobTitleIds };
+      if (!isAdmin && query.currentUserId) {
+        try {
+          const subRes = await firstValueFrom<any>(this.userService.GetSubordinates({ userId: query.currentUserId }));
+          const allowedDepartmentIds = subRes?.allowedDepartmentIds || subRes?.allowed_department_ids || [];
+          const allowedEmployeeCodes = subRes?.allowedEmployeeCodes || subRes?.allowed_employee_codes || [];
+
+          const orConditions: any[] = [];
+          if (allowedDepartmentIds.length > 0) {
+            orConditions.push({ departmentId: { in: allowedDepartmentIds } });
+          }
+          if (allowedEmployeeCodes.length > 0) {
+            orConditions.push({ employeeCode: { in: allowedEmployeeCodes } });
+          }
+
+          if (orConditions.length > 0) {
+            whereClause.OR = orConditions;
+          } else {
+            whereClause.id = -1; // Không có quyền gì cả
+          }
+        } catch (e) {
+          console.error('Failed to get subordinates from user-service:', e);
+          whereClause.id = -1;
+        }
       }
 
       if (query.excludeEmployeeCode) {

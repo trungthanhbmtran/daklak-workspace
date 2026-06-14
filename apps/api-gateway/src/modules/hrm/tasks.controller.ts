@@ -314,50 +314,22 @@ export class TasksController implements OnModuleInit {
     @Query('strategy') strategy: string,
   ) {
     const user = req.user;
-    const isAdmin = user?.roles?.some((r: any) => r === 'SUPER_ADMIN' || r?.code === 'SUPER_ADMIN') || user?.permissionsFlatten?.includes('TASK:MANAGE');
-
     const unitMap = await this.getUnitMap();
 
-    let allowedDepartmentIds: number[] | undefined = undefined;
-    let allowedJobTitleIds: number[] | undefined = undefined;
-    let excludeEmployeeCode: string | undefined = undefined;
+    // API Gateway chỉ đóng vai trò forward context (token info) xuống backend.
+    // Việc quyết định user có quyền gì (Admin, Quản lý) và được phép xem danh sách nhân sự nào
+    // hoàn toàn thuộc trách nhiệm của hrm-service.
 
-    // ── Áp dụng filter phân cấp cho non-admin ──────────────────────────────────
-    if (!isAdmin && user?.id) {
-      try {
-        const subRes: any = await firstValueFrom(
-          this.userService.GetSubordinates({ userId: user.id }),
-        );
-        allowedDepartmentIds = subRes?.allowedDepartmentIds || [];
-        // Nếu API trả về mảng rỗng, nghĩa là không được phép xem ai (trừ phi có override khác)
-        // allowedEmployeeCodes sẽ được truyền vào query để filter.
-        // Tạm thời, nếu chưa hỗ trợ allowedEmployeeCodes trong hrm-service, chúng ta cứ truyền.
-        const empCodes = subRes?.allowedEmployeeCodes || [];
-        
-        // Cần đảm bảo hrm-service support allowedEmployeeCodes, ta sẽ gửi nó qua
-        // Tuy nhiên, req params có excludeEmployeeCode.
-        excludeEmployeeCode = user.employeeCode;
-        
-        // Để hrm-service hiểu, ta sẽ nhét vào object gọi RecommendAssignees
-        (req as any).allowedEmployeeCodes = empCodes; 
-      } catch (e) {
-        console.error('Failed to get subordinates:', e);
-        allowedDepartmentIds = [];
-        (req as any).allowedEmployeeCodes = [];
-      }
-    }
-
-    // ── Gọi taskService.RecommendAssignees ở backend ───────────────────────────
     let res: any;
     try {
       res = await firstValueFrom(
         this.taskService.RecommendAssignees({
           rankCode: rankCode || 'ALL',
           strategy: strategy || 'LOW_PERFORMANCE',
-          allowedDepartmentIds,
-          allowedJobTitleIds,
-          excludeEmployeeCode,
-          allowedEmployeeCodes: (req as any).allowedEmployeeCodes
+          currentUserId: user?.id,
+          currentUserCode: user?.employeeCode,
+          currentUserRoles: user?.roles?.map((r: any) => typeof r === 'string' ? r : r.code) || [],
+          currentUserPermissions: user?.permissionsFlatten || [],
         }),
       );
     } catch (e) {
