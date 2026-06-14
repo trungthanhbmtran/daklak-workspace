@@ -42,7 +42,7 @@ export class TasksController {
   }
 
   @GrpcMethod('TaskService', 'RecommendAssignees')
-  recommendAssignees(data: { rankCode: string; strategy: string; allowedDepartmentIds?: number[]; allowedJobTitleIds?: number[]; excludeEmployeeCode?: string }) {
+  recommendAssignees(data: { rankCode: string; strategy: string; allowedDepartmentIds?: number[]; allowedJobTitleIds?: number[]; excludeEmployeeCode?: string; allowedEmployeeCodes?: string[] }) {
     return this.tasksService.recommendAssignees(data);
   }
 

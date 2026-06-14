@@ -1,14 +1,12 @@
 model Category {
-  id    Int    @id @default(autoincrement())
-  groupCode String @map("group_code")
-  group     CategoryGroup @relation(fields: [groupCode], references: [code])
-  code      String
-  order Int    @default(0)
-
-  isActive Boolean @default(true) @map("is_active")
-
+  id                  Int                   @id @default(autoincrement())
+  groupCode           String                @map("group_code")
+  code                String
+  order               Int                   @default(0)
+  isActive            Boolean               @default(true) @map("is_active")
   unitDomains         UnitDomain[]
   unitGeographicAreas UnitGeographicArea[]
+  group               CategoryGroup         @relation(fields: [groupCode], references: [code])
   translations        CategoryTranslation[]
 
   @@unique([groupCode, code])
@@ -17,13 +15,12 @@ model Category {
 }
 
 model CategoryTranslation {
-  id          Int     @id @default(autoincrement())
-  categoryId  Int     @map("category_id")
-  langCode    String  @map("lang_code")
-  name        String  @db.Text
-  description String? @db.Text
-
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  id          Int      @id @default(autoincrement())
+  categoryId  Int      @map("category_id")
+  langCode    String   @map("lang_code")
+  name        String   @db.Text
+  description String?  @db.Text
+  category    Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   @@unique([categoryId, langCode])
   @@index([langCode])
@@ -31,11 +28,10 @@ model CategoryTranslation {
 }
 
 model CategoryGroup {
-  code     String  @id
-  name     String
-  order    Int     @default(0)
-  isActive   Boolean @default(true)
-
+  code       String     @id
+  name       String
+  order      Int        @default(0)
+  isActive   Boolean    @default(true)
   categories Category[]
 
   @@map("sys_category_groups")

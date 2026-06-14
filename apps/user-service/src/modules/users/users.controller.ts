@@ -162,4 +162,10 @@ export class UsersController {
       jobTitleName: result.jobTitle?.name ?? '',
     };
   }
+
+  @GrpcMethod('UserService', 'GetSubordinates')
+  async getSubordinates(data: { user_id?: number; userId?: number }) {
+    const userId = data.userId ?? data.user_id ?? 0;
+    return this.usersService.getSubordinates({ userId });
+  }
 }

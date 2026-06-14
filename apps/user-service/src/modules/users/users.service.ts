@@ -635,6 +635,108 @@ export class UsersService implements OnModuleInit {
     return { success: true, message: 'Đã cập nhật vai trò.' };
   }
 
+  async getSubordinates(data: { userId: number }) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: data.userId },
+      include: {
+        jobPositions: {
+          where: { endDate: null },
+          include: { jobTitle: true },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new RpcException({
+        message: 'User không tồn tại',
+        code: GRPC.NOT_FOUND,
+      });
+    }
+
+    const deptIds = new Set<number>();
+    const empCodes = new Set<string>();
+
+    for (const pos of user.jobPositions) {
+      if (!pos.unitId || !pos.jobTitle) continue;
+      const myRank = pos.jobTitle.rank;
+
+      // 1. Giao việc trong cùng đơn vị: rank > myRank
+      const sameUnitColleagues = await this.prisma.jobPosition.findMany({
+        where: {
+          unitId: pos.unitId,
+          endDate: null,
+          jobTitle: { rank: { gt: myRank } },
+          user: { isActive: true },
+        },
+        include: { user: true },
+      });
+      for (const col of sameUnitColleagues) {
+        if (col.user.employeeCode) empCodes.add(col.user.employeeCode);
+      }
+
+      // 2. Xác định các đơn vị con / được phân công theo dõi
+      const staffings = await this.prisma.organizationStaffing.findMany({
+        where: { unitId: pos.unitId, jobTitleId: pos.jobTitleId },
+        include: {
+          slots: {
+            include: { monitoredUnits: true },
+          },
+        },
+      });
+
+      for (const st of staffings) {
+        for (const slot of st.slots) {
+          for (const mu of slot.monitoredUnits) {
+            deptIds.add(mu.unitId);
+          }
+        }
+      }
+
+      // Nếu là rank cao nhất trong unit, tự động có quyền với tất cả đơn vị con
+      const allRanksInUnit = await this.prisma.jobPosition.findMany({
+        where: { unitId: pos.unitId, endDate: null },
+        include: { jobTitle: true },
+      });
+      const minRank = allRanksInUnit.length > 0 
+        ? Math.min(...allRanksInUnit.map((p) => p.jobTitle.rank)) 
+        : myRank;
+
+      if (myRank <= minRank) {
+        const childUnits = await this.prisma.organizationUnit.findMany({
+          where: { parentId: pos.unitId },
+        });
+        for (const cu of childUnits) {
+          deptIds.add(cu.id);
+        }
+      }
+
+      // 3. Với các đơn vị cấp dưới, tìm những người có rank cao nhất (Trưởng / Phó)
+      for (const childUnitId of Array.from(deptIds)) {
+        const allChildPositions = await this.prisma.jobPosition.findMany({
+          where: { unitId: childUnitId, endDate: null, user: { isActive: true } },
+          include: { jobTitle: true, user: true },
+        });
+        if (allChildPositions.length > 0) {
+          const distinctRanks = [...new Set(allChildPositions.map((p) => p.jobTitle.rank))].sort((a, b) => a - b);
+          // Lấy top 2 ranks (Trưởng và Phó)
+          const topRanks = distinctRanks.slice(0, 2);
+          for (const p of allChildPositions) {
+            if (topRanks.includes(p.jobTitle.rank) && p.user.employeeCode) {
+              empCodes.add(p.user.employeeCode);
+            }
+          }
+        }
+      }
+    }
+
+    return {
+      allowedDepartmentIds: Array.from(deptIds),
+      allowedEmployeeCodes: Array.from(empCodes),
+      allowed_department_ids: Array.from(deptIds),
+      allowed_employee_codes: Array.from(empCodes),
+    };
+  }
+
   private toUserResponse(user: {
     id: number;
     email: string;

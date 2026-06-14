@@ -323,38 +323,27 @@ export class TasksController implements OnModuleInit {
     let excludeEmployeeCode: string | undefined = undefined;
 
     // ── Áp dụng filter phân cấp cho non-admin ──────────────────────────────────
-    if (!isAdmin && user?.unitId) {
-      const jtMap = await this.getJobTitlesMap();
-      const callerUnitId = parseInt(user.unitId, 10);
-      const callerUnit = unitMap[callerUnitId];
-
-      const isDirectChildByCode = (childCode: string, parentCode: string) => {
-        if (!childCode || !parentCode || childCode.length <= parentCode.length) return false;
-        if (!childCode.startsWith(parentCode)) return false;
-        const remainder = childCode.substring(parentCode.length);
-        if (remainder[0] !== '.') return false;
-        return !remainder.substring(1).includes('.');
-      };
-
-      if (callerUnit?.isLeaf) {
-        allowedDepartmentIds = [callerUnitId];
-        excludeEmployeeCode = user.employeeCode;
-      } else {
-        const callerUnitCode = callerUnit?.code || '';
-        const directChildIds = new Set<number>();
-        Object.values(unitMap).forEach((u: any) => {
-          if (isDirectChildByCode(u.code, callerUnitCode)) {
-            directChildIds.add(u.id);
-          }
-        });
-
-        allowedDepartmentIds = Array.from(directChildIds);
+    if (!isAdmin && user?.id) {
+      try {
+        const subRes: any = await firstValueFrom(
+          this.userService.GetSubordinates({ userId: user.id }),
+        );
+        allowedDepartmentIds = subRes?.allowedDepartmentIds || [];
+        // Nếu API trả về mảng rỗng, nghĩa là không được phép xem ai (trừ phi có override khác)
+        // allowedEmployeeCodes sẽ được truyền vào query để filter.
+        // Tạm thời, nếu chưa hỗ trợ allowedEmployeeCodes trong hrm-service, chúng ta cứ truyền.
+        const empCodes = subRes?.allowedEmployeeCodes || [];
+        
+        // Cần đảm bảo hrm-service support allowedEmployeeCodes, ta sẽ gửi nó qua
+        // Tuy nhiên, req params có excludeEmployeeCode.
         excludeEmployeeCode = user.employeeCode;
         
-        const leaderCategories = new Set(['EXECUTIVE', 'MANAGER']);
-        allowedJobTitleIds = Object.values(jtMap)
-          .filter((jt: any) => leaderCategories.has(jt.category))
-          .map((jt: any) => jt.id);
+        // Để hrm-service hiểu, ta sẽ nhét vào object gọi RecommendAssignees
+        (req as any).allowedEmployeeCodes = empCodes; 
+      } catch (e) {
+        console.error('Failed to get subordinates:', e);
+        allowedDepartmentIds = [];
+        (req as any).allowedEmployeeCodes = [];
       }
     }
 
@@ -367,7 +356,8 @@ export class TasksController implements OnModuleInit {
           strategy: strategy || 'LOW_PERFORMANCE',
           allowedDepartmentIds,
           allowedJobTitleIds,
-          excludeEmployeeCode
+          excludeEmployeeCode,
+          allowedEmployeeCodes: (req as any).allowedEmployeeCodes
         }),
       );
     } catch (e) {

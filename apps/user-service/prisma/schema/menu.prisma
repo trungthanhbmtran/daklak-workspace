@@ -1,31 +1,29 @@
 model Menu {
-  id                  Int                      @id @default(autoincrement())
-  code                String                   @unique
-  name                String
-  route               String?
-  icon                String?
-  order               Int                      @default(0)
-  description         String?                  @map("description")
-  iconColor           String?                  @map("icon_color")
-  service             String?                  @map("service_code")
-  application         String                   @default("ADMIN_PORTAL")
-  target              String                   @default("SELF")
-  parentId            Int?                     @map("parent_id")
-  parent              Menu?                    @relation("MenuHierarchy", fields: [parentId], references: [id])
-  children            Menu[]                   @relation("MenuHierarchy")
-  isActive            Boolean                  @default(true) @map("is_active")
-  createdAt           DateTime                 @default(now()) @map("created_at")
-  updatedAt           DateTime                 @updatedAt @map("updated_at")
-
-  /**
-   * PBAC chuẩn: Resource code để kiểm soát hiển thị menu.
-   * Menu visible nếu user có BẤT KỲ policy nào trên resource này.
-   * Để trống = menu công khai (không yêu cầu quyền).
-   * Thay thế dần cơ chế requiredPermissions (sẽ deprecated).
-   */
-  linkedResourceCode  String?                  @map("linked_resource_code")
+  id                 Int      @id @default(autoincrement())
+  code               String   @unique
+  name               String
+  route              String?
+  icon               String?
+  order              Int      @default(0)
+  description        String?  @map("description")
+  iconColor          String?  @map("icon_color")
+  service            String?  @map("service_code")
+  application        String   @default("ADMIN_PORTAL")
+  target             String   @default("SELF")
+  parentId           Int?     @map("parent_id")
+  isActive           Boolean  @default(true) @map("is_active")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+  /// *
+  ///    * PBAC chuẩn: Resource code để kiểm soát hiển thị menu.
+  ///    * Menu visible nếu user có BẤT KỲ policy nào trên resource này.
+  ///    * Để trống = menu công khai (không yêu cầu quyền).
+  ///    * Thay thế dần cơ chế requiredPermissions (sẽ deprecated).
+  linkedResourceCode String?  @map("linked_resource_code")
+  parent             Menu?    @relation("MenuHierarchy", fields: [parentId], references: [id])
+  children           Menu[]   @relation("MenuHierarchy")
 
   @@index([application, parentId, order])
+  @@index([parentId], map: "sys_menus_parent_id_fkey")
   @@map("sys_menus")
 }
-

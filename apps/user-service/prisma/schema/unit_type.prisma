@@ -1,16 +1,12 @@
-// prisma/schema/unit_type.prisma
-
 model UnitType {
-  id          Int     @id @default(autoincrement())
-  code        String  @unique
-  name        String
-  description String?
-  level       Int     @default(1) // 1: Tỉnh, 2: Huyện, 3: Xã/Phòng ban
-
-  isActive  Boolean  @default(true) @map("is_active")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
+  id                Int                   @id @default(autoincrement())
+  code              String                @unique
+  name              String
+  description       String?
+  level             Int                   @default(1)
+  isActive          Boolean               @default(true) @map("is_active")
+  createdAt         DateTime              @default(now()) @map("created_at")
+  updatedAt         DateTime              @updatedAt @map("updated_at")
   organizationUnits OrganizationUnit[]
   jobTemplates      UnitTypeJobTemplate[]
 
@@ -18,12 +14,12 @@ model UnitType {
 }
 
 model UnitTypeJobTemplate {
-  unitTypeId Int @map("unit_type_id")
-  jobTitleId Int @map("job_title_id")
-
-  unitType UnitType @relation(fields: [unitTypeId], references: [id], onDelete: Cascade)
-  jobTitle JobTitle @relation(fields: [jobTitleId], references: [id], onDelete: Cascade)
+  unitTypeId Int      @map("unit_type_id")
+  jobTitleId Int      @map("job_title_id")
+  jobTitle   JobTitle @relation(fields: [jobTitleId], references: [id], onDelete: Cascade)
+  unitType   UnitType @relation(fields: [unitTypeId], references: [id], onDelete: Cascade)
 
   @@id([unitTypeId, jobTitleId])
+  @@index([jobTitleId], map: "unit_type_job_templates_job_title_id_fkey")
   @@map("unit_type_job_templates")
 }

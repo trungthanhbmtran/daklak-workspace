@@ -30,6 +30,10 @@ message AssignTaskRequest {
 message RecommendAssigneesRequest {
   string rankCode = 1;
   string strategy = 2; // "HIGH_PERFORMANCE" or "LOW_PERFORMANCE"
+  repeated int32 allowedDepartmentIds = 3;
+  repeated int32 allowedJobTitleIds = 4;
+  string excludeEmployeeCode = 5;
+  repeated string allowedEmployeeCodes = 6;
 }
 
 message AssigneeRecommendation {

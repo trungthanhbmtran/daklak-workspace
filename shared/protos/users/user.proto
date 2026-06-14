@@ -20,6 +20,8 @@ service UserService {
   rpc RevokeRefreshToken (RevokeRefreshTokenRequest) returns (RevokeRefreshTokenResponse);
   // Đặt/đổi mật khẩu cho user (khi đã có tài khoản)
   rpc SetPassword (SetPasswordRequest) returns (SetPasswordResponse);
+  // Lấy danh sách phòng ban và nhân viên cấp dưới trực tiếp để giao việc
+  rpc GetSubordinates (GetSubordinatesRequest) returns (GetSubordinatesResponse);
 }
 
 message CreateUserRequest {
@@ -165,4 +167,13 @@ message SetPasswordRequest {
 
 message SetPasswordResponse {
   bool success = 1;
+}
+
+message GetSubordinatesRequest {
+  int32 user_id = 1;
+}
+
+message GetSubordinatesResponse {
+  repeated int32 allowed_department_ids = 1;
+  repeated string allowed_employee_codes = 2;
 }

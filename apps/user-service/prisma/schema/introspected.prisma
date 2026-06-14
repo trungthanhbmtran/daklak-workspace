@@ -1,0 +1,10 @@
+model UserToUserGroup {
+  A           Int
+  B           Int
+  users       User      @relation(fields: [A], references: [id], onDelete: Cascade)
+  user_groups UserGroup @relation(fields: [B], references: [id], onDelete: Cascade)
+
+  @@unique([A, B], map: "_UserToUserGroup_AB_unique")
+  @@index([B], map: "_UserToUserGroup_B_index")
+  @@map("_UserToUserGroup")
+}

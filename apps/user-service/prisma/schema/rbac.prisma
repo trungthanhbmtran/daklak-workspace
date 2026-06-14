@@ -3,31 +3,31 @@ model Role {
   code        String      @unique
   name        String?
   description String?
-  users       User[]
-  groups      UserGroup[]
-  policies    Policy[]
+  policies    Policy[]    @relation("PolicyToRole")
+  users       User[]      @relation("RoleToUser")
+  groups      UserGroup[] @relation("RoleToUserGroup")
 
   @@map("roles")
 }
 
 model Policy {
-  id         Int    @id @default(autoincrement())
-  resourceId Int    @map("resource_id")
+  id         Int      @id @default(autoincrement())
+  resourceId Int      @map("resource_id")
   action     String
-  effect     String @default("ALLOW")
+  effect     String   @default("ALLOW")
   conditions Json?
+  resource   Resource @relation(fields: [resourceId], references: [id])
+  roles      Role[]   @relation("PolicyToRole")
 
-  roles    Role[]
-  resource Resource @relation(fields: [resourceId], references: [id])
-
+  @@index([resourceId], map: "policies_resource_id_fkey")
   @@map("policies")
 }
 
 model Resource {
-  id          Int          @id @default(autoincrement())
-  code        String       @unique
+  id          Int      @id @default(autoincrement())
+  code        String   @unique
   name        String
-  serviceCode String?      @map("service_code")
+  serviceCode String?  @map("service_code")
   policies    Policy[]
 
   @@map("resources")

@@ -538,11 +538,27 @@ export class TasksService implements OnModuleInit {
     try {
       const whereClause: any = { employmentStatus: 'active' };
 
-      if (query.allowedDepartmentIds) {
-        whereClause.departmentId = { in: query.allowedDepartmentIds };
+      if (query.allowedDepartmentIds || query.allowedEmployeeCodes) {
+        // Nếu có truyền filter phân quyền (non-admin), dùng điều kiện OR
+        const orConditions: any[] = [];
+        
+        if (query.allowedDepartmentIds && query.allowedDepartmentIds.length > 0) {
+          orConditions.push({ departmentId: { in: query.allowedDepartmentIds } });
+        }
+        
+        if (query.allowedEmployeeCodes && query.allowedEmployeeCodes.length > 0) {
+          orConditions.push({ employeeCode: { in: query.allowedEmployeeCodes } });
+        }
+        
+        if (orConditions.length > 0) {
+          whereClause.OR = orConditions;
+        } else {
+          // Nếu mảng truyền vào nhưng rỗng -> không có quyền gì cả
+          whereClause.id = -1; // Không trả về ai
+        }
       }
-      
-      if (query.allowedJobTitleIds) {
+
+      if (query.allowedJobTitleIds && query.allowedJobTitleIds.length > 0) {
         whereClause.jobTitleId = { in: query.allowedJobTitleIds };
       }
 
