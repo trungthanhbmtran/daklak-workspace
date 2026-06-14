@@ -216,14 +216,10 @@ export class TasksService implements OnModuleInit {
     const conditions: any[] = [];
 
     // Default status filter
-    if (query.assigneeCode === 'UNASSIGNED') {
-      where.status = 'TEMPLATE';
+    if (query.status && query.status !== 'ALL') {
+      where.status = query.status;
     } else {
-      if (query.status && query.status !== 'ALL') {
-        where.status = query.status;
-      } else {
-        where.status = { not: 'TEMPLATE' };
-      }
+      where.status = { not: 'TEMPLATE' };
     }
 
     // Role filter
