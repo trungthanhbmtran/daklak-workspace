@@ -493,25 +493,35 @@ export class PostsService implements OnModuleInit {
       orderBy = { [sortBy]: sortOrder || 'desc' };
     }
 
-    const [items, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.post.findMany({
         where,
         skip,
         take: limit,
         orderBy,
-        include: {
-          tags: true,
-          category: true,
-          translations_rel: {
-            // Nếu có lang, ưu tiên lấy bản dịch của ngôn ngữ đó
-            where: lang ? { langCode: lang, isPublished: true } : undefined,
-            orderBy: { version: 'desc' },
-            take: 1
-          }
-        },
+        select: { id: true },
       }),
       this.prisma.post.count({ where }),
     ]);
+
+    const ids = idsResult.map((r) => r.id);
+    const items = ids.length > 0
+      ? await this.prisma.post.findMany({
+          where: { id: { in: ids } },
+          orderBy,
+          include: {
+            tags: true,
+            category: true,
+            translations_rel: {
+              // Nếu có lang, ưu tiên lấy bản dịch của ngôn ngữ đó
+              where: lang ? { langCode: lang, isPublished: true } : undefined,
+              orderBy: { version: 'desc' },
+              take: 1
+            }
+          },
+        })
+      : [];
 
     // Format và Merge bản dịch nếu được yêu cầu
     const formattedItems = items.map(post => {

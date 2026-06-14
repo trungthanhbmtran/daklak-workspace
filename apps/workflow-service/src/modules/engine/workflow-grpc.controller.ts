@@ -108,14 +108,24 @@ export class WorkflowGrpcController {
   async listWorkflows(data: { skip?: number; take?: number }) {
     const skip = data.skip || 0;
     const take = data.take || 10;
-    const [workflows, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.workflow.findMany({
         skip,
         take,
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
+        select: { id: true },
       }),
       this.prisma.workflow.count(),
     ]);
+
+    const ids = idsResult.map((w) => w.id);
+    const workflows = ids.length > 0
+      ? await this.prisma.workflow.findMany({
+          where: { id: { in: ids } },
+          orderBy: { createdAt: 'desc' },
+        })
+      : [];
 
     return {
       items: workflows.map(w => this.mapWorkflow(w)),

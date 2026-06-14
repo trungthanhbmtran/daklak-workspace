@@ -63,24 +63,34 @@ export class ConsultationService {
     }
     if (status) where.status = status;
 
-    const [items, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.consultation.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          _count: {
-            select: { responses: true }
-          },
-          responses: {
-            where: { status: 'RESPONDED' },
-            select: { id: true }
-          }
-        },
+        select: { id: true },
       }),
       this.prisma.consultation.count({ where }),
     ]);
+
+    const ids = idsResult.map((item) => item.id);
+    const items = ids.length > 0
+      ? await this.prisma.consultation.findMany({
+          where: { id: { in: ids } },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            _count: {
+              select: { responses: true }
+            },
+            responses: {
+              where: { status: 'RESPONDED' },
+              select: { id: true }
+            }
+          },
+        })
+      : [];
 
     return {
       data: items.map(item => ({

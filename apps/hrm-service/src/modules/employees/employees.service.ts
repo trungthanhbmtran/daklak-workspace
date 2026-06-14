@@ -236,11 +236,25 @@ export class EmployeesService {
     if (params.employmentStatus) where.employmentStatus = params.employmentStatus;
     if (params.departmentId != null && params.departmentId > 0) where.departmentId = params.departmentId;
 
-    // Query DB
-    const [items, total] = await Promise.all([
-      this.prisma.employee.findMany({ where, orderBy: [{ id: 'asc' }], skip, take: pageSize }),
+    // Query DB - Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
+      this.prisma.employee.findMany({
+        where,
+        orderBy: [{ id: 'asc' }],
+        skip,
+        take: pageSize,
+        select: { id: true },
+      }),
       this.prisma.employee.count({ where }),
     ]);
+
+    const ids = idsResult.map((e) => e.id);
+    const items = ids.length > 0
+      ? await this.prisma.employee.findMany({
+          where: { id: { in: ids } },
+          orderBy: [{ id: 'asc' }],
+        })
+      : [];
 
     const totalPages = Math.ceil(total / pageSize);
     return {

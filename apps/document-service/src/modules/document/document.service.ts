@@ -89,15 +89,25 @@ export class DocumentService {
       if (endDate) where.issueDate.lte = new Date(endDate);
     }
 
-    const [items, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.document.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
+        select: { id: true },
       }),
       this.prisma.document.count({ where }),
     ]);
+
+    const ids = idsResult.map((item) => item.id);
+    const items = ids.length > 0
+      ? await this.prisma.document.findMany({
+          where: { id: { in: ids } },
+          orderBy: { createdAt: 'desc' },
+        })
+      : [];
 
     return {
       data: items.map(item => this.mapToProto(item)),
@@ -392,15 +402,25 @@ export class DocumentService {
       where.category = query.category;
     }
 
-    const [items, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.administrativeProcedure.findMany({
         where,
         skip,
         take: limit,
         orderBy: { code: 'asc' },
+        select: { id: true },
       }),
       this.prisma.administrativeProcedure.count({ where }),
     ]);
+
+    const ids = idsResult.map((item) => item.id);
+    const items = ids.length > 0
+      ? await this.prisma.administrativeProcedure.findMany({
+          where: { id: { in: ids } },
+          orderBy: { code: 'asc' },
+        })
+      : [];
 
     return {
       data: items.map(item => this.mapProcedureToProto(item)),
@@ -527,15 +547,25 @@ export class DocumentService {
       where.status = query.status;
     }
 
-    const [items, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.oneStopDossier.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
+        select: { id: true },
       }),
       this.prisma.oneStopDossier.count({ where }),
     ]);
+
+    const ids = idsResult.map((item) => item.id);
+    const items = ids.length > 0
+      ? await this.prisma.oneStopDossier.findMany({
+          where: { id: { in: ids } },
+          orderBy: { createdAt: 'desc' },
+        })
+      : [];
 
     return {
       data: items.map(item => this.mapDossierToProto(item)),

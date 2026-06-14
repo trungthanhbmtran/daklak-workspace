@@ -507,15 +507,25 @@ export class UsersService implements OnModuleInit {
       };
     }
 
-    const [users, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.user.findMany({
         where: whereCondition,
         skip,
         take,
         orderBy: { id: 'asc' },
+        select: { id: true },
       }),
-      this.prisma.user.count({ where: whereCondition })
+      this.prisma.user.count({ where: whereCondition }),
     ]);
+
+    const ids = idsResult.map((u) => u.id);
+    const users = ids.length > 0
+      ? await this.prisma.user.findMany({
+          where: { id: { in: ids } },
+          orderBy: { id: 'asc' },
+        })
+      : [];
 
     return {
       data: users.map((u) => this.toUserResponse(u)),

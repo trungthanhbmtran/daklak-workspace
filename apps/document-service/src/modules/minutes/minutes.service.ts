@@ -37,15 +37,25 @@ export class MinutesService {
     }
     if (status) where.status = status;
 
-    const [items, total] = await Promise.all([
+    // Optimized via ID-Indexed Deferred Join
+    const [idsResult, total] = await Promise.all([
       this.prisma.minutes.findMany({
         where,
         skip,
         take: limit,
         orderBy: { startTime: 'desc' },
+        select: { id: true },
       }),
       this.prisma.minutes.count({ where }),
     ]);
+
+    const ids = idsResult.map((item) => item.id);
+    const items = ids.length > 0
+      ? await this.prisma.minutes.findMany({
+          where: { id: { in: ids } },
+          orderBy: { startTime: 'desc' },
+        })
+      : [];
 
     return {
       data: items.map(item => this.mapToProto(item)),
