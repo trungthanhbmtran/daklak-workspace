@@ -12,7 +12,12 @@ RUN npm ci
 COPY apps/document-service/ ./
 COPY shared/protos ./shared/protos
 
-# Build the NestJS app directly (without prisma generate, since client is pre-generated in 'generated/')
+# 🔥 SỬA LỖI TRÊN CI: Bắt buộc phải chạy prisma generate trước khi build NestJS.
+# Lệnh này sẽ tự động sinh ra thư mục 'generated/' và các TypeScript Types 
+# giúp quá trình biên dịch không còn bị lỗi "Property 'user' does not exist".
+RUN npx prisma generate
+
+# Build ứng dụng NestJS (Đã loại bỏ lệnh '&& npx tsc' thừa)
 RUN npx nest build && npx tsc-alias
 
 
@@ -26,15 +31,15 @@ ENV NODE_ENV=production
 
 RUN apk add --no-cache openssl
 
-# Create non-root user early to run container and install packages under its ownership
+# Tạo non-root user từ sớm để chạy container bảo mật hơn
 RUN addgroup -S app && adduser -S app -G app && chown app:app /app
 USER app
 
-# Copy package files and install production dependencies directly as non-root user (avoids slow chown at the end)
+# Copy package files và cài production dependencies trực tiếp dưới quyền user app
 COPY --chown=app:app apps/document-service/package*.json ./
 RUN npm ci --omit=dev
 
-# Copy build outputs from builder stage with correct ownership
+# Copy kết quả từ builder stage sang với quyền sở hữu chính xác của user app
 COPY --chown=app:app --from=builder /app/dist ./dist
 COPY --chown=app:app --from=builder /app/prisma ./prisma
 COPY --chown=app:app --from=builder /app/generated ./generated

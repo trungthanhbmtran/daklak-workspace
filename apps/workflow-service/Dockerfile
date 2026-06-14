@@ -12,7 +12,12 @@ RUN npm ci
 COPY apps/workflow-service/ ./
 COPY shared/protos ./shared/protos
 
-# Build the NestJS app directly (without prisma generate, since client is pre-generated in 'generated/')
+# 🔥 SỬA LỖI TRÊN CI: Bắt buộc phải chạy prisma generate trước khi build NestJS.
+# Lệnh này sẽ tự động sinh ra thư mục 'generated/' và các TypeScript Types 
+# giúp quá trình biên dịch không còn bị lỗi "Property 'user' does not exist".
+RUN npx prisma generate
+
+# Build the NestJS app directly
 RUN npx nest build && npx tsc-alias
 
 
