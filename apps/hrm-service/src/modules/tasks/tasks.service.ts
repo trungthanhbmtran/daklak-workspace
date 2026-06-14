@@ -61,6 +61,9 @@ export class TasksService implements OnModuleInit {
         if (approver) employeeCodes.add(approver);
         if (coordinators) coordinators.forEach((c: string) => employeeCodes.add(c));
       }
+      if (t.creatorEmployeeCode) {
+        employeeCodes.add(t.creatorEmployeeCode);
+      }
       if (t.children) t.children.forEach(collectCodes);
     };
     tasks.forEach(collectCodes);
@@ -77,15 +80,20 @@ export class TasksService implements OnModuleInit {
     }
 
     const mapNames = (t: any) => {
+      if (t.creatorEmployeeCode) {
+        t.creatorName = employeeMap.get(t.creatorEmployeeCode) || t.creatorEmployeeCode;
+      }
       if (t.participants) {
         const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
         t.assigneeCode = assignee || 'UNASSIGNED';
         t.assigneeName = assignee && assignee !== 'UNASSIGNED' ? (employeeMap.get(assignee) || assignee) : 'Chưa phân công';
         t.assignerCode = owner || '';
-        t.assignerName = owner ? (employeeMap.get(owner) || owner) : '';
+        t.assignerName = owner ? (employeeMap.get(owner) || owner) : (t.creatorName || '');
         t.supervisorCode = approver || '';
         t.supervisorName = approver ? (employeeMap.get(approver) || approver) : '';
         t.coassigneeCodes = coordinators;
+      } else {
+        t.assignerName = t.creatorName || '';
       }
       if (t.children) t.children.forEach(mapNames);
     };

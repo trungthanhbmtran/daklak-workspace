@@ -96,7 +96,23 @@ export const TaskTable = memo(function TaskTable({
 
                   {/* 4th col: dynamic per context */}
                   <td className="px-6 py-5">
-                    {context === 'I_ASSIGNED' ? (
+                    {context === 'PENDING_ASSIGN' ? (
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center">
+                          <div className="w-7 h-7 rounded-full bg-indigo-100 text-indigo-700 flex justify-center items-center text-xs font-bold mr-2.5 shrink-0">
+                            {((task.assignerName || task.creatorName || task.creatorEmployeeCode || '?')?.charAt(0) || '?')}
+                          </div>
+                          <span className="font-medium text-sm truncate">
+                            {task.assignerName || task.creatorName || task.creatorEmployeeCode || 'Hệ thống'}
+                          </span>
+                        </div>
+                        {task.plan && (
+                          <div className="text-[10px] font-bold text-indigo-600 bg-indigo-50 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-indigo-100 w-fit ml-[38px]">
+                            <Target className="w-3 h-3" /> {task.plan.title}
+                          </div>
+                        )}
+                      </div>
+                    ) : context === 'I_ASSIGNED' ? (
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex justify-center items-center text-xs font-bold shrink-0">
