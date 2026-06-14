@@ -13,6 +13,8 @@ COPY apps/document-service/ ./
 COPY shared/protos ./shared/protos
 
 # Generate Prisma client and build the NestJS app
+# Provide a dummy DATABASE_URL for Prisma generate during build
+ENV DATABASE_URL="mysql://dummy:dummy@localhost:3306/dummy"
 RUN npm run build
 
 
