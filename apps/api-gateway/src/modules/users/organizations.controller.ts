@@ -38,7 +38,7 @@ export class OrganizationsController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.client.getService(
@@ -117,18 +117,23 @@ export class OrganizationsController implements OnModuleInit {
     // Gọi FindOne để lấy roles và unitCode của người đang đăng nhập
     const userId = request?.user?.id;
     const userInfo: any = userId
-      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(() => null)
+      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(
+          () => null,
+        )
       : null;
 
-    const isAdmin: boolean = !!(userInfo?.roles?.some(
+    const isAdmin: boolean = !!userInfo?.roles?.some(
       (r: any) => r?.code === 'SUPER_ADMIN' || r?.code === 'ADMIN',
-    ));
+    );
 
     if (!isAdmin) {
       if (!userInfo?.unitCode) {
         nodes = [];
       } else {
-        const findNodeByCodePrefix = (treeNodes: any[], prefix: string): any | null => {
+        const findNodeByCodePrefix = (
+          treeNodes: any[],
+          prefix: string,
+        ): any | null => {
           for (const node of treeNodes) {
             if (node.code && node.code.startsWith(prefix)) return node;
             if (node.children && node.children.length > 0) {
@@ -295,9 +300,13 @@ export class OrganizationsController implements OnModuleInit {
   @Put(':id/scope')
   @ApiOperation({
     summary: 'Cập nhật phạm vi phụ trách của đơn vị (lĩnh vực + địa bàn)',
-    description: 'Endpoint chuyên biệt, chỉ cập nhật domainIds và geographicAreaIds. Không ảnh hưởng đến tên, mã, phân loại.',
+    description:
+      'Endpoint chuyên biệt, chỉ cập nhật domainIds và geographicAreaIds. Không ảnh hưởng đến tên, mã, phân loại.',
   })
-  @ApiResponse({ status: 200, description: 'Đơn vị đã cập nhật phạm vi (camelCase)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Đơn vị đã cập nhật phạm vi (camelCase)',
+  })
   async updateScope(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: { domainIds?: number[]; geographicAreaIds?: number[] },
@@ -305,7 +314,10 @@ export class OrganizationsController implements OnModuleInit {
     if (body.domainIds !== undefined && !Array.isArray(body.domainIds)) {
       throw new BadRequestException('domainIds phải là một mảng');
     }
-    if (body.geographicAreaIds !== undefined && !Array.isArray(body.geographicAreaIds)) {
+    if (
+      body.geographicAreaIds !== undefined &&
+      !Array.isArray(body.geographicAreaIds)
+    ) {
       throw new BadRequestException('geographicAreaIds phải là một mảng');
     }
     try {
@@ -318,7 +330,8 @@ export class OrganizationsController implements OnModuleInit {
       );
       return { success: true, data: result };
     } catch (err: any) {
-      const message = err?.message ?? err?.details ?? 'Lỗi cập nhật phạm vi phụ trách';
+      const message =
+        err?.message ?? err?.details ?? 'Lỗi cập nhật phạm vi phụ trách';
       if (err?.code === 5) throw new NotFoundException(message);
       throw new BadRequestException(message);
     }
@@ -415,7 +428,7 @@ export class PublicOrganizationsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.orgService = this.client.getService(

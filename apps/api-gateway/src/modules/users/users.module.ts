@@ -40,5 +40,4 @@ import { ConfigsController } from './configs.controller';
   ],
   providers: [],
 })
-export class UsersModule { }
-
+export class UsersModule {}

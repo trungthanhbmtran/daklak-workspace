@@ -21,7 +21,7 @@ export class ConfigsController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.SYS_CONFIG.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.configService = this.client.getService('SystemConfigService');
@@ -42,5 +42,3 @@ export class ConfigsController implements OnModuleInit {
     return firstValueFrom(this.configService.UpdateConfig(body));
   }
 }
-
-

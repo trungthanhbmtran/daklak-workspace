@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Post,
   Get,
@@ -35,7 +35,7 @@ export class AuthController implements OnModuleInit {
     @Inject(MICROSERVICES.AUTH.SYMBOL) private readonly authClient: any,
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly userClient: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.authService = this.authClient.getService(MICROSERVICES.AUTH.SERVICE);
@@ -177,15 +177,21 @@ export class AuthController implements OnModuleInit {
     const employeeId = req.user?.employeeId;
     const userId = req.user?.id;
     if (!userId) {
-      throw new UnauthorizedException('Không tìm thấy thông tin user trong token');
+      throw new UnauthorizedException(
+        'Không tìm thấy thông tin user trong token',
+      );
     }
 
-    const user: any = await firstValueFrom(this.userService.FindOne({ id: Number(userId) }));
+    const user: any = await firstValueFrom(
+      this.userService.FindOne({ id: Number(userId) }),
+    );
     let hrm: any = null;
 
     if (employeeId) {
       try {
-        const empRes: any = await firstValueFrom(this.employeeService.GetEmployee({ id: Number(employeeId) }));
+        const empRes: any = await firstValueFrom(
+          this.employeeService.GetEmployee({ id: Number(employeeId) }),
+        );
         hrm = empRes?.data;
       } catch (e) {
         // Ignore error
@@ -199,4 +205,3 @@ export class AuthController implements OnModuleInit {
     });
   }
 }
-

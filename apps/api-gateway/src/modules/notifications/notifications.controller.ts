@@ -44,4 +44,3 @@ export class NotificationsController {
     return { success: ok };
   }
 }
-

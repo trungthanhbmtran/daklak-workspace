@@ -32,12 +32,10 @@ export class ResourcesController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.PBAC.SYMBOL)
     private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
-    this.pbacService = this.client.getService(
-      MICROSERVICES.PBAC.SERVICE,
-    );
+    this.pbacService = this.client.getService(MICROSERVICES.PBAC.SERVICE);
   }
 
   /**
@@ -49,7 +47,9 @@ export class ResourcesController implements OnModuleInit {
   @ApiOperation({ summary: 'Danh sách PBAC Resource (dùng cho menu form)' })
   @ApiResponse({ status: 200, description: 'Mảng resources phẳng' })
   async listResources() {
-    const res = await firstValueFrom(this.pbacService.GetResources({})) as any;
+    const res = (await firstValueFrom(
+      this.pbacService.GetResources({}),
+    )) as any;
     const rawResources = res?.resources ?? res?.data?.resources ?? [];
     return (rawResources as any[]).map((r: any) => ({
       id: r.id,
@@ -67,7 +67,9 @@ export class ResourcesController implements OnModuleInit {
   ) {
     return firstValueFrom(
       this.pbacService.CreateResource({
-        code: body.code, name: body.name, serviceCode: body.serviceCode,
+        code: body.code,
+        name: body.name,
+        serviceCode: body.serviceCode,
       }),
     );
   }
@@ -82,10 +84,10 @@ export class ResourcesController implements OnModuleInit {
     return firstValueFrom(
       this.pbacService.UpdateResource({
         id,
-        code: body.code, name: body.name, serviceCode: body.serviceCode,
+        code: body.code,
+        name: body.name,
+        serviceCode: body.serviceCode,
       }),
     );
   }
-
-
 }

@@ -75,13 +75,22 @@ export class CategoriesController implements OnModuleInit {
 
   @Get()
   @ApiOperation({
-    summary: 'Lấy danh mục theo nhóm (hỗ trợ tìm kiếm, phân trang, selected-first server-side)',
+    summary:
+      'Lấy danh mục theo nhóm (hỗ trợ tìm kiếm, phân trang, selected-first server-side)',
   })
   @ApiQuery({ name: 'group', required: false })
   @ApiQuery({ name: 'q', required: false, description: 'Từ khóa tìm kiếm' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Số lượng (mặc định 50)' })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Số lượng (mặc định 50)',
+  })
   @ApiQuery({ name: 'skip', required: false })
-  @ApiQuery({ name: 'selectedIds', required: false, description: 'IDs đã chọn (comma-separated), luôn xuất hiện đầu' })
+  @ApiQuery({
+    name: 'selectedIds',
+    required: false,
+    description: 'IDs đã chọn (comma-separated), luôn xuất hiện đầu',
+  })
   @ApiResponse({ status: 200 })
   async getByGroup(
     @Query('group') group?: string,
@@ -93,7 +102,10 @@ export class CategoriesController implements OnModuleInit {
     const limitNum = limit ? parseInt(limit, 10) : 50;
     const skipNum = skip ? parseInt(skip, 10) : 0;
     const selectedIdsArr = selectedIds
-      ? selectedIds.split(',').map(Number).filter(n => !isNaN(n) && n > 0)
+      ? selectedIds
+        .split(',')
+        .map(Number)
+        .filter((n) => !isNaN(n) && n > 0)
       : [];
 
     if (!group) {
@@ -207,7 +219,11 @@ export class PublicCategoriesController implements OnModuleInit {
   @ApiQuery({ name: 'lang', required: false, description: 'Mã ngôn ngữ' })
   @ApiQuery({ name: 'q', required: false, description: 'Từ khóa tìm kiếm' })
   @ApiQuery({ name: 'limit', required: false, description: 'Số lượng trả về' })
-  @ApiQuery({ name: 'skip', required: false, description: 'Bỏ qua N phần tử đầu' })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    description: 'Bỏ qua N phần tử đầu',
+  })
   @ApiResponse({ status: 200, description: 'Danh sách danh mục thuộc nhóm' })
   async getByGroup(@Query() query: any) {
     const group = query.group;

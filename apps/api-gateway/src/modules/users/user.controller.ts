@@ -40,30 +40,35 @@ export class UserController implements OnModuleInit {
     @Inject(MICROSERVICES.USER.SYMBOL) private readonly client: any,
     @Inject(MICROSERVICES.EMPLOYEE.SYMBOL) private readonly employeeClient: any,
     private readonly notificationsService: NotificationsService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.userService = this.client.getService(MICROSERVICES.USER.SERVICE);
-    this.employeeService = this.employeeClient.getService(MICROSERVICES.EMPLOYEE.SERVICE);
+    this.employeeService = this.employeeClient.getService(
+      MICROSERVICES.EMPLOYEE.SERVICE,
+    );
   }
 
   @Get()
   @ApiOperation({ summary: 'Danh sách user' })
   @ApiResponse({
     status: 200,
-    description: 'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
+    description:
+      'Mảng user (id, email, username, fullName, phoneNumber, avatarUrl, isActive)',
   })
   async list(@Req() req: any) {
     const userId = req?.user?.id;
 
     // Gọi FindOne để lấy roles và unitCode của người đang đăng nhập
     const userInfo: any = userId
-      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(() => null)
+      ? await firstValueFrom(this.userService.FindOne({ id: userId })).catch(
+          () => null,
+        )
       : null;
 
-    const isAdmin: boolean = !!(userInfo?.roles?.some(
+    const isAdmin: boolean = !!userInfo?.roles?.some(
       (r: any) => r.code === 'SUPER_ADMIN' || r.code === 'ADMIN',
-    ));
+    );
 
     let unitCodeStartsWith: string | undefined;
     if (!isAdmin) {
@@ -87,7 +92,8 @@ export class UserController implements OnModuleInit {
   @ApiOperation({ summary: 'Chi tiết user theo ID' })
   @ApiResponse({
     status: 200,
-    description: 'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
+    description:
+      'id, email, username, fullName, phoneNumber, avatarUrl, isActive (camelCase)',
   })
   async getDetail(@Param('id', ParseIntPipe) id: number) {
     const data: any = await firstValueFrom(this.userService.FindOne({ id }));
@@ -121,7 +127,10 @@ export class UserController implements OnModuleInit {
 
   @Get(':id/policies')
   @ApiOperation({ summary: 'Chính sách hiệu lực của user (lazy load)' })
-  @ApiResponse({ status: 200, description: 'Danh sách policies từ tất cả roles của user' })
+  @ApiResponse({
+    status: 200,
+    description: 'Danh sách policies từ tất cả roles của user',
+  })
   async getUserPolicies(@Param('id', ParseIntPipe) id: number) {
     const data: any = await firstValueFrom(this.userService.FindOne({ id }));
     if (!data) return { success: true, data: [] };
@@ -135,7 +144,11 @@ export class UserController implements OnModuleInit {
         if (!policiesMap.has(key)) {
           policiesMap.set(key, {
             description: `${p.action} trên ${p.resource?.name ?? p.resource?.code ?? p.resourceId ?? '—'}`,
-            resource: p.resource?.code ?? p.resourceCode ?? p.resource_code ?? String(p.resourceId ?? '—'),
+            resource:
+              p.resource?.code ??
+              p.resourceCode ??
+              p.resource_code ??
+              String(p.resourceId ?? '—'),
             action: p.action,
             effect: p.effect ?? 'ALLOW',
           });

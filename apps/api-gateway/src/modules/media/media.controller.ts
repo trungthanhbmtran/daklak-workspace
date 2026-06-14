@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -48,7 +48,7 @@ export class MediaGatewayController implements OnModuleInit {
   constructor(
     @Inject(MICROSERVICES.MEDIA.SYMBOL)
     private readonly client: microservices.ClientGrpc,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.mediaService = this.client.getService<MediaGrpcService>(
@@ -139,4 +139,3 @@ export class MediaGatewayController implements OnModuleInit {
     return await firstValueFrom(this.mediaService.GetMedia({ fileId: id }));
   }
 }
-

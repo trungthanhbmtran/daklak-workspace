@@ -29,6 +29,7 @@ export type AggregateTask = {
 export type TaskAvgAggregateOutputType = {
   id: number | null
   parentId: number | null
+  creatorUserId: number | null
   baseScore: number | null
   weight: number | null
   bonusPerDay: number | null
@@ -40,6 +41,7 @@ export type TaskAvgAggregateOutputType = {
 export type TaskSumAggregateOutputType = {
   id: number | null
   parentId: number | null
+  creatorUserId: number | null
   baseScore: number | null
   weight: number | null
   bonusPerDay: number | null
@@ -55,7 +57,7 @@ export type TaskMinAggregateOutputType = {
   description: string | null
   status: string | null
   priority: string | null
-  creatorEmployeeCode: string | null
+  creatorUserId: number | null
   baseScore: number | null
   weight: number | null
   scoringMethod: string | null
@@ -79,7 +81,7 @@ export type TaskMaxAggregateOutputType = {
   description: string | null
   status: string | null
   priority: string | null
-  creatorEmployeeCode: string | null
+  creatorUserId: number | null
   baseScore: number | null
   weight: number | null
   scoringMethod: string | null
@@ -103,7 +105,7 @@ export type TaskCountAggregateOutputType = {
   description: number
   status: number
   priority: number
-  creatorEmployeeCode: number
+  creatorUserId: number
   baseScore: number
   weight: number
   scoringMethod: number
@@ -127,6 +129,7 @@ export type TaskCountAggregateOutputType = {
 export type TaskAvgAggregateInputType = {
   id?: true
   parentId?: true
+  creatorUserId?: true
   baseScore?: true
   weight?: true
   bonusPerDay?: true
@@ -138,6 +141,7 @@ export type TaskAvgAggregateInputType = {
 export type TaskSumAggregateInputType = {
   id?: true
   parentId?: true
+  creatorUserId?: true
   baseScore?: true
   weight?: true
   bonusPerDay?: true
@@ -153,7 +157,7 @@ export type TaskMinAggregateInputType = {
   description?: true
   status?: true
   priority?: true
-  creatorEmployeeCode?: true
+  creatorUserId?: true
   baseScore?: true
   weight?: true
   scoringMethod?: true
@@ -177,7 +181,7 @@ export type TaskMaxAggregateInputType = {
   description?: true
   status?: true
   priority?: true
-  creatorEmployeeCode?: true
+  creatorUserId?: true
   baseScore?: true
   weight?: true
   scoringMethod?: true
@@ -201,7 +205,7 @@ export type TaskCountAggregateInputType = {
   description?: true
   status?: true
   priority?: true
-  creatorEmployeeCode?: true
+  creatorUserId?: true
   baseScore?: true
   weight?: true
   scoringMethod?: true
@@ -314,7 +318,7 @@ export type TaskGroupByOutputType = {
   description: string | null
   status: string
   priority: string
-  creatorEmployeeCode: string
+  creatorUserId: number
   baseScore: number | null
   weight: number | null
   scoringMethod: string
@@ -363,7 +367,7 @@ export type TaskWhereInput = {
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
-  creatorEmployeeCode?: Prisma.StringFilter<"Task"> | string
+  creatorUserId?: Prisma.IntFilter<"Task"> | number
   baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
   weight?: Prisma.FloatNullableFilter<"Task"> | number | null
   scoringMethod?: Prisma.StringFilter<"Task"> | string
@@ -394,7 +398,7 @@ export type TaskOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  creatorEmployeeCode?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
   scoringMethod?: Prisma.SortOrder
@@ -429,7 +433,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
-  creatorEmployeeCode?: Prisma.StringFilter<"Task"> | string
+  creatorUserId?: Prisma.IntFilter<"Task"> | number
   baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
   weight?: Prisma.FloatNullableFilter<"Task"> | number | null
   scoringMethod?: Prisma.StringFilter<"Task"> | string
@@ -460,7 +464,7 @@ export type TaskOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  creatorEmployeeCode?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrderInput | Prisma.SortOrder
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
   scoringMethod?: Prisma.SortOrder
@@ -494,7 +498,7 @@ export type TaskScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Task"> | string
   priority?: Prisma.StringWithAggregatesFilter<"Task"> | string
-  creatorEmployeeCode?: Prisma.StringWithAggregatesFilter<"Task"> | string
+  creatorUserId?: Prisma.IntWithAggregatesFilter<"Task"> | number
   baseScore?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
   weight?: Prisma.FloatNullableWithAggregatesFilter<"Task"> | number | null
   scoringMethod?: Prisma.StringWithAggregatesFilter<"Task"> | string
@@ -519,7 +523,7 @@ export type TaskCreateInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -549,7 +553,7 @@ export type TaskUncheckedCreateInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -578,7 +582,7 @@ export type TaskUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -608,7 +612,7 @@ export type TaskUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -638,7 +642,7 @@ export type TaskCreateManyInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -663,7 +667,7 @@ export type TaskUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -688,7 +692,7 @@ export type TaskUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -720,7 +724,7 @@ export type TaskCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  creatorEmployeeCode?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   scoringMethod?: Prisma.SortOrder
@@ -742,6 +746,7 @@ export type TaskCountOrderByAggregateInput = {
 export type TaskAvgOrderByAggregateInput = {
   id?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
@@ -757,7 +762,7 @@ export type TaskMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  creatorEmployeeCode?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   scoringMethod?: Prisma.SortOrder
@@ -781,7 +786,7 @@ export type TaskMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
   priority?: Prisma.SortOrder
-  creatorEmployeeCode?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   scoringMethod?: Prisma.SortOrder
@@ -801,6 +806,7 @@ export type TaskMinOrderByAggregateInput = {
 export type TaskSumOrderByAggregateInput = {
   id?: Prisma.SortOrder
   parentId?: Prisma.SortOrder
+  creatorUserId?: Prisma.SortOrder
   baseScore?: Prisma.SortOrder
   weight?: Prisma.SortOrder
   bonusPerDay?: Prisma.SortOrder
@@ -944,7 +950,7 @@ export type TaskCreateWithoutParticipantsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -973,7 +979,7 @@ export type TaskUncheckedCreateWithoutParticipantsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1017,7 +1023,7 @@ export type TaskUpdateWithoutParticipantsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1046,7 +1052,7 @@ export type TaskUncheckedUpdateWithoutParticipantsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1074,7 +1080,7 @@ export type TaskCreateWithoutDescendantsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1103,7 +1109,7 @@ export type TaskUncheckedCreateWithoutDescendantsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1136,7 +1142,7 @@ export type TaskCreateWithoutAncestorsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1165,7 +1171,7 @@ export type TaskUncheckedCreateWithoutAncestorsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1209,7 +1215,7 @@ export type TaskUpdateWithoutDescendantsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1238,7 +1244,7 @@ export type TaskUncheckedUpdateWithoutDescendantsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1277,7 +1283,7 @@ export type TaskUpdateWithoutAncestorsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1306,7 +1312,7 @@ export type TaskUncheckedUpdateWithoutAncestorsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1334,7 +1340,7 @@ export type TaskCreateWithoutCommentsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1363,7 +1369,7 @@ export type TaskUncheckedCreateWithoutCommentsInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1407,7 +1413,7 @@ export type TaskUpdateWithoutCommentsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1436,7 +1442,7 @@ export type TaskUncheckedUpdateWithoutCommentsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1464,7 +1470,7 @@ export type TaskCreateWithoutPlanInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1493,7 +1499,7 @@ export type TaskUncheckedCreateWithoutPlanInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1551,7 +1557,7 @@ export type TaskScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   status?: Prisma.StringFilter<"Task"> | string
   priority?: Prisma.StringFilter<"Task"> | string
-  creatorEmployeeCode?: Prisma.StringFilter<"Task"> | string
+  creatorUserId?: Prisma.IntFilter<"Task"> | number
   baseScore?: Prisma.FloatNullableFilter<"Task"> | number | null
   weight?: Prisma.FloatNullableFilter<"Task"> | number | null
   scoringMethod?: Prisma.StringFilter<"Task"> | string
@@ -1577,7 +1583,7 @@ export type TaskCreateManyPlanInput = {
   description?: string | null
   status?: string
   priority?: string
-  creatorEmployeeCode?: string
+  creatorUserId?: number
   baseScore?: number | null
   weight?: number | null
   scoringMethod?: string
@@ -1601,7 +1607,7 @@ export type TaskUpdateWithoutPlanInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1630,7 +1636,7 @@ export type TaskUncheckedUpdateWithoutPlanInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1659,7 +1665,7 @@ export type TaskUncheckedUpdateManyWithoutPlanInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   priority?: Prisma.StringFieldUpdateOperationsInput | string
-  creatorEmployeeCode?: Prisma.StringFieldUpdateOperationsInput | string
+  creatorUserId?: Prisma.IntFieldUpdateOperationsInput | number
   baseScore?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   scoringMethod?: Prisma.StringFieldUpdateOperationsInput | string
@@ -1742,7 +1748,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   description?: boolean
   status?: boolean
   priority?: boolean
-  creatorEmployeeCode?: boolean
+  creatorUserId?: boolean
   baseScore?: boolean
   weight?: boolean
   scoringMethod?: boolean
@@ -1776,7 +1782,7 @@ export type TaskSelectScalar = {
   description?: boolean
   status?: boolean
   priority?: boolean
-  creatorEmployeeCode?: boolean
+  creatorUserId?: boolean
   baseScore?: boolean
   weight?: boolean
   scoringMethod?: boolean
@@ -1795,7 +1801,7 @@ export type TaskSelectScalar = {
   rejectReason?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "creatorEmployeeCode" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "documentIds" | "workflowInstId" | "metadata" | "startDate" | "dueDate" | "completedAt" | "createdAt" | "updatedAt" | "planId" | "progress" | "rejectReason", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "parentId" | "title" | "description" | "status" | "priority" | "creatorUserId" | "baseScore" | "weight" | "scoringMethod" | "bonusPerDay" | "penaltyPerDay" | "documentIds" | "workflowInstId" | "metadata" | "startDate" | "dueDate" | "completedAt" | "createdAt" | "updatedAt" | "planId" | "progress" | "rejectReason", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.Task$planArgs<ExtArgs>
   participants?: boolean | Prisma.Task$participantsArgs<ExtArgs>
@@ -1821,7 +1827,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     description: string | null
     status: string
     priority: string
-    creatorEmployeeCode: string
+    creatorUserId: number
     baseScore: number | null
     weight: number | null
     scoringMethod: string
@@ -2218,7 +2224,7 @@ export interface TaskFieldRefs {
   readonly description: Prisma.FieldRef<"Task", 'String'>
   readonly status: Prisma.FieldRef<"Task", 'String'>
   readonly priority: Prisma.FieldRef<"Task", 'String'>
-  readonly creatorEmployeeCode: Prisma.FieldRef<"Task", 'String'>
+  readonly creatorUserId: Prisma.FieldRef<"Task", 'Int'>
   readonly baseScore: Prisma.FieldRef<"Task", 'Float'>
   readonly weight: Prisma.FieldRef<"Task", 'Float'>
   readonly scoringMethod: Prisma.FieldRef<"Task", 'String'>

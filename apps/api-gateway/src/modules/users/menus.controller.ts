@@ -114,7 +114,7 @@ export class MenusController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.MENU.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.menuService = this.client.getService(MICROSERVICES.MENU.SERVICE);
@@ -133,13 +133,20 @@ export class MenusController implements OnModuleInit {
 
   @Get('me')
   @ApiOperation({ summary: 'Menu sidebar theo user đăng nhập và ứng dụng' })
-  @ApiQuery({ name: 'app', required: false, description: 'ADMIN_PORTAL | CITIZEN_PORTAL', example: 'ADMIN_PORTAL' })
+  @ApiQuery({
+    name: 'app',
+    required: false,
+    description: 'ADMIN_PORTAL | CITIZEN_PORTAL',
+    example: 'ADMIN_PORTAL',
+  })
   @ApiResponse({ status: 200, description: 'Cây menu (chỉ mục user có quyền)' })
   async getMyMenus(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
       rawId != null && rawId !== ''
-        ? typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)
+        ? typeof rawId === 'number'
+          ? rawId
+          : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
@@ -159,14 +166,18 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get('hub')
-  @ApiOperation({ summary: 'Danh sách phân hệ cho trang Hub (chỉ root cards, không sidebar)' })
+  @ApiOperation({
+    summary: 'Danh sách phân hệ cho trang Hub (chỉ root cards, không sidebar)',
+  })
   @ApiQuery({ name: 'app', required: false, example: 'ADMIN_PORTAL' })
   @ApiResponse({ status: 200, description: 'Mảng AppItem cho Hub' })
   async getHubApps(@Req() req: any, @Query('app') app?: string) {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
       rawId != null && rawId !== ''
-        ? typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)
+        ? typeof rawId === 'number'
+          ? rawId
+          : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
@@ -179,8 +190,15 @@ export class MenusController implements OnModuleInit {
   }
 
   @Get('sidebar')
-  @ApiOperation({ summary: 'Sidebar items theo service (load khi user chọn phân hệ)' })
-  @ApiQuery({ name: 'code', required: true, description: 'Menu code của service root (VD: HRM_GROUP)', example: 'HRM_GROUP' })
+  @ApiOperation({
+    summary: 'Sidebar items theo service (load khi user chọn phân hệ)',
+  })
+  @ApiQuery({
+    name: 'code',
+    required: true,
+    description: 'Menu code của service root (VD: HRM_GROUP)',
+    example: 'HRM_GROUP',
+  })
   @ApiQuery({ name: 'app', required: false, example: 'ADMIN_PORTAL' })
   @ApiResponse({ status: 200, description: 'Sidebar items cho 1 service' })
   async getServiceSidebar(
@@ -191,7 +209,9 @@ export class MenusController implements OnModuleInit {
     const rawId = req.user?.id ?? req.user?.userId;
     const userId =
       rawId != null && rawId !== ''
-        ? typeof rawId === 'number' ? rawId : parseInt(String(rawId), 10)
+        ? typeof rawId === 'number'
+          ? rawId
+          : parseInt(String(rawId), 10)
         : 0;
     const response: any = await firstValueFrom(
       this.menuService.GetMyMenus({
@@ -201,7 +221,8 @@ export class MenusController implements OnModuleInit {
     );
     const branches = getRealBranches(response?.items ?? []);
     const sidebarMenus = this.buildSidebarMenus(branches);
-    const sidebar = sidebarMenus.find((s: any) => s.serviceCode === code) ?? null;
+    const sidebar =
+      sidebarMenus.find((s: any) => s.serviceCode === code) ?? null;
     return { sidebar };
   }
 
@@ -215,9 +236,13 @@ export class MenusController implements OnModuleInit {
         const menuCode = (b.code ?? '').trim();
         let href = basePath;
         if (b.children?.length) {
-          const firstChild = [...b.children].sort((x, y) => (x.order || 0) - (y.order || 0))[0];
+          const firstChild = [...b.children].sort(
+            (x, y) => (x.order || 0) - (y.order || 0),
+          )[0];
           if (firstChild.route) {
-            href = firstChild.route.startsWith('/') ? firstChild.route : `${basePath}/${firstChild.route}`;
+            href = firstChild.route.startsWith('/')
+              ? firstChild.route
+              : `${basePath}/${firstChild.route}`;
           }
         }
         href = href.replace(/([^:])\/\//g, '$1/');

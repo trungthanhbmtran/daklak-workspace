@@ -1,4 +1,4 @@
-﻿import {
+import {
   Controller,
   Get,
   Post,
@@ -29,7 +29,7 @@ export class PositionController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.ORGANIZATION.SYMBOL) private readonly client: any,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.orgService = this.client.getService(
@@ -119,4 +119,3 @@ export class PositionController implements OnModuleInit {
     );
   }
 }
-

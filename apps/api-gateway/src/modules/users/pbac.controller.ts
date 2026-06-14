@@ -31,7 +31,7 @@ export class PbacController implements OnModuleInit {
 
   constructor(
     @Inject(MICROSERVICES.PBAC.SYMBOL) private readonly client: any,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.pbacService = this.client.getService(MICROSERVICES.PBAC.SERVICE);
@@ -68,7 +68,12 @@ export class PbacController implements OnModuleInit {
       code: string;
       name: string;
       description?: string;
-      policies?: { resourceId: number; action: string; effect?: string; conditions?: string }[];
+      policies?: {
+        resourceId: number;
+        action: string;
+        effect?: string;
+        conditions?: string;
+      }[];
     },
   ) {
     return firstValueFrom(
@@ -93,7 +98,12 @@ export class PbacController implements OnModuleInit {
     body: {
       name?: string;
       description?: string;
-      policies?: { resourceId: number; action: string; effect?: string; conditions?: string }[];
+      policies?: {
+        resourceId: number;
+        action: string;
+        effect?: string;
+        conditions?: string;
+      }[];
     },
   ) {
     return firstValueFrom(

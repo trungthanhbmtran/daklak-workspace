@@ -99,7 +99,13 @@ export class TransformInterceptor implements NestInterceptor {
     // --- Dạng object ---
 
     // Legacy: { status: 'success'|'error', data, message }
-    if ('status' in response && !('success' in response)) {
+    if (
+      'status' in response &&
+      !('success' in response) &&
+      (response.status === 'success' ||
+        response.status === 'error' ||
+        response.status === 'fail')
+    ) {
       const isOk = response.status === 'success';
       const meta = this.normalizeMeta(response.meta);
       return {

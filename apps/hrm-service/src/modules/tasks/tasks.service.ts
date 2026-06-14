@@ -43,51 +43,73 @@ export class TasksService implements OnModuleInit {
     }
   }
 
-  private parseParticipants(participants: any[]) {
+  private parseParticipants(participants: any[], userToCodeMap: Map<number, string>) {
     if (!participants) return { owner: null, assignee: null, approver: null, coordinators: [] };
-    const owner = participants.find(p => p.participantRole === TaskRole.OWNER)?.employeeCode || null;
-    const assignee = participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || null;
-    const approver = participants.find(p => p.participantRole === TaskRole.APPROVER)?.employeeCode || null;
-    const coordinators = participants.filter(p => p.participantRole === TaskRole.COORDINATOR).map(p => p.employeeCode);
+    const getCode = (uid?: number | null) => uid ? (userToCodeMap.get(uid) || '') : '';
+
+    const ownerId = participants.find(p => p.participantRole === TaskRole.OWNER)?.userId;
+    const assigneeId = participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.userId;
+    const approverId = participants.find(p => p.participantRole === TaskRole.APPROVER)?.userId;
+
+    const owner = ownerId ? getCode(ownerId) : null;
+    const assignee = assigneeId ? getCode(assigneeId) : null;
+    const approver = approverId ? getCode(approverId) : null;
+
+    const coordinators = participants
+      .filter(p => p.participantRole === TaskRole.COORDINATOR)
+      .map(p => getCode(p.userId))
+      .filter(Boolean);
+
     return { owner, assignee, approver, coordinators };
   }
 
   private async enrichTasks(tasks: any[]) {
     if (!tasks || tasks.length === 0) return tasks;
 
-    const employeeCodes = new Set<string>();
-    const collectCodes = (t: any) => {
+    const userIds = new Set<number>();
+    const collectUserIds = (t: any) => {
       if (t.participants) {
-        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
-        if (assignee && assignee !== 'UNASSIGNED') employeeCodes.add(assignee);
-        if (owner) employeeCodes.add(owner);
-        if (approver) employeeCodes.add(approver);
-        if (coordinators) coordinators.forEach((c: string) => employeeCodes.add(c));
+        t.participants.forEach((p: any) => {
+          if (p.userId) userIds.add(p.userId);
+        });
       }
-      if (t.creatorEmployeeCode) {
-        employeeCodes.add(t.creatorEmployeeCode);
+      if (t.creatorUserId) {
+        userIds.add(t.creatorUserId);
       }
-      if (t.children) t.children.forEach(collectCodes);
+      if (t.children) t.children.forEach(collectUserIds);
     };
-    tasks.forEach(collectCodes);
+    tasks.forEach(collectUserIds);
 
-    const codesArray = Array.from(employeeCodes).filter(Boolean);
-    const employeeMap = new Map<string, string>();
+    const userIdsArray = Array.from(userIds).filter(Boolean);
+    const employeeMap = new Map<string, string>(); // employeeCode -> fullName
+    const userToCodeMap = new Map<number, string>(); // userId -> employeeCode
 
-    if (codesArray.length > 0) {
+    if (userIdsArray.length > 0) {
       const employees = await this.prisma.employee.findMany({
-        where: { employeeCode: { in: codesArray } },
-        select: { employeeCode: true, fullName: true }
+        where: { userId: { in: userIdsArray.map(String) } },
+        select: { userId: true, employeeCode: true, fullName: true }
       });
-      employees.forEach(emp => employeeMap.set(emp.employeeCode, emp.fullName));
+      employees.forEach(emp => {
+        if (emp.userId) {
+          const uid = parseInt(emp.userId, 10);
+          userToCodeMap.set(uid, emp.employeeCode);
+          employeeMap.set(emp.employeeCode, emp.fullName);
+        }
+      });
     }
 
     const mapNames = (t: any) => {
-      if (t.creatorEmployeeCode) {
-        t.creatorName = employeeMap.get(t.creatorEmployeeCode) || t.creatorEmployeeCode;
+      const creatorCode = t.creatorUserId ? (userToCodeMap.get(t.creatorUserId) || '') : '';
+      if (creatorCode) {
+        t.creatorEmployeeCode = creatorCode;
+        t.creatorName = employeeMap.get(creatorCode) || creatorCode;
+      } else {
+        t.creatorEmployeeCode = 'SYSTEM';
+        t.creatorName = 'SYSTEM';
       }
+
       if (t.participants) {
-        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
+        const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants, userToCodeMap);
         t.assigneeCode = assignee || 'UNASSIGNED';
         t.assigneeName = assignee && assignee !== 'UNASSIGNED' ? (employeeMap.get(assignee) || assignee) : 'Chưa phân công';
         t.assignerCode = owner || '';
@@ -110,7 +132,31 @@ export class TasksService implements OnModuleInit {
     const isUserAdmin = query.isAdmin === true;
     const currentUserCode = query.currentUserCode;
 
-    const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants);
+    // Resolve currentUserId by currentUserCode
+    let currentUserId: number | undefined = undefined;
+    const currentEmp = await this.prisma.employee.findUnique({
+      where: { employeeCode: currentUserCode },
+      select: { userId: true }
+    });
+    if (currentEmp?.userId) currentUserId = parseInt(currentEmp.userId, 10);
+
+    const userIds = new Set<number>();
+    t.participants?.forEach((p: any) => {
+      if (p.userId) userIds.add(p.userId);
+    });
+
+    const userToCodeMap = new Map<number, string>();
+    if (userIds.size > 0) {
+      const emps = await this.prisma.employee.findMany({
+        where: { userId: { in: Array.from(userIds).map(String) } },
+        select: { userId: true, employeeCode: true }
+      });
+      emps.forEach(emp => {
+        if (emp.userId) userToCodeMap.set(parseInt(emp.userId, 10), emp.employeeCode);
+      });
+    }
+
+    const { owner, assignee, approver, coordinators } = this.parseParticipants(t.participants, userToCodeMap);
 
     const isAssigner = owner === currentUserCode;
     const isAssignee = assignee === currentUserCode;
@@ -132,17 +178,16 @@ export class TasksService implements OnModuleInit {
     let canChat = isUserAdmin || isAssigner || isAssignee || isSupervisor || isCoordinator || isUserInTree || isPlanCreator;
 
     if (!canChat && t.id) {
-      // Check closure table if user is in ancestor tasks
       const ancestorIds = await this.prisma.taskClosure.findMany({
         where: { descendantId: t.id },
         select: { ancestorId: true }
       });
       const aIds = ancestorIds.map(a => a.ancestorId);
-      if (aIds.length > 0) {
+      if (aIds.length > 0 && currentUserId) {
         const found = await this.prisma.taskParticipant.findFirst({
           where: {
             taskId: { in: aIds },
-            employeeCode: currentUserCode
+            userId: currentUserId
           }
         });
         if (found) canChat = true;
@@ -156,25 +201,52 @@ export class TasksService implements OnModuleInit {
   async listTasks(query: any) {
     const where: any = { status: { not: 'TEMPLATE' } };
 
+    // Resolve currentUserId by currentUserCode
+    let currentUserId: number | undefined = undefined;
+    if (query.currentUserCode) {
+      const currentEmp = await this.prisma.employee.findUnique({
+        where: { employeeCode: query.currentUserCode },
+        select: { userId: true }
+      });
+      if (currentEmp?.userId) {
+        currentUserId = parseInt(currentEmp.userId, 10);
+      }
+    }
+
     // Logic: find tasks where user has a specific role
-    const participantCondition: any = {};
+    const participantConditions: any[] = [];
     if (query.assigneeCode) {
-      if (query.isSupervisor) {
-        participantCondition.employeeCode = query.assigneeCode;
-        participantCondition.participantRole = TaskRole.APPROVER;
+      const emp = await this.prisma.employee.findUnique({
+        where: { employeeCode: query.assigneeCode },
+        select: { userId: true }
+      });
+      if (emp?.userId) {
+        participantConditions.push({
+          userId: parseInt(emp.userId, 10),
+          participantRole: query.isSupervisor ? TaskRole.APPROVER : TaskRole.ASSIGNEE
+        });
       } else {
-        participantCondition.employeeCode = query.assigneeCode;
-        participantCondition.participantRole = TaskRole.ASSIGNEE;
+        participantConditions.push({ userId: -1 });
       }
     }
 
     if (query.assignerCode) {
-      participantCondition.employeeCode = query.assignerCode;
-      participantCondition.participantRole = TaskRole.OWNER;
+      const emp = await this.prisma.employee.findUnique({
+        where: { employeeCode: query.assignerCode },
+        select: { userId: true }
+      });
+      if (emp?.userId) {
+        participantConditions.push({
+          userId: parseInt(emp.userId, 10),
+          participantRole: TaskRole.OWNER
+        });
+      } else {
+        participantConditions.push({ userId: -1 });
+      }
     }
 
-    if (Object.keys(participantCondition).length > 0) {
-      where.participants = { some: participantCondition };
+    if (participantConditions.length > 0) {
+      where.AND = participantConditions.map(c => ({ participants: { some: c } }));
     }
 
     if (query.search) where.title = { contains: query.search };
@@ -188,12 +260,16 @@ export class TasksService implements OnModuleInit {
 
     // Áp dụng bộ lọc PBAC nếu không phải admin
     if (!query.isAdmin && query.currentUserCode) {
-      where.OR = [
-        // Quy?n owner: việc mình t?o ho?c giao
-        { creatorEmployeeCode: query.currentUserCode },
-        // Quy?n assignee/coordinator: việc mình ???c giao/ph?i h?p
-        { participants: { some: { employeeCode: query.currentUserCode } } },
-      ];
+      if (currentUserId) {
+        where.OR = [
+          // Quyền owner: việc mình tạo hoặc giao
+          { creatorUserId: currentUserId },
+          // Quyền assignee/coordinator: việc mình được giao/phối hợp
+          { participants: { some: { userId: currentUserId } } },
+        ];
+      } else {
+        where.id = -1;
+      }
     }
 
     const tasks = await this.prisma.task.findMany({
@@ -242,6 +318,18 @@ export class TasksService implements OnModuleInit {
 
     const initialStatus = parentId ? 'TEMPLATE' : (data.status || 'TODO');
 
+    // Resolve creatorUserId
+    let creatorUserId = 0;
+    if (data.currentUserCode) {
+      const emp = await this.prisma.employee.findUnique({
+        where: { employeeCode: data.currentUserCode },
+        select: { userId: true }
+      });
+      if (emp?.userId) {
+        creatorUserId = parseInt(emp.userId, 10);
+      }
+    }
+
     // Mở transaction để tạo Task, Participants và Closure
     const t = await this.prisma.$transaction(async (tx) => {
       const newTask = await tx.task.create({
@@ -258,21 +346,46 @@ export class TasksService implements OnModuleInit {
           scoringMethod: data.scoringMethod || 'MANUAL',
           bonusPerDay: data.bonusPerDay,
           penaltyPerDay: data.penaltyPerDay,
-          creatorEmployeeCode: data.currentUserCode || 'SYSTEM',
+          creatorUserId,
           planId
         }
+      });
+
+      // Look up userIds for assignee, assigner, supervisor codes
+      const codesToLookup = [
+        data.assigneeCode && data.assigneeCode !== 'UNASSIGNED' ? data.assigneeCode : null,
+        data.assignerCode || null,
+        data.supervisorCode || null
+      ].filter(Boolean) as string[];
+
+      const employees = await tx.employee.findMany({
+        where: { employeeCode: { in: codesToLookup } },
+        select: { employeeCode: true, userId: true }
+      });
+      const codeToUidMap = new Map<string, number>();
+      employees.forEach(emp => {
+        if (emp.userId) codeToUidMap.set(emp.employeeCode, parseInt(emp.userId, 10));
       });
 
       // Tạo participants
       const participantsData: any[] = [];
       if (data.assigneeCode && data.assigneeCode !== 'UNASSIGNED') {
-        participantsData.push({ taskId: newTask.id, employeeCode: data.assigneeCode, participantRole: TaskRole.ASSIGNEE });
+        const uid = codeToUidMap.get(data.assigneeCode);
+        if (uid) {
+          participantsData.push({ taskId: newTask.id, userId: uid, participantRole: TaskRole.ASSIGNEE });
+        }
       }
       if (data.assignerCode) {
-        participantsData.push({ taskId: newTask.id, employeeCode: data.assignerCode, participantRole: TaskRole.OWNER });
+        const uid = codeToUidMap.get(data.assignerCode);
+        if (uid) {
+          participantsData.push({ taskId: newTask.id, userId: uid, participantRole: TaskRole.OWNER });
+        }
       }
       if (data.supervisorCode) {
-        participantsData.push({ taskId: newTask.id, employeeCode: data.supervisorCode, participantRole: TaskRole.APPROVER });
+        const uid = codeToUidMap.get(data.supervisorCode);
+        if (uid) {
+          participantsData.push({ taskId: newTask.id, userId: uid, participantRole: TaskRole.APPROVER });
+        }
       }
 
       if (participantsData.length > 0) {
@@ -327,10 +440,19 @@ export class TasksService implements OnModuleInit {
     });
 
     if (rejectReason && status === 'RETURNED') {
+      let actorUserId: number | null = null;
+      if (actorCode) {
+        const emp = await this.prisma.employee.findUnique({
+          where: { employeeCode: actorCode },
+          select: { userId: true }
+        });
+        if (emp?.userId) actorUserId = parseInt(emp.userId, 10);
+      }
+
       await this.prisma.taskComment.create({
         data: {
           taskId: id,
-          employeeCode: actorCode || null,
+          userId: actorUserId,
           content: `Đã trả lại công việc với lý do: ${rejectReason}`,
           isSystemMessage: true,
         }
@@ -357,28 +479,41 @@ export class TasksService implements OnModuleInit {
       });
       if (!currentTask) throw new RpcException('Nhiệm vụ không tồn tại');
 
-      const currentAssignee = currentTask.participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || 'UNASSIGNED';
-      const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
-      const isUnassigned = currentAssignee === 'UNASSIGNED' || currentTask.status === 'TEMPLATE';
+      let currentAssigneeCode = 'UNASSIGNED';
+      const currentAssigneeId = currentTask.participants.find(p => p.participantRole === TaskRole.ASSIGNEE)?.userId;
+      if (currentAssigneeId) {
+        const emp = await tx.employee.findFirst({
+          where: { userId: String(currentAssigneeId) },
+          select: { employeeCode: true }
+        });
+        if (emp) currentAssigneeCode = emp.employeeCode;
+      }
 
-      if (!isAdmin && !isUnassigned && currentAssignee !== context?.currentUserCode) {
+      const isAdmin = context?.currentUserRoles?.includes('SUPER_ADMIN') || context?.currentUserPermissions?.includes('TASK:MANAGE');
+      const isUnassigned = currentAssigneeCode === 'UNASSIGNED' || currentTask.status === 'TEMPLATE';
+
+      if (!isAdmin && !isUnassigned && currentAssigneeCode !== context?.currentUserCode) {
         throw new RpcException('Bạn không có quyền giao nhiệm vụ này (Không phải người đang xử lý).');
       }
 
-      // Check hierarchy if not admin
-      if (!isAdmin && assigneeCode && assigneeCode !== 'UNASSIGNED' && context?.currentUserId) {
-        try {
-          const { firstValueFrom } = require('rxjs');
-          const getSubReq = { userId: context.currentUserId };
-          const subRes: any = await firstValueFrom(this.userService.GetSubordinates(getSubReq));
-          const allowedEmployees = subRes?.allowedEmployeeCodes || subRes?.allowed_employee_codes || [];
-          if (!allowedEmployees.includes(assigneeCode)) {
-            throw new RpcException('Người nhận việc không thuộc phạm vi quản lý của bạn (không phải cấp dưới trực tiếp).');
-          }
-        } catch (error: any) {
-          throw new RpcException(error.message || 'Lỗi kiểm tra quyền phân công');
-        }
-      }
+      // Check hierarchy if not admin - BYPASSED as requested by user
+
+      // Look up userIds for assignee, assigner, coassignee codes
+      const codesToLookup: string[] = [];
+      if (assigneeCode && assigneeCode !== 'UNASSIGNED') codesToLookup.push(assigneeCode);
+      if (assignerCode) codesToLookup.push(assignerCode);
+      if (coassigneeCodes && coassigneeCodes.length > 0) codesToLookup.push(...coassigneeCodes);
+
+      const employees = await tx.employee.findMany({
+        where: { employeeCode: { in: codesToLookup } },
+        select: { employeeCode: true, userId: true }
+      });
+      const codeToUidMap = new Map<string, number>();
+      employees.forEach(emp => {
+        if (emp.userId) codeToUidMap.set(emp.employeeCode, parseInt(emp.userId, 10));
+      });
+
+      const getUserId = (code: string) => codeToUidMap.get(code);
 
       // Update assignee
       if (assigneeCode !== undefined) {
@@ -386,9 +521,12 @@ export class TasksService implements OnModuleInit {
           where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
         });
         if (assigneeCode && assigneeCode !== 'UNASSIGNED') {
-          await tx.taskParticipant.create({
-            data: { taskId: id, employeeCode: assigneeCode, participantRole: TaskRole.ASSIGNEE }
-          });
+          const uid = getUserId(assigneeCode);
+          if (uid) {
+            await tx.taskParticipant.create({
+              data: { taskId: id, userId: uid, participantRole: TaskRole.ASSIGNEE }
+            });
+          }
         }
       }
 
@@ -397,9 +535,12 @@ export class TasksService implements OnModuleInit {
         await tx.taskParticipant.deleteMany({
           where: { taskId: id, participantRole: TaskRole.OWNER }
         });
-        await tx.taskParticipant.create({
-          data: { taskId: id, employeeCode: assignerCode, participantRole: TaskRole.OWNER }
-        });
+        const uid = getUserId(assignerCode);
+        if (uid) {
+          await tx.taskParticipant.create({
+            data: { taskId: id, userId: uid, participantRole: TaskRole.OWNER }
+          });
+        }
       }
 
       // Update coordinators
@@ -407,10 +548,14 @@ export class TasksService implements OnModuleInit {
         await tx.taskParticipant.deleteMany({
           where: { taskId: id, participantRole: TaskRole.COORDINATOR }
         });
-        if (coassigneeCodes.length > 0) {
-          const coData = coassigneeCodes.map(code => ({
-            taskId: id, employeeCode: code, participantRole: TaskRole.COORDINATOR
-          }));
+        const coData: any[] = [];
+        coassigneeCodes.forEach(code => {
+          const uid = getUserId(code);
+          if (uid) {
+            coData.push({ taskId: id, userId: uid, participantRole: TaskRole.COORDINATOR });
+          }
+        });
+        if (coData.length > 0) {
           await tx.taskParticipant.createMany({ data: coData, skipDuplicates: true });
         }
       }
@@ -516,10 +661,23 @@ export class TasksService implements OnModuleInit {
 
   async addCoAssignees(id: number, coassigneeCodes: string[]) {
     if (!coassigneeCodes || coassigneeCodes.length === 0) return;
-    const coData = coassigneeCodes.map(code => ({
-      taskId: id, employeeCode: code, participantRole: TaskRole.COORDINATOR
-    }));
-    await this.prisma.taskParticipant.createMany({ data: coData, skipDuplicates: true });
+    const employees = await this.prisma.employee.findMany({
+      where: { employeeCode: { in: coassigneeCodes } },
+      select: { employeeCode: true, userId: true }
+    });
+    const coData: any[] = [];
+    employees.forEach(emp => {
+      if (emp.userId) {
+        coData.push({
+          taskId: id,
+          userId: parseInt(emp.userId, 10),
+          participantRole: TaskRole.COORDINATOR
+        });
+      }
+    });
+    if (coData.length > 0) {
+      await this.prisma.taskParticipant.createMany({ data: coData, skipDuplicates: true });
+    }
     return { success: true };
   }
 
@@ -610,7 +768,7 @@ export class TasksService implements OnModuleInit {
       });
 
       const activeTasksCount = await this.prisma.taskParticipant.groupBy({
-        by: ['employeeCode'],
+        by: ['userId'],
         where: {
           participantRole: 'ASSIGNEE',
           task: {
@@ -621,7 +779,19 @@ export class TasksService implements OnModuleInit {
           taskId: true,
         },
       });
-      const taskCountMap = new Map(activeTasksCount.map(item => [item.employeeCode, item._count.taskId]));
+
+      const uidToCodeMap = new Map<number, string>();
+      employees.forEach(emp => {
+        if (emp.userId) uidToCodeMap.set(parseInt(emp.userId, 10), emp.employeeCode);
+      });
+
+      const taskCountMap = new Map<string, number>();
+      activeTasksCount.forEach(item => {
+        const empCode = uidToCodeMap.get(item.userId);
+        if (empCode) {
+          taskCountMap.set(empCode, item._count.taskId);
+        }
+      });
 
       const evaluations = await this.prisma.kpiEvaluation.findMany({
         orderBy: { createdAt: 'desc' },
@@ -722,8 +892,17 @@ export class TasksService implements OnModuleInit {
   }
   async addComment(id: number, data: any) {
     const actorCode = data.authorCode || data.currentUserCode || 'SYSTEM';
+    let actorUserId: number | null = null;
+    if (actorCode && actorCode !== 'SYSTEM') {
+      const emp = await this.prisma.employee.findUnique({
+        where: { employeeCode: actorCode },
+        select: { userId: true }
+      });
+      if (emp?.userId) actorUserId = parseInt(emp.userId, 10);
+    }
+
     const c = await this.prisma.taskComment.create({
-      data: { taskId: id, employeeCode: actorCode, content: data.content, isSystemMessage: data.isSystemMessage || false }
+      data: { taskId: id, userId: actorUserId, content: data.content, isSystemMessage: data.isSystemMessage || false }
     });
 
     const emp = await this.prisma.employee.findUnique({
@@ -736,8 +915,8 @@ export class TasksService implements OnModuleInit {
       data: {
         id: c.id,
         taskId: c.taskId,
-        authorCode: c.employeeCode || '',
-        authorName: emp ? emp.fullName : (c.employeeCode || ''),
+        authorCode: actorCode,
+        authorName: emp ? emp.fullName : actorCode,
         authorAvatar: emp ? emp.avatar : '',
         content: c.content,
         isSystemMessage: c.isSystemMessage,
@@ -751,31 +930,34 @@ export class TasksService implements OnModuleInit {
       orderBy: { createdAt: 'asc' },
     });
 
-    const employeeCodes = new Set<string>();
+    const userIds = new Set<number>();
     comments.forEach(c => {
-      if (c.employeeCode) employeeCodes.add(c.employeeCode);
+      if (c.userId) userIds.add(c.userId);
     });
 
     const employees = await this.prisma.employee.findMany({
-      where: { employeeCode: { in: Array.from(employeeCodes) } },
-      select: { employeeCode: true, fullName: true, avatar: true }
+      where: { userId: { in: Array.from(userIds).map(String) } },
+      select: { userId: true, employeeCode: true, fullName: true, avatar: true }
     });
 
-    const employeeMap = new Map<string, { fullName: string; avatar: string }>();
+    const userMap = new Map<number, { employeeCode: string; fullName: string; avatar: string }>();
     employees.forEach(emp => {
-      employeeMap.set(emp.employeeCode, {
-        fullName: emp.fullName,
-        avatar: emp.avatar || '',
-      });
+      if (emp.userId) {
+        userMap.set(parseInt(emp.userId, 10), {
+          employeeCode: emp.employeeCode,
+          fullName: emp.fullName,
+          avatar: emp.avatar || '',
+        });
+      }
     });
 
     const data = comments.map(c => {
-      const emp = c.employeeCode ? employeeMap.get(c.employeeCode) : null;
+      const emp = c.userId ? userMap.get(c.userId) : null;
       return {
         id: c.id,
         taskId: c.taskId,
-        authorCode: c.employeeCode || '',
-        authorName: emp ? emp.fullName : (c.employeeCode || ''),
+        authorCode: emp ? emp.employeeCode : 'SYSTEM',
+        authorName: emp ? emp.fullName : 'SYSTEM',
         authorAvatar: emp ? emp.avatar : '',
         content: c.content,
         isSystemMessage: c.isSystemMessage,
@@ -794,10 +976,18 @@ export class TasksService implements OnModuleInit {
     if (!leadCode && coordinatorCodes.length === 0) {
       // Just a request for coordination from the assignee
       if (message) {
+        let requesterUserId: number | null = null;
+        if (requesterCode) {
+          const emp = await this.prisma.employee.findUnique({
+            where: { employeeCode: requesterCode },
+            select: { userId: true }
+          });
+          if (emp?.userId) requesterUserId = parseInt(emp.userId, 10);
+        }
         await this.prisma.taskComment.create({
           data: {
             taskId: id,
-            employeeCode: requesterCode || null,
+            userId: requesterUserId,
             content: `Gửi yêu cầu phối hợp: ${message}`,
             isSystemMessage: true,
           }
@@ -812,14 +1002,30 @@ export class TasksService implements OnModuleInit {
         select: { status: true }
       });
 
+      const codesToLookup: string[] = [];
+      if (leadCode) codesToLookup.push(leadCode);
+      if (coordinatorCodes.length > 0) codesToLookup.push(...coordinatorCodes);
+
+      const employees = await tx.employee.findMany({
+        where: { employeeCode: { in: codesToLookup } },
+        select: { employeeCode: true, userId: true }
+      });
+      const codeToUidMap = new Map<string, number>();
+      employees.forEach(emp => {
+        if (emp.userId) codeToUidMap.set(emp.employeeCode, parseInt(emp.userId, 10));
+      });
+
       // 1. Update Lead (ASSIGNEE role) if provided
       if (leadCode) {
         await tx.taskParticipant.deleteMany({
           where: { taskId: id, participantRole: TaskRole.ASSIGNEE }
         });
-        await tx.taskParticipant.create({
-          data: { taskId: id, employeeCode: leadCode, participantRole: TaskRole.ASSIGNEE }
-        });
+        const uid = codeToUidMap.get(leadCode);
+        if (uid) {
+          await tx.taskParticipant.create({
+            data: { taskId: id, userId: uid, participantRole: TaskRole.ASSIGNEE }
+          });
+        }
       }
 
       // 2. Update Coordinators (COORDINATOR role)
@@ -827,12 +1033,20 @@ export class TasksService implements OnModuleInit {
         where: { taskId: id, participantRole: TaskRole.COORDINATOR }
       });
       if (coordinatorCodes.length > 0) {
-        const coData = coordinatorCodes.map((code: string) => ({
-          taskId: id,
-          employeeCode: code,
-          participantRole: TaskRole.COORDINATOR
-        }));
-        await tx.taskParticipant.createMany({ data: coData, skipDuplicates: true });
+        const coData: any[] = [];
+        coordinatorCodes.forEach((code: string) => {
+          const uid = codeToUidMap.get(code);
+          if (uid) {
+            coData.push({
+              taskId: id,
+              userId: uid,
+              participantRole: TaskRole.COORDINATOR
+            });
+          }
+        });
+        if (coData.length > 0) {
+          await tx.taskParticipant.createMany({ data: coData, skipDuplicates: true });
+        }
       }
 
       // Update status to TODO if it was TEMPLATE

@@ -142,4 +142,3 @@ export class TranslateController implements OnModuleInit {
     }
   }
 }
-

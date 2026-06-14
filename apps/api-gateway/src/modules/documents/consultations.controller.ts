@@ -93,4 +93,3 @@ export class ConsultationsController implements OnModuleInit {
     return firstValueFrom(this.consultationService.ModerateComment(payload));
   }
 }
-

@@ -113,8 +113,10 @@ export class KpisController implements OnModuleInit {
   @Get('criteria')
   async findCriteria(@Req() req: any) {
     const userRoles = req.user?.roles || [];
-    const checkRole = (roleCode: string) => userRoles.some((r: any) => r === roleCode || r?.code === roleCode);
-    const hasGlobalAccess = checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
+    const checkRole = (roleCode: string) =>
+      userRoles.some((r: any) => r === roleCode || r?.code === roleCode);
+    const hasGlobalAccess =
+      checkRole(Role.ADMIN) || checkRole(Role.SUPER_ADMIN);
     const res: any = await firstValueFrom(
       this.kpiService.FindCriteria({ isAdmin: hasGlobalAccess }),
     );
@@ -126,7 +128,8 @@ export class KpisController implements OnModuleInit {
 
       if (perms.includes('KPI:CREATE') || hasGlobalAccess)
         allowedActions.push('CREATE');
-      if (perms.includes('KPI:UPDATE') || hasGlobalAccess) allowedActions.push('EDIT');
+      if (perms.includes('KPI:UPDATE') || hasGlobalAccess)
+        allowedActions.push('EDIT');
       if (perms.includes('KPI:DELETE') || hasGlobalAccess)
         allowedActions.push('DELETE');
 

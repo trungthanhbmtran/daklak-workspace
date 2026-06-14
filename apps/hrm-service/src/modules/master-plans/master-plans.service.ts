@@ -16,7 +16,6 @@ export class MasterPlansService {
       const authConditions: any[] = [];
 
       // QUY TẮC 1: Kế hoạch thuộc đơn vị của user hoặc đơn vị CẤP TRÊN
-      // (Giám đốc IOC thấy kế hoạch của Sở vì Sở là cấp trên của IOC)
       const ancestorIds: number[] = Array.isArray(query.callerAncestorUnitIds)
         ? query.callerAncestorUnitIds.map(Number).filter(Boolean)
         : (query.currentUserDept ? [query.currentUserDept] : []);
@@ -26,19 +25,28 @@ export class MasterPlansService {
       }
 
       // QUY TẮC 2: User là người được giao hoặc người giao của bất kỳ task nào trong kế hoạch
-      // (Trưởng phòng thấy kế hoạch vì là assignee/assigner của task)
-      authConditions.push({
-        tasks: {
-          some: {
-            participants: {
-              some: {
-                employeeCode: query.currentUserCode,
-                participantRole: { in: ['ASSIGNEE', 'OWNER'] }
+      const currentEmp = await this.prisma.employee.findUnique({
+        where: { employeeCode: query.currentUserCode },
+        select: { userId: true }
+      });
+      const currentUserId = currentEmp?.userId ? parseInt(currentEmp.userId, 10) : null;
+
+      if (currentUserId) {
+        authConditions.push({
+          tasks: {
+            some: {
+              participants: {
+                some: {
+                  userId: currentUserId,
+                  participantRole: { in: ['ASSIGNEE', 'OWNER'] }
+                }
               }
             }
           }
-        }
-      });
+        });
+      } else {
+        authConditions.push({ id: -1 });
+      }
 
       where.AND = [{ OR: authConditions }];
     }
@@ -53,6 +61,27 @@ export class MasterPlansService {
       }
     });
 
+    // Collect all userIds from all participants across all fetched master plans
+    const userIds = new Set<number>();
+    masterPlans.forEach(mp => {
+      mp.tasks.forEach(t => {
+        t.participants?.forEach((p: any) => {
+          if (p.userId) userIds.add(p.userId);
+        });
+      });
+    });
+
+    const userToCodeMap = new Map<number, string>();
+    if (userIds.size > 0) {
+      const emps = await this.prisma.employee.findMany({
+        where: { userId: { in: Array.from(userIds).map(String) } },
+        select: { userId: true, employeeCode: true }
+      });
+      emps.forEach(emp => {
+        if (emp.userId) userToCodeMap.set(parseInt(emp.userId, 10), emp.employeeCode);
+      });
+    }
+
     return {
       success: true,
       message: 'Lấy danh sách Kế hoạch thành công',
@@ -60,7 +89,8 @@ export class MasterPlansService {
         let completedTasks = 0;
         const tasks = mp.tasks.map((t: any) => {
           if (t.status === 'DONE') completedTasks++;
-          const assigneeCode = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || 'UNASSIGNED';
+          const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId;
+          const assigneeCode = assigneeId ? (userToCodeMap.get(assigneeId) || 'UNASSIGNED') : 'UNASSIGNED';
           return {
             ...t,
             assigneeCode: assigneeCode,
@@ -124,7 +154,12 @@ export class MasterPlansService {
         hasAccess = true;
       } else {
         const code = query.currentUserCode;
-        if (mp.tasks.some((t: any) => t.participants?.some((p: any) => p.employeeCode === code))) {
+        const currentEmp = await this.prisma.employee.findUnique({
+          where: { employeeCode: code },
+          select: { userId: true }
+        });
+        const currentUserId = currentEmp?.userId ? parseInt(currentEmp.userId, 10) : null;
+        if (currentUserId && mp.tasks.some((t: any) => t.participants?.some((p: any) => p.userId === currentUserId))) {
           hasAccess = true;
         }
       }
@@ -134,10 +169,30 @@ export class MasterPlansService {
       }
     }
 
+    // Collect userIds from mp.tasks' participants
+    const userIds = new Set<number>();
+    mp.tasks.forEach(t => {
+      t.participants?.forEach((p: any) => {
+        if (p.userId) userIds.add(p.userId);
+      });
+    });
+
+    const userToCodeMap = new Map<number, string>();
+    if (userIds.size > 0) {
+      const emps = await this.prisma.employee.findMany({
+        where: { userId: { in: Array.from(userIds).map(String) } },
+        select: { userId: true, employeeCode: true }
+      });
+      emps.forEach(emp => {
+        if (emp.userId) userToCodeMap.set(parseInt(emp.userId, 10), emp.employeeCode);
+      });
+    }
+
     let completedTasks = 0;
     const tasks = mp.tasks.map((t: any) => {
       if (t.status === 'DONE') completedTasks++;
-      const assigneeCode = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.employeeCode || 'UNASSIGNED';
+      const assigneeId = t.participants?.find((p: any) => p.participantRole === TaskRole.ASSIGNEE)?.userId;
+      const assigneeCode = assigneeId ? (userToCodeMap.get(assigneeId) || 'UNASSIGNED') : 'UNASSIGNED';
       return {
         ...t,
         assigneeCode: assigneeCode,
@@ -182,8 +237,6 @@ export class MasterPlansService {
     });
 
     if (data.tasks && data.tasks.length > 0) {
-      const taskData: any[] = [];
-
       let systemUser = await this.prisma.employee.findUnique({ where: { employeeCode: 'UNASSIGNED' } });
       if (!systemUser) {
         systemUser = await this.prisma.employee.create({
@@ -196,12 +249,46 @@ export class MasterPlansService {
             employmentStatus: 'inactive',
             departmentId: 0,
             jobTitleId: 0,
-            startDate: new Date()
+            startDate: new Date(),
+            userId: '0'
           }
+        });
+      } else if (!systemUser.userId) {
+        systemUser = await this.prisma.employee.update({
+          where: { employeeCode: 'UNASSIGNED' },
+          data: { userId: '0' }
         });
       }
 
+      const codesToLookup = ['UNASSIGNED'];
+      if (data.createdByCode) codesToLookup.push(data.createdByCode);
+
+      const employees = await this.prisma.employee.findMany({
+        where: { employeeCode: { in: codesToLookup } },
+        select: { employeeCode: true, userId: true }
+      });
+      const codeToUidMap = new Map<string, number>();
+      employees.forEach(emp => {
+        if (emp.userId) codeToUidMap.set(emp.employeeCode, parseInt(emp.userId, 10));
+      });
+
+      const getUserId = (code: string) => codeToUidMap.get(code);
+
       for (const task of data.tasks) {
+        let creatorUserId = 0;
+        const creatorUid = getUserId(data.createdByCode || '');
+        if (creatorUid) creatorUserId = creatorUid;
+
+        const participants: any[] = [];
+        const unassignedUid = getUserId('UNASSIGNED');
+        if (unassignedUid) {
+          participants.push({ userId: unassignedUid, participantRole: 'ASSIGNEE' });
+        }
+        const ownerUid = getUserId(data.createdByCode || 'UNASSIGNED');
+        if (ownerUid) {
+          participants.push({ userId: ownerUid, participantRole: 'OWNER' });
+        }
+
         await this.prisma.task.create({
           data: {
             title: task.title,
@@ -211,11 +298,9 @@ export class MasterPlansService {
             weight: task.weight,
             baseScore: task.targetValue,
             planId: mp.id,
+            creatorUserId,
             participants: {
-              create: [
-                { employeeCode: 'UNASSIGNED', participantRole: 'ASSIGNEE' },
-                { employeeCode: data.createdByCode || 'UNASSIGNED', participantRole: 'OWNER' }
-              ]
+              create: participants
             }
           }
         });

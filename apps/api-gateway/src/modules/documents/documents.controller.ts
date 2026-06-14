@@ -252,4 +252,3 @@ export class DocumentsController implements OnModuleInit {
     return firstValueFrom(this.documentService.DeleteDocument({ id }));
   }
 }
-

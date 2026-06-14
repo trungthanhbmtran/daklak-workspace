@@ -66,4 +66,3 @@ export class TaskTemplatesController implements OnModuleInit {
     return firstValueFrom(this.taskTemplateService.Delete({ id: Number(id) }));
   }
 }
-

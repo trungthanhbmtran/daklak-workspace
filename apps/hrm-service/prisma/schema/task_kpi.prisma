@@ -8,7 +8,7 @@ model Task {
   priority       String    @default("MEDIUM")
   
   // Auditing
-  creatorEmployeeCode  String    @default("SYSTEM") @map("creator_employee_code")
+  creatorUserId  Int       @default(0) @map("creator_user_id")
   
   // Scoring
   baseScore      Float?    @map("base_score")
@@ -52,14 +52,13 @@ enum TaskRole {
 
 model TaskParticipant {
   taskId          Int      @map("task_id")
-  employeeCode    String   @map("employee_code")
+  userId          Int      @map("user_id")
   participantRole TaskRole @map("participant_role")
   assignedAt      DateTime @default(now()) @map("assigned_at")
 
   task            Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  // employee        Employee @relation(fields: [employeeCode], references: [employeeCode])
 
-  @@id([taskId, employeeCode, participantRole])
+  @@id([taskId, userId, participantRole])
   @@map("task_participants")
 }
 
@@ -78,7 +77,7 @@ model TaskClosure {
 model TaskComment {
   id              Int       @id @default(autoincrement())
   taskId          Int       @map("task_id")
-  employeeCode    String?   @map("employee_code")
+  userId          Int?      @map("user_id")
   content         String    @db.Text
   isSystemMessage Boolean   @default(false) @map("is_system_message")
   

@@ -68,4 +68,3 @@ export class DocumentCategoryController implements OnModuleInit {
     return firstValueFrom(this.categoryService.DeleteCategory({ id }));
   }
 }
-

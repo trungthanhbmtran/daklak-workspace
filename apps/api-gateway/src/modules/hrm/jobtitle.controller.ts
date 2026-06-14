@@ -79,4 +79,3 @@ export class JobTitleController implements OnModuleInit {
     return firstValueFrom(this.orgService.UpdateJobTitle(payload));
   }
 }
-
